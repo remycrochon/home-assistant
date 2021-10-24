@@ -79,6 +79,8 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+hacs:
+  token: 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
 
 http:
   use_x_forwarded_for: true

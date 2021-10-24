@@ -215,18 +215,18 @@ template:
         {% set a = states('input_number.energy_pac_p') | float | round(3) %}
         {{ a / 1000 | round(3) }}        
 
-# Consommation autres totale en KWh
-    - name: "energy_autres"
+# Consommation autres totale en W
+    - name: "puissance_autres"
       state: >-
-        {% set a = states('sensor.pzem_totale_energy') | float | round(2) %}
-        {% set b = states('sensor.pzem_pisc_energy') | float | round(2) %}
-        {% set c = states('sensor.pzem_sdb_energie') | float | round(2) %}
-        {% set d = states('sensor.energy_pac_p_kw') | float | round(2) %}          
-        {% set e = states('sensor.energy_ecs_p_kw') | float | round(2) %}
+        {% set a = states('sensor.pzem_totale_puissance') | float(default=0) | round(2) %}
+        {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
+        {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
+        {% set d = states('sensor.energy_pac_p_kw') | float(default=0) | round(2) %}          
+        {% set e = states('sensor.energy_ecs_p_kw') | float(default=0) | round(2) %}
         {{ (a-b-c-d-e) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"  
 
 # Consommation journalière HP + HC - addition des utility meter
     - name: "energy_total_daily"
@@ -453,6 +453,13 @@ sensor:
 # Energie ECS mesurée avec integration 
   - platform: integration
     source: sensor.ecocompteur_ecs
-    name: Ecs Energie Integration
+    name: Energie ECS Integration
+    unit_prefix: k
+    round: 2
+
+# Energie Puissance autres 
+  - platform: integration
+    source: sensor.energy_autres
+    name: Energie Autres Integration
     unit_prefix: k
     round: 2

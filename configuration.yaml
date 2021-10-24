@@ -9,7 +9,7 @@ homeassistant:
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
 
-# Example configuration.yaml entry
+# configuration des log
 logger:
   default: warning
   logs:
@@ -59,10 +59,11 @@ logger:
 tts:
   - platform: google_translate
 
-
+# Inclusion des themes
 frontend:
   themes: !include_dir_merge_named themes/
 
+# Cartes
 lovelace:
 #  mode: yaml
 #  resources: !include www/custom-lovelace/resources.yaml
@@ -72,11 +73,12 @@ lovelace:
 
 #lovelace_gen:
 
-
+# Inclusion groupes/automatismes/script/scene
 group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+
 
 http:
   use_x_forwarded_for: true
@@ -90,7 +92,7 @@ rfxtrx:
  device: //dev/serial/by-id/usb-RFXCOM_RFXtrx433_A128N1JF-if00-port0
 #  device: /dev/ttyUSB0
 
-# enable the recorder integration 
+# Valide l'enregistrement dans les bases de données
 recorder:
   db_url: !secret db_mysql
   auto_purge: true

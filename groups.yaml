@@ -1,0 +1,12 @@
+all_users:
+  name: all users
+  entities:
+    - device_tracker.sm_g935f
+    - device_tracker.oneplus_a5010
+
+volets_bureau:
+  name: vol_buro
+  all: true
+  entities:
+    - cover.bureau_gauche
+    - cover.bureau_droit

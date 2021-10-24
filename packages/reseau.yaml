@@ -1,0 +1,169 @@
+binary_sensor:
+  - platform: ping
+    host: 192.168.0.11
+    name: "NAS_Dlink"
+
+  - platform: ping
+    host: 192.168.0.14
+    name: "pc_jeedom"
+
+  - platform: ping
+    host: 192.168.0.21
+    name: "cam_terrasse"
+
+  - platform: ping
+    host: 192.168.0.36
+    name: "cam_cuisine"
+
+  - platform: ping
+    host: 192.168.0.39
+    name: "cam_garage_ext"
+
+  - platform: ping
+    host: 192.168.0.25
+    name: "ping_RPI ADguard"
+
+  - platform: ping
+    host: 192.168.0.26
+    name: "ping_ECO COMPTEUR"
+
+  - platform: ping
+    host: 192.168.0.47
+    name: "ping_Module Adam"
+
+  - platform: ping
+    host: 192.168.0.54
+    name: "cam_salon"
+
+  - platform: ping
+    host: 192.168.0.56
+    name: "cam_sous_sol"
+
+  - platform: ping
+    host: 192.168.0.57
+    name: "cam_garage_int"
+
+  - platform: ping
+    host: 192.168.0.61
+    name: "cam_piscine"
+
+  - platform: ping
+    host: 192.168.0.62
+    name: "ping RPI Weewx"
+
+  - platform: ping
+    host: 192.168.0.101
+    name: "ping_Module Wago Piscine"
+
+  - platform: ping
+    host: 192.168.0.121
+    name: "ping_Arduino Piscine"
+
+  - platform: ping
+    host: 192.168.0.123
+    name: "ping_ESP123_PEZM SdB"
+
+  - platform: ping
+    host: 192.168.0.125
+    name: "ping_ESP125_Piscine"
+
+  - platform: ping
+    host: 192.168.0.132
+    name: "ping_ESP132_PEZM Totale"
+
+  - platform: ping
+    host: 192.168.0.133
+    name: "ping_ESP133_congelateur"
+
+  - platform: ping
+    host: 192.168.0.134
+    name: "ping_ESP134_UV"
+
+  - platform: ping
+    host: 192.168.0.135
+    name: "ping_ESP135_Luxmetre"
+
+  - platform: ping
+    host: 192.168.0.137
+    name: "ping_ESP137_PZEM Piscine"
+
+  - platform: ping
+    host: 192.168.0.138
+    name: "ping_ESP138_Voy_Def"
+
+  - platform: ping
+    host: 192.168.0.139
+    name: "ping_ESP139_VMC Sous Sol"
+
+  - platform: group
+    name: ping_reseau
+    all: true
+    device_class: "connectivity"
+    entities:
+      - binary_sensor.ping_rpi_adguard
+      - binary_sensor.ping_module_adam
+      - binary_sensor.ping_module_wago_piscine
+      - binary_sensor.ping_esp123_pezm_sdb
+      - binary_sensor.ping_esp125_piscine
+      - binary_sensor.ping_esp132_pezm_totale
+      - binary_sensor.ping_esp133_congelateur
+      - binary_sensor.ping_esp134_uv
+      - binary_sensor.ping_esp135_luxmetre
+      - binary_sensor.ping_esp137_pzem_piscine
+      - binary_sensor.ping_esp139_vmc_sous_sol
+      - binary_sensor.cam_cuisine
+      - binary_sensor.cam_garage_ext
+      - binary_sensor.cam_garage_int
+      - binary_sensor.cam_piscine
+      - binary_sensor.cam_salon
+  #    - binary_sensor.cam_terrasse    
+
+  - platform: group
+    name: esp_reseau
+    all: true
+    device_class: "connectivity"
+    entities:
+      - binary_sensor.esp123_status
+      - binary_sensor.esp125_status
+      - binary_sensor.esp132_status
+      - binary_sensor.esp133_status
+      - binary_sensor.esp134_status
+      - binary_sensor.esp135_status
+      - binary_sensor.esp137_status
+      - binary_sensor.esp138_status
+      - binary_sensor.esp139_status
+#      - binary_sensor.esp140_status
+
+  - platform: group
+    name: uptime_reseau
+    all: true
+    device_class: "connectivity"
+    entities:
+      - binary_sensor.domo_rem81
+      - binary_sensor.jeedom
+      - binary_sensor.meteo81000
+      - binary_sensor.meteoweewx
+      - binary_sensor.ha
+      - binary_sensor.motioneye
+      - binary_sensor.vtt
+
+input_text:
+  text_def_l1:
+    name: Texte L1 Reseau
+    initial: L1
+  text_def_l2:
+    name: Texte L2 Alarme
+    initial: L2
+  text_def_l3:
+    name: Texte L3 Defaut
+    initial: L3
+  text_def_l4:
+    name: Texte L4 Intrusion
+    initial: L4
+
+sensor:
+# External IP - Ip Public
+  - platform: dnsip
+    name: ip_public
+    
+        

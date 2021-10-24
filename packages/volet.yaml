@@ -1,0 +1,228 @@
+input_boolean:
+  # Gestion volets
+  presence_amis_bureau:
+    name: Presence Amis Bureau
+    icon: mdi:account
+
+  presence_amis_ch_sud:
+    name: Presence Amis Chamb Sud
+    icon: mdi:account
+
+  presence_amis_ch_nord:
+    name: Presence Amis Chamb Nord
+    icon: mdi:account
+
+# Calcul Jour/nuit selon luminosite et position du soleil sur l'horizon
+  nuit_jour:
+    name: Nuit=0/Jour=1
+    icon: mdi:weather-sunny
+
+
+# Calcul Jour/nuit selon luminosite
+  val_automs_soleil:
+    name: Valid Automs Volet Soleil
+    icon: mdi:weather-sunny
+
+input_datetime:
+  # Horaires Volets ete
+  horaire_ete_volet_ouv:
+    name: Horaire ete volets ouverture
+    has_date: false
+    has_time: true
+  horaire_ete_volet_ferm:
+    name: Horaire ete volets fermeture
+    has_date: false
+    has_time: true
+
+# Horaire surveillance porte
+  heure_debut_alarme_porte:
+    name: Heure debut alarme portes
+    has_date: false
+    has_time: true
+  heure_fin_alarme_porte:
+    name: Heure fin alarme portes
+    has_date: false
+    has_time: true
+
+
+input_number:
+# Consigne Min/max luminosité 
+# gestion volet: Calcul du Input_boolean Nuit/jout
+    luminosite_seuil_bas:
+      name: Lum. seuil bas
+      mode: box
+      min: 0
+      max: 10
+      unit_of_measurement: "Lux"
+      icon: mdi:weather-sunny
+    luminosite_seuil_haut:
+      name: Lum. seuil haut
+      mode: box
+      min: 10
+      max: 50
+      unit_of_measurement: "Lux"
+      icon: mdi:weather-sunny 
+
+# gestion volet: Niveau Ensoleilement ouv auto volet
+    radiation_seuil_ferm_volet:
+      name: Radiat seuil ferm volets
+      mode: box
+      min: 0
+      max: 1200
+      unit_of_measurement: "w/m2"
+      icon: mdi:weather-sunny
+
+
+binary_sensor:
+#inversion d'état pour l'alarme ALARMO
+  - platform: template
+    sensors:
+      porte_garage_non_fermee:
+        value_template: >-
+          {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
+            off
+          {% else %}
+            on
+          {% endif %} 
+      porte_ssol_non_fermee:
+        value_template: >-
+          {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
+            off
+          {% else %}
+            on
+          {% endif %} 
+
+
+input_select:
+  volets:
+    name: Volets
+    icon: mdi:window-shutter
+    options:
+      - Auto Hiv
+      - Auto Ete
+      - Absent
+      - Arret
+cover:
+# Convertion TC volet Amis grand en cover
+  - platform: template
+    covers:
+      volet_amis_sud_grand:
+        friendly_name: "Volet amis sud grand"
+        open_cover:
+          service: switch.turn_on
+          data:
+            entity_id: switch.tc_volet_amis_grand
+        close_cover:
+          service: switch.turn_off
+          data:
+            entity_id: switch.tc_volet_amis_grand
+        icon_template: >-
+          {% if is_state('switch.tc_volet_amis_grand', 'on') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage
+          {% endif %} 
+  # Convertion TC volet SaM en cover
+      volet_sam:
+        friendly_name: "Volet SaM"
+        open_cover:
+          service: switch.turn_on
+          data:
+            entity_id: switch.tc_volet_sam
+        close_cover:
+          service: switch.turn_off
+          data:
+            entity_id: switch.tc_volet_sam
+        icon_template: >-
+          {% if is_state('switch.tc_volet_sam', 'on') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage
+          {% endif %} 
+  # Convertion TC parents grand
+      volet_parents_grand:
+        friendly_name: "Volet Parents Grand"
+        open_cover:
+          service: switch.turn_on
+          data:
+            entity_id: switch.tc_chamb_parents
+        close_cover:
+          service: switch.turn_off
+          data:
+            entity_id: switch.tc_chamb_parents
+        icon_template: >-
+          {% if is_state('switch.tc_chamb_parents', 'on') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage
+          {% endif %}
+
+# porte de garage RDC
+      garage_rdc:
+        device_class: garage
+        friendly_name: "Garage RdC"
+        value_template: "{{is_state('binary_sensor.porte_garage_fermee', 'off')}}"
+        open_cover:
+          service: script.cde_porte_garage
+        close_cover:
+          service: script.cde_porte_garage        
+        icon_template: >-
+          {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
+            mdi:garage
+          {% else %} 
+            {% if is_state('binary_sensor.porte_garage_ouverte', 'on') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage-alert
+          {% endif %}
+          {% endif %}
+
+# Porte de garage Sous Sol
+      garage_soussol:
+        device_class: garage
+        friendly_name: "Garage Sous-Sol"
+        value_template: "{{ is_state('binary_sensor.porte_ssol_fermee', 'off')}}"
+        open_cover:
+          service: script.Cde2_porte_Sous_Sol
+        close_cover:
+          service: script.Cde2_porte_Sous_Sol       
+        icon_template: >-
+          {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
+            mdi:garage
+          {% else %} 
+            {% if is_state('binary_sensor.porte_ssol_ouverte', 'on') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage-alert
+          {% endif %}
+          {% endif %}
+
+# Volet Proportionnel
+# Bureau Droit
+  - platform: cover_rf_time_based
+    devices:
+      volet_bureau_droit_proport:
+        name: Volet Droit P
+        travelling_time_up: 18
+        travelling_time_down: 17
+        close_script_entity_id: script.volet_bureau_droit_down
+        stop_script_entity_id: script.volet_bureau_droit_stop
+        open_script_entity_id: script.volet_bureau_droit_up
+
+
+
+
+
+# Moteur pas à Pas en test
+automation:
+  - alias: Write Stepper Value to ESP
+    trigger:
+      platform: state
+      entity_id: input_number.stepper_control
+    action:
+      # Replace livingroom with the name you gave the ESP
+      - service: esphome.esp140_test_control_stepper
+        data_template:
+          target: '{{ trigger.to_state.state | int }}'
+
+

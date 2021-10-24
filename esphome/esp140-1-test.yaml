@@ -1,0 +1,97 @@
+esphome:
+  name: esp140_1_test
+  platform: ESP8266
+  board: d1_mini
+#  board: esp01_1m  
+  
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+
+  reboot_timeout: 5min
+  fast_connect: true
+    
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  #ap:
+  #  ssid: "Esp140 Test Fallback Hotspot"
+  #  password: "r9UaK4KhGcIW"
+
+  manual_ip:
+    static_ip: 192.168.0.140
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+#  services:
+#    - service: control_stepper
+#      variables:
+#        target: int
+#      then:
+#        - stepper.set_target:
+#            id: my_stepper
+#            target: !lambda 'return target;'
+ota:
+
+web_server:
+  port: 80
+
+sun:
+  latitude: 43.9193
+  longitude: 2.198449722222222
+
+time:
+  - platform: homeassistant
+    timezone:  Europe/Paris #UTC+0  #Africa/Abidjan #Africa/Algiers #Europe/Paris  #Africa/Algiers
+
+#stepper:
+#  - platform: uln2003
+#    id: my_stepper
+#    pin_a: GPIO14
+#    pin_b: GPIO12
+#    pin_c: GPIO13
+#    pin_d: GPIO15
+#    max_speed: 250 steps/s
+
+    # Optional:
+#    acceleration: inf
+#   deceleration: inf
+uart:
+  rx_pin: GPIO3 # RX=pin 21
+  tx_pin: GPIO1 # TX=pin 22
+  baud_rate: 9600
+
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: true
+  id: bus_a
+  
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp140_Status"
+
+switch:    
+
+  - platform: restart
+    name: "ESP138_Restart"
+        
+sensor:
+
+  - platform: wifi_signal
+    name: "ESP140 WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "ESP140 Uptime Sensor"
+    id: esp140_uptime
+    update_interval: 60s
+

@@ -1,0 +1,227 @@
+input_number:
+  # utilisé pour simuler la température de l'eau pendant les test
+  simul_ph:
+    name: Ph Simulation
+    min: 6
+    max: 8
+    step: 0.1
+    unit_of_measurement: pH
+    mode: box
+
+# Mémorisation pH
+  ph_memoire:
+    name: pH Mémoire avant arret
+    min: 6
+    max: 9
+    step: 0.1
+    unit_of_measurement: pH
+    mode: box
+
+# pH Valeur cible
+  ph_cible:
+    name: Ph Cible 
+    min: 7.0
+    max: 7.5
+    step: 0.1
+    unit_of_measurement: pH
+    icon: mdi:alpha-h-circle-outline
+    mode: box
+# Hysteresis- non utilisé A SUPPRIMER dans les equations
+  ph_hysteresis:
+    name: Ph Hysteresis 
+    min: 0.0
+    max: 2.0
+    step: 0.01
+    unit_of_measurement: pH
+    mode: box
+
+# Débit pompe pH (Etalonnage obligatoire de la pompe)
+  ph_debit_ppe:
+    name: pH Débit Ppe
+    min: 0
+    max: 7.2
+    step: 0.1
+    unit_of_measurement: l/h
+    icon: mdi:pump
+    mode: box
+
+# Durée injection pH
+  ph_duree_inject_s:
+    name: pH Durée inject effect(s)
+    min: 0
+    max: 60
+    step: 0.1
+    unit_of_measurement: "s"
+    icon: mdi:clock
+    mode: box
+# Durée injection pH
+  ph_duree_inject_mn:
+    name: pH Durée inject effect (mn)
+    min: 0
+    max: 60
+    step: 0.1
+    unit_of_measurement: "mn"
+    icon: mdi:clock
+    mode: box
+
+# Seuil au dessus duquel on déclenche une injection en s NON UTILISE
+  ph_tps_min_inject:
+    name: pH Tps min injection
+    min: 0
+    max: 60
+    step: 0.1
+    unit_of_measurement: "s"
+    icon: mdi:clock
+    mode: box
+
+# Concentration du ph Moins
+  ph_concentration:
+    name: pH Concentration
+    min: 0
+    max: 1000
+    step: 0.1
+    unit_of_measurement: "%"
+    icon: mdi:percent
+    mode: box
+
+# Cumul du pH moins injecté chaque jour"
+  ph_vol_injecte:
+    name: pH Cumul Vol Injecté
+    min: 0
+    max: 25
+    step: 0.1
+    unit_of_measurement: "l"
+    icon: mdi:needle
+    mode: box
+
+# Volume du bidon de pH moins
+  ph_vol_bidon:
+    name: pH Volume Bidon
+    min: 0
+    max: 30
+    step: 0.1
+    unit_of_measurement: "l"
+    icon: mdi:blood-bag
+    mode: box
+
+# Seuil bas du bidon pH moins déclenchant une notification
+  ph_seuil_bas_bidon:
+    name: pH Niveau bas Bidon
+    min: 0
+    max: 5
+    step: 0.5
+    unit_of_measurement: 'l'
+    icon: mdi:flask-empty-outline
+    mode: box
+
+# Temps maximum utilisation cartouche de Chlore en h déclenchant une notification
+  chlore_seuil_max_utilisation:
+    name: Temps maxi utilisation cart Chlore
+    min: 0
+    max: 100
+    step: 0.5
+    unit_of_measurement: 'h'
+    icon: mdi:timer-sand-full
+    mode: box
+  
+input_boolean:
+  # Validation regul Ph
+  regul_ph:
+    name: pH validation Regul
+
+binary_sensor:
+  # Niveau bas bidon pH
+  - platform: template
+    sensors:
+      ph_niveau_bas_bidon:
+        value_template: >-
+          {% set a=states('input_number.ph_vol_bidon')|float %}
+          {% set b=states('input_number.ph_vol_injecte')|float %}
+          {% set c=states('input_number.ph_seuil_bas_bidon')|float %}
+          {{ (a-b) <= c }}   
+        friendly_name: "pH Seuil Niveau Bas Bidon"
+sensor:
+  - platform: history_stats
+    name: pH_derniere_heure
+    entity_id: switch.cde_traitement
+    state: 'on'
+    type: time
+    end: '{{now().replace(minute=0).replace(second=0)}}'
+    duration: 01:00:00
+
+  - platform: history_stats
+    name: pH_derniere__48h
+    entity_id: switch.cde_traitement
+    state: 'on'
+    type: time
+    end: '{{now()}}'
+    duration: 48:00:00
+
+  # Recopie mémoire pH dans le sensor pour calcul qt à injecter
+  - platform: template
+    sensors:
+      ph_piscine_ph:
+        friendly_name: "ph_piscine_ph"
+        value_template: '{{ states("input_number.ph_memoire") }}'
+        unit_of_measurement: "pH"
+    
+  - platform: template
+    sensors:
+      ph_volume_restant_bidon:
+        friendly_name: "Volume pH restant bidon"
+        value_template: >-
+          {% set a=states('input_number.ph_vol_bidon')|float %}
+          {% set b=states('input_number.ph_vol_injecte')|float %}
+          {{ (a-b)|round(2) }}   
+        icon_template: mdi:flask-empty-minus-outline
+        unit_of_measurement: "l"
+
+  # temps d'injection en mn
+  - platform: template
+    sensors:
+      ph_tps_inject_mn:
+        friendly_name: "pH Durée Inject calc. (mn)"
+        value_template: >-
+          {% set a=states('sensor.ph_piscine_ph') | float(0) %}
+          {% set y=state_attr("sensor.ph_stat", "mean") | float(0) %}
+          {% set x=states('input_number.simul_ph') | float(0) %}
+          {% set b=states('input_number.ph_cible') | float(0) %}
+          {% set d=states('input_number.ph_debit_ppe') | float(0) %}
+          {% set e=states('input_number.ph_concentration') | float(0) %}
+          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int %} 
+          {% if r < 0 %}
+            {{ 0 }}
+          {% else %}
+            {{ (r//60)|int }}
+          {% endif %}
+        unit_of_measurement: "mn"
+  # temps d'injection en s
+  - platform: template
+    sensors:
+      ph_tps_inject_s:
+        friendly_name: "pH Durée Inject calc. (s)"
+        value_template: >-
+          {% set a=states('sensor.ph_piscine_ph') | float(0) %}
+          {% set y=state_attr("sensor.ph_stat", "mean") | float(0) %}
+          {% set x=states('input_number.simul_ph') | float(0) %}
+          {% set b=states('input_number.ph_cible') | float(0) %}
+          {% set d=states('input_number.ph_debit_ppe') | float(0) %}
+          {% set e=states('input_number.ph_concentration') | float(0) %}
+          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int %} 
+          {% if r < 0 %}
+            {{ 0 }}
+          {% else %}
+            {{ (r%60)|int }}
+          {% endif %}
+        unit_of_measurement: "s"
+
+  # Statistiques pH
+  - platform: statistics
+    name: ph_stat
+    entity_id: sensor.ph_piscine_ph
+    sampling_size: 30
+    #max_age:
+      # minutes: 30
+
+
+  

@@ -1,0 +1,16 @@
+input_boolean:
+  # Validation automatisme
+  robot_valide:
+    name: Validation Automs robot
+    icon: mdi:power-settings
+
+input_number:
+  # Seuil au dela duquel le robot est inertdit de tont
+  seuil_pluie_stop_robot:
+    name: Seuil Pluie Stop Robot
+    min: 0.0
+    max: 100.0
+    step: 0.1
+    unit_of_measurement: mm
+    mode: box
+

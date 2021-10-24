@@ -1,0 +1,68 @@
+esphome:
+  name: esp137_pzem_piscine
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+
+  manual_ip:
+    static_ip: 192.168.0.137  
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+  reboot_timeout: 5min
+  fast_connect: true
+
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+# Configuration UART
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp137_Status"
+
+sensor:
+  - platform: pzemac
+    current:
+      name: "pzem_pisc_courant"
+      unit_of_measurement: "A"
+    voltage:
+      name: "pzem_pisc_tension"
+      unit_of_measurement: "V"
+    energy:
+      name: "pzem_pisc_energy"
+      unit_of_measurement: "kWh"
+      filters:
+        - multiply: 0.001
+    power:
+      name: "pzem_pisc_puissance"
+      unit_of_measurement: "W"
+    frequency:
+      name: "pzem_pisc_frequence"
+      unit_of_measurement: "hz"
+    power_factor:
+      name: "pzem_pisc_factpuiss"
+      unit_of_measurement: "fp"
+    update_interval: 30s
+
+switch:    
+  - platform: restart
+    name: "ESP137_Restart"

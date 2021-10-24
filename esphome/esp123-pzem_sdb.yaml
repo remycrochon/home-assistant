@@ -1,0 +1,74 @@
+esphome:
+  name: esp123_pzem_sdb
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+  reboot_timeout: 5min
+  fast_connect: true
+
+  manual_ip:
+    static_ip: 192.168.0.123
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+    
+#captive_portal:
+
+# Enable logging
+logger:
+  baud_rate: 0
+  
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+# Configuration UART
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+  stop_bits: 1
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp123_Status"
+
+sensor:
+  - platform: pzemac
+    current:
+      name: "PZEM-SdB Intensité"
+    voltage:
+      name: "PZEM-SdB Tension"
+    energy:
+      name: "PZEM-SdB Energie"
+      unit_of_measurement: "kWh"
+      filters:
+        - multiply: 0.001
+    power:
+      name: "PZEM-SdB Puissance"
+    frequency:
+      name: "PZEM-SdB Frequence"
+    power_factor:
+      name: "PZEM-SdB FactPuiss"
+    update_interval: 30s
+    
+  - platform: uptime
+    name: "ESP123 Uptime Sensor"
+    id: esp123_uptime
+    update_interval: 60s
+    
+  - platform: wifi_signal
+    name: "ESP123 WiFi Signal Sensor"
+    update_interval: 60s
+
+switch:    
+  - platform: restart
+    name: "ESP123_Restart"

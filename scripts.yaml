@@ -1,0 +1,492 @@
+ouverture_volet:
+  alias: ouverture_volet
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    entity_id: cover.salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    entity_id: cover.cuisine
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    entity_id: cover.sdb
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    entity_id: cover.volet_sam
+  - service: script.volets_bureau
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.ouverture_volets_chamb_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.ouverture_volet_chamb_sud
+  mode: single
+  icon: mdi:shuttle
+fermeture_volet:
+  alias: fermeture_volet
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    entity_id: cover.bureau_gauche
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.bureau_droit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.sdb
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.amis_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.parents_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.volet_parents_grand
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.amis_sud_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.volet_amis_sud_grand
+  mode: single
+  icon: mdi:shuttle
+ouverture_volet_absent:
+  alias: ouverture_volet_absent
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.bureau_droit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bureau_gauche
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.cuisine
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.sdb
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.amis_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.parents_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.volet_parents_grand
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.volet_sam
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.volet_amis_sud_grand
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.amis_sud_petit
+  mode: single
+  icon: mdi:shuttle
+fermeture_volet_absent:
+  alias: fermeture_volet_absent
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    entity_id: cover.bureau_gauche
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.bureau_droit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.cuisine
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.sdb
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.amis_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.parents_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.volet_parents_grand
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.amis_sud_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.volet_amis_sud_grand
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    entity_id: cover.volet_sam
+  mode: single
+  icon: mdi:shuttle
+ouverture_porte_soussol:
+  alias: cde_porte_soussol
+  sequence:
+  - service: switch.turn_on
+    data: {}
+    entity_id: switch.cde_porte_ssol
+  - delay: 00:00:02
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_porte_ssol
+  mode: single
+cde_porte_garage:
+  alias: cde_porte_garage
+  sequence:
+  - service: switch.turn_on
+    data: {}
+    entity_id: switch.cde_porte_garage
+  - delay: '2'
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_porte_garage
+  mode: single
+cde2_porte_sous_sol:
+  alias: Cde2_porte_Sous_Sol
+  sequence:
+  - service: switch.turn_on
+    data: {}
+    entity_id: switch.cde_porte_ssol
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_porte_ssol
+  mode: single
+volet_piscine_ouverture:
+  alias: volet_piscine_ouverture
+  sequence:
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_volet_fermeture
+  - delay: 00:00:02
+  - service: switch.turn_on
+    data: {}
+    entity_id: switch.cde_volet_ouverture
+  - delay: 00:00:05
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_volet_ouverture
+  mode: single
+  icon: mdi:garage-open
+volet_piscine_fermeture:
+  alias: volet_piscine_fermeture
+  sequence:
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_volet_ouverture
+  - delay: 00:00:02
+  - service: switch.turn_on
+    data: {}
+    entity_id: switch.cde_volet_fermeture
+  - service: switch.turn_on
+    data: {}
+    entity_id: switch.cde_eclairage
+  - delay: 00:01:30
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_volet_fermeture
+  - service: switch.turn_off
+    data: {}
+    entity_id: switch.cde_eclairage
+  mode: single
+  icon: mdi:garage
+volets_bureau:
+  alias: Ouverture Volets Bureau
+  sequence:
+  - condition: state
+    entity_id: input_boolean.presence_amis_bureau
+    state: 'off'
+  - service: cover.open_cover
+    target:
+      entity_id: cover.bureau_droit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bureau_gauche
+  mode: single
+ouverture_volets_chamb_nord:
+  alias: Ouverture Volets Chamb Nord
+  sequence:
+  - condition: state
+    entity_id: input_boolean.presence_amis_ch_nord
+    state: 'off'
+  - service: cover.open_cover
+    target:
+      entity_id: cover.amis_nord
+  mode: single
+ouverture_volet_chamb_sud:
+  alias: Ouverture Volet Chamb Sud
+  sequence:
+  - condition: state
+    entity_id: input_boolean.presence_amis_ch_sud
+    state: 'off'
+  - service: cover.open_cover
+    target:
+      entity_id: cover.volet_amis_sud_grand
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    target:
+      entity_id: cover.amis_sud_petit
+  mode: single
+'1619887011976':
+  alias: Alarm Siren
+  sequence:
+  - service: notify.telegram
+    data:
+      message: "Intruder Alert!  {% for open_sensor in state_attr(\"alarm_control_panel.alarmo_2\"\
+        , \"open_sensors\").key() | list %}\n  at {{ state_attr(open_sensor, 'friendly_name')\
+        \ }}\n{% endfor %}\n"
+      title: Alarme intrusion
+  mode: single
+ecs_on:
+  sequence:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs_router_pv
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_relais_ecs
+  mode: single
+  alias: Ecs_On
+ecs_off:
+  sequence:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: input_boolean.ecs_av_pv
+      state: 'on'
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_relais_ecs_router_pv
+  mode: single
+  alias: Ecs_Off
+volet_bureau_droit_up:
+  alias: volet bureau droit up
+  sequence:
+  - service: cover.open_cover
+    target:
+      entity_id: cover.bureau_droit
+  mode: single
+volet_bureau_droit_down:
+  alias: volet bureau droit down
+  sequence:
+  - service: cover.close_cover
+    target:
+      entity_id: cover.bureau_droit
+  mode: single
+volet_bureau_droit_stop:
+  alias: volet bureau droit stop
+  sequence:
+  - service: cover.stop_cover
+    target:
+      entity_id: cover.bureau_droit
+  mode: single

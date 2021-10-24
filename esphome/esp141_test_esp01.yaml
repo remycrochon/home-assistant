@@ -1,0 +1,39 @@
+esphome:
+  name: esp141_test_esp01
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+
+  manual_ip:
+    static_ip: 192.168.0.141
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp141 Test Esp01"
+    password: "LmPj303I5jAB"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+
+sensor:    
+  - platform: uptime
+    name: "ESP141 Uptime Sensor"
+    id: esp141_uptime
+    update_interval: 10s    
+    
+switch:
+  - platform: restart
+    name: "ESP141_Restart"

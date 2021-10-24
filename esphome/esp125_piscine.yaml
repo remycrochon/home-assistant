@@ -1,0 +1,115 @@
+esphome:
+  name: esp125_piscine
+  platform: ESP32
+  board: lolin_d32
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+  reboot_timeout: 5min
+  fast_connect: true
+
+
+  manual_ip:
+    static_ip: 192.168.0.125
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+
+# Example configuration entry for ESP32
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+  
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp125_Status"
+
+sensor:
+
+# Mesure du pH
+  - platform: ezo
+    id: esp125_ph_ezo
+    name: ph_ezo
+    address: 99
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    update_interval: 60s
+# moyenne sur 15 mn
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 15  
+#      - lambda: return id(esp125_ph_ezo).set_tempcomp_value(temp_piscine);
+
+# Mesure de l'ORP
+  - platform: ezo
+    id: esp125_orp_ezo
+    name: orp_ezo
+    address: 98
+    unit_of_measurement: "mV"
+    accuracy_decimals: 1
+    update_interval: 60s
+# moyenne sur 15 mn
+#    filters:
+#      - sliding_window_moving_average:
+#          window_size: 15
+#          send_every: 15           
+
+# Mesure de la pression filtre
+  - platform: adc
+    pin: A0
+    id: esp125_pression_filtre
+    name: "Pression filtre"
+    unit_of_measurement: "Bars"
+    update_interval: 60s
+    attenuation: 11db
+    filters:
+      - calibrate_linear:
+        - 0.5 -> 0.0
+        - 0.808 -> 0.85
+# moyenne sur 30 mn
+#      - sliding_window_moving_average:
+#          window_size: 30
+#          send_every: 30
+         
+
+  - platform: wifi_signal
+    name: "ESP125 WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: homeassistant
+    name: "T° Eau Piscine"
+    id: temp_piscine
+    entity_id: sensor.temp_piscine
+
+# gestion afficheur
+display:
+  - platform: lcd_pcf8574
+    dimensions: 16x2
+    address: 0x27
+    update_interval: 5s
+    lambda: |-
+      it.printf(0,0,"Ph=%.2f",id(esp125_ph_ezo).state);
+      it.printf(0,1,"Orp=%.2f",id(esp125_orp_ezo).state);
+      it.printf(8,0,"P=%.3f",id(esp125_pression_filtre).state);
+
+
+switch:    
+  - platform: restart
+    name: "ESP125_Restart"

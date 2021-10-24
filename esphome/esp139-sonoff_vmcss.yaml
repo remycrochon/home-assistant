@@ -1,0 +1,59 @@
+esphome:
+  name: esp139_sonoff_vmcss
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+
+  manual_ip:
+    # Set this to the IP of the ESP
+    static_ip: 192.168.0.139
+    # Set this to the IP address of the router. Often ends with .1
+    gateway: 192.168.0.1
+    # The subnet of the network. 255.255.255.0 works for most home networks.
+    subnet: 255.255.255.0
+
+  reboot_timeout: 5min
+  fast_connect: true
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "esp139_Status"
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "bp_vmc_ssol"
+    on_press:
+      - switch.toggle: relay
+
+switch:
+  - platform: gpio
+    name: "vmc_ssol"
+    pin: GPIO12
+    id: relay
+    
+  - platform: restart
+    name: "ESP139_Restart"
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: yes
+    

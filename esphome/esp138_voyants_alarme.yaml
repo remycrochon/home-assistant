@@ -1,0 +1,106 @@
+esphome:
+  name: esp138_voyants_alarme
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+
+  manual_ip:
+    static_ip: 192.168.0.138
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+  reboot_timeout: 5min
+  fast_connect: true
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: True
+  id: bus_a
+
+
+# Example configuration entry
+text_sensor:
+  - platform: homeassistant
+    name: "def_l1"
+    entity_id: input_text.text_def_l1
+    id: texte_def_l1
+  - platform: homeassistant
+    name: "def_l2"
+    entity_id: input_text.text_def_l2
+    id: texte_def_l2
+  - platform: homeassistant
+    name: "def_l3"
+    entity_id: input_text.text_def_l3
+    id: texte_def_l3
+  - platform: homeassistant
+    name: "def_l4"
+    entity_id: input_text.text_def_l4
+    id: texte_def_l4
+
+sensor:
+  - platform: uptime
+    name: "ESP138 Uptime Sensor"
+    id: esp138_uptime
+    update_interval: 10s
+
+  - platform: wifi_signal
+    name: "ESP138 WiFi Signal Sensor"
+    update_interval: 60s
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO16
+      inverted: True
+    name: bp_raz
+#Etat de la connection
+  - platform: status
+    name: "esp138_Status"
+
+switch:    
+  - platform: gpio
+    pin: GPIO12
+    name: voyant_reseau
+
+  - platform: gpio
+    pin: GPIO13
+    name: voyant_intrusion
+    
+  - platform: gpio
+    pin: GPIO14
+    name: voyant_alarme
+    
+  - platform: gpio
+    pin: GPIO15
+    name: voyant_defaut
+
+  - platform: restart
+    name: "ESP138_Restart"
+    
+# gestion afficheur
+display:
+  - platform: lcd_pcf8574
+    dimensions: 20x4
+    address: 0x27
+    lambda: |-
+      it.printf(0, 0, id(texte_def_l1).state.c_str());
+      it.printf(0, 1, id(texte_def_l2).state.c_str());
+      it.printf(0, 2, id(texte_def_l3).state.c_str());
+      it.printf(0, 3, id(texte_def_l4).state.c_str());
+      

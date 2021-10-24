@@ -1,0 +1,51 @@
+esphome:
+  name: esp135_luxmetre
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+  
+  manual_ip:
+    static_ip: 192.168.0.135  # IP à VALIDER
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+  reboot_timeout: 5min
+  fast_connect: true
+
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+
+web_server:
+  port: 80
+
+i2c:
+  sda: GPIO0
+  scl: GPIO2
+  scan: False
+  id: bus_a
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp135_Status"
+
+sensor:
+  - platform: bh1750
+    name: "BH1750 Illuminance"
+    address: 0x23
+    measurement_duration: 69
+    update_interval: 60s
+
+switch:
+  - platform: restart
+    name: "ESP135_Restart"

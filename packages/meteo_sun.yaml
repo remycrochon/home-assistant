@@ -1,0 +1,193 @@
+sensor:
+# Vantage Pro2 -> WEEXWX
+  - platform: mqtt
+    name: "VP2_DateTime"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'ms'
+    value_template: "{{ value_json.dateTime | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Temp_Out"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '°C'
+    value_template: "{{ value_json.outTemp_C | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Humidity_Out"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '%'
+    value_template: "{{ value_json.outHumidity | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Barometer"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'mbar'
+    value_template: "{{ value_json.barometer_mbar | round(1) }}"
+    
+#DAILY RAIN (PRECIPITATION QUOTIDIENNE).
+#Appuyez sur RAINDAY pour afficher la pluviométrie cumulée depuis minuit.
+#Toutes les précipitations cumulées depuis les 24 dernières heures sont affichées dans le bandeau déroulant au bas de l'écran.
+  - platform: mqtt
+    name: "VP2_Rain"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'mm'
+    force_update: true
+    value_template: >-
+      {% set a=value_json.rain_cm|float%}
+      {{ (a*10)|round(3) }}     
+    
+
+  - platform: mqtt
+    name: "VP2_Rain24"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'mm'
+    force_update: true
+    value_template: >-
+      {% set a=value_json.rain24_cm|float%}
+      {{ (a*10)|round(3) }}
+
+# La Rain Rate (pluviométrie) sera nulle et l'icône parapluie ne sera pas affichée tant que
+# deux basculements du pluviomètre ne sont pas survenus dans une période de 15 minutes.
+  - platform: mqtt
+    name: "VP2_Rain_Rate"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'mm/h'
+    force_update: true
+    value_template: >-
+      {% set a=value_json.rainRate_cm_per_hour|float%}
+      {{ (a*10)|round(3) }}
+
+#RAIN STORM (AVERSE D'ORAGE).
+#Rain Storm (L'averse d'orage) affiche le cumul de pluie de la dernière averse.
+#Il faut deux basculements du pluviomètre pour démarrer un événement d'orage et 24 heures sans pluie pour le stopper.
+#Appuyez sur RAINDAY pour basculer entre les précipitations quotidiennes et le total d'Averse d'orage.
+#Le cumul de pluie peut être affiché en pouces (in) ou millimètres (mm).    
+  - platform: mqtt
+    name: "VP2_Rain_Storm"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'mm'
+    force_update: true
+    value_template: >-
+      {% set a=value_json.stormRain_cm|float%}
+      {{ (a*10)|round(3) }}
+
+  - platform: mqtt
+    name: "VP2_Rafale"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'km/h'
+    value_template: "{{ value_json.windGust_kph | round(2) }}"
+
+  - platform: mqtt
+    name: "VP2_Win_Speed"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'km/h'
+    value_template: "{{ value_json.windSpeed_kph | round(2) }}"
+
+  - platform: mqtt
+    name: "VP2_Win_Dir"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '°'
+    value_template: "{{ value_json.windDir | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Temp_In"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '°C'
+    value_template: "{{ value_json.inTemp_C | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Humidté_In"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '%'
+    value_template: "{{ value_json.inHumidity | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Ressenti"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '°C'
+    value_template: "{{ value_json.windchill_C | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_HeatIndex"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: '°C'
+    value_template: "{{ value_json.heatindex_C | round(1) }}"
+
+  - platform: mqtt
+    name: "VP2_Radiation"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'W/m²'
+    value_template: "{{ value_json.radiation_Wpm2 | round(0) }}"
+
+  - platform: mqtt
+    name: "VP2_UV"
+    state_topic: "home/Vp2/loop"
+    unit_of_measurement: 'UV'
+    value_template: "{{ value_json.UV | round(1) }}"
+
+  - platform: template
+    sensors:
+# Azimuth et elevation soleil sont aussi calculés dans ESP134 mais sujet à coupure
+      sun_elevation:
+        friendly_name: 'elevation soleil'
+        unit_of_measurement: "°"
+        value_template: "{{'%+.1f'|format(state_attr('sun.sun', 'elevation'))}}"
+
+      sun_azimuth:
+        friendly_name: 'azimut soleil'
+        unit_of_measurement: "°"
+        value_template: "{{'%+.1f'|format(state_attr('sun.sun', 'azimuth'))}}"
+
+# calcul de l'heure lever et coucher du soleil
+      heure_leve_soleil:
+        friendly_name: 'heure_leve_soleil'
+        value_template: '{{ as_timestamp(strptime(state_attr("sun.sun", "next_rising")|default(0), "")) | timestamp_custom("%H:%M") }}'
+        icon_template: mdi:weather-sunset-up
+        
+      heure_couche_soleil:
+        friendly_name: 'heure_couche_soleil'
+        value_template: '{{ as_timestamp(strptime(state_attr("sun.sun", "next_setting")|default(0), "")) | timestamp_custom("%H:%M") }}'
+        icon_template: mdi:weather-sunset-down
+
+
+# Statistiques Pluviometrie
+# sert à gestion robot tonte
+  - platform: statistics
+    entity_id: sensor.vp2_rain24
+    max_age:
+      minutes: 320 # sur 6h
+    name: stats_vp2_pluviometrie
+  - platform: template
+    sensors:
+      vp2_pluviometrie_min:
+        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'min_value') }}" 
+      vp2_pluviometrie_max:
+        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'max_value') }}" 
+      vp2_pluviometrie_moyenne:
+        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'median') }}" 
+      vp2_pluviometrie_standard_deviation:
+        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'standard_deviation') }}"
+
+# Statistiques Temperature exterieure
+# sert à anticipation chauffage?
+  - platform: statistics
+    entity_id: sensor.vp2_temp_out
+    max_age:
+      minutes: 30 
+    name: stats_vp2_temp_out
+
+    
+input_boolean:
+  # Validation notitification laerte météo
+  stop_notif_previ_pluie:
+    name: Stop Notif Previ Pluie
+
+input_number:
+  # Utilisé pour calculer le time out de VP2
+  mem_vp2_datetime:
+    name: Mem VP2 DateTime
+    min: 0
+    max: 100000000000
+    unit_of_measurement: ms
+    icon: mdi:timeline-check-outline
+    mode: box

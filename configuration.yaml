@@ -1,0 +1,357 @@
+
+homeassistant:
+  name: Crochon
+  latitude: !secret latitude
+  longitude: !secret longitude
+  unit_system: metric
+  packages: !include_dir_named packages
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Example configuration.yaml entry
+logger:
+  default: warning
+  logs:
+# log level for HA core
+    homeassistant.core: fatal
+
+# log level for MQTT integration
+    homeassistant.components.mqtt: warning
+
+# log level for all python scripts
+    homeassistant.components.python_script: warning
+
+# individual log level for this python script
+    homeassistant.components.python_script.my_new_script.py: warning
+
+# log level for SmartThings lights
+    homeassistant.components.smartthings.light: warning
+    
+# log level for a custom component
+    #custom_components.my_integration: debug
+    custom_components.pool_pump: debug
+    
+# log level for the `aiohttp` Python package
+    aiohttp: error
+
+# log level for both 'glances_api' and 'glances' integration
+    homeassistant.components.glances: fatal
+    glances_api: fatal
+    
+#base de données
+    homeassistant.components.recorder: warning
+    
+# RFXCOM
+    rfxtrx: warning
+
+# Modbus
+    homeassistant.components.modbus: warning
+    pymodbus.client: warning
+
+#AutomMower
+    custom_components.husqvarna_automower: warning
+    custom_components.husqvarna_automower.vacuum: warning
+    custom_components.husqvarna_automower.config_flow: warning
+    aioautomower: warning
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+
+frontend:
+  themes: !include_dir_merge_named themes/
+
+lovelace:
+#  mode: yaml
+#  resources: !include www/custom-lovelace/resources.yaml
+
+#  - url: /local/meteofrance/meteofrance-raininhourforecast.js
+#    type: module
+
+#lovelace_gen:
+
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.0.105
+
+glances:
+  - host: 192.168.0.37
+
+rfxtrx:
+ device: //dev/serial/by-id/usb-RFXCOM_RFXtrx433_A128N1JF-if00-port0
+#  device: /dev/ttyUSB0
+
+# enable the recorder integration 
+recorder:
+  db_url: !secret db_mysql
+  auto_purge: true
+  commit_interval: 15
+  purge_keep_days: 7
+  include:
+    domains:
+      - binary_sensor
+      - input_boolean
+      - input_datetime
+      - input_number
+      - input_select
+      - sensor
+      - switch
+      - light
+      - utility_meter
+      - vacuum
+      - sun
+      - device_tracker
+      - weather
+      - group      
+  exclude:
+    domains:
+      - camera
+      - zone
+      - automation
+      - cover
+      - script
+      - pool_pump
+      - alarm_control_panel
+      - climate
+      - persistent_notification
+      - person
+
+# base influxdb
+influxdb:
+  host: a0d7b954-influxdb
+  port: 8086
+  database: homeassistant2
+  username: !secret influxdb_user
+  password: !secret influxdb_password
+  max_retries: 3
+  default_measurement: state
+  include:
+    domains:
+      - binary_sensor
+      - input_boolean
+      - input_datetime
+      - input_number
+      - input_select
+      - sensor
+      - switch
+      - light
+      - utility_meter
+      - vacuum
+      - sun
+  exclude:
+    domains:
+      - camera
+      - zone
+      - automation
+      - weather
+      - cover
+      - group
+      - script
+      - pool_pump
+      - device_tracker
+      - alarm_control_panel
+      - climate
+      - persistent_notification
+      - person
+
+      
+
+    
+# Modbus TCP connection Wago Piscine
+modbus:
+  - type: tcp
+    name: wago_piscine
+    host: 192.168.0.101
+    port: 502
+    switches:
+      - name: pool_pump_switch
+        slave: 1
+        address: 12288
+        write_type: coil
+
+      - name: cde_traitement
+        slave: 1
+        address: 12289
+        write_type: coil
+
+      - name: cde_eclairage
+        slave: 1
+        address: 12290
+        write_type: coil
+
+      - name: cde_volet_ouverture
+        slave: 1
+        address: 12291
+        write_type: coil
+
+      - name: cde_volet_fermeture
+        slave: 1
+        address: 12292
+        write_type: coil
+
+      - name: cde_ev_eau
+        slave: 1
+        address: 12293
+        write_type: coil
+
+      - name: cde_ppe_chlore
+        slave: 1
+        address: 12294
+        write_type: coil
+
+    binary_sensors:
+      #      - name:
+      #        slave: 1
+      #        address: 0
+      # niveau haut piscine
+      - name: tp_plein_lsh
+        slave: 1
+        address: 1
+      #  scan_interval: 10 en sec 10 par défaut
+      # niveau bas piscine
+      - name: tp_plein_lsl
+        slave: 1
+        address: 2
+      # information couverture flottante piscine fermée
+      - name: volet piscine fermé
+        slave: 1
+        address: 3
+
+    # lecture de la sonde pt100 de la mesure de temperature de l'eau
+    sensors:
+      - name: temp_piscine
+        unit_of_measurement: °C
+        slave: 1
+        address: 0
+        input_type: input
+        scale: 0.1
+        precision: 1
+
+      # lecture de la sonde pt100 de la mesure de temperature du local piscine
+      # uniquement à titre indicatif
+      - name: temp_local_piscine
+        unit_of_measurement: °C
+        slave: 1
+        address: 2
+        input_type: input
+        scale: 0.1
+        precision: 1
+
+# Modbus TCP connection Module Adam SSol
+  - type: tcp
+    name: adam_ssol
+    host: 192.168.0.47
+    port: 502
+    switches:
+# Sortie D0
+      - name: cde_relais_ecs
+        slave: 1
+        address: 16
+        write_type: coil
+
+# Sortie D1
+      - name: cde_relais_ecs_router_pv
+        slave: 1
+        address: 17
+        write_type: coil
+
+# Sortie D2
+      - name: cde_porte_ssol
+        slave: 1
+        address: 18
+        write_type: coil
+
+# Sortie D3     
+      - name: cde_porte_garage
+        slave: 1
+        address: 19
+        write_type: coil
+
+# Sortie D4  
+      - name: adam_sortie_d4
+        slave: 1
+        address: 20
+        write_type: coil
+
+# Sortie D5      
+      - name: sort5_adam_ssol
+        slave: 1
+        address: 21
+        write_type: coil
+
+    binary_sensors:
+# Entrées module Adam sous sol
+      - name: porte_ssol_fermee
+        slave: 1
+        address: 0
+      - name: porte_ssol_ouverte
+        slave: 1
+        address: 1
+      - name: porte_garage_fermee
+        slave: 1
+        address: 2
+      - name: porte_garage_ouverte
+        slave: 1
+        address: 3
+      - name: Etor5_adam_ssol
+        slave: 1
+        address: 4
+      - name: Etor6_adam_ssol
+        slave: 1
+        address: 5
+
+# Notification dans Telegram 
+telegram_bot:
+  - platform: polling
+    api_key: !secret telegram_token
+    allowed_chat_ids:
+      - !secret id_telegram_remy ## remy
+      
+notify:
+  - name: Telegram
+    platform: telegram
+    chat_id: !secret id_telegram_remy
+
+  - platform: pushbullet
+    api_key: !secret pushbullet_api_key
+    name: pushbullet
+
+# Notification dans les fichiers
+  - name: log_energy
+    platform: file
+    filename: conso_energy.csv
+    timestamp: True
+
+  - name: log_piscine
+    platform: file
+    filename: conso_piscine.csv
+    timestamp: True
+
+# déclaration de l'intrégration HACS Pool Pump Manager
+pool_pump:
+  switch_entity_id: switch.pool_pump_switch
+  pool_pump_mode_entity_id: input_select.pool_pump_mode
+  pool_temperature_entity_id: sensor.pool_water_temperature
+
+
+livebox:
+  host: 192.168.0.1
+  username: !secret user_livebox
+  password: !secret mdp_livebox
+  
+owntracks:
+  max_gps_accuracy: 200
+  waypoints: false
+  mqtt_topic: "owntracks/#"
+
+python_script:
+

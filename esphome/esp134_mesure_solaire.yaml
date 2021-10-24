@@ -1,0 +1,88 @@
+esphome:
+  name: esp134mesuresolaire
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+  manual_ip:
+    static_ip: 192.168.0.134
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+  reboot_timeout: 5min
+  fast_connect: true
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+
+mqtt:
+  broker: 192.168.0.37
+  username: remy
+  password: Albi_2020
+  topic_prefix: HA
+  log_topic: esp131_uv_ha2
+
+# Bus I²C
+#i2c:
+#  sda: GPIO4
+#  scl: GPIO5
+#  scan: true
+#  id: bus_a
+
+sun:
+  latitude: 43.9193
+  longitude: 2.198449722222222
+time:
+  - platform: homeassistant
+    timezone:  Europe/Paris #UTC+0  #Africa/Abidjan #Africa/Algiers #Europe/Paris  #Africa/Algiers
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp134_Status"
+    
+sensor:
+#ML8511 Mesure UV en mW/Cm²
+  - platform: adc
+    pin: A0
+    name: "esp134_uv"
+    unit_of_measurement: "UV"
+    update_interval: 60s
+    accuracy_decimals: 1
+    filters:
+      - calibrate_linear:
+        - 0.31 -> 0.0
+        - 0.88 -> 15.0
+# moyenne sur 5 mn
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 5  
+          
+          
+# Signal du WIFI
+  - platform: wifi_signal
+    name: "ESP134 WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: sun
+    name: Sun_Elevation
+    type: elevation
+  - platform: sun
+    name: Sun_Azimuth
+    type: azimuth
+
+# BP Restart
+switch:    
+  - platform: restart
+    name: "ESP134_Restart"

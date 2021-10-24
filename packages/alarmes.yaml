@@ -1,0 +1,69 @@
+# Test Alert
+input_boolean:
+  test_alert:
+    name: Test Alert
+
+  def_com_vp2:
+    name: Defaut Comm VP2 si Off
+# Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple
+  inhib_alarme_pac:
+    name: Inhib Alarm PAC
+
+# Surveillance de la temperature du congelateur        
+template:
+  binary_sensor:
+# Surveillance de la temperature du congelateur     
+# normalement sur off
+    - name: "alarme_temp_congelo_haute"
+      state: "{{ states('sensor.temp_congelo_garage_2')|float(default=0)>-10 }}"
+      device_class: "heat"
+
+# Surveillance discordance PAC entre l'état du thermostat et l'état du switch de commande   
+# normalement sur on  
+    - name: "alarme_discord_pac"
+      state: >-
+        {% set a=states("sensor.puissance_pac_rpac")| float(default=0)<200 %}
+        {% set b=states("switch.altherma") %}
+        {{ (a==true and b=="on") or (a==false and b=="off") }}
+      device_class: "connectivity"
+        
+# Surveillance status PAC
+# normalement sur on
+    - name: "alarme_status_pac"
+      state: >-
+        {% set a=states("sensor.esp_altherma_status") %}
+        {{ a=="Online" }}
+      device_class: "connectivity"
+
+# Surveillance porte garage
+# normalement sur on
+    - name: "alarme_porte_garage"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.porte_garage_fermee") %}
+        {{ a==True and b=="off" }}
+      device_class: "problem"
+
+# Surveillance porte sous sol
+# normalement sur on
+    - name: "alarme_porte_sous_sol"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.porte_ssol_fermee") %}
+        {{ a==True and b=="off" }}
+      device_class: "problem"
+
+# Surveillance porte cellier
+# Sur on si fermée
+    - name: "alarme_porte_cellier"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.porte_cellier") %}
+        {{ a==True and b=="on" }}
+      device_class: "problem"
+
+
+
+
+
+

@@ -1,0 +1,56 @@
+sensor:
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+        arg: /config
+      - type: disk_use
+      - type: disk_free
+      - type: memory_use_percent
+      - type: memory_free
+      - type: processor_use
+      - type: memory_use
+      - type: swap_use
+      - type: swap_use_percent
+      - type: swap_free
+      - type: load_1m
+      - type: load_5m
+      - type: load_15m
+#      - type: network_in 	Interface, e.g., eth0 	yes
+#      - type: network_out 	Interface, e.g., eth0 	yes
+#      - type: throughput_network_in 	Interface, e.g., eth0 	yes
+#      - type: throughput_network_out 	Interface, e.g., eth0 	yes
+#      - type: packets_in 	Interface, e.g., eth0 	yes
+#      - type: packets_out 	Interface, e.g., eth0 	yes
+#      - type: ipv4_address 	Interface, e.g., eth0 	yes
+#      - type: ipv6_address 	Interface, e.g., eth0 	yes
+#      - type: process 	Binary, e.g., octave-cli 	yes
+      - type: last_boot
+      - type: network_in
+        arg: hassio
+      - type: network_out
+        arg: enp3s0
+
+  - platform: cpuspeed
+    name: CPU_Speed
+
+  - platform: command_line
+    name: processor_temperature_z0
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
+  - platform: command_line
+    name: processor_temperature_z1
+    command: "cat /sys/class/thermal/thermal_zone1/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
+
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'date_time_utc'
+      - 'date_time_iso'
+      - 'time_date'
+      - 'time_utc'
+      - 'beat'

@@ -1,0 +1,206 @@
+input_number:
+  # utilisé pour simuler la température de l'eau pendant les test
+  simul_orp:
+    name: orp Simulation
+    min: -1019.9
+    max: 1019.9
+    step: 0.1
+    unit_of_measurement: mV
+    mode: box
+
+# Mémorisation orp
+  orp_memoire:
+    name: orp Mémoire avant arret
+    min: -1019.9
+    max: 1019.9
+    step: 0.1
+    unit_of_measurement: mV
+    mode: box
+
+# orp Valeur cible
+  orp_cible:
+    name: orp Cible 
+    min: -1019.9    
+    max: 1019.9
+    step: 0.1
+    unit_of_measurement: mV
+    icon: mdi:alpha-h-circle-outline
+    mode: box
+# Hysteresis- non utilisé A SUPPRIMER dans les equations
+  orp_hysteresis:
+    name: orp Hysteresis 
+    min: 0.0
+    max: 100.0
+    step: 0.01
+    unit_of_measurement: mV
+    mode: box
+
+# Débit pompe chlore (Etalonnage obligatoire de la pompe)
+  chlore_debit_ppe:
+    name: chlore Débit Ppe
+    min: 0
+    max: 7.2
+    step: 0.1
+    unit_of_measurement: l/h
+    icon: mdi:pump
+    mode: box
+
+# Durée injection chlore
+  chlore_duree_inject_s:
+    name: chlore Durée inject effect(s)
+    min: 0
+    max: 60
+    step: 0.1
+    unit_of_measurement: "s"
+    icon: mdi:clock
+    mode: box
+# Durée injection chlore
+  chlore_duree_inject_mn:
+    name: chlore Durée inject effect (mn)
+    min: 0
+    max: 60
+    step: 0.1
+    unit_of_measurement: "mn"
+    icon: mdi:clock
+    mode: box
+
+# Concentration du chlore
+  chlore_concentration:
+    name: chlore Concentration
+    min: 0
+    max: 100
+    step: 0.1
+    unit_of_measurement: "%"
+    icon: mdi:percent
+    mode: box
+
+# Cumul du chlore moins injecté chaque jour"
+  chlore_vol_injecte:
+    name: chlore Cumul Vol Injecté
+    min: 0
+    max: 25
+    step: 0.1
+    unit_of_measurement: "l"
+    icon: mdi:needle
+    mode: box
+
+# Volume du bidon de chlore
+  chlore_vol_bidon:
+    name: chlore Volume Bidon
+    min: 0
+    max: 30
+    step: 0.1
+    unit_of_measurement: "l"
+    icon: mdi:blood-bag
+    mode: box
+
+# Seuil bas du bidon chlore moins déclenchant une notification
+  chlore_seuil_bas_bidon:
+    name: chlore Niveau bas Bidon
+    min: 0
+    max: 5
+    step: 0.5
+    unit_of_measurement: 'l'
+    icon: mdi:flask-empty-outline
+    mode: box
+  
+input_boolean:
+  # Validation regul chlore
+  regul_chlore:
+    name: chlore validation Regul
+
+binary_sensor:
+  # Niveau bas bidon chlore
+  - platform: template
+    sensors:
+      chlore_niveau_bas_bidon:
+        value_template: >-
+          {% set a=states('input_number.chlore_vol_bidon')|float %}
+          {% set b=states('input_number.chlore_vol_injecte')|float %}
+          {% set c=states('input_number.chlore_seuil_bas_bidon')|float %}
+          {{ (a-b) <= c }}   
+        friendly_name: "chlore Seuil Niveau Bas Bidon"
+sensor:
+  - platform: history_stats
+    name: chlore_derniere_heure
+    entity_id: switch.cde_ppe_chlore
+    state: 'on'
+    type: time
+    end: '{{now().replace(minute=0).replace(second=0)}}'
+    duration: 01:00:00
+
+  - platform: history_stats
+    name: chlore_derniere__48h
+    entity_id: switch.cde_ppe_chlore
+    state: 'on'
+    type: time
+    end: '{{now()}}'
+    duration: 48:00:00
+
+  # Recopie mémoire orp dans le sensor pour calcul qt à injecter
+  - platform: template
+    sensors:
+      orp_piscine_orp:
+        friendly_name: "orp_piscine_orp"
+        value_template: '{{ states("input_number.orp_memoire") }}'
+        unit_of_measurement: "orp"
+    
+  - platform: template
+    sensors:
+      chlore_volume_restant_bidon:
+        friendly_name: "Volume chlore restant bidon"
+        value_template: >-
+          {% set a=states('input_number.chlore_vol_bidon')|float %}
+          {% set b=states('input_number.chlore_vol_injecte')|float %}
+          {{ (a-b)|round(2) }}   
+        icon_template: mdi:flask-empty-minus-outline
+        unit_of_measurement: "l"
+
+  # temps d'injection en mn
+  - platform: template
+    sensors:
+      chlore_tps_inject_mn:
+        friendly_name: "chlore Durée Inject calc. (mn)"
+        value_template: >-
+          {% set a=states('sensor.orp_piscine_orp') | float %}
+          {% set y=state_attr("sensor.orp_stat", "mean") | float %}
+          {% set x=states('input_number.simul_orp') | float %}
+          {% set b=states('input_number.orp_cible') | float %}
+          {% set c=states('input_number.orp_hysteresis') | float %}
+          {% set d=states('input_number.chlore_debit_ppe') | float %}
+          {% set e=states('input_number.chlore_concentration') | float %}
+          {% set r=(((a+c-b)/(e/100))/d)*3600|round(2)|int %} 
+          {% if r < 0 %}
+            {{ 0 }}
+          {% else %}
+            {{ (r//60)|int }}
+          {% endif %}
+        unit_of_measurement: "mn"
+  # temps d'injection en s
+  - platform: template
+    sensors:
+      chlore_tps_inject_s:
+        friendly_name: "chlore Durée Inject calc. (s)"
+        value_template: >-
+          {% set a=states('sensor.orp_piscine_orp') | float %}
+          {% set y=state_attr("sensor.orp_stat", "mean") | float %}
+          {% set x=states('input_number.simul_orp') | float %}
+          {% set b=states('input_number.orp_cible') | float %}
+          {% set c=states('input_number.orp_hysteresis') | float %}
+          {% set d=states('input_number.chlore_debit_ppe') | float %}
+          {% set e=states('input_number.chlore_concentration') | float %}
+          {% set r=(((a+c-b)/(e/100))/d)*3600|round(2)|int %} 
+          {% if r < 0 %}
+            {{ 0 }}
+          {% else %}
+            {{ (r%60)|int }}
+          {% endif %}
+        unit_of_measurement: "s"
+
+  # Statistiques orp
+  - platform: statistics
+    name: orp_stat
+    entity_id: sensor.orp_piscine_orp
+    sampling_size: 30
+    #max_age:
+      # minutes: 30

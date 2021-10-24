@@ -1,0 +1,19 @@
+input_datetime:
+  # Horaire VMC
+  horaire_vmc_debut:
+    name: Horaire VMC Début
+    has_date: false
+    has_time: true
+  horaire_vmc_fin:
+    name: Horaire VMC Fin
+    has_date: false
+    has_time: true
+
+input_select:
+  vmc_ssol:
+    name: Vmc_SSol
+    icon: mdi:fan
+    options:
+      - Auto
+      - Arret
+      - Marche

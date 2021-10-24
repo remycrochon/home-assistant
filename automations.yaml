@@ -1,0 +1,2326 @@
+- id: daily_energy_use_message
+  alias: 00 - Message Journalier Bilan puissance
+  trigger:
+  - platform: time
+    at: '23:59:00'
+  action:
+  - service: notify.telegram
+    data:
+      message: Tot={{states('sensor.energy_total_daily')}} -HP={{states('sensor.energy_total_usage_daily_hp')
+        }} -HC={{states('sensor.energy_total_usage_daily_hc') }} {{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Conso Electrique du jour en kWh
+  - service: notify.log_energy
+    data:
+      message: '{{states(''sensor.energy_total_daily'') }},{{states(''sensor.energy_total_usage_daily_hp'')
+        }},{{states(''sensor.energy_total_usage_daily_hc'') }},{{states(''sensor.energy_pisc_daily'')
+        }},{{states(''sensor.energy_pisc_usage_daily_hp'') }},{{states(''sensor.energy_pisc_usage_daily_hc'')
+        }},{{states(''sensor.energy_sdb_daily'') }},{{states(''sensor.energy_sdb_usage_daily_hp'')
+        }},{{states(''sensor.energy_sdb_usage_daily_hc'') }},{{states(''sensor.energy_pac1_daily'')
+        }},{{states(''sensor.energy_pac1_usage_daily_hp'') }},{{states(''sensor.energy_pac1_usage_daily_hc'')
+        }},{{states(''sensor.energy_ecs1_daily'') }},{{states(''sensor.energy_ecs1_usage_daily_hp'')
+        }},{{states(''sensor.energy_ecs1_usage_daily_hc'') }}'
+      title: Conso Electrique du jour en kWh
+  mode: single
+- id: '1610184966825'
+  alias: Volet_Boolean Nuit/Jour
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.luminosite'' )|float > states(''input_number.luminosite_seuil_haut'')|float
+      and is_state("sun.sun", "above_horizon") }}'
+    id: nuit->jour
+  - platform: template
+    value_template: '{{ states(''sensor.luminosite'')|float < states(''input_number.luminosite_seuil_bas'')|float
+      and is_state("sun.sun", "below_horizon") }}'
+    id: jour->nuit
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.nuit_jour
+    - conditions:
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.nuit_jour
+    default: []
+  mode: single
+- id: '1610371647929'
+  alias: 01 - Purge base de données
+  description: ''
+  trigger:
+  - platform: time
+    at: 01:30:00
+  condition: []
+  action:
+  - service: recorder.purge
+    data:
+      keep_days: 7
+      repack: true
+  mode: single
+- id: '1611218307411'
+  alias: Mode_Present/Absent
+  description: Passage du mode Presence de Absent ou Vacances à Present
+  trigger:
+  - platform: state
+    entity_id: input_select.presence
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.presence
+        state: Vacance
+      - condition: state
+        entity_id: input_select.presence
+        state: Absent
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id:
+          - input_select.volets
+        data:
+          option: Absent
+    - conditions:
+      - condition: state
+        entity_id: input_select.presence
+        state: Present
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.volets
+        data:
+          option: Auto
+    default: []
+  mode: single
+- id: '1611515162753'
+  alias: Piscine Calcul fonctionnement Pompe
+  description: 'Mode Auto/On/Off/Hivernage '
+  trigger:
+  - platform: homeassistant
+    event: start
+    id: Start
+  - platform: state
+    entity_id: sensor.pool_water_temperature
+    id: temp
+  - platform: state
+    entity_id: input_select.pool_pump_mode
+    id: mode
+  - platform: state
+    entity_id: input_boolean.pool_water_level_critical
+    id: lsll
+  - platform: time_pattern
+    minutes: /5
+    id: 5min
+  - platform: time
+    at: input_datetime.heure_ma_pump_pisc_hiv
+    id: mapompe
+  - platform: time
+    at: input_datetime.heure_at_pump_pisc_hiv
+    id: atpompe
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: and
+        conditions:
+        - condition: state
+          state: Auto
+          entity_id: input_select.pool_pump_mode
+        - condition: or
+          conditions:
+          - condition: trigger
+            id: Start
+          - condition: trigger
+            id: temp
+          - condition: trigger
+            id: mode
+          - condition: trigger
+            id: lsll
+          - condition: trigger
+            id: 5min
+      sequence:
+      - service: pool_pump.check
+    - conditions:
+      - condition: state
+        entity_id: input_select.pool_pump_mode
+        state: 'On'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.pool_pump_switch
+    - conditions:
+      - condition: state
+        entity_id: input_select.pool_pump_mode
+        state: 'Off'
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.pool_pump_switch
+    - conditions:
+      - condition: state
+        entity_id: input_select.pool_pump_mode
+        state: Hivernage
+      - condition: trigger
+        id: mapompe
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.pool_pump_switch
+    - conditions:
+      - condition: state
+        entity_id: input_select.pool_pump_mode
+        state: Hivernage
+      - condition: trigger
+        id: atpompe
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.pool_pump_switch
+    default: []
+  mode: single
+- id: '1610181804077'
+  alias: Piscine Hors_Gel Calcul
+  description: '  '
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.vp2_temp_out
+    below: input_number.hors_gel_inf
+    id: inf
+  - platform: state
+    entity_id: sensor.vp2_temp_out
+    id: sup
+    to: input_number.hors_gel_sup
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: inf
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.hors_gel
+    - conditions:
+      - condition: trigger
+        id: sup
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.hors_gel
+    default: []
+  mode: single
+- id: '1611999559298'
+  alias: Notification Pascale home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.owntrack_pascale
+    zone: zone.maison
+    event: enter
+  condition: []
+  action:
+  - service: notify.pushbullet
+    data:
+      message: Pascale retour maison
+  mode: single
+- id: '1611999613234'
+  alias: Notification Pascale no_home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.owntrack_pascale
+    zone: zone.maison
+    event: leave
+  condition: []
+  action:
+  - service: notify.pushbullet
+    data:
+      message: Pascale quitte maison
+  mode: single
+- id: '1611999675391'
+  alias: Notification Remy no_home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.owntrack_remy
+    zone: zone.maison
+    event: leave
+  condition: []
+  action:
+  - service: notify.pushbullet
+    data:
+      message: Remy quitte maison
+  mode: single
+- id: '1611999722072'
+  alias: Notification Remy home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.owntrack_remy
+    zone: zone.maison
+    event: enter
+  condition: []
+  action:
+  - service: notify.pushbullet
+    data:
+      message: Remy retour maison
+  mode: single
+- id: '1612183951669'
+  alias: Bureau-Ampoule On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.detecteur_presence1_ias_zone
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.luminosite
+    below: '100'
+  action:
+  - type: turn_on
+    device_id: 8394a13f5f95935a9b68bb19f625e4e7
+    entity_id: light.tz3000_49qchf10_ts0502a_level_light_color_on_off
+    domain: light
+    brightness_pct: 0
+  mode: single
+- id: '1612184213140'
+  alias: Bureau Ampoule off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.detecteur_presence1_ias_zone
+    from: 'on'
+    to: 'off'
+    for: 00:02:00
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 8394a13f5f95935a9b68bb19f625e4e7
+    entity_id: light.tz3000_49qchf10_ts0502a_level_light_color_on_off
+    domain: light
+  mode: single
+- id: '1614244769739'
+  alias: Lampe Desodo
+  description: 'PC1 Lidl '
+  trigger:
+  - platform: time
+    at: '19:30'
+    id: Allume
+  - platform: time
+    at: '23:30'
+    id: Eteint
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Allume
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.pc1_lidl
+    - conditions:
+      - condition: trigger
+        id: Eteint
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.pc1_lidl
+    default: []
+  mode: single
+- id: '1616955642150'
+  alias: ECS_Integration énergie
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.ecocompteur_ecs
+  condition: []
+  action:
+  - service: python_script.energy1
+    data:
+      power: sensor.ecocompteur_ecs
+      last_power: last_power_ecs
+      energy_accum: energy_ecs_p
+  mode: single
+- id: '1616973133305'
+  alias: Energie-energy integration
+  description: Calcul énergie PZEM Totale
+  trigger:
+  - platform: state
+    entity_id: sensor.pzem_totale_puissance
+  condition: []
+  action:
+  - service: python_script.energy1
+    data:
+      power: sensor.pzem_totale_puissance
+      last_power: last_power
+      energy_accum: energy_power
+  mode: single
+- id: '1617008500219'
+  alias: PAC_Energy integration
+  description: Calcul énergie PAC
+  trigger:
+  - platform: state
+    entity_id: sensor.puissance_pac_rpac
+  condition: []
+  action:
+  - service: python_script.energy1
+    data:
+      power: sensor.puissance_pac_rpac
+      last_power: last_power_pac
+      energy_accum: energy_pac_p
+  mode: single
+- id: '1617185147880'
+  alias: Piscine Notification Alarme Appoint d'eau
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.ev_eau_tps_ouverture_jour
+    above: '1.00'
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: Temps ouverture supérieur à {{states('sensor.ev_eau_tps_ouverture_jour')}}
+        h{{-"\n"-}}{{states("sensor.date_time") }}
+      title: Alarme EV Appoint d'eau Piscine
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_ev_eau
+  mode: single
+- id: '1617199790692'
+  alias: Piscine Notification alarme niveau bas
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.tp_plein_lsl
+    from: 'off'
+    to: 'on'
+    for: 00:00:10
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      title: ALARME
+      message: Niveau bas Piscine
+  - service: input_select.select_option
+    data:
+      option: 'Off'
+    target:
+      entity_id: input_select.pool_pump_mode
+  - service: notify.telegram
+    data:
+      message: Niveau bas piscine{{-"\n"-}}{{states("sensor.date_time") }}{{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Alarme Niveau Bas !!!
+  mode: single
+- id: '1617968589301'
+  alias: Alarmo_ Activation Nuit
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.heure_debut_alarme_porte
+  condition: []
+  action:
+  - service: alarm_control_panel.alarm_arm_night
+    target:
+      entity_id: alarm_control_panel.alarmo
+  mode: single
+- id: '1617968698367'
+  alias: Alarmo_Desactivation
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.heure_fin_alarme_porte
+  condition: []
+  action:
+  - service: alarm_control_panel.alarm_disarm
+    target:
+      entity_id: alarm_control_panel.alarmo
+  mode: single
+- id: '1619854078498'
+  alias: Alarme BP_RAZ_Defaut
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bp_raz
+    to: 'on'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id:
+      - switch.voyant_alarme
+      - switch.voyant_defaut
+      - switch.voyant_intrusion
+      - switch.voyant_reseau
+  - service: input_text.set_value
+    data:
+      value: .
+    target:
+      entity_id:
+      - input_text.text_def_l1
+      - input_text.text_def_l2
+      - input_text.text_def_l3
+      - input_text.text_def_l4
+  mode: single
+- id: '1622182531449'
+  alias: Piscine Volet Ouv/Ferm Horaires
+  description: Suivant tranches horaires
+  trigger:
+  - platform: time
+    at: input_datetime.heure_ferm_volet_pisc
+    id: ferm
+  - platform: time
+    at: input_datetime.heure_ouv_volet_pisc
+    id: ouv
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ferm
+      - condition: state
+        entity_id: input_boolean.volet_piscine_auto
+        state: 'on'
+      sequence:
+      - service: script.volet_piscine_fermeture
+    - conditions:
+      - condition: trigger
+        id: ouv
+      - condition: state
+        entity_id: input_boolean.volet_piscine_auto
+        state: 'on'
+      sequence:
+      - service: script.volet_piscine_ouverture
+    default: []
+  mode: single
+- id: '1623911201023'
+  alias: Piscine Température Mémorisation avant arrêt
+  description: 'On fait tourner la pompe 15 mn avant prise en compte de la température '
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition:
+  - condition: state
+    entity_id: binary_sensor.pool_pump_running
+    state: 'on'
+    for: 00:15:00
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.mem_temp_piscine
+    data_template:
+      value: '{{ states(''sensor.temp_piscine'')|float }}'
+  mode: single
+- id: '1624083693650'
+  alias: Piscine pH Validation Automatismes
+  description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.pool_pump_running
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+    to: 'on'
+    from: 'off'
+    id: ma_pump
+  - platform: state
+    entity_id: binary_sensor.pool_pump_running
+    id: at_pump
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - platform: state
+    entity_id: input_boolean.regul_ph
+    id: regule_ph_off
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ma_pump
+      - condition: state
+        entity_id: input_boolean.regul_ph
+        state: 'on'
+      sequence:
+      - service: automation.turn_on
+        target:
+          entity_id:
+          - automation.piscine_injection_v2
+          - automation.piscine_notification_ph
+      - service: notify.telegram
+        data:
+          message: pH sonde= {{states('sensor.ph_piscine_ph')}} {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Piscine Activation Traitement pH !
+    - conditions:
+      - condition: trigger
+        id: at_pump
+      sequence:
+      - service: automation.turn_off
+        target:
+          entity_id:
+          - automation.piscine_injection_v2
+          - automation.piscine_notification_ph
+    - conditions:
+      - condition: trigger
+        id: regule_ph_off
+      sequence:
+      - service: automation.turn_off
+        target:
+          entity_id:
+          - automation.piscine_injection_v2
+          - automation.piscine_notification_ph
+    default: []
+  mode: single
+- id: '1624381456670'
+  alias: Piscine Pression haute
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.pression_piscine_p
+    above: '1.0'
+    for: 00:15:00
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: Pression Haute = {{states("sensor.pression_piscine_p") }}{{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Alerte Pression Filtre !!!
+  mode: single
+- id: '1624811066593'
+  alias: Piscine pH Injection
+  description: 'Injection pH '
+  trigger:
+  - platform: time_pattern
+    hours: /1
+  condition:
+  - condition: template
+    value_template: '{% set a=states(''sensor.ph_piscine_ph'') | float %}
+
+      {% set b=states(''input_number.ph_cible'') | float %}
+
+      {{ a > b }}'
+  - condition: numeric_state
+    entity_id: sensor.ph_piscine_ph
+    above: '0'
+  - condition: state
+    entity_id: input_boolean.regul_ph
+    state: 'on'
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.ph_duree_inject_s
+    data_template:
+      value: '{{ states(''sensor.ph_tps_inject_s'')|float }}'
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.ph_duree_inject_mn
+    data_template:
+      value: '{{ states(''sensor.ph_tps_inject_mn'')|float }}'
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.cde_traitement
+  - service: notify.telegram
+    data:
+      message: pH sonde= {{states('sensor.ph_piscine_ph')}} {{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Début injection pH !!!
+  - delay: 00:{{ states('input_number.ph_duree_inject_mn')|int}}:{{ states('input_number.ph_duree_inject_s')
+      | int }}
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.ph_vol_injecte
+      value: '{% set a=states(''input_number.ph_vol_injecte'')|float %} {% set b=states(''input_number.ph_debit_ppe'')|float
+        %} {% set c=states(''input_number.ph_duree_inject_s'')|float %} {% set d=states(''input_number.ph_duree_inject_mn'')|float
+        %} {{a+( (b*((d*60)+c)/3600))|round(2) }}'
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_traitement
+  - service: notify.telegram
+    data:
+      message: pH sonde= {{states('sensor.ph_piscine_ph')}}{{-"\n"-}} Vol Injecté
+        =  {% set b=states('input_number.ph_debit_ppe')|float %} {% set c=states('input_number.ph_duree_inject_s')|float
+        %} {% set d=states('input_number.ph_duree_inject_mn')|float %} {{(b*((d*60)+c)/3600)|round(2)
+        }} l {{-"\n"-}}{{states("sensor.date_time") }}
+      title: Piscine Fin injection pH !!!
+  mode: single
+- id: '1624864713180'
+  alias: Piscine Cartouche Chlore
+  description: Mémorisation du temps d''utilisation cartouche chlore hedbo- RAZ à
+    la main
+  trigger:
+  - platform: time
+    at: '23:50:00'
+  condition: []
+  action:
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.temps_cartouche_chlore
+      value: '{% set a=states(''input_number.temps_cartouche_chlore'')|float %} {%
+        set b=states(''sensor.pool_pump_running_today'')|float %} {{ (a + b)|round(2)
+        }}'
+  mode: single
+- id: '1625162846851'
+  alias: Piscine Temps utilisation cartouche chlore atteint
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{% set a=states(''input_number.temps_cartouche_chlore'') | float
+      %}
+
+      {% set b=states(''input_number.chlore_seuil_max_utilisation'') | float %}
+
+      {{ a > b }}'
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: 'Tps Utilisation cart. Chlore = {{states(''input_number.temps_cartouche_chlore'')}}
+        h {{-"\n"-}} Temps maxi:  {{states(''input_number.chlore_seuil_max_utilisation'')}}
+        h {{-"\n"-}}{{states("sensor.date_time") }}'
+      title: Piscine Alerte Cartouche Chlore à changer!!!
+  mode: single
+- id: '1625215180800'
+  alias: Piscine pH Mémorisation valeur arret
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition:
+  - condition: state
+    entity_id: binary_sensor.pool_pump_running
+    state: 'on'
+    for: 00:30:00
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.ph_memoire
+    data_template:
+      value: '{{ states("sensor.ph_ezo") | float |round(2) }}'
+  mode: single
+- id: '1625215180801'
+  alias: Piscine ORP Mémorisation valeur avant arrêt
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition:
+  - condition: state
+    entity_id: binary_sensor.pool_pump_running
+    state: 'on'
+    for: 00:15:00
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.orp_memoire
+    data_template:
+      value: '{{ states("sensor.orp_ezo") | float |round(2) }}'
+  mode: single
+- id: '1559049859762'
+  alias: Piscine ORP Haut
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.orp_piscine_orp
+    above: '900.0'
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: ORP Haut = {{states('sensor.orp_piscine_orp') }}{{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Alerte ORP !!!
+  initial_state: true
+  mode: single
+- id: '1559049839763'
+  alias: Piscine ORP bas
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.orp_piscine_orp
+    below: '600.0'
+    above: '0'
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: ORP Bas = {{states('sensor.orp_piscine_orp') }}{{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Alerte ORP !!!
+  initial_state: true
+  mode: single
+- id: '1559049893757'
+  alias: Piscine ORP Anormal
+  trigger:
+  - platform: template
+    value_template: '{{state_attr("sensor.orp_stat", "standard_deviation") | float  >
+      0.1}}'
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: ORP Mauvais sonde à calibrer??{{-"\n"-}} Moyenne = {{state_attr("sensor.orp_stat",
+        "mean")}}{{-"\n"-}} Deviation(S=0.01) = {{state_attr("sensor.orp_stat", "standard_deviation")}}
+        {{-"\n"-}}{{states("sensor.date_time") }}
+      title: Piscine Alerte ORP !!!
+  initial_state: true
+  mode: single
+- id: '1624811066594'
+  alias: Piscine Chlore Injection
+  description: ''
+  trigger:
+  - platform: time_pattern
+    hours: /1
+  condition:
+  - condition: template
+    value_template: '{% set a=states(''sensor.orp_piscine_orp'') | float %}
+
+      {% set b=states(''input_number.orp_cible'') | float %}
+
+      {{ a > b }}'
+  - condition: numeric_state
+    entity_id: sensor.orp_piscine_orp
+    above: '0'
+  - condition: state
+    entity_id: input_boolean.regul_orp
+    state: 'on'
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.chlore_duree_inject_s
+    data_template:
+      value: '{{ states(''sensor.chlore_tps_inject_s'')|float }}'
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.chlore_duree_inject_mn
+    data_template:
+      value: '{{ states(''sensor.chlore_tps_inject_mn'')|float }}'
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.cde_ppe_chlore
+  - service: notify.telegram
+    data:
+      message: ORP sonde= {{states('sensor.orp_piscine_orp')}} {{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Début injection Chlore !!!
+  - delay: 00:{{ states('input_number.chlore_duree_inject_mn')|int}}:{{ states('input_number.chlore_duree_inject_s')
+      | int }}
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.chlore_vol_injecte
+      value: '{% set a=states(''input_number.chlore_vol_injecte'')|float %} {% set
+        b=states(''input_number.chlore_debit_ppe'')|float %} {% set c=states(''input_number.chlore_duree_inject_s'')|float
+        %} {% set d=states(''input_number.chlore_duree_inject_mn'')|float %} {{a+(
+        (b*((d*60)+c)/3600))|round(2) }}'
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_ppe_chlore
+  - service: notify.telegram
+    data:
+      message: ORP sonde= {{states('sensor.orp_piscine_orp')}}{{-"\n"-}} Vol Injecté
+        =  {% set b=states('input_number.chlore_debit_ppe')|float %} {% set c=states('input_number.chlore_duree_inject_s')|float
+        %} {% set d=states('input_number.chlore_duree_inject_mn')|float %} {{(b*((d*60)+c)/3600)|round(2)
+        }} l {{-"\n"-}}{{states("sensor.date_time") }}
+      title: Piscine Fin injection Chlore !!!
+  mode: single
+- id: '1624083693660'
+  alias: Piscine Chlore Traitement On
+  description: Valide les automations régulation pH au bout de 1 h de fonctionnement
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.pool_pump_running
+    for: 01:00:00
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.regul_chlore
+    state: 'on'
+  action:
+  - service: automation.turn_on
+    target:
+      entity_id:
+      - automation.orp_bas
+      - automation.orp_haut
+      - automation.orp_mauvais
+      - automation.piscine_injection_chlore
+  - service: notify.telegram
+    data:
+      message: ORP sonde= {{states('sensor.orp_piscine_orp')}} {{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Piscine Activation Traitement Chlore !
+  mode: single
+- id: '1624083788324'
+  alias: Piscine Chlore Traitement Off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.pool_pump_running
+    to: 'off'
+  - platform: state
+    entity_id: input_boolean.regul_chlore
+    to: 'off'
+  condition: []
+  action:
+  - service: automation.turn_off
+    target:
+      entity_id:
+      - automation.orp_bas
+      - automation.orp_haut
+      - automation.orp_mauvais
+      - automation.piscine_injection_chlore
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_ppe_chlore
+  mode: single
+- id: '1629296468909'
+  alias: Robot_Stop Pluie
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.vp2_pluviometrie_moyenne
+    above: input_number.seuil_pluie_stop_robot
+  condition:
+  - condition: state
+    entity_id: input_boolean.robot_valide
+    state: 'on'
+  action:
+  - service: vacuum.return_to_base
+    target:
+      entity_id: vacuum.automower_r_435x_am435x_awd
+  - service: notify.telegram
+    data:
+      message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
+        mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
+        mm {{-"\n"-}}{{states("sensor.date_time") }}
+      title: Alerte Meteo Pluie !!!
+  mode: single
+- id: '1629792204535'
+  alias: Volet_Proport_Bureau_droit
+  description: Mise à jour Position fermé (=0)
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.volet_buro_droit_ias_zone
+    to: 'off'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      entity_id: cover.volet_droit_p
+      position: 0
+  mode: single
+- id: '1629817943890'
+  alias: Meteo_Alerte quand pluie attendue
+  description: Envoie des notifications quand la pluie est attendue dans l'heure
+  trigger:
+  - platform: state
+    entity_id: sensor.albi_next_rain
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.to_state.state != "unknown" }}'
+      - condition: state
+        entity_id: input_boolean.stop_notif_previ_pluie
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ trigger.to_state.state != trigger.from_state.state
+              }}'
+          sequence:
+          - service: notify.telegram
+            data:
+              message: 'La pluie est attendue à {{ as_timestamp(states(''sensor.albi_next_rain''))
+                | timestamp_custom(''%H:%M'', True) }}.
+
+                '
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ state_attr("sensor.albi_next_rain", "1_hour_forecast")["0
+              min"] != "Temps sec" }}'
+          sequence:
+          - service: input_boolean.turn_on
+            data:
+              entity_id: input_boolean.stop_notif_previ_pluie
+          - condition: time
+            before: '21:30'
+            after: '10:00:00'
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.to_state.state == "unknown" }}'
+      - condition: template
+        value_template: '{{ trigger.from_state.state != "unknown" }}'
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Plus de pluie attendue dans la prochaine heure.
+      - service: input_boolean.turn_off
+        data:
+          entity_id: input_boolean.stop_notif_previ_pluie
+  mode: single
+- id: '1629792204665'
+  alias: Meteo_Notification si alerte météo en cours
+  description: Envoie une notification sur Telegram si une alerte météo est levée
+    par Météo-France
+  trigger:
+  - platform: state
+    entity_id: sensor.81_weather_alert
+  condition:
+  - condition: template
+    value_template: '{% if (is_state(''sensor.81_weather_alert'', ''Vert'') or is_state(''sensor.81_weather_alert'',
+      ''unavailable'') )  %}false{% else %}true{% endif %}'
+  action:
+  - service: notify.telegram
+    data:
+      message: "Alerte météo {{states('sensor.81_weather_alert')}} en cours:\n {%-\
+        \ for attr in ['Vent violent', 'Pluie-inondation', 'Orages', 'Inondation',\
+        \ 'Neige-verglas', 'Canicule', 'Grand-froid', 'Avalanches', 'Vagues-submersion']\
+        \ -%} {%- if state_attr('sensor.81_weather_alert', attr) != 'Vert' and state_attr('sensor.81_weather_alert',\
+        \ attr) != None %}\n - {{attr}}: {{state_attr('sensor.81_weather_alert', attr)}}\
+        \ {%- endif -%} {%- endfor -%}{{-\"\\n\"-}}{{states(\"sensor.date_time\")\
+        \ }}"
+  mode: single
+- id: '1629792266535'
+  alias: Meteo_Notification si alerte météo terminée
+  description: Envoie un notification sur Telegram si toutes les alertes météos sont
+    terminées
+  trigger:
+  - platform: state
+    entity_id: sensor.81_weather_alert
+    to: Vert
+  condition:
+  - condition: template
+    value_template: '{% if trigger.from_state.state != ''unavailable'' %}true{% endif
+      %}'
+  action:
+  - service: notify.telegram
+    data:
+      message: Fin alerte météo {{-"\n"-}} {{states("sensor.date_time") }}
+      title: Réseau:!!!
+  mode: single
+- id: '1630914740344'
+  alias: Balise
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: e1fbd7f1-da40-4f4d-a300-76b3175a1d2c
+  condition: []
+  action:
+  - service: switch.toggle
+    target:
+      entity_id: switch.pump
+  mode: single
+- id: '1632232387237'
+  alias: Reseau_Notification Nouvelle IP
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.ip_public
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: 'Nouvelle IP: {{ states(''sensor.ip_public'')}} {{-"\n"-}}{{states("sensor.date_time")
+        }}'
+      title: Réseau:!!!
+  - service: persistent_notification.create
+    data:
+      message: Nouvelle IP
+  mode: single
+- id: '1632989157968'
+  alias: Volet_Automatismes
+  description: Ete/Hiver/Absent
+  trigger:
+  - platform: state
+    entity_id: input_boolean.nuit_jour
+    from: 'on'
+    to: 'off'
+    id: jour->nuit
+  - platform: time
+    at: input_datetime.horaire_ete_volet_ouv
+    id: ouv
+  - platform: time
+    at: input_datetime.horaire_ete_volet_ferm
+    id: ferm
+  - platform: state
+    entity_id: input_boolean.nuit_jour
+    id: nuit->jour
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - service: script.fermeture_volet
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - service: script.ouverture_volet
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id: ouv
+      sequence:
+      - service: script.ouverture_volet
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id: ferm
+      sequence:
+      - service: script.fermeture_volet
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - service: script.fermeture_volet_absent
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - service: script.fermeture_volet_absent
+    default: []
+  mode: single
+- id: '1632994496716'
+  alias: VMC_Sous_Sol_Automatismes
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_select.vmc_ssol
+  - platform: time
+    id: debut
+    at: input_datetime.horaire_vmc_debut
+  - platform: time
+    id: fin
+    at: input_datetime.horaire_vmc_fin
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_ssol
+        state: Auto
+      - condition: trigger
+        id: debut
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.vmc_ssol
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_ssol
+        state: Auto
+      - condition: trigger
+        id: fin
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.vmc_ssol
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_ssol
+        state: Arret
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.vmc_ssol
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_ssol
+        state: Marche
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.vmc_ssol
+    default: []
+  mode: single
+- id: '1632995598078'
+  alias: ECS_Automatisations
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_select.ecs_ssol
+  - platform: time
+    id: debut
+    at: input_datetime.horaire_ecs_debut
+  - platform: time
+    id: fin
+    at: input_datetime.horaire_ecs_fin
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: trigger
+        id: debut
+      sequence:
+      - service: script.ecs_on
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: trigger
+        id: fin
+      sequence:
+      - service: script.ecs_off
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Arret
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+          - switch.cde_relais_ecs
+          - switch.cde_relais_ecs_router_pv
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Marche ECS
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_relais_ecs
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_relais_ecs_router_pv
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Marche PV
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_relais_ecs
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_relais_ecs_router_pv
+    default: []
+  mode: single
+- id: '1633075302563'
+  alias: Piscine Hors-Gel Actions
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.hors_gel
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hors_gel
+        state: 'on'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: 'On'
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Hors-Gel Activé
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.hors_gel
+        state: 'off'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: Hivernage
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Hors-Gel Désactivé
+    default: []
+  mode: single
+- id: '1633416414001'
+  alias: Meteo_Notification Time Out VP2
+  description: ' '
+  trigger:
+  - platform: time_pattern
+    minutes: /6
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{% set a=states(''sensor.vp2_datetime'')|default(0)|int %}
+
+          {% set b=states(''input_number.mem_vp2_datetime'')|default(0)|int %}
+
+          {{ a != b }}'
+      sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.mem_vp2_datetime
+        data_template:
+          value: '{{ states(''sensor.vp2_datetime'')|float }}'
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.def_com_vp2
+    default:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.def_com_vp2
+  mode: single
+- id: '1633502766002'
+  alias: Volets_Suivi Azimuth Soleil
+  description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
+  trigger:
+  - platform: state
+    entity_id: sensor.sun_azimuth
+    from: '103'
+    id: ferme_nord
+  - platform: numeric_state
+    entity_id: sensor.sun_azimuth
+    above: '137'
+    id: ferme_sud
+  - platform: numeric_state
+    entity_id: sensor.sun_azimuth
+    above: '160'
+    id: ouvre_nord
+  - platform: numeric_state
+    entity_id: sensor.sun_azimuth
+    above: '266'
+    id: ouvre_sud
+  condition:
+  - condition: state
+    entity_id: input_boolean.val_automs_soleil
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ferme_nord
+      - condition: numeric_state
+        entity_id: sensor.vp2_radiation
+        above: input_number.radiation_seuil_ferm_volet
+      sequence:
+      - service: cover.close_cover
+        target:
+          entity_id:
+          - cover.sdb
+          - cover.amis_nord
+    - conditions:
+      - condition: trigger
+        id: ferme_sud
+      - condition: numeric_state
+        entity_id: sensor.sun_azimuth
+        above: input_number.radiation_seuil_ferm_volet
+      sequence:
+      - service: cover.close_cover
+        target:
+          entity_id:
+          - cover.parents_petit
+          - cover.amis_sud_petit
+    - conditions:
+      - condition: trigger
+        id: ouvre_nord
+      sequence:
+      - service: cover.open_cover
+        target:
+          entity_id: cover.sdb
+      - condition: state
+        entity_id: input_boolean.presence_amis_ch_nord
+        state: 'off'
+      - service: cover.open_cover
+        target:
+          entity_id: cover.amis_nord
+    - conditions:
+      - condition: trigger
+        id: ouvre_sud
+      sequence:
+      - service: cover.open_cover
+        target:
+          entity_id: cover.parents_petit
+      - condition: state
+        entity_id: input_boolean.presence_amis_ch_sud
+        state: 'off'
+      - service: cover.open_cover
+        target:
+          entity_id: cover.amis_sud_petit
+    default: []
+  mode: single
+- id: '1634125204090'
+  alias: Reseau NAS_ Alim Dlink
+  description: Alimentation du Switch Dlink NAS Dlink uniquement lors des sauvegardes
+    du dimanche et du lundi
+  trigger:
+  - platform: time
+    at: 00:30
+    id: debut
+  - platform: time
+    id: fin
+    at: 05:30
+  condition:
+  - condition: time
+    after: 00:20
+    before: 05:40
+    weekday:
+    - mon
+    - sun
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: debut
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.pc2_lidl
+    - conditions:
+      - condition: trigger
+        id: fin
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.pc2_lidl
+    default: []
+  mode: single
+- id: '1634204887702'
+  alias: Piscine pH Notifications
+  description: Notifie Ph bas, haut, anormal, bidon bas
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.ph_piscine_ph
+    below: '6.8'
+    above: '0'
+    id: ph_bas
+  - platform: numeric_state
+    entity_id: sensor.ph_piscine_ph
+    id: ph_haut
+    above: '7.8'
+  - platform: template
+    value_template: '''{{state_attr("sensor.ph_stat", "standard_deviation") | float  >  0.1}}'''
+    id: ph_mauvais
+  - platform: state
+    entity_id: binary_sensor.ph_niveau_bas_bidon
+    id: niv_bas_bidon
+    to: 'on'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ph_bas
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Ph Bas = {{states('sensor.ph_piscine_ph') }}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Piscine Alerte pH !!!
+    - conditions:
+      - condition: trigger
+        id: ph_haut
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Ph Haut = {{states('sensor.ph_piscine_ph') }}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Piscine Alerte pH !!!
+    - conditions:
+      - condition: trigger
+        id: ph_mauvais
+      sequence:
+      - service: notify.telegram
+        data:
+          message: ORP Mauvais sonde à calibrer??{{-"\n"-}} Moyenne = {{state_attr("sensor.orp_stat",
+            "mean")}}{{-"\n"-}} Deviation(S=0.01) = {{state_attr("sensor.orp_stat",
+            "standard_deviation")}} {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Alerte ORP !!!
+    - conditions:
+      - condition: trigger
+        id: niv_bas_bidon
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Volume Restant = {{(states("sensor.ph_volume_restant_bidon"))|round(2)
+            }} l{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Alerte niveau Bas Bidon pH !!!
+    default: []
+  mode: single
+- id: '1634222619535'
+  alias: Piscine Notifications filtration
+  description: Debut, Fin
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.pool_pump_running
+    from: 'off'
+    to: 'on'
+    id: ma_ppe
+  - platform: state
+    entity_id: binary_sensor.pool_pump_running
+    id: at_ppe
+    from: 'on'
+    to: 'off'
+  - platform: time
+    at: '23:59'
+    id: minuit
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ma_ppe
+      sequence:
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Début Filtration
+    - conditions:
+      - condition: trigger
+        id: at_ppe
+      sequence:
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Fin de filtration
+    - conditions:
+      - condition: trigger
+        id: minuit
+      sequence:
+      - service: notify.telegram
+        data:
+          message: 'Temps de filtration:  {{states.sensor.pool_pump_running_today.attributes.value}}{{-"\n"-}}Conso:
+            {{states(''sensor.energy_pisc_daily'')}} kWh.{{-"\n"-}} Tps Utilisation
+            cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}} h {{-"\n"-}}{{states("sensor.date_time")
+            }}'
+          title: Piscine Rapport Fin de journée
+      - service: notify.log_piscine
+        data:
+          message: '{{states.sensor.pool_pump_running_today.attributes.value }},{{states(''sensor.energy_pisc_daily'')}}'
+          title: Rapport jour piscine
+    default: []
+  mode: single
+- id: '1634389653339'
+  alias: Piscine EV Appoint EAU
+  description: 'Appoint EAU uniquement si volet ouvert depuis 15 mn  '
+  trigger:
+  - platform: state
+    entity_id: cover.volet_piscine
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+    id: vol_ouv
+  - platform: state
+    entity_id: input_boolean.ev_eau_piscine
+    to: 'on'
+    id: valid_ev
+    from: 'off'
+  - platform: state
+    entity_id: input_boolean.ev_eau_piscine
+    id: devalid_ev
+    to: 'off'
+    from: 'on'
+  - platform: state
+    entity_id: binary_sensor.tp_plein_lsh
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+      milliseconds: 0
+    id: lsh_off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: vol_ouv
+      - condition: state
+        entity_id: input_boolean.ev_eau_piscine
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.tp_plein_lsh
+        state: 'on'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_ev_eau
+      - service: notify.telegram
+        data:
+          message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Appoint Eau!
+    - conditions:
+      - condition: state
+        entity_id: switch.cde_ev_eau
+        state: 'on'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: devalid_ev
+        - condition: trigger
+          id: lsh_off
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_ev_eau
+      - service: notify.telegram
+        data:
+          message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Appoint Eau!
+    default: []
+  mode: single
+- id: '1634540632162'
+  alias: Alert Acquittement Ping Reseau
+  description: Alert Acquittement Ping
+  trigger:
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /ping_reseau_acquittement
+  condition: []
+  action:
+  - service: alert.turn_off
+    target:
+      entity_id: alert.ping_reseau
+  mode: single
+- id: '1634541484202'
+  alias: Alert Acquittement Etat ESP
+  description: Alert Acquittement Ping ESP
+  trigger:
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /esp_acquittement
+    id: acquit
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /esp_off
+    id: liste
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: acquit
+      sequence:
+      - service: alert.turn_off
+        target:
+          entity_id:
+          - alert.ping_esp
+    - conditions:
+      - condition: trigger
+        id: liste
+      sequence:
+      - service: alert.turn_off
+        target:
+          entity_id:
+          - alert.ping_esp
+      - service: notify.telegram
+        data:
+          message: Un ESP est HS{{-"\n"-}} -> ESP PEZM SdB est {{states('binary_sensor.esp123_status')}}{{-"\n"-}}
+            -> ESP Piscine est {{states('binary_sensor.esp125_status')}}{{-"\n"-}}
+            -> ESP PZEM Total est {{states('binary_sensor.esp132_status')}}{{-"\n"-}}
+            -> ESP Congelo est {{states('binary_sensor.esp133_status')}}{{-"\n"-}}
+            -> ESP Mesure UV est {{states('binary_sensor.esp134_status')}}{{-"\n"-}}
+            -> ESP Luxmetre est {{states('binary_sensor.esp135_status')}}{{-"\n"-}}
+            -> ESP PZEM Piscine est {{states('binary_sensor.esp137_status')}}{{-"\n"-}}
+            -> ESP Voyant Alarm est {{states('binary_sensor.esp138_status')}}{{-"\n"-}}
+            -> ESP VMC SSol est {{states('binary_sensor.esp139_status')}}{{-"\n"-}}
+            -> ESP Test8266 est {{states('binary_sensor.esp140_status')}}{{-"\n"-}}
+            {{states("sensor.date_time") }}
+          title: Défaut ESP !!!
+    default: []
+  mode: single
+- id: '1634541982642'
+  alias: Alert Acquittement Etat UP TIME
+  description: Alert Acquittement Ping UP TIME
+  trigger:
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /uptime_acquittement
+  condition: []
+  action:
+  - service: alert.turn_off
+    target:
+      entity_id:
+      - alert.etat_uptime
+  mode: single
+- id: '1634544128428'
+  alias: Alarme Blueprints Notification ESP Off Line
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.esp_reseau
+      alert_state: 'off'
+      initial_delay: 10
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Un ESP est Off Line{{-"\n"-}} -> ESP PEZM SdB est {{states('binary_sensor.esp123_status')}}{{-"\n"-}}
+            -> ESP Piscine est {{states('binary_sensor.esp125_status')}}{{-"\n"-}}
+            -> ESP PZEM Total est {{states('binary_sensor.esp132_status')}}{{-"\n"-}}
+            -> ESP Congelo est {{states('binary_sensor.esp133_status')}}{{-"\n"-}}
+            -> ESP Mesure UV est {{states('binary_sensor.esp134_status')}}{{-"\n"-}}
+            -> ESP Luxmetre est {{states('binary_sensor.esp135_status')}}{{-"\n"-}}
+            -> ESP PZEM Piscine est {{states('binary_sensor.esp137_status')}}{{-"\n"-}}
+            -> ESP Voyant Alarm est {{states('binary_sensor.esp138_status')}}{{-"\n"-}}
+            -> ESP VMC SSol est {{states('binary_sensor.esp139_status')}}{{-"\n"-}}
+            -> ESP Test8266 est {{states('binary_sensor.esp140_status')}}{{-"\n"-}}
+            {{states("sensor.date_time") }}
+          title: Etat Réseau!!!
+      - service: persistent_notification.create
+        data:
+          message: un ESP est Off Line {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Etat ESP OK{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat Réseau!!!
+      - service: persistent_notification.create
+        data:
+          message: ESP On Line {{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      max_alerts: 100
+- id: '1634568011264'
+  alias: Alarme Blueprints Notification Ping Reseau
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.ping_reseau
+      alert_state: 'off'
+      initial_delay: 1
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Un PING est HS{{-"\n"-}} -> NAS Dlink est {{states('binary_sensor.nas_dlink')}}{{-"\n"-}}
+            -> Eco_Compteur est {{states('binary_sensor.ping_eco_compteur')}}{{-"\n"-}}
+            -> Rpi_Adguard est {{states('binary_sensor.ping_rpi_adguard')}}{{-"\n"-}}
+            -> Module Adam est {{states('binary_sensor.ping_module_adam')}}{{-"\n"-}}
+            -> Wago Piscine est {{states('binary_sensor.ping_module_wago_piscine')}}{{-"\n"-}}
+            -> ESP123 PZEM SdB est {{states('binary_sensor.ping_esp123_pezm_sdb')}}{{-"\n"-}}
+            -> ESP125 Piscine est {{states('binary_sensor.ping_esp125_piscine')}}{{-"\n"-}}
+            -> ESP132 PEZM Total est {{states('binary_sensor.ping_esp132_pezm_totale')}}{{-"\n"-}}
+            -> ESP133 Congelo {{states('binary_sensor.ping_esp133_congelateur')}}{{-"\n"-}}
+            -> ESP134 UV est {{states('binary_sensor.ping_esp134_uv')}}{{-"\n"-}}
+            -> ESP135 Luxmetre est {{states('binary_sensor.ping_esp135_luxmetre')}}{{-"\n"-}}
+            -> ESP137 PEZM Piscine est {{states('binary_sensor.ping_esp137_pzem_piscine')}}{{-"\n"-}}
+            -> ESP139 VMCSSol est {{states('binary_sensor.ping_esp139_vmc_sous_sol')}}{{-"\n"-}}
+            -> Cam Cuisine est {{states('binary_sensor.cam_cuisine')}}{{-"\n"-}} ->
+            Cam Gar Ext est {{states('binary_sensor.cam_garage_ext')}}{{-"\n"-}} ->
+            Cam Gar Int est {{states('binary_sensor.cam_garage_int')}}{{-"\n"-}} ->
+            Cam Piscine est {{states('binary_sensor.cam_piscine')}}{{-"\n"-}} -> Cam
+            Salon est {{states('binary_sensor.cam_salon')}}{{-"\n"-}} -> Cam terrasse
+            est {{states('binary_sensor.cam_terrasse')}}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Réseau:!!!
+      - service: persistent_notification.create
+        data:
+          message: Un PING est Off Line {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Les PING sont OK{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat RESEAU!!!
+      - service: persistent_notification.create
+        data:
+          message: PING OK {{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      max_alerts: 100
+- id: '1634568800107'
+  alias: Alarme Blueprints Notification Ping UP Time
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.uptime_reseau
+      alert_state: 'off'
+      initial_delay: 10
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Un Serveur WEB est HS{{-"\n"-}} -> Blog DOMO Rem81 est {{states('binary_sensor.domo_rem81')}}{{-"\n"-}}
+            -> Jeedom est {{states('binary_sensor.jeedom')}}{{-"\n"-}} -> ZIMETEO
+            est {{states('binary_sensor.meteo81000')}}{{-"\n"-}} -> Meteo VP2 est
+            {{states('binary_sensor.meteoweewx')}}{{-"\n"-}} -> HA est {{states('binary_sensor.ha')}}{{-"\n"-}}
+            -> MotionEye est {{states('binary_sensor.motioneye')}}{{-"\n"-}} -> VTT
+            est {{states('binary_sensor.vtt')}}{{-"\n"-}} {{states("sensor.date_time")
+            }}
+          data:
+            inline_keyboard:
+            - Ping Off:/uptime_reseau_off, Acquit:/uptime_reseau_acquittement
+          title: Etat Reseau !!!
+      - service: persistent_notification.create
+        data:
+          message: Un UPTime est Off Line {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Les UPTime sont OK{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat RESEAU!!!
+      - service: persistent_notification.create
+        data:
+          message: UPTime OK {{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      max_alerts: 100
+- id: '1634569261594'
+  alias: Alarme Blueprints Notification Status PAC
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_status_pac
+      alert_state: 'off'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: PAC Off Line{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Reseau !!!
+      - service: persistent_notification.create
+        data:
+          message: PAC Off Line {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: PAC On Line{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat RESEAU!!!
+      - service: persistent_notification.create
+        data:
+          message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      initial_delay: 120
+      max_alerts: 100
+      dismiss_entity: input_boolean.inhib_alarme_pac
+- id: '1634569580188'
+  alias: Alarme Blueprints Notification Porte Cellier Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_porte_cellier
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Porte Cellier ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes !!!
+      - service: persistent_notification.create
+        data:
+          message: Porte Cellier ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Portes!!!
+      - service: persistent_notification.create
+        data:
+          message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      initial_delay: 1
+      max_alerts: 100
+- id: '1634569751638'
+  alias: Alarme Blueprints Notification Porte Sous Sol Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      sensor_entity: binary_sensor.alarme_porte_sous_sol
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Porte Sous Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes !!!
+          data:
+            inline_keyboard:
+            - Ferme porte:/ferme_soussol, Cancel:/cancel
+      - service: persistent_notification.create
+        data:
+          message: Porte Sous Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Portes!!!
+      - service: persistent_notification.create
+        data:
+          message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Porte Sous _Sol Ouverte
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      resolved_message: Porte Sous Sol Ok
+      initial_delay: 300
+      condition_entity_state: 'off'
+      max_alerts: 100
+      repeat_delay: 600
+- id: '1634569897913'
+  alias: Alarme Blueprints Notification Porte Garage Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_porte_garage
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Porte Garage ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes !!!
+          data:
+            inline_keyboard:
+            - Ferme Porte:/ferme_garage, Cancel:/cancel
+      - service: persistent_notification.create
+        data:
+          message: Porte Garage ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Portes!!!
+      - service: persistent_notification.create
+        data:
+          message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      initial_delay: 300
+      max_alerts: 100
+- id: '1634570304569'
+  alias: Alarme Blueprints Notification Discordance PAC
+  description: ' Surveillance discordance PAC entre l''état du thermostat et l''état
+    du switch de commande  '
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_discord_pac
+      alert_state: 'false'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Discordance PAC= Mode Fonctionnement= {{states("sensor.espaltherma_mode_fonctionnement")}}
+            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat PAC !!!
+      - service: persistent_notification.create
+        data:
+          message: Discordance PAC= Mode de Fonctionnement= {{states("sensor.espaltherma_mode_fonctionnement")}}
+            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Discordance PAC OK= Mode Fonct PAC= {{states("sensor.espaltherma_mode_fonctionnement")}}
+            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat PAC !!!
+      - service: persistent_notification.create
+        data:
+          message: Discordance PAC OK= Mode Fonct PAC= {{states("sensor.espaltherma_mode_fonctionnement")}}
+            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 300
+      resolved_message: Alert {{ entity_name }} resolved
+      max_alerts: 100
+      initial_delay: 300
+      dismiss_entity: input_boolean.inhib_alarme_pac
+- id: '1634571065075'
+  alias: 'Alarme Blueprints Notification Porte frigo garage ouverte   '
+  description: '# Alarme porte frigo garage ouverte   '
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.porte_frigo
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Porte Frigo Garage Ouverte {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes !!!
+      - service: persistent_notification.create
+        data:
+          message: Porte Frigo Garage Ouverte {{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes !!!
+      - service: persistent_notification.create
+        data:
+          message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
+            }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 60
+      resolved_message: Alert {{ entity_name }} resolved
+      initial_delay: 60
+      max_alerts: 100
+- id: '1634571983587'
+  alias: Alarme Blueprints Notification Temperature  congelateur  haute
+  description: '# Surveillance de la temperature du congelateur  '
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_temp_congelo_haute
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: T° Haute Congelo = {{states("sensor.temp_congelo_garage_2") }}°C
+            {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Congelo !!!
+      - service: persistent_notification.create
+        data:
+          message: T° Haute Congelo = {{states("sensor.temp_congelo_garage_2") }}°C
+            {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
+            {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Congelo !!!
+      - service: persistent_notification.create
+        data:
+          message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
+            {{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 300
+      resolved_message: Alert {{ entity_name }} resolved
+      initial_delay: 300
+      max_alerts: 100
+- id: '1634621594490'
+  alias: Alarme Blueprints Notification Def Com VP2
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: input_boolean.def_com_vp2
+      alert_state: 'off'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: VP2 Off Line{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Reseau !!!
+      - service: persistent_notification.create
+        data:
+          message: VP2 Off Line {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: VP2 On Line{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat RESEAU!!!
+      - service: persistent_notification.create
+        data:
+          message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 300
+      resolved_message: Alert {{ entity_name }} resolved
+      initial_delay: 1
+      max_alerts: 100
+- id: '1634706860525'
+  alias: Energie Changement HP<->HC
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.horaire_hc_debut_1
+    id: hc1
+  - platform: time
+    at: input_datetime.horaire_hc_debut_2
+    id: hc2
+  - platform: time
+    at: input_datetime.horaire_hp_debut_1
+    id: hp1
+  - platform: time
+    at: input_datetime.horaire_hp_debut_2
+    id: hp2
+  - platform: state
+    entity_id: input_boolean.forcage_hc_hp
+    from: 'off'
+    to: 'on'
+    id: forcage hc
+  - platform: state
+    entity_id: input_boolean.forcage_hc_hp
+    from: 'on'
+    to: 'off'
+    id: forcage hp
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: hc1
+        - condition: trigger
+          id: hc2
+        - condition: trigger
+          id: forcage hc
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        entity_id: input_boolean.hc_hp
+      - service: utility_meter.select_tariff
+        data:
+          tariff: hc
+        target:
+          entity_id:
+          - utility_meter.energy_total_usage_daily
+          - utility_meter.energy_pisc_usage_daily
+          - utility_meter.energy_sdb_usage_daily
+          - utility_meter.energy_ecs1_usage_daily
+          - utility_meter.energy_pac1_usage_daily
+          - utility_meter.energy_total_usage_weekly
+          - utility_meter.energy_pisc_usage_weekly
+          - utility_meter.energy_sdb_usage_weekly
+          - utility_meter.energy_ecs1_usage_weekly
+          - utility_meter.energy_pac1_usage_weekly
+          - utility_meter.energy_total_usage_monthly
+          - utility_meter.energy_pisc_usage_monthly
+          - utility_meter.energy_sdb_usage_monthly
+          - utility_meter.energy_ecs1_usage_monthly
+          - utility_meter.energy_pac1_usage_monthly
+          - utility_meter.energy_total_usage_yearly
+          - utility_meter.energy_pisc_usage_yearly
+          - utility_meter.energy_sdb_usage_yearly
+          - utility_meter.energy_ecs1_usage_yearly
+          - utility_meter.energy_pac1_usage_yearly
+          - utility_meter.energy_autres_usage_daily
+          - utility_meter.energy_autres_usage_monthly
+          - utility_meter.energy_autres_usage_weekly
+          - utility_meter.energy_autres_usage_yearly
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: hp1
+        - condition: trigger
+          id: hp2
+        - condition: trigger
+          id: forcage hp
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        entity_id: input_boolean.hc_hp
+      - service: utility_meter.select_tariff
+        data:
+          tariff: hp
+        target:
+          entity_id:
+          - utility_meter.energy_total_usage_daily
+          - utility_meter.energy_pisc_usage_daily
+          - utility_meter.energy_sdb_usage_daily
+          - utility_meter.energy_ecs1_usage_daily
+          - utility_meter.energy_pac1_usage_daily
+          - utility_meter.energy_total_usage_weekly
+          - utility_meter.energy_pisc_usage_weekly
+          - utility_meter.energy_sdb_usage_weekly
+          - utility_meter.energy_ecs1_usage_weekly
+          - utility_meter.energy_pac1_usage_weekly
+          - utility_meter.energy_total_usage_monthly
+          - utility_meter.energy_pisc_usage_monthly
+          - utility_meter.energy_sdb_usage_monthly
+          - utility_meter.energy_ecs1_usage_monthly
+          - utility_meter.energy_pac1_usage_monthly
+          - utility_meter.energy_total_usage_yearly
+          - utility_meter.energy_pisc_usage_yearly
+          - utility_meter.energy_sdb_usage_yearly
+          - utility_meter.energy_ecs1_usage_yearly
+          - utility_meter.energy_pac1_usage_yearly
+          - utility_meter.energy_autres_usage_daily
+          - utility_meter.energy_autres_usage_monthly
+          - utility_meter.energy_autres_usage_weekly
+          - utility_meter.energy_autres_usage_yearly
+    default: []
+  mode: single
+- id: '1634708878890'
+  alias: 'Energie Delestage '
+  description: Arret piscine si prod superieur au seuil et piscine sur on et MaL en
+    marche
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.envoy_122103023124_current_energy_production
+    id: mal on
+    above: input_number.seuil_delestage_pv
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - platform: state
+    entity_id: binary_sensor.malaver_en_marche
+    from: 'on'
+    to: 'off'
+    id: at mal
+  condition:
+  - condition: state
+    entity_id: input_boolean.valid_delestage
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.malaver_en_marche
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.pool_pump_running
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.mem_delestage
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: 'Off'
+      - service: notify.telegram
+        data:
+          message: Delectage Piscine sur ON{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Energie-Delestage !!!
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.mem_delestage
+        state: 'on'
+      - condition: trigger
+        id: at mal
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.mem_delestage
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: Auto
+      - service: notify.telegram
+        data:
+          message: Delectage Piscine sur OFF{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Energie-Delestage !!!
+    default: []
+  mode: single
+- id: '1634766452141'
+  alias: Alarme Acquittement Porte Sous Sol
+  description: Ferme la porte du sous sol
+  trigger:
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /ferme_soussol
+  condition: []
+  action:
+  - service: cover.close_cover
+    target:
+      entity_id: cover.garage_soussol
+  mode: single
+- id: '1634766777070'
+  alias: Alarme Acquittement Porte Garage
+  description: Ferme la porte du sous sol
+  trigger:
+  - platform: event
+    event_type: telegram_callback
+    event_data:
+      data: /ferme_garage
+  condition: []
+  action:
+  - service: cover.close_cover
+    target:
+      entity_id: cover.garage_rdc
+  mode: single
+- id: '1634916685737'
+  alias: Pusch gitub
+  description: pousse vers githtub
+  trigger:
+  - platform: time
+    at: '23:59'
+  condition: []
+  action:
+  - service: hassio.addon_stdin
+    data:
+      addon: a0d7b954_ssh
+      input: /config/ha_gitpush.sh
+  mode: single

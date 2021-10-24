@@ -1,0 +1,77 @@
+esphome:
+  name: esp132_pzem_total
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+  reboot_timeout: 5min
+  fast_connect: true
+
+  manual_ip:
+    static_ip: 192.168.0.132
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+    
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+# Configuration UART
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp132_Status"
+
+sensor:
+  - platform: pzemac
+    current:
+      name: "pzem_totale_courant"
+      unit_of_measurement: "A"
+    voltage:
+      name: "pzem_totale_tension"
+      unit_of_measurement: "V"
+    energy:
+      name: "pzem_totale_energy"
+      unit_of_measurement: "kWh"
+      filters:
+        - multiply: 0.001
+    power:
+      name: "pzem_totale_puissance"
+      unit_of_measurement: "W"
+    frequency:
+      name: "pzem_totale_frequence"
+      unit_of_measurement: "hz"
+    power_factor:
+      name: "pzem_totale_factpuiss"
+      unit_of_measurement: "fp"
+    update_interval: 30s
+    
+  - platform: uptime
+    name: "ESP132 Uptime Sensor"
+    id: esp132_uptime
+    update_interval: 10s
+
+  - platform: wifi_signal
+    name: "ESP132 WiFi Signal Sensor"
+    update_interval: 60s
+
+
+switch:    
+  - platform: restart
+    name: "ESP132_Restart"

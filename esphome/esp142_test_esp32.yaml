@@ -1,0 +1,48 @@
+esphome:
+  name: esp142_test_esp32
+  platform: ESP32
+  board: lolin_d32
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+  
+  manual_ip:
+    static_ip: 192.168.0.142
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp142 Test Esp32"
+    password: "kzKppXfx9rYB"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+web_server:
+  port: 80
+
+
+sensor:
+
+  - platform: uptime
+    name: "ESP142 Uptime Sensor"
+    id: esp142_uptime
+    update_interval: 10s
+  
+switch:
+  - platform: gpio
+    name: "esp142_relais0"
+    pin: GPIO0
+    id: relay
+    
+  - platform: restart
+    name: "ESP142_Restart"

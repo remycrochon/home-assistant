@@ -1,0 +1,12 @@
+switch.tc_volet_amis_grand:
+  event: 0b11000301a1836601000070
+  friendly_name: TC Volet Amis Grand
+
+
+homeassistant:
+  customize_domain: #for all covers 
+    cover:
+      device_class: shutter
+  customize: #for each cover separately
+    cover.my_room_cover_time_based:
+      device_class: shutter

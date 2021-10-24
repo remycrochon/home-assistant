@@ -1,0 +1,37 @@
+# WARNING: Make your GitHub repo Private if you are using this as it is
+# Example .gitignore file for your config dir.
+# 
+# Un * garanti que tout sera ignoré.
+*
+# Vous pouvez ajouter des fichiers/dossiers à la liste blanche avec !, ceux-ci ne seront pas ignorés.
+!*.yaml
+!.gitignore
+!*.md
+!*.sh
+!*.js*
+
+# Comment these 2 lines if you don't want to include your SSH keys
+#!.ssh/
+#!id_rsa*
+
+# Comment this if you don't want to include your Node-RED flows.
+# This is only valid if you install Node-RED as Home Assistant Add-on
+!blueprints/
+!custom_components/
+!esphome/
+!glances/
+!node-red/
+!packages/
+!python_scripts/
+!themes/
+!image/
+
+# Uncomment this if you don' want to include secrets.yaml 
+#secrets.yaml
+
+# Ignore these files/folders
+secrets.yaml
+home-assistant.log
+home-assistant.log1
+.storage
+

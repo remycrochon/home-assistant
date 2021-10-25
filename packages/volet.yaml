@@ -122,6 +122,7 @@ cover:
           {% else %}
             mdi:garage
           {% endif %} 
+
   # Convertion TC volet SaM en cover
       volet_sam:
         friendly_name: "Volet SaM"
@@ -161,40 +162,72 @@ cover:
       garage_rdc:
         device_class: garage
         friendly_name: "Garage RdC"
-        value_template: "{{is_state('binary_sensor.porte_garage_fermee', 'off')}}"
+#        value_template: "{{is_state('binary_sensor.porte_garage_fermee', 'off')}}"
+        value_template: >-
+          {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
+            closed
+          {% else %}
+            {% if is_state('binary_sensor.porte_garage_ouverte', 'on') %}
+            open
+            {% endif %}
+          {% endif %}        
         open_cover:
-          service: script.cde_porte_garage
+          - condition: state
+            entity_id: binary_sensor.porte_garage_fermee
+            state: "on"
+          - service: script.cde_ouv_porte_garage
         close_cover:
-          service: script.cde_porte_garage        
+          - condition: state
+            entity_id: binary_sensor.porte_garage_ouverte
+            state: "on"
+          - service: script.cde_ferm_porte_garage
+        stop_cover:
+          service: script.cde_ferm_porte_garage 
         icon_template: >-
           {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
             mdi:garage
           {% else %} 
             {% if is_state('binary_sensor.porte_garage_ouverte', 'on') %}
             mdi:garage-open
-          {% else %}
+            {% else %}
             mdi:garage-alert
-          {% endif %}
+            {% endif %}
           {% endif %}
 
 # Porte de garage Sous Sol
       garage_soussol:
         device_class: garage
         friendly_name: "Garage Sous-Sol"
-        value_template: "{{ is_state('binary_sensor.porte_ssol_fermee', 'off')}}"
+#        value_template: "{{ is_state('binary_sensor.porte_ssol_fermee', 'off')}}"
+        value_template: >-
+          {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
+            closed
+          {% else %}
+            {% if is_state('binary_sensor.porte_ssol_ouverte', 'on') %}
+            open
+            {% endif %}
+          {% endif %}        
         open_cover:
-          service: script.Cde2_porte_Sous_Sol
+          - condition: state
+            entity_id: binary_sensor.porte_ssol_fermee
+            state: "on"          
+          - service: script.cde_ouv_porte_sous_Sol
         close_cover:
-          service: script.Cde2_porte_Sous_Sol       
+          - condition: state
+            entity_id: binary_sensor.porte_ssol_ouverte
+            state: "on"          
+          - service: script.cde_ferm_porte_sous_Sol      
+        stop_cover:
+          service: script.cde_ferm_porte_sous_sol           
         icon_template: >-
           {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
             mdi:garage
           {% else %} 
             {% if is_state('binary_sensor.porte_ssol_ouverte', 'on') %}
             mdi:garage-open
-          {% else %}
+            {% else %}
             mdi:garage-alert
-          {% endif %}
+            {% endif %}
           {% endif %}
 
 # Volet Proportionnel

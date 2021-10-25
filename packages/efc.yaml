@@ -6,10 +6,10 @@ sensor:
 #value_template: "{{ ( 0.23 * (1 + states('input_number.e_fc_adjust')|float / 100 ) * ( 14 - states('sensor.ph_mean')|float) ** ( 1 / (400 - states('sensor.orp_mean')|float) ) * ( states('sensor.ph_mean')|float -4.1) ** ( ( states('sensor.orp_mean')|float - 516)/145) + 10.0 ** ( (states('sensor.orp_mean')|float + states('sensor.ph_mean')|float * 70 -1282) / 40 ) ) |round(1) }}"
 # signe ** = élevé à la puissance (2**3)=8
         value_template: >-
-          {% set a=states('input_number.e_fc_adjuste')|float %}
-          {% set ph=states('sensor.ph_piscine_ph')|float %}
-          {% set orp=states('sensor.orp_piscine_orp')|float %}
-          {{ (0.23*(1+a/100) * (14-ph) ** (1/(400-orp)) * (ph-4.1) ** ((orp-516)/145) + 10.0**(orp+ph*70-1282)/40 )| round(1) }}
+          {% set a=states('input_number.e_fc_adjuste')|float(default=0) %}
+          {% set ph=states('sensor.ph_piscine_ph')|float(default=0) %}
+          {% set orp=states('sensor.orp_piscine_orp')|float(default=0) %}
+          {{ (0.23*(1+a/100) * (14-ph) ** (1/(400-orp)) * (ph-4.1) ** ((orp-516)/145) + 10.0**(orp+ph*70-1282)/40 )|float(default=0)| round(1) }}
 #          {{  0.23 * (1 + a/100 ) * ( 14 - ph) ** ( 1 / (400 - orp) ) * ( ph-4.1) ** ( (orp - 516)/145) + 10.0 ** ( orp+ph * 70 -1282) / 40 )   }}
         unit_of_measurement: ppm
         # icon_template: mdi:chemical-weapon

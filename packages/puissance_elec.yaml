@@ -133,12 +133,13 @@ template:
 # Consommation autres totale en W
     - name: "puissance_autres"
       state: >-
-        {% set a = states('sensor.pzem_totale_puissance') | float(default=0) | round(2) %}
+        {% set a = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
         {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
         {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
-        {% set d = states('sensor.energy_pac_p_kw') | float(default=0) | round(2) %}          
-        {% set e = states('sensor.energy_ecs_p_kw') | float(default=0) | round(2) %}
-        {{ (a-b-c-d-e) | round(2) }}
+        {% set d = states('sensor.energy_pac_p_kw') | float(default=0) | round(2) %}
+        {% set e = states('sensor.energy_ecs_p_kw') | float(default=0) | round(2) %}          
+        {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
+        {{ (a-b-c-d-e-f) | round(2) }}
       unit_of_measurement: "W"
       device_class: "power"
       state_class: "measurement"  

@@ -90,13 +90,13 @@ sensor:
         unit_of_measurement : ' COP '
         value_template: >-
           {% if is_state("sensor.espaltherma_mode_fonctionnement", "Heating")
-            and (states('sensor.espaltherma_courant_primaire')|float > 0) %}
-            {% set a = states('sensor.espaltherma_capteur_debit') | float %}
-            {% set b = states('sensor.espaltherma_temp_eau_depart_echangeur_plaque') | float %}
-            {% set c = states('sensor.espaltherma_temp_eau_retour_rt4') | float %}
-            {% set d = states('sensor.espaltherma_courant_primaire') | float %}
-            {% set e = states('sensor.pzem_totale_tension') | float %}
-            {{ ((a*0.06*1.16)*(b-c)/(d*e/1000)) | round(2) }}
+            and (states('sensor.espaltherma_courant_primaire')|float(default=0) > 0) %}
+            {% set a = states('sensor.espaltherma_capteur_debit') | float(default=0) %}
+            {% set b = states('sensor.espaltherma_temp_eau_depart_echangeur_plaque') | float(default=0) %}
+            {% set c = states('sensor.espaltherma_temp_eau_retour_rt4') | float(default=0) %}
+            {% set d = states('sensor.espaltherma_courant_primaire') | float(default=0) %}
+            {% set e = states('sensor.pzem_totale_tension') | float(default=0) %}
+            {{ ((a*0.06*1.16)*(b-c)/(d*e/1000))| float(default=0) | round(2) }}
           {%else%}
             0
           {%endif%}
@@ -110,16 +110,16 @@ sensor:
           {% set p103=25 %}
           {% set p100=-10 %}
           {% set p101=20 %}
-          {% set a=(p102-p103)/(p100-p101) | float %}
+          {% set a=(p102-p103)/(p100-p101) | float(default=0) %}
           {% set b=p103-a*p101 | float %}
-          {% set t = states('sensor.espaltherma_temp_air_ext') | float %}
+          {% set t = states('sensor.espaltherma_temp_air_ext') | float(default=0) %}
           {% if t<= p100 %}
             {{ p100 }}
           {%else%}
             {% if t>= p101 %}
               {{ p101 }}
             {%else%}
-              {{ (a*t)+b |round(2)}}
+              {{ (a*t)+b | float(default=0) |round(2)}}
             {%endif%}
           {%endif%}
 

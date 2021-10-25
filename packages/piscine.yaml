@@ -136,7 +136,7 @@ template:
 # en commentant ou decommentant les lignes ci-dessous
   sensor:
     - name: "pool_water_temperature"
-      state: "{{ states('input_number.mem_temp_piscine')|float|round(1) }}" # memoire temperature de l'eau avant arret pompe
+      state: "{{ states('input_number.mem_temp_piscine')|float(default=0)|round(1) }}" # memoire temperature de l'eau avant arret pompe
         #e_template: "{{ states('input_number.temp_piscine_ph')|float|round(1) }}" # Simulation avec input_numbe
       icon: mdi:oil-temperature
       unit_of_measurement: "ºC"
@@ -149,20 +149,20 @@ template:
 
   # Recopie pression filtre lu dans esphome dans un template
     - name: "pression_piscine_p"
-      state: '{{ states("sensor.pression_filtre") |float | round(2) }}'
+      state: '{{ states("sensor.pression_filtre") |float(default=0) | round(2) }}'
       unit_of_measurement: "Bars"
 
   binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement
     - name: "pool_pump_running"
       state: >-
-        {{states.sensor.pzem_pisc_puissance.state | float > 500}}
+        {{states.sensor.pzem_pisc_puissance.state | float(default=0) > 500}}
 
   # Calcul en fonction de la position du soleil
   # Sun Azimtuh est calculé dans Meteo
     - name: "soleil_volet_piscine"
       state: >-
-        {% set a=states('sensor.sun_azimuth_2')|float %}
+        {% set a=states('sensor.sun_azimuth_2')|float(default=0) %}
         {{ (a>97) and (a<290) }}
 
 # Commande du volet roulant via un Cover

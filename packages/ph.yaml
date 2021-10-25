@@ -170,8 +170,8 @@ sensor:
       ph_volume_restant_bidon:
         friendly_name: "Volume pH restant bidon"
         value_template: >-
-          {% set a=states('input_number.ph_vol_bidon')|float %}
-          {% set b=states('input_number.ph_vol_injecte')|float %}
+          {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
+          {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
           {{ (a-b)|round(2) }}   
         icon_template: mdi:flask-empty-minus-outline
         unit_of_measurement: "l"
@@ -182,17 +182,17 @@ sensor:
       ph_tps_inject_mn:
         friendly_name: "pH Durée Inject calc. (mn)"
         value_template: >-
-          {% set a=states('sensor.ph_piscine_ph') | float(0) %}
-          {% set y=state_attr("sensor.ph_stat", "mean") | float(0) %}
-          {% set x=states('input_number.simul_ph') | float(0) %}
-          {% set b=states('input_number.ph_cible') | float(0) %}
-          {% set d=states('input_number.ph_debit_ppe') | float(0) %}
-          {% set e=states('input_number.ph_concentration') | float(0) %}
-          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int %} 
+          {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
+          {% set y=state_attr("sensor.ph_stat", "mean") | float(default=0) %}
+          {% set x=states('input_number.simul_ph') | float(default=0) %}
+          {% set b=states('input_number.ph_cible') | float(default=0) %}
+          {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
+          {% set e=states('input_number.ph_concentration') | float(default=0) %}
+          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
           {% if r < 0 %}
             {{ 0 }}
           {% else %}
-            {{ (r//60)|int }}
+            {{ (r//60)|int(default=0) }}
           {% endif %}
         unit_of_measurement: "mn"
   # temps d'injection en s
@@ -201,17 +201,17 @@ sensor:
       ph_tps_inject_s:
         friendly_name: "pH Durée Inject calc. (s)"
         value_template: >-
-          {% set a=states('sensor.ph_piscine_ph') | float(0) %}
-          {% set y=state_attr("sensor.ph_stat", "mean") | float(0) %}
-          {% set x=states('input_number.simul_ph') | float(0) %}
-          {% set b=states('input_number.ph_cible') | float(0) %}
-          {% set d=states('input_number.ph_debit_ppe') | float(0) %}
-          {% set e=states('input_number.ph_concentration') | float(0) %}
-          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int %} 
+          {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
+          {% set y=state_attr("sensor.ph_stat", "mean") | float(default=0) %}
+          {% set x=states('input_number.simul_ph') | float(default=0) %}
+          {% set b=states('input_number.ph_cible') | float(default=0) %}
+          {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
+          {% set e=states('input_number.ph_concentration') | float(default=0) %}
+          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
           {% if r < 0 %}
             {{ 0 }}
           {% else %}
-            {{ (r%60)|int }}
+            {{ (r%60)|int(default=0) }}
           {% endif %}
         unit_of_measurement: "s"
 

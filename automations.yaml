@@ -27,11 +27,11 @@
   description: ''
   trigger:
   - platform: template
-    value_template: '{{ states(''sensor.luminosite'' )|float > states(''input_number.luminosite_seuil_haut'')|float
+    value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) > states(''input_number.luminosite_seuil_haut'')|float(default=0)
       and is_state("sun.sun", "above_horizon") }}'
     id: nuit->jour
   - platform: template
-    value_template: '{{ states(''sensor.luminosite'')|float < states(''input_number.luminosite_seuil_bas'')|float
+    value_template: '{{ states(''sensor.bh1750_illuminance'')|float(default=0) < states(''input_number.luminosite_seuil_bas'')|float(default=0)
       and is_state("sun.sun", "below_horizon") }}'
     id: jour->nuit
   condition: []

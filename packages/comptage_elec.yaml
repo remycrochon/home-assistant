@@ -152,6 +152,7 @@ utility_meter:
 
 template:
 # Consommation journalière HP + HC - addition des utility meter
+  - sensor:
     - name: "energy_total_daily"
       state: >-
         {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}

@@ -15,7 +15,7 @@ template:
 # Surveillance de la temperature du congelateur     
 # normalement sur off
     - name: "alarme_temp_congelo_haute"
-      state: "{{ states('sensor.temp_congelo_garage_2')|float(default=0)>-10 }}"
+      state: "{{ states('sensor.temp_congelo_garage')|float(default=0)>-10 }}"
       device_class: "heat"
 
 # Surveillance discordance PAC entre l'état du thermostat et l'état du switch de commande   

@@ -303,42 +303,27 @@ fermeture_volet_absent:
     entity_id: cover.volet_sam
   mode: single
   icon: mdi:shuttle
-ouverture_porte_soussol:
-  alias: cde_porte_soussol
-  sequence:
-  - service: switch.turn_on
-    data: {}
-    entity_id: switch.cde_porte_ssol
-  - delay: 00:00:02
-  - service: switch.turn_off
-    data: {}
-    entity_id: switch.cde_porte_ssol
-  mode: single
-cde_porte_garage:
-  alias: cde_porte_garage
-  sequence:
-  - service: switch.turn_on
-    data: {}
-    entity_id: switch.cde_porte_garage
-  - delay: '2'
-  - service: switch.turn_off
-    data: {}
-    entity_id: switch.cde_porte_garage
-  mode: single
 cde2_porte_sous_sol:
-  alias: Cde2_porte_Sous_Sol
+  alias: cde_ouv_porte_sous_Sol
   sequence:
-  - service: switch.turn_on
-    data: {}
-    entity_id: switch.cde_porte_ssol
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: switch.turn_off
-    data: {}
-    entity_id: switch.cde_porte_ssol
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.porte_ssol_ouverte
+        state: 'off'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_porte_ssol
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_porte_ssol
+    default: []
   mode: single
 volet_piscine_ouverture:
   alias: volet_piscine_ouverture
@@ -489,4 +474,70 @@ volet_bureau_droit_stop:
   - service: cover.stop_cover
     target:
       entity_id: cover.bureau_droit
+  mode: single
+ferm_porte_sous_sol:
+  alias: cde_ferm_porte_sous_Sol
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.porte_ssol_fermee
+        state: 'off'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_porte_ssol
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_porte_ssol
+    default: []
+  mode: single
+cde_ferm_porte_garage:
+  alias: cde_ferm_porte_garage
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.porte_garage_fermee
+        state: 'off'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_porte_garage
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_porte_garage
+    default: []
+  mode: single
+cde_ouv_porte_garage:
+  alias: cde_ouv_porte_garage
+  sequence:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.porte_garage_ouverte
+        state: 'off'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.cde_porte_garage
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: switch.turn_off
+        target:
+          entity_id: switch.cde_porte_garage
+    default: []
   mode: single

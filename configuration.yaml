@@ -167,7 +167,7 @@ influxdb:
       - persistent_notification
       - person
 
-   
+
 # Modbus TCP connection Wago Piscine
 modbus:
   - type: tcp
@@ -295,15 +295,19 @@ modbus:
       - name: porte_ssol_fermee
         slave: 1
         address: 0
+        scan_interval: 5
       - name: porte_ssol_ouverte
         slave: 1
         address: 1
+        scan_interval: 5
       - name: porte_garage_fermee
         slave: 1
         address: 2
+        scan_interval: 5
       - name: porte_garage_ouverte
         slave: 1
         address: 3
+        scan_interval: 5
       - name: Etor5_adam_ssol
         slave: 1
         address: 4

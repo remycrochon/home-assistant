@@ -38,6 +38,6 @@ binary_sensor:
   - platform: template
     sensors:
       ecs_chauffe:
-        value_template: "{{ states.sensor.ecocompteur_ecs.state | float > 500 }}"
+        value_template: "{{ states.sensor.ecocompteur_ecs.state | float(default=0) > 500 }}"
         friendly_name: "ECS en Chauffe"
 #        device_class: heat

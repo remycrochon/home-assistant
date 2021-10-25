@@ -12,10 +12,6 @@ wifi:
   reboot_timeout: 5min
   fast_connect: true
     
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  #ap:
-  #  ssid: "Esp140 Test Fallback Hotspot"
-  #  password: "r9UaK4KhGcIW"
 
   manual_ip:
     static_ip: 192.168.0.140

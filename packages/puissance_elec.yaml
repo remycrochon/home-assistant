@@ -184,6 +184,6 @@ sensor:
 # Energie Puissance autres 
   - platform: integration
     source: sensor.puissance_autres
-    name: Energie Autres Integration
+    name: energy_autres
     unit_prefix: k
     round: 2

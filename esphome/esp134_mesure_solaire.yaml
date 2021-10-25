@@ -26,13 +26,6 @@ web_server:
   port: 80
 
 
-mqtt:
-  broker: 192.168.0.37
-  username: remy
-  password: Albi_2020
-  topic_prefix: HA
-  log_topic: esp131_uv_ha2
-
 # Bus I²C
 #i2c:
 #  sda: GPIO4

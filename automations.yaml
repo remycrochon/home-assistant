@@ -27,8 +27,9 @@
   description: ''
   trigger:
   - platform: template
-    value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) > states(''input_number.luminosite_seuil_haut'')|float(default=0)
-      and is_state("sun.sun", "above_horizon") }}'
+    value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) >
+      states(''input_number.luminosite_seuil_haut'')|float(default=0) and is_state("sun.sun",
+      "above_horizon") }}'
     id: nuit->jour
   - platform: template
     value_template: '{{ states(''sensor.bh1750_illuminance'')|float(default=0) < states(''input_number.luminosite_seuil_bas'')|float(default=0)
@@ -1884,8 +1885,8 @@
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
       resolved_message: Alert {{ entity_name }} resolved
-      initial_delay: 1
       max_alerts: 100
+      initial_delay: 300
 - id: '1634569751638'
   alias: Alarme Blueprints Notification Porte Sous Sol Ouverte
   description: Blue Print

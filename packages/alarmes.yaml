@@ -22,7 +22,7 @@ template:
 # normalement sur on  
     - name: "alarme_discord_pac"
       state: >-
-        {% set a=states("sensor.puissance_pac_rpac")| float(default=0)<200 %}
+        {% set a=states("sensor.puissance_pac_rpac")| float(default=0)>200 %}
         {% set b=states("switch.altherma") %}
         {{ (a==true and b=="on") or (a==false and b=="off") }}
       device_class: "connectivity"

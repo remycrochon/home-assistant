@@ -1699,7 +1699,7 @@
       condition_entity_state: 'on'
       sensor_entity: binary_sensor.esp_reseau
       alert_state: 'off'
-      initial_delay: 10
+      initial_delay: 300
       alert_action:
       - service: notify.telegram
         data:
@@ -1740,7 +1740,7 @@
       condition_entity_state: 'on'
       sensor_entity: binary_sensor.ping_reseau
       alert_state: 'off'
-      initial_delay: 1
+      initial_delay: 300
       alert_action:
       - service: notify.telegram
         data:
@@ -1790,7 +1790,7 @@
       condition_entity_state: 'on'
       sensor_entity: binary_sensor.uptime_reseau
       alert_state: 'off'
-      initial_delay: 10
+      initial_delay: 300
       alert_action:
       - service: notify.telegram
         data:
@@ -1850,7 +1850,7 @@
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
       resolved_message: Alert {{ entity_name }} resolved
-      initial_delay: 120
+      initial_delay: 300
       max_alerts: 100
       dismiss_entity: input_boolean.inhib_alarme_pac
 - id: '1634569580188'
@@ -1967,7 +1967,7 @@
     input:
       condition_entity_state: 'on'
       sensor_entity: binary_sensor.alarme_discord_pac
-      alert_state: 'false'
+      alert_state: 'off'
       alert_action:
       - service: notify.telegram
         data:

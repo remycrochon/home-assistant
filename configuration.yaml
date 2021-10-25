@@ -79,16 +79,16 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-hacs:
-  token: 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
+#hacs:
+#  token: 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
 
 http:
   use_x_forwarded_for: true
   trusted_proxies:
     - 192.168.0.105
 
-glances:
-  - host: 192.168.0.37
+#glances:
+#  - host: 192.168.0.37
 
 rfxtrx:
  device: //dev/serial/by-id/usb-RFXCOM_RFXtrx433_A128N1JF-if00-port0

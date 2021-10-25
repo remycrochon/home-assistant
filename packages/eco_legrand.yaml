@@ -1,0 +1,32 @@
+# lecture de l'energie dans l'eco compteur Legrand
+sensor:  
+  #EcoLegrand
+  - platform: command_line
+    name: "EcoCompteur ECS"
+    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
+    scan_interval: 60
+    unit_of_measurement: W
+
+  - platform: command_line
+    name: "EcoCompteur RPAC"
+    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data2'
+    scan_interval: 60
+    unit_of_measurement: W
+
+  - platform: command_line
+    name: "EcoCompteur PAC"
+    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data3'
+    scan_interval: 60
+    unit_of_measurement: W
+
+  - platform: command_line
+    name: "EcoCompteur Clim"
+    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data4'
+    scan_interval: 60
+    unit_of_measurement: W
+
+  - platform: command_line
+    name: "EcoCompteur Total"
+    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
+    scan_interval: 60
+    unit_of_measurement: W

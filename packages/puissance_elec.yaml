@@ -1,0 +1,188 @@
+input_boolean:
+  # H pleine/creuse
+  hc_hp:
+    name: Tarif HC-HP
+    icon: mdi:power-settings
+
+  forcage_hc_hp:
+    name: Forcage HC
+    icon: mdi:power-settings
+
+  valid_delestage:
+    name: validation Delestage PV
+    icon: mdi:power-settings
+
+  mem_delestage:
+    name: memoire Delestage PV
+    icon: mdi:power-settings
+
+input_number:
+  # Seuil Délestage
+  seuil_delestage_pv:
+    name: Seuil Délestage PV
+    min: 0
+    max: 1800
+    unit_of_measurement: W
+    icon: mdi:flash
+    mode: box
+
+# Sert au calcul integration puissance elec python
+# réservé aux essais
+  furnace_power:
+    name: Furnace Power
+    min: 0
+    max: 50
+    step: 0.1
+    mode: box
+    unit_of_measurement: 'kW'
+
+  last_power:
+    min: 0
+    max: 100
+    step: 0.1
+    mode: box
+
+  energy_power:
+    min: 0
+    max: 9999
+    step: 0.1 
+
+# Réservé ECS calcul python
+  energy_ecs_p:
+    min: 0
+    max: 9999
+    step: 0.1 
+
+  last_power_ecs:
+    min: 0
+    max: 10000
+    step: 0.1
+    mode: box
+
+# Réservé PAC calcul python
+  energy_pac_p:
+    min: 0
+    max: 9999
+    step: 0.1 
+
+  last_power_pac:
+    min: 0
+    max: 10000
+    step: 0.1
+    mode: box
+
+input_datetime:
+  # Horaire HC/HP
+  horaire_hc_debut_1:
+    name: Horaire HC Début 1
+    has_date: false
+    has_time: true
+  horaire_hc_debut_2:
+    name: Horaire HC Début 2
+    has_date: false
+    has_time: true
+
+  horaire_hp_debut_1:
+    name: Horaire HP Début 1
+    has_date: false
+    has_time: true
+  horaire_hp_debut_2:
+    name: Horaire HP Début 2
+    has_date: false
+    has_time: true
+
+binary_sensor:
+  - platform: template # = true si HC
+    sensors:
+      display_hp_hc:
+        friendly_name: "HC"
+        value_template: "{{ (states.input_boolean.hc_hp.state == 'off') }}"
+
+
+
+  #Enedis supprimer avec la version HA 2021-06
+#  - platform: myEnedis
+#   token: okMOLa3RWnuDbFnxg3X5VhO2mvceDI5f8655HNaWuWGTG7y5nJfZAq
+#    code: 23264544053089
+#    heures_creuses: "[['01:54','06:54'], ['12:24', '15:24']]"
+#    hc_cout: 0.1312
+#    hp_cout: 0.1982
+#    scan_interval: 3600
+#    delay: 7200  # OPTION
+
+template:
+  - sensor:
+# Consommation ECS calcul python conversion en KWh            
+    - name: "energy_ecs_p_kw"
+      device_class: "energy"
+      state_class: "total"
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set a = states('input_number.energy_ecs_p') | float(default=0) | round(3) %}
+        {{ a / 1000 | round(3) }}
+
+# Consommation PAC calcul python conversion en KWh
+    - name: "energy_pac_p_kw"
+      device_class: "energy"
+      state_class: "total"
+      unit_of_measurement: "kWh"
+      state: >-        
+        {% set a = states('input_number.energy_pac_p') | float(default=0) | round(3) %}
+        {{ a / 1000 | round(3) }}        
+
+# Consommation autres totale en W
+    - name: "puissance_autres"
+      state: >-
+        {% set a = states('sensor.pzem_totale_puissance') | float(default=0) | round(2) %}
+        {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
+        {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
+        {% set d = states('sensor.energy_pac_p_kw') | float(default=0) | round(2) %}          
+        {% set e = states('sensor.energy_ecs_p_kw') | float(default=0) | round(2) %}
+        {{ (a-b-c-d-e) | round(2) }}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"  
+
+# Cumul de PAC et RPAC
+    - name: "puissance_pac_rpac"
+      device_class: "energy"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+          {% set p = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
+          {% set o = states('sensor.ecocompteur_rpac') | float(default=0) | round(2) %}
+          {{ (o + p) | round(2) }}
+
+# Calcul puissance injecté sur le réseau
+    - name: "p_injection_reseau"
+      device_class: "energy"
+      state_class: "total"
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set p = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
+        {% set o = states('sensor.envoy_122103023124_current_energy_production') | float(default=0) | round(2) %}
+        {{ (o - p) | round(2) }}
+
+#Indique que la machine à laver est en fonctionnement
+  - binary_sensor:
+      - name: "MaLaver en marche"
+        delay_off:
+          minutes: 5
+        state: >
+          {{ states('sensor.pc_mal')|float(default=0) > 10 }}
+
+  
+sensor:
+# Energie ECS mesurée avec integration 
+  - platform: integration
+    source: sensor.ecocompteur_ecs
+    name: Energie ECS Integration
+    unit_prefix: k
+    round: 2
+
+# Energie Puissance autres 
+  - platform: integration
+    source: sensor.puissance_autres
+    name: Energie Autres Integration
+    unit_prefix: k
+    round: 2

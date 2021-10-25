@@ -149,90 +149,13 @@ utility_meter:
     tariffs:
       - hp
       - hc
-# Sert au calcul python
-input_number:
-# réservé aux essais
-  furnace_power:
-    name: Furnace Power
-    min: 0
-    max: 50
-    step: 0.1
-    mode: box
-    unit_of_measurement: 'kW'
-
-  last_power:
-    min: 0
-    max: 100
-    step: 0.1
-    mode: box
-
-  energy_power:
-    min: 0
-    max: 9999
-    step: 0.1 
-
-# Réservé ECS calcul python
-  energy_ecs_p:
-    min: 0
-    max: 9999
-    step: 0.1 
-
-  last_power_ecs:
-    min: 0
-    max: 10000
-    step: 0.1
-    mode: box
-
-# Réservé PAC calcul python
-  energy_pac_p:
-    min: 0
-    max: 9999
-    step: 0.1 
-
-  last_power_pac:
-    min: 0
-    max: 10000
-    step: 0.1
-    mode: box
 
 template:
-  - sensor:
-# Consommation ECS calcul python conversion en KWh            
-    - name: "energy_ecs_p_kw"
-      device_class: "energy"
-      state_class: "total"
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set a = states('input_number.energy_ecs_p') | float | round(3) %}
-        {{ a / 1000 | round(3) }}
-
-# Consommation PAC calcul python conversion en KWh
-    - name: "energy_pac_p_kw"
-      device_class: "energy"
-      state_class: "total"
-      unit_of_measurement: "kWh"
-      state: >-        
-        {% set a = states('input_number.energy_pac_p') | float | round(3) %}
-        {{ a / 1000 | round(3) }}        
-
-# Consommation autres totale en W
-    - name: "puissance_autres"
-      state: >-
-        {% set a = states('sensor.pzem_totale_puissance') | float(default=0) | round(2) %}
-        {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
-        {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
-        {% set d = states('sensor.energy_pac_p_kw') | float(default=0) | round(2) %}          
-        {% set e = states('sensor.energy_ecs_p_kw') | float(default=0) | round(2) %}
-        {{ (a-b-c-d-e) | round(2) }}
-      unit_of_measurement: "W"
-      device_class: "power"
-      state_class: "measurement"  
-
 # Consommation journalière HP + HC - addition des utility meter
     - name: "energy_total_daily"
       state: >-
-        {% set p = states('sensor.energy_total_usage_daily_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_total_usage_daily_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -240,8 +163,8 @@ template:
 
     - name: "energy_pisc_daily"
       state: >-
-        {% set p = states('sensor.energy_pisc_usage_daily_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_daily_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_pisc_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pisc_usage_daily_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -249,8 +172,8 @@ template:
 
     - name: "energy_sdb_daily"
       state: >-
-        {% set p = states('sensor.energy_sdb_usage_daily_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_sdb_usage_daily_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_sdb_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_daily_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -258,8 +181,8 @@ template:
 
     - name: "energy_pac1_daily"
       state: >-
-        {% set p = states('sensor.energy_pac1_usage_daily_hp') | float | round(3) %}
-        {% set o = states('sensor.energy_pac1_usage_daily_hc') | float | round(3) %}
+        {% set p = states('sensor.energy_pac1_usage_daily_hp') | float(default=0) | round(3) %}
+        {% set o = states('sensor.energy_pac1_usage_daily_hc') | float(default=0) | round(3) %}
         {{ (o + p) | round(3) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -267,8 +190,8 @@ template:
 
     - name: "energy_ecs1_daily"
       state: >-
-        {% set p = states('sensor.energy_ecs1_usage_daily_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_daily_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_ecs1_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_daily_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -276,8 +199,8 @@ template:
 
     - name: "energy_autres_daily"
       state: >-
-        {% set p = states('sensor.energy_autres_usage_daily_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_autres_usage_daily_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_autres_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_autres_usage_daily_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -286,8 +209,8 @@ template:
 # Consommation semaine HP + HC
     - name: "energy_total_weekly"
       state: >-
-        {% set p = states('sensor.energy_total_usage_weekly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_total_usage_weekly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_total_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_weekly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -295,8 +218,8 @@ template:
 
     - name: "energy_pisc_weekly"
       state: >-
-        {% set p = states('sensor.energy_pisc_usage_weekly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_weekly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_pisc_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pisc_usage_weekly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -304,8 +227,8 @@ template:
 
     - name: "energy_sdb_weekly"
       state: >-
-        {% set p = states('sensor.energy_sdb_usage_weekly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_sdb_usage_weekly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_sdb_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_weekly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -313,8 +236,8 @@ template:
 
     - name: "energy_pac1_weekly"
       state: >-
-        {% set p = states('sensor.energy_pac1_usage_weekly_hp') | float | round(3) %}
-        {% set o = states('sensor.energy_pac1_usage_weekly_hc') | float | round(3) %}
+        {% set p = states('sensor.energy_pac1_usage_weekly_hp') | float(default=0) | round(3) %}
+        {% set o = states('sensor.energy_pac1_usage_weekly_hc') | float(default=0) | round(3) %}
         {{ (o + p) | round(3) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -322,8 +245,8 @@ template:
 
     - name: "energy_ecs1_weekly"
       state: >-
-        {% set p = states('sensor.energy_ecs1_usage_weekly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_weekly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_ecs1_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_weekly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -331,8 +254,8 @@ template:
 
     - name: "energy_autres_weekly"
       state: >-
-        {% set p = states('sensor.energy_autres_usage_weekly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_autres_usage_weekly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_autres_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_autres_usage_weekly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -342,8 +265,8 @@ template:
 # Consommation mensuelle HP + HC
     - name: "energy_total_monthly"
       state: >-
-        {% set p = states('sensor.energy_total_usage_monthly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_total_usage_monthly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_total_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -351,8 +274,8 @@ template:
 
     - name: "energy_pisc_monthly"
       state: >-
-        {% set p = states('sensor.energy_pisc_usage_monthly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_monthly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_pisc_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pisc_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -360,8 +283,8 @@ template:
 
     - name: "energy_sdb_monthly"
       state: >-
-        {% set p = states('sensor.energy_sdb_usage_monthly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_sdb_usage_monthly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_sdb_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -369,8 +292,8 @@ template:
 
     - name: "energy_pac1_monthly"
       state: >-
-        {% set p = states('sensor.energy_pac1_usage_monthly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_pac1_usage_monthly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_pac1_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pac1_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -378,8 +301,8 @@ template:
 
     - name: "energy_ecs1_monthly"
       state: >-
-        {% set p = states('sensor.energy_ecs1_usage_monthly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_monthly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_ecs1_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -387,8 +310,8 @@ template:
 
     - name: "energy_autres_monthly"
       state: >-
-        {% set p = states('sensor.energy_autres_usage_monthly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_autres_usage_monthly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_autres_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_autres_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -397,8 +320,8 @@ template:
 # Consommation annuelle HP + HC
     - name: "energy_total_yearly"
       state: >-
-        {% set p = states('sensor.energy_total_usage_yearly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_total_usage_yearly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_total_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_yearly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -406,8 +329,8 @@ template:
 
     - name: "energy_pisc_yearly"
       state: >-
-        {% set p = states('sensor.energy_pisc_usage_yearly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_yearly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_pisc_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pisc_usage_yearly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -415,8 +338,8 @@ template:
 
     - name: "energy_sdb_yearly"
       state: >-
-        {% set p = states('sensor.energy_sdb_usage_yearly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_sdb_usage_yearly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_sdb_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_yearly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -424,8 +347,8 @@ template:
 
     - name: "energy_pac1_yearly"
       state: >-
-        {% set p = states('sensor.energy_pac1_usage_yearly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_pac1_usage_yearly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_pac1_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pac1_usage_yearly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -433,8 +356,8 @@ template:
 
     - name: "energy_ecs1_yearly"
       state: >-
-        {% set p = states('sensor.energy_ecs1_usage_yearly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_yearly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_ecs1_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_yearly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -442,24 +365,10 @@ template:
 
     - name: "energy_autres_yearly"
       state: >-
-        {% set p = states('sensor.energy_autres_usage_yearly_hp') | float | round(2) %}
-        {% set o = states('sensor.energy_autres_usage_yearly_hc') | float | round(2) %}
+        {% set p = states('sensor.energy_autres_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_autres_usage_yearly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"          
 
-sensor:
-# Energie ECS mesurée avec integration 
-  - platform: integration
-    source: sensor.ecocompteur_ecs
-    name: Energie ECS Integration
-    unit_prefix: k
-    round: 2
-
-# Energie Puissance autres 
-  - platform: integration
-    source: sensor.energy_autres
-    name: Energie Autres Integration
-    unit_prefix: k
-    round: 2

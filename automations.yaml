@@ -1972,26 +1972,26 @@
       alert_action:
       - service: notify.telegram
         data:
-          message: Discordance PAC= Mode Fonctionnement= {{states("sensor.espaltherma_mode_fonctionnement")}}
-            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+          message: Discordance PAC=> PU= {{states("sensor.puissance_pac_rpac")}} et
+            Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat PAC !!!
       - service: persistent_notification.create
         data:
-          message: Discordance PAC= Mode de Fonctionnement= {{states("sensor.espaltherma_mode_fonctionnement")}}
-            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+          message: Discordance PAC=> PU= {{states("sensor.puissance_pac_rpac")}} et
+            Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
             }}
       resolved_action:
       - service: notify.telegram
         data:
-          message: Discordance PAC OK= Mode Fonct PAC= {{states("sensor.espaltherma_mode_fonctionnement")}}
-            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+          message: Discordance PAC=> PU= {{states("sensor.puissance_pac_rpac")}} et
+            Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat PAC !!!
       - service: persistent_notification.create
         data:
-          message: Discordance PAC OK= Mode Fonct PAC= {{states("sensor.espaltherma_mode_fonctionnement")}}
-            et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
+          message: Discordance PAC=> PU= {{states("sensor.puissance_pac_rpac")}} et
+            Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
             }}
       notify_message: Alert {{ entity_name }} triggered
       notify_device: 62cdce054a9d3448484b4df8e44cc499

@@ -211,14 +211,14 @@ cover:
           - condition: state
             entity_id: binary_sensor.porte_ssol_fermee
             state: "on"          
-          - service: script.cde_ouv_porte_sous_Sol
+          - service: script.cde2_porte_sous_sol
         close_cover:
           - condition: state
             entity_id: binary_sensor.porte_ssol_ouverte
             state: "on"          
-          - service: script.cde_ferm_porte_sous_Sol      
+          - service: script.ferm_porte_sous_sol      
         stop_cover:
-          service: script.cde_ferm_porte_sous_sol           
+          service: script.ferm_porte_sous_sol           
         icon_template: >-
           {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
             mdi:garage

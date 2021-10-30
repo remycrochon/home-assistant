@@ -339,48 +339,6 @@
           entity_id: switch.pc1_lidl
     default: []
   mode: single
-- id: '1616955642150'
-  alias: ECS_Integration énergie
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: sensor.ecocompteur_ecs
-  condition: []
-  action:
-  - service: python_script.energy1
-    data:
-      power: sensor.ecocompteur_ecs
-      last_power: last_power_ecs
-      energy_accum: energy_ecs_p
-  mode: single
-- id: '1616973133305'
-  alias: Energie-energy integration
-  description: Calcul énergie PZEM Totale
-  trigger:
-  - platform: state
-    entity_id: sensor.pzem_totale_puissance
-  condition: []
-  action:
-  - service: python_script.energy1
-    data:
-      power: sensor.pzem_totale_puissance
-      last_power: last_power
-      energy_accum: energy_power
-  mode: single
-- id: '1617008500219'
-  alias: PAC_Energy integration
-  description: Calcul énergie PAC
-  trigger:
-  - platform: state
-    entity_id: sensor.puissance_pac_rpac
-  condition: []
-  action:
-  - service: python_script.energy1
-    data:
-      power: sensor.puissance_pac_rpac
-      last_power: last_power_pac
-      energy_accum: energy_pac_p
-  mode: single
 - id: '1617185147880'
   alias: Piscine Notification Alarme Appoint d'eau
   description: ''
@@ -1706,9 +1664,9 @@
         data:
           message: Un ESP est Off Line{{-"\n"-}} -> ESP PEZM SdB est {{states('binary_sensor.esp123_status')}}{{-"\n"-}}
             -> ESP Piscine est {{states('binary_sensor.esp125_status')}}{{-"\n"-}}
-            -> ESP PZEM Total est {{states('binary_sensor.esp132_status')}}{{-"\n"-}}
+            -> ESP IKEA est {{states('binary_sensor.esp131_status')}}{{-"\n"-}} ->
+            ESP PZEM Total est {{states('binary_sensor.esp132_status')}}{{-"\n"-}}
             -> ESP Congelo est {{states('binary_sensor.esp133_status')}}{{-"\n"-}}
-            -> ESP Mesure UV est {{states('binary_sensor.esp134_status')}}{{-"\n"-}}
             -> ESP Luxmetre est {{states('binary_sensor.esp135_status')}}{{-"\n"-}}
             -> ESP PZEM Piscine est {{states('binary_sensor.esp137_status')}}{{-"\n"-}}
             -> ESP Voyant Alarm est {{states('binary_sensor.esp138_status')}}{{-"\n"-}}
@@ -2322,4 +2280,16 @@
     data:
       addon: a0d7b954_ssh
       input: /config/ha_gitpush.sh
+  mode: single
+- id: '1635590858245'
+  alias: BP Sonof
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zha_event
+  condition: []
+  action:
+  - service: notify.persistent_notification
+    data:
+      message: bp sonof
   mode: single

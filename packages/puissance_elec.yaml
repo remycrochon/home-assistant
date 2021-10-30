@@ -26,50 +26,6 @@ input_number:
     icon: mdi:flash
     mode: box
 
-# Sert au calcul integration puissance elec python
-# réservé aux essais
-  furnace_power:
-    name: Furnace Power
-    min: 0
-    max: 50
-    step: 0.1
-    mode: box
-    unit_of_measurement: 'kW'
-
-  last_power:
-    min: 0
-    max: 100
-    step: 0.1
-    mode: box
-
-  energy_power:
-    min: 0
-    max: 9999
-    step: 0.1 
-
-# Réservé ECS calcul python
-  energy_ecs_p:
-    min: 0
-    max: 9999
-    step: 0.1 
-
-  last_power_ecs:
-    min: 0
-    max: 10000
-    step: 0.1
-    mode: box
-
-# Réservé PAC calcul python
-  energy_pac_p:
-    min: 0
-    max: 9999
-    step: 0.1 
-
-  last_power_pac:
-    min: 0
-    max: 10000
-    step: 0.1
-    mode: box
 
 input_datetime:
   # Horaire HC/HP
@@ -177,8 +133,17 @@ sensor:
 # Energie ECS mesurée avec integration 
   - platform: integration
     source: sensor.ecocompteur_ecs
-    name: Energie ECS Integration
+    name: energy_ecs_p
     unit_prefix: k
+    method: left
+    round: 2
+
+# Energie PAC mesurée avec integration 
+  - platform: integration
+    source: sensor.puissance_pac_rpac
+    name: energy_pac_p
+    unit_prefix: k
+    method: left
     round: 2
 
 # Energie Puissance autres 
@@ -186,4 +151,15 @@ sensor:
     source: sensor.puissance_autres
     name: energy_autres
     unit_prefix: k
+    method: left
     round: 2
+
+# Energie PC MàL 
+  - platform: integration
+    source: sensor.pc_mal
+    name: energy_pc_mal
+    unit_prefix: k
+    method: left
+    round: 2
+
+    

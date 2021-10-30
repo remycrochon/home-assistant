@@ -125,14 +125,15 @@ binary_sensor:
     entities:
       - binary_sensor.esp123_status
       - binary_sensor.esp125_status
+      - binary_sensor.esp131_status
       - binary_sensor.esp132_status
       - binary_sensor.esp133_status
-      - binary_sensor.esp134_status
+#      - binary_sensor.esp134_status
       - binary_sensor.esp135_status
       - binary_sensor.esp137_status
       - binary_sensor.esp138_status
       - binary_sensor.esp139_status
-#      - binary_sensor.esp140_status
+      - binary_sensor.esp140_status
 
   - platform: group
     name: uptime_reseau

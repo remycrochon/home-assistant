@@ -68,6 +68,10 @@ binary_sensor:
     name: "ping_ESP125_Piscine"
 
   - platform: ping
+    host: 192.168.0.131
+    name: "ping_ESP131_Qualité_Air"
+
+  - platform: ping
     host: 192.168.0.132
     name: "ping_ESP132_PEZM Totale"
 
@@ -105,9 +109,10 @@ binary_sensor:
       - binary_sensor.ping_module_wago_piscine
       - binary_sensor.ping_esp123_pezm_sdb
       - binary_sensor.ping_esp125_piscine
+      - binary_sensor.ping_esp131_qualite_air
       - binary_sensor.ping_esp132_pezm_totale
       - binary_sensor.ping_esp133_congelateur
-      - binary_sensor.ping_esp134_uv
+#      - binary_sensor.ping_esp134_uv
       - binary_sensor.ping_esp135_luxmetre
       - binary_sensor.ping_esp137_pzem_piscine
       - binary_sensor.ping_esp139_vmc_sous_sol

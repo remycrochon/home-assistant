@@ -1710,9 +1710,9 @@
             -> Wago Piscine est {{states('binary_sensor.ping_module_wago_piscine')}}{{-"\n"-}}
             -> ESP123 PZEM SdB est {{states('binary_sensor.ping_esp123_pezm_sdb')}}{{-"\n"-}}
             -> ESP125 Piscine est {{states('binary_sensor.ping_esp125_piscine')}}{{-"\n"-}}
+            -> ESP131 Qualité air est {{states('binary_sensor.ping_esp131_qualite_air')}}{{-"\n"-}}
             -> ESP132 PEZM Total est {{states('binary_sensor.ping_esp132_pezm_totale')}}{{-"\n"-}}
             -> ESP133 Congelo {{states('binary_sensor.ping_esp133_congelateur')}}{{-"\n"-}}
-            -> ESP134 UV est {{states('binary_sensor.ping_esp134_uv')}}{{-"\n"-}}
             -> ESP135 Luxmetre est {{states('binary_sensor.ping_esp135_luxmetre')}}{{-"\n"-}}
             -> ESP137 PEZM Piscine est {{states('binary_sensor.ping_esp137_pzem_piscine')}}{{-"\n"-}}
             -> ESP139 VMCSSol est {{states('binary_sensor.ping_esp139_vmc_sous_sol')}}{{-"\n"-}}

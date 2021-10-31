@@ -68,23 +68,7 @@ binary_sensor:
 
 template:
   - sensor:
-# Consommation ECS calcul python conversion en KWh            
-    - name: "energy_ecs_p_kw"
-      device_class: "energy"
-      state_class: "total"
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set a = states('input_number.energy_ecs_p') | float(default=0) | round(3) %}
-        {{ a / 1000 | round(3) }}
-
-# Consommation PAC calcul python conversion en KWh
-    - name: "energy_pac_p_kw"
-      device_class: "energy"
-      state_class: "total"
-      unit_of_measurement: "kWh"
-      state: >-        
-        {% set a = states('input_number.energy_pac_p') | float(default=0) | round(3) %}
-        {{ a / 1000 | round(3) }}        
+   
 
 # Consommation autres totale en W
     - name: "puissance_autres"
@@ -133,7 +117,7 @@ sensor:
 # Energie ECS mesurée avec integration 
   - platform: integration
     source: sensor.ecocompteur_ecs
-    name: energy_ecs_p
+    name: energy_ecs_p_kw
     unit_prefix: k
     method: left
     round: 2
@@ -141,7 +125,7 @@ sensor:
 # Energie PAC mesurée avec integration 
   - platform: integration
     source: sensor.puissance_pac_rpac
-    name: energy_pac_p
+    name: energy_pac_p_kw
     unit_prefix: k
     method: left
     round: 2

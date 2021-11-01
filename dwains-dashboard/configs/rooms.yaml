@@ -1,0 +1,146 @@
+# https://dwainscheeren.github.io/dwains-lovelace-dashboard/configuration/rooms.html
+
+rooms:
+  - name: Salon Cuisine
+    icon: mdi:home
+#     light: light.hallway
+    temperature: sensor.temperature_salon_zb
+    humidity: sensor.humidite_salon_zb
+    pressure: sensor.pression_salon_zb
+    cover: group.volets_salon_cuisine
+    climate: climate.altherma
+#     motion: binary_sensor.hallway_sensor_motion
+#     door: binary_sensor.hallway_door_contact
+#     window: binary_sensor.hallway_window_contact
+#     safety: sensor.smoke_sensor
+#     device: switch.television
+#     vacuum: 
+#       entity: vacuum.rockrobo
+#       camera: camera.rockrobo_map
+#     plant: plant.hallway_plant
+#     media_player: media_player.awesome_hallway_tv
+    more_entities:
+      entities:
+        - entity: sensor.power_salon_zb
+
+# Sdb
+  - name: Salle de Bain
+    icon: mdi:shower-head
+    temperature: sensor.temperature_sdb
+    humidity: sensor.humidity_sdb
+    cover: cover.sdb
+    more_entities:
+      entities:
+        - entity: sensor.humidty_status_sdb
+          name: Hum Status       
+        - entity: sensor.battery_sdb
+          name: Batterie
+        - entity: sensor.rssi_sdb
+          name: Rssi
+
+# Chambre Parents
+  - name: Chambre Parents
+    icon: mdi:bed
+    temperature: sensor.chamb_parents_temperature
+    humidity: sensor.chamb_parents_humidite
+    pressure: sensor.chamb_parents_pressure
+    cover: group.volets_parents
+    more_entities:
+      entities:
+        - entity: sensor.chamb_parents_power
+
+# Chambre nord
+  - name: Chambre Nord
+    icon: mdi:bed
+    temperature: sensor.chambre_nord_temperature
+    humidity: sensor.chambre_nord_humidite
+    pressure: sensor.chamb_nord_pression
+    cover: cover.amis_nord
+    more_entities:
+      entities:
+        - entity: sensor.chambre_nord_power
+          name: Batterie
+        - entity: input_boolean.presence_amis_ch_nord
+          name: Presence Amis Chamb Nord
+
+# Chambre sud
+  - name: Chambre Sud
+    icon: mdi:bed
+    temperature: sensor.chambre_sud_temperature
+    humidity: sensor.chambre_sud_humidity
+    cover: group.volets_amis_sud
+    more_entities:
+      entities:
+        - entity: sensor.chambre_sud_humidity_status
+          name: Hum Status       
+        - entity: sensor.chambre_sud_battery_numeric
+          name: Batterie
+        - entity: input_boolean.presence_amis_ch_sud
+          name: Presence Amis Chamb Sud
+
+# Cellier
+  - name: Cellier
+    icon: mdi:home-roof
+    temperature: sensor.temperature_cellier
+    humidity: sensor.humidity_cellier
+    door: binary_sensor.porte_cellier
+    light: switch.lumiere_cellier
+    more_entities:
+      entities:
+        - entity: sensor.battery_cellier
+          name: Batterie
+        - entity: sensor.humidity_status_cellier
+          name: Status Hum
+# Garage          
+  - name: Garage
+    icon: mdi:garage
+    cover: cover.garage_rdc
+    temperature: sensor.temperature_garage
+    humidity: sensor.humidity_garage
+    more_entities:
+      columns: 2 #optional
+      entities:
+        - entity: sensor.temp_congelo_garage
+        - entity: binary_sensor.porte_frigo
+
+# Sous-sol
+  - name: Sous-Sol
+    icon: mdi:garage
+    cover: cover.garage_soussol
+#    temperature: sensor.temperature_garage
+#    humidity: sensor.humidity_garage
+
+# Terrasse
+  - name: Terrasse
+    icon: mdi:warehouse
+    temperature: sensor.temperature_terrasse2
+    humidity: sensor.humidite_terrasse2
+    light: switch.spots_ext_sud
+    more_entities:
+      entities:
+        - entity: sensor.power_terrasse2
+          name: Batterie
+
+#     light: group.garage_lights
+#     door: group.garage_doors
+#    addons:
+#      - name: Hello room
+#        icon: mdi:puzzle
+#        path: 'dwains-dashboard/addons/rooms/hello-room/page.yaml'
+#        button_path: 'dwains-dashboard/addons/rooms/hello-room/button.yaml'
+#        data:
+#          some_data: 'This is some data parsed.'
+#          some_other_data: 'and some other data.'
+#           entity: vacuum.roborock
+#   - name: Bedroom
+#     icon: fal:bed
+#     more_entities:
+#       columns: 2 #optional
+#       entities:
+#         - entity: sensor.name1
+#         - entity: sensor.name2
+#     page_entities:
+#       columns: 1 #optional
+#       entities:
+#         - entity: sensor.name1
+#         - entity: sensor.name2

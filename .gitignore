@@ -11,6 +11,7 @@
 !*.js*
 !*.csv
 !*.png
+!*.jpg
 
 !appdaemon/
 !blueprints/
@@ -23,8 +24,8 @@
 !themes/
 !image/
 !www/
-!dwains-dashboard/configs/global.yaml
-
+!dwains-dashboard/
+!dwains-dashboard/configs/
 
 # Ignore these files/folders
 secrets.yaml

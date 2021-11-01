@@ -1,0 +1,38 @@
+# https://dwainscheeren.github.io/dwains-lovelace-dashboard/configuration/more_page.html
+
+more_page:
+    addons:
+      - name: Climate
+        icon: mdi:home-thermometer-outline
+        main_menu: 'true' #Show this addon in the main navigation bar!
+        path: 'dwains-dashboard/addons/more_page/climate_dashboard/page.yaml'
+        
+      - name: Conso Elec
+        icon: mdi:flash
+        main_menu: 'true' #Show this addon in the main navigation bar!
+        path: 'dwains-dashboard/addons/more_page/house_consumption/page.yaml'
+
+      - name: PAC
+        icon: mdi:radiator
+        main_menu: 'true' #Show this addon in the main navigation bar!
+        path: 'dwains-dashboard/addons/more_page/pac/page.yaml'
+
+      - name: System
+        icon: mdi:nas
+        main_menu: 'true' #Show this addon in the main navigation bar!
+        path: 'dwains-dashboard/addons/more_page/system/page.yaml'
+
+      - name: AdGuard
+        icon: mdi:angular
+        main_menu: 'true'
+        path: 'dwains-dashboard/addons/more_page/adguard/page.yaml'
+
+      - name: SpeedTest
+        main_menu: 'true'
+        icon: mdi:lan
+        path: 'dwains-dashboard/addons/more_page/speedtest/page.yaml' 
+
+      - name: UptimeRobot
+        main_menu: 'true' #Show this addon in the main navigation bar!
+        icon: mdi:cloud-upload-outline
+        path: 'dwains-dashboard/addons/more_page/uptimerobot/page.yaml'

@@ -12,9 +12,7 @@
 !*.csv
 !*.png
 
-
-# Comment this if you don't want to include your Node-RED flows.
-# This is only valid if you install Node-RED as Home Assistant Add-on
+!appdaemon/
 !blueprints/
 !custom_components/
 !esphome/

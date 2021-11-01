@@ -1,3 +1,9 @@
+substitutions:
+  device_name: esp140-test
+  friendly_name: esp140 test
+  time_timezone: "Europe/Paris"
+  watermeterkit_version: "1.2"
+  watermeterkit_model: "model-a"
 esphome:
   name: esp140-1-test
   platform: ESP8266
@@ -90,4 +96,28 @@ sensor:
     name: "ESP140 Uptime Sensor"
     id: esp140_uptime
     update_interval: 60s
-
+text_sensor:
+  # IP address #
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP address"
+      icon: "mdi:network-outline"
+    ssid:
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"
+  - platform: template
+    id: text_sensor_watermeterkit_version
+    name: "${friendly_name} Version"
+    update_interval: 5h
+    lambda: |-
+      return {"${watermeterkit_version}"};
+  - platform: template
+    id: text_sensor_watermeterkit_model
+    name: "${friendly_name} Model"
+    update_interval: 5h
+    lambda: |-
+      return {"${watermeterkit_model}"};

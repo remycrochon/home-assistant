@@ -68,7 +68,6 @@ binary_sensor:
 
 template:
   - sensor:
-   
 
 # Consommation autres totale en W
     - name: "puissance_autres"
@@ -94,11 +93,20 @@ template:
           {% set o = states('sensor.ecocompteur_rpac') | float(default=0) | round(2) %}
           {{ (o + p) | round(2) }}
 
-# Calcul puissance injecté sur le réseau
-    - name: "p_injection_reseau"
+# Calcul energie injectée sur le réseau du jour
+    - name: "energy_injectee_reseau_jour"
       device_class: "energy"
       state_class: "total"
       unit_of_measurement: "kWh"
+      state: >-
+        {% set p = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
+        {% set o = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
+        {{ (o - p)/1000 | round(2) }}
+# Calcul puissance injectée sur le réseau
+    - name: "puissance_injectee_reseau"
+      device_class: "energy"
+      state_class: "measurement"
+      unit_of_measurement: "W"
       state: >-
         {% set p = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
         {% set o = states('sensor.envoy_122103023124_current_energy_production') | float(default=0) | round(2) %}
@@ -110,7 +118,15 @@ template:
         delay_off:
           minutes: 5
         state: >
-          {{ states('sensor.pc_mal')|float(default=0) > 10 }}
+          {{ states('sensor.puissance_pc_mal')|float(default=0) > 10 }}
+
+#Indique que SdB est en fonctionnement
+  - binary_sensor:
+      - name: "SdB en chauffe"
+        delay_off:
+          minutes: 5
+        state: >
+          {{ states('sensor.pzem_sdb_puissance')|float(default=0) > 10 }}
 
   
 sensor:
@@ -140,7 +156,7 @@ sensor:
 
 # Energie PC MàL 
   - platform: integration
-    source: sensor.pc_mal
+    source: sensor.puissance_pc_mal
     name: energy_pc_mal
     unit_prefix: k
     method: left

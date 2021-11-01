@@ -1084,7 +1084,7 @@
   mode: single
 - id: '1632994496716'
   alias: VMC_Sous_Sol_Automatismes
-  description: ''
+  description: ' '
   trigger:
   - platform: state
     entity_id: input_select.vmc_ssol
@@ -2105,25 +2105,29 @@
         target:
           entity_id:
           - utility_meter.energy_total_usage_daily
-          - utility_meter.energy_pisc_usage_daily
-          - utility_meter.energy_sdb_usage_daily
-          - utility_meter.energy_ecs1_usage_daily
-          - utility_meter.energy_pac1_usage_daily
           - utility_meter.energy_total_usage_weekly
-          - utility_meter.energy_pisc_usage_weekly
-          - utility_meter.energy_sdb_usage_weekly
-          - utility_meter.energy_ecs1_usage_weekly
-          - utility_meter.energy_pac1_usage_weekly
           - utility_meter.energy_total_usage_monthly
-          - utility_meter.energy_pisc_usage_monthly
-          - utility_meter.energy_sdb_usage_monthly
-          - utility_meter.energy_ecs1_usage_monthly
-          - utility_meter.energy_pac1_usage_monthly
           - utility_meter.energy_total_usage_yearly
+          - utility_meter.energy_pisc_usage_daily
+          - utility_meter.energy_pisc_usage_weekly
+          - utility_meter.energy_pisc_usage_monthly
           - utility_meter.energy_pisc_usage_yearly
+          - utility_meter.energy_sdb_usage_daily
+          - utility_meter.energy_sdb_usage_weekly
+          - utility_meter.energy_sdb_usage_monthly
           - utility_meter.energy_sdb_usage_yearly
+          - utility_meter.energy_ecs1_usage_daily
+          - utility_meter.energy_ecs1_usage_weekly
+          - utility_meter.energy_ecs1_usage_monthly
           - utility_meter.energy_ecs1_usage_yearly
+          - utility_meter.energy_pac1_usage_daily
+          - utility_meter.energy_pac1_usage_weekly
+          - utility_meter.energy_pac1_usage_monthly
           - utility_meter.energy_pac1_usage_yearly
+          - utility_meter.energy_mal_usage_daily
+          - utility_meter.energy_mal_usage_monthly
+          - utility_meter.energy_mal_usage_weekly
+          - utility_meter.energy_mal_usage_yearly
           - utility_meter.energy_autres_usage_daily
           - utility_meter.energy_autres_usage_monthly
           - utility_meter.energy_autres_usage_weekly
@@ -2147,25 +2151,29 @@
         target:
           entity_id:
           - utility_meter.energy_total_usage_daily
-          - utility_meter.energy_pisc_usage_daily
-          - utility_meter.energy_sdb_usage_daily
-          - utility_meter.energy_ecs1_usage_daily
-          - utility_meter.energy_pac1_usage_daily
           - utility_meter.energy_total_usage_weekly
-          - utility_meter.energy_pisc_usage_weekly
-          - utility_meter.energy_sdb_usage_weekly
-          - utility_meter.energy_ecs1_usage_weekly
-          - utility_meter.energy_pac1_usage_weekly
           - utility_meter.energy_total_usage_monthly
-          - utility_meter.energy_pisc_usage_monthly
-          - utility_meter.energy_sdb_usage_monthly
-          - utility_meter.energy_ecs1_usage_monthly
-          - utility_meter.energy_pac1_usage_monthly
           - utility_meter.energy_total_usage_yearly
+          - utility_meter.energy_pisc_usage_daily
+          - utility_meter.energy_pisc_usage_weekly
+          - utility_meter.energy_pisc_usage_monthly
           - utility_meter.energy_pisc_usage_yearly
+          - utility_meter.energy_sdb_usage_daily
+          - utility_meter.energy_sdb_usage_weekly
+          - utility_meter.energy_sdb_usage_monthly
           - utility_meter.energy_sdb_usage_yearly
+          - utility_meter.energy_ecs1_usage_daily
+          - utility_meter.energy_ecs1_usage_weekly
+          - utility_meter.energy_ecs1_usage_monthly
           - utility_meter.energy_ecs1_usage_yearly
+          - utility_meter.energy_pac1_usage_daily
+          - utility_meter.energy_pac1_usage_weekly
+          - utility_meter.energy_pac1_usage_monthly
           - utility_meter.energy_pac1_usage_yearly
+          - utility_meter.energy_mal_usage_daily
+          - utility_meter.energy_mal_usage_monthly
+          - utility_meter.energy_mal_usage_weekly
+          - utility_meter.energy_mal_usage_yearly
           - utility_meter.energy_autres_usage_daily
           - utility_meter.energy_autres_usage_monthly
           - utility_meter.energy_autres_usage_weekly
@@ -2292,4 +2300,21 @@
   - service: notify.persistent_notification
     data:
       message: bp sonof
+  mode: single
+- id: '1635590853335'
+  alias: 02 -  Choix theme for day and night
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id: sun.sun
+    to: above_horizon
+  - platform: state
+    entity_id: sun.sun
+    to: below_horizon
+  action:
+  - service: frontend.set_theme
+    data:
+      name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n\
+        {% else %}\n  Dwains Dark Theme\n{% endif %}\n"
   mode: single

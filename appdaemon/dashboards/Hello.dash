@@ -1,0 +1,48 @@
+#
+# Main arguments, all optional
+#
+title: Hello Panel
+widget_dimensions: [150, 150]
+widget_margins: [5, 5]
+columns: 8
+
+label:
+    widget_type: label
+    text: Hello World
+
+layout:
+    - temp_int(1x1), temp_ext(1x1)
+    - pac(1x1), uv_vp2
+    - meteo(2x2)
+
+meteo:
+    widget_type: weather
+    entity: weather.albi
+#    sensors:
+#        temperature: sensor.vp2_temp_out
+
+temp_int:
+    widget_type: sensor
+    title: Temp int
+    units: "C°"
+    precision: 1
+    entity: sensor.espaltherma_temp_ambiante_int_r1t
+temp_ext:
+    widget_type: gauge
+    title: Temp ext
+    units: "C°"
+    entity: sensor.vp2_temp_out
+    max: 45
+    min: 0
+uv_vp2:
+    widget_type: sensor
+    title: UV
+    units: "UV"
+    precision: 1
+    entity: sensor.vp2_uv
+pac:
+    widget_type: climate
+    entity: climate.altherma
+    title: PAC
+    units: "C°"
+

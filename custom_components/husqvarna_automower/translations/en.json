@@ -1,0 +1,35 @@
+{
+    "config": {
+        "title": "Husqvarna Automower",
+        "step": {
+            "user": {
+                "title": "Husqvarna Automower",
+                "description": "If you need help with the configuration have a look here: https://github.com/Thomas55555/husqvarna_automower",
+                "data": {
+                    "api_key": "36 digits API Key",
+                    "username": "Username",
+                    "password": "Password"
+                }
+            },
+            "reauth_confirm": {
+                "description": "The Husqvarna Automower integration needs to re-authenticate with Husqvarna",
+                "title": "Reauthenticate Integration"
+            }
+        },
+        "error": {
+            "auth": "Username/Password/API-Key is wrong.",
+            "api_key": "Your API-Key is not compatible to websocket, please renew it on https://developer.husqvarnagroup.cloud/",
+            "mower": "Make sure that the Authentication API and the Automower-Connect API is connected with your API-Key: https://developer.husqvarnagroup.cloud/",
+            "unknown": "An unknown error occured"
+        },
+        "abort": {
+            "single_instance_allowed": "Only a single configuration of Husqvarna Automower is allowed.",
+            "reauth_successful": "The reauthentication was successful"
+        }
+    },
+    "system_health": {
+        "info": {
+            "can_reach_server": "Reach Husqvarna Token server"
+        }
+    }
+}

@@ -1,0 +1,210 @@
+    - type: 'custom:uptime-card'
+      entity: binary_sensor.ha #<- fill in the right sensor
+      icon: 'fas:safari'
+      name: HA
+      hours_to_show: 72
+      status_adaptive_color: true
+      average_text: '% uptime'
+      alias:
+        ok: Online
+        ko: Offline
+      blink:
+        effect: fade
+        target: card
+        speed: 1
+      color:
+        icon: gray
+        ok: '#45C669'
+        ko: '#C6B145'
+        half: '#C66445'
+        none: '#C9C9C9'
+        title: gray
+      show:
+        header: true
+        title: true
+        icon: true
+        footer: true
+        status: true
+        timeline: true
+        average: true
+      tooltip:
+         animation: true
+      #tap_action:
+         #action: url
+         #url_path: 'https://'
+
+    - type: 'custom:uptime-card'
+      entity: binary_sensor.domo_rem81 #<- fill in the right sensor
+      icon: 'fas:safari'
+      name: Domo.rem81
+      hours_to_show: 72
+      status_adaptive_color: true
+      average_text: '% uptime'
+      alias:
+        ok: Online
+        ko: Offline
+      blink:
+        effect: fade
+        target: card
+        speed: 1
+      color:
+        icon: gray
+        ok: '#45C669'
+        ko: '#C6B145'
+        half: '#C66445'
+        none: '#C9C9C9'
+        title: gray
+      show:
+        header: true
+        title: true
+        icon: true
+        footer: true
+        status: true
+        timeline: true
+        average: true
+      tooltip:
+         animation: true
+      #tap_action:
+         #action: url
+         #url_path: 'https://'
+
+    - type: 'custom:uptime-card'
+      entity: binary_sensor.vtt #<- fill in the right sensor
+      icon: 'fas:safari'
+      name: VTT.rem81
+      hours_to_show: 72
+      status_adaptive_color: true
+      average_text: '% uptime'
+      alias:
+        ok: Online
+        ko: Offline
+      blink:
+        effect: fade
+        target: card
+        speed: 1
+      color:
+        icon: gray
+        ok: '#45C669'
+        ko: '#C6B145'
+        half: '#C66445'
+        none: '#C9C9C9'
+        title: gray
+      show:
+        header: true
+        title: true
+        icon: true
+        footer: true
+        status: true
+        timeline: true
+        average: true
+      tooltip:
+         animation: true
+      #tap_action:
+         #action: url
+         #url_path: 'https://'
+
+    - type: 'custom:uptime-card'
+      entity: binary_sensor.meteoweewx #<- fill in the right sensor
+      icon: 'fas:safari'
+      name: Meteo Weewx
+      hours_to_show: 72
+      status_adaptive_color: true
+      average_text: '% uptime'
+      alias:
+        ok: Online
+        ko: Offline
+      blink:
+        effect: fade
+        target: card
+        speed: 1
+      color:
+        icon: gray
+        ok: '#45C669'
+        ko: '#C6B145'
+        half: '#C66445'
+        none: '#C9C9C9'
+        title: gray
+      show:
+        header: true
+        title: true
+        icon: true
+        footer: true
+        status: true
+        timeline: true
+        average: true
+      tooltip:
+         animation: true
+      #tap_action:
+         #action: url
+         #url_path: 'https://'
+
+    - type: 'custom:uptime-card'
+      entity: binary_sensor.meteo81000 #<- fill in the right sensor
+      icon: 'fas:safari'
+      name: Zimeteo
+      hours_to_show: 72
+      status_adaptive_color: true
+      average_text: '% uptime'
+      alias:
+        ok: Online
+        ko: Offline
+      blink:
+        effect: fade
+        target: card
+        speed: 1
+      color:
+        icon: gray
+        ok: '#45C669'
+        ko: '#C6B145'
+        half: '#C66445'
+        none: '#C9C9C9'
+        title: gray
+      show:
+        header: true
+        title: true
+        icon: true
+        footer: true
+        status: true
+        timeline: true
+        average: true
+      tooltip:
+         animation: true
+      #tap_action:
+         #action: url
+         #url_path: 'https://'
+
+    - type: 'custom:uptime-card'
+      entity: binary_sensor.motioneye #<- fill in the right sensor
+      icon: 'fas:safari'
+      name: Motioneye
+      hours_to_show: 72
+      status_adaptive_color: true
+      average_text: '% uptime'
+      alias:
+        ok: Online
+        ko: Offline
+      blink:
+        effect: fade
+        target: card
+        speed: 1
+      color:
+        icon: gray
+        ok: '#45C669'
+        ko: '#C6B145'
+        half: '#C66445'
+        none: '#C9C9C9'
+        title: gray
+      show:
+        header: true
+        title: true
+        icon: true
+        footer: true
+        status: true
+        timeline: true
+        average: true
+      tooltip:
+         animation: true
+      #tap_action:
+         #action: url
+         #url_path: 'https://'
+

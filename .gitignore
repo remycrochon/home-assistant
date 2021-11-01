@@ -12,20 +12,12 @@
 !*.csv
 !*.png
 !*.jpg
+!*.dash
 
-!appdaemon/
-!blueprints/
-!custom_components/
-!esphome/
-!glances/
-!node-red/
-!packages/
-!python_scripts/
-!themes/
-!image/
-!www/
-!dwains-dashboard/
-!dwains-dashboard/configs/
+
+!*/
+
+
 
 # Ignore these files/folders
 secrets.yaml

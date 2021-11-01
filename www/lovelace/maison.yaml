@@ -1,0 +1,3306 @@
+title: Maison
+views:
+  - title: MAISON
+    path: maison
+    icon: mdi:home
+    theme: dark_cyan
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:meteo-france-weather-card
+            name: Albi
+            entity: weather.albi
+            rainForecastEntity: sensor.albi_next_rain
+            freezeChanceEntity: sensor.albi_freeze_chance
+            rainChanceEntity: sensor.albi_rain_chance
+            snowChanceEntity: sensor.albi_snow_chance
+            thunderChanceEntity: sensor.albi_thunder_chance
+            alertEntity: sensor.albi_weather_alert
+            uvEntity: sensor.esp134_uv
+            cloudCoverEntity: sensor.albi_cloud_cover
+      - type: glance
+        entities:
+          - entity: binary_sensor.alarme_porte_cellier
+            name: Cellier
+          - entity: binary_sensor.alarme_porte_garage
+            name: Garage
+          - entity: binary_sensor.alarme_porte_sous_sol
+            name: SS Sol
+          - entity: binary_sensor.alarme_status_pac
+            name: Com PAC
+          - entity: binary_sensor.alarme_discord_pac
+            name: Disc PAC
+          - entity: binary_sensor.alarme_temp_congelo_haute
+            name: T° Congel
+          - entity: binary_sensor.ping_reseau
+            name: Ping Re
+          - entity: binary_sensor.esp_reseau
+            name: ESP
+          - entity: binary_sensor.uptime_reseau
+            name: UPTime
+          - entity: binary_sensor.porte_frigo
+            name: Frigo
+          - entity: input_boolean.def_com_vp2
+            name: Com VP2
+        title: Alarmes
+        state_color: true
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - aspect_ratio: 2/1
+                entity: cover.garage_soussol
+                name: Garage Sous_Sol
+                hold_action:
+                  action: more-info
+                show_last_changed: true
+                show_state: true
+                confirmation:
+                  text: >-
+                    [[[ return `Etes vous sur
+                    ${entity.attributes.friendly_name}?` ]]]
+                state:
+                  - styles:
+                      icon:
+                        - color: red
+                    value: open
+                  - styles:
+                      icon:
+                        - color: green
+                    value: closed
+                type: custom:button-card
+              - aspect_ratio: 2/1
+                entity: cover.garage_rdc
+                name: Garage RdC
+                hold_action:
+                  action: more-info
+                show_last_changed: true
+                show_state: true
+                confirmation:
+                  text: >-
+                    [[[ return `Etes vous sur
+                    ${entity.attributes.friendly_name}?` ]]]
+                state:
+                  - styles:
+                      icon:
+                        - color: red
+                    value: open
+                  - styles:
+                      icon:
+                        - color: green
+                    value: closed
+                type: custom:button-card
+          - type: glance
+            entities:
+              - entity: binary_sensor.porte_cellier
+                name: P Cellier
+              - entity: binary_sensor.porte_frigo
+                name: P Frigo G
+              - entity: binary_sensor.detecteur_porte_4_ias_zone
+                name: P Ent
+            show_name: true
+            show_icon: true
+            show_state: false
+            state_color: true
+          - type: glance
+            entities:
+              - entity: vacuum.automower_r_435x_am435x_awd
+              - entity: device_tracker.automower_r_435x_am435x_awd_device_tracker
+          - type: glance
+            entities:
+              - entity: binary_sensor.hatos_is_online
+              - entity: binary_sensor.zoe_is_online
+          - type: glance
+            entities:
+              - entity: input_select.presence
+              - entity: input_select.volets
+              - entity: input_select.pool_pump_mode
+              - entity: input_select.vmc_ssol
+              - entity: input_select.ecs_ssol
+            show_name: false
+            show_icon: true
+            show_state: true
+            state_color: true
+          - type: glance
+            entities:
+              - entity: input_boolean.hc_hp
+                name: HP
+              - entity: switch.pool_pump_switch
+                name: Ppe
+              - entity: switch.vmc_ssol
+                name: VMC
+              - entity: switch.cde_relais_ecs
+                name: ECS
+            show_name: true
+            show_state: false
+            state_color: true
+      - type: vertical-stack
+        cards:
+          - type: grid
+            cards:
+              - type: gauge
+                entity: sensor.envoy_122103023124_current_energy_production
+                min: 0
+                max: 1800
+                name: Prod
+                severity:
+                  green: 1200
+                  yellow: 900
+                  red: 0
+                needle: true
+              - type: gauge
+                entity: sensor.envoy_122103023124_current_energy_consumption
+                min: 0
+                max: 8000
+                name: Conso
+                severity:
+                  green: 300
+                  yellow: 800
+                  red: 1800
+                needle: true
+              - type: gauge
+                entity: sensor.p_injection_reseau
+                max: 10000
+                name: Soutirage si P-
+                min: -10000
+                unit: W
+                needle: true
+                severity:
+                  green: 1
+                  yellow: 0
+                  red: -10000
+              - type: gauge
+                entity: sensor.vp2_radiation
+                min: 0
+                max: 1200
+                name: Radiation
+                severity:
+                  green: 1000
+                  yellow: 600
+                  red: 0
+                needle: true
+              - type: gauge
+                entity: sensor.ecocompteur_ecs
+                min: 0
+                max: 4000
+                name: ECS
+                severity:
+                  green: 0
+                  yellow: 300
+                  red: 2900
+                needle: true
+              - type: gauge
+                entity: sensor.luminosite
+                min: 0
+                name: Luminosité
+                needle: true
+                severity:
+                  green: 0
+                  yellow: 1000
+                  red: 4000
+                max: 5000
+              - type: gauge
+                entity: input_number.mem_temp_piscine
+                max: 45
+                min: -3
+                severity:
+                  green: 27
+                  yellow: 0
+                  red: 30
+                name: Piscine
+                needle: true
+              - type: gauge
+                entity: sensor.vp2_temp_out
+                max: 45
+                name: T° Ext
+                min: -10
+                severity:
+                  green: 15
+                  yellow: -10
+                  red: 30
+                needle: true
+              - type: gauge
+                entity: sensor.ph_piscine_ph
+                min: 6
+                max: 8
+                name: pH
+                severity:
+                  green: 7.1
+                  yellow: 6
+                  red: 7.7
+                needle: true
+      - type: custom:alarmo-card
+        entity: alarm_control_panel.alarmo_2
+        keep_keypad_visible: false
+        button_scale: 1
+      - type: glance
+        entities:
+          - entity: binary_sensor.home_assistant_operating_system_update_available
+            name: HA OS
+          - entity: sensor.home_assistant_operating_system_newest_version
+            name: Vers. Nouvelle
+          - entity: sensor.home_assistant_operating_system_version
+            name: Vers. en cours
+  - title: PAC
+    path: pac
+    icon: mdi:radiator
+    theme: teal
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: grid
+            cards:
+              - type: gauge
+                entity: sensor.espaltherma_temp_ambiante_int_r1t
+                min: 10
+                max: 40
+                needle: true
+                severity:
+                  green: 22
+                  yellow: 18
+                  red: 0
+              - type: gauge
+                entity: sensor.espaltherma_temp_air_ext
+                max: 50
+                needle: true
+                min: -10
+                severity:
+                  green: 18
+                  yellow: -10
+                  red: 30
+                name: T° Ext
+              - type: gauge
+                entity: sensor.espaltherma_temp_cible
+                min: 0
+                max: 40
+                name: Temp Cible
+              - type: gauge
+                entity: sensor.espaltherma_cop
+                min: 0
+                max: 10
+                name: COP
+                needle: true
+                severity:
+                  green: 8
+                  yellow: 5
+                  red: 0
+              - type: gauge
+                entity: sensor.espaltherma_courant_primaire
+                min: 0
+                max: 15
+                name: Courant P
+                unit: A
+                needle: true
+                severity:
+                  green: 0
+                  yellow: 3
+                  red: 5
+              - type: gauge
+                entity: sensor.espaltherma_temp_dep_calculee
+                min: 0
+                max: 100
+                name: Temp. Dep c
+          - type: picture-elements
+            elements:
+              - type: state-badge
+                entity: sensor.espaltherma_temp_eau_depart
+                style:
+                  top: 40%
+                  left: 90%
+              - type: state-badge
+                entity: sensor.espaltherma_temp_eau_depart_echangeur_plaque
+                style:
+                  top: 43%
+                  left: 77%
+              - type: state-badge
+                entity: sensor.espaltherma_signal_ppe_eau
+                style:
+                  top: 25%
+                  left: 65%
+              - type: state-badge
+                entity: sensor.espaltherma_capteur_debit
+                style:
+                  top: 25%
+                  left: 52%
+              - type: state-badge
+                entity: sensor.espaltherma_temp_eau_retour_rt4
+                style:
+                  top: 89%
+                  left: 90%
+              - type: state-badge
+                entity: sensor.espaltherma_temp_liquid_r3t
+                style:
+                  top: 40%
+                  left: 27%
+            image: /local/pac4.png
+      - type: custom:thermostat-dark-card
+        step: '0.5'
+        chevron_size: '50'
+        pending: '3'
+        idle_zone: '2'
+        entity: climate.altherma
+        name: Altherma
+        highlight_tap: true
+      - type: entities
+        entities:
+          - entity: sensor.espaltherma_mode_fonctionnement
+          - entity: sensor.espaltherma_temp_air_ext
+          - entity: sensor.espaltherma_temp_ambiante_int_r1t
+          - entity: sensor.espaltherma_temp_eau_retour_rt4
+          - entity: sensor.espaltherma_temp_eau_depart
+          - entity: sensor.espaltherma_temp_eau_depart_echangeur_plaque
+          - entity: sensor.espaltherma_capteur_debit
+          - entity: sensor.espaltherma_courant_primaire
+          - entity: sensor.puissance_pac_rpac
+          - entity: sensor.espaltherma_cop
+          - entity: sensor.espaltherma_temp_cible
+          - entity: sensor.espaltherma_temp_dep_calculee
+          - entity: sensor.espaltherma_pression
+          - entity: sensor.esp_altherma_status
+          - entity: switch.altherma
+          - entity: sensor.espaltherma_thermostat
+        title: Altherma
+      - type: vertical-stack
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: history-graph
+                entities:
+                  - entity: sensor.espaltherma_temp_eau_depart_echangeur_plaque
+                    name: T° Départ
+                  - entity: sensor.espaltherma_temp_eau_retour_rt4
+                    name: T° Retour
+                  - entity: sensor.espaltherma_temp_air_ext
+                    name: T° Ext
+                  - entity: sensor.espaltherma_temp_ambiante_int_r1t
+                    name: T° Int
+                  - entity: sensor.espaltherma_mode_fonctionnement
+                  - entity: switch.altherma
+                hours_to_show: 24
+                refresh_interval: 0
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 2000
+              - color: '#EA9999'
+                value: 4000
+              - color: '#CC0000'
+                value: 8000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: true
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.puissance_pac_rpac
+                name: Totale
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                y_axis: secondary
+            name: Puissance PAC 24h
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.energy_pac1_daily
+                    name: Jour
+                name: Conso PAC 7J
+                hours_to_show: 168
+                aggregate_func: max
+                group_by: date
+                show:
+                  graph: bar
+                icon: mdi:flash
+      - type: history-graph
+        entities:
+          - entity: sensor.vp2_temp_out
+          - entity: sensor.temp_ext_change_par_heure
+        hours_to_show: 24
+        refresh_interval: 0
+        title: Derivée Temp Ext
+  - title: Piscine
+    panel: false
+    icon: mdi:pool
+    theme: teal
+    badges: []
+    cards:
+      - type: grid
+        cards:
+          - type: gauge
+            entity: input_number.mem_temp_piscine
+            min: 0
+            max: 40
+            severity:
+              green: 27
+              yellow: 0
+              red: 30
+            name: Temp Eau
+            needle: true
+          - type: gauge
+            entity: sensor.vp2_temp_out
+            max: 45
+            name: T° Ext
+            min: -10
+            severity:
+              green: 15
+              yellow: -10
+              red: 30
+            needle: true
+          - type: gauge
+            entity: sensor.pression_filtre
+            min: 0
+            max: 2
+            severity:
+              green: 0
+              yellow: 0.9
+              red: 1
+            name: P Filtre
+            unit: B
+            needle: true
+          - type: gauge
+            entity: sensor.ph_piscine_ph
+            min: 6
+            max: 9
+            name: pH
+            severity:
+              green: 7.1
+              yellow: 6
+              red: 7.7
+            needle: true
+          - type: gauge
+            entity: sensor.orp_piscine_orp
+            min: 0
+            name: ORP
+            severity:
+              green: 750
+              yellow: 0
+              red: 900
+            needle: true
+            max: 1009
+          - type: gauge
+            entity: sensor.e_fc
+            min: 0
+            max: 10
+            name: Fc
+            needle: true
+          - type: gauge
+            entity: input_number.temps_cartouche_chlore
+            min: 0
+            max: 70
+            name: Cart Chlore
+            severity:
+              green: 0
+              yellow: 30
+              red: 60
+            needle: true
+          - type: gauge
+            entity: sensor.pzem_pisc_puissance
+            min: 0
+            max: 900
+            name: Puissance
+            severity:
+              green: 0
+              yellow: 350
+              red: 800
+            needle: true
+          - aspect_ratio: 1
+            color: auto
+            entity: pool_pump.next_run_schedule
+            name: Tranche Horaire
+            hold_action:
+              action: more-info
+            show_state: true
+            type: custom:button-card
+          - aspect_ratio: 1
+            color: auto
+            entity: binary_sensor.pool_pump_running
+            name: Ppe Filtre
+            hold_action:
+              action: more-info
+            show_last_changed: true
+            show_state: true
+            state:
+              - styles:
+                  icon:
+                    - color: red
+                value: 'off'
+              - styles:
+                  icon:
+                    - color: green
+                value: 'on'
+            type: custom:button-card
+          - aspect_ratio: 1
+            color: auto
+            entity: automation.piscine_injection_v2
+            name: Injection pH
+            hold_action:
+              action: more-info
+            show_last_changed: true
+            show_state: true
+            state:
+              - styles:
+                  icon:
+                    - color: red
+                value: 'off'
+              - styles:
+                  icon:
+                    - color: green
+                value: 'on'
+            type: custom:button-card
+          - aspect_ratio: 1
+            color: auto
+            entity: cover.volet_piscine
+            name: Volet Piscine
+            hold_action:
+              action: more-info
+            show_last_changed: true
+            show_state: true
+            confirmation:
+              text: >-
+                [[[ return `Etes vous sur ${entity.attributes.friendly_name}?`
+                ]]]
+            state:
+              - styles:
+                  icon:
+                    - color: red
+                value: open
+              - styles:
+                  icon:
+                    - color: green
+                value: closed
+            type: custom:button-card
+        square: true
+      - type: vertical-stack
+        cards:
+          - title: <- 3 jours
+            entities:
+              - entity: switch.pool_pump_switch
+                name: Ppe filtre
+              - entity: switch.cde_ev_eau
+                name: Ev Eau
+              - entity: switch.cde_traitement
+                name: Ppe pH
+              - entity: switch.cde_ppe_chlore
+                name: Ppe Ch
+            type: history-graph
+            hours_to_show: 72
+            refresh_interval: 0
+      - entities:
+          - entity: input_select.pool_pump_mode
+            name: Mode de Fonctionnement
+          - entities:
+              - entity: sensor.pression_piscine_p
+                name: Pression
+              - entity: sensor.temp_piscine
+                name: T Eau
+              - entity: sensor.pool_water_temperature
+                name: T° At
+              - entity: sensor.vp2_temp_out
+                name: T Ext
+            entity: sensor.pression_piscine_p
+            icon: mdi:chart-bell-curve
+            name: Mesures
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: switch.cde_traitement
+                name: Ppe
+              - entity: input_boolean.regul_ph
+                name: Val Ph
+              - entity: sensor.ph_ezo
+                name: Ezo
+                unit: false
+              - entity: sensor.ph_piscine_ph
+                name: Filtré
+                unit: false
+              - entity: input_number.ph_cible
+                name: Cible
+                unit: false
+              - entity: sensor.ph_volume_restant_bidon
+                name: Vol Bid
+                unit: false
+            entity: input_boolean.regul_ph
+            icon: mdi:chart-bell-curve
+            name: Ph
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: switch.cde_ppe_chlore
+                name: Ppe
+              - entity: input_boolean.regul_chlore
+                name: Val Ph
+              - entity: sensor.orp_ezo
+                name: Ezo
+                unit: false
+              - entity: sensor.orp_piscine_orp
+                name: Filtré
+                unit: false
+              - entity: input_number.chlore_cible
+                name: Cible
+                unit: false
+              - entity: sensor.chlore_volume_restant_bidon
+                name: Vol Bid
+                unit: false
+            entity: input_boolean.regul_chlore
+            icon: mdi:chart-bell-curve
+            name: Chlore/ORP
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_number.temps_cartouche_chlore
+                name: Tps Cartouche
+                unit: false
+              - entity: input_number.chlore_seuil_max_utilisation
+                name: Tps Max
+            entity: input_number.temps_cartouche_chlore
+            icon: mdi:chart-bell-curve
+            name: Chlore cart
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: pool_pump.next_run_schedule
+                name: 'A venir '
+              - entity: sensor.heure_pivot_piscine
+                name: Heure pivot
+            entity: pool_pump.next_run_schedule
+            icon: mdi:clock
+            name: Tranche horaire
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.pool_pump_running_today
+                name: Fonct. Jour
+              - entity: binary_sensor.pool_pump_running
+                name: Etat
+            entity: sensor.pool_pump_running_today
+            icon: mdi:pump
+            name: Pompe Filtration
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.pzem_pisc_puissance
+                name: Puissance
+              - entity: sensor.pzem_pisc_courant
+                name: Intensité
+            entity: sensor.pzem_pisc_puissance
+            icon: mdi:flash
+            name: Conso Elec
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_datetime.heure_ma_pump_pisc_hiv
+                name: MaPpe
+              - entity: input_datetime.heure_at_pump_pisc_hiv
+                name: AtPpe
+              - entity: input_boolean.hors_gel
+                name: HG si actif
+              - entity: input_number.hors_gel_inf
+                name: T°Inf
+              - entity: input_number.hors_gel_sup
+                name: T°Sup
+            entity: input_boolean.hors_gel
+            icon: mdi:snowflake-alert
+            name: Hivernage
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_boolean.volet_piscine_auto
+                name: Auto
+              - entity: cover.volet_piscine
+                name: Volet
+              - entity: input_datetime.heure_ouv_volet_pisc
+                name: Ouv
+              - entity: input_datetime.heure_ferm_volet_pisc
+                name: Ferm
+            entity: cover.volet_piscine
+            icon: mdi:window-shutter
+            name: Volet piscine
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.ev_eau_sur_7j
+                name: 7J
+              - entity: sensor.ev_eau_tps_ouverture_jour
+                name: 1J
+              - entity: switch.cde_ev_eau
+                name: Cde EV
+              - entity: binary_sensor.tp_plein_lsh
+                name: Niv H
+              - entity: binary_sensor.tp_plein_lsl
+                name: Niv B
+            entity: sensor.ev_eau_tps_ouverture_jour
+            icon: mdi:water
+            name: Appoint Eau
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - label: Filtration
+                type: section
+              - entity: input_number.mem_temp_piscine
+              - label: Volet
+                type: section
+              - entity: input_boolean.volet_piscine_auto
+              - entity: input_datetime.heure_ouv_volet_pisc
+              - entity: input_datetime.heure_ferm_volet_pisc
+              - label: Hivernage
+                type: section
+              - entity: input_datetime.heure_ma_pump_pisc_hiv
+                name: Heure Marche Ppe
+              - entity: input_datetime.heure_at_pump_pisc_hiv
+                name: Heure Arret Ppe
+              - entity: input_boolean.hors_gel
+                name: Hors Gel si Actif
+              - entity: input_number.hors_gel_inf
+              - entity: input_number.hors_gel_sup
+              - label: Chlore
+                type: section
+              - entity: input_number.temps_cartouche_chlore
+              - entity: input_number.chlore_seuil_max_utilisation
+              - label: pH
+                type: section
+              - entity: sensor.ph_ezo
+                name: pH Ezo
+              - entity: sensor.ph_piscine_ph
+                name: pH filtré
+              - entity: input_number.ph_memoire
+              - entity: sensor.ph_stat
+                name: pH Statistiques
+              - entity: input_boolean.regul_ph
+              - entity: input_number.ph_cible
+              - entity: input_number.ph_hysteresis
+              - entity: sensor.ph_derniere_heure
+              - entity: sensor.ph_derniere_48h
+              - entity: input_number.ph_debit_ppe
+              - entity: input_number.ph_concentration
+              - entity: input_number.ph_vol_bidon
+              - entity: input_number.ph_seuil_bas_bidon
+              - entity: input_number.ph_vol_injecte
+              - entity: binary_sensor.ph_niveau_bas_bidon
+              - entity: sensor.ph_tps_inject_mn
+              - entity: sensor.ph_tps_inject_s
+              - entity: input_number.ph_duree_inject_mn
+              - entity: input_number.ph_duree_inject_s
+              - label: Chlore/ORP
+                type: section
+              - entity: sensor.orp_ezo
+                name: ORP Ezo
+              - entity: sensor.orp_piscine_orp
+                name: ORP filtré
+              - entity: input_number.orp_memoire
+              - entity: sensor.orp_stat
+                name: ORP Statistiques
+              - entity: input_boolean.regul_chlore
+              - entity: input_number.orp_cible
+              - entity: input_number.orp_hysteresis
+              - entity: sensor.chlore_derniere_heure
+              - entity: sensor.chlore_derniere_48h
+              - entity: input_number.chlore_debit_ppe
+              - entity: input_number.chlore_concentration
+              - entity: input_number.chlore_vol_bidon
+              - entity: input_number.chlore_seuil_bas_bidon
+              - entity: input_number.chlore_vol_injecte
+              - entity: binary_sensor.chlore_niveau_bas_bidon
+              - entity: sensor.chlore_tps_inject_mn
+              - entity: sensor.chlore_tps_inject_s
+              - entity: input_number.chlore_duree_inject_mn
+              - entity: input_number.chlore_duree_inject_s
+              - label: Commutateurs
+                type: section
+              - entity: cover.volet_piscine
+                name: Couverture flottante
+              - entity: input_boolean.eclairage_piscine
+                name: Eclairage
+              - entity: input_boolean.ev_eau_piscine
+                name: EV Eau appoint en auto si actif
+            show_state: false
+            head:
+              label: PARAMETRES & COMMUTATEURS
+              type: section
+            padding: 0
+            type: custom:fold-entity-row
+          - entities:
+              - entity: switch.pool_pump_switch
+                name: Relais Pompe Filtre
+              - entity: switch.cde_traitement
+                name: Relais pH
+              - entity: switch.cde_ppe_chlore
+                name: Relais Chlore
+              - entity: switch.cde_volet_ouverture
+                name: Relais Ouverture Volet
+              - entity: switch.cde_volet_fermeture
+                name: Relais fermeture Volet
+              - entity: switch.cde_eclairage
+                name: Relais Eclairage
+              - entity: switch.cde_ev_eau
+                name: EV Eau
+            show_state: false
+            head:
+              label: COMMANDES DIRECTES
+              type: section
+            padding: 0
+            type: custom:fold-entity-row
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        show_header_toggle: false
+        title: Piscine
+        type: entities
+      - type: entities
+        entities:
+          - entity: input_boolean.ev_eau_piscine
+            name: Validation Appoint eau
+          - entity: automation.piscine_ev_appoint_eau
+            name: Autom Appoint Eau On
+          - entity: cover.volet_piscine
+          - entity: sensor.ev_eau_tps_ouverture_jour
+          - entity: sensor.ev_eau_sur_7j
+          - entity: switch.cde_ev_eau
+          - entity: binary_sensor.tp_plein_lsh
+            name: Niveau Haut Régulation (Inactif=recouvert)
+          - entity: binary_sensor.tp_plein_lsl
+            name: Niveau Tres Bas (Inactif=recouvert)
+          - entity: binary_sensor.pool_pump_running
+        title: EV Appoint eau
+        show_header_toggle: false
+      - type: logbook
+        entities:
+          - switch.cde_ev_eau
+        hours_to_show: 96
+      - type: vertical-stack
+        cards:
+          - type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+              brush: true
+            graph_span: 72h
+            cache: true
+            header:
+              show: true
+              title: Temp Piscine
+              show_states: true
+              standard_format: false
+            brush:
+              selection_span: 6h
+              apex_config: null
+            series:
+              - entity: sensor.temp_piscine
+                color: blue
+                type: area
+                stroke_width: 1
+                color_threshold:
+                  - value: 0
+                    color: red
+                  - value: 20
+                    color: yellow
+                  - value: 27
+                    color: green
+              - entity: sensor.temp_piscine
+                color: blue
+                stroke_width: 1
+                float_precision: 0
+                show:
+                  in_brush: true
+                  in_chart: false
+          - type: custom:apexcharts-card
+            graph_span: 1d
+            cache: true
+            y_axis_precision: 2
+            span:
+              start: day
+            header:
+              show: true
+              show_states: true
+              standard_format: false
+            series:
+              - entity: sensor.ph_piscine_ph
+                stroke_width: 1
+                name: pH
+              - entity: sensor.ph_piscine_ph
+                offset: '-1d'
+                stroke_width: 1
+                name: pH
+                float_precision: 2
+  - title: Piscine2
+    path: piscine
+    icon: mdi:swim
+    panel: false
+    theme: dark_cyan
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: sensor.ph_ezo
+          - entity: sensor.ph_piscine_ph
+          - entity: input_number.ph_cible
+          - entity: input_number.simul_ph
+          - entity: sensor.ph_stat
+          - entity: input_boolean.regul_ph
+          - entity: input_number.ph_memoire
+          - entity: input_number.ph_concentration
+          - entity: input_number.ph_debit_ppe
+          - entity: input_number.ph_duree_inject_mn
+          - entity: input_number.ph_duree_inject_s
+          - entity: input_number.ph_hysteresis
+          - entity: input_number.ph_vol_bidon
+          - entity: input_number.ph_vol_injecte
+          - entity: input_number.ph_seuil_bas_bidon
+          - entity: binary_sensor.ph_niveau_bas_bidon
+          - entity: sensor.ph_derniere_48h
+          - entity: sensor.ph_derniere_heure
+          - entity: sensor.ph_tps_inject_mn
+          - entity: sensor.ph_tps_inject_s
+          - entity: automation.piscine_traitement_ph
+          - entity: automation.piscine_traitement_ph
+        title: pH
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: input_boolean.regul_chlore
+          - entity: input_number.chlore_concentration
+          - entity: input_number.chlore_debit_ppe
+          - entity: input_number.chlore_duree_inject_mn
+          - entity: input_number.chlore_duree_inject_s
+          - entity: input_number.chlore_seuil_bas_bidon
+          - entity: input_number.chlore_vol_bidon
+          - entity: input_number.chlore_vol_injecte
+          - entity: sensor.chlore_volume_restant_bidon
+          - entity: binary_sensor.chlore_niveau_bas_bidon
+          - entity: sensor.chlore_derniere_48h
+          - entity: sensor.chlore_derniere_heure
+          - entity: sensor.chlore_tps_inject_mn
+          - entity: sensor.chlore_tps_inject_s
+          - entity: automation.piscine_chlore_traitement_on
+          - entity: automation.piscine_chlore_traitement_off
+          - entity: automation.piscine_injection_chlore
+          - entity: switch.cde_ppe_chlore
+        title: Chlore
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: sensor.orp_ezo
+          - entity: sensor.orp_piscine_orp
+          - entity: sensor.orp_stat
+          - entity: input_number.orp_memoire
+          - entity: input_number.orp_cible
+          - entity: input_number.orp_hysteresis
+          - entity: input_number.simul_orp
+          - entity: automation.piscine_orp_bas
+          - entity: automation.piscine_orp_haut
+          - entity: automation.piscine_orp_anormal
+          - entity: automation.piscine_memorisation_orp_avant_arret
+          - entity: automation.piscine_chlore_traitement_on
+          - entity: automation.piscine_chlore_traitement_off
+          - entity: automation.piscine_injection_chlore
+        title: ORP
+        show_header_toggle: false
+        state_color: false
+      - type: entities
+        entities:
+          - entity: sensor.e_fc
+          - entity: input_number.fc_cible
+          - entity: input_number.e_fc_adjuste
+        title: Fc
+        show_header_toggle: false
+  - title: reglages
+    path: ''
+    panel: false
+    icon: mdi:cog
+    theme: dark_cyan
+    badges: []
+    cards:
+      - entities:
+          - entity: input_select.volets
+            name: Mode de Fonctionnement
+          - entities:
+              - entity: sensor.heure_leve_soleil
+                name: Levé
+              - entity: sensor.heure_couche_soleil
+                name: Couché
+            entity: sensor.heure_leve_soleil
+            icon: mdi:weather-sunny
+            name: Soleil
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sun.sun
+                name: Position
+              - entity: sensor.luminosite
+                name: mesure
+              - entity: input_number.luminosite_seuil_bas
+                name: Bas
+              - entity: input_number.luminosite_seuil_haut
+                name: Haut
+            entity: input_number.luminosite_seuil_bas
+            icon: mdi:weather-sunny
+            name: Auto Hiver
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_datetime.horaire_ete_volet_ouv
+                name: Ouv
+              - entity: input_datetime.horaire_ete_volet_ferm
+                name: Ferm
+            entity: input_datetime.horaire_ete_volet_ouv
+            icon: mdi:clock
+            name: Auto Ete
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_boolean.nuit_jour
+                name: N/J (Actif)
+              - entity: input_boolean.presence_amis_bureau
+                name: Amis Bur
+              - entity: input_boolean.presence_amis_ch_nord
+                name: Amis Nord
+              - entity: input_boolean.presence_amis_ch_sud
+                name: Amis Sud
+            entity: input_boolean.nuit_jour
+            icon: mdi:account
+            name: Communs
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_datetime.horaire_ete_volet_ouv
+                name: Heure Ouverture ETE
+              - entity: input_datetime.horaire_ete_volet_ferm
+                name: Heure Fermeture ETE
+              - entity: input_number.luminosite_seuil_bas
+                name: Lumin. Seuil bas
+              - entity: input_number.luminosite_seuil_haut
+                name: Lumin. Seuil Haut
+              - entity: input_boolean.nuit_jour
+              - entity: input_boolean.presence_amis_bureau
+                name: Presence Amis Bureau
+              - entity: input_boolean.presence_amis_ch_nord
+                name: Presence Amis Chamb Nord
+              - entity: input_boolean.presence_amis_ch_sud
+                name: Presence Amis Chamb Sud
+            head:
+              label: Parametres
+              type: section
+            padding: 0
+            type: custom:fold-entity-row
+        how_header_toggle: false
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        title: Volets
+        type: entities
+      - entities:
+          - entity: input_select.ecs_ssol
+            name: Mode de Fonctionnement
+          - entities:
+              - entity: input_datetime.horaire_ecs_debut
+                name: Debut
+              - entity: input_datetime.horaire_ecs_fin
+                name: Fin
+            entity: input_datetime.horaire_hc_debut_1
+            icon: mdi:clock
+            name: Tranche ECS
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_datetime.horaire_hc_debut_1
+                name: Debut 1
+              - entity: input_datetime.horaire_hp_debut_1
+                name: Fin 1
+              - entity: input_datetime.horaire_hc_debut_2
+                name: Debut 2
+              - entity: input_datetime.horaire_hp_debut_2
+                name: Fin 2
+            entity: input_datetime.horaire_hc_debut_1
+            icon: mdi:clock
+            name: Tranches HC
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_boolean.hc_hp
+                name: ' '
+            entity: input_boolean.hc_hp
+            icon: mdi:clock
+            name: HC / HP si actif
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_boolean.ecs_av_pv
+                name: ' '
+            entity: input_boolean.ecs_av_pv
+            icon: mdi:clock
+            name: ECS piloté par Routeur PV
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.ecs_chauffage_ce_jour
+                name: Tps Chauffe
+              - entity: binary_sensor.ecs_chauffe
+                name: Chauffage
+              - entity: switch.cde_relais_ecs
+                name: Rel ECS
+              - entity: switch.cde_relais_ecs_router_pv
+                name: Rel PV
+            entity: switch.cde_relais_ecs
+            icon: mdi:water-boiler
+            name: Info ECS
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_datetime.horaire_ecs_debut
+                name: Heure debut tranche ECS
+              - entity: input_datetime.horaire_ecs_fin
+                name: Heure fin tranche ECS
+              - entity: input_datetime.horaire_hc_debut_1
+                name: Heure debut HC tranche 1
+              - entity: input_datetime.horaire_hp_debut_1
+                name: Heure fin HC tranche 1
+              - entity: input_datetime.horaire_hc_debut_2
+                name: Heure debut HC tranche 2
+              - entity: input_datetime.horaire_hp_debut_2
+                name: Heure fin HC tranche 2
+              - entity: input_boolean.hc_hp
+                name: HC / HP si actif
+              - entity: input_boolean.forcage_hc_hp
+                name: Forcage en HC
+              - entity: input_boolean.ecs_av_pv
+                name: ECS piloté par Routeur PV
+            head:
+              label: Parametres
+              type: section
+            padding: 0
+            type: custom:fold-entity-row
+          - entities:
+              - entity: switch.cde_relais_ecs
+                name: Relais ECS
+              - entity: switch.cde_relais_ecs_router_pv
+                name: Relais Routeur PV
+            head:
+              label: Commandes relais
+              type: section
+            padding: 0
+            type: custom:fold-entity-row
+        how_header_toggle: false
+        show_header_toggle: false
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        title: ECS
+        type: entities
+      - entities:
+          - entity: input_select.vmc_ssol
+            name: Mode de Fonctionnement
+          - entities:
+              - entity: input_datetime.horaire_vmc_debut
+                name: Heure Marche VMC
+              - entity: input_datetime.horaire_vmc_fin
+                name: Heure Arret VMC
+            entity: input_datetime.horaire_vmc_debut
+            icon: mdi:clock
+            name: Tranche Horaire Auto
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: switch.vmc_ssol
+                name: ' '
+            entity: input_datetime.horaire_vmc_debut
+            icon: mdi:fan-speed-3
+            name: Relais VMC
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: input_datetime.horaire_vmc_debut
+                name: Heure Marche VMC
+              - entity: input_datetime.horaire_vmc_fin
+                name: Heure Arret VMC
+              - entity: switch.vmc_ssol
+                name: Relais VMC
+            head:
+              label: Parametres
+              type: section
+            padding: 0
+            type: custom:fold-entity-row
+        how_header_toggle: false
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        title: VMC
+        type: entities
+      - type: entities
+        entities:
+          - entity: input_select.presence
+        state_color: true
+        title: Modes de Présence
+      - type: entities
+        entities:
+          - entity: binary_sensor.detecteur_presence1_ias_zone
+          - entity: sensor.detecteur_presence1_power
+      - type: entities
+        entities:
+          - entity: binary_sensor.porte_garage_fermee
+          - entity: binary_sensor.porte_garage_ouverte
+          - entity: binary_sensor.porte_ssol_fermee
+          - entity: binary_sensor.porte_ssol_ouverte
+          - entity: binary_sensor.etor5_adam_ssol
+          - entity: binary_sensor.etor6_adam_ssol
+        title: Module Adam
+        state_color: true
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: input_datetime.heure_debut_alarme_porte
+          - entity: input_datetime.heure_fin_alarme_porte
+        title: Horaire Alarme Portes
+      - type: entities
+        entities:
+          - entity: sun.sun
+          - entity: input_boolean.val_automs_soleil
+          - entity: sensor.vp2_radiation
+          - entity: input_number.radiation_seuil_ferm_volet
+          - entity: sensor.heure_leve_soleil
+          - entity: sensor.heure_couche_soleil
+          - entity: sensor.sun_azimuth
+          - entity: sensor.sun_elevation
+          - entity: sensor.sun_azimuth_2
+          - entity: sensor.sun_elevation_2
+          - entity: binary_sensor.soleil_volet_piscine
+        title: Automatismes avec le Soleil
+      - type: entities
+        entities:
+          - entity: input_boolean.robot_valide
+          - entity: vacuum.automower_r_435x_am435x_awd
+          - entity: device_tracker.automower_r_435x_am435x_awd_device_tracker
+          - entity: input_number.seuil_pluie_stop_robot
+          - entity: sensor.vp2_pluviometrie_moyenne
+          - entity: automation.robot_stop_pluie
+          - entity: input_boolean.stop_notif_previ_pluie
+        title: Robot AM435 AWD
+      - type: entities
+        entities:
+          - device_tracker.zoe
+          - sensor.zoe_cell_tower_id
+          - sensor.zoe_gps_satellites
+          - sensor.zoe_gsm_strength
+          - binary_sensor.zoe_is_online
+          - sensor.zoe_last_message_received
+          - sensor.zoe_last_sensor_mode
+          - sensor.zoe_last_update_rate
+          - sensor.zoe_sensor_mode
+          - sensor.zoe_update_rate
+          - binary_sensor.zoe_valid_signal
+        title: ZOE
+      - type: entities
+        entities:
+          - device_tracker.hatos
+          - sensor.hatos_cell_tower_id
+          - sensor.hatos_gps_satellites
+          - sensor.hatos_gsm_strength
+          - binary_sensor.hatos_is_online
+          - sensor.hatos_last_message_received
+          - sensor.hatos_last_sensor_mode
+          - sensor.hatos_last_update_rate
+          - sensor.hatos_sensor_mode
+          - sensor.hatos_update_rate
+          - binary_sensor.hatos_valid_signal
+        title: HATOS
+      - type: entities
+        entities:
+          - entity: input_boolean.test_alert
+          - entity: sensor.date_time
+          - entity: sensor.date_time_iso
+          - entity: sensor.date_time_utc
+          - entity: sensor.time
+          - entity: sensor.time_date
+          - entity: sensor.date
+  - title: METEO
+    path: meteo
+    icon: mdi:cloud
+    theme: dark_cyan
+    badges: []
+    cards:
+      - type: grid
+        cards:
+          - type: gauge
+            entity: sensor.vp2_temp_out
+            max: 50
+            needle: true
+            min: -10
+            severity:
+              green: 18
+              yellow: -10
+              red: 30
+            name: T° Ext
+          - type: gauge
+            entity: sensor.vp2_humidity_out
+            min: 0
+            max: 100
+            name: Hum ext
+            needle: true
+            severity:
+              green: 50
+              yellow: 0
+              red: 90
+          - type: gauge
+            entity: sensor.vp2_barometer
+            min: 950
+            max: 1030
+            needle: true
+            severity:
+              green: 1012
+              yellow: 950
+              red: 1000
+            name: Pression
+          - type: gauge
+            entity: sensor.vp2_win_speed
+            min: 0
+            name: Vent
+            max: 100
+            needle: true
+            severity:
+              green: 0
+              yellow: 25
+              red: 50
+          - type: gauge
+            entity: sensor.vp2_rafale
+            min: 0
+            max: 100
+            name: Rafale
+            needle: true
+            severity:
+              green: 0
+              yellow: 20
+              red: 50
+          - type: gauge
+            entity: sensor.vp2_rain
+            min: 0
+            max: 10
+            name: Pluie 15mn
+            needle: true
+            severity:
+              green: 0
+              yellow: 2
+              red: 5
+          - type: gauge
+            entity: sensor.vp2_rain24
+            min: 0
+            max: 20
+            name: Pluie 24h
+            needle: true
+            severity:
+              green: 0
+              yellow: 5
+              red: 10
+          - type: gauge
+            entity: sensor.vp2_rain_storm
+            min: 0
+            max: 20
+            name: Pluie Orage
+            needle: true
+            severity:
+              green: 0
+              yellow: 5
+              red: 10
+          - type: gauge
+            entity: sensor.vp2_rain_rate
+            min: 0
+            max: 30
+            name: Intensité
+            severity:
+              green: 0
+              yellow: 10
+              red: 20
+            needle: true
+          - type: gauge
+            min: 0
+            max: 1200
+            entity: sensor.vp2_radiation
+            name: Radiation
+            needle: true
+            severity:
+              green: 500
+              yellow: 0
+              red: 1000
+          - type: gauge
+            entity: sensor.esp134_uv
+            min: 0
+            max: 10
+            name: UV
+            needle: true
+            severity:
+              green: 0
+              yellow: 6
+              red: 8
+          - type: gauge
+            entity: sensor.vp2_uv
+            min: 0
+            max: 11
+            needle: true
+            severity:
+              green: 0
+              yellow: 6
+              red: 8
+            name: UV VP2
+            unit: UV
+        square: true
+      - type: entities
+        entities:
+          - entity: sensor.vp2_win_dir
+          - entity: sensor.vp2_heatindex
+          - entity: sensor.vp2_ressenti
+          - entity: sensor.stats_vp2_pluviometrie
+          - entity: sensor.vp2_pluviometrie_moyenne
+          - entity: sensor.vp2_pluviometrie_standard_deviation
+          - entity: sensor.vp2_pluviometrie_min
+          - entity: sensor.vp2_pluviometrie_max
+          - entity: sensor.vp2_heatindex
+          - entity: sensor.vp2_datetime
+          - entity: input_number.mem_vp2_datetime
+        title: Vantage Pro 2
+        state_color: true
+        theme: dark
+      - type: entities
+        entities:
+          - entity: switch.esp134_restart
+          - entity: sensor.sun_azimuth
+          - entity: sensor.sun_elevation
+          - entity: sensor.esp134_uptime_sensor_2
+          - entity: sensor.esp134_uv
+          - entity: sensor.esp134_wifi_signal_sensor
+        title: ESP134 UV
+      - type: vertical-stack
+        cards:
+          - type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+              brush: true
+            cache: true
+            graph_span: 24h
+            header:
+              show: true
+              title: Temp Ext
+              show_states: true
+              standard_format: false
+            brush:
+              selection_span: 6h
+              apex_config: null
+            series:
+              - entity: sensor.vp2_temp_out
+                color: blue
+                type: area
+                stroke_width: 1
+                color_threshold:
+                  - value: 0
+                    color: red
+                  - value: 5
+                    color: yellow
+                  - value: 10
+                    color: green
+              - entity: sensor.vp2_temp_out
+                color: blue
+                stroke_width: 1
+                float_precision: 1
+                show:
+                  in_brush: true
+                  in_chart: false
+          - type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+              brush: true
+            cache: true
+            graph_span: 24h
+            header:
+              show: true
+              title: Radiation
+              show_states: true
+              standard_format: false
+            brush:
+              selection_span: 6h
+              apex_config: null
+            series:
+              - entity: sensor.vp2_radiation
+                color: blue
+                type: area
+                stroke_width: 1
+                color_threshold:
+                  - value: 0
+                    color: red
+                  - value: 500
+                    color: yellow
+                  - value: 10000
+                    color: green
+              - entity: sensor.vp2_radiation
+                color: blue
+                stroke_width: 1
+                float_precision: 0
+                show:
+                  in_brush: true
+                  in_chart: false
+      - type: weather-forecast
+        entity: weather.albi
+        show_forecast: false
+      - type: entities
+        entities:
+          - entity: sensor.81_weather_alert
+          - entity: sensor.albi_cloud_cover
+          - entity: sensor.albi_daily_precipitation
+          - entity: sensor.albi_freeze_chance
+          - entity: sensor.albi_next_rain
+          - entity: sensor.albi_rain_chance
+          - entity: sensor.albi_snow_chance
+          - entity: sensor.albi_uv
+          - entity: sensor.esp134_uv
+          - entity: sensor.albi_daily_original_condition
+          - entity: sensor.albi_original_condition
+          - entity: sensor.albi_pressure
+          - entity: sensor.albi_temperature
+          - entity: sensor.albi_wind_gust
+          - entity: sensor.albi_wind_speed
+        title: Meteo France
+        theme: dark
+      - type: history-graph
+        entities:
+          - entity: sensor.esp134_uv_3
+          - entity: sensor.vp2_uv
+        hours_to_show: 24
+        refresh_interval: 0
+        title: Comparatif UV
+  - panel: false
+    title: Systeme
+    theme: dark_cyan
+    icon: mdi:lan
+    badges: []
+    cards:
+      - type: entities
+        title: NAS DS218
+        show_header_toggle: false
+        style: |
+          ha-card { border-radius: 20px; }
+        entities:
+          - type: custom:hui-vertical-stack-card
+            cards:
+              - type: horizontal-stack
+                cards:
+                  - type: picture
+                    style: |
+                      ha-card { 
+                          --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                          --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                          --ha-card-box-shadow: 'none';
+                      }
+                    image: /local/ds218.png
+                  - type: custom:button-card
+                    layout: icon_name_state2nd
+                    show_icon: true
+                    show_state: true
+                    styles:
+                      grid:
+                        - grid-template-columns: 50px auto
+                      icon:
+                        - padding: 20px 10px
+                        - height: 30px
+                        - width: 30px
+                      card:
+                        - '--ha-card-background': rgba(0, 0, 0, 0.0)
+                        - '--ha-card-box-shadow': none
+                      state:
+                        - padding: 0px 10px
+                        - justify-self: start
+                        - font-family: Roboto, sans-serif
+                        - font-size: 15px
+                      name:
+                        - padding: 0px 10px
+                        - justify-self: start
+                        - color: var(--secondary-text-color)
+                    entity: sensor.nas_ds218_volume_1_average_disk_temp
+                    name: CPU Temperature
+                    icon: mdi:fire
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.nas_ds218_cpu_utilization_total
+                name: CPU Usage Total
+                height: 50
+                line_width: 2
+                font_size: 80
+                hours_to_show: 4
+                points_per_hour: 90
+                show:
+                  icon: false
+                  extrema: true
+                color_thresholds:
+                  - value: 28
+                    color: '#e74c3c'
+                  - value: 15
+                    color: '#1db954'
+                  - value: 0
+                    color: '#3498db'
+                style: |
+                  ha-card { 
+                      --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                      --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                      --ha-card-box-shadow: 'none';
+                  }
+              - type: horizontal-stack
+                cards:
+                  - type: custom:bar-card
+                    title_position: inside
+                    show_icon: true
+                    align: split
+                    columns: 1
+                    max: 100
+                    unit_of_measurement: '%'
+                    severity:
+                      - value: 50
+                        color: '#3498db'
+                      - value: 75
+                        color: '#f39c12'
+                      - value: 100
+                        color: '#e45e65'
+                    style: |
+                      ha-card { 
+                        --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                        --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                        --ha-card-box-shadow: 'none';
+                      }
+                    entity: sensor.nas_ds218_volume_1_volume_used
+                    name: Disk usage 1.7 To
+              - type: horizontal-stack
+                cards:
+                  - type: custom:bar-card
+                    title_position: inside
+                    show_icon: true
+                    align: split
+                    columns: 1
+                    max: 100
+                    unit_of_measurement: '%'
+                    severity:
+                      - value: 50
+                        color: '#3498db'
+                      - value: 75
+                        color: '#f39c12'
+                      - value: 100
+                        color: '#e45e65'
+                    style: |
+                      ha-card { 
+                        --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                        --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                        --ha-card-box-shadow: 'none';
+                      }
+                    entity: sensor.nas_ds218_memory_usage_real
+                    name: RAM usage
+                  - type: custom:bar-card
+                    title_position: inside
+                    show_icon: true
+                    align: split
+                    columns: 1
+                    max: 100
+                    unit_of_measurement: '%'
+                    severity:
+                      - value: 50
+                        color: '#3498db'
+                      - value: 75
+                        color: '#f39c12'
+                      - value: 100
+                        color: '#e45e65'
+                    style: |
+                      ha-card { 
+                        --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                        --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                        --ha-card-box-shadow: 'none';
+                      }
+                    entity: sensor.nas_ds218_cpu_utilization_user
+                    name: CPU Util User
+              - type: custom:mini-graph-card
+                height: 130
+                line_width: 3
+                font_size: 80
+                hours_to_show: 48
+                points_per_hour: 1
+                show:
+                  extrema: true
+                  fill: true
+                style: |
+                  ha-card { 
+                    --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                    --ha-card-box-shadow: 'none';
+                    border-radius: 5px;
+                  }
+                entities:
+                  - sensor.nas_ds218_disque_1_temperature
+                name: Temperature
+                color_thresholds:
+                  - value: 40
+                    color: '#3498db'
+                  - value: 50
+                    color: '#f39c12'
+                  - value: 60
+                    color: '#E45E65'
+              - entities:
+                  - entity: sensor.nas_ds218_cpu_load_average_15_min
+                    name: Charge 15 mn
+                  - entity: binary_sensor.nas_ds218_update_available
+                    name: Update
+                  - entity: binary_sensor.nas_ds218_security_status
+                    name: Sécurité
+                show_header_toggle: false
+                type: entities
+                style: |
+                  ha-card { 
+                      --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                      --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                      --ha-card-box-shadow: 'none';
+                  }
+      - type: entities
+        entities:
+          - entity: binary_sensor.ping_reseau
+          - entity: binary_sensor.ping_rpi_adguard
+          - entity: binary_sensor.ping_module_adam
+          - entity: binary_sensor.ping_module_wago_piscine
+          - entity: binary_sensor.ping_esp123_pezm_sdb
+          - entity: binary_sensor.ping_esp125_piscine
+          - entity: binary_sensor.ping_esp132_pezm_totale
+          - entity: binary_sensor.ping_esp133_congelateur
+          - entity: binary_sensor.ping_esp134_uv
+          - entity: binary_sensor.ping_esp135_luxmetre
+          - entity: binary_sensor.ping_esp137_pzem_piscine
+          - entity: binary_sensor.ping_esp139_vmc_sous_sol
+          - entity: binary_sensor.ping_eco_compteur
+          - entity: binary_sensor.cam_cuisine
+          - entity: binary_sensor.cam_garage_ext
+          - entity: binary_sensor.cam_garage_int
+          - entity: binary_sensor.cam_piscine
+          - entity: binary_sensor.cam_salon
+          - entity: binary_sensor.cam_terrasse
+          - entity: binary_sensor.nas_dlink
+        title: Ping
+        state_color: true
+      - type: glance
+        entities:
+          - entity: binary_sensor.esp123_status
+            name: 123
+          - entity: binary_sensor.esp125_status
+            name: 125
+          - entity: binary_sensor.esp132_status
+            name: 133
+          - entity: binary_sensor.esp133_status
+            name: 133
+          - entity: binary_sensor.esp134_status
+            name: 134
+          - entity: binary_sensor.esp135_status
+            name: 135
+          - entity: binary_sensor.esp137_status
+            name: 137
+          - entity: binary_sensor.esp138_status
+            name: 138
+          - entity: binary_sensor.esp139_status
+            name: 139
+          - entity: binary_sensor.esp140_status
+            name: 140
+        title: Status ESP
+        state_color: true
+      - type: entities
+        entities:
+          - entity: binary_sensor.domo_rem81
+          - entity: binary_sensor.jeedom
+          - entity: binary_sensor.meteo81000
+          - entity: binary_sensor.meteoweewx
+          - entity: binary_sensor.ha
+          - entity: binary_sensor.motioneye
+          - entity: binary_sensor.vtt
+        title: Up Time Robot
+        state_color: true
+      - type: entities
+        entities:
+          - entity: binary_sensor.call_missed
+          - entity: sensor.orange_livebox_download_speed
+          - entity: sensor.orange_livebox_upload_speed
+          - entity: binary_sensor.wan_status
+          - entity: switch.wifi_switch
+          - entity: sensor.ip_public
+      - type: glance
+        entities:
+          - entity: sensor.cert_expiry_timestamp_domo_rem81_com
+            name: domo
+          - entity: sensor.cert_expiry_timestamp_ha_rem81_com
+            name: ha
+          - entity: sensor.cert_expiry_timestamp_jeedom_rem81_com
+            name: jeed
+          - entity: sensor.cert_expiry_timestamp_meteo81000_rem81_com
+            name: meteo81
+          - entity: sensor.cert_expiry_timestamp_meteo_rem81_com
+            name: meteo
+          - entity: sensor.cert_expiry_timestamp_motioneye_rem81_com
+            name: Mot
+          - entity: sensor.cert_expiry_timestamp_octoprint_rem81_com
+            name: octo
+          - entity: sensor.cert_expiry_timestamp_vtt_rem81_com
+            name: VTT
+        title: Expiration Certif
+      - type: history-graph
+        entities:
+          - entity: sensor.speedtest_download
+            name: Down
+          - entity: sensor.speedtest_upload
+            name: Up
+          - entity: sensor.speedtest_ping
+            name: Ping
+        hours_to_show: 24
+        refresh_interval: 0
+        title: Speedtest
+      - type: entities
+        entities:
+          - sensor.brother_mfc_j5330dw
+          - sensor.brother_mfc_j5330dw_bk
+          - sensor.brother_mfc_j5330dw_c
+          - sensor.brother_mfc_j5330dw_m
+          - sensor.brother_mfc_j5330dw_y
+        state_color: true
+      - type: entities
+        entities:
+          - sensor.nas_ds218_cpu_load_average_15_min
+          - sensor.nas_ds218_cpu_load_average_5_min
+          - sensor.nas_ds218_cpu_utilization_total
+          - sensor.nas_ds218_cpu_utilization_user
+          - sensor.nas_ds218_download_throughput
+          - sensor.nas_ds218_memory_available_real
+          - sensor.nas_ds218_memory_available_swap
+          - sensor.nas_ds218_memory_total_real
+          - sensor.nas_ds218_memory_total_swap
+          - sensor.nas_ds218_memory_usage_real
+          - binary_sensor.nas_ds218_security_status
+          - binary_sensor.nas_ds218_update_available
+          - sensor.nas_ds218_upload_throughput
+          - sensor.nas_ds218_temperature
+      - type: entities
+        entities:
+          - sensor.nas_ds218_volume_1_average_disk_temp
+          - sensor.nas_ds218_volume_1_status
+          - sensor.nas_ds218_volume_1_used_space
+          - sensor.nas_ds218_volume_1_volume_used
+      - type: entities
+        entities:
+          - binary_sensor.nas_ds218_disque_1_below_min_remaining_life
+          - binary_sensor.nas_ds218_disque_1_exceeded_max_bad_sectors
+          - sensor.nas_ds218_disque_1_status
+          - sensor.nas_ds218_disque_1_temperature
+      - type: entities
+        entities:
+          - binary_sensor.nas_ds218_disque_2_below_min_remaining_life
+          - binary_sensor.nas_ds218_disque_2_exceeded_max_bad_sectors
+          - sensor.nas_ds218_disque_2_status
+          - sensor.nas_ds218_disque_2_temperature
+      - type: entities
+        entities:
+          - entity: sensor.myups_status
+          - entity: sensor.myups_battery_runtime
+          - entity: sensor.myups_battery_charge
+          - entity: sensor.myups_battery_chemistry
+          - entity: sensor.myups_beeper_status
+          - entity: sensor.myups_high_voltage_transfer
+          - entity: sensor.myups_load
+          - entity: sensor.myups_load_restart_delay
+          - entity: sensor.myups_load_shutdown_timer
+          - entity: sensor.myups_load_start_timer
+          - entity: sensor.myups_low_battery_setpoint
+          - entity: sensor.myups_low_voltage_transfer
+          - entity: sensor.myups_nominal_output_frequency
+          - entity: sensor.myups_nominal_output_voltage
+          - entity: sensor.myups_nominal_power
+          - entity: sensor.myups_output_voltage
+          - entity: sensor.myups_status_data
+          - entity: sensor.myups_ups_shutdown_delay
+        title: Onduleur Eaton 800
+      - type: entities
+        entities:
+          - entity: sensor.esp_altherma_status
+          - entity: binary_sensor.wan_status
+        title: STATUS
+      - type: entities
+        entities:
+          - entity: sensor.network_in_hassio
+          - entity: sensor.network_out_enp3s0
+        title: Monitoring System
+      - type: entities
+        title: ' NUC5CPYH'
+        show_header_toggle: false
+        style: |
+          ha-card { border-radius: 20px; }
+        entities:
+          - type: custom:hui-vertical-stack-card
+            cards:
+              - type: horizontal-stack
+                cards:
+                  - type: picture
+                    style: |
+                      ha-card { 
+                          --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                          --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                          --ha-card-box-shadow: 'none';
+                      }
+                    image: /local/nuc.jpg
+                  - type: custom:button-card
+                    layout: icon_name_state2nd
+                    show_icon: true
+                    show_state: true
+                    styles:
+                      grid:
+                        - grid-template-columns: 50px auto
+                      icon:
+                        - padding: 20px 10px
+                        - height: 30px
+                        - width: 30px
+                      card:
+                        - '--ha-card-background': rgba(0, 0, 0, 0.0)
+                        - '--ha-card-box-shadow': none
+                      state:
+                        - padding: 0px 10px
+                        - justify-self: start
+                        - font-family: Roboto, sans-serif
+                        - font-size: 15px
+                      name:
+                        - padding: 0px 10px
+                        - justify-self: start
+                        - color: var(--secondary-text-color)
+                    entity: sensor.processor_temperature_z1
+                    name: CPU Temperature
+                    icon: mdi:fire
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.cpu_speed
+                name: CPU Usage
+                height: 50
+                line_width: 2
+                font_size: 80
+                hours_to_show: 4
+                points_per_hour: 90
+                show:
+                  icon: false
+                  extrema: true
+                color_thresholds:
+                  - value: 28
+                    color: '#e74c3c'
+                  - value: 15
+                    color: '#1db954'
+                  - value: 0
+                    color: '#3498db'
+                style: |
+                  ha-card { 
+                      --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                      --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                      --ha-card-box-shadow: 'none';
+                  }
+              - type: horizontal-stack
+                cards:
+                  - type: custom:bar-card
+                    title_position: inside
+                    show_icon: true
+                    align: split
+                    columns: 1
+                    max: 100
+                    unit_of_measurement: '%'
+                    severity:
+                      - value: 50
+                        color: '#3498db'
+                      - value: 75
+                        color: '#f39c12'
+                      - value: 100
+                        color: '#e45e65'
+                    style: |
+                      ha-card { 
+                        --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                        --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                        --ha-card-box-shadow: 'none';
+                      }
+                    entity: sensor.disk_use_percent_config
+                    name: Disk usage 110 Gb
+              - type: custom:bar-card
+                title_position: inside
+                show_icon: true
+                align: split
+                columns: 1
+                max: 100
+                unit_of_measurement: '%'
+                severity:
+                  - value: 50
+                    color: '#3498db'
+                  - value: 75
+                    color: '#f39c12'
+                  - value: 100
+                    color: '#e45e65'
+                style: |
+                  ha-card { 
+                    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                    --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                    --ha-card-box-shadow: 'none';
+                   }
+                entity: sensor.processor_use_percent
+                name: CPU usage
+              - type: horizontal-stack
+                cards:
+                  - type: custom:bar-card
+                    title_position: inside
+                    show_icon: true
+                    align: split
+                    columns: 1
+                    max: 100
+                    unit_of_measurement: '%'
+                    severity:
+                      - value: 50
+                        color: '#3498db'
+                      - value: 75
+                        color: '#f39c12'
+                      - value: 100
+                        color: '#e45e65'
+                    style: |
+                      ha-card { 
+                        --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                        --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                        --ha-card-box-shadow: 'none';
+                      }
+                    entity: sensor.memory_use_percent
+                    name: RAM usage
+                  - type: custom:bar-card
+                    title_position: inside
+                    show_icon: true
+                    align: split
+                    columns: 1
+                    max: 100
+                    unit_of_measurement: '%'
+                    severity:
+                      - value: 50
+                        color: '#3498db'
+                      - value: 75
+                        color: '#f39c12'
+                      - value: 100
+                        color: '#e45e65'
+                    style: |
+                      ha-card { 
+                        --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                        --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                        --ha-card-box-shadow: 'none';
+                      }
+                    entity: sensor.swap_use_percent
+                    name: SWAP usage
+              - type: custom:mini-graph-card
+                height: 130
+                line_width: 3
+                font_size: 80
+                hours_to_show: 48
+                points_per_hour: 1
+                show:
+                  extrema: true
+                  fill: true
+                style: |
+                  ha-card { 
+                    --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                    --ha-card-box-shadow: 'none';
+                    border-radius: 5px;
+                  }
+                entities:
+                  - sensor.processor_temperature_z1
+                name: Temperature Z1
+                color_thresholds:
+                  - value: 40
+                    color: '#3498db'
+                  - value: 50
+                    color: '#f39c12'
+                  - value: 60
+                    color: '#E45E65'
+              - entities:
+                  - entity: sensor.load_15m
+                    name: Charge 15 mn
+                  - entity: sensor.last_boot
+                    name: Dernier restart
+                show_header_toggle: false
+                type: entities
+                style: |
+                  ha-card { 
+                      --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                      --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                      --ha-card-box-shadow: 'none';
+                  }
+      - type: entities
+        entities:
+          - sensor.local_raw_printer
+          - sensor.local_raw_printer_uptime
+      - type: entities
+        entities:
+          - sensor.oneplus_a5010_activite_detectee
+          - sensor.oneplus_a5010_adresse_ip_wi_fi
+          - sensor.oneplus_a5010_adresse_ip_publique
+          - sensor.oneplus_a5010_app_importance
+          - sensor.oneplus_a5010_app_standby_bucket
+          - binary_sensor.oneplus_a5010_appareil_securise
+          - binary_sensor.oneplus_a5010_appareil_verrouille
+          - binary_sensor.oneplus_a5010_application_inactive
+          - sensor.oneplus_a5010_bssid_wi_fi
+          - sensor.oneplus_a5010_capteur_de_luminosite
+          - sensor.oneplus_a5010_capteur_de_pas
+          - sensor.oneplus_a5010_capteur_de_proximite
+          - sensor.oneplus_a5010_capteur_ne_pas_deranger
+          - sensor.oneplus_a5010_connexion_bluetooth
+          - sensor.oneplus_a5010_connexion_wi_fi
+          - sensor.oneplus_a5010_dernier_redemarrage
+          - sensor.oneplus_a5010_derniere_notification
+          - sensor.oneplus_a5010_derniere_notification_supprimee
+          - sensor.oneplus_a5010_donnees_recues_par_l_application_gb
+          - sensor.oneplus_a5010_donnees_transmises_par_l_application_gb
+          - sensor.oneplus_a5010_declencheur_de_la_derniere_mise_a_jour
+          - binary_sensor.oneplus_a5010_en_charge
+          - sensor.oneplus_a5010_force_du_signal_wi_fi
+          - sensor.oneplus_a5010_frequence_wi_fi
+          - sensor.oneplus_a5010_fuseau_horaire_actuel
+          - binary_sensor.oneplus_a5010_haut_parleur
+          - binary_sensor.oneplus_a5010_interactif
+          - binary_sensor.oneplus_a5010_keyguard_securise
+          - binary_sensor.oneplus_a5010_keyguard_verrouille
+          - sensor.oneplus_a5010_lieu_geocode
+          - binary_sensor.oneplus_a5010_micro_en_sourdine
+          - binary_sensor.oneplus_a5010_mode_doze
+          - sensor.oneplus_a5010_mode_audio
+          - sensor.oneplus_a5010_mode_sonnerie
+          - binary_sensor.oneplus_a5010_musique_active
+          - sensor.oneplus_a5010_memoire_de_lapplication
+          - sensor.oneplus_a5010_niveau_de_volume_de_la_musique
+          - sensor.oneplus_a5010_niveau_de_volume_de_la_sonnerie
+          - sensor.oneplus_a5010_niveau_de_volume_des_alarmes
+          - sensor.oneplus_a5010_niveau_de_volume_des_appels
+          - sensor.oneplus_a5010_nombre_de_notifications_actives
+          - sensor.oneplus_a5010_prochaine_alarme
+          - sensor.oneplus_a5010_recu_mobile_en_gb
+          - sensor.oneplus_a5010_sim_1
+          - sensor.oneplus_a5010_sim_2
+          - sensor.oneplus_a5010_sante_de_la_batterie
+          - sensor.oneplus_a5010_stockage_externe
+          - sensor.oneplus_a5010_stockage_interne
+          - sensor.oneplus_a5010_temperature_de_la_batterie
+          - sensor.oneplus_a5010_total_recu_go
+          - sensor.oneplus_a5010_total_transmis_go
+          - sensor.oneplus_a5010_transmis_mobile_en_gb
+          - sensor.oneplus_a5010_type_de_chargeur
+          - sensor.oneplus_a5010_version_actuelle
+          - sensor.oneplus_a5010_vitesse_de_liaison_wi_fi
+          - binary_sensor.oneplus_a5010_economie_d_energie
+          - binary_sensor.oneplus_a5010_ecouteurs
+          - sensor.oneplus_a5010_etat_de_la_batterie
+          - binary_sensor.oneplus_a5010_etat_du_bluetooth
+          - binary_sensor.oneplus_a5010_etat_du_wi_fi
+          - sensor.oneplus_a5010_etat_du_telephone
+  - title: PV
+    path: pv
+    icon: mdi:solar-power
+    theme: teal
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: grid
+            cards:
+              - type: gauge
+                entity: sensor.envoy_122103023124_current_energy_production
+                min: 0
+                max: 1800
+                name: Prod
+                severity:
+                  green: 1200
+                  yellow: 900
+                  red: 0
+                needle: true
+              - type: gauge
+                entity: sensor.envoy_122103023124_current_energy_consumption
+                min: 0
+                max: 8000
+                name: Conso
+                severity:
+                  green: 300
+                  yellow: 800
+                  red: 1800
+                needle: true
+              - type: gauge
+                entity: sensor.p_injection_reseau
+                max: 10000
+                name: Soutirage si P-
+                min: -10000
+                unit: W
+                needle: true
+                severity:
+                  green: 1
+                  yellow: 0
+                  red: -10000
+              - type: gauge
+                entity: sensor.vp2_radiation
+                min: 0
+                max: 1200
+                name: Radiation
+                severity:
+                  green: 1000
+                  yellow: 600
+                  red: 0
+                needle: true
+              - type: gauge
+                entity: sensor.ecocompteur_ecs
+                min: 0
+                max: 4000
+                name: ECS
+                severity:
+                  green: 0
+                  yellow: 300
+                  red: 2900
+                needle: true
+              - type: gauge
+                entity: sensor.luminosite
+                min: 0
+                name: Luminosité
+                needle: true
+                severity:
+                  green: 0
+                  yellow: 1000
+                  red: 4000
+                max: 5000
+      - type: entities
+        entities:
+          - entity: input_boolean.valid_delestage
+          - entity: sensor.envoy_122103023124_current_energy_production
+          - entity: input_number.seuil_delestage_pv
+          - entity: binary_sensor.malaver_en_marche
+            name: Machine à Laver en fonctionnement
+          - entity: binary_sensor.pool_pump_running
+            name: Piscine en fonctionnement
+          - entity: input_boolean.mem_delestage
+          - entity: input_select.pool_pump_mode
+            name: Mode Fonctionnement Piscine
+          - entity: sensor.pc_mal
+        title: Delestage
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - sensor.envoy_122103023124_current_energy_consumption
+          - sensor.envoy_122103023124_current_energy_production
+          - sensor.envoy_122103023124_last_seven_days_energy_consumption
+          - sensor.envoy_122103023124_last_seven_days_energy_production
+          - sensor.envoy_122103023124_lifetime_energy_consumption
+          - sensor.envoy_122103023124_lifetime_energy_production
+          - sensor.envoy_122103023124_today_s_energy_consumption
+          - sensor.envoy_122103023124_today_s_energy_production
+        title: Panneau  Solaire
+      - type: entities
+        entities:
+          - sensor.energy_next_hour
+          - sensor.energy_current_hour
+          - sensor.energy_production_today
+          - sensor.energy_production_tomorrow
+          - sensor.power_production_now
+          - sensor.power_highest_peak_time_today
+          - sensor.power_highest_peak_time_tomorrow
+        title: Estimation production PV
+      - type: vertical-stack
+        cards:
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 4000
+              - color: '#EA9999'
+                value: 6000
+              - color: '#CC0000'
+                value: 10000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: true
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.pzem_totale_puissance
+                name: Totale
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                y_axis: secondary
+            name: Puissance Soutirée 24h
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 4000
+              - color: '#EA9999'
+                value: 6000
+              - color: '#CC0000'
+                value: 10000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: true
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.envoy_122103023124_current_energy_production
+                name: Totale
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                y_axis: secondary
+            name: Production PV 24h
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energy_total_daily
+                name: Jour
+            name: Soutirage sur 7 J
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.envoy_122103023124_today_s_energy_production
+                name: Jour
+            name: Prod sur 7 J
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+  - title: Energie
+    path: energie
+    icon: mdi:flash
+    theme: teal
+    panel: false
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 4000
+              - color: '#EA9999'
+                value: 6000
+              - color: '#CC0000'
+                value: 10000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: true
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.pzem_totale_puissance
+                name: Totale
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                y_axis: secondary
+            name: Puissance Elec 24h
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 400
+              - color: '#EA9999'
+                value: 600
+              - color: '#CC0000'
+                value: 1000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: fade
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.pzem_pisc_puissance
+                name: Puissance
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                y_axis: secondary
+            name: Puissance Piscine 24h
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 4000
+              - color: '#EA9999'
+                value: 6000
+              - color: '#CC0000'
+                value: 10000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: fade
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.pzem_sdb_puissance
+                name: Puissance
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                show_points: false
+                show_legend: false
+                y_axis: secondary
+            name: Puissance SdB 24h
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 4000
+              - color: '#EA9999'
+                value: 6000
+              - color: '#CC0000'
+                value: 10000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: fade
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.ecocompteur_ecs
+                name: Puissance
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                show_points: false
+                show_legend: false
+                y_axis: secondary
+            name: Puissance ECS 24h
+          - type: custom:mini-graph-card
+            color_thresholds:
+              - color: '#00FF00'
+                value: 0
+              - color: '#FF9900'
+                value: 4000
+              - color: '#EA9999'
+                value: 6000
+              - color: '#CC0000'
+                value: 10000
+            color_thresholds_transition: hard
+            line_width: 2
+            icon: mdi:flash
+            show:
+              extrema: true
+              fill: fade
+              icon: true
+              labels: false
+              name: true
+              state: true
+            hour24: true
+            points_per_hour: 4
+            hours_to_show: 24
+            group: false
+            state_map:
+              - label: hp
+                value: 'off'
+              - label: hc
+                value: 'on'
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            entities:
+              - entity: sensor.puissance_pac_rpac
+                name: Puissance
+              - color: '#CCC0cCC'
+                entity: binary_sensor.display_hp_hc
+                name: HC
+                show_line: false
+                show_points: false
+                show_legend: false
+                y_axis: secondary
+            name: Puissance PAC 24h
+      - type: vertical-stack
+        cards:
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energy_total_daily
+            name: Conso totale 7j HA
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+          - type: horizontal-stack
+            cards:
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.energy_pac1_daily
+                    name: Jour
+                name: Conso PAC 7J
+                hours_to_show: 168
+                aggregate_func: max
+                group_by: date
+                show:
+                  graph: bar
+                icon: mdi:flash
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energy_ecs1_daily
+                name: Jour
+            name: Conso ECS 7J
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energy_pisc_daily
+            name: Conso Piscine 7j HA
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energy_autres_daily
+            name: Conso autres 7j HA
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+      - type: custom:battery-state-card
+        title: Capteurs sur piles
+        thresholds:
+          - value: 30
+            color: '#8fffe1'
+          - value: 40
+            color: '#8fbbff'
+          - value: 60
+            color: '#978fff'
+          - value: 100
+            color: '#fe8fff'
+        entities:
+          - entity: sensor.chambre_nord_power
+            name: Chamb Nord
+          - entity: sensor.chamb_parents_power
+            name: Chamb Parents
+          - entity: sensor.power_bureau_zb
+            name: bureau
+          - entity: sensor.detecteur_presence1_power
+            name: Detecteur de Présence
+          - entity: sensor.cave_power
+            name: Cave
+          - entity: sensor.battery_garage
+            name: Garage
+          - entity: sensor.battery_cellier
+            name: Cellier
+          - entity: sensor.battery_chambre_ami_sub
+            name: Amis Sud
+          - entity: sensor.battery_sdb
+            name: SdB
+          - entity: sensor.power_terrasse2
+            name: Terrasse Af
+          - entity: sensor.oneplus_a5010_niveau_de_batterie
+            name: tel remy
+      - type: entities
+        entities:
+          - entity: sensor.ecs_energie_integration
+          - entity: sensor.ecocompteur_ecs
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:mini-graph-card
+                entities:
+                  - entity: sensor.ecs_energie_integration
+                    name: Jour
+                name: Conso PAC 7J Integration
+                hours_to_show: 168
+                aggregate_func: max
+                group_by: date
+                show:
+                  graph: bar
+                icon: mdi:flash
+      - type: entities
+        entities:
+          - entity: sensor.energy_autres_usage_daily_hc
+          - entity: sensor.energy_autres_usage_daily_hp
+          - entity: sensor.energy_autres_daily
+          - entity: input_boolean.forcage_hc_hp
+          - entity: input_boolean.hc_hp
+      - type: glance
+        entities:
+          - sensor.myups_battery_charge
+          - sensor.myups_battery_chemistry
+          - sensor.myups_battery_runtime
+          - sensor.myups_beeper_status
+          - sensor.myups_high_voltage_transfer
+          - sensor.myups_load
+          - sensor.myups_load_restart_delay
+          - sensor.myups_load_shutdown_timer
+          - sensor.myups_load_start_timer
+          - sensor.myups_low_battery_setpoint
+          - sensor.myups_low_voltage_transfer
+          - sensor.myups_nominal_output_frequency
+          - sensor.myups_nominal_output_voltage
+          - sensor.myups_nominal_power
+          - sensor.myups_output_voltage
+          - sensor.myups_status
+          - sensor.myups_status_data
+          - sensor.myups_ups_shutdown_delay
+  - title: Eclairage-PC
+    path: eclai
+    icon: mdi:lightbulb
+    theme: dark_cyan
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: switch.pc_mal
+            name: PC MaL
+          - entity: sensor.pc_mal
+            name: Puissance
+          - entity: sensor.pc_mal_energie
+            name: Energie
+        title: Machine à Laver
+      - type: button
+        tap_action:
+          action: toggle
+        entity: switch.tz3000_oiymh3qu_ts011f_on_off
+        icon: mdi:spotlight-beam
+        name: Spots Exterieurs Sud
+      - type: light
+        entity: light.tz3000_49qchf10_ts0502a_level_light_color_on_off
+      - type: entities
+        entities:
+          - entity: switch.pc1_lidl
+            name: Lampe Desodo
+          - entity: switch.pc2_lidl
+            name: Alim Dlink
+          - entity: switch.pc3_lidl_on_off
+        state_color: true
+        title: PC
+        show_header_toggle: false
+  - title: Temperatures
+    path: temperatures
+    icon: mdi:thermometer
+    theme: teal
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - entities:
+              - entities:
+                  - entity: sensor.chambre_nord_power
+                    name: Batt
+                  - entity: sensor.chamb_nord_pression
+                    name: Pression
+                  - entity: sensor.chambre_nord_humidite
+                    name: Hum
+                  - entity: sensor.chambre_nord_temperature
+                    name: Temp
+                entity: sensor.chambre_nord_temperature
+                name: Chambre Nord
+                show_state: false
+                type: custom:multiple-entity-row
+              - entities:
+                  - entity: sensor.humidity_status_chambre_ami_sud
+                    name: Status
+                  - entity: sensor.humidity_chambre_ami_sud
+                    name: Hum
+                  - entity: sensor.temperature_chambre_ami_sud
+                    name: Temp
+                entity: sensor.temperature_chambre_ami_sud
+                name: Chambre Sud
+                show_state: false
+                type: custom:multiple-entity-row
+              - entities:
+                  - entity: sensor.chamb_parents_power
+                    name: Batt
+                  - entity: sensor.chamb_parents_pressure
+                    name: Pression
+                  - entity: sensor.chamb_parents_humidite
+                    name: Hum
+                  - entity: sensor.chamb_parents_temperature
+                    name: Temp
+                entity: sensor.chamb_parents_temperature
+                icon: mdi:account
+                name: Chambre Parents
+                show_state: false
+                type: custom:multiple-entity-row
+              - entities:
+                  - entity: sensor.vp2_humidte_in
+                    name: Hum
+                  - entity: sensor.vp2_temp_in
+                    name: Temp
+                entity: sensor.vp2_temp_in
+                icon: mdi:account
+                name: Int Salon
+                show_state: false
+                type: custom:multiple-entity-row
+              - entities:
+                  - entity: sensor.power_bureau_zb
+                    name: Batt
+                  - entity: sensor.pression_bureau_zb
+                    name: Pression
+                  - entity: sensor.humidite_bureau_zb
+                    name: Hum
+                  - entity: sensor.temperature_bureau_zb
+                    name: temp
+                entity: sensor.temperature_bureau_zb
+                icon: mdi:account
+                name: Th Salon (ex Bureau)
+                show_state: false
+                type: custom:multiple-entity-row
+              - entities:
+                  - entity: sensor.humidity_status_sdb
+                    name: Status
+                  - entity: sensor.humidity_sdb
+                    name: Hum
+                  - entity: sensor.temperature_sdb
+                    name: Temp
+                entity: sensor.temperature_sdb
+                icon: mdi:account
+                name: SdB
+                show_state: false
+                type: custom:multiple-entity-row
+            how_header_toggle: false
+            style: |
+              ha-card {
+                border: solid 2px var(--primary-color);
+              }
+            title: Temperatures
+            type: entities
+          - type: custom:apexcharts-card
+            graph_span: 1d
+            header:
+              show: true
+              show_states: true
+            series:
+              - entity: sensor.chambre_nord_temperature
+                stroke_width: 1
+                name: Ch Nord
+              - entity: sensor.temperature_chambre_ami_sud
+                stroke_width: 1
+                name: Ch Sud
+              - entity: sensor.chamb_parents_temperature
+                stroke_width: 1
+                name: Ch Par
+              - entity: sensor.temperature_bureau_zb
+                stroke_width: 1
+                name: Salon
+      - entities:
+          - entities:
+              - entity: sensor.temp_congelo_garage_2
+                name: Temp
+            entity: sensor.temp_congelo_garage_2
+            name: Congelo
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.battery_garage
+                name: Batt
+              - entity: sensor.humidity_status_garage
+                name: Status
+              - entity: sensor.humidity_garage
+                name: Hum
+              - entity: sensor.temperature_garage
+                name: Temp
+            entity: sensor.temperature_garage
+            name: Garage
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.power_terrasse2
+                name: Batt
+              - entity: sensor.humidite_terrasse2
+                name: Hum
+              - entity: sensor.temperature_terrasse2
+                name: Temp
+            entity: sensor.temperature_terrasse2
+            icon: mdi:thermometer
+            name: Terrasse
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.vp2_barometer
+                name: Pression
+              - entity: sensor.vp2_humidity_out
+                name: Hum
+              - entity: sensor.vp2_temp_out
+                name: Temp
+            entity: sensor.vp2_temp_out
+            icon: mdi:thermometer
+            name: VP2
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.temp_local_piscine
+                name: Local P
+              - entity: sensor.temp_piscine
+                name: Eau
+            entity: sensor.temp_piscine
+            icon: mdi:thermometer
+            name: Piscine
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.imp_3d_power
+                name: batt
+              - entity: sensor.imp_3d_temperature
+                name: Temp
+              - entity: sensor.imp_3d_humidity
+                name: Hum
+            entity: sensor.imp_3d_temperature
+            icon: mdi:thermometer
+            name: Imp 3D
+            show_state: false
+            type: custom:multiple-entity-row
+          - entities:
+              - entity: sensor.cave_power
+                name: batt
+              - entity: sensor.cave_temperature
+                name: Temp
+              - entity: sensor.cave_humidity
+                name: Hum
+            entity: sensor.imp_3d_temperature
+            icon: mdi:thermometer
+            name: Cave
+            show_state: false
+            type: custom:multiple-entity-row
+        how_header_toggle: false
+        style: |
+          ha-card {
+            border: solid 2px var(--primary-color);
+          }
+        title: Temperatures
+        type: entities
+      - type: entities
+        entities:
+          - entity: sensor.temperature_cellier
+        title: Cellier
+      - type: custom:apexcharts-card
+        graph_span: 1d
+        header:
+          show: true
+          show_states: true
+        series:
+          - entity: sensor.temp_congelo_garage_2
+            stroke_width: 1
+            name: Congelo
+      - type: entities
+        entities:
+          - entity: sensor.cave_humidity
+          - entity: sensor.cave_temperature
+          - entity: sensor.cave_power
+      - type: entities
+        entities:
+          - entity: sensor.temperature_bureau
+          - entity: sensor.humidity_bureau
+        title: Salon
+  - title: Volets
+    path: volets
+    icon: mdi:window-shutter
+    theme: dark_cyan
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: cover.bureau_gauche
+          - entity: cover.bureau_droit
+          - entity: cover.salon_petit
+          - entity: cover.cuisine
+          - entity: cover.sdb
+          - entity: cover.amis_nord
+          - entity: cover.parents_petit
+          - entity: cover.amis_sud_petit
+          - entity: cover.volet_parents_grand
+          - entity: cover.volet_sam
+          - entity: cover.volet_amis_sud_grand
+        title: Volets
+      - type: entities
+        entities:
+          - entity: group.volets_bureau
+      - type: grid
+        cards:
+          - type: button
+            tap_action:
+              action: toggle
+            entity: cover.bureau_gauche
+            name: Bureau Gauche
+          - type: button
+            tap_action:
+              action: toggle
+            entity: cover.bureau_droit
+            name: Bureau Droit
+      - type: entities
+        entities:
+          - entity: cover.bureau_droit
+          - entity: cover.volet_droit_p
+      - type: entities
+        entities:
+          - binary_sensor.volet_buro_droit_ias_zone
+  - title: Carte
+    path: test
+    panel: true
+    icon: mdi:map
+    badges: []
+    cards:
+      - type: map
+        entities:
+          - entity: device_tracker.sm_g935f
+        hours_to_show: 72
+        geo_location_sources: []
+  - title: Robot
+    path: robot
+    icon: mdi:robot-mower-outline
+    type: panel
+    badges: []
+    cards:
+      - type: map
+        entities:
+          - entity: device_tracker.automower_r_435x_am435x_awd_device_tracker
+        title: Robot
+        hours_to_show: 72
+        dark_mode: false
+        default_zoom: 30
+  - title: Conso
+    path: conso
+    panel: false
+    theme: teal
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: input_number.furnace_power
+          - entity: sensor.pzem_totale_puissance
+          - entity: input_number.last_power
+          - entity: input_number.energy_power
+        title: Essais
+      - type: entities
+        entities:
+          - entity: sensor.ecocompteur_ecs
+          - entity: input_number.last_power_ecs
+          - entity: input_number.energy_ecs_p
+          - entity: sensor.energy_ecs_p_kw
+          - entity: sensor.energy_ecs1_usage_daily_hc
+          - entity: sensor.energy_ecs1_usage_daily_hp
+          - entity: sensor.energy_ecs1_daily
+          - entity: sensor.ecs_energie_integration
+          - entity: sensor.co2_intensity
+        title: ECS
+      - type: history-graph
+        entities:
+          - entity: sensor.ecocompteur_ecs
+          - entity: sensor.puissance_pac_rpac
+        hours_to_show: 24
+        refresh_interval: 0
+      - type: entities
+        entities:
+          - entity: sensor.puissance_pac_rpac
+          - entity: input_number.last_power_pac
+          - entity: input_number.energy_pac_p
+          - entity: sensor.energy_pac_p_kw
+          - entity: sensor.energy_pac1_usage_daily_hc
+          - entity: sensor.energy_pac1_usage_daily_hp
+          - entity: sensor.energy_pac1_daily
+        title: PAC
+      - type: entities
+        entities:
+          - entity: input_text.text_def_l1
+          - entity: input_text.text_def_l2
+          - entity: input_text.text_def_l3
+          - entity: input_text.text_def_l4
+  - title: Poubelle
+    path: poubelle
+    theme: dark
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: binary_sensor.display_hp_hc
+          - entity: sensor.energy_total_yearly
+          - entity: sensor.energy_total_usage_yearly_hp
+          - entity: sensor.energy_total_usage_yearly_hc
+          - entity: sensor.energy_sdb_yearly
+          - entity: sensor.energy_sdb_usage_yearly_hc
+          - entity: sensor.energy_sdb_usage_yearly_hp
+          - entity: sensor.energy_pisc_yearly
+          - entity: sensor.energy_pisc_usage_yearly_hc
+          - entity: sensor.energy_pisc_usage_yearly_hp
+          - entity: sensor.energy_pac1_yearly
+          - entity: sensor.energy_pac1_usage_yearly_hc
+          - entity: sensor.energy_pac1_usage_yearly_hp
+          - entity: sensor.energy_ecs1_yearly
+          - entity: sensor.energy_ecs1_usage_yearly_hc
+          - entity: sensor.energy_ecs1_usage_yearly_hp
+          - entity: sensor.energy_autres_yearly
+          - entity: sensor.energy_autres_usage_yearly_hc
+          - entity: sensor.energy_autres_usage_yearly_hp
+        title: CONSO AN
+        state_color: false
+      - type: entities
+        entities:
+          - entity: sensor.energy_total_monthly
+          - entity: sensor.energy_total_usage_monthly_hp
+          - entity: sensor.energy_total_usage_monthly_hc
+          - entity: sensor.energy_sdb_monthly
+          - entity: sensor.energy_sdb_usage_monthly_hc
+          - entity: sensor.energy_sdb_usage_monthly_hp
+          - entity: sensor.energy_pisc_monthly
+          - entity: sensor.energy_pisc_usage_monthly_hc
+          - entity: sensor.energy_pisc_usage_monthly_hp
+          - entity: sensor.energy_pac1_monthly
+          - entity: sensor.energy_pac1_usage_monthly_hc
+          - entity: sensor.energy_pac1_usage_monthly_hp
+          - entity: sensor.energy_ecs1_monthly
+          - entity: sensor.energy_ecs1_usage_monthly_hc
+          - entity: sensor.energy_ecs1_usage_monthly_hp
+          - entity: sensor.energy_autres_monthly
+          - entity: sensor.energy_autres_usage_daily_hc
+          - entity: sensor.energy_autres_usage_daily_hp
+        title: CONSO MOIS
+      - type: entities
+        entities:
+          - entity: binary_sensor.display_hp_hc
+          - entity: sensor.energy_total_daily
+          - entity: sensor.energy_total_usage_daily_hp
+          - entity: sensor.energy_total_usage_daily_hc
+          - entity: sensor.energy_pac1_daily
+          - entity: sensor.energy_pac1_usage_daily_hc
+          - entity: sensor.energy_pac1_usage_daily_hp
+          - entity: sensor.energy_ecs1_daily
+          - entity: sensor.energy_ecs1_usage_daily_hc
+          - entity: sensor.energy_ecs1_usage_daily_hp
+          - entity: sensor.energy_sdb_daily
+          - entity: sensor.energy_sdb_usage_daily_hc
+          - entity: sensor.energy_sdb_usage_daily_hp
+          - entity: sensor.energy_pisc_daily
+          - entity: sensor.energy_pisc_usage_daily_hc
+          - entity: sensor.energy_pisc_usage_daily_hp
+          - entity: sensor.energy_autres_daily
+          - entity: sensor.energy_autres_usage_daily_hc
+          - entity: sensor.energy_autres_usage_daily_hp
+        title: CONSO JOUR
+      - type: entities
+        entities:
+          - sensor.pzem_sdb_energie
+          - sensor.pzem_sdb_factpuiss
+          - sensor.pzem_sdb_frequence
+          - sensor.pzem_sdb_intensite
+          - sensor.pzem_sdb_puissance
+          - sensor.pzem_sdb_tension
+        title: Salle de Bain
+      - type: entities
+        entities:
+          - entity: sensor.ecocompteur_ecs
+          - entity: sensor.ecocompteur_rpac
+          - entity: sensor.ecocompteur_pac
+          - entity: sensor.ecocompteur_clim
+          - entity: sensor.ecocompteur_total
+          - entity: sensor.puissance_pac_rpac
+        title: Eco Compteur
+      - type: entities
+        entities:
+          - entity: sensor.pzem_pisc_tension
+          - entity: sensor.pzem_pisc_courant
+          - entity: sensor.pzem_pisc_puissance
+          - entity: sensor.pzem_pisc_energy
+          - entity: sensor.pzem_pisc_factpuiss
+          - entity: sensor.pzem_pisc_frequence
+        title: Energie Piscine
+      - type: entities
+        entities:
+          - entity: sensor.pzem_totale_puissance
+          - entity: sensor.pzem_totale_courant
+          - entity: sensor.pzem_totale_tension
+          - entity: sensor.pzem_totale_energy
+          - entity: sensor.pzem_totale_frequence
+          - entity: sensor.pzem_totale_factpuiss
+        title: PZEM Total sortie ESP et Template
+      - type: entities
+        entities:
+          - entity: input_number.stepper_control
+      - type: thermostat
+        entity: climate.altherma
+  - title: WC_RC
+    path: waterc-rem
+    panel: true
+    badges: []
+    cards:
+      - type: iframe
+        url: https://app.weathercloud.net/d6643872780#profile
+        aspect_ratio: 100%
+  - title: WC_AL
+    path: wc-al
+    panel: true
+    badges: []
+    cards:
+      - type: iframe
+        url: https://app.weathercloud.net/d0833706592#profile
+        aspect_ratio: 100%
+  - type: sidebar
+    title: Stat
+    badges: []
+    cards:
+      - type: statistics-graph
+        entities:
+          - sensor.pzem_totale_puissance
+        days_to_show: 7
+        chart_type: line
+        stat_types:
+          - mean
+          - sum
+          - min
+          - max
+      - type: gauge
+        entity: sensor.pzem_totale_puissance
+        min: 0
+        max: 6000
+        severity:
+          green: 5
+          yellow: 500
+          red: 1800
+        view_layout:
+          position: sidebar
+        needle: true

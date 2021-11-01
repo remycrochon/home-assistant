@@ -1,7 +1,7 @@
 # WARNING: Make your GitHub repo Private if you are using this as it is
 # Example .gitignore file for your config dir.
 # 
-# Une * garantit que tout sera ignoré.
+# Une * garanti que tout sera ignoré.
 *
 # Vous pouvez ajouter des fichiers/dossiers à la liste blanche avec !, ceux-ci ne seront pas ignorés.
 !*.yaml
@@ -12,19 +12,7 @@
 !*.csv
 !*.png
 
-!appdaemon/
-!blueprints/
-!custom_components/
-!esphome/
-!glances/
-!node-red/
-!packages/
-!python_scripts/
-!themes/
-!image/
-!www/
-!dwains-dashboard/addons/more_page/**
-!custom_components/dwains_dashboard/
+
 
 # Ignore these files/folders
 secrets.yaml

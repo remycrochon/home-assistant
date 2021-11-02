@@ -144,45 +144,45 @@
                   - entity: switch.altherma
                 hours_to_show: 24
                 refresh_interval: 0
-          - type: custom:mini-graph-card
-            color_thresholds:
-              - color: '#00FF00'
-                value: 0
-              - color: '#FF9900'
-                value: 2000
-              - color: '#EA9999'
-                value: 4000
-              - color: '#CC0000'
-                value: 8000
-            color_thresholds_transition: hard
-            line_width: 2
-            icon: mdi:flash
-            show:
-              extrema: true
-              fill: true
-              icon: true
-              labels: false
-              name: true
-              state: true
-            hour24: true
-            points_per_hour: 4
-            hours_to_show: 24
-            group: false
-            state_map:
-              - label: hp
-                value: 'off'
-              - label: hc
-                value: 'on'
-            style: |
-              ha-card {
-                border: solid 2px var(--primary-color);
-              }
-            entities:
-              - entity: sensor.puissance_pac_rpac
-                name: Totale
-              - color: '#CCC0cCC'
-                entity: binary_sensor.display_hp_hc
-                name: HC
-                show_line: false
-                y_axis: secondary
-            name: Puissance PAC 24h
+  - type: custom:mini-graph-card
+    color_thresholds:
+      - color: '#00FF00'
+        value: 0
+      - color: '#FF9900'
+        value: 2000
+      - color: '#EA9999'
+        value: 4000
+      - color: '#CC0000'
+        value: 8000
+    color_thresholds_transition: hard
+    line_width: 2
+    icon: mdi:flash
+    show:
+      extrema: true
+      fill: true
+      icon: true
+      labels: false
+      name: true
+      state: true
+    hour24: true
+    points_per_hour: 4
+    hours_to_show: 24
+    group: false
+    state_map:
+      - label: hp
+        value: 'off'
+      - label: hc
+        value: 'on'
+    style: |
+      ha-card {
+        border: solid 2px var(--primary-color);
+      }
+    entities:
+      - entity: sensor.puissance_pac_rpac
+        name: Totale
+      - color: '#CCC0cCC'
+        entity: binary_sensor.display_hp_hc
+        name: HC
+        show_line: false
+        y_axis: secondary
+    name: Puissance PAC 24h

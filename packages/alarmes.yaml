@@ -9,6 +9,7 @@ input_boolean:
   inhib_alarme_pac:
     name: Inhib Alarm PAC
 
+
 # Surveillance de la temperature du congelateur        
 template:
   binary_sensor:
@@ -62,8 +63,20 @@ template:
         {{ a==True and b=="on" }}
       device_class: "problem"
 
-
-
-
-
-
+# Regoupement des alarmes => 
+    - name: "Alarmes Importantes"
+#      entity_id: "alarmes_importantes"
+      state: >-
+        {%set a=states("binary_sensor.alarme_porte_cellier")%}
+        {%set b=states("binary_sensor.alarme_porte_garage")%}
+        {%set c=states("binary_sensor.alarme_porte_sous_sol")%}
+        {%set d=states("binary_sensor.alarme_status_pac")%}
+        {%set e=states("binary_sensor.alarme_discord_pac")%}
+        {%set f=states("binary_sensor.alarme_temp_congelo_haute")%}
+        {%set g=states("binary_sensor.ping_reseau")%}
+        {%set h=states("binary_sensor.esp_reseau")%}                                                        
+        {%set i=states("binary_sensor.uptime_reseau")%}
+        {%set j=states("binary_sensor.porte_frigo")%}
+        {%set k=states("input_boolean.def_com_vp")%}
+        {{not(a=="off" and b=="off" and c=="off" and d=="on" and e=="on" and f=="off" and g=="on" and h=="on"and i=="on" and j=="off")}}
+      device_class: "problem"

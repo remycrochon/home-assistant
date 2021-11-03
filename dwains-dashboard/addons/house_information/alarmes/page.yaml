@@ -1,0 +1,20 @@
+- type: custom:dwains-flexbox-card
+  items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
+  cards:
+## 
+
+  - type: custom:auto-entities
+    title: Ping
+    card:
+      type: entities
+      show_header_toggle: false
+      state_color: false
+    filter:
+      include:
+        - entity_id: '*ping_*'
+          sort:
+            method: state
+            reverse: true
+            numeric: true
+      exclude:
+        - entity_id: '*blueprints_*'

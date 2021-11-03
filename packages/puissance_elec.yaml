@@ -70,7 +70,8 @@ template:
   - sensor:
 
 # Consommation autres totale en W
-    - name: "puissance_autres"
+    - name: "Puissance Autres"
+      unique_id: "puissance_autres"
       state: >-
         {% set a = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
         {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
@@ -84,7 +85,8 @@ template:
       state_class: "measurement"  
 
 # Cumul de PAC et RPAC
-    - name: "puissance_pac_rpac"
+    - name: "Puissance PAC+RPAC"
+      unique_id: "puissance_pac_rpac"
       device_class: "energy"
       state_class: "measurement"
       unit_of_measurement: "W"
@@ -94,7 +96,8 @@ template:
           {{ (o + p) | round(2) }}
 
 # Calcul energie injectée sur le réseau du jour
-    - name: "energy_injectee_reseau_jour"
+    - name: "Energie Injectée Réseau Jour"
+      unique_id: "energy_injectee_reseau_jour"
       device_class: "energy"
       state_class: "total"
       unit_of_measurement: "kWh"
@@ -103,7 +106,8 @@ template:
         {% set o = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
         {{ (o - p)/1000 | round(2) }}
 # Calcul puissance injectée sur le réseau
-    - name: "puissance_injectee_reseau"
+    - name: "Puissance Injectée Réseau"
+      unique_id: "puissance_injectee_reseau"
       device_class: "energy"
       state_class: "measurement"
       unit_of_measurement: "W"

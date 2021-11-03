@@ -41,7 +41,7 @@ rooms:
 
 # Chambre Parents
   - name: Chambre Parents
-    icon: mdi:bed
+    icon: mdi:bed-double
     temperature: sensor.chamb_parents_temperature
     humidity: sensor.chamb_parents_humidite
     pressure: sensor.chamb_parents_pressure
@@ -95,7 +95,7 @@ rooms:
 
 # Cellier
   - name: Cellier
-    icon: mdi:home-roof
+    icon: mdi:home-flood
     temperature: sensor.temperature_cellier
     humidity: sensor.humidity_cellier
     door: binary_sensor.porte_cellier
@@ -125,8 +125,20 @@ rooms:
     icon: mdi:garage
     cover: cover.garage_soussol
     door: binary_sensor.porte_ssol_ouverte
-#    temperature: sensor.temperature_garage
+    temperature: sensor.temp_local_piscine
 #    humidity: sensor.humidity_garage
+
+# Cave
+  - name: Cave
+    icon: mdi:bottle-wine
+#    cover: cover.garage_soussol
+#    door: binary_sensor.porte_ssol_ouverte
+    temperature: sensor.cave_temperature
+    humidity: sensor.cave_humidity
+    more_entities:
+      entities:
+        - entity: sensor.cave_power
+          name: Batterie
 
 # Terrasse
   - name: Terrasse

@@ -1,13 +1,24 @@
 # https://dwainscheeren.github.io/dwains-lovelace-dashboard/configuration/house_information.html
 
-#house_information:
+house_information:
   favorites:
-    - entity: group.ping_reseau
-    - entity: group.esp_reseau
-    - entity: group.uptime_reseau    
-  #   - entity: binary_sensor.doorbell_button
-  #     icon_on: mdi:bell
-  #     icon_off: mdi:bell-outline
+    - entity: binary_sensor.ping_reseau
+      icon_on: mdi:lan-connect
+      icon_off: mdi:lan-disconnect
+    - entity: binary_sensor.esp_reseau
+      icon_on: mdi:lan-connect
+      icon_off: mdi:lan-disconnect
+    - entity: binary_sensor.uptime_reseau
+      icon_on: mdi:lan-connect
+      icon_off: mdi:lan-disconnect
+    - entity: binary_sensor.alarmes_importantes
+
+  addons:
+    - name: Alarmes
+      icon: mdi:lan-disconnect
+      path: 'dwains-dashboard/addons/house_information/alarmes/page.yaml'
+      main_menu: 'true' #Show this addon in the main navigation bar!
+
 
   # addons:
   #   - name: Calendar #This is an example addon see: https://github.com/dwainscheeren/dwains-dashboard-addons/tree/for-1.0/house_information/calendar

@@ -176,7 +176,8 @@ utility_meter:
 template:
 # Consommation journalière HP + HC - addition des utility meter
   - sensor:
-    - name: "energy_total_daily"
+    - name: "Energie Totale Jour"
+      unique_id: "energy_total_daily"
       state: >-
         {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
@@ -185,7 +186,8 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "energy_pisc_daily"
+    - name: "Energie Piscine Jour"
+      unique_id: "energy_pisc_daily" 
       state: >-
         {% set p = states('sensor.energy_pisc_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_pisc_usage_daily_hc') | float(default=0) | round(2) %}
@@ -194,7 +196,8 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "energy_sdb_daily"
+    - name: "Energie SdB Jour"
+      unique_id: "energy_sdb_daily"    
       state: >-
         {% set p = states('sensor.energy_sdb_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_sdb_usage_daily_hc') | float(default=0) | round(2) %}
@@ -203,7 +206,8 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "energy_pac1_daily"
+    - name: "Energie PAC Jour"
+      unique_id: "energy_pac1_daily"
       state: >-
         {% set p = states('sensor.energy_pac1_usage_daily_hp') | float(default=0) | round(3) %}
         {% set o = states('sensor.energy_pac1_usage_daily_hc') | float(default=0) | round(3) %}
@@ -212,7 +216,8 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "energy_ecs1_daily"
+    - name: "Energie ECS Jour"
+      unique_id: "energy_ecs1_daily"
       state: >-
         {% set p = states('sensor.energy_ecs1_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_ecs1_usage_daily_hc') | float(default=0) | round(2) %}
@@ -221,7 +226,8 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "energy_mal_daily"
+    - name: "Energie MàL Jour"
+      unique_id: "energy_mal_daily"
       state: >-
         {% set p = states('sensor.energy_mal_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_mal_usage_daily_hc') | float(default=0) | round(2) %}
@@ -230,7 +236,8 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "energy_autres_daily"
+    - name: "Energie Autres Jour"
+      unique_id: "energy_autres_daily"
       state: >-
         {% set p = states('sensor.energy_autres_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_autres_usage_daily_hc') | float(default=0) | round(2) %}

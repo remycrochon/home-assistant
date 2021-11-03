@@ -23,21 +23,8 @@ more_page:
         path: 'dwains-dashboard/addons/more_page/piscine/page.yaml'
 
       - name: System
-        icon: mdi:nas
+        icon: mdi:lan
         main_menu: 'true' #Show this addon in the main navigation bar!
         path: 'dwains-dashboard/addons/more_page/system/page.yaml'
 
-      - name: AdGuard
-        icon: mdi:angular
-        main_menu: 'true'
-        path: 'dwains-dashboard/addons/more_page/adguard/page.yaml'
 
-      - name: SpeedTest
-        main_menu: 'true'
-        icon: mdi:lan
-        path: 'dwains-dashboard/addons/more_page/speedtest/page.yaml' 
-
-      - name: UptimeRobot
-        main_menu: 'true' #Show this addon in the main navigation bar!
-        icon: mdi:cloud-upload-outline
-        path: 'dwains-dashboard/addons/more_page/uptimerobot/page.yaml'

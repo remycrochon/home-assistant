@@ -33,18 +33,3 @@ volets_salon_cuisine:
     - cover.cuisine
     - cover.volet_sam
 
-alarmes:
-  name: alarmes
-  all: true
-  entities:  
-    - binary_sensor.alarme_porte_cellier
-    - binary_sensor.alarme_porte_garage
-    - binary_sensor.alarme_porte_sous_sol
-    - binary_sensor.alarme_status_pac
-    - binary_sensor.alarme_discord_pac
-    - binary_sensor.alarme_temp_congelo_haute
-    - binary_sensor.ping_reseau
-    - binary_sensor.esp_reseau
-    - binary_sensor.uptime_reseau
-    - binary_sensor.porte_frigo
-    - input_boolean.def_com_vp2

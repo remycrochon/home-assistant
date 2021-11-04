@@ -2,15 +2,6 @@
 
 house_information:
   favorites:
-    - entity: binary_sensor.ping_reseau
-      icon_on: mdi:lan-connect
-      icon_off: mdi:lan-disconnect
-    - entity: binary_sensor.esp_reseau
-      icon_on: mdi:lan-connect
-      icon_off: mdi:lan-disconnect
-    - entity: binary_sensor.uptime_reseau
-      icon_on: mdi:lan-connect
-      icon_off: mdi:lan-disconnect
     - entity: binary_sensor.alarmes_importantes
 
   addons:

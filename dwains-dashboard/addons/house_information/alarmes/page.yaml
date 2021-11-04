@@ -7,14 +7,30 @@
     title: Ping
     card:
       type: entities
-      show_header_toggle: false
+      show_header_toggle: true
       state_color: false
+      show_empty: false
+      title: 'Liste Alarmes'
     filter:
       include:
         - entity_id: '*ping_*'
+        - entity_id: '*esp*_status'
+        - entity_id: 'binary_sensor.uptime_reseau'    
+        - entity_id: 'binary_sensor.alarme_porte_cellier'
+        - entity_id: 'binary_sensor.alarme_porte_garage'
+        - entity_id: 'binary_sensor.alarme_porte_sous_sol'
+        - entity_id: 'binary_sensor.alarme_status_pac'
+        - entity_id: 'binary_sensor.alarme_discord_pac'
+        - entity_id: 'binary_sensor.alarme_temp_congelo_haute'
+        - entity_id: 'binary_sensor.porte_frigo'
+        - entity_id: 'input_boolean.def_com_vp'        
           sort:
             method: state
             reverse: true
             numeric: true
       exclude:
-        - entity_id: '*blueprints_*'
+        - entity_id: "*blueprints_*"
+        - entity_id: "*134*"
+        - entity_id: "binary_sensor.ping_arduino_piscine"
+        - state: "on"
+        - state: Online

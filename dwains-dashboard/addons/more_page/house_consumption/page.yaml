@@ -81,10 +81,9 @@
 - type: custom:dwains-flexbox-card
   items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
   cards:
-
-# Total
+# Total & PV
       - cards:
-          - name: Total
+          - name: Total & PV
             styles:
               card:
                 - text-transform: uppercase
@@ -99,8 +98,8 @@
           - cards:
               - entities:
                   - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.pzem_totale_puissance
-                    name: Puissance 24h
+                    entity: sensor.envoy_122103023124_current_energy_consumption
+                    name: Conso Tot. (24h)
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2
@@ -120,8 +119,8 @@
                 type: 'custom:mini-graph-card'
               - entities:
                   - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.puissance_injectee_reseau
-                    name: Injection
+                    entity: sensor.envoy_122103023124_current_energy_production
+                    name: Prod PV (24h)
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2
@@ -140,75 +139,11 @@
                 theme: ios-dark-mode-blue-red
                 type: 'custom:mini-graph-card'
             type: horizontal-stack
-          - entities:
-            - entity: sensor.energie_totale_jour
-              name: Energie du jour
-            - entity: sensor.energy_total_weekly
-              name: Energie semaine                
-            - entity: sensor.energy_total_monthly
-              name: Energie Mois
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Plus d'Informations
-              entities:
-                - entity: sensor.energy_total_usage_daily_hc
-                  name: Energie HC du jour
-                - entity: sensor.energy_total_usage_daily_hp
-                  name: Energie HP du jour
-                - entity: sensor.pzem_totale_courant
-                  name: Intensité
-                  secondary_info: last-updated
-                - entity: sensor.pzem_totale_tension
-                  name: Tension
-                - entity: sensor.pzem_totale_factpuiss
-                  name: FP                  
-                - entity: sensor.pzem_totale_frequence
-                  name: Fréquence          
-                - entity: sensor.esp132_wifi_signal_sensor
-                  name: Signal WiFI
-            type: entities
-        type: vertical-stack
-# PV
-      - cards:
-          - name: Photo Voltaique
-            styles:
-              card:
-                - text-transform: uppercase
-                - font-size: 125%
-                - color: 'var(--dwains-theme-accent)'
-                - border-radius: 0%
-                - font-weight: 100
-                - letter-spacing: 10px
-                - --mdc-ripple-press-opacity: 0
-                - cursor: initial
-            type: 'custom:button-card'
           - cards:
               - entities:
                   - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.envoy_122103023124_current_energy_production
-                    name: Prod 24h
-                font_size: 80
-                hours_to_show: 24
-                line_width: 2
-                hour24: true
-                points_per_hour: 2
-                decimals: 0
-                show:
-                  animate: true
-                  fill: true
-                  icon: false
-                  labels: false
-                  name: true
-                  graph: bar
-                  extrema: true
-                  average: true
-                theme: ios-dark-mode-blue-red
-                type: 'custom:mini-graph-card'
-              - entities:
-                  - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.envoy_122103023124_current_energy_consumption
-                    name: Conso 24h
+                    entity: sensor.puissance_injectee_reseau
+                    name: Injection Réseau (si P+)
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2
@@ -229,15 +164,15 @@
             type: horizontal-stack
           - entities:
             - entity: sensor.envoy_122103023124_today_s_energy_production
-              name: Prod Jour
+              name: Prod PV Jour
               secondary_info: last-updated
             - entity: sensor.envoy_122103023124_today_s_energy_consumption
-              name: Conso Jour
+              name: Conso Total Jour
               secondary_info: last-updated
             - type: custom:fold-entity-row
               head:
                 type: section
-                label: Plus d'Informations
+                label: Plus d'Informations PV
               entities:
                 - entity: sensor.envoy_122103023124_last_seven_days_energy_production
                   name: Prod 7 jours
@@ -251,8 +186,93 @@
                 - entity: sensor.envoy_122103023124_lifetime_energy_consumption
                   name: Conso Totale
                   secondary_info: last-updated
+            - type: custom:fold-entity-row
+              head:              
+                type: section
+                label: Plus d'Informations PZEM
+              entities:
+                - entity: sensor.energie_totale_jour
+                  name: Energie PZEM jour
+                - entity: sensor.energy_total_weekly
+                  name: Energie PZEM semaine                
+                - entity: sensor.energy_total_monthly
+                  name: Energie PZEM Mois
+                - entity: sensor.energy_total_usage_daily_hc
+                  name: Energie PZEM HC du jour
+                - entity: sensor.energy_total_usage_daily_hp
+                  name: Energie PZEM HP du jour
+                - entity: sensor.pzem_totale_courant
+                  name: Intensité
+                  secondary_info: last-updated
+                - entity: sensor.pzem_totale_tension
+                  name: Tension
+                - entity: sensor.pzem_totale_factpuiss
+                  name: FP                  
+                - entity: sensor.pzem_totale_frequence
+                  name: Fréquence          
+                - entity: sensor.esp132_wifi_signal_sensor
+                  name: Signal WiFI
             type: entities
         type: vertical-stack
+
+# Autres
+      - cards:
+          - name: Autres
+            styles:
+              card:
+                - text-transform: uppercase
+                - font-size: 125%
+                - color: 'var(--dwains-theme-accent)'
+                - border-radius: 0%
+                - font-weight: 100
+                - letter-spacing: 10px
+                - --mdc-ripple-press-opacity: 0
+                - cursor: initial
+            type: 'custom:button-card'
+          - cards:
+              - entities:
+                  - color: 'var(--dwains-theme-accent)'
+                    entity: sensor.puissance_autres
+                    name: Puissance 24h
+                font_size: 80
+                hours_to_show: 24
+                line_width: 2
+                hour24: true
+                points_per_hour: 2
+                decimals: 0
+                show:
+                  animate: true
+                  fill: true
+                  icon: false
+                  labels: false
+                  name: true
+                  graph: bar
+                  extrema: true
+                  average: true
+                theme: ios-dark-mode-blue-red
+                type: 'custom:mini-graph-card'
+
+            type: horizontal-stack
+          - entities:
+            - entity: sensor.energie_autres_jour
+              name: Energie du jour
+            - entity: sensor.energy_autres_weekly
+              name: Energie semaine                
+            - entity: sensor.energy_autres_monthly
+              name: Energie Mois
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Plus d'Informations
+              entities:
+                - entity: sensor.energy_autres_usage_daily_hc
+                  name: Energie HC du jour
+                - entity: sensor.energy_autres_usage_daily_hp
+                  name: Energie HP du jour
+
+            type: entities
+        type: vertical-stack
+
 # Piscine
       - cards:
           - name: Piscine

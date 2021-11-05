@@ -1,0 +1,107 @@
+substitutions:
+  device_name: esp130-climat-sous-sol
+  friendly_name: esp130
+  time_timezone: "Europe/Paris"
+
+esphome:
+  name: ${device_name}
+  platform: ESP8266
+  board: d1_mini
+#  board: esp01_1m  
+  
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+
+  reboot_timeout: 5min
+  fast_connect: true
+    
+
+  manual_ip:
+    static_ip: 192.168.0.130
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+#  services:
+#    - service: control_stepper
+#      variables:
+#        target: int
+#      then:
+#        - stepper.set_target:
+#            id: my_stepper
+#            target: !lambda 'return target;'
+ota:
+
+web_server:
+  port: 80
+
+sun:
+  latitude: 43.9193
+  longitude: 2.198449722222222
+
+time:
+  - platform: homeassistant
+    timezone:  ${time_timezone} #UTC+0  #Africa/Abidjan #Africa/Algiers #Europe/Paris  #Africa/Algiers
+
+#uart:
+#  rx_pin: GPIO3 # RX=pin 21
+#  tx_pin: GPIO1 # TX=pin 22
+#  baud_rate: 9600
+
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: true
+  id: bus_a
+  
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+switch:    
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+    
+        
+sensor:
+
+  - platform: htu21d
+    temperature:
+      name: "${device_name} Temperature"
+    humidity:
+      name: "${device_name} Humidité"
+    update_interval: 60s
+    
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "${friendly_name} Uptime Sensor"
+    id: esp140_uptime
+    update_interval: 60s
+
+text_sensor:
+  # IP address #
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP address"
+      icon: "mdi:network-outline"
+    ssid:
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"

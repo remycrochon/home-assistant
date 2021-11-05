@@ -27,11 +27,11 @@ web_server:
 
 
 # Bus I²C
-#i2c:
-#  sda: GPIO4
-#  scl: GPIO5
-#  scan: true
-#  id: bus_a
+i2c:
+  sda: GPIO4
+  scl: GPIO5
+  scan: true
+  id: bus_a
 
 sun:
   latitude: 43.9193
@@ -61,7 +61,17 @@ sensor:
       - sliding_window_moving_average:
           window_size: 5
           send_every: 5  
-          
+
+  - platform: bme280
+    temperature:
+      name: "Temperature Sous-sol"
+      oversampling: 16x
+    pressure:
+      name: "Pression Sous-sol"
+    humidity:
+      name: "Humidité Sous-sol"
+    address: 0x77
+    update_interval: 60s          
           
 # Signal du WIFI
   - platform: wifi_signal

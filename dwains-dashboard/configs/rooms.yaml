@@ -112,7 +112,7 @@ rooms:
     cover: cover.garage_rdc
     temperature: sensor.temperature_garage
     humidity: sensor.humidity_garage
-    door: binary_sensor.porte_garage_ouverte
+    door: group.portes_garage_rdc
 
     more_entities:
       columns: 2 #optional
@@ -125,9 +125,9 @@ rooms:
     icon: mdi:garage
     cover: cover.garage_soussol
     door: binary_sensor.porte_ssol_ouverte
-    temperature: sensor.temp_local_piscine
+    temperature: sensor.esp130_climat_sous_sol_temperature
+    humidity: sensor.esp130_climat_sous_sol_humidite
     light: switch.pc_ht
-#    humidity: sensor.humidity_garage
 
 # Cave
   - name: Cave

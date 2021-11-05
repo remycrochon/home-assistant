@@ -33,3 +33,10 @@ volets_salon_cuisine:
     - cover.cuisine
     - cover.volet_sam
 
+portes_garage_rdc:
+  name: "portes garage rdc"
+  all: true
+  entities:
+    - binary_sensor.porte_frigo
+    - binary_sensor.porte_garage_ouverte
+

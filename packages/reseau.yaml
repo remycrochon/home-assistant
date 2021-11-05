@@ -107,15 +107,6 @@ binary_sensor:
       - binary_sensor.ping_rpi_adguard
       - binary_sensor.ping_module_adam
       - binary_sensor.ping_module_wago_piscine
-      - binary_sensor.ping_esp123_pezm_sdb
-      - binary_sensor.ping_esp125_piscine
-      - binary_sensor.ping_esp131_qualite_air
-      - binary_sensor.ping_esp132_pezm_totale
-      - binary_sensor.ping_esp133_congelateur
-#      - binary_sensor.ping_esp134_uv
-      - binary_sensor.ping_esp135_luxmetre
-      - binary_sensor.ping_esp137_pzem_piscine
-      - binary_sensor.ping_esp139_vmc_sous_sol
       - binary_sensor.cam_cuisine
       - binary_sensor.cam_garage_ext
       - binary_sensor.cam_garage_int
@@ -130,6 +121,7 @@ binary_sensor:
     entities:
       - binary_sensor.esp123_status
       - binary_sensor.esp125_status
+      - binary_sensor.esp130_status
       - binary_sensor.esp131_status
       - binary_sensor.esp132_status
       - binary_sensor.esp133_status

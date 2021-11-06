@@ -82,8 +82,8 @@ rooms:
 # Bureau
   - name: Bureau
     icon: mdi:desk
-#    temperature: sensor.temperature_cellier
-#    humidity: sensor.humidity_cellier
+    temperature: sensor.esp129_climat_bureau_temperature
+    humidity: sensor.esp129_climat_bureau_humidite
 #    door: binary_sensor.porte_cellier
     cover: group.volets_bureau
 #    more_entities:

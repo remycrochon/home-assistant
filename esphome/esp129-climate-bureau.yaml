@@ -1,7 +1,7 @@
 substitutions:
-  device_name: esp141-test-esp01
-  adress_ip: "192.168.0.141"
-  friendly_name: esp141
+  device_name: esp129-climat-bureau
+  adress_ip: "192.168.0.129"
+  friendly_name: esp129
   time_timezone: "Europe/Paris"
   
 esphome:
@@ -83,4 +83,3 @@ text_sensor:
   - platform: version
     id: text_sensor_version
     name: "${friendly_name} ESPHome Version"
-

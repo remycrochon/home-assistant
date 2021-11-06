@@ -14,64 +14,101 @@
             elements:
               - type: state-badge
                 entity: sensor.espaltherma_temp_eau_depart
+                title: Depart
                 style:
-                  top: 28%
+                  top: 25%
                   left: 10%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_temp_eau_depart_echangeur_plaque
                 style:
-                  top: 35%
-                  left: 58%
+                  top: 25%
+                  left: 57%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_signal_ppe_eau
                 style:
                   top: 85%
                   left: 62%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_capteur_debit
                 style:
-                  top: 35%
-                  left: 68%
+                  top: 25%
+                  left: 68.5%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_temp_eau_retour_rt4
                 style:
                   top: 80%
                   left: 10%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_temp_liquid_r3t
                 style:
                   top: 80%
-                  left: 85%
+                  left: 87%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_temp_ambiante_int_r1t
                 style:
-                  top: 50%
-                  left: 40%
+                  top: 45%
+                  left: 35%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_temp_air_ext
                 style:
-                  top: 50%
-                  left: 35%
+                  top: 45%
+                  left: 25%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_temp_cible
                 style:
-                  top: 50%
-                  left: 30%
+                  top: 60%
+                  left: 35%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_cop
                 style:
-                  top: 50%
+                  top: 60%
                   left: 25%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_courant_primaire
                 style:
                   top: 50%
-                  left: 20%
+                  left: 15%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'
               - type: state-badge
                 entity: sensor.espaltherma_pression
                 style:
                   top: 70%
-                  left: 61%                  
+                  left: 61%
+                  color: white
+                  font-size: 110%
+                  background: '#000000'                      
 - type: custom:dwains-flexbox-card
 #  items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
   items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-12'

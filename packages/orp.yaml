@@ -142,7 +142,7 @@ sensor:
     sensors:
       orp_piscine_orp:
         friendly_name: "orp_piscine_orp"
-        value_template: '{{ states("input_number.orp_memoire") }}'
+        value_template: '{{ states("input_number.orp_memoire")|float(default=0) }}'
         unit_of_measurement: "orp"
     
   - platform: template

@@ -135,9 +135,9 @@ binary_sensor:
     sensors:
       ph_niveau_bas_bidon:
         value_template: >-
-          {% set a=states('input_number.ph_vol_bidon')|float %}
-          {% set b=states('input_number.ph_vol_injecte')|float %}
-          {% set c=states('input_number.ph_seuil_bas_bidon')|float %}
+          {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
+          {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
+          {% set c=states('input_number.ph_seuil_bas_bidon')|float(default=0) %}
           {{ (a-b) <= c }}   
         friendly_name: "pH Seuil Niveau Bas Bidon"
 sensor:
@@ -162,7 +162,7 @@ sensor:
     sensors:
       ph_piscine_ph:
         friendly_name: "ph_piscine_ph"
-        value_template: '{{ states("input_number.ph_memoire") }}'
+        value_template: '{{ states("input_number.ph_memoire")|float(default=0) }}'
         unit_of_measurement: "pH"
     
   - platform: template

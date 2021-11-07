@@ -70,6 +70,11 @@ input_boolean:
     initial: false
 
   # EV appoint Piscine en mode automatique
+  piscine_mode_hivernage:
+    name: Piscine Mode Hivernage
+    icon: mdi:head-snowflake
+
+  # EV appoint Piscine en mode automatique
   ev_eau_piscine:
     name: Ev Piscine
     icon: mdi:water
@@ -98,7 +103,6 @@ input_select:
       - "Auto"
       - "On"
       - "Off"
-      - "Hivernage"
     icon: mdi:pool
 
 sensor:

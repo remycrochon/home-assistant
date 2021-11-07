@@ -24,11 +24,31 @@
           name:
             - font-weight: 900
         type: 'custom:button-card'
-      - type: "custom:power-usage-card-regex"
-        title: "Conso Elec "
-        total_daily_usage: sensor.energie_totale_jour
-        unknownText: "Inconnu"
-        filter: "^.*jour*$"
+      - type: entities
+        entities:
+          - entity: sensor.energie_totale_consommee_jour
+            name: Energie Totale jour
+      - type: custom:apexcharts-card
+        chart_type: pie
+        header:
+          show: true
+          title: Energie 24h
+          show_states: false
+          colorize_states: true
+        series:
+          - entity: sensor.energie_autres_jour
+            name: Autres
+          - entity: sensor.energie_pac_jour
+            name: PAC
+          - entity: sensor.energie_ecs_jour
+            name: ECS
+          - entity: sensor.energie_sdb_jour
+            name: SdB
+          - entity: sensor.energie_piscine_jour
+            name: Pisc
+          - entity: sensor.energie_mal_jour
+            name: MaL
+
   - type: vertical-stack
     cards:
       - name: Aperçu
@@ -53,11 +73,18 @@
           state_color: false
         filter:
           include:
+            - entity_id: sensor.envoy_122103023124_current_energy_consumption
+              sort:
+                method: state
+                reverse: true
+                numeric: true
             - entity_id: '*puissance*'
               sort:
                 method: state
                 reverse: true
                 numeric: true
+          exclude:
+            - entity_id: 'sensor.pzem_totale_puissance'
 #          exclude:
 #            - state: "< 1.81"
 

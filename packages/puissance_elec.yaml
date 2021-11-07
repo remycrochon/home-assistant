@@ -76,8 +76,8 @@ template:
         {% set a = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
         {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
         {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
-        {% set d = states('sensor.energy_pac_p_kw') | float(default=0) | round(2) %}
-        {% set e = states('sensor.energy_ecs_p_kw') | float(default=0) | round(2) %}          
+        {% set d = states('sensor.puissance_pac_rpac') | float(default=0) | round(2) %}
+        {% set e = states('sensor.ecocompteur_ecs') | float(default=0) | round(2) %}          
         {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
         {{ (a-b-c-d-e-f) | round(2) }}
       unit_of_measurement: "W"
@@ -115,6 +115,26 @@ template:
         {% set p = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
         {% set o = states('sensor.envoy_122103023124_current_energy_production') | float(default=0) | round(2) %}
         {{ (o - p) | round(2) }}
+
+# Convertion en kWh de la consommation energie jour délivrée par la passerelle Envoy
+    - name: "Energie Totale Consommée Jour"
+      unique_id: "energie_totale_conso_jour"
+      state: >-
+        {% set p = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
+        {{ (p / 1000) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"      
+ 
+# Convertion en kWh de la production energie jour délivrée par la passerelle Envoy
+    - name: "Energie Totale Produite Jour"
+      unique_id: "energie_totale_prod_jour"
+      state: >-
+        {% set p = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
+        {{ (p / 1000) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"       
 
 #Indique que la machine à laver est en fonctionnement
   - binary_sensor:

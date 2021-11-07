@@ -89,7 +89,6 @@ sensor:
 
   - platform: uptime
     name: "${friendly_name} Uptime Sensor"
-    id: esp140_uptime
     update_interval: 60s
 
 text_sensor:

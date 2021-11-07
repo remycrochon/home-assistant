@@ -148,6 +148,9 @@
             id: lsll
           - condition: trigger
             id: 5min
+        - condition: state
+          entity_id: input_boolean.piscine_mode_hivernage
+          state: 'off'
       sequence:
       - service: pool_pump.check
     - conditions:
@@ -169,9 +172,12 @@
     - conditions:
       - condition: state
         entity_id: input_select.pool_pump_mode
-        state: Hivernage
+        state: Auto
       - condition: trigger
         id: mapompe
+      - condition: state
+        entity_id: input_boolean.piscine_mode_hivernage
+        state: 'on'
       sequence:
       - service: switch.turn_on
         target:
@@ -179,9 +185,12 @@
     - conditions:
       - condition: state
         entity_id: input_select.pool_pump_mode
-        state: Hivernage
+        state: Auto
       - condition: trigger
         id: atpompe
+      - condition: state
+        entity_id: input_boolean.piscine_mode_hivernage
+        state: 'on'
       sequence:
       - service: switch.turn_off
         target:
@@ -732,8 +741,8 @@
   alias: Piscine ORP Anormal
   trigger:
   - platform: template
-    value_template: '{{state_attr("sensor.orp_stat", "standard_deviation") | float  >
-      0.1}}'
+    value_template: '{{state_attr("sensor.orp_stat", "standard_deviation") |float(default=0)
+      > 0.1}}'
   condition: []
   action:
   - service: notify.telegram

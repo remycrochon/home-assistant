@@ -2,24 +2,26 @@
   alias: 00 - Message Journalier Bilan puissance
   trigger:
   - platform: time
-    at: '23:59:00'
+    at: '23:59'
   action:
   - service: notify.telegram
     data:
-      message: Tot={{states('sensor.energy_total_daily')}} -HP={{states('sensor.energy_total_usage_daily_hp')
+      message: Tot={{states('sensor.energie_totale_jour')}} -HP={{states('sensor.energy_total_usage_daily_hp')
         }} -HC={{states('sensor.energy_total_usage_daily_hc') }} {{-"\n"-}}{{states("sensor.date_time")
         }}
       title: Conso Electrique du jour en kWh
   - service: notify.log_energy
     data:
-      message: '{{states(''sensor.energy_total_daily'') }},{{states(''sensor.energy_total_usage_daily_hp'')
-        }},{{states(''sensor.energy_total_usage_daily_hc'') }},{{states(''sensor.energy_pisc_daily'')
+      message: '{{states(''sensor.energie_totale_jour'') }},{{states(''sensor.energy_total_usage_daily_hp'')
+        }},{{states(''sensor.energy_total_usage_daily_hc'') }},{{states(''sensor.energie_piscine_jour'')
         }},{{states(''sensor.energy_pisc_usage_daily_hp'') }},{{states(''sensor.energy_pisc_usage_daily_hc'')
-        }},{{states(''sensor.energy_sdb_daily'') }},{{states(''sensor.energy_sdb_usage_daily_hp'')
-        }},{{states(''sensor.energy_sdb_usage_daily_hc'') }},{{states(''sensor.energy_pac1_daily'')
+        }},{{states(''sensor.energie_sdb_jour'') }},{{states(''sensor.energy_sdb_usage_daily_hp'')
+        }},{{states(''sensor.energy_sdb_usage_daily_hc'') }},{{states(''sensor.energie_pac_jour'')
         }},{{states(''sensor.energy_pac1_usage_daily_hp'') }},{{states(''sensor.energy_pac1_usage_daily_hc'')
-        }},{{states(''sensor.energy_ecs1_daily'') }},{{states(''sensor.energy_ecs1_usage_daily_hp'')
-        }},{{states(''sensor.energy_ecs1_usage_daily_hc'') }}'
+        }},{{states(''sensor.energie_ecs_jour'') }},{{states(''sensor.energy_ecs1_usage_daily_hp'')
+        }},{{states(''sensor.energy_ecs1_usage_daily_hc'') }} ,{{states(''sensor.energie_autres_jour'')
+        }},{{states(''sensor.energy_autres_usage_daily_hp'') }},{{states(''sensor.energy_autres_usage_daily_hc'')
+        }}'
       title: Conso Electrique du jour en kWh
   mode: single
 - id: '1610184966825'
@@ -1497,13 +1499,13 @@
       - service: notify.telegram
         data:
           message: 'Temps de filtration:  {{states.sensor.pool_pump_running_today.attributes.value}}{{-"\n"-}}Conso:
-            {{states(''sensor.energy_pisc_daily'')}} kWh.{{-"\n"-}} Tps Utilisation
+            {{states(''sensor.energie_piscine_jour'')}} kWh.{{-"\n"-}} Tps Utilisation
             cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}} h {{-"\n"-}}{{states("sensor.date_time")
             }}'
           title: Piscine Rapport Fin de journée
       - service: notify.log_piscine
         data:
-          message: '{{states.sensor.pool_pump_running_today.attributes.value }},{{states(''sensor.energy_pisc_daily'')}}'
+          message: '{{states.sensor.pool_pump_running_today.attributes.value }},{{states(''sensor.energie_piscine_jour'')}}'
           title: Rapport jour piscine
     default: []
   mode: single

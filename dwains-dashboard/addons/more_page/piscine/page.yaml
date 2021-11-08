@@ -267,6 +267,8 @@
             show_state: false
             type: custom:multiple-entity-row
           - entities:
+              - entity: input_boolean.piscine_mode_hivernage
+                name: Mode Hiv
               - entity: input_datetime.heure_ma_pump_pisc_hiv
                 name: MaPpe
               - entity: input_datetime.heure_at_pump_pisc_hiv
@@ -279,10 +281,10 @@
                 name: T°Sup
             entity: input_boolean.hors_gel
             icon: mdi:snowflake-alert
-            name: Hivernage
+            name: Hiver
             show_state: false
             type: custom:multiple-entity-row
-          - entities:
+          - entities:            
               - entity: input_boolean.volet_piscine_auto
                 name: Auto
               - entity: cover.volet_piscine
@@ -321,8 +323,9 @@
               - entity: input_boolean.volet_piscine_auto
               - entity: input_datetime.heure_ouv_volet_pisc
               - entity: input_datetime.heure_ferm_volet_pisc
-              - label: Hivernage
+              - label: Hiver
                 type: section
+              - entity: input_boolean.piscine_mode_hivernage
               - entity: input_datetime.heure_ma_pump_pisc_hiv
                 name: Heure Marche Ppe
               - entity: input_datetime.heure_at_pump_pisc_hiv

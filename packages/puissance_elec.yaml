@@ -87,9 +87,9 @@ template:
 # Cumul de PAC et RPAC
     - name: "Puissance PAC+RPAC"
       unique_id: "puissance_pac_rpac"
-      device_class: "energy"
+      device_class: "power"
       state_class: "measurement"
-      unit_of_measurement: "W"
+      unit_of_measurement: "w"
       state: >-
           {% set p = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
           {% set o = states('sensor.ecocompteur_rpac') | float(default=0) | round(2) %}
@@ -108,9 +108,9 @@ template:
 # Calcul puissance injectée sur le réseau
     - name: "Puissance Injectée Réseau"
       unique_id: "puissance_injectee_reseau"
-      device_class: "energy"
+      device_class: "power"
       state_class: "measurement"
-      unit_of_measurement: "W"
+      unit_of_measurement: "w"
       state: >-
         {% set p = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
         {% set o = states('sensor.envoy_122103023124_current_energy_production') | float(default=0) | round(2) %}

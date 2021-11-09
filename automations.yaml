@@ -105,7 +105,7 @@
     default: []
   mode: single
 - id: '1611515162753'
-  alias: Piscine Calcul fonctionnement Pompe
+  alias: Piscine Calcul fonctionnement Pompe Ete
   description: 'Mode Auto/On/Off/Hivernage '
   trigger:
   - platform: homeassistant
@@ -123,12 +123,6 @@
   - platform: time_pattern
     minutes: /5
     id: 5min
-  - platform: time
-    at: input_datetime.heure_ma_pump_pisc_hiv
-    id: mapompe
-  - platform: time
-    at: input_datetime.heure_at_pump_pisc_hiv
-    id: atpompe
   condition: []
   action:
   - choose:
@@ -150,9 +144,9 @@
             id: lsll
           - condition: trigger
             id: 5min
-        - condition: state
-          entity_id: input_boolean.piscine_mode_hivernage
-          state: 'off'
+      - condition: state
+        entity_id: input_boolean.piscine_mode_hivernage
+        state: 'off'
       sequence:
       - service: pool_pump.check
     - conditions:
@@ -167,32 +161,6 @@
       - condition: state
         entity_id: input_select.pool_pump_mode
         state: 'Off'
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.pool_pump_switch
-    - conditions:
-      - condition: state
-        entity_id: input_select.pool_pump_mode
-        state: Auto
-      - condition: trigger
-        id: mapompe
-      - condition: state
-        entity_id: input_boolean.piscine_mode_hivernage
-        state: 'on'
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.pool_pump_switch
-    - conditions:
-      - condition: state
-        entity_id: input_select.pool_pump_mode
-        state: Auto
-      - condition: trigger
-        id: atpompe
-      - condition: state
-        entity_id: input_boolean.piscine_mode_hivernage
-        state: 'on'
       sequence:
       - service: switch.turn_off
         target:
@@ -2328,4 +2296,60 @@
     data:
       name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n\
         {% else %}\n  Dwains Dark Theme\n{% endif %}\n"
+  mode: single
+- id: '1636444851657'
+  alias: Piscine Calcul fonctionnement Pompe Hiver
+  description: 'Mode Auto/On/Off/Hivernage '
+  trigger:
+  - platform: homeassistant
+    event: start
+    id: Start
+  - platform: time
+    at: input_datetime.heure_ma_pump_pisc_hiv
+    id: mapompe
+  - platform: time
+    at: input_datetime.heure_at_pump_pisc_hiv
+    id: atpompe
+  - platform: state
+    entity_id: input_boolean.piscine_mode_hivernage
+    from: 'on'
+    to: 'off'
+    id: hivernage=off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: mapompe
+      - condition: state
+        entity_id: input_boolean.piscine_mode_hivernage
+        state: 'on'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: 'On'
+    - conditions:
+      - condition: trigger
+        id: atpompe
+      - condition: state
+        entity_id: input_boolean.piscine_mode_hivernage
+        state: 'on'
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: 'Off'
+    - conditions:
+      - condition: trigger
+        id: hivernage=off
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: Auto
+    default: []
   mode: single

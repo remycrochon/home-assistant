@@ -1,0 +1,33 @@
+
+- type: custom:dwains-flexbox-card
+  items_classes: 'col-xs-12 col-sm-6 col-md-6 col-lg-6'
+  padding: true
+  cards:
+  
+    - type: custom:meteo-france-weather-card
+      name: Albi
+      entity: weather.albi
+      rainForecastEntity: sensor.albi_next_rain
+      freezeChanceEntity: sensor.albi_freeze_chance
+      rainChanceEntity: sensor.albi_rain_chance
+      snowChanceEntity: sensor.albi_snow_chance
+      thunderChanceEntity: sensor.albi_thunder_chance
+      alertEntity: sensor.albi_weather_alert
+      uvEntity: sensor.vp2_uv
+      cloudCoverEntity: sensor.albi_cloud_cover
+
+    - type: custom:apexcharts-card
+      graph_span: 8d
+      span:
+        start: hour
+      header:
+        show: true
+        title: Prévisions precipitation
+      series:
+        - entity: weather.albi
+          type: area
+          extend_to_end: false
+          data_generator: |
+            return entity.attributes.forecast.map((entry) => {
+              return [new Date(entry.datetime).getTime(), entry.precipitation];
+            });

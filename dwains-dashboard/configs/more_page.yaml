@@ -6,7 +6,12 @@ more_page:
         icon: mdi:home-thermometer-outline
         main_menu: 'true' #Show this addon in the main navigation bar!
         path: 'dwains-dashboard/addons/more_page/climate_dashboard/page.yaml'
-        
+ 
+      - name: Meteo
+        icon: mdi:weather-cloudy
+        main_menu: 'true'
+        path: 'dwains-dashboard/addons/more_page/meteo/page.yaml'
+       
       - name: Conso Elec
         icon: mdi:flash
         main_menu: 'true' #Show this addon in the main navigation bar!

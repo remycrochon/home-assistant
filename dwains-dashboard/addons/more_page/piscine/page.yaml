@@ -247,6 +247,8 @@
             show_state: false
             type: custom:multiple-entity-row
           - entities:
+              - entity: pool_pump.total_daily_filtering_duration
+                name: Durée Calculée
               - entity: sensor.pool_pump_running_today
                 name: Fonct. Jour
               - entity: binary_sensor.pool_pump_running

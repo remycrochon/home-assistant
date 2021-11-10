@@ -73,7 +73,7 @@
           state_color: false
         filter:
           include:
-            - entity_id: sensor.envoy_122103023124_current_energy_consumption
+            - entity_id: sensor.envoy_122103023124_current_power_consumption
               sort:
                 method: state
                 reverse: true
@@ -125,7 +125,7 @@
           - cards:
               - entities:
                   - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.envoy_122103023124_current_energy_consumption
+                    entity: sensor.envoy_122103023124_current_power_consumption
                     name: Conso Tot. (24h)
                 font_size: 80
                 hours_to_show: 24
@@ -146,7 +146,7 @@
                 type: 'custom:mini-graph-card'
               - entities:
                   - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.envoy_122103023124_current_energy_production
+                    entity: sensor.envoy_122103023124_current_power_production
                     name: Prod PV (24h)
                 font_size: 80
                 hours_to_show: 24

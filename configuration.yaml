@@ -237,6 +237,7 @@ modbus:
         input_type: input
         scale: 0.1
         precision: 1
+        data_type: float16
 
       # lecture de la sonde pt100 de la mesure de temperature du local piscine
       # uniquement à titre indicatif
@@ -247,6 +248,7 @@ modbus:
         input_type: input
         scale: 0.1
         precision: 1
+        data_type: float16
 
 # Modbus TCP connection Module Adam SSol
   - type: tcp

@@ -1229,9 +1229,9 @@
   - choose:
     - conditions:
       - condition: template
-        value_template: '{% set a=states(''sensor.vp2_datetime'')|default(0)|int %}
+        value_template: '{% set a=states(''sensor.vp2_datetime'')|int(default=0) %}
 
-          {% set b=states(''input_number.mem_vp2_datetime'')|default(0)|int %}
+          {% set b=states(''input_number.mem_vp2_datetime'')|int(default=0) %}
 
           {{ a != b }}'
       sequence:
@@ -1239,7 +1239,7 @@
         target:
           entity_id: input_number.mem_vp2_datetime
         data_template:
-          value: '{{ states(''sensor.vp2_datetime'')|float }}'
+          value: '{{ states(''sensor.vp2_datetime'')|float(default=0) }}'
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.def_com_vp2
@@ -1664,10 +1664,8 @@
       - service: persistent_notification.create
         data:
           message: ESP On Line {{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
-      resolved_message: Alert {{ entity_name }} resolved
       max_alerts: 100
 - id: '1634568011264'
   alias: Alarme Blueprints Notification Ping Reseau
@@ -1790,7 +1788,7 @@
       resolved_message: Alert {{ entity_name }} resolved
       initial_delay: 300
       max_alerts: 100
-      dismiss_entity: input_boolean.inhib_alarme_pac
+      condition_entity: input_boolean.inhib_alarme_pac
 - id: '1634569580188'
   alias: Alarme Blueprints Notification Porte Cellier Ouverte
   description: Blue Print
@@ -1899,7 +1897,7 @@
 - id: '1634570304569'
   alias: Alarme Blueprints Notification Discordance PAC
   description: ' Surveillance discordance PAC entre l''état du thermostat et l''état
-    du switch de commande  '
+    du switch de commande '
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
     input:
@@ -1928,13 +1926,12 @@
         data:
           message: PAC OK=> PU= {{states("sensor.puissance_pac_rpac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
-      resolved_message: Alert {{ entity_name }} resolved
       max_alerts: 100
       initial_delay: 600
       dismiss_entity: input_boolean.inhib_alarme_pac
+      resolved_message: Alert {{ entity_name }} resolved
 - id: '1634571065075'
   alias: 'Alarme Blueprints Notification Porte frigo garage ouverte   '
   description: '# Alarme porte frigo garage ouverte   '
@@ -2030,10 +2027,8 @@
       - service: persistent_notification.create
         data:
           message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
-      resolved_message: Alert {{ entity_name }} resolved
       initial_delay: 1
       max_alerts: 100
 - id: '1634706860525'
@@ -2165,7 +2160,7 @@
     marche
   trigger:
   - platform: numeric_state
-    entity_id: sensor.envoy_122103023124_current_energy_production
+    entity_id: sensor.envoy_122103023124_current_power_production
     id: mal on
     above: input_number.seuil_delestage_pv
     for:
@@ -2202,7 +2197,7 @@
           option: 'Off'
       - service: notify.telegram
         data:
-          message: Delectage Piscine sur ON{{-"\n"-}}{{states("sensor.date_time")
+          message: Delestage Piscine sur ON{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Energie-Delestage !!!
     - conditions:
@@ -2222,7 +2217,7 @@
           option: Auto
       - service: notify.telegram
         data:
-          message: Delectage Piscine sur OFF{{-"\n"-}}{{states("sensor.date_time")
+          message: Delestage Piscine sur OFF{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Energie-Delestage !!!
     default: []

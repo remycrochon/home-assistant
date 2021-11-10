@@ -17,7 +17,7 @@
       cloudCoverEntity: sensor.albi_cloud_cover
 
     - type: custom:apexcharts-card
-      graph_span: 8d
+      graph_span: 14d
       span:
         start: hour
       header:

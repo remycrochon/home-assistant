@@ -31,7 +31,7 @@ sensor:
 
       espaltherma_temp_cible:
         friendly_name: "T° cible"
-        value_template: "{{ state_attr('sensor.althermasensors','Temp. cond. cible')|round(2) }}" # L39
+        value_template: "{{ state_attr('sensor.althermasensors','Temp. cond. cible')|round(2,default=0) }}" # L39
         unit_of_measurement: '°C'
 
       espaltherma_temp_ambiante_int_r1t:
@@ -76,7 +76,7 @@ sensor:
 
       espaltherma_signal_ppe_eau:
         friendly_name: "Signal Ppe Eau"
-        value_template: "{{ 100-state_attr('sensor.althermasensors','Signal de pompe à eau (0:max-100:arrêt)')|int }}" # L186
+        value_template: "{{ 100-state_attr('sensor.althermasensors','Signal de pompe à eau (0:max-100:arrêt)')|int(default=0) }}" # L186
         unit_of_measurement: '%'
 
       espaltherma_pression:

@@ -73,7 +73,7 @@ template:
     - name: "Puissance Autres"
       unique_id: "puissance_autres"
       state: >-
-        {% set a = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
+        {% set a = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
         {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
         {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
         {% set d = states('sensor.puissance_pac_rpac') | float(default=0) | round(2) %}
@@ -112,8 +112,8 @@ template:
       state_class: "measurement"
       unit_of_measurement: "w"
       state: >-
-        {% set p = states('sensor.envoy_122103023124_current_energy_consumption') | float(default=0) | round(2) %}
-        {% set o = states('sensor.envoy_122103023124_current_energy_production') | float(default=0) | round(2) %}
+        {% set p = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
+        {% set o = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
         {{ (o - p) | round(2) }}
 
 # Convertion en kWh de la consommation energie jour délivrée par la passerelle Envoy

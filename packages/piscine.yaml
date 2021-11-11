@@ -70,8 +70,8 @@ input_boolean:
     initial: false
 
   # EV appoint Piscine en mode automatique
-  piscine_mode_hivernage:
-    name: Piscine Mode Hivernage
+  piscine_arret_force:
+    name: Piscine Arret Forcé
     icon: mdi:head-snowflake
 
   # EV appoint Piscine en mode automatique
@@ -105,6 +105,14 @@ input_select:
       - "Off"
     icon: mdi:pool
 
+  mode_fonctionnement_piscine:
+    name: Mode Fonct Piscine
+    options:
+      - "Ete"
+      - "Hiver"
+      - "Ma F"
+      - "At F"
+    icon: mdi:pool
 sensor:
   # Affichage du temps de fonctionnement de la pompe ce jour
   - platform: history_stats

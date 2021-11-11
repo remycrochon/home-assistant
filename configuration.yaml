@@ -11,7 +11,7 @@ default_config:
 
 # configuration des log
 logger:
-  default: warning
+  default: info
   logs:
 # log level for HA core
     homeassistant.core: fatal
@@ -349,6 +349,7 @@ pool_pump:
   switch_entity_id: switch.pool_pump_switch
   pool_pump_mode_entity_id: input_select.pool_pump_mode
   pool_temperature_entity_id: sensor.pool_water_temperature
+  water_level_critical_entity_id: input_boolean.piscine_arret_force
 
 
 livebox:

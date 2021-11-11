@@ -105,8 +105,8 @@
     default: []
   mode: single
 - id: '1611515162753'
-  alias: Piscine Calcul fonctionnement Pompe Ete
-  description: 'Mode Auto/On/Off/Hivernage '
+  alias: Piscine Calcul fonctionnement Pompe Ete/Hiver
+  description: Mode Etet/Hiver/Ma Forcée/At Forcé
   trigger:
   - platform: homeassistant
     event: start
@@ -115,11 +115,11 @@
     entity_id: sensor.pool_water_temperature
     id: temp
   - platform: state
-    entity_id: input_select.pool_pump_mode
+    entity_id: input_select.mode_fonctionnement_piscine
     id: mode
   - platform: state
-    entity_id: input_boolean.pool_water_level_critical
-    id: lsll
+    entity_id: input_boolean.piscine_arret_force
+    id: at_forcé
   - platform: time_pattern
     minutes: /5
     id: 5min
@@ -130,42 +130,76 @@
       - condition: and
         conditions:
         - condition: state
-          state: Auto
-          entity_id: input_select.pool_pump_mode
+          entity_id: input_select.mode_fonctionnement_piscine
+          state: Ete
         - condition: or
           conditions:
           - condition: trigger
-            id: Start
-          - condition: trigger
             id: temp
           - condition: trigger
-            id: mode
-          - condition: trigger
-            id: lsll
-          - condition: trigger
-            id: 5min
-      - condition: state
-        entity_id: input_boolean.piscine_mode_hivernage
-        state: 'off'
+            id: at_forcé
       sequence:
-      - service: pool_pump.check
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: Auto
     - conditions:
       - condition: state
-        entity_id: input_select.pool_pump_mode
-        state: 'On'
+        entity_id: input_select.mode_fonctionnement_piscine
+        state: Hiver
       sequence:
-      - service: switch.turn_on
+      - choose:
+        - conditions:
+          - condition: time
+            after: input_datetime.heure_ma_pump_pisc_hiv
+            before: input_datetime.heure_at_pump_pisc_hiv
+          sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: input_select.pool_pump_mode
+            data:
+              option: 'On'
+          - service: homeassistant.turn_on
+            target:
+              entity_id: switch.pool_pump_switch
+        default:
+        - service: input_select.select_option
+          target:
+            entity_id: input_select.pool_pump_mode
+          data:
+            option: 'Off'
+        - service: homeassistant.turn_off
+          target:
+            entity_id: switch.pool_pump_switch
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine
+        state: Ma F
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: 'On'
+      - service: homeassistant.turn_on
         target:
           entity_id: switch.pool_pump_switch
     - conditions:
       - condition: state
-        entity_id: input_select.pool_pump_mode
-        state: 'Off'
+        entity_id: input_select.mode_fonctionnement_piscine
+        state: At F
       sequence:
-      - service: switch.turn_off
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pool_pump_mode
+        data:
+          option: 'Off'
+      - service: homeassistant.turn_off
         target:
           entity_id: switch.pool_pump_switch
     default: []
+  - service: pool_pump.check
   mode: single
 - id: '1610181804077'
   alias: Piscine Hors_Gel Calcul
@@ -1194,10 +1228,10 @@
         state: 'on'
       sequence:
       - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
         data:
-          option: 'On'
+          option: Ma F
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
@@ -1208,10 +1242,10 @@
         state: 'off'
       sequence:
       - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
         data:
-          option: Hivernage
+          option: Hiver
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
@@ -2190,16 +2224,17 @@
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.mem_delestage
-      - service: input_select.select_option
+      - service: automation.turn_off
         target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: 'Off'
+          entity_id: automation.check_pool_pump_on_event
       - service: notify.telegram
         data:
           message: Delestage Piscine sur ON{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Energie-Delestage !!!
+      - service: homeassistant.turn_off
+        target:
+          entity_id: switch.pool_pump_switch
     - conditions:
       - condition: state
         entity_id: input_boolean.mem_delestage
@@ -2210,11 +2245,9 @@
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.mem_delestage
-      - service: input_select.select_option
+      - service: automation.turn_on
         target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: Auto
+          entity_id: automation.check_pool_pump_on_event
       - service: notify.telegram
         data:
           message: Delestage Piscine sur OFF{{-"\n"-}}{{states("sensor.date_time")
@@ -2291,60 +2324,4 @@
     data:
       name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n\
         {% else %}\n  Dwains Dark Theme\n{% endif %}\n"
-  mode: single
-- id: '1636444851657'
-  alias: Piscine Calcul fonctionnement Pompe Hiver
-  description: 'Mode Auto/On/Off/Hivernage '
-  trigger:
-  - platform: homeassistant
-    event: start
-    id: Start
-  - platform: time
-    at: input_datetime.heure_ma_pump_pisc_hiv
-    id: mapompe
-  - platform: time
-    at: input_datetime.heure_at_pump_pisc_hiv
-    id: atpompe
-  - platform: state
-    entity_id: input_boolean.piscine_mode_hivernage
-    from: 'on'
-    to: 'off'
-    id: hivernage=off
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: mapompe
-      - condition: state
-        entity_id: input_boolean.piscine_mode_hivernage
-        state: 'on'
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: 'On'
-    - conditions:
-      - condition: trigger
-        id: atpompe
-      - condition: state
-        entity_id: input_boolean.piscine_mode_hivernage
-        state: 'on'
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: 'Off'
-    - conditions:
-      - condition: trigger
-        id: hivernage=off
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: Auto
-    default: []
   mode: single

@@ -165,7 +165,7 @@
             hours_to_show: 72
             refresh_interval: 0
       - entities:
-          - entity: input_select.pool_pump_mode
+          - entity: input_select.mode_fonctionnement_piscine
             name: Mode de Fonctionnement
           - entities:
               - entity: sensor.pression_piscine_p
@@ -269,8 +269,6 @@
             show_state: false
             type: custom:multiple-entity-row
           - entities:
-              - entity: input_boolean.piscine_mode_hivernage
-                name: Mode Hiv
               - entity: input_datetime.heure_ma_pump_pisc_hiv
                 name: MaPpe
               - entity: input_datetime.heure_at_pump_pisc_hiv
@@ -320,6 +318,8 @@
               - label: Filtration
                 type: section
               - entity: input_number.mem_temp_piscine
+              - entity: input_select.pool_pump_mode
+              - entity: input_boolean.piscine_arret_force
               - label: Volet
                 type: section
               - entity: input_boolean.volet_piscine_auto
@@ -327,7 +327,6 @@
               - entity: input_datetime.heure_ferm_volet_pisc
               - label: Hiver
                 type: section
-              - entity: input_boolean.piscine_mode_hivernage
               - entity: input_datetime.heure_ma_pump_pisc_hiv
                 name: Heure Marche Ppe
               - entity: input_datetime.heure_at_pump_pisc_hiv

@@ -29,15 +29,13 @@ rooms:
     icon: mdi:shower-head
     temperature: sensor.temperature_sdb
     humidity: sensor.humidity_sdb
+    pressure: sensor.pression_sdb
     cover: cover.sdb
     more_entities:
       entities:
-        - entity: sensor.humidty_status_sdb
-          name: Hum Status       
         - entity: sensor.battery_sdb
           name: Batterie
-        - entity: sensor.rssi_sdb
-          name: Rssi
+
 
 # Chambre Parents
   - name: Chambre Parents
@@ -82,16 +80,15 @@ rooms:
 # Bureau
   - name: Bureau
     icon: mdi:desk
-    temperature: sensor.esp129_climat_bureau_temperature
-    humidity: sensor.esp129_climat_bureau_humidite
+    temperature: sensor.bureau_temperature
+    humidity: sensor.bureau_humidite
+    pressure: sensor.bureau_pression
 #    door: binary_sensor.porte_cellier
     cover: group.volets_bureau
-#    more_entities:
-#      entities:
-#        - entity: sensor.battery_cellier
-#          name: Batterie
-#        - entity: sensor.humidity_status_cellier
-#          name: Status Hum
+    more_entities:
+      entities:
+        - entity: sensor.bureau_power
+          name: Batterie
 
 # Cellier
   - name: Cellier

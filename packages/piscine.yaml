@@ -154,9 +154,9 @@ template:
 
         # calcul de l'heure pivot, c'est l'heure autour de laquelle le temps de fonctionnement est réparti
     - name: "heure_pivot_piscine"
-      state: '{{ as_timestamp(strptime(state_attr("sun.sun", "next_noon"), "")) | timestamp_custom("%H:%M") }}'
+      state: >-
+        {{ as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom(' %H %M') }}
       icon: mdi:weather-sunny
-
 
   # Recopie pression filtre lu dans esphome dans un template
     - name: "pression_piscine_p"

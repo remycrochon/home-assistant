@@ -138,6 +138,9 @@
             id: temp
           - condition: trigger
             id: at_forcé
+          - condition: state
+            entity_id: input_select.mode_fonctionnement_piscine
+            state: Ete
       sequence:
       - service: input_select.select_option
         target:

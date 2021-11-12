@@ -136,13 +136,25 @@ template:
       device_class: "energy"
       state_class: "total"       
 
+# Totale energie soutirée calculée depuis les releves de passerelle Envoy
+    - name: "Energie Totale Soutirée Jour"
+      unique_id: "energie_totale_soutiree_jour"
+      state: >-
+        {% set a = states('sensor.energie_totale_consommee_jour') | float(default=0) | round(2) %}
+        {% set b = states('sensor.energie_totale_produite_jour') | float(default=0) | round(2) %}
+        {{ ( a-b )| round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"       
+
+
 #Indique que la machine à laver est en fonctionnement
   - binary_sensor:
       - name: "MaLaver en marche"
         delay_off:
           minutes: 5
         state: >
-          {{ states('sensor.puissance_pc_mal')|float(default=0) > 10 }}
+          {{ states('sensor.puissance_pc_mal')|float(default=0) > 15 }}
 
 #Indique que SdB est en fonctionnement
   - binary_sensor:
@@ -150,7 +162,7 @@ template:
         delay_off:
           minutes: 5
         state: >
-          {{ states('sensor.pzem_sdb_puissance')|float(default=0) > 10 }}
+          {{ states('sensor.pzem_sdb_puissance')|float(default=0) > 15 }}
 
   
 sensor:

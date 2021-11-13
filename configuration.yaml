@@ -357,10 +357,10 @@ livebox:
   username: !secret user_livebox
   password: !secret mdp_livebox
   
-owntracks:
-  max_gps_accuracy: 200
-  waypoints: false
-  mqtt_topic: "owntracks/#"
+#owntracks:
+#  max_gps_accuracy: 200
+#  waypoints: false
+#  mqtt_topic: "owntracks/#"
 
 python_script:
 

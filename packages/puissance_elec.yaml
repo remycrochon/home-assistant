@@ -96,29 +96,67 @@ template:
           {{ (o + p) | round(2) }}
 
 # Calcul energie injectée sur le réseau du jour
-    - name: "Energie Injectée Réseau Jour"
-      unique_id: "energy_injectee_reseau_jour"
+    - name: "Envoy Energie Injectée Réseau Jour"
+      unique_id: "envoy_energie_injectee_reseau_jour"
       device_class: "energy"
       state_class: "total"
       unit_of_measurement: "kWh"
       state: >-
-        {% set p = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
-        {% set o = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
-        {{ (o - p)/1000 | round(2) }}
-# Calcul puissance injectée sur le réseau
-    - name: "Puissance Injectée Réseau"
-      unique_id: "puissance_injectee_reseau"
+        {% set prod = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
+        {% set conso = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
+        {% if prod>conso %}
+          {{ (prod - conso)/1000 | round(2) }}
+        {% else%}
+          0
+        {%endif%}
+
+# Envoy:  Energie soutirée depuis le reseau
+    - name: "Envoy Energie Totale Soutirée Jour"
+      unique_id: "envoy_energie_totale_soutiree_jour"
+      state: >-
+        {% set prod = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
+        {% set conso = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
+        {% if conso>prod %}
+            {{ (conso - prod)/1000 | round(2) }}
+        {% else%}
+          0
+        {%endif%}        
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+
+# Envoy: Puissance injectée sur le réseau
+    - name: "Envoy Puissance Injectée Réseau"
+      unique_id: "envoy_puissance_injectee_reseau"
       device_class: "power"
       state_class: "measurement"
       unit_of_measurement: "w"
       state: >-
-        {% set p = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
-        {% set o = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
-        {{ (o - p) | round(2) }}
+        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
+        {% set conso = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
+        {% if prod>conso %}
+          {{ (prod - conso) | round(2) }}
+        {% else%}
+          0
+        {%endif%}
+# Envoy: Puissance soutirée sur le réseau
+    - name: "Envoy Puissance soutirée Réseau"
+      unique_id: "envoy_puissance_soutiree_reseau"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "w"
+      state: >-
+        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
+        {% set conso = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
+        {% if conso>prod %}
+          {{ (conso - prod) | round(2) }}
+        {% else%}
+          0
+        {%endif%}    
 
-# Convertion en kWh de la consommation energie jour délivrée par la passerelle Envoy
-    - name: "Energie Totale Consommée Jour"
-      unique_id: "energie_totale_conso_jour"
+# Envoy: Convertion en kWh de la consommation energie jour
+    - name: "Envoy Energie Totale Consommée Jour"
+      unique_id: "envoy_energie_totale_conso_jour"
       state: >-
         {% set p = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
         {{ (p / 1000) | round(2) }}
@@ -126,23 +164,12 @@ template:
       device_class: "energy"
       state_class: "total"      
  
-# Convertion en kWh de la production energie jour délivrée par la passerelle Envoy
-    - name: "Energie Totale Produite Jour"
-      unique_id: "energie_totale_prod_jour"
+# Envoy: Convertion en kWh de la production energie jour
+    - name: "Envoy Energie Totale Produite Jour"
+      unique_id: "envoy_energie_totale_prod_jour"
       state: >-
         {% set p = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
         {{ (p / 1000) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"       
-
-# Totale energie soutirée calculée depuis les releves de passerelle Envoy
-    - name: "Energie Totale Soutirée Jour"
-      unique_id: "energie_totale_soutiree_jour"
-      state: >-
-        {% set a = states('sensor.energie_totale_consommee_jour') | float(default=0) | round(2) %}
-        {% set b = states('sensor.energie_totale_produite_jour') | float(default=0) | round(2) %}
-        {{ ( a-b )| round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"       

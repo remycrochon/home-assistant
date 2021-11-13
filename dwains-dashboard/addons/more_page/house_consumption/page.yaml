@@ -26,8 +26,8 @@
         type: 'custom:button-card'
       - type: entities
         entities:
-          - entity: sensor.energie_totale_consommee_jour
-            name: Energie Totale jour
+          - entity: sensor.envoy_energie_totale_soutiree_jour
+            name: Energie Totale soutirée jour
       - type: custom:apexcharts-card
         chart_type: pie
         header:
@@ -169,8 +169,29 @@
           - cards:
               - entities:
                   - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.puissance_injectee_reseau
-                    name: Injection Réseau (si P+)
+                    entity: sensor.envoy_puissance_soutiree_reseau
+                    name: Soutirage Réseau
+                font_size: 80
+                hours_to_show: 24
+                line_width: 2
+                hour24: true
+                points_per_hour: 2
+                decimals: 0
+                show:
+                  animate: true
+                  fill: true
+                  icon: false
+                  labels: false
+                  name: true
+                  graph: bar
+                  extrema: true
+                  average: true
+                theme: ios-dark-mode-blue-red
+                type: 'custom:mini-graph-card'
+              - entities:
+                  - color: 'var(--dwains-theme-accent)'
+                    entity: sensor.envoy_puissance_injectee_reseau
+                    name: Injection Réseau
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2

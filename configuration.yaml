@@ -115,7 +115,9 @@ recorder:
       - sun
       - device_tracker
       - weather
-      - group      
+      - group   
+      - person
+      
   exclude:
     domains:
       - camera
@@ -127,7 +129,7 @@ recorder:
       - alarm_control_panel
       - climate
       - persistent_notification
-      - person
+
 
 # base influxdb
 influxdb:

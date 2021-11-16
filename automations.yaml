@@ -2328,3 +2328,27 @@
       name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n\
         {% else %}\n  Dwains Dark Theme\n{% endif %}\n"
   mode: single
+- id: '1637073026237'
+  alias: Volet Balise ouverture sous sol
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 6e75d49a-ec3d-4bfc-bd4f-2d1ab41b7cb1
+  condition: []
+  action:
+  - service: cover.open_cover
+    target:
+      entity_id: cover.garage_soussol
+  mode: single
+- id: '1637074521273'
+  alias: Volet Balise ouverture garage
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: dca56861-8baf-4881-a5c8-4b99d90c3716
+  condition: []
+  action:
+  - service: cover.open_cover
+    target:
+      entity_id: cover.garage_rdc
+  mode: single

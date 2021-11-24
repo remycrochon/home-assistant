@@ -93,16 +93,16 @@ rooms:
 # Cellier
   - name: Cellier
     icon: mdi:home-flood
-    temperature: sensor.temperature_cellier
-    humidity: sensor.humidity_cellier
+    temperature: sensor.esp129_climat_cellier_temperature
+    humidity: sensor.esp129_climat_cellier_humidite
     door: binary_sensor.porte_cellier
     light: switch.lumiere_cellier
     more_entities:
       entities:
-        - entity: sensor.battery_cellier
-          name: Batterie
-        - entity: sensor.humidity_status_cellier
-          name: Status Hum
+        - entity: sensor.esp129_wifi_signal_sensor
+          name: Wifi
+        - entity: binary_sensor.esp129_cellier_status
+          name: Status Connection
 # Garage          
   - name: Garage
     icon: mdi:garage

@@ -106,11 +106,8 @@
   mode: single
 - id: '1611515162753'
   alias: Piscine Calcul fonctionnement Pompe Ete/Hiver
-  description: Mode Etet/Hiver/Ma Forcée/At Forcé
+  description: Mode Ete/Hiver/Ma Forcée/At Forcé
   trigger:
-  - platform: homeassistant
-    event: start
-    id: Start
   - platform: state
     entity_id: sensor.pool_water_temperature
     id: temp
@@ -201,6 +198,10 @@
       - service: homeassistant.turn_off
         target:
           entity_id: switch.pool_pump_switch
+    - conditions:
+      - condition: trigger
+        id: Start
+      sequence: []
     default: []
   - service: pool_pump.check
   mode: single

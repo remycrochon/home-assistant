@@ -1,8 +1,8 @@
-# lecture de l'energie dans l'eco compteur Legrand
-sensor:  
-  #EcoLegrand
+
+#EcoLegrand
+sensor:
   - platform: command_line
-    name: "EcoCompteur ECS"
+    name: "EcoCompteur ECS"  
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
     scan_interval: 60
     unit_of_measurement: W
@@ -30,3 +30,63 @@ sensor:
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
     scan_interval: 60
     unit_of_measurement: W
+
+
+  - platform: command_line
+    name: "Linky HP W"
+    command: curl -s 'http://192.168.0.26/data.json' | jq '.conso_hp'
+    scan_interval: 60
+    unit_of_measurement: W
+    
+  - platform: command_line
+    name: "Linky HC W"
+    command: curl -s 'http://192.168.0.26/data.json' | jq '.conso_hc'
+    scan_interval: 60
+    unit_of_measurement: W
+
+  - platform: command_line
+    name: "Linky tarif Courant"
+    command: curl -s 'http://192.168.0.26/data.json' | jq '.tarif_courant'
+    scan_interval: 60
+    
+
+template:
+  sensor:
+    - name: "Linky Conso HP"
+      unique_id: "linky_conso_hp"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+      state: >-
+        {% set hp = states('sensor.linky_hp_w') | float(default=0) | round(0) %}
+        {{ (hp/1000) | round(0) }}
+
+    - name: "Linky Conso HC"
+      unique_id: "linky_conso_hc"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+      state: >-
+        {% set hp = states('sensor.linky_hc_w') | float(default=0) | round(0) %}
+        {{ (hp/1000) | round(0) }}
+
+
+    - name: "linky_conso_totale_hphc"
+      unique_id: "linky_conso_totale_hphc"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+      state: >-
+        {% set hp = states('sensor.linky_conso_hp') | float(default=0) | round(0) %}
+        {% set hc = states('sensor.linky_conso_hc') | float(default=0) | round(0) %}
+        {{ (hp+hc) | round(0) }}
+        
+    - name: "linky_tarif"
+      unique_id: "linky_tarif"
+      state: >
+        {% if is_state("sensor.linky_tarif_courant", "2") -%}
+          HP
+        {%- else -%}
+          HC
+        {%- endif %}
+

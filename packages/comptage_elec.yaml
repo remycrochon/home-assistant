@@ -6,6 +6,12 @@ utility_meter:
     tariffs:
       - hp
       - hc
+  energy_total_linky_usage_daily:
+    source: sensor.linky_conso_totale_hphc
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
   energy_pisc_usage_daily:
     source: sensor.pzem_pisc_energy
     cycle: daily
@@ -46,6 +52,12 @@ utility_meter:
 # usage semaine
   energy_total_usage_weekly:
     source: sensor.pzem_totale_energy
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+  energy_total_linky_usage_weekly:
+    source: sensor.linky_conso_totale_hphc
     cycle: weekly
     tariffs:
       - hp
@@ -93,6 +105,12 @@ utility_meter:
     tariffs:
       - hp
       - hc
+  energy_total_linky_usage_monthly:
+    source: sensor.linky_conso_totale_hphc
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
   energy_pisc_usage_monthly:
     source: sensor.pzem_pisc_energy
     cycle: monthly
@@ -132,6 +150,12 @@ utility_meter:
 #usage an
   energy_total_usage_yearly:
     source: sensor.pzem_totale_energy
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+  energy_total_linky_usage_yearly:
+    source: sensor.linky_conso_totale_hphc
     cycle: yearly
     tariffs:
       - hp
@@ -181,6 +205,16 @@ template:
       state: >-
         {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+
+    - name: "Energie Totale Linky Jour"
+      unique_id: "energy_total_linky_daily"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_daily_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -256,6 +290,16 @@ template:
       device_class: "energy"
       state_class: "total"  
 
+    - name: "Energie Totale Linky weekly"
+      unique_id: "energy_total_linky_weekly"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+    
     - name: "energy_pisc_weekly"
       state: >-
         {% set p = states('sensor.energy_pisc_usage_weekly_hp') | float(default=0) | round(2) %}
@@ -316,6 +360,16 @@ template:
       state: >-
         {% set p = states('sensor.energy_total_usage_monthly_hp') | float(default=0) | round(2) %}
         {% set o = states('sensor.energy_total_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "Energie Totale Linky Mois"
+      unique_id: "energy_total_linky_monthly"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_monthly_hc') | float(default=0) | round(2) %}
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
@@ -385,6 +439,16 @@ template:
       device_class: "energy"
       state_class: "total"  
 
+    - name: "Energie Totale Linky An"
+      unique_id: "energy_total_linky_yearly"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
     - name: "energy_pisc_yearly"
       state: >-
         {% set p = states('sensor.energy_pisc_usage_yearly_hp') | float(default=0) | round(2) %}
@@ -437,4 +501,65 @@ template:
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
-      state_class: "total"          
+      state_class: "total"  
+
+# Cout de l'Energie
+# le kWh HP et HC sont calculés dans excel en fonction des factures recues
+
+    - name: "Cout Energy Total Jour HPHC"
+      state: >-
+        {% set hp = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
+        {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
+        {{(hc*chc + hp*chp) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energy_total_jour_hphc"
+
+    - name: "Cout Energy Total Jour HP"
+      state: >-
+        {% set hp = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
+        {{(hp*chp) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energy_total_jour_hp"
+      
+    - name: "Cout Energy Total Jour HC"
+      state: >-
+        {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
+        {{(hc*chc) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energy_total_jour_hc"
+
+
+      
+
+
+input_number:
+  # utilisé pour simuler la température de l'eau pendant les test
+  cout_kwh_hp:
+    name: Cout du Kwh HP
+    min: 0
+    max: 10
+    unit_of_measurement: €
+    icon: mdi:currency-eur
+    step: 0.00001
+    mode: box
+
+  cout_kwh_hc:
+    name: Cout du Kwh HC
+    min: 0
+    max: 10
+    unit_of_measurement: €
+    icon: mdi:currency-eur
+    step: 0.00001
+    mode: box
+
+

@@ -8,7 +8,7 @@ sensor:
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur RPAC"
+    name: "EcoCompteur WC"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data2'
     scan_interval: 60
     unit_of_measurement: W
@@ -71,7 +71,7 @@ template:
         {{ (hp/1000) | round(0) }}
 
 
-    - name: "linky_conso_totale_hphc"
+    - name: "Linky Conso Totale HPHC"
       unique_id: "linky_conso_totale_hphc"
       unit_of_measurement: "kWh"
       device_class: "energy"

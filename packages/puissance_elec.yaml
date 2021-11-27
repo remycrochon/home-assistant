@@ -91,9 +91,8 @@ template:
       state_class: "measurement"
       unit_of_measurement: "w"
       state: >-
-          {% set p = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
-          {% set o = states('sensor.ecocompteur_rpac') | float(default=0) | round(2) %}
-          {{ (o + p) | round(2) }}
+        {% set pac = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
+        {{ (pac) | round(2) }}
 
 # Calcul energie injectée sur le réseau du jour
     - name: "Envoy Energie Injectée Réseau Jour"

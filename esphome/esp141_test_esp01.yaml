@@ -7,7 +7,7 @@ substitutions:
 esphome:
   name: ${device_name}
   platform: ESP8266
-  board: esp01_1m
+  board: d1_mini
 
 wifi:
   networks:
@@ -36,12 +36,15 @@ time:
 #  rx_pin: GPIO3 # RX=pin 21
 #  tx_pin: GPIO1 # TX=pin 22
 #  baud_rate: 9600
+uart:
+  rx_pin: GPIO2 #D4
+  baud_rate: 9600
 
-i2c:
-  sda: GPIO00 #
-  scl: GPIO02 #
-  scan: true
-  id: bus_a
+#i2c:
+#  sda: GPIO00 #
+#  scl: GPIO02 #
+#  scan: true
+#  id: bus_a
 
 #Etat de la connection
 binary_sensor:
@@ -54,13 +57,96 @@ switch:
     name: "${friendly_name} Restart"
 
 sensor:
-  - platform: htu21d
-    temperature:
-      name: "${device_name} Temperature"
-    humidity:
-      name: "${device_name} Humidité"
-    update_interval: 60s
-    
+
+  - platform: pmsx003
+    type: PMSX003
+    pm_1_0:
+      name: "Concentration de particules <1.0µm"
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+
+    pm_2_5:
+      name: "Concentration de particules <2.5µm"
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+
+    pm_10_0:
+      name: "Concentration de particules <10.0µm"
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+
+    pm_0_3um:
+      name: "Nb de particules >0.3"
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+      
+    pm_0_5um:
+      name: "Nb de particules >0.5"
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+      
+    pm_1_0um:
+      name: "Nb de particules >1.0"
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+      
+    pm_2_5um:
+      name: "Nb de particules >2.5"
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+      
+    pm_5_0um:
+      name: "Nb de particules >5.0"
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+      
+    pm_10_0um:
+      name: "Nb de particules >10.0"
+      unit_of_measurement: "ppd"
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 50
+            send_every: 10 
+            send_first_at: 10
+      
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s

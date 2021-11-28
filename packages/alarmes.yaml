@@ -5,9 +5,17 @@ input_boolean:
 
   def_com_vp2:
     name: Defaut Comm VP2 si Off
+
+  def_com_linky:
+    name: Defaut Comm Linky si Off
+
 # Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple
   inhib_alarme_pac:
     name: Inhib Alarm PAC
+
+# Permet de d'inhiber l'alarme Linky
+  inhib_alarme_linky:
+    name: Inhib Alarm Linky
 
 
 # Surveillance de la temperature du congelateur        

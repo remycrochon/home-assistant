@@ -211,6 +211,8 @@
                 type: 'custom:mini-graph-card'
             type: horizontal-stack
           - entities:
+            - entity: sensor.cout_energy_total_jour_hphc
+              name: Coût Tot Jour
             - entity: sensor.envoy_122103023124_today_s_energy_production
               name: Prod PV Jour
               secondary_info: last-updated

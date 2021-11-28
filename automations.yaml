@@ -1257,7 +1257,7 @@
     default: []
   mode: single
 - id: '1633416414001'
-  alias: Meteo_Notification Time Out VP2
+  alias: Alarme_Notification Time Out VP2
   description: ' '
   trigger:
   - platform: time_pattern
@@ -1277,7 +1277,7 @@
         target:
           entity_id: input_number.mem_vp2_datetime
         data_template:
-          value: '{{ states(''sensor.vp2_datetime'')|float(default=0) }}'
+          value: '{{ states(''sensor.vp2_datetime'')|int(default=0) }}'
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.def_com_vp2
@@ -2064,11 +2064,12 @@
           title: Etat RESEAU!!!
       - service: persistent_notification.create
         data:
-          message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
+          message: VP2 On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 1
       max_alerts: 100
+      resolved_message: Alert {{ entity_name }} resolved
 - id: '1634706860525'
   alias: Energie Changement HP<->HC
   description: ''
@@ -2353,3 +2354,65 @@
     target:
       entity_id: cover.garage_rdc
   mode: single
+- id: '1638118858848'
+  alias: Alarme_Notification Time Out Linky
+  description: ' '
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{% set a=states(''sensor.linky_conso_totale_hphc_wh'')|int(default=0)
+          %}
+
+          {% set b=states(''input_number.mem_linky_hphc'')|int(default=0) %}
+
+          {{ a != b }}'
+      sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.mem_linky_hphc
+        data_template:
+          value: '{{ states(''sensor.linky_conso_totale_hphc_wh'')|int(default=0)
+            }}'
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.def_com_linky
+    default:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.def_com_linky
+  mode: single
+- id: '1638119466260'
+  alias: Alarme Blueprints Notification Def Com Linky
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: input_boolean.def_com_linky
+      alert_state: 'off'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Com Linky off Line{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Reseau !!!
+      - service: persistent_notification.create
+        data:
+          message: Com Linky Off Line {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Com Linky On Line{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat RESEAU!!!
+      - service: persistent_notification.create
+        data:
+          message: Com Linky On Line{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 300
+      initial_delay: 1
+      max_alerts: 100
+      resolved_message: Alert {{ entity_name }} resolved

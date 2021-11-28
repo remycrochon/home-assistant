@@ -31,34 +31,62 @@ sensor:
     scan_interval: 60
     unit_of_measurement: W
 
-
   - platform: command_line
-    name: "Linky HP W"
+    name: "EcoCompteur Date_Time"
+    command: curl -s 'http://192.168.0.26/inst.json' | jq '.Date_Time'
+    scan_interval: 120
+    unit_of_measurement: s
+
+# Consommation - Energies
+  - platform: command_line
+    name: "Linky HP Wh"
     command: curl -s 'http://192.168.0.26/data.json' | jq '.conso_hp'
     scan_interval: 60
-    unit_of_measurement: W
+    unit_of_measurement: Wh
     
   - platform: command_line
-    name: "Linky HC W"
+    name: "Linky HC Wh"
     command: curl -s 'http://192.168.0.26/data.json' | jq '.conso_hc'
     scan_interval: 60
-    unit_of_measurement: W
+    unit_of_measurement: Wh
 
   - platform: command_line
     name: "Linky tarif Courant"
     command: curl -s 'http://192.168.0.26/data.json' | jq '.tarif_courant'
     scan_interval: 60
+
+
+input_number:
+# Utilisé pour calculer le time out de la liaison linky
+# en vérifiant que la consommation évolue dans une periode horaire
+  mem_linky_hphc:
+    name: Mem linky HPHC
+    min: 0
+    max: 100000000000
+    unit_of_measurement: Wh
+    icon: mdi:timeline-check-outline
+    mode: box
     
 
 template:
   sensor:
+    - name: "Linky Conso Totale HPHC Wh"
+      unique_id: "linky_hphc_wh"
+      unit_of_measurement: "Wh"
+      device_class: "energy"
+      state_class: "total"  
+      state: >-
+        {% set hp = states('sensor.linky_hp_wh') | float(default=0) | round(0) %}
+        {% set hc = states('sensor.linky_hc_wh') | float(default=0) | round(0) %}
+        {{ (hp+hc) | round(0) }}
+
     - name: "Linky Conso HP"
       unique_id: "linky_conso_hp"
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
       state: >-
-        {% set hp = states('sensor.linky_hp_w') | float(default=0) | round(0) %}
+        {% set hp = states('sensor.linky_hp_wh') | float(default=0) | round(0) %}
         {{ (hp/1000) | round(0) }}
 
     - name: "Linky Conso HC"
@@ -67,7 +95,7 @@ template:
       device_class: "energy"
       state_class: "total"  
       state: >-
-        {% set hp = states('sensor.linky_hc_w') | float(default=0) | round(0) %}
+        {% set hp = states('sensor.linky_hc_wh') | float(default=0) | round(0) %}
         {{ (hp/1000) | round(0) }}
 
 

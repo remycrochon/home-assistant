@@ -42,6 +42,12 @@ utility_meter:
     tariffs:
       - hp
       - hc
+  energy_wc_usage_daily:
+    source: sensor.energy_pc_wc
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
   energy_autres_usage_daily:
     source: sensor.energy_autres
     cycle: daily
@@ -269,6 +275,17 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
+
+    - name: "Energie WC Jour"
+      unique_id: "energy_wc_daily"
+      state: >-
+        {% set p = states('sensor.energy_wc_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_wc_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
 
     - name: "Energie Autres Jour"
       unique_id: "energy_autres_daily"
@@ -537,9 +554,6 @@ template:
       device_class: "monetary"
       state_class: "total"  
       unique_id: "cout_energy_total_jour_hc"
-
-
-      
 
 
 input_number:

@@ -79,12 +79,13 @@ template:
         {% set d = states('sensor.puissance_pac_rpac') | float(default=0) | round(2) %}
         {% set e = states('sensor.ecocompteur_ecs') | float(default=0) | round(2) %}          
         {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
-        {{ (a-b-c-d-e-f) | round(2) }}
+        {% set g = states('sensor.ecocompteur_wc') | float(default=0) | round(2) %}
+        {{ (a-b-c-d-e-f-g) | round(2) }}
       unit_of_measurement: "W"
       device_class: "power"
       state_class: "measurement"  
 
-# Cumul de PAC et RPAC
+# Cumul de PAC et RPAC -> devenu inutile suite regroupement des TC en 1 seul sur l'ecocomppteur
     - name: "Puissance PAC+RPAC"
       unique_id: "puissance_pac_rpac"
       device_class: "power"
@@ -173,7 +174,6 @@ template:
       device_class: "energy"
       state_class: "total"       
 
-
 #Indique que la machine à laver est en fonctionnement
   - binary_sensor:
       - name: "MaLaver en marche"
@@ -213,7 +213,7 @@ sensor:
     source: sensor.puissance_autres
     name: energy_autres
     unit_prefix: k
-#    method: left
+    #    method: left
     round: 2
 
 # Energie PC MàL 
@@ -224,4 +224,11 @@ sensor:
     method: left
     round: 2
 
+# Energie WC
+  - platform: integration
+    source: sensor.ecocompteur_wc
+    name: energy_pc_wc
+    unit_prefix: k
+    method: left
+    round: 2
     

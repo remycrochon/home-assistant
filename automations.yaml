@@ -424,32 +424,6 @@
     target:
       entity_id: alarm_control_panel.alarmo
   mode: single
-- id: '1619854078498'
-  alias: Alarme BP_RAZ_Defaut
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.bp_raz
-    to: 'on'
-  condition: []
-  action:
-  - service: switch.turn_off
-    target:
-      entity_id:
-      - switch.voyant_alarme
-      - switch.voyant_defaut
-      - switch.voyant_intrusion
-      - switch.voyant_reseau
-  - service: input_text.set_value
-    data:
-      value: .
-    target:
-      entity_id:
-      - input_text.text_def_l1
-      - input_text.text_def_l2
-      - input_text.text_def_l3
-      - input_text.text_def_l4
-  mode: single
 - id: '1622182531449'
   alias: Piscine Volet Ouv/Ferm Horaires
   description: Suivant tranches horaires
@@ -2145,6 +2119,7 @@
           - utility_meter.energy_autres_usage_monthly
           - utility_meter.energy_autres_usage_weekly
           - utility_meter.energy_autres_usage_yearly
+          - utility_meter.energy_wc_usage_daily
     - conditions:
       - condition: or
         conditions:
@@ -2191,6 +2166,7 @@
           - utility_meter.energy_autres_usage_monthly
           - utility_meter.energy_autres_usage_weekly
           - utility_meter.energy_autres_usage_yearly
+          - utility_meter.energy_wc_usage_daily
     default: []
   mode: single
 - id: '1634708878890'
@@ -2314,7 +2290,7 @@
       message: bp sonof
   mode: single
 - id: '1635590853335'
-  alias: 02 -  Choix theme for day and night
+  alias: 02 -  Choix du theme jour ou nuit
   trigger:
   - platform: homeassistant
     event: start

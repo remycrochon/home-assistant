@@ -36,6 +36,12 @@ time:
 #  rx_pin: GPIO3 # RX=pin 21
 #  tx_pin: GPIO1 # TX=pin 22
 #  baud_rate: 9600
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: True
+  id: bus_a
+
 uart:
   rx_pin: GPIO2 #D4
   baud_rate: 9600
@@ -48,6 +54,12 @@ uart:
 
 #Etat de la connection
 binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO16
+      inverted: True
+    name: bp_raz
+
   - platform: status
     name: "${friendly_name} Status"
 

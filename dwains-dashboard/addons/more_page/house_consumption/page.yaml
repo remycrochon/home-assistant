@@ -29,7 +29,7 @@
           - entity: sensor.envoy_energie_totale_soutiree_jour
             name: Energie Totale soutirée jour
       - type: custom:apexcharts-card
-        chart_type: pie
+        chart_type: donut
         header:
           show: true
           title: Energie 24h
@@ -48,6 +48,8 @@
             name: Pisc
           - entity: sensor.energie_mal_jour
             name: MaL
+          - entity: sensor.energie_wc_jour
+            name: WC            
 
   - type: vertical-stack
     cards:
@@ -66,14 +68,15 @@
           name:
             - font-weight: 900
         type: 'custom:button-card'
-      - type: 'custom:auto-entities'
+      - type: custom:auto-entities
         card:
           type: entities
           show_header_toggle: false
           state_color: false
+          title: Puissances Instantanées
         filter:
           include:
-            - entity_id: sensor.envoy_122103023124_current_power_consumption
+            - entity_id: sensor.envoy_122103023124_current_energy_consumption
               sort:
                 method: state
                 reverse: true
@@ -83,8 +86,14 @@
                 method: state
                 reverse: true
                 numeric: true
+            - entity_id: sensor.ecocompteur_wc
+            - entity_id: sensor.ecocompteur_clim
           exclude:
-            - entity_id: 'sensor.pzem_totale_puissance'
+            - entity_id: sensor.pzem_totale_puissance
+        sort:
+          method: state
+          reverse: true
+          numeric: true
 #          exclude:
 #            - state: "< 1.81"
 

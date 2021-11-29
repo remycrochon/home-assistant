@@ -3,7 +3,6 @@ esphome:
   platform: ESP8266
   board: d1_mini
 
-  
 wifi:
   networks:
     - ssid: !secret wifi
@@ -68,7 +67,20 @@ sensor:
     uart_id: uart_b
     co2:
       name: "MH-Z19 CO2 Value"
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 12 # moyenne sur 12 lecture
+            send_every: 6 # envoi toutes les 6 lectures
+            send_first_at: 1 # envoi à la premiere lecture
+            
     temperature:
       name: "MH-Z19 Temperature"
-    update_interval: 120s
+      filters:
+        - sliding_window_moving_average:
+            window_size: 24
+            send_every: 12
+            send_first_at: 1
+            
+    update_interval: 10s
     automatic_baseline_calibration: false    

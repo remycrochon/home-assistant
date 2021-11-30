@@ -105,7 +105,7 @@
     default: []
   mode: single
 - id: '1611515162753'
-  alias: Piscine Calcul fonctionnement Pompe Ete/Hiver
+  alias: Piscine 1-Calcul fonctionnement Pompe Ete/Hiver
   description: Mode Ete/Hiver/Ma Forcée/At Forcé
   trigger:
   - platform: state
@@ -153,7 +153,9 @@
         - conditions:
           - condition: time
             after: input_datetime.heure_ma_pump_pisc_hiv
-            before: input_datetime.heure_at_pump_pisc_hiv
+          - condition: numeric_state
+            entity_id: sensor.pool_pump_running_today
+            below: input_number.duree_filtration_max_mode_hiver
           sequence:
           - service: input_select.select_option
             target:
@@ -443,7 +445,7 @@
       value: '{{ states(''sensor.temp_piscine'')|float }}'
   mode: single
 - id: '1624083693650'
-  alias: Piscine pH Validation Automatismes
+  alias: Piscine 3-pH Validation Automatismes
   description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '
   trigger:
   - platform: state
@@ -528,7 +530,7 @@
       title: Piscine Alerte Pression Filtre !!!
   mode: single
 - id: '1624811066593'
-  alias: Piscine pH Injection
+  alias: Piscine 4-pH Injection
   description: 'Injection pH '
   trigger:
   - platform: time_pattern
@@ -1161,11 +1163,11 @@
     default: []
   mode: single
 - id: '1633075302563'
-  alias: Piscine Hors-Gel
+  alias: Piscine 2-Hors-Gel
   description: ''
   trigger:
   - platform: time_pattern
-    hours: '1'
+    hours: /1
   - platform: state
     entity_id: input_boolean.hors_gel_valid
     id: hg_deval
@@ -1996,11 +1998,12 @@
           message: PAC OK=> PU= {{states("sensor.puissance_pac_rpac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
-      repeat_delay: 600
+      repeat_delay: 1200
       max_alerts: 100
-      initial_delay: 600
+      initial_delay: 1200
       dismiss_entity: input_boolean.inhib_alarme_pac
       resolved_message: Alert {{ entity_name }} resolved
+      notify_message: Alert {{ entity_name }} triggered
 - id: '1634571065075'
   alias: 'Alarme Blueprints Notification Porte frigo garage ouverte   '
   description: '# Alarme porte frigo garage ouverte   '

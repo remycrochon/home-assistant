@@ -42,6 +42,18 @@ input_number:
     unit_of_measurement: °C
     icon: mdi:thermometer
 
+# Durée de filtration max en hiver
+  duree_filtration_max_mode_hiver:
+    name: Durée filtration en Hiver
+    min: 0
+    max: 15
+    unit_of_measurement: h
+    step: 0.1
+    icon: mdi:clock
+    mode: box
+
+
+
 input_datetime:
   heure_ouv_volet_pisc:
     name: Heure Ouv Volet Auto

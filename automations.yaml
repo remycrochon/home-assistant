@@ -205,37 +205,6 @@
     default: []
   - service: pool_pump.check
   mode: single
-- id: '1610181804077'
-  alias: Piscine Hors_Gel Calcul
-  description: '  '
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.vp2_temp_out
-    below: input_number.hors_gel_inf
-    id: inf
-  - platform: state
-    entity_id: sensor.vp2_temp_out
-    id: sup
-    to: input_number.hors_gel_sup
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: inf
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.hors_gel
-    - conditions:
-      - condition: trigger
-        id: sup
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.hors_gel
-    default: []
-  mode: single
 - id: '1611999559298'
   alias: Notification Pascale home
   description: ''
@@ -1192,17 +1161,28 @@
     default: []
   mode: single
 - id: '1633075302563'
-  alias: Piscine Hors-Gel Actions
+  alias: Piscine Hors-Gel
   description: ''
   trigger:
+  - platform: time_pattern
+    hours: '1'
   - platform: state
-    entity_id: input_boolean.hors_gel
+    entity_id: input_boolean.hors_gel_valid
+    id: hg_deval
+    from: 'on'
+    to: 'off'
   condition: []
   action:
   - choose:
     - conditions:
+      - condition: numeric_state
+        entity_id: sensor.stats_vp2_temp_out
+        below: input_number.hors_gel_inf_seuil2
       - condition: state
-        entity_id: input_boolean.hors_gel
+        entity_id: input_select.mode_fonctionnement_piscine
+        state: Hiver
+      - condition: state
+        entity_id: input_boolean.hors_gel_valid
         state: 'on'
       sequence:
       - service: input_select.select_option
@@ -1213,23 +1193,100 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Piscine Hors-Gel Activé
+          title: Piscine Hors-Gel Seuil 2 Marc Ppe
+      - delay:
+          hours: 0
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
+        data:
+          option: At F
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
+        data:
+          option: Hiver
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Hors-Gel Seuil 2 Arret Ppe
     - conditions:
+      - condition: numeric_state
+        entity_id: sensor.stats_vp2_temp_out
+        below: input_number.hors_gel_inf_seuil1
       - condition: state
-        entity_id: input_boolean.hors_gel
-        state: 'off'
+        entity_id: input_select.mode_fonctionnement_piscine
+        state: Hiver
+      - condition: state
+        entity_id: input_boolean.hors_gel_valid
+        state: 'on'
       sequence:
       - service: input_select.select_option
         data:
-          option: Hiver
+          option: Ma F
         target:
           entity_id: input_select.mode_fonctionnement_piscine
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Piscine Hors-Gel Désactivé
+          title: Piscine Hors-Gel Seuil 1 Marc Ppe
+      - delay:
+          hours: 0
+          minutes: 15
+          seconds: 0
+          milliseconds: 0
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
+        data:
+          option: At F
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
+        data:
+          option: Hiver
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Hors-Gel Seuil 2 Arret Ppe
+    - conditions:
+      - condition: trigger
+        id: hg_deval
+      sequence:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
+        data:
+          option: At F
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 2
+          milliseconds: 0
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.mode_fonctionnement_piscine
+        data:
+          option: Hiver
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Piscine Hors-Gel devalidé
     default: []
-  mode: single
+  mode: restart
 - id: '1633416414001'
   alias: Alarme_Notification Time Out VP2
   description: ' '

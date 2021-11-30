@@ -27,18 +27,18 @@ input_number:
     icon: mdi:clock
     mode: box
 
-# Seuil inferieur temperature Hors gel
-  hors_gel_inf:
-    name: Temp Inf Hors-Gel
+# Seuil 1 inferieur temperature Hors gel
+  hors_gel_inf_seuil1:
+    name: Temp Inf Hors-Gel Seuil 1
     min: -5
-    max: 1
+    max: 0
     unit_of_measurement: °C
     icon: mdi:thermometer
-# Seuil superieur temperature Hors gel
-  hors_gel_sup:
-    name: Temp Sup Hors-Gel
-    min: -2
-    max: 5
+# Seuil 2 inferieur temperature Hors gel
+  hors_gel_inf_seuil2:
+    name: Temp Inf Hors-Gel Seuil 2
+    min: -10
+    max: 0
     unit_of_measurement: °C
     icon: mdi:thermometer
 
@@ -90,8 +90,8 @@ input_boolean:
     icon: mdi:car-light-high
 
   # Calcul du hors gel- Mémoire de mise en hors gel
-  hors_gel:
-    name: Gel piscine (si=1)
+  hors_gel_valid:
+    name: Valid Hors Gel Piscine (si=1)
     icon: mdi:snowflake-alert
     initial: false
 

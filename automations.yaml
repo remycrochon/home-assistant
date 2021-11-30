@@ -1263,7 +1263,7 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Piscine Hors-Gel Seuil 2 Arret Ppe
+          title: Piscine Hors-Gel Seuil 1 Arret Ppe
     - conditions:
       - condition: trigger
         id: hg_deval

@@ -49,6 +49,11 @@ sensor:
       name: "Concentration de particules <1.0µm"
       id: pm1_0
       accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 15
+            send_every: 10
+            send_first_at: 1
 
     pm_2_5:
       name: "Concentration de particules <2.5µm"
@@ -56,9 +61,9 @@ sensor:
       accuracy_decimals: 0
       filters:
         - sliding_window_moving_average:
-            window_size: 60
-            send_every: 30
-            send_first_at: 10
+            window_size: 15
+            send_every: 10
+            send_first_at: 1
 
       on_value:
           - if:
@@ -92,12 +97,16 @@ sensor:
                   - output.turn_off: gpio_13 #Led jaune
                   - output.turn_on: gpio_15 #Led rouge                    
             
-
     pm_10_0:
       name: "Concentration de particules <10.0µm"
       id: pm10_0
       accuracy_decimals: 0
-
+      filters:
+        - sliding_window_moving_average:
+            window_size: 15
+            send_every: 10
+            send_first_at: 1
+            
     pm_0_3um:
       name: "Nb de particules >0.3"
       unit_of_measurement: "ppd" 
@@ -147,7 +156,7 @@ sensor:
     unit_of_measurement: µg/m³
     lambda: |-
       return id(pm2_5).state;
-    update_interval: 1s
+    update_interval: 60s
     filters:
       - median:
           window_size: 30
@@ -209,7 +218,7 @@ interval:
           id(aff1).backlight();
       - delay: 20s
       - switch.turn_off: val_mes
-      - delay: 10s
+      - delay: 20s
       - lambda: |-
           id(aff1).no_backlight();    
 

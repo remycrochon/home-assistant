@@ -1,11 +1,21 @@
 input_datetime:
-  # Horaire VMC
-  horaire_vmc_debut:
-    name: Horaire VMC Début
+  # Horaire VMC SS
+  horaire_vmc_ss_debut:
+    name: Horaire VMC SS Début
     has_date: false
     has_time: true
-  horaire_vmc_fin:
-    name: Horaire VMC Fin
+  horaire_vmc_ss_fin:
+    name: Horaire VMC SS Fin
+    has_date: false
+    has_time: true
+
+  # Horaire VMC Niv0
+  horaire_vmc_niv0_debut:
+    name: Horaire VMC N0 Début
+    has_date: false
+    has_time: true
+  horaire_vmc_niv0_fin:
+    name: Horaire VMC N0 Fin
     has_date: false
     has_time: true
 
@@ -17,3 +27,51 @@ input_select:
       - Auto
       - Arret
       - Marche
+
+  vmc_niv0:
+    name: Vmc_Niv0
+    icon: mdi:fan
+    options:
+      - Ete
+      - Hiver
+      - Arret
+      - Marche
+
+input_number:
+# Seuil PM2.5 Arret VMC
+  seuil_pm2_5_at:
+    name: Seuil PM2.5 At VMC
+    min: 0
+    max: 50
+    unit_of_measurement: µg/m3
+    step: 0.1
+    icon: mdi:thermometer
+    mode: box
+# Seuil PM2.5 Marche VMC
+  seuil_pm2_5_ma:
+    name: Seuil PM2.5 Ma VMC
+    min: 0
+    max: 50
+    unit_of_measurement: µg/m3
+    step: 0.1
+    icon: mdi:thermometer
+    mode: box
+    
+template:
+  - sensor:
+# Efficacité de la VMC double Flux
+    - name: "Efficacité VMC"
+      unique_id: "efficacite_vmc"
+      state: >-
+        {% set insu = states('sensor.thermometre_temperature') | float(default=0) | round(2) %}
+        {% set extr= states('sensor.temperature_salon_zb') | float(default=0) | round(2) %}
+        {% set exter = states('sensor.stats_vp2_temp_out') | float(default=0) | round(2) %}
+        {% set pu = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(2) %}
+        {% if ((extr-exter) >= 0) and (pu>10) %}
+          {{ ((insu-exter)/(extr-exter)*100) | round(2) }}
+        {% else%}
+          0
+        {%endif%}
+      unit_of_measurement: "%"
+      device_class: "aqi"
+      state_class: "measurement"  

@@ -1052,10 +1052,10 @@
     entity_id: input_select.vmc_ssol
   - platform: time
     id: debut
-    at: input_datetime.horaire_vmc_debut
+    at: input_datetime.horaire_vmc_ss_debut
   - platform: time
     id: fin
-    at: input_datetime.horaire_vmc_fin
+    at: input_datetime.horaire_vmc_ss_fin
   condition: []
   action:
   - choose:

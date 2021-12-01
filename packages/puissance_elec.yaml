@@ -212,6 +212,22 @@ sensor:
     method: left
     round: 2
 
+# Energie WC
+  - platform: integration
+    source: sensor.ecocompteur_wc
+    name: energy_pc_wc
+    unit_prefix: k
+    method: left
+    round: 2
+
+# Energie VMC Niv0
+  - platform: integration
+    source: sensor.ecocompteur_vmc_niv0
+    name: energy_vmc_n0
+    unit_prefix: k
+    #    method: left
+    round: 2
+
 # Energie Puissance autres 
   - platform: integration
     source: sensor.puissance_autres
@@ -228,11 +244,4 @@ sensor:
     method: left
     round: 2
 
-# Energie WC
-  - platform: integration
-    source: sensor.ecocompteur_wc
-    name: energy_pc_wc
-    unit_prefix: k
-    method: left
-    round: 2
     

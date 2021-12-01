@@ -26,7 +26,7 @@ sensor:
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur Total"
+    name: "EcoCompteur VMC Niv0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
     scan_interval: 60
     unit_of_measurement: W

@@ -24,6 +24,7 @@ wifi:
 
 # Enable logging
 logger:
+  baud_rate: 0
 
 # Enable Home Assistant API
 api:
@@ -39,11 +40,18 @@ i2c:
   scan: True
   id: bus_a
 uart:
-  rx_pin: GPIO2 #D4
-  baud_rate: 9600
+  - id: uart_a
+    rx_pin: GPIO2 #D4
+    baud_rate: 9600
+
+  - id: uart_b
+    rx_pin: GPIO3
+    tx_pin: GPIO1
+    baud_rate: 9600
 
 sensor:
   - platform: pmsx003
+    uart_id: uart_a
     type: PMSX003
     pm_1_0:
       name: "Concentration de particules <1.0µm"
@@ -145,10 +153,35 @@ sensor:
   - platform: uptime
     name: "${friendly_name} Uptime Sensor"
     update_interval: 60s
+    
+  - platform: mhz19
+    uart_id: uart_b
+    co2:
+      name: "MH-Z19 CO2 Value"
+      id: co2
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 12 # moyenne sur 12 lecture
+            send_every: 6 # envoi toutes les 6 lectures
+            send_first_at: 1 # envoi à la premiere lecture
+            
+    temperature:
+      name: "MH-Z19 Temperature"
+      id: temp
+      filters:
+        - sliding_window_moving_average:
+            window_size: 24
+            send_every: 12
+            send_first_at: 1
+            
+    update_interval: 10s
+    automatic_baseline_calibration: false    
 
-# This is a "helper" template sensor which is doing 30 sec moving average of PM2.5
-# I use it for sensing in automations controlling purifiers (with Home Assistant), 
-# in order to remove the outlier values and making the control more smooth
+
+# Il s'agit d'un modèle de capteur qui effectue une moyenne mobile de 30 minutes de PM2,5
+# il supprime les valeurs aberrantes et de rendre le contrôle plus fluide
+
   - platform: template
     name: "Concentration de particules <2.5µm median"
     id: pm2_5_median
@@ -248,8 +281,10 @@ display:
     lambda: |-
       it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
       it.printf(0,1,"PM2.5=%.2f",id(pm2_5).state);
+      it.printf(12,1,"M=%.2f",id(pm2_5_median).state);
       it.printf(0,2,"PM10.0=%.2f",id(pm10_0).state);
-
+      it.printf(0,3,"CO2=%.0f",id(co2).state);
+      it.printf(12,3,"T=%.2f",id(temp).state);
 
 
       

@@ -48,6 +48,12 @@ utility_meter:
     tariffs:
       - hp
       - hc
+  energy_vmc_usage_daily:
+    source: sensor.energy_vmc_n0
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
   energy_autres_usage_daily:
     source: sensor.energy_autres
     cycle: daily

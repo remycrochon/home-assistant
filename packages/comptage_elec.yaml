@@ -293,6 +293,17 @@ template:
       state_class: "total"  
 
 
+    - name: "Energie VMC Jour"
+      unique_id: "energy_vmc_daily"
+      state: >-
+        {% set p = states('sensor.energy_vmc_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_vmc_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+
     - name: "Energie Autres Jour"
       unique_id: "energy_autres_daily"
       state: >-

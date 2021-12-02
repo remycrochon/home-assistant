@@ -10,12 +10,12 @@ input_datetime:
     has_time: true
 
   # Horaire VMC Niv0
-  horaire_vmc_niv0_debut:
-    name: Horaire VMC N0 Début
+  heure_vmc_niv0_ma:
+    name: Heure Ma Ete VMC_N0
     has_date: false
     has_time: true
-  horaire_vmc_niv0_fin:
-    name: Horaire VMC N0 Fin
+  heure_vmc_niv0_at:
+    name: Heure At Ete VMC_N0
     has_date: false
     has_time: true
 
@@ -25,8 +25,8 @@ input_select:
     icon: mdi:fan
     options:
       - Auto
-      - Arret
       - Marche
+      - Arret
 
   vmc_niv0:
     name: Vmc_Niv0
@@ -34,8 +34,8 @@ input_select:
     options:
       - Ete
       - Hiver
-      - Arret
       - Marche
+      - Arret
 
 input_number:
 # Seuil PM2.5 Arret VMC
@@ -50,8 +50,8 @@ input_number:
 # Seuil PM2.5 Marche VMC
   seuil_pm2_5_ma:
     name: Seuil PM2.5 Ma VMC
-    min: 0
-    max: 50
+    min: 30
+    max: 100
     unit_of_measurement: µg/m3
     step: 0.1
     icon: mdi:thermometer
@@ -67,10 +67,14 @@ template:
         {% set extr= states('sensor.temperature_salon_zb') | float(default=0) | round(2) %}
         {% set exter = states('sensor.stats_vp2_temp_out') | float(default=0) | round(2) %}
         {% set pu = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(2) %}
-        {% if ((extr-exter) >= 0) and (pu>10) %}
-          {{ ((insu-exter)/(extr-exter)*100) | round(2) }}
+        {% if (pu<10) or ((insu-exter)/(extr-exter)*100) <=0 %}
+            0              
         {% else%}
-          0
+          {% if ((insu-exter)/(extr-exter)*100) >100 %}
+            100
+          {% else%}
+            {{ ((insu-exter)/(extr-exter)*100) | round(2) }}
+          {%endif%}
         {%endif%}
       unit_of_measurement: "%"
       device_class: "aqi"

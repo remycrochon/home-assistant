@@ -50,7 +50,8 @@
             name: MaL
           - entity: sensor.energie_wc_jour
             name: WC            
-
+          - entity: sensor.energie_vmc_jour
+            name: VMC          
   - type: vertical-stack
     cards:
       - name: Aperçu
@@ -88,6 +89,7 @@
                 numeric: true
             - entity_id: sensor.ecocompteur_wc
             - entity_id: sensor.ecocompteur_clim
+            - entity_id: sensor.ecocompteur_vmc_niv0
           exclude:
             - entity_id: sensor.pzem_totale_puissance
         sort:

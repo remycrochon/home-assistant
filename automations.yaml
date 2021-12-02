@@ -1313,11 +1313,11 @@
           value: '{{ states(''sensor.vp2_datetime'')|int(default=0) }}'
       - service: input_boolean.turn_on
         target:
-          entity_id: input_boolean.def_com_vp2
+          entity_id: input_boolean.com_vp2
     default:
     - service: input_boolean.turn_off
       target:
-        entity_id: input_boolean.def_com_vp2
+        entity_id: input_boolean.com_vp2
   mode: single
 - id: '1633502766002'
   alias: Volets_Suivi Azimuth Soleil
@@ -2081,7 +2081,7 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: input_boolean.def_com_vp2
+      sensor_entity: input_boolean.com_vp2
       alert_state: 'off'
       alert_action:
       - service: notify.telegram
@@ -2130,16 +2130,34 @@
     from: 'on'
     to: 'off'
     id: forcage hp
+  - platform: state
+    entity_id: sensor.linky_tarif_courant
+    id: tarif_hc
   condition: []
   action:
   - choose:
     - conditions:
       - condition: or
         conditions:
-        - condition: trigger
-          id: hc1
-        - condition: trigger
-          id: hc2
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.com_linky
+            state: 'off'
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: hc1
+            - condition: trigger
+              id: hc2
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: sensor.linky_tarif_courant
+            state: '1'
+          - condition: state
+            entity_id: input_boolean.com_linky
+            state: 'on'
         - condition: trigger
           id: forcage hc
       sequence:
@@ -2179,14 +2197,29 @@
           - utility_meter.energy_autres_usage_monthly
           - utility_meter.energy_autres_usage_weekly
           - utility_meter.energy_autres_usage_yearly
-          - utility_meter.energy_wc_usage_daily
+          - utility_meter.energy_vmc_usage_daily
     - conditions:
       - condition: or
         conditions:
-        - condition: trigger
-          id: hp1
-        - condition: trigger
-          id: hp2
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: input_boolean.com_linky
+            state: 'off'
+          - condition: or
+            conditions:
+            - condition: trigger
+              id: hp1
+            - condition: trigger
+              id: hp2
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: sensor.linky_tarif_courant
+            state: '2'
+          - condition: state
+            entity_id: input_boolean.com_linky
+            state: 'on'
         - condition: trigger
           id: forcage hp
       sequence:
@@ -2227,6 +2260,7 @@
           - utility_meter.energy_autres_usage_weekly
           - utility_meter.energy_autres_usage_yearly
           - utility_meter.energy_wc_usage_daily
+          - utility_meter.energy_vmc_usage_daily
     default: []
   mode: single
 - id: '1634708878890'
@@ -2416,11 +2450,11 @@
             }}'
       - service: input_boolean.turn_on
         target:
-          entity_id: input_boolean.def_com_linky
+          entity_id: input_boolean.com_linky
     default:
     - service: input_boolean.turn_off
       target:
-        entity_id: input_boolean.def_com_linky
+        entity_id: input_boolean.com_linky
   mode: single
 - id: '1638119466260'
   alias: Alarme Blueprints Notification Def Com Linky
@@ -2429,7 +2463,7 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: input_boolean.def_com_linky
+      sensor_entity: input_boolean.com_linky
       alert_state: 'off'
       alert_action:
       - service: notify.telegram
@@ -2452,3 +2486,98 @@
       initial_delay: 1
       max_alerts: 100
       resolved_message: Alert {{ entity_name }} resolved
+- id: '1638433932226'
+  alias: VMC_Niv0_Automatismes
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id: input_select.vmc_niv0
+    id: mode
+  - platform: time
+    at: input_datetime.heure_vmc_niv0_ma
+  - platform: time
+    at: input_datetime.heure_vmc_niv0_at
+  - platform: numeric_state
+    entity_id: sensor.concentration_de_particules_2_5um
+    id: pm2.5-sh
+    above: input_number.seuil_pm2_5_ma
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - platform: numeric_state
+    entity_id: sensor.concentration_de_particules_2_5um
+    id: pm2.5-sb
+    below: input_number.seuil_pm2_5_at
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: Ete
+      sequence:
+      - choose:
+        - conditions:
+          - condition: time
+            after: input_datetime.heure_vmc_niv0_ma
+            before: input_datetime.heure_vmc_niv0_at
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id:
+              - switch.sonoff_vmc_niv0_on_off
+        default:
+        - service: switch.turn_off
+          target:
+            entity_id:
+            - switch.sonoff_vmc_niv0_on_off
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: Hiver
+      sequence:
+      - choose:
+        - conditions:
+          - condition: trigger
+            id: pm2.5-sh
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id:
+              - switch.sonoff_vmc_niv0_on_off
+        - conditions:
+          - condition: trigger
+            id: pm2.5-sb
+          sequence:
+          - service: switch.turn_off
+            target:
+              entity_id:
+              - switch.sonoff_vmc_niv0_on_off
+        default: []
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: Arret
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+          - switch.sonoff_vmc_niv0_on_off
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: Marche
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id:
+          - switch.sonoff_vmc_niv0_on_off
+    default: []
+  mode: single

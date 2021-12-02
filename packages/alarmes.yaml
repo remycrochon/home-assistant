@@ -3,10 +3,10 @@ input_boolean:
   test_alert:
     name: Test Alert
 
-  def_com_vp2:
+  com_vp2:
     name: Defaut Comm VP2 si Off
 
-  def_com_linky:
+  com_linky:
     name: Defaut Comm Linky si Off
 
 # Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple

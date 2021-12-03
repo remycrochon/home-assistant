@@ -94,7 +94,7 @@ template:
       unique_id: "puissance_pac_rpac"
       device_class: "power"
       state_class: "measurement"
-      unit_of_measurement: "w"
+      unit_of_measurement: "W"
       state: >-
         {% set pac = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
         {{ (pac) | round(2) }}

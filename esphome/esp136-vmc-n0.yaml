@@ -1,0 +1,72 @@
+substitutions:
+  device_name: esp138-vmc-n0
+  adress_ip: "192.168.0.136"
+  friendly_name: esp136
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP8266
+  board: d1_mini_pro
+
+wifi:
+  ssid: !secret wifi
+  password: !secret mdpwifi
+
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+  reboot_timeout: 5min
+  fast_connect: true
+
+# Enable logging
+logger:
+
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+
+# Example configuration entry
+dallas:
+  - pin: GPIO2 #D4
+
+# Individual sensors
+sensor:
+  - platform: dallas
+    address: 0x0C000004923C0A28
+    name: "Temp Air Neuf"
+    
+  - platform: dallas
+    address: 0x2A00000492ADAA28
+    name: "Temp Air Vicié"
+
+  - platform: dallas
+    address: 0x3E00000492D66328
+    name: "Temp insufflation"
+
+  - platform: dallas
+    address: 0x4300461100004B28
+    name: "Temp aspiration"
+
+
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+switch:   
+
+    
+  - platform: restart
+    name: "${friendly_name} Restart"
+    

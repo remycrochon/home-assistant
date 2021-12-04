@@ -134,7 +134,7 @@ template:
       unique_id: "envoy_puissance_injectee_reseau"
       device_class: "power"
       state_class: "measurement"
-      unit_of_measurement: "w"
+      unit_of_measurement: "W"
       state: >-
         {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
         {% set conso = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
@@ -148,7 +148,7 @@ template:
       unique_id: "envoy_puissance_soutiree_reseau"
       device_class: "power"
       state_class: "measurement"
-      unit_of_measurement: "w"
+      unit_of_measurement: "W"
       state: >-
         {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
         {% set conso = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}

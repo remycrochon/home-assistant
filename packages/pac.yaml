@@ -89,17 +89,23 @@ sensor:
         friendly_name : " COP "
         unit_of_measurement : ' COP '
         value_template: >-
+          {% set a = states('sensor.espaltherma_capteur_debit') | float(default=0) %}
+          {% set b = states('sensor.espaltherma_temp_eau_depart_echangeur_plaque') | float(default=0) %}
+          {% set c = states('sensor.espaltherma_temp_eau_retour_rt4') | float(default=0) %}
+          {% set d = states('sensor.espaltherma_courant_primaire') | float(default=0) %}
+          {% set e = states('sensor.pzem_totale_tension') | float(default=0) %}
           {% if is_state("sensor.espaltherma_mode_fonctionnement", "Heating")
             and (states('sensor.espaltherma_courant_primaire')|float(default=0) > 0) %}
-            {% set a = states('sensor.espaltherma_capteur_debit') | float(default=0) %}
-            {% set b = states('sensor.espaltherma_temp_eau_depart_echangeur_plaque') | float(default=0) %}
-            {% set c = states('sensor.espaltherma_temp_eau_retour_rt4') | float(default=0) %}
-            {% set d = states('sensor.espaltherma_courant_primaire') | float(default=0) %}
-            {% set e = states('sensor.pzem_totale_tension') | float(default=0) %}
-            {{ ((a*0.06*1.16)*(b-c)/(d*e/1000))| float(default=0) | round(2) }}
+            {% set cop=((a*0.06*1.16)*(b-c)/(d*e/1000))| float(default=0) | round(2) %}
+            {% if cop>=0 %}
+              {{ cop }}
+            {%else%}
+              0
+            {%endif%}
           {%else%}
             0
           {%endif%}
+
 
 # Calcul Température de départ
       espaltherma_temp_dep_calculee :

@@ -50,7 +50,7 @@ input_number:
 # Seuil PM2.5 Marche VMC
   seuil_pm2_5_ma:
     name: Seuil PM2.5 Ma VMC
-    min: 30
+    min: 0
     max: 100
     unit_of_measurement: µg/m3
     step: 0.1
@@ -79,3 +79,13 @@ template:
       unit_of_measurement: "%"
       device_class: "aqi"
       state_class: "measurement"  
+
+sensor:
+    # Affichage du temps de fonctionnement de la VMC du jour
+  - platform: history_stats
+    name: temps de Fonctionnement VMC N0
+    entity_id: switch.sonoff_vmc_niv0_on_off
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
+    end: "{{ now() }}"

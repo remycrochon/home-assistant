@@ -26,7 +26,7 @@ sensor:
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur VMC Niv0"
+    name: "EcoCompteur VMC Niv0 brut"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
     scan_interval: 60
     unit_of_measurement: W
@@ -58,7 +58,7 @@ sensor:
 # Statistiques puissance 
   - platform: statistics
     name: puissance_vmc_niv0
-    entity_id: sensor.ecocompteur_vmc_niv0
+    entity_id: sensor.ecocompteur_vmc_niv0_brut
     sampling_size: 10
     #max_age:
       # minutes: 30
@@ -125,3 +125,17 @@ template:
           HC
         {%- endif %}
 
+# Limite les valeurs aberantes de la puissance de la VMC
+    - name: "EcoCompteur VMC Niv0"
+      unique_id: "ecocompteur_vmc_niv0"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+#        {% set p = states('sensor.ecocompteur_vmc_niv0_brut') | float(default=0) | round(0) %}      
+      state: >-
+        {% set p = state_attr('sensor.puissance_vmc_niv0', 'median') | float(default=0) | round(1) %}
+        {% if p>100 %}
+          100
+        {%- else -%}
+          {{ p }}
+        {%- endif %}

@@ -23,7 +23,7 @@ wifi:
 
 # Enable logging
 logger:
-
+#  baud_rate: 0
 # Enable Home Assistant API
 api:
 
@@ -34,16 +34,17 @@ web_server:
 
 # Example configuration entry
 uart:
-  id: uart_bus
-  rx_pin: GPIO3
-  tx_pin: GPIO1
+  id: uart_a
+  rx_pin: GPIO0
+#  tx_pin: GPIO1
   baud_rate: 1200
   parity: EVEN
   data_bits: 7
 
 teleinfo:
   id: myteleinfo
-  update_interval: 60s
+  uart_id: uart_a
+  update_interval: 10s
   historical_mode: true
   
 sensor:

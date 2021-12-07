@@ -48,7 +48,10 @@ uart:
     rx_pin: GPIO3
     tx_pin: GPIO1
     baud_rate: 9600
-
+globals:
+  - id: bp_mode
+    type: int
+    initial_value: '1'
 sensor:
   - platform: pmsx003
     uart_id: uart_a
@@ -117,31 +120,37 @@ sensor:
             
     pm_0_3um:
       name: "Nb de particules >0.3"
+      id: pm_03_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_0_5um:
       name: "Nb de particules >0.5"
+      id: pm_05_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_1_0um:
       name: "Nb de particules >1.0"
+      id: pm_10_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_2_5um:
       name: "Nb de particules >2.5"
+      id: pm_25_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_5_0um:
       name: "Nb de particules >5.0"
+      id: pm_50_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_10_0um:
       name: "Nb de particules >10.0"
+      id: pm_100_um
       unit_of_measurement: "ppd"
       accuracy_decimals: 0
 
@@ -198,24 +207,36 @@ sensor:
 
 binary_sensor:
   - platform: gpio
+    name: bp_mod
+    id: button
     pin:
       number: GPIO16
-      inverted: True
-    name: bp_ecl
-#    on_press:
-#      then:
-#        - output.turn_on: gpio_12
-#        - delay: 5s
-#        - output.turn_off: gpio_12
+      inverted: true
+    on_click:
+      - min_length: 25ms
+        max_length: 500ms
+        then:
+          - lambda: |-
+              if (id(bp_mode) < 2) { id(bp_mode) += 1; }
+              else { id(bp_mode) = 1; }
 
-    on_press:
-      then:
-        - binary_sensor.template.publish:
+  - platform: gpio
+    name: bp_ecl
+    id: bp_ecl
+    pin:
+      number: GPIO12
+      inverted: true    
+    on_click:
+      - min_length: 25ms
+        max_length: 500ms
+        then:
+         - binary_sensor.template.publish:
             id: backlight
             state: ON
-        - binary_sensor.template.publish:
+         - binary_sensor.template.publish:
             id: backlight
-            state: OFF
+            state: OFF    
+      
   - platform: template
     id: backlight
     filters:
@@ -244,22 +265,19 @@ switch:
     name: "${friendly_name} Restart"
     
 interval:
-  - interval: 120s
+  - interval: 60s
     then:
       - switch.turn_on: val_mes
       - lambda: |-
           id(aff1).backlight();
-      - delay: 20s
+      - delay: 10s
       - switch.turn_off: val_mes
-      - delay: 20s
+      - delay: 30s
       - lambda: |-
           id(aff1).no_backlight();    
 
 output:
-  - platform: gpio
-    pin: GPIO12 #D6 Bleu
-    id: gpio_12
-    
+
   - platform: gpio
     pin: GPIO13 #D7 Jaune
     id: gpio_13
@@ -279,12 +297,25 @@ display:
     dimensions: 20x4
     address: 0x27
     lambda: |-
-      it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
-      it.printf(0,1,"PM2.5=%.2f",id(pm2_5).state);
-      it.printf(12,1,"M=%.2f",id(pm2_5_median).state);
-      it.printf(0,2,"PM10.0=%.2f",id(pm10_0).state);
-      it.printf(0,3,"CO2=%.0f",id(co2).state);
-      it.printf(12,3,"T=%.2f",id(temp).state);
+      if (id(bp_mode) == 2 )
+        {
+        it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
+        it.printf(0,1,"PM2.5=%.2f",id(pm2_5).state);
+        it.printf(12,1,"M=%.2f",id(pm2_5_median).state);
+        it.printf(0,2,"PM10.0=%.2f",id(pm10_0).state);
+        it.printf(0,3,"CO2=%.0f",id(co2).state);
+        it.printf(12,3,"T=%.2f",id(temp).state);
+        }
+      else if (id(bp_mode) == 1 )
+        {
+        it.print(0,0,"UM");        
+        it.printf(0,1,"0.3=%.1f",id(pm_03_um).state);
+        it.printf(11,1,"0.5=%.1f",id(pm_05_um).state);
+        it.printf(0,2,"1.0=%.1f",id(pm_10_um).state);
+        it.printf(11,2,"2.5=%.1f",id(pm_25_um).state);        
+        it.printf(0,3,"5.0=%.1f",id(pm_50_um).state);
+        it.printf(11,3,"10.0=%.1f",id(pm_100_um).state);        
+        }
 
 
       

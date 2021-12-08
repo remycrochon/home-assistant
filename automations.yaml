@@ -2133,6 +2133,13 @@
   - platform: state
     entity_id: sensor.linky_tarif_courant
     id: tarif_hc
+    from: '2'
+    to: '1'
+  - platform: state
+    entity_id: sensor.linky_tarif_courant
+    from: '1'
+    to: '2'
+    id: tarif_hp
   condition: []
   action:
   - choose:
@@ -2152,9 +2159,8 @@
               id: hc2
         - condition: and
           conditions:
-          - condition: state
-            entity_id: sensor.linky_tarif_courant
-            state: '1'
+          - condition: trigger
+            id: tarif_hc
           - condition: state
             entity_id: input_boolean.com_linky
             state: 'on'
@@ -2198,6 +2204,10 @@
           - utility_meter.energy_autres_usage_weekly
           - utility_meter.energy_autres_usage_yearly
           - utility_meter.energy_vmc_usage_daily
+          - utility_meter.energy_total_linky_usage_daily
+          - utility_meter.energy_total_linky_usage_monthly
+          - utility_meter.energy_total_linky_usage_weekly
+          - utility_meter.energy_total_linky_usage_yearly
     - conditions:
       - condition: or
         conditions:
@@ -2215,11 +2225,10 @@
         - condition: and
           conditions:
           - condition: state
-            entity_id: sensor.linky_tarif_courant
-            state: '2'
-          - condition: state
             entity_id: input_boolean.com_linky
             state: 'on'
+          - condition: trigger
+            id: tarif_hp
         - condition: trigger
           id: forcage hp
       sequence:
@@ -2261,6 +2270,10 @@
           - utility_meter.energy_autres_usage_yearly
           - utility_meter.energy_wc_usage_daily
           - utility_meter.energy_vmc_usage_daily
+          - utility_meter.energy_total_linky_usage_daily
+          - utility_meter.energy_total_linky_usage_monthly
+          - utility_meter.energy_total_linky_usage_weekly
+          - utility_meter.energy_total_linky_usage_yearly
     default: []
   mode: single
 - id: '1634708878890'

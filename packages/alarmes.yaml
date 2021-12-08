@@ -4,10 +4,10 @@ input_boolean:
     name: Test Alert
 
   com_vp2:
-    name: Defaut Comm VP2 si Off
+    name: Comm VP2 OK=On
 
   com_linky:
-    name: Defaut Comm Linky si Off
+    name: Comm Linky OK=On
 
 # Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple
   inhib_alarme_pac:

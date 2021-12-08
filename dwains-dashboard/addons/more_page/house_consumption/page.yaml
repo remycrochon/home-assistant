@@ -250,6 +250,18 @@
             - type: custom:fold-entity-row
               head:              
                 type: section
+                label: Plus d'Informations Linky
+              entities:
+                - entity: sensor.energy_total_linky_usage_daily_hc
+                  name: Linky HC Jour
+                - entity: sensor.energy_total_linky_usage_daily_hp
+                  name: Linky HP Jour
+                - entity: sensor.energie_totale_linky_jour
+                  name: Linky Jour
+
+            - type: custom:fold-entity-row
+              head:              
+                type: section
                 label: Plus d'Informations PZEM
               entities:
                 - entity: sensor.energie_totale_jour
@@ -272,7 +284,7 @@
                 - entity: sensor.pzem_totale_frequence
                   name: Fréquence          
                 - entity: sensor.esp132_wifi_signal_sensor
-                  name: Signal WiFI
+                  name: Signal WiFI                  
             type: entities
         type: vertical-stack
 

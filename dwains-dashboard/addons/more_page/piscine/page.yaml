@@ -432,20 +432,3 @@
         show_header_toggle: false
         title: Piscine
         type: entities
-      - type: entities
-        entities:
-          - entity: input_boolean.ev_eau_piscine
-            name: Validation Appoint eau
-          - entity: automation.piscine_ev_appoint_eau
-            name: Autom Appoint Eau On
-          - entity: cover.volet_piscine
-          - entity: sensor.ev_eau_tps_ouverture_jour
-          - entity: sensor.ev_eau_sur_7j
-          - entity: switch.cde_ev_eau
-          - entity: binary_sensor.tp_plein_lsh
-            name: Niveau Haut Régulation (Inactif=recouvert)
-          - entity: binary_sensor.tp_plein_lsl
-            name: Niveau Tres Bas (Inactif=recouvert)
-          - entity: binary_sensor.pool_pump_running
-        title: EV Appoint eau
-        show_header_toggle: false

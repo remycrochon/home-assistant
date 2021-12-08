@@ -1,6 +1,73 @@
 - type: custom:dwains-flexbox-card
   items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
   cards:
+
+###############################################################
+# GENERAUX
+    - type: vertical-stack
+      cards:
+        - name: GENERAUX
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+
+        - type: entities
+          entities:
+            - entity: input_select.presence
+              name: Mode Présence
+            - entities:
+                - entity: sensor.linky_tarif_2
+                  name: Tarif
+                - entity: input_boolean.com_linky  
+                  name: Com 
+              entity: sensor.linky_tarif_2
+              icon: mdi:flash
+              name: Linky
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+                - entity: input_datetime.horaire_hc_debut_1
+                  name: Déb
+                - entity: input_datetime.horaire_hp_debut_1
+                  name: Fin
+              entity: input_datetime.horaire_hc_debut_1
+              icon: mdi:clock
+              name: Tranche 1 HC
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+                - entity: input_datetime.horaire_hc_debut_2
+                  name: Déb
+                - entity: input_datetime.horaire_hp_debut_2
+                  name: Fin
+              entity: input_datetime.horaire_hc_debut_1
+              icon: mdi:clock
+              name: Tranche 2 HC
+              show_state: false
+              type: custom:multiple-entity-row              
+            - entities:
+                - entity: input_boolean.hc_hp
+                  name: HC / HP si actif
+                - entity: input_boolean.forcage_hc_hp
+                  name: Forcage en HC                  
+              entity: input_boolean.hc_hp
+              icon: mdi:clock
+              name: HC / HP si actif
+              show_state: false
+              type: custom:multiple-entity-row
+
+          how_header_toggle: false
+          style: |
+            ha-card {
+              border: solid 2px var(--primary-color);
+            }
+
 ###############################################################    
 ## volets
     - type: vertical-stack
@@ -20,6 +87,8 @@
             - entity: input_select.volets
               name: Mode de Fonctionnement
             - entities:
+                - entity: sun.sun
+                  name: Position              
                 - entity: sensor.heure_leve_soleil
                   name: Levé
                 - entity: sensor.heure_couche_soleil
@@ -30,8 +99,6 @@
               show_state: false
               type: custom:multiple-entity-row
             - entities:
-                - entity: sun.sun
-                  name: Position
                 - entity: sensor.bh1750_illuminance
                   name: mesure
                 - entity: input_number.luminosite_seuil_bas
@@ -84,7 +151,7 @@
                 - entity: input_boolean.presence_amis_ch_sud
                   name: Presence Amis Chamb Sud
               head:
-                label: Parametres
+                label: Plus d'Informations
                 type: section
               padding: 0
               type: custom:fold-entity-row
@@ -120,31 +187,10 @@
                   name: Fin
               entity: input_datetime.horaire_hc_debut_1
               icon: mdi:clock
-              name: Tranche ECS
+              name: Hor ECS
               show_state: false
               type: custom:multiple-entity-row
-            - entities:
-                - entity: input_datetime.horaire_hc_debut_1
-                  name: Debut 1
-                - entity: input_datetime.horaire_hp_debut_1
-                  name: Fin 1
-                - entity: input_datetime.horaire_hc_debut_2
-                  name: Debut 2
-                - entity: input_datetime.horaire_hp_debut_2
-                  name: Fin 2
-              entity: input_datetime.horaire_hc_debut_1
-              icon: mdi:clock
-              name: Tranches HC
-              show_state: false
-              type: custom:multiple-entity-row
-            - entities:
-                - entity: input_boolean.hc_hp
-                  name: ' '
-              entity: input_boolean.hc_hp
-              icon: mdi:clock
-              name: HC / HP si actif
-              show_state: false
-              type: custom:multiple-entity-row
+
             - entities:
                 - entity: input_boolean.ecs_av_pv
                   name: ' '
@@ -158,36 +204,33 @@
                   name: Tps Chauffe
                 - entity: binary_sensor.ecs_chauffe
                   name: Chauffage
+
+              entity: sensor.ecs_chauffage_ce_jour
+              icon: mdi:water-boiler
+              name: Info ECS
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+
                 - entity: switch.cde_relais_ecs
                   name: Rel ECS
                 - entity: switch.cde_relais_ecs_router_pv
                   name: Rel PV
               entity: switch.cde_relais_ecs
               icon: mdi:water-boiler
-              name: Info ECS
+              name: Relais
               show_state: false
-              type: custom:multiple-entity-row
+              type: custom:multiple-entity-row              
             - entities:
                 - entity: input_datetime.horaire_ecs_debut
                   name: Heure debut tranche ECS
                 - entity: input_datetime.horaire_ecs_fin
                   name: Heure fin tranche ECS
-                - entity: input_datetime.horaire_hc_debut_1
-                  name: Heure debut HC tranche 1
-                - entity: input_datetime.horaire_hp_debut_1
-                  name: Heure fin HC tranche 1
-                - entity: input_datetime.horaire_hc_debut_2
-                  name: Heure debut HC tranche 2
-                - entity: input_datetime.horaire_hp_debut_2
-                  name: Heure fin HC tranche 2
-                - entity: input_boolean.hc_hp
-                  name: HC / HP si actif
-                - entity: input_boolean.forcage_hc_hp
-                  name: Forcage en HC
+
                 - entity: input_boolean.ecs_av_pv
                   name: ECS piloté par Routeur PV
               head:
-                label: Parametres
+                label: Plus d'Informations
                 type: section
               padding: 0
               type: custom:fold-entity-row
@@ -203,61 +246,6 @@
               type: custom:fold-entity-row
           how_header_toggle: false
           show_header_toggle: false
-          style: |
-            ha-card {
-              border: solid 2px var(--primary-color);
-            }
-
-###############################################################            
-# VMC SOUS SOL
-    - type: vertical-stack
-      cards:
-        - name: VMC SSOL
-          styles:
-            card:
-              - text-transform: uppercase
-              - color: 'var(--dwains-theme-accent)'
-              - font-size: 125%
-              - border-radius: 0%
-              - font-weight: 100
-              - letter-spacing: 10px
-          type: 'custom:button-card'
-
-        - type: entities
-          entities:
-            - entity: input_select.vmc_ssol
-              name: Mode de Fonctionnement
-            - entities:
-                - entity: input_datetime.horaire_vmc_ss_debut
-                  name: Heure Marche VMC
-                - entity: input_datetime.horaire_vmc_ss_fin
-                  name: Heure Arret VMC
-              entity: input_datetime.horaire_vmc_ss_debut
-              icon: mdi:clock
-              name: Tranche Horaire Auto
-              show_state: false
-              type: custom:multiple-entity-row
-            - entities:
-                - entity: switch.vmc_ssol
-                  name: ' '
-              entity: input_datetime.horaire_vmc_ss_debut
-              icon: mdi:fan-speed-3
-              name: Relais VMC
-              show_state: false
-              type: custom:multiple-entity-row
-            - entities:
-                - entity: input_datetime.horaire_vmc_ss_debut
-                  name: Heure Marche VMC
-                - entity: input_datetime.horaire_vmc_ss_fin
-                  name: Heure Arret VMC
-                - entity: switch.vmc_ssol
-                  name: Relais VMC
-              head:
-                label: Parametres
-                type: section
-              padding: 0
-              type: custom:fold-entity-row
-          how_header_toggle: false
           style: |
             ha-card {
               border: solid 2px var(--primary-color);
@@ -313,7 +301,7 @@
                   name: Seuil At
               entity: input_datetime.heure_vmc_niv0_ma
               icon: mdi:molecule
-              name: Parametres Hiver
+              name: M Hiver
               show_state: false
               type: custom:multiple-entity-row
             - entities:
@@ -323,7 +311,7 @@
                   name: Heure At VMC
               entity: input_datetime.heure_vmc_niv0_ma
               icon: mdi:clock
-              name: Parametres Ete
+              name: M Ete
               show_state: false
               type: custom:multiple-entity-row
             - entities:
@@ -350,7 +338,7 @@
                 - entity: switch.sonoff_vmc_niv0_on_off
                   name: Relais VMC
               head:
-                label: Parametres
+                label: Plus d'Informations
                 type: section
               padding: 0
               type: custom:fold-entity-row
@@ -359,5 +347,59 @@
             ha-card {
               border: solid 2px var(--primary-color);
             }
-       
-          
+
+
+###############################################################            
+# VMC SOUS SOL
+    - type: vertical-stack
+      cards:
+        - name: VMC SSOL
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+
+        - type: entities
+          entities:
+            - entity: input_select.vmc_ssol
+              name: Mode de Fonctionnement
+            - entities:
+                - entity: input_datetime.horaire_vmc_ss_debut
+                  name: Heure Marche VMC
+                - entity: input_datetime.horaire_vmc_ss_fin
+                  name: Heure Arret VMC
+              entity: input_datetime.horaire_vmc_ss_debut
+              icon: mdi:clock
+              name: Tranche Horaire Auto
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+                - entity: switch.vmc_ssol
+                  name: ' '
+              entity: input_datetime.horaire_vmc_ss_debut
+              icon: mdi:fan-speed-3
+              name: Relais VMC
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+                - entity: input_datetime.horaire_vmc_ss_debut
+                  name: Heure Marche VMC
+                - entity: input_datetime.horaire_vmc_ss_fin
+                  name: Heure Arret VMC
+                - entity: switch.vmc_ssol
+                  name: Relais VMC
+              head:
+                label: Plus d'Informations
+                type: section
+              padding: 0
+              type: custom:fold-entity-row
+          how_header_toggle: false
+          style: |
+            ha-card {
+              border: solid 2px var(--primary-color);
+            }

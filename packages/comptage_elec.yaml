@@ -546,7 +546,7 @@ template:
         {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
         {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
         {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
-        {{(hc*chc + hp*chp) | round(2) }}
+        {{((hc*chc) + (hp*chp)) | round(2) }}
       unit_of_measurement: "€"
       device_class: "monetary"
       state_class: "total"  

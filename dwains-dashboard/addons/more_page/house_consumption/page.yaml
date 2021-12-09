@@ -92,6 +92,7 @@
             - entity_id: sensor.ecocompteur_vmc_niv0
           exclude:
             - entity_id: sensor.pzem_totale_puissance
+            - entity_id: sensor.puissance_vmc_niv0
         sort:
           method: state
           reverse: true

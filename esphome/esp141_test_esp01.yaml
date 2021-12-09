@@ -99,9 +99,8 @@ display:
     rotation: 90
     lambda: |-
       it.printf(0, 0, id(arial),"%.1f",id(up).state);
-      it.printf(0, 15, id(arial),"%.1f",id(up).state);      
-      it.printf(0, 30, id(arial),"%.1f",id(up).state);
-      it.printf(0, 45, id(arial),"%.1f",id(up).state);      
+      it.printf(0, 30, id(arial30),"%.1f",id(up).state);
+
 #      it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
 #          it.printf(0, 0, id(arial), "%.1f C", id(temp).state);
 

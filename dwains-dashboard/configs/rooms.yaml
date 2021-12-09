@@ -23,6 +23,27 @@ rooms:
     more_entities:
       entities:
         - entity: sensor.power_salon_zb
+# Sous-sol
+  - name: Sous-Sol
+    icon: mdi:garage
+    cover: cover.garage_soussol
+    door: binary_sensor.porte_ssol_ouverte
+    temperature: sensor.esp130_climat_sous_sol_temperature
+    humidity: sensor.esp130_climat_sous_sol_humidite
+    light: switch.pc_ht
+
+# Garage          
+  - name: Garage
+    icon: mdi:garage
+    cover: cover.garage_rdc
+    temperature: sensor.temperature_garage
+    humidity: sensor.humidity_garage
+    door: group.portes_garage_rdc
+    more_entities:
+      columns: 2 #optional
+      entities:
+        - entity: sensor.temp_congelo_garage
+        - entity: binary_sensor.porte_frigo
 
 # Sdb
   - name: Salle de Bain
@@ -103,28 +124,6 @@ rooms:
           name: Wifi
         - entity: binary_sensor.esp129_cellier_status
           name: Status Connection
-# Garage          
-  - name: Garage
-    icon: mdi:garage
-    cover: cover.garage_rdc
-    temperature: sensor.temperature_garage
-    humidity: sensor.humidity_garage
-    door: group.portes_garage_rdc
-
-    more_entities:
-      columns: 2 #optional
-      entities:
-        - entity: sensor.temp_congelo_garage
-        - entity: binary_sensor.porte_frigo
-
-# Sous-sol
-  - name: Sous-Sol
-    icon: mdi:garage
-    cover: cover.garage_soussol
-    door: binary_sensor.porte_ssol_ouverte
-    temperature: sensor.esp130_climat_sous_sol_temperature
-    humidity: sensor.esp130_climat_sous_sol_humidite
-    light: switch.pc_ht
 
 # Cave
   - name: Cave

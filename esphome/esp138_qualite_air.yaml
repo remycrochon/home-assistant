@@ -33,7 +33,18 @@ ota:
 
 web_server:
   port: 80
-
+  
+font:
+  - file: "fonts/arial.ttf"
+    id: arial
+    size: 15
+  - file: "fonts/arial.ttf"
+    id: arial30
+    size: 30
+  - file: "fonts/arial.ttf"
+    id: arial10
+    size: 10
+    
 i2c:
   sda: GPIO4 #D2=pin 19
   scl: GPIO5 #D1=pin 20
@@ -165,6 +176,7 @@ sensor:
     
   - platform: mhz19
     uart_id: uart_b
+    id: mh_z19
     co2:
       name: "MH-Z19 CO2 Value"
       id: co2
@@ -217,42 +229,21 @@ binary_sensor:
         max_length: 500ms
         then:
           - lambda: |-
-              if (id(bp_mode) < 2) { id(bp_mode) += 1; }
+              if (id(bp_mode) < 3) { id(bp_mode) += 1; }
               else { id(bp_mode) = 1; }
 
-  - platform: gpio
-    name: bp_ecl
-    id: bp_ecl
-    pin:
-      number: GPIO12
-      inverted: true    
-    on_click:
-      - min_length: 25ms
-        max_length: 500ms
-        then:
-         - binary_sensor.template.publish:
-            id: backlight
-            state: ON
-         - binary_sensor.template.publish:
-            id: backlight
-            state: OFF    
-      
-  - platform: template
-    id: backlight
-    filters:
-      - delayed_off: 90s
-    on_press:
-      then:
-        - lambda: |-
-            id(aff1).backlight();
-    on_release:
-      then:
-        - lambda: |-
-            id(aff1).no_backlight();
-        
+
 #Etat de la connection
   - platform: status
     name: "${friendly_name} Status"
+
+interval:
+  - interval: 60s
+    then:
+      - switch.turn_on: val_mes
+      - delay: 10s
+      - switch.turn_off: val_mes
+      - delay: 30s
 
 switch:   
   - platform: gpio
@@ -261,20 +252,16 @@ switch:
     id: val_mes
     name: "${friendly_name} Validation mesure"
     
+  - platform: template
+    name: "Calibration zero Mh-Z19 CO2"
+    turn_on_action:
+      - mhz19.calibrate_zero: mh_z19
+      - switch.turn_off: co2_cal
+    id: co2_cal
+
   - platform: restart
     name: "${friendly_name} Restart"
-    
-interval:
-  - interval: 60s
-    then:
-      - switch.turn_on: val_mes
-      - lambda: |-
-          id(aff1).backlight();
-      - delay: 10s
-      - switch.turn_off: val_mes
-      - delay: 30s
-      - lambda: |-
-          id(aff1).no_backlight();    
+
 
 output:
 
@@ -291,31 +278,31 @@ output:
     id: gpio_15
     
 # gestion afficheur
+
 display:
-  - platform: lcd_pcf8574
-    id: aff1
-    dimensions: 20x4
-    address: 0x27
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    brightness: 100%
     lambda: |-
       if (id(bp_mode) == 1 )
         {
-        it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
-        it.printf(0,1,"PM2.5=%.2f",id(pm2_5).state);
-        it.printf(12,1,"M=%.2f",id(pm2_5_median).state);
-        it.printf(0,2,"PM10.0=%.2f",id(pm10_0).state);
-        it.printf(0,3,"CO2=%.0f",id(co2).state);
-        it.printf(12,3,"T=%.2f",id(temp).state);
+        it.printf(0,0,id(arial),"PM1.0=%.2f",id(pm1_0).state);
+        it.printf(0,15,id(arial),"PM2.5=%.2f",id(pm2_5).state);
+        it.printf(0,30,id(arial),"PM10.0=%.2f",id(pm10_0).state);
+        it.printf(0,45,id(arial),"CO2=%.0f",id(co2).state);
         }
       else if (id(bp_mode) == 2 )
         {
-        it.print(0,0,"UM");        
-        it.printf(0,1,"0.3=%.1f",id(pm_03_um).state);
-        it.printf(11,1,"0.5=%.1f",id(pm_05_um).state);
-        it.printf(0,2,"1.0=%.1f",id(pm_10_um).state);
-        it.printf(11,2,"2.5=%.1f",id(pm_25_um).state);        
-        it.printf(0,3,"5.0=%.1f",id(pm_50_um).state);
-        it.printf(11,3,"10.0=%.1f",id(pm_100_um).state);        
+        it.printf(0,0,id(arial),"0.3UM=%.1f",id(pm_03_um).state);
+        it.printf(0,15,id(arial),"0.5UM=%.1f",id(pm_05_um).state);
+        it.printf(0,30,id(arial),"1.0UM=%.1f",id(pm_10_um).state);
+        it.printf(0,45,id(arial),"2.5UM=%.1f",id(pm_25_um).state);        
         }
-
+      else if (id(bp_mode) == 3 )
+        {
+        it.printf(0,0,id(arial),"5.0UM=%.1f",id(pm_50_um).state);
+        it.printf(0,15,id(arial),"10.0UM=%.1f",id(pm_100_um).state);  
+        }
 
       

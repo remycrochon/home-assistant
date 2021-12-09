@@ -131,7 +131,6 @@ template:
       device_class: "power"
       state_class: "measurement"
       unit_of_measurement: "W"
-#        {% set p = states('sensor.ecocompteur_vmc_niv0_brut') | float(default=0) | round(0) %}      
       state: >-
         {% set p = state_attr('sensor.puissance_vmc_niv0', 'median') | float(default=0) | round(1) %}
         {% if p>100 %}

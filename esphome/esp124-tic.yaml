@@ -6,8 +6,16 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP8266
-  board: esp01_1m
+  platform: ESP8266  # ESP32             
+  board: d1_mini     # mhetesp32minikit
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      - light.control:
+          id: led1
+          brightness: 0.25
+          state: on
 
 wifi:
   ssid: !secret wifi
@@ -32,10 +40,27 @@ ota:
 web_server:
   port: 80
 
-# Example configuration entry
+font:
+  - file: "fonts/arial.ttf"
+    id: arial
+    size: 15
+  - file: "fonts/arial.ttf"
+    id: arial30
+    size: 30
+  - file: "fonts/arial.ttf"
+    id: arial10
+    size: 10
+
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: True
+  id: bus_a
+  
+# 
 uart:
   id: uart_a
-  rx_pin: GPIO0
+  rx_pin: GPIO13
 #  tx_pin: GPIO1
   baud_rate: 1200
   parity: EVEN
@@ -49,23 +74,94 @@ teleinfo:
   
 sensor:
   - platform: teleinfo
+    id: hchc
     tag_name: "HCHC"
     name: "hchc"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    
   - platform: teleinfo
+    id: hchp
     tag_name: "HCHP"
     name: "hchp"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    
+
   - platform: teleinfo
+    id: papp
     tag_name: "PAPP"
     name: "papp"
     unit_of_measurement: "VA"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    
+  - platform: teleinfo
+    id: isousc
+    tag_name: "ISOUSC"
+    name: "I Sousc"
+    unit_of_measurement: "A"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+  - platform: teleinfo
+    id: iinst
+    tag_name: "IINST"
+    name: "Int Inst"
+    unit_of_measurement: "A"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+  - platform: teleinfo
+    id: imax
+    tag_name: "IMAX"
+    name: "Int Max"
+    unit_of_measurement: "A"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+  - platform: template
+    name: "I"
+    id: i100
+    icon: mdi:flash
+    unit_of_measurement: "%"
+    lambda: |-
+      return (id(iinst).state/id(isousc).state*100);
+      
+  - platform: homeassistant
+    name: "HC J"
+    entity_id: sensor.energy_total_linky_usage_daily_hc
+    id: hcj
+
+  - platform: homeassistant
+    name: "HP J"
+    entity_id: sensor.energy_total_linky_usage_daily_hp
+    id: hpj
+
+  - platform: wifi_signal
+    id: wif
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+light:
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: rgb_led
+        from: 0
+        to: 0
+
+  - platform: neopixelbus
+    num_leds: 1
+    pin: GPIO14
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s
 
 text_sensor:
   - platform: teleinfo
@@ -82,3 +178,17 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    brightness: 100%
+    lambda: |-
+      it.printf(0,0,id(arial),"PuC=%.0f",id(papp).state);
+      it.printf(0,15,id(arial),"I Inst=%.0f",id(iinst).state);
+      it.printf(64,15,id(arial),"I Max=%.0f",id(imax).state);
+      it.printf(0,30,id(arial),"I=%.0f",id(i100).state);
+      it.printf(0,45,id(arial),"HCJ=%.0f",id(hcj).state);
+      it.printf(64,45,id(arial),"HPJ=%.0f",id(hpj).state);
+   

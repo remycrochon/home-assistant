@@ -38,17 +38,6 @@ sensor:
     unit_of_measurement: s
 
 # Consommation - Energies
-  - platform: command_line
-    name: "Linky HP Wh"
-    command: curl -s 'http://192.168.0.26/data.json' | jq '.conso_hp'
-    scan_interval: 60
-    unit_of_measurement: Wh
-    
-  - platform: command_line
-    name: "Linky HC Wh"
-    command: curl -s 'http://192.168.0.26/data.json' | jq '.conso_hc'
-    scan_interval: 60
-    unit_of_measurement: Wh
 
   - platform: command_line
     name: "Linky tarif Courant"
@@ -104,7 +93,6 @@ template:
       state: >-
         {% set hp = states('sensor.linky_hc_wh') | float(default=0) | round(0) %}
         {{ (hp/1000) | round(0) }}
-
 
     - name: "Linky Conso Totale HPHC"
       unique_id: "linky_conso_totale_hphc"

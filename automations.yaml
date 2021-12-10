@@ -2131,14 +2131,14 @@
     to: 'off'
     id: forcage hp
   - platform: state
-    entity_id: sensor.linky_tarif_courant
+    entity_id: sensor.linky_ptec
     id: tarif_hc
-    from: '2'
-    to: '1'
+    from: HP..
+    to: HC..
   - platform: state
-    entity_id: sensor.linky_tarif_courant
-    from: '1'
-    to: '2'
+    entity_id: sensor.linky_ptec
+    from: HC..
+    to: HP..
     id: tarif_hp
   condition: []
   action:

@@ -8,14 +8,7 @@ esphome:
   name: ${device_name}
   platform: ESP8266  # ESP32             
   board: d1_mini     # mhetesp32minikit
-  platformio_options:
-    lib_deps: NeoPixelBus@2.6.0
-  on_boot:
-    then:
-      - light.control:
-          id: led1
-          brightness: 0.25
-          state: on
+
 
 wifi:
   ssid: !secret wifi
@@ -76,7 +69,7 @@ sensor:
   - platform: teleinfo
     id: hchc
     tag_name: "HCHC"
-    name: "hchc"
+    name: "Linky HC Wh"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -84,7 +77,7 @@ sensor:
   - platform: teleinfo
     id: hchp
     tag_name: "HCHP"
-    name: "hchp"
+    name: "Linky HP Wh"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -93,7 +86,7 @@ sensor:
   - platform: teleinfo
     id: papp
     tag_name: "PAPP"
-    name: "papp"
+    name: "Linky PAPP"
     unit_of_measurement: "VA"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -101,7 +94,7 @@ sensor:
   - platform: teleinfo
     id: isousc
     tag_name: "ISOUSC"
-    name: "I Sousc"
+    name: "Linky I Sousc"
     unit_of_measurement: "A"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -109,7 +102,7 @@ sensor:
   - platform: teleinfo
     id: iinst
     tag_name: "IINST"
-    name: "Int Inst"
+    name: "Linky I Inst"
     unit_of_measurement: "A"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -117,13 +110,13 @@ sensor:
   - platform: teleinfo
     id: imax
     tag_name: "IMAX"
-    name: "Int Max"
+    name: "linky I Max"
     unit_of_measurement: "A"
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
   - platform: template
-    name: "I"
+    name: "Linky I/Imax"
     id: i100
     icon: mdi:flash
     unit_of_measurement: "%"
@@ -145,28 +138,15 @@ sensor:
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
 
-light:
-  - platform: partition
-    name: led1
-    id: led1
-    default_transition_length: 0s
-    segments:
-      - id: rgb_led
-        from: 0
-        to: 0
-
-  - platform: neopixelbus
-    num_leds: 1
-    pin: GPIO14
-    name: "RGB strip"
-    variant: ws2812
-    id: rgb_led
-    default_transition_length: 0s
-
 text_sensor:
   - platform: teleinfo
     tag_name: "OPTARIF"
-    name: "optarif"
+    name: "Linky OPTARIF"
+    teleinfo_id: myteleinfo
+    
+  - platform: teleinfo
+    tag_name: "PTEC"
+    name: "Linky PTEC"
     teleinfo_id: myteleinfo
 
 #Etat de la connection

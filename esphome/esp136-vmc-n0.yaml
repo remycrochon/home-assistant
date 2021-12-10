@@ -43,19 +43,19 @@ dallas:
 sensor:
   - platform: dallas
     address: 0x0C000004923C0A28
-    name: "Temp Air Neuf"
+    name: "${friendly_name} T° Air Neuf"
     
   - platform: dallas
     address: 0x2A00000492ADAA28
-    name: "Temp Air Vicié"
+    name: "${friendly_name} T° Air Vicié"
 
   - platform: dallas
     address: 0x3E00000492D66328
-    name: "Temp insufflation"
+    name: "${friendly_name} T° insufflation"
 
   - platform: dallas
     address: 0x4300461100004B28
-    name: "Temp aspiration"
+    name: "${friendly_name} T° aspiration"
 
 
 
@@ -65,6 +65,26 @@ binary_sensor:
     name: "${friendly_name} Status"
 
 switch:   
+  - platform: gpio
+    name: "${friendly_name} Relais"
+    pin: GPIO05 #D1
+    id: relais
+    
+  - platform: template
+    name: "${friendly_name} Vit_2"
+    id: vit2
+    turn_on_action:
+      - switch.turn_on: relais
+      - delay: 2s
+      - switch.turn_off: relais
+
+  - platform: template
+    name: "${friendly_name} Vit_3"
+    id: vit3
+    turn_on_action:
+      - switch.turn_on: relais
+      - delay: 6s
+      - switch.turn_off: relais      
 
     
   - platform: restart

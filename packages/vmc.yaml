@@ -44,16 +44,24 @@ input_number:
     min: 0
     max: 50
     unit_of_measurement: µg/m3
-    step: 0.1
+    step: 1
     icon: mdi:thermometer
     mode: box
 # Seuil PM2.5 Marche VMC
-  seuil_pm2_5_ma:
-    name: Seuil PM2.5 Ma VMC
+  seuil_haut_pm2_5:
+    name: Seuil Haut PM2.5 Ma VMC
     min: 0
-    max: 100
+    max: 500
     unit_of_measurement: µg/m3
-    step: 0.1
+    step: 1
+    icon: mdi:thermometer
+    mode: box
+  seuil_tres_haut_pm2_5:
+    name: Seuil Tres Haut PM2.5 Ma VMC
+    min: 0
+    max: 1000
+    unit_of_measurement: µg/m3
+    step: 11
     icon: mdi:thermometer
     mode: box
     

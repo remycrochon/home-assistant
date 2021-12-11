@@ -295,8 +295,10 @@
               show_state: false
               type: custom:multiple-entity-row
             - entities:
-                - entity: input_number.seuil_pm2_5_ma
-                  name: Seuil Ma
+                - entity: input_number.seuil_haut_pm2_5
+                  name: Seuil H
+                - entity: input_number.seuil_tres_haut_pm2_5
+                  name: Seul TH
                 - entity: input_number.seuil_pm2_5_at
                   name: Seuil At
               entity: input_datetime.heure_vmc_niv0_ma
@@ -325,9 +327,13 @@
               show_state: false
               type: custom:multiple-entity-row
             - entities:
-                - entity: switch.sonoff_vmc_niv0_on_off
-                  name: ' '
-              entity: input_datetime.horaire_vmc_ss_debut
+              - entity: switch.sonoff_vmc_niv0_on_off
+                name: Ma
+              - entity: switch.esp136_vit_2
+                name: Vit2
+              - entity: switch.esp136_vit_3
+                name: Vit3
+              entity: switch.sonoff_vmc_niv0_on_off
               icon: mdi:fan-speed-3
               name: Relais VMC
               show_state: false
@@ -335,8 +341,6 @@
             - entities:
                 - entity: sensor.energy_vmc_usage_daily_hc
                 - entity: sensor.energy_vmc_usage_daily_hp
-                - entity: switch.sonoff_vmc_niv0_on_off
-                  name: Relais VMC
               head:
                 label: Plus d'Informations
                 type: section

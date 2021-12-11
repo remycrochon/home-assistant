@@ -6,8 +6,10 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP8266  # ESP32             
-  board: d1_mini     # mhetesp32minikit
+#  platform: ESP8266  # ESP32             
+#  board: d1_mini     # mhetesp32minikit
+  platform: ESP32
+  board: lolin_d32
 
 
 wifi:
@@ -45,15 +47,15 @@ font:
     size: 10
 
 i2c:
-  sda: GPIO4 #D2=pin 19
-  scl: GPIO5 #D1=pin 20
+  sda: GPIO21 #D2=pin 19
+  scl: GPIO22 #D1=pin 20
   scan: True
   id: bus_a
   
 # 
 uart:
   id: uart_a
-  rx_pin: GPIO13
+  rx_pin: GPIO32
 #  tx_pin: GPIO1
   baud_rate: 1200
   parity: EVEN
@@ -137,6 +139,15 @@ sensor:
     id: wif
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
+    
+  - platform: uptime
+    id: uptime_seconds
+    name: "${friendly_name} Uptime"
+    update_interval: 60s
+    unit_of_measurement: s
+    accuracy_decimals: 0
+    force_update: false
+    icon: mdi:timer
 
 text_sensor:
   - platform: teleinfo
@@ -148,6 +159,28 @@ text_sensor:
     tag_name: "PTEC"
     name: "Linky PTEC"
     teleinfo_id: myteleinfo
+
+  - platform: template
+    name: "${friendly_name} Uptime"
+    update_interval: 60s
+    icon: mdi:clock-start
+    lambda: |-
+      int seconds = (id(uptime_seconds).state);
+      int days = seconds / (24 * 3600);
+      seconds = seconds % (24 * 3600);
+      int hours = seconds / 3600;
+      seconds = seconds % 3600;
+      int minutes = seconds /  60;
+      seconds = seconds % 60;
+      if ( days ) {
+        return { (String(days) +"d " + String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
+      } else if ( hours ) {
+        return { (String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
+      } else if ( minutes ) {
+        return { (String(minutes) +"m "+ String(seconds) +"s").c_str() };
+      } else {
+        return { (String(seconds) +"s").c_str() };
+      }
 
 #Etat de la connection
 binary_sensor:

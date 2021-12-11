@@ -2511,9 +2511,9 @@
   - platform: time
     at: input_datetime.heure_vmc_niv0_at
   - platform: numeric_state
-    entity_id: sensor.concentration_de_particules_2_5um
+    entity_id: input_number.seuil_haut_pm2_5
     id: pm2.5-sh
-    above: input_number.seuil_pm2_5_ma
+    above: input_number.seuil_pm2
     for:
       hours: 0
       minutes: 5
@@ -2525,9 +2525,18 @@
     below: input_number.seuil_pm2_5_at
     for:
       hours: 0
-      minutes: 15
+      minutes: 0
       seconds: 0
       milliseconds: 0
+  - platform: numeric_state
+    entity_id: sensor.concentration_de_particules_2_5um
+    above: input_number.seuil_tres_haut_pm2_5
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+    id: pm2.5_sth
   condition: []
   action:
   - choose:
@@ -2563,17 +2572,25 @@
           sequence:
           - service: switch.turn_on
             target:
-              entity_id:
-              - switch.sonoff_vmc_niv0_on_off
+              entity_id: switch.esp136_vit_2
+        - conditions:
+          - condition: trigger
+            id: pm2.5_sth
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.esp136_vit_3
         - conditions:
           - condition: trigger
             id: pm2.5-sb
           sequence:
-          - service: switch.turn_off
+          - service: switch.turn_on
             target:
-              entity_id:
-              - switch.sonoff_vmc_niv0_on_off
+              entity_id: switch.esp136_vit_2
         default: []
+      - service: switch.turn_on
+        target:
+          entity_id: switch.sonoff_vmc_niv0_on_off
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
@@ -2593,4 +2610,29 @@
           entity_id:
           - switch.sonoff_vmc_niv0_on_off
     default: []
+  mode: single
+- id: '1639204589929'
+  alias: 04-Sapin
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.heure_allum_sapin
+    id: allume
+  - platform: time
+    at: input_datetime.heure_eteint_sapin
+    id: eteint
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: allume
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.tc6_bp1
+    default:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.tc6_bp1
   mode: single

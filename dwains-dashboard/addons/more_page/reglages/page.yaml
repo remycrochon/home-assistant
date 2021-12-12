@@ -272,38 +272,50 @@
               name: Mode de Fonctionnement
             - entities:
                 - entity: sensor.temperature_salon_zb
-                  name: Aspi
+                  name: Insuf.
                 - entity: sensor.thermometre_temperature
-                  name: Insuf
+                  name: Aspi
                 - entity: sensor.vp2_temp_out
                   name: Ext
                 - entity: sensor.efficacite_vmc
-                  name: Eff
+                  name: Rend
               entity: sensor.efficacite_vmc
               icon: mdi:temperature-celsius
               name: Temp
               show_state: false
               type: custom:multiple-entity-row
             - entities:
+                - entity: sensor.mh_z19_co2_value
+                  name: CO2
                 - entity: sensor.concentration_de_particules_2_5um
                   name: PM2.5
-                - entity: sensor.mh_z19_co2_value
-                  name: Co2
               entity: input_datetime.heure_vmc_niv0_ma
-              icon: mdi:molecule-co2
+              icon: mdi:blur
               name: Qualité Air
               show_state: false
               type: custom:multiple-entity-row
             - entities:
-                - entity: input_number.seuil_haut_pm2_5
-                  name: Seuil H
-                - entity: input_number.seuil_tres_haut_pm2_5
-                  name: Seul TH
-                - entity: input_number.seuil_pm2_5_at
-                  name: Seuil At
+                - entity: input_number.seuil_haut_co2
+                  name: Haut
+                - entity: input_number.seuil_tres_haut_co2
+                  name: T Haut
+                - entity: input_number.seuil_co2_at
+                  name: Arret
               entity: input_datetime.heure_vmc_niv0_ma
-              icon: mdi:molecule
-              name: M Hiver
+              icon: mdi:molecule-co2
+              name: Seuils CO2
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+                - entity: input_number.seuil_haut_pm2_5
+                  name: Haut
+                - entity: input_number.seuil_tres_haut_pm2_5
+                  name: T Haut
+                - entity: input_number.seuil_pm2_5_at
+                  name: Arret
+              entity: input_datetime.heure_vmc_niv0_ma
+              icon: mdi:chemical-weapon
+              name: Seuils PM2.5
               show_state: false
               type: custom:multiple-entity-row
             - entities:
@@ -313,10 +325,12 @@
                   name: Heure At VMC
               entity: input_datetime.heure_vmc_niv0_ma
               icon: mdi:clock
-              name: M Ete
+              name: Mode Hor
               show_state: false
               type: custom:multiple-entity-row
             - entities:
+                - entity: sensor.temps_de_fonctionnement_vmc_n0
+                  name: Tps F
                 - entity: sensor.energie_vmc_jour
                   name: Jour
                 - entity: sensor.ecocompteur_vmc_niv0
@@ -327,13 +341,13 @@
               show_state: false
               type: custom:multiple-entity-row
             - entities:
-              - entity: switch.sonoff_vmc_niv0_on_off
-                name: Ma
-              - entity: switch.esp136_vit_2
-                name: Vit2
-              - entity: switch.esp136_vit_3
-                name: Vit3
-              entity: switch.sonoff_vmc_niv0_on_off
+                - entity: switch.sonoff_vmc_niv0_on_off
+                  name: Ma
+                - entity: switch.esp136_vit_2
+                  name: Vit2
+                - entity: switch.esp136_vit_3
+                  name: Vit3
+              entity: input_datetime.horaire_vmc_ss_debut
               icon: mdi:fan-speed-3
               name: Relais VMC
               show_state: false
@@ -342,7 +356,7 @@
                 - entity: sensor.energy_vmc_usage_daily_hc
                 - entity: sensor.energy_vmc_usage_daily_hp
               head:
-                label: Plus d'Informations
+                label: Parametres
                 type: section
               padding: 0
               type: custom:fold-entity-row
@@ -351,7 +365,6 @@
             ha-card {
               border: solid 2px var(--primary-color);
             }
-
 
 ###############################################################            
 # VMC SOUS SOL

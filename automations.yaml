@@ -2511,9 +2511,9 @@
   - platform: time
     at: input_datetime.heure_vmc_niv0_at
   - platform: numeric_state
-    entity_id: input_number.seuil_haut_pm2_5
+    entity_id: sensor.concentration_de_particules_2_5um
     id: pm2.5-sh
-    above: input_number.seuil_pm2
+    above: input_number.seuil_haut_pm2_5
     for:
       hours: 0
       minutes: 5
@@ -2521,7 +2521,7 @@
       milliseconds: 0
   - platform: numeric_state
     entity_id: sensor.concentration_de_particules_2_5um
-    id: pm2.5-sb
+    id: pm2.5-at
     below: input_number.seuil_pm2_5_at
     for:
       hours: 0
@@ -2536,14 +2536,41 @@
       minutes: 5
       seconds: 0
       milliseconds: 0
-    id: pm2.5_sth
+    id: pm2.5-sth
+  - platform: numeric_state
+    entity_id: sensor.mh_z19_co2_value
+    id: co2-sh
+    above: input_number.seuil_haut_co2
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - platform: numeric_state
+    entity_id: sensor.mh_z19_co2_value
+    id: co2-at
+    below: input_number.seuil_co2_at
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - platform: numeric_state
+    entity_id: sensor.mh_z19_co2_value
+    above: input_number.seuil_tres_haut_co2
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+    id: co2-sth
   condition: []
   action:
   - choose:
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
-        state: Ete
+        state: Hor
       sequence:
       - choose:
         - conditions:
@@ -2563,7 +2590,7 @@
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
-        state: Hiver
+        state: PM2_5
       sequence:
       - choose:
         - conditions:
@@ -2575,14 +2602,45 @@
               entity_id: switch.esp136_vit_2
         - conditions:
           - condition: trigger
-            id: pm2.5_sth
+            id: pm2.5-sth
           sequence:
           - service: switch.turn_on
             target:
               entity_id: switch.esp136_vit_3
         - conditions:
           - condition: trigger
-            id: pm2.5-sb
+            id: pm2.5-at
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.esp136_vit_2
+        default: []
+      - service: switch.turn_on
+        target:
+          entity_id: switch.sonoff_vmc_niv0_on_off
+    - conditions:
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: CO2
+      sequence:
+      - choose:
+        - conditions:
+          - condition: trigger
+            id: co2-sh
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.esp136_vit_2
+        - conditions:
+          - condition: trigger
+            id: co2-sth
+          sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.esp136_vit_3
+        - conditions:
+          - condition: trigger
+            id: co2-at
           sequence:
           - service: switch.turn_on
             target:

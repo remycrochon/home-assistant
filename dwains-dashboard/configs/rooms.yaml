@@ -14,7 +14,7 @@ rooms:
 #     door: binary_sensor.hallway_door_contact
 #     window: binary_sensor.hallway_window_contact
 #     safety: sensor.smoke_sensor
-#     device: switch.television
+    device: switch.tc6_bp1
 #     vacuum: 
 #       entity: vacuum.rockrobo
 #       camera: camera.rockrobo_map
@@ -23,6 +23,9 @@ rooms:
     more_entities:
       entities:
         - entity: sensor.power_salon_zb
+        - entity: input_datetime.heure_allum_sapin
+        - entity: input_datetime.heure_eteint_sapin
+
 # Sous-sol
   - name: Sous-Sol
     icon: mdi:garage

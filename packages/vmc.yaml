@@ -32,8 +32,9 @@ input_select:
     name: Vmc_Niv0
     icon: mdi:fan
     options:
-      - Ete
-      - Hiver
+      - Hor
+      - CO2
+      - PM2_5
       - Marche
       - Arret
 
@@ -45,7 +46,7 @@ input_number:
     max: 50
     unit_of_measurement: µg/m3
     step: 1
-    icon: mdi:thermometer
+    icon: mdi:chemical-weapon
     mode: box
 # Seuil PM2.5 Marche VMC
   seuil_haut_pm2_5:
@@ -54,21 +55,48 @@ input_number:
     max: 500
     unit_of_measurement: µg/m3
     step: 1
-    icon: mdi:thermometer
+    icon: mdi:chemical-weapon
     mode: box
   seuil_tres_haut_pm2_5:
     name: Seuil Tres Haut PM2.5 Ma VMC
     min: 0
     max: 1000
     unit_of_measurement: µg/m3
-    step: 11
-    icon: mdi:thermometer
+    step: 1
+    icon: mdi:chemical-weapon
+    mode: box
+
+# Seuil CO2 Arret VMC
+  seuil_co2_at:
+    name: Seuil CO2 At VMC
+    min: 400
+    max: 500
+    unit_of_measurement: ppm
+    step: 1
+    icon: mdi:molecule-co2
+    mode: box
+# Seuil CO2 Marche VMC
+  seuil_haut_co2:
+    name: Seuil Haut CO2 Ma VMC
+    min: 400
+    max: 1500
+    unit_of_measurement: ppm
+    step: 1
+    icon: mdi:molecule-co2
+    mode: box
+  seuil_tres_haut_co2:
+    name: Seuil Tres Haut CO2 Ma VMC
+    min: 400
+    max: 3000
+    unit_of_measurement: ppm
+    step: 1
+    icon: mdi:molecule-co2
     mode: box
     
 template:
   - sensor:
-# Efficacité de la VMC double Flux
-    - name: "Efficacité VMC"
+# Rendement de la VMC double Flux
+    - name: "Rendement VMC"
       unique_id: "efficacite_vmc"
       state: >-
         {% set insu = states('sensor.thermometre_temperature') | float(default=0) | round(2) %}
@@ -88,11 +116,17 @@ template:
       device_class: "aqi"
       state_class: "measurement"  
 
+  - binary_sensor:
+    # Si la puissance electrique est superieure à 10w, on considere que la VMC est en fonctionnement
+    - name: "vmc_marche"
+      state: >-
+        {{states.sensor.ecocompteur_vmc_niv0.state | float(default=0) > 10}}      
+
 sensor:
     # Affichage du temps de fonctionnement de la VMC du jour
   - platform: history_stats
     name: temps de Fonctionnement VMC N0
-    entity_id: switch.sonoff_vmc_niv0_on_off
+    entity_id: binary_sensor.vmc_marche
     state: "on"
     type: time
     start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"

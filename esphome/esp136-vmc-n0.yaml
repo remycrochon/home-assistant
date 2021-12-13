@@ -38,24 +38,35 @@ web_server:
 # Example configuration entry
 dallas:
   - pin: GPIO2 #D4
+    update_interval: 30s
 
 # Individual sensors
 sensor:
   - platform: dallas
     address: 0x0C000004923C0A28
     name: "${friendly_name} T° Air Neuf"
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 10
+          send_first_at: 1    
     
-  - platform: dallas
-    address: 0x2A00000492ADAA28
-    name: "${friendly_name} T° Air Vicié"
+#  - platform: dallas
+#    address: 0x2A00000492ADAA28
+#    name: "${friendly_name} T° Air Vicié"
 
-  - platform: dallas
-    address: 0x3E00000492D66328
-    name: "${friendly_name} T° insufflation"
+#  - platform: dallas
+#    address: 0x3E00000492D66328
+#    name: "${friendly_name} T° insufflation"
 
   - platform: dallas
     address: 0x4300461100004B28
     name: "${friendly_name} T° aspiration"
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 10
+          send_first_at: 1
 
 
 

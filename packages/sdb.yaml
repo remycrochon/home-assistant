@@ -1,0 +1,84 @@
+####################################################
+#                                                  #
+#                 Salle De Bains                   #
+#                                                  #
+####################################################
+
+utility_meter:
+
+  energy_sdb_usage_daily:
+    source: sensor.pzem_sdb_energie
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
+
+  energy_sdb_usage_weekly:
+    source: sensor.pzem_sdb_energie
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+
+  energy_sdb_usage_monthly:
+    source: sensor.pzem_sdb_energie
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+
+  energy_sdb_usage_yearly:
+    source: sensor.pzem_sdb_energie
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+      
+template:
+# Consommation HP + HC - addition des utility meter
+  - sensor:
+    - name: "Energie SdB Jour"
+      unique_id: "energy_sdb_daily"    
+      state: >-
+        {% set p = states('sensor.energy_sdb_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_sdb_weekly"
+      state: >-
+        {% set p = states('sensor.energy_sdb_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_sdb_monthly"
+      state: >-
+        {% set p = states('sensor.energy_sdb_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_sdb_yearly"
+      state: >-
+        {% set p = states('sensor.energy_sdb_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_sdb_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+
+#Indique que SdB est en fonctionnement
+  - binary_sensor:
+      - name: "SdB en chauffe"
+        delay_off:
+          minutes: 5
+        state: >
+          {{ states('sensor.pzem_sdb_puissance')|float(default=0) > 15 }}

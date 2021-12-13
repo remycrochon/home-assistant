@@ -52,66 +52,8 @@ sensor:
     #max_age:
       # minutes: 30
 
-input_number:
-# Utilisé pour calculer le time out de la liaison linky
-# en vérifiant que la consommation évolue dans une periode horaire
-  mem_linky_hphc:
-    name: Mem linky HPHC
-    min: 0
-    max: 100000000000
-    unit_of_measurement: Wh
-    icon: mdi:timeline-check-outline
-    mode: box
-    
-
 template:
   sensor:
-    - name: "Linky Conso Totale HPHC Wh"
-      unique_id: "linky_hphc_wh"
-      unit_of_measurement: "Wh"
-      device_class: "energy"
-      state_class: "total"  
-      state: >-
-        {% set hp = states('sensor.linky_hp_wh') | float(default=0) | round(0) %}
-        {% set hc = states('sensor.linky_hc_wh') | float(default=0) | round(0) %}
-        {{ (hp+hc) | round(0) }}
-
-    - name: "Linky Conso HP"
-      unique_id: "linky_conso_hp"
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-      state: >-
-        {% set hp = states('sensor.linky_hp_wh') | float(default=0) | round(0) %}
-        {{ (hp/1000) | round(0) }}
-
-    - name: "Linky Conso HC"
-      unique_id: "linky_conso_hc"
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-      state: >-
-        {% set hp = states('sensor.linky_hc_wh') | float(default=0) | round(0) %}
-        {{ (hp/1000) | round(0) }}
-
-    - name: "Linky Conso Totale HPHC"
-      unique_id: "linky_conso_totale_hphc"
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-      state: >-
-        {% set hp = states('sensor.linky_conso_hp') | float(default=0) | round(0) %}
-        {% set hc = states('sensor.linky_conso_hc') | float(default=0) | round(0) %}
-        {{ (hp+hc) | round(0) }}
-        
-    - name: "linky_tarif"
-      unique_id: "linky_tarif"
-      state: >
-        {% if is_state("sensor.linky_tarif_courant", "2") -%}
-          HP
-        {%- else -%}
-          HC
-        {%- endif %}
 
 # Limite les valeurs aberantes de la puissance de la VMC
     - name: "EcoCompteur VMC Niv0"

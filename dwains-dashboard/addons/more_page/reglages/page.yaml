@@ -271,14 +271,14 @@
             - entity: input_select.vmc_niv0
               name: Mode de Fonctionnement
             - entities:
-                - entity: sensor.temperature_salon_zb
-                  name: Insuf.
+                - entity: sensor.esp136_tdeg_aspiration
+                  name: Aspi.
                 - entity: sensor.thermometre_temperature
-                  name: Aspi
-                - entity: sensor.vp2_temp_out
-                  name: Ext
+                  name: Insuf.
+                - entity: sensor.esp136_tdeg_air_neuf
+                  name: A Neuf
                 - entity: sensor.efficacite_vmc
-                  name: Rend
+                  name: Rend.
               entity: sensor.efficacite_vmc
               icon: mdi:temperature-celsius
               name: Temp

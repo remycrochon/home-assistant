@@ -1,4 +1,38 @@
-# PAC 
+####################################################
+#                                                  #
+#                      PAC                         #
+#                                                  #
+####################################################
+
+utility_meter:
+  energy_pac1_usage_daily:
+    source: sensor.energy_pac_p_kw
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
+
+  energy_pac1_usage_weekly:
+    source: sensor.energy_pac_p_kw
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+
+  energy_pac1_usage_monthly:
+    source: sensor.energy_pac_p_kw
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+
+  energy_pac1_usage_yearly:
+    source: sensor.energy_pac_p_kw
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+
 climate:
   - platform: generic_thermostat
     name: Altherma
@@ -17,6 +51,57 @@ climate:
     ac_mode: false
     keep_alive:
       minutes: 5
+
+
+template:
+# Consommation journalière HP + HC - addition des utility meter
+  - sensor:
+    - name: "Energie PAC Jour"
+      unique_id: "energy_pac1_daily"
+      state: >-
+        {% set p = states('sensor.energy_pac1_usage_daily_hp') | float(default=0) | round(3) %}
+        {% set o = states('sensor.energy_pac1_usage_daily_hc') | float(default=0) | round(3) %}
+        {{ (o + p) | round(3) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_pac1_weekly"
+      state: >-
+        {% set p = states('sensor.energy_pac1_usage_weekly_hp') | float(default=0) | round(3) %}
+        {% set o = states('sensor.energy_pac1_usage_weekly_hc') | float(default=0) | round(3) %}
+        {{ (o + p) | round(3) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_pac1_monthly"
+      state: >-
+        {% set p = states('sensor.energy_pac1_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pac1_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_pac1_yearly"
+      state: >-
+        {% set p = states('sensor.energy_pac1_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_pac1_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+# Cumul de PAC et RPAC -> devenu inutile suite regroupement des TC en 1 seul sur l'ecocomppteur
+    - name: "Puissance PAC+RPAC"
+      unique_id: "puissance_pac_rpac"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set pac = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
+        {{ (pac) | round(2) }}
 
 sensor:
   - platform: template
@@ -133,7 +218,16 @@ sensor:
     name: "ESP_altherma status"
     state_topic: "espaltherma/LWT"
 
-# Antitipication du changement de Température Exterieure
+# Energie PAC mesurée avec integration 
+  - platform: integration
+    source: sensor.puissance_pac_rpac
+    name: energy_pac_p_kw
+    unit_prefix: k
+    method: left
+    round: 2    
+
+# Antipication du changement de Température Exterieure
+# Utilisation ????????
 # https://www.home-assistant.io/integrations/derivative/
   - platform: derivative
     source: sensor.vp2_temp_out

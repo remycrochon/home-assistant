@@ -9,7 +9,7 @@ esphome:
 #  platform: ESP8266  # ESP32             
 #  board: d1_mini     # mhetesp32minikit
   platform: ESP32
-  board: lolin_d32
+  board: mhetesp32minikit
 
 
 wifi:
@@ -55,7 +55,7 @@ i2c:
 # 
 uart:
   id: uart_a
-  rx_pin: GPIO32
+  rx_pin: GPIO23
 #  tx_pin: GPIO1
   baud_rate: 1200
   parity: EVEN
@@ -122,8 +122,18 @@ sensor:
     id: i100
     icon: mdi:flash
     unit_of_measurement: "%"
+    accuracy_decimals: 0
     lambda: |-
       return (id(iinst).state/id(isousc).state*100);
+
+  - platform: template
+    name: "Linky HPHC KWH"
+    id: hphc_kwh
+    icon: mdi:flash
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 0
+    lambda: |-
+      return ((id(hchc).state+id(hchp).state)/1000);
       
   - platform: homeassistant
     name: "HC J"

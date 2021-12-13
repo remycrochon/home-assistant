@@ -1,3 +1,34 @@
+####################################################
+#                                                  #
+#              EAU CHAUDE SANITAIRE                #
+#                                                  #
+####################################################
+utility_meter:
+  energy_ecs1_usage_daily:
+    source: sensor.energy_ecs_p_kw
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
+  energy_ecs1_usage_weekly:
+    source: sensor.energy_ecs_p_kw
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+  energy_ecs1_usage_monthly:
+    source: sensor.energy_ecs_p_kw
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+  energy_ecs1_usage_yearly:
+    source: sensor.energy_ecs_p_kw
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+
 input_datetime:
   # Horaire Chauffe ECS
   horaire_ecs_debut:
@@ -33,6 +64,15 @@ sensor:
     start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
     end: '{{ now() }}'
 
+# Energie ECS mesurée avec integration 
+  - platform: integration
+    source: sensor.ecocompteur_ecs
+    name: energy_ecs_p_kw
+    unit_prefix: k
+    method: left
+    round: 2
+
+
 binary_sensor:
 # Si puissance superieur à 500w = ECS en Marche
   - platform: template
@@ -41,3 +81,44 @@ binary_sensor:
         value_template: "{{ states.sensor.ecocompteur_ecs.state | float(default=0) > 500 }}"
         friendly_name: "ECS en Chauffe"
 #        device_class: heat
+
+template:
+# Consommation hP + HC - addition des utility meter
+  - sensor:
+    - name: "Energie ECS Jour"
+      unique_id: "energy_ecs1_daily"
+      state: >-
+        {% set p = states('sensor.energy_ecs1_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_ecs1_weekly"
+      state: >-
+        {% set p = states('sensor.energy_ecs1_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total" 
+
+    - name: "energy_ecs1_monthly"
+      state: >-
+        {% set p = states('sensor.energy_ecs1_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "energy_ecs1_yearly"
+      state: >-
+        {% set p = states('sensor.energy_ecs1_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs1_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+

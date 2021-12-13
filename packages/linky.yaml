@@ -1,0 +1,223 @@
+####################################################
+#                                                  #
+#                      LINKY                       #
+#                                                  #
+####################################################
+
+
+utility_meter:
+# usage jour  
+  energy_total_usage_daily:
+    source: sensor.pzem_totale_energy
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
+
+  energy_total_linky_usage_daily:
+    source: sensor.linky_conso_totale_hphc
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
+      
+# usage semaine
+  energy_total_usage_weekly:
+    source: sensor.pzem_totale_energy
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+  energy_total_linky_usage_weekly:
+    source: sensor.linky_conso_totale_hphc
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+
+# usage mois
+  energy_total_usage_monthly:
+    source: sensor.pzem_totale_energy
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+  energy_total_linky_usage_monthly:
+    source: sensor.linky_conso_totale_hphc
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+#usage an
+  energy_total_usage_yearly:
+    source: sensor.pzem_totale_energy
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+  energy_total_linky_usage_yearly:
+    source: sensor.linky_conso_totale_hphc
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+
+template:
+# Consommation journalière HP + HC - addition des utility meter
+  - sensor:
+    - name: "Energie Totale Jour"
+      unique_id: "energy_total_daily"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+
+    - name: "Energie Totale Linky Jour"
+      unique_id: "energy_total_linky_daily"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+# Consommation semaine HP + HC
+    - name: "energy_total_weekly"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+    - name: "Energie Totale Linky weekly"
+      unique_id: "energy_total_linky_weekly"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+
+# Consommation mensuelle HP + HC
+    - name: "energy_total_monthly"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+    - name: "Energie Totale Linky Mois"
+      unique_id: "energy_total_linky_monthly"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+# Consommation annuelle HP + HC
+    - name: "energy_total_yearly"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+    - name: "Energie Totale Linky An"
+      unique_id: "energy_total_linky_yearly"
+      state: >-
+        {% set p = states('sensor.energy_total_linky_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_linky_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+# Cout de l'Energie
+# le kWh HP et HC sont calculés dans excel en fonction des factures recues
+
+    - name: "Cout Energy Total Jour HPHC"
+      state: >-
+        {% set hp = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
+        {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
+        {{((hc*chc) + (hp*chp)) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energy_total_jour_hphc"
+
+    - name: "Cout Energy Total Jour HP"
+      state: >-
+        {% set hp = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
+        {{(hp*chp) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energy_total_jour_hp"
+      
+    - name: "Cout Energy Total Jour HC"
+      state: >-
+        {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
+        {{(hc*chc) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energy_total_jour_hc"
+ 
+# Linky: Cumul HP+HC en kWh -> Utilisé dans utility meter
+# sensor.linky_hphc_kwh est calculé dahns l'ESP
+    - name: "Linky Conso Totale HPHC"
+      unique_id: "linky_conso_totale_hphc"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+      state: >-
+        {% set hphc = states('sensor.linky_hphc_kwh') | float(default=0) | round(0) %}
+        {% if (hphc)>10000 %}
+          {{ (hphc) | round(0) }}
+        {%endif%}          
+
+input_number:
+# Utilisé pour calculer le time out de la liaison linky
+# en vérifiant que la consommation évolue dans une periode horaire
+  mem_linky_hphc:
+    name: Mem linky HPHC
+    min: 0
+    max: 100000000000
+    unit_of_measurement: Wh
+    icon: mdi:timeline-check-outline
+    mode: box
+
+  # Calcul des coûts journaliers
+  cout_kwh_hp:
+    name: Cout du Kwh HP
+    min: 0
+    max: 10
+    unit_of_measurement: €
+    icon: mdi:currency-eur
+    step: 0.00001
+    mode: box
+
+  cout_kwh_hc:
+    name: Cout du Kwh HC
+    min: 0
+    max: 10
+    unit_of_measurement: €
+    icon: mdi:currency-eur
+    step: 0.00001
+    mode: box

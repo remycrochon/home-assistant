@@ -2525,7 +2525,7 @@
     below: input_number.seuil_pm2_5_at
     for:
       hours: 0
-      minutes: 0
+      minutes: 10
       seconds: 0
       milliseconds: 0
   - platform: numeric_state
@@ -2552,7 +2552,7 @@
     below: input_number.seuil_co2_at
     for:
       hours: 0
-      minutes: 0
+      minutes: 10
       seconds: 0
       milliseconds: 0
   - platform: numeric_state

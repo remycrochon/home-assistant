@@ -122,19 +122,19 @@ template:
 
 # Rendement de la VMC double Flux
     - name: "Rendement VMC"
-      unique_id: "efficacite_vmc"
+      unique_id: "rendement_vmc"
       state: >-
-        {% set insu = states('sensor.thermometre_temperature') | float(default=0) | round(2) %}
-        {% set extr= states('sensor.esp136_tdeg_aspiration') | float(default=0) | round(2) %}
-        {% set out = states('sensor.esp136_tdeg_air_neuf') | float(default=0) | round(2) %}
-        {% set pu = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(2) %}
-        {% if (pu<10) or ((insu-out)/(extr-out)*100) <=0 %}
+        {% set insu = states('sensor.thermometre_temperature') | float(default=0) | round(1) %}
+        {% set extr= states('sensor.esp136_tdeg_aspiration') | float(default=0) | round(1) %}
+        {% set out = states('sensor.esp136_tdeg_air_neuf') | float(default=0) | round(1) %}
+        {% set pu = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(1) %}
+        {% if (pu<10) or (((insu-out)/(extr-out)*100) <=0) %}
             0              
         {% else%}
-          {% if ((insu-out)/(extr-out)*100) >100 %}
+          {% if ((insu-out)/(extr-out)*100) >= 100 %}
             100
           {% else%}
-            {{ ((insu-out)/(extr-out)*100) | round(2) }}
+            {{ ((insu-out)/(extr-out)*100) | round(1) }}
           {%endif%}
         {%endif%}
       unit_of_measurement: "%"

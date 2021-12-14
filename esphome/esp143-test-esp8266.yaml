@@ -1,13 +1,13 @@
 substitutions:
-  device_name: esp136-vmc-n0
-  adress_ip: "192.168.0.136"
-  friendly_name: esp136
+  device_name: esp143-test-esp8266
+  adress_ip: "192.168.0.143"
+  friendly_name: esp143
   time_timezone: "Europe/Paris"
   
 esphome:
   name: ${device_name}
   platform: ESP8266
-  board: d1_mini_pro
+  board: d1_mini
 
 wifi:
   ssid: !secret wifi
@@ -37,8 +37,9 @@ web_server:
 
 # Example configuration entry
 dallas:
-  - pin: GPIO2 #D4
-    update_interval: 30s
+#  - pin: GPIO2 #D4
+  - pin: GPIO0 #D3
+    update_interval: 10s
 
 # Individual sensors
 sensor:
@@ -48,13 +49,13 @@ sensor:
     filters:
       - filter_out: 0.0
       
-#  - platform: dallas
-#    address: 0x2A00000492ADAA28
-#    name: "${friendly_name} T° Air Vicié"
+  - platform: dallas
+    address: 0x2A00000492ADAA28
+    name: "${friendly_name} T° Air Vicié"
 
-#  - platform: dallas
-#    address: 0x3E00000492D66328
-#    name: "${friendly_name} T° insufflation"
+  - platform: dallas
+    address: 0x3E00000492D66328
+    name: "${friendly_name} T° insufflation"
 
   - platform: dallas
     address: 0x4300461100004B28

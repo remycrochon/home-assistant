@@ -277,9 +277,9 @@
                   name: Insuf.
                 - entity: sensor.esp136_tdeg_air_neuf
                   name: A Neuf
-                - entity: sensor.efficacite_vmc
+                - entity: sensor.rendement_vmc
                   name: Rend.
-              entity: sensor.efficacite_vmc
+              entity: sensor.rendement_vmc
               icon: mdi:temperature-celsius
               name: Temp
               show_state: false

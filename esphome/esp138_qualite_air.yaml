@@ -10,17 +10,15 @@ esphome:
   board: d1_mini
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
-
+  ssid: !secret wifi_esp
+  password: !secret mdpwifi_esp
+  reboot_timeout: 5min
+  fast_connect: true
 
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
-
-  reboot_timeout: 5min
-  fast_connect: true
 
 # Enable logging
 logger:

@@ -13,8 +13,8 @@ esphome:
 
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
+  ssid: !secret wifi_esp
+  password: !secret mdpwifi_esp
 
   manual_ip:
     static_ip: ${adress_ip}

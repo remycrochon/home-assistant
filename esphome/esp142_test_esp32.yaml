@@ -1,24 +1,25 @@
+substitutions:
+  device_name: esp142-test-esp32
+  adress_ip: "192.168.0.142"
+  friendly_name: esp142
+  time_timezone: "Europe/Paris"
+  
 esphome:
-  name: esp142-test-esp32
+  name: ${device_name}
   platform: ESP32
   board: lolin_d32
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
+  ssid: !secret wifi_esp
+  password: !secret mdpwifi_esp
 
-  
   manual_ip:
-    static_ip: 192.168.0.142
+    static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
 
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "Esp142 Test Esp32"
-    password: "kzKppXfx9rYB"
-
-captive_portal:
+  reboot_timeout: 5min
+  fast_connect: true
 
 # Enable logging
 logger:

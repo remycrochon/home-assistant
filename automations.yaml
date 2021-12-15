@@ -2448,8 +2448,7 @@
   - choose:
     - conditions:
       - condition: template
-        value_template: '{% set a=states(''sensor.linky_conso_totale_hphc_wh'')|int(default=0)
-          %}
+        value_template: '{% set a=states(''sensor.linky_papp'')|int(default=0) %}
 
           {% set b=states(''input_number.mem_linky_hphc'')|int(default=0) %}
 
@@ -2459,8 +2458,7 @@
         target:
           entity_id: input_number.mem_linky_hphc
         data_template:
-          value: '{{ states(''sensor.linky_conso_totale_hphc_wh'')|int(default=0)
-            }}'
+          value: '{{ states(''sensor.linky_papp'')|int(default=0) }}'
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.com_linky
@@ -2512,58 +2510,20 @@
     at: input_datetime.heure_vmc_niv0_at
   - platform: numeric_state
     entity_id: sensor.concentration_de_particules_2_5um
-    id: pm2.5-sh
+    id: pm2.5sh
     above: input_number.seuil_haut_pm2_5
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-  - platform: numeric_state
-    entity_id: sensor.concentration_de_particules_2_5um
-    id: pm2.5-at
-    below: input_number.seuil_pm2_5_at
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-      milliseconds: 0
-  - platform: numeric_state
-    entity_id: sensor.concentration_de_particules_2_5um
-    above: input_number.seuil_tres_haut_pm2_5
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-    id: pm2.5-sth
   - platform: numeric_state
     entity_id: sensor.mh_z19_co2_value
-    id: co2-sh
+    id: co2sh
     above: input_number.seuil_haut_co2
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
+  - platform: numeric_state
+    entity_id: sensor.concentration_de_particules_2_5um
+    id: pm2.5sth
+    above: input_number.seuil_tres_haut_pm2_5
   - platform: numeric_state
     entity_id: sensor.mh_z19_co2_value
-    id: co2-at
-    below: input_number.seuil_co2_at
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-      milliseconds: 0
-  - platform: numeric_state
-    entity_id: sensor.mh_z19_co2_value
+    id: co2sth
     above: input_number.seuil_tres_haut_co2
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-    id: co2-sth
   condition: []
   action:
   - choose:
@@ -2590,65 +2550,55 @@
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
-        state: PM2_5
+        state: CO2 PM2.5
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: pm2.5sh
+        - condition: trigger
+          id: co2sh
       sequence:
-      - choose:
-        - conditions:
-          - condition: trigger
-            id: pm2.5-sh
-          sequence:
-          - service: switch.turn_on
-            target:
-              entity_id: switch.esp136_vit_2
-        - conditions:
-          - condition: trigger
-            id: pm2.5-sth
-          sequence:
-          - service: switch.turn_on
-            target:
-              entity_id: switch.esp136_vit_3
-        - conditions:
-          - condition: trigger
-            id: pm2.5-at
-          sequence:
-          - service: switch.turn_on
-            target:
-              entity_id: switch.esp136_vit_2
-        default: []
       - service: switch.turn_on
         target:
           entity_id: switch.sonoff_vmc_niv0_on_off
+      - service: switch.turn_on
+        target:
+          entity_id: switch.esp136_vit_2
+      - delay:
+          hours: 0
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
-        state: CO2
+        state: CO2 PM2.5
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: pm2.5sth
+        - condition: trigger
+          id: co2sth
       sequence:
-      - choose:
-        - conditions:
-          - condition: trigger
-            id: co2-sh
-          sequence:
-          - service: switch.turn_on
-            target:
-              entity_id: switch.esp136_vit_2
-        - conditions:
-          - condition: trigger
-            id: co2-sth
-          sequence:
-          - service: switch.turn_on
-            target:
-              entity_id: switch.esp136_vit_3
-        - conditions:
-          - condition: trigger
-            id: co2-at
-          sequence:
-          - service: switch.turn_on
-            target:
-              entity_id: switch.esp136_vit_2
-        default: []
       - service: switch.turn_on
         target:
           entity_id: switch.sonoff_vmc_niv0_on_off
+      - service: switch.turn_on
+        target:
+          entity_id: switch.esp136_vit_3
+      - delay:
+          hours: 0
+          minutes: 15
+          seconds: 0
+          milliseconds: 0
+      - service: switch.turn_on
+        target:
+          entity_id: switch.esp136_vit_2
+      - delay:
+          hours: 0
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0

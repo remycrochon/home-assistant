@@ -10,8 +10,8 @@ esphome:
   board: d1_mini
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
+  ssid: !secret wifi_esp
+  password: !secret mdpwifi_esp
 
 
   manual_ip:
@@ -37,32 +37,27 @@ web_server:
 
 # Example configuration entry
 dallas:
-#  - pin: GPIO2 #D4
-  - pin: GPIO0 #D3
+  - pin: GPIO2 #D4
+#  - pin: GPIO0 #D3
     update_interval: 10s
 
-# Individual sensors
+# DS18B20 15/12/2021
 sensor:
   - platform: dallas
-    address: 0x0C000004923C0A28
+    address: 0x5A012111F0026A28
     name: "${friendly_name} T° Air Neuf"
-    filters:
-      - filter_out: 0.0
-      
+
   - platform: dallas
-    address: 0x2A00000492ADAA28
+    address: 0xBE012113327ECD28
     name: "${friendly_name} T° Air Vicié"
 
   - platform: dallas
-    address: 0x3E00000492D66328
+    address: 0x570121130B1F6B28
     name: "${friendly_name} T° insufflation"
 
   - platform: dallas
-    address: 0x4300461100004B28
+    address: 0xC90121137D4EA028
     name: "${friendly_name} T° aspiration"
-    filters:
-      - filter_out: 0.0
-
 
 
 #Etat de la connection

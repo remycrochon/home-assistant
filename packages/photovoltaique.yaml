@@ -1,12 +1,9 @@
+####################################################
+#                                                  #
+#                 PHOTO VOLTAIQUE                  #
+#                                                  #
+####################################################
 input_boolean:
-  # H pleine/creuse
-  hc_hp:
-    name: Tarif HC-HP
-    icon: mdi:power-settings
-
-  forcage_hc_hp:
-    name: Forcage HC
-    icon: mdi:power-settings
 
   valid_delestage:
     name: validation Delestage PV
@@ -26,65 +23,9 @@ input_number:
     icon: mdi:flash
     mode: box
 
-input_datetime:
-  # Horaire HC/HP
-  horaire_hc_debut_1:
-    name: Horaire HC Début 1
-    has_date: false
-    has_time: true
-  horaire_hc_debut_2:
-    name: Horaire HC Début 2
-    has_date: false
-    has_time: true
-
-  horaire_hp_debut_1:
-    name: Horaire HP Début 1
-    has_date: false
-    has_time: true
-  horaire_hp_debut_2:
-    name: Horaire HP Début 2
-    has_date: false
-    has_time: true
-
-binary_sensor:
-  - platform: template # = true si HC
-    sensors:
-      display_hp_hc:
-        friendly_name: "HC"
-        value_template: "{{ (states.input_boolean.hc_hp.state == 'off') }}"
-
-  #Enedis supprimer avec la version HA 2021-06
-#  - platform: myEnedis
-#   token: okMOLa3RWnuDbFnxg3X5VhO2mvceDI5f8655HNaWuWGTG7y5nJfZAq
-#    code: 23264544053089
-#    heures_creuses: "[['01:54','06:54'], ['12:24', '15:24']]"
-#    hc_cout: 0.1312
-#    hp_cout: 0.1982
-#    scan_interval: 3600
-#    delay: 7200  # OPTION
 
 template:
   - sensor:
-# Consommation autres totale en W
-    - name: "Puissance Autres"
-      unique_id: "puissance_autres"
-      state: >-
-        {% set a = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
-        {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
-        {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
-        {% set d = states('sensor.puissance_pac_rpac') | float(default=0) | round(2) %}
-        {% set e = states('sensor.ecocompteur_ecs') | float(default=0) | round(2) %}          
-        {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
-        {% set g = states('sensor.ecocompteur_wc') | float(default=0) | round(2) %}
-        {% if (a-b-c-d-e-f-g) >= 0 %}
-          {{ (a-b-c-d-e-f-g) | round(2) }}
-        {% else%}
-          0
-        {%endif%}
-      unit_of_measurement: "W"
-      device_class: "power"
-      state_class: "measurement"  
-
 
 # Calcul energie injectée sur le réseau du jour
     - name: "Envoy Energie Injectée Réseau Jour"
@@ -164,19 +105,3 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"       
-
-
-
-  
-sensor:
-
-# Energie Puissance autres 
-  - platform: integration
-    source: sensor.puissance_autres
-    name: energy_autres
-    unit_prefix: k
-    #    method: left
-    round: 2
-
-
-    

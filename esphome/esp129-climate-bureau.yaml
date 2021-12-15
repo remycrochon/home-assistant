@@ -1,7 +1,7 @@
 substitutions:
   device_name: esp129-climat-cellier
   adress_ip: "192.168.0.129"
-  friendly_name: esp129 Cellier
+  friendly_name: esp129
   time_timezone: "Europe/Paris"
   
 esphome:
@@ -11,8 +11,8 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi
-      password: !secret mdpwifi
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
 
   reboot_timeout: 5min
   fast_connect: true

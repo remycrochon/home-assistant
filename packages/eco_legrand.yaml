@@ -44,13 +44,7 @@ sensor:
     command: curl -s 'http://192.168.0.26/data.json' | jq '.tarif_courant'
     scan_interval: 60
 
-# Statistiques puissance 
-  - platform: statistics
-    name: puissance_vmc_niv0
-    entity_id: sensor.ecocompteur_vmc_niv0_brut
-    sampling_size: 10
-    #max_age:
-      # minutes: 30
+
 
 template:
   sensor:

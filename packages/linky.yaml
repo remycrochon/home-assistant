@@ -1,6 +1,6 @@
 ####################################################
 #                                                  #
-#                      LINKY                       #
+#                  LINKY - ESP TOTAL               #
 #                                                  #
 ####################################################
 
@@ -13,14 +13,12 @@ utility_meter:
     tariffs:
       - hp
       - hc
-
   energy_total_linky_usage_daily:
     source: sensor.linky_conso_totale_hphc
     cycle: daily
     tariffs:
       - hp
       - hc
-      
 # usage semaine
   energy_total_usage_weekly:
     source: sensor.pzem_totale_energy
@@ -34,7 +32,6 @@ utility_meter:
     tariffs:
       - hp
       - hc
-
 # usage mois
   energy_total_usage_monthly:
     source: sensor.pzem_totale_energy
@@ -61,6 +58,74 @@ utility_meter:
     tariffs:
       - hp
       - hc
+
+
+input_boolean:
+  # H pleine/creuse
+  hc_hp:
+    name: Tarif HC-HP
+    icon: mdi:power-settings
+
+  forcage_hc_hp:
+    name: Forcage HC
+    icon: mdi:power-settings
+
+input_number:
+# Utilisé pour calculer le time out de la liaison linky
+# en vérifiant que la consommation évolue dans une periode horaire
+  mem_linky_hphc:
+    name: Mem linky HPHC
+    min: 0
+    max: 100000000000
+    unit_of_measurement: VA
+    icon: mdi:timeline-check-outline
+    mode: box
+
+  # Calcul des coûts journaliers
+  cout_kwh_hp:
+    name: Cout du Kwh HP
+    min: 0
+    max: 10
+    unit_of_measurement: €
+    icon: mdi:currency-eur
+    step: 0.00001
+    mode: box
+
+  cout_kwh_hc:
+    name: Cout du Kwh HC
+    min: 0
+    max: 10
+    unit_of_measurement: €
+    icon: mdi:currency-eur
+    step: 0.00001
+    mode: box
+
+input_datetime:
+  # Horaire HC/HP
+  horaire_hc_debut_1:
+    name: Horaire HC Début 1
+    has_date: false
+    has_time: true
+  horaire_hc_debut_2:
+    name: Horaire HC Début 2
+    has_date: false
+    has_time: true
+
+  horaire_hp_debut_1:
+    name: Horaire HP Début 1
+    has_date: false
+    has_time: true
+  horaire_hp_debut_2:
+    name: Horaire HP Début 2
+    has_date: false
+    has_time: true
+
+binary_sensor:
+  - platform: template # = true si HC
+    sensors:
+      display_hp_hc:
+        friendly_name: "HC"
+        value_template: "{{ (states.input_boolean.hc_hp.state == 'off') }}"
 
 template:
 # Consommation journalière HP + HC - addition des utility meter
@@ -178,7 +243,7 @@ template:
       device_class: "monetary"
       state_class: "total"  
       unique_id: "cout_energy_total_jour_hc"
- 
+
 # Linky: Cumul HP+HC en kWh -> Utilisé dans utility meter
 # sensor.linky_hphc_kwh est calculé dahns l'ESP
     - name: "Linky Conso Totale HPHC"
@@ -191,33 +256,3 @@ template:
         {% if (hphc)>10000 %}
           {{ (hphc) | round(0) }}
         {%endif%}          
-
-input_number:
-# Utilisé pour calculer le time out de la liaison linky
-# en vérifiant que la consommation évolue dans une periode horaire
-  mem_linky_hphc:
-    name: Mem linky HPHC
-    min: 0
-    max: 100000000000
-    unit_of_measurement: Wh
-    icon: mdi:timeline-check-outline
-    mode: box
-
-  # Calcul des coûts journaliers
-  cout_kwh_hp:
-    name: Cout du Kwh HP
-    min: 0
-    max: 10
-    unit_of_measurement: €
-    icon: mdi:currency-eur
-    step: 0.00001
-    mode: box
-
-  cout_kwh_hc:
-    name: Cout du Kwh HC
-    min: 0
-    max: 10
-    unit_of_measurement: €
-    icon: mdi:currency-eur
-    step: 0.00001
-    mode: box

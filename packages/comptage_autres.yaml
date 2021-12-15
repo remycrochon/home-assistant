@@ -1,15 +1,12 @@
 utility_meter:
 # usage jour  
-
   energy_autres_usage_daily:
     source: sensor.energy_autres
     cycle: daily
     tariffs:
       - hp
       - hc
-      
 # usage semaine
-
   energy_autres_usage_weekly:
     source: sensor.energy_autres
     cycle: weekly
@@ -17,8 +14,6 @@ utility_meter:
       - hp
       - hc
 # usage mois
-
-
   energy_autres_usage_monthly:
     source: sensor.energy_autres
     cycle: monthly
@@ -26,8 +21,6 @@ utility_meter:
       - hp
       - hc
 #usage an
-
-
   energy_autres_usage_yearly:
     source: sensor.energy_autres
     cycle: yearly
@@ -38,7 +31,6 @@ utility_meter:
 template:
 # Consommation journalière HP + HC - addition des utility meter
   - sensor:
-
     - name: "Energie Autres Jour"
       unique_id: "energy_autres_daily"
       state: >-
@@ -48,9 +40,7 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"
-
 # Consommation semaine HP + HC
-
     - name: "energy_autres_weekly"
       state: >-
         {% set p = states('sensor.energy_autres_usage_weekly_hp') | float(default=0) | round(2) %}
@@ -59,10 +49,7 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
-
-
 # Consommation mensuelle HP + HC
-
     - name: "energy_autres_monthly"
       state: >-
         {% set p = states('sensor.energy_autres_usage_monthly_hp') | float(default=0) | round(2) %}
@@ -71,9 +58,7 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
-
 # Consommation annuelle HP + HC
-
     - name: "energy_autres_yearly"
       state: >-
         {% set p = states('sensor.energy_autres_usage_yearly_hp') | float(default=0) | round(2) %}
@@ -83,7 +68,35 @@ template:
       device_class: "energy"
       state_class: "total"  
 
+# Consommation autres totale en W
+    - name: "Puissance Autres"
+      unique_id: "puissance_autres"
+      state: >-
+        {% set a = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
+        {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
+        {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
+        {% set d = states('sensor.puissance_pac_rpac') | float(default=0) | round(2) %}
+        {% set e = states('sensor.ecocompteur_ecs') | float(default=0) | round(2) %}          
+        {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
+        {% set g = states('sensor.ecocompteur_wc') | float(default=0) | round(2) %}
+        {% if (a-b-c-d-e-f-g) >= 0 %}
+          {{ (a-b-c-d-e-f-g) | round(2) }}
+        {% else%}
+          0
+        {%endif%}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"  
 
+  
+sensor:
+# Energie Puissance autres 
+  - platform: integration
+    source: sensor.puissance_autres
+    name: energy_autres
+    unit_prefix: k
+    #    method: left
+    round: 2
 
 
 

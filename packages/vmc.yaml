@@ -3,6 +3,7 @@
 #               VMC NIV0 & SOUS SOL                #
 #                                                  #
 ####################################################
+
 utility_meter:
 # usage jour  
   energy_vmc_usage_daily:
@@ -47,8 +48,7 @@ input_select:
     icon: mdi:fan
     options:
       - Hor
-      - CO2
-      - PM2_5
+      - CO2 PM2.5
       - Marche
       - Arret
 
@@ -164,3 +164,11 @@ sensor:
     unit_prefix: k
     #    method: left
     round: 2
+
+# Statistiques puissance 
+  - platform: statistics
+    name: puissance_vmc_niv0
+    entity_id: sensor.ecocompteur_vmc_niv0_brut
+    sampling_size: 10
+    #max_age:
+      # minutes: 30

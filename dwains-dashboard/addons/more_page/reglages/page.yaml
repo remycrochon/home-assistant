@@ -271,14 +271,22 @@
             - entity: input_select.vmc_niv0
               name: Mode de Fonctionnement
             - entities:
+                - entity: sensor.rendement_vmc
+                  name: Rend
+                - entity: sensor.esp136_tdeg_air_vicie
+                  name: Vicie
+                - entity: sensor.esp136_tdeg_air_neuf
+                  name: Ext.
+              entity: sensor.rendement_vmc
+              icon: mdi:temperature-celsius
+              name: Temp
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
                 - entity: sensor.esp136_tdeg_aspiration
                   name: Aspi.
-                - entity: sensor.thermometre_temperature
-                  name: Insuf.
-                - entity: sensor.esp136_tdeg_air_neuf
-                  name: A Neuf
-                - entity: sensor.rendement_vmc
-                  name: Rend.
+                - entity: sensor.esp136_tdeg_insufflation
+                  name: Insuff.
               entity: sensor.rendement_vmc
               icon: mdi:temperature-celsius
               name: Temp

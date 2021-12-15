@@ -4,9 +4,9 @@ esphome:
   board: esp01_1m
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
-
+  ssid: !secret wifi_esp
+  password: !secret mdpwifi_esp
+  
   reboot_timeout: 5min
   fast_connect: true
   

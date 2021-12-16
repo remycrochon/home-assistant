@@ -34,6 +34,17 @@ web_server:
 
 sensor:
 
+  - platform: homeassistant
+    name: "prod"
+    entity_id: sensor.envoy_122103023124_current_power_production
+    id: prod
+
+  - platform: homeassistant
+    name: "HP J"
+    entity_id: sensor.envoy_122103023124_current_power_consumption
+    id: conso
+
+
   - platform: uptime
     name: "ESP142 Uptime Sensor"
     id: esp142_uptime

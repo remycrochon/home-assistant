@@ -80,6 +80,26 @@ switch:
 
 sensor:
 
+  - platform: homeassistant
+    name: "Prod"
+    entity_id: sensor.envoy_122103023124_current_power_production
+    id: prod
+
+  - platform: homeassistant
+    name: "Conso"
+    entity_id: sensor.envoy_122103023124_current_power_consumption
+    id: conso
+
+  - platform: homeassistant
+    name: "Sout"
+    entity_id: sensor.envoy_puissance_soutiree_reseau
+    id: sout
+    
+  - platform: homeassistant
+    name: "Inj"
+    entity_id: sensor.envoy_puissance_injectee_reseau
+    id: inj
+    
   - platform: wifi_signal
     id: wif
     name: "${friendly_name} WiFi Signal Sensor"
@@ -96,10 +116,12 @@ display:
     reset_pin: D0
     address: 0x3C
     brightness: 100%
-    rotation: 90
+    rotation: 0
     lambda: |-
-      it.printf(0, 0, id(arial),"%.1f",id(up).state);
-      it.printf(0, 30, id(arial30),"%.1f",id(up).state);
+      it.printf(0, 0, id(arial10),"P:%.0f W",id(prod).state);
+      it.printf(0, 10, id(arial10),"C:%.0f W",id(conso).state);
+      it.printf(0, 20, id(arial10),"S:%.0f W",id(sout).state);
+      it.printf(0, 30, id(arial10),"I:%.0f W",id(inj).state);      
 
 #      it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
 #          it.printf(0, 0, id(arial), "%.1f C", id(temp).state);

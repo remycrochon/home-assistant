@@ -223,8 +223,9 @@ sensor:
 
   # Statistiques pH
   - platform: statistics
-    name: ph_stat
+    name: ph_stat_mean
     entity_id: sensor.ph_piscine_ph
+    state_characteristic: mean
     sampling_size: 30
     #max_age:
       # minutes: 30

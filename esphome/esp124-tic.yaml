@@ -6,8 +6,6 @@ substitutions:
   
 esphome:
   name: ${device_name}
-#  platform: ESP8266  # ESP32             
-#  board: d1_mini     # mhetesp32minikit
   platform: ESP32
   board: mhetesp32minikit
 

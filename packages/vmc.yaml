@@ -119,27 +119,19 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-
-# Rendement de la VMC double Flux
-    - name: "Rendement VMC"
-      unique_id: "rendement_vmc"
+# Limite les valeurs aberantes de la puissance de la VMC
+    - name: "EcoCompteur VMC Niv0"
+      unique_id: "ecocompteur_vmc_niv0"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
       state: >-
-        {% set insu = states('sensor.thermometre_temperature') | float(default=0) | round(1) %}
-        {% set extr= states('sensor.esp136_tdeg_aspiration') | float(default=0) | round(1) %}
-        {% set out = states('sensor.esp136_tdeg_air_neuf') | float(default=0) | round(1) %}
-        {% set pu = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(1) %}
-        {% if (pu<10) or (((insu-out)/(extr-out)*100) <=0) %}
-            0              
-        {% else%}
-          {% if ((insu-out)/(extr-out)*100) >= 100 %}
-            100
-          {% else%}
-            {{ ((insu-out)/(extr-out)*100) | round(1) }}
-          {%endif%}
-        {%endif%}
-      unit_of_measurement: "%"
-      device_class: "aqi"
-      state_class: "measurement"  
+        {% set p = states('sensor.puissance_vmc_niv0_median') | float(default=0) | round(1) %}
+        {% if p>100 %}
+          100
+        {%- else -%}
+          {{ p }}
+        {%- endif %}
 
   - binary_sensor:
     # Si la puissance electrique est superieure à 10w, on considere que la VMC est en fonctionnement
@@ -159,7 +151,7 @@ sensor:
 
 # Energie VMC Niv0
   - platform: integration
-    source: sensor.ecocompteur_vmc_niv0
+    source: sensor.ecocompteur_vmc_niv0_median
     name: energy_vmc_n0
     unit_prefix: k
     #    method: left
@@ -167,8 +159,7 @@ sensor:
 
 # Statistiques puissance 
   - platform: statistics
-    name: puissance_vmc_niv0
+    name: puissance_vmc_niv0_median
     entity_id: sensor.ecocompteur_vmc_niv0_brut
+    state_characteristic: median
     sampling_size: 10
-    #max_age:
-      # minutes: 30

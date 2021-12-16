@@ -44,20 +44,8 @@ dallas:
 # DS18B20 15/12/2021
 sensor:
   - platform: dallas
-    address: 0x5A012111F0026A28
-    name: "${friendly_name} T° Air Neuf"
-
-  - platform: dallas
-    address: 0xBE012113327ECD28
-    name: "${friendly_name} T° Air Vicié"
-
-  - platform: dallas
-    address: 0x570121130B1F6B28
-    name: "${friendly_name} T° insufflation"
-
-  - platform: dallas
-    address: 0xC90121137D4EA028
-    name: "${friendly_name} T° aspiration"
+    address: 0x28012112F58CF028
+    name: "${friendly_name} T°Combles"
 
 
 #Etat de la connection

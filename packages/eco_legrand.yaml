@@ -45,20 +45,3 @@ sensor:
     scan_interval: 60
 
 
-
-template:
-  sensor:
-
-# Limite les valeurs aberantes de la puissance de la VMC
-    - name: "EcoCompteur VMC Niv0"
-      unique_id: "ecocompteur_vmc_niv0"
-      device_class: "power"
-      state_class: "measurement"
-      unit_of_measurement: "W"
-      state: >-
-        {% set p = state_attr('sensor.puissance_vmc_niv0', 'median') | float(default=0) | round(1) %}
-        {% if p>100 %}
-          100
-        {%- else -%}
-          {{ p }}
-        {%- endif %}

@@ -199,8 +199,9 @@ sensor:
 
   # Statistiques orp
   - platform: statistics
-    name: orp_stat
+    name: orp_stat_mean
     entity_id: sensor.orp_piscine_orp
+    state_characteristic: mean
     sampling_size: 30
     #max_age:
       # minutes: 30

@@ -10,10 +10,15 @@ esphome:
   board: d1_mini_pro
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+
   reboot_timeout: 5min
-  fast_connect: true
 
   manual_ip:
     static_ip: ${adress_ip}

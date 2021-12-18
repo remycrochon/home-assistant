@@ -11,16 +11,20 @@ esphome:
 
 
 wifi:
-  ssid: !secret wifi_esp
-  password: !secret mdpwifi_esp
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
 
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
 
-  reboot_timeout: 5min
-  fast_connect: true
 
 # Enable logging
 logger:

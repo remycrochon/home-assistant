@@ -10,16 +10,23 @@ esphome:
   board: lolin_d32
 
 wifi:
-  ssid: !secret wifi_esp
-  password: !secret mdpwifi_esp
+  networks:
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
+      priority: 2
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
 
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
 
-  reboot_timeout: 5min
-  fast_connect: true
 
 # Enable logging
 logger:
@@ -58,3 +65,17 @@ switch:
     
   - platform: restart
     name: "ESP142_Restart"
+    
+text_sensor:
+  # IP address #
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP address"
+      icon: "mdi:network-outline"
+    ssid:
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"

@@ -189,7 +189,6 @@ sensor:
         friendly_name: "pH Durée Inject calc. (mn)"
         value_template: >-
           {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
-          {% set y=state_attr("sensor.ph_stat", "mean") | float(default=0) %}
           {% set x=states('input_number.simul_ph') | float(default=0) %}
           {% set b=states('input_number.ph_cible') | float(default=0) %}
           {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
@@ -208,7 +207,6 @@ sensor:
         friendly_name: "pH Durée Inject calc. (s)"
         value_template: >-
           {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
-          {% set y=state_attr("sensor.ph_stat", "mean") | float(default=0) %}
           {% set x=states('input_number.simul_ph') | float(default=0) %}
           {% set b=states('input_number.ph_cible') | float(default=0) %}
           {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
@@ -223,9 +221,16 @@ sensor:
 
   # Statistiques pH
   - platform: statistics
-    name: ph_stat_mean
+    name: ph_stat_median
     entity_id: sensor.ph_piscine_ph
-    state_characteristic: mean
+    state_characteristic: median
+    sampling_size: 30
+    #max_age:
+      # minutes: 30
+  - platform: statistics
+    name: ph_stat_moyenne
+    entity_id: sensor.ph_piscine_ph
+    state_characteristic: average_step
     sampling_size: 30
     #max_age:
       # minutes: 30

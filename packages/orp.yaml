@@ -199,9 +199,17 @@ sensor:
 
   # Statistiques orp
   - platform: statistics
-    name: orp_stat_mean
+    name: orp_stat_median
     entity_id: sensor.orp_piscine_orp
-    state_characteristic: mean
+    state_characteristic: median
     sampling_size: 30
     #max_age:
       # minutes: 30
+  - platform: statistics
+    name: orp_stat_moyenne
+    entity_id: sensor.orp_piscine_orp
+    state_characteristic: average_step
+    sampling_size: 30
+    #max_age:
+      # minutes: 30
+

@@ -1,6 +1,7 @@
 substitutions:
   device_name: esp130-climat-sous-sol
   friendly_name: esp130
+  adress_ip: "192.168.0.130"
   time_timezone: "Europe/Paris"
 
 esphome:
@@ -11,15 +12,16 @@ esphome:
   
 wifi:
   networks:
-    - ssid: !secret wifi
-      password: !secret mdpwifi
-
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
   reboot_timeout: 5min
-  fast_connect: true
+ 
     
 
   manual_ip:
-    static_ip: 192.168.0.130
+    static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
 

@@ -349,8 +349,8 @@
               - entity: sensor.ph_piscine_ph
                 name: pH filtré
               - entity: input_number.ph_memoire
-              - entity: sensor.ph_stat
-                name: pH Statistiques
+              - entity: sensor.ph_stat_median
+                name: pH Median
               - entity: input_boolean.regul_ph
               - entity: input_number.ph_cible
               - entity: input_number.ph_hysteresis
@@ -373,8 +373,8 @@
               - entity: sensor.orp_piscine_orp
                 name: ORP filtré
               - entity: input_number.orp_memoire
-              - entity: sensor.orp_stat
-                name: ORP Statistiques
+              - entity: sensor.orp_stat_median
+                name: ORP Median
               - entity: input_boolean.regul_chlore
               - entity: input_number.orp_cible
               - entity: input_number.orp_hysteresis

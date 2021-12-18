@@ -1,17 +1,24 @@
+substitutions:
+  device_name: esp125-piscine
+  friendly_name: esp125
+  adress_ip: "192.168.0.125"
+  time_timezone: "Europe/Paris"
+  
 esphome:
-  name: esp125-piscine
+  name: ${device_name}
   platform: ESP32
   board: lolin_d32
 
 wifi:
-  ssid: !secret wifi
-  password: !secret mdpwifi
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
   reboot_timeout: 5min
-  fast_connect: true
-
 
   manual_ip:
-    static_ip: 192.168.0.125
+    static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
 
@@ -38,7 +45,7 @@ i2c:
 #Etat de la connection
 binary_sensor:
   - platform: status
-    name: "esp125_Status"
+    name: "${friendly_name}_Status"
 
 sensor:
 
@@ -90,7 +97,7 @@ sensor:
          
 
   - platform: wifi_signal
-    name: "ESP125 WiFi Signal Sensor"
+    name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
 
   - platform: homeassistant
@@ -112,4 +119,19 @@ display:
 
 switch:    
   - platform: restart
-    name: "ESP125_Restart"
+    name: "${friendly_name}_Restart"
+    
+
+text_sensor:
+  # IP address #
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP address"
+      icon: "mdi:network-outline"
+    ssid:
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"

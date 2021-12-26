@@ -2096,13 +2096,13 @@
   description: pousse vers githtub
   trigger:
   - platform: time
-    at: '23:59'
+    at: 02:00
   condition: []
   action:
   - service: hassio.addon_stdin
     data:
       addon: a0d7b954_ssh
-      input: /config/ha_gitpush.sh
+      input: /bin/bash /config/ha_gitpush.sh
   mode: single
 - id: '1635590858245'
   alias: 1_4_1 BP Sonof

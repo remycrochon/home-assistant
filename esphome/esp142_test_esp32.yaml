@@ -13,7 +13,7 @@ wifi:
   networks:
     - ssid: !secret wifi_mi4
       password: !secret mdpwifi_mi4
-      priority: 2
+      priority: 2    
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 1
@@ -53,18 +53,19 @@ sensor:
 
 
   - platform: uptime
-    name: "ESP142 Uptime Sensor"
+    name: "${friendly_name} Uptime Sensor"
     id: esp142_uptime
-    update_interval: 10s
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+    
   
 switch:
-  - platform: gpio
-    name: "esp142_relais0"
-    pin: GPIO0
-    id: relay
-    
+
   - platform: restart
-    name: "ESP142_Restart"
+    name: "${friendly_name}_Restart"
     
 text_sensor:
   # IP address #

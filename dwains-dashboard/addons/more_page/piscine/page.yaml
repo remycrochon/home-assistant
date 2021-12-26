@@ -351,6 +351,8 @@
               - entity: input_number.ph_memoire
               - entity: sensor.ph_stat_median
                 name: pH Median
+              - entity: sensor.ph_stat_standard_deviation
+                name: pH Standard Deviation
               - entity: input_boolean.regul_ph
               - entity: input_number.ph_cible
               - entity: input_number.ph_hysteresis
@@ -375,6 +377,8 @@
               - entity: input_number.orp_memoire
               - entity: sensor.orp_stat_median
                 name: ORP Median
+              - entity: sensor.orp_stat_standard_deviation
+                name: ORP Standard Deviation                
               - entity: input_boolean.regul_chlore
               - entity: input_number.orp_cible
               - entity: input_number.orp_hysteresis

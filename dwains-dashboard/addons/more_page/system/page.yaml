@@ -1,7 +1,7 @@
 - type: custom:dwains-flexbox-card
   items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
   cards:
-## NAS218
+###############################  NAS218  ########################################""
     - type: vertical-stack
       cards:
         - name: NAS218
@@ -193,6 +193,8 @@
                         --ha-card-background: "rgba(0, 0, 0, 0.0)";
                         --ha-card-box-shadow: 'none';
                     }
+
+###################################  NUC  #########################################                    
     - type: vertical-stack
       cards:
         - name: NUC5CPYH
@@ -405,7 +407,7 @@
                         --ha-card-background: "rgba(0, 0, 0, 0.0)";
                         --ha-card-box-shadow: 'none';
                     }   
-
+################################### UPTIME #######################################""
     - type: vertical-stack
       cards:
         - name: Uptime
@@ -693,6 +695,7 @@
             graph: line
           #   extrema: false
 
+################################ ADGUARD  ###################################
     - type: vertical-stack
       cards:
         - name: Adguard
@@ -753,3 +756,45 @@
             - entity: sensor.adguard_dns_queries
             - entity: sensor.adguard_dns_queries_blocked
             - entity: sensor.adguard_dns_queries_blocked_ratio
+
+################################ CERTIFICATS LETS  ###########################""
+    - type: vertical-stack
+      cards:
+        - name: Certificats Let's 
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+
+        - type: entities
+          style: |
+            ha-card {
+              background-color: var(--dwains-theme-primary);
+            }
+          show_header_toggle: false
+          entities:
+            - entity: sensor.cert_expiry_timestamp_domo_rem81_com
+              name: domo
+            - entity: sensor.cert_expiry_timestamp_ha_rem81_com
+              name: ha
+            - entity: sensor.cert_expiry_timestamp_meteo81000_rem81_com
+              name: meteo81
+            - entity: sensor.cert_expiry_timestamp_meteo_rem81_com
+              name: meteo
+            - entity: sensor.cert_expiry_timestamp_motioneye_rem81_com
+              name: Motio Eye
+            - entity: sensor.cert_expiry_timestamp_vtt_rem81_com
+              name: VTT
+            - entity: binary_sensor.certificat_domo
+            - entity: binary_sensor.certificat_ha
+            - entity: binary_sensor.certificat_meteo
+            - entity: binary_sensor.certificat_meteo_81000
+            - entity: binary_sensor.certificat_motion
+            - entity: binary_sensor.certificat_vtt
+            - entity: binary_sensor.certificats_lets
+        

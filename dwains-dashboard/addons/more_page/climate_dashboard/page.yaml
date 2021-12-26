@@ -580,7 +580,7 @@
             type: 'custom:button-card'
           - cards:
               - entities:
-                  - entity: sensor.esp129_climat_cellier_temperature
+                  - entity: sensor.cellier_temperature
                     name: Temperature (24h)
                     color: 'var(--dwains-theme-accent)'
                     show_fill: true
@@ -603,7 +603,7 @@
                 theme: ios-dark-mode-blue-red
                 type: 'custom:mini-graph-card'
               - entities:
-                  - entity: sensor.esp129_climat_cellier_humidite
+                  - entity: sensor.cellier_humidity
                     name: Humidité (24h)
                     color: 'var(--dwains-theme-accent)'
                     show_fill: true
@@ -627,18 +627,16 @@
                 type: 'custom:mini-graph-card'
             type: horizontal-stack
           - entities:
-              - entity: sensor.esp129_wifi_signal_sensor
-                name: Wifi
+              - entity: sensor.cellier_pression
+                name: Pression
                 secondary_info: last-updated
               - type: custom:fold-entity-row
                 head:
                   type: section
                   label: Plus d'informations
                 entities:
-                  - entity: sensor.esp129_uptime_sensor
-                    name: UpTime ESP
-                  - entity: binary_sensor.esp129_status
-                    name: Status Connection
+                  - entity: sensor.cellier_power
+                    name: Batterie Capteur
                     secondary_info: last-updated
             type: entities
         type: vertical-stack

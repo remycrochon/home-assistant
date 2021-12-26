@@ -17,6 +17,7 @@
             - entity_id: 'binary_sensor.uptime_reseau'    
             - entity_id: 'binary_sensor.alarme_status_pac'
             - entity_id: 'binary_sensor.alarme_discord_pac'
+            - entity_id: 'binary_sensor.certificats_lets'
             - entity_id: 'input_boolean.def_com_vp'        
               sort:
                 method: state
@@ -27,6 +28,8 @@
             - entity_id: "*134*"
             - entity_id: "*141*"
             - entity_id: "binary_sensor.ping_arduino_piscine"
+            - entity_id: "binary_sensor.ping_nas_dlink"
+            - entity_id: "binary_sensor.ping_cam_terrasse"
             - state: "on"
             - state: Online
       - type: custom:auto-entities

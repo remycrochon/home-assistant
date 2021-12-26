@@ -135,17 +135,7 @@ input_boolean:
   regul_ph:
     name: pH validation Regul
 
-binary_sensor:
-  # Niveau bas bidon pH
-  - platform: template
-    sensors:
-      ph_niveau_bas_bidon:
-        value_template: >-
-          {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
-          {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
-          {% set c=states('input_number.ph_seuil_bas_bidon')|float(default=0) %}
-          {{ (a-b) <= c }}   
-        friendly_name: "pH Seuil Niveau Bas Bidon"
+
 sensor:
   - platform: history_stats
     name: pH_derniere_heure
@@ -163,63 +153,7 @@ sensor:
     end: '{{now()}}'
     duration: 48:00:00
 
-  # Recopie mémoire pH dans le sensor pour calcul qt à injecter
-  - platform: template
-    sensors:
-      ph_piscine_ph:
-        friendly_name: "ph_piscine_ph"
-        value_template: '{{ states("input_number.ph_memoire")|float(default=0) }}'
-        unit_of_measurement: "pH"
-    
-  - platform: template
-    sensors:
-      ph_volume_restant_bidon:
-        friendly_name: "Volume pH restant bidon"
-        value_template: >-
-          {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
-          {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
-          {{ (a-b)|round(2) }}   
-        icon_template: mdi:flask-empty-minus-outline
-        unit_of_measurement: "l"
-
-  # temps d'injection en mn
-  - platform: template
-    sensors:
-      ph_tps_inject_mn:
-        friendly_name: "pH Durée Inject calc. (mn)"
-        value_template: >-
-          {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
-          {% set x=states('input_number.simul_ph') | float(default=0) %}
-          {% set b=states('input_number.ph_cible') | float(default=0) %}
-          {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
-          {% set e=states('input_number.ph_concentration') | float(default=0) %}
-          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
-          {% if r < 0 %}
-            {{ 0 }}
-          {% else %}
-            {{ (r//60)|int(default=0) }}
-          {% endif %}
-        unit_of_measurement: "mn"
-  # temps d'injection en s
-  - platform: template
-    sensors:
-      ph_tps_inject_s:
-        friendly_name: "pH Durée Inject calc. (s)"
-        value_template: >-
-          {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
-          {% set x=states('input_number.simul_ph') | float(default=0) %}
-          {% set b=states('input_number.ph_cible') | float(default=0) %}
-          {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
-          {% set e=states('input_number.ph_concentration') | float(default=0) %}
-          {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
-          {% if r < 0 %}
-            {{ 0 }}
-          {% else %}
-            {{ (r%60)|int(default=0) }}
-          {% endif %}
-        unit_of_measurement: "s"
-
-  # Statistiques pH
+# Statistiques pH
   - platform: statistics
     name: ph_stat_median
     entity_id: sensor.ph_piscine_ph
@@ -234,6 +168,77 @@ sensor:
     sampling_size: 30
     #max_age:
       # minutes: 30
+  - platform: statistics
+    name: ph_stat_standard_deviation
+    entity_id: sensor.ph_piscine_ph
+    state_characteristic: standard_deviation
+    sampling_size: 30
+    #max_age:
+      # minutes: 30      
+
+template:
+####################################
+  - binary_sensor:
+    - name: "ph_niveau_bas_bidon"
+      unique_id: "pH Seuil Niveau Bas Bidon"
+      state: >-
+          {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
+          {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
+          {% set c=states('input_number.ph_seuil_bas_bidon')|float(default=0) %}
+          {{ (a-b) <= c }}
+
+####################################
+  - sensor:
+# Recopie mémoire pH dans le sensor pour calcul qt à injecter
+    - name: "pH_piscine_ph"
+      unique_id: "ph_piscine_ph"
+      state: >-
+        {{ states("input_number.ph_memoire")|float(default=0) }}
+      unit_of_measurement: "pH"
+
+    - name: "ph_volume_restant_bidon"
+      unique_id: "Volume pH restant bidon"
+      state: >-
+        {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
+        {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
+        {{ (a-b)|round(2) }}   
+      icon: mdi:flask-empty-minus-outline
+      unit_of_measurement: "l"
+
+  # temps d'injection en mn
+    - name: "ph tps inject mn"
+      unique_id: "ph_tps_inject_mn"
+      state: >-
+        {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
+        {% set x=states('input_number.simul_ph') | float(default=0) %}
+        {% set b=states('input_number.ph_cible') | float(default=0) %}
+        {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
+        {% set e=states('input_number.ph_concentration') | float(default=0) %}
+        {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
+        {% if r < 0 %}
+          {{ 0 }}
+        {% else %}
+          {{ (r//60)|int(default=0) }}
+        {% endif %}
+      unit_of_measurement: "mn"
+  # temps d'injection en s
+    - name: "ph tps inject s"
+      unique_id: "ph_tps_inject_s"
+      state: >-
+        {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
+        {% set x=states('input_number.simul_ph') | float(default=0) %}
+        {% set b=states('input_number.ph_cible') | float(default=0) %}
+        {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
+        {% set e=states('input_number.ph_concentration') | float(default=0) %}
+        {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
+        {% if r < 0 %}
+          {{ 0 }}
+        {% else %}
+          {{ (r%60)|int(default=0) }}
+        {% endif %}
+      unit_of_measurement: "s"
+
+
 
 
   

@@ -85,8 +85,7 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    
-
+ 
   - platform: teleinfo
     id: papp
     tag_name: "PAPP"
@@ -138,14 +137,10 @@ sensor:
       return ((id(hchc).state+id(hchp).state)/1000);
       
   - platform: homeassistant
-    name: "HC J"
-    entity_id: sensor.energy_total_linky_usage_daily_hc
-    id: hcj
-
-  - platform: homeassistant
-    name: "HP J"
-    entity_id: sensor.energy_total_linky_usage_daily_hp
-    id: hpj
+    name: "HCHP J"
+    unit_of_measurement: "Wh"
+    entity_id: sensor.energie_totale_linky_jour
+    id: hphcj
 
   - platform: wifi_signal
     id: wif
@@ -210,10 +205,9 @@ display:
     address: 0x3C
     brightness: 100%
     lambda: |-
-      it.printf(0,0,id(arial),"PuC=%.0f",id(papp).state);
-      it.printf(0,15,id(arial),"I Inst=%.0f",id(iinst).state);
-      it.printf(64,15,id(arial),"I Max=%.0f",id(imax).state);
-      it.printf(0,30,id(arial),"I=%.0f",id(i100).state);
-      it.printf(0,45,id(arial),"HCJ=%.0f",id(hcj).state);
-      it.printf(64,45,id(arial),"HPJ=%.0f",id(hpj).state);
+      it.printf(0,0,id(arial),"PuC=%.0f W",id(papp).state);
+      it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
+      it.printf(0,30,id(arial),"I/IMax=%.0f ",id(i100).state);
+      it.printf(0,45,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
+      
    

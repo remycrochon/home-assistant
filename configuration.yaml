@@ -5,6 +5,8 @@ homeassistant:
   longitude: !secret longitude
   unit_system: metric
   packages: !include_dir_named packages
+  external_url: !secret external-url
+  internal_url: !secret internal-url
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:

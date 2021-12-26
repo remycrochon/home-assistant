@@ -158,25 +158,29 @@ sensor:
     entity_id: sensor.vp2_rain24
     max_age:
       minutes: 320 # sur 6h
-    name: stats_vp2_pluviometrie
-  - platform: template
-    sensors:
-      vp2_pluviometrie_min:
-        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'min_value') }}" 
-      vp2_pluviometrie_max:
-        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'max_value') }}" 
-      vp2_pluviometrie_moyenne:
-        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'median') }}" 
-      vp2_pluviometrie_standard_deviation:
-        value_template: "{{ state_attr('sensor.stats_vp2_pluviometrie', 'standard_deviation') }}"
+    name: vp2_pluviometrie_min
+    state_characteristic: value_min
 
-# Statistiques Temperature exterieure
-# sert à anticipation chauffage?
   - platform: statistics
-    entity_id: sensor.vp2_temp_out
+    entity_id: sensor.vp2_rain24
     max_age:
-      minutes: 30 
-    name: stats_vp2_temp_out
+      minutes: 320 # sur 6h
+    name: vp2_pluviometrie_max
+    state_characteristic: value_max
+
+  - platform: statistics
+    entity_id: sensor.vp2_rain24
+    max_age:
+      minutes: 320 # sur 6h
+    name: vp2_pluviometrie_moyenne
+    state_characteristic: median
+
+  - platform: statistics
+    entity_id: sensor.vp2_rain24
+    max_age:
+      minutes: 320 # sur 6h
+    name: vp2_pluviometrie_standard_deviation
+    state_characteristic: standard_deviation
 
     
 input_boolean:

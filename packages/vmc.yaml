@@ -149,17 +149,17 @@ sensor:
     start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
     end: "{{ now() }}"
 
-# Energie VMC Niv0
-  - platform: integration
-    source: sensor.ecocompteur_vmc_niv0_median
-    name: energy_vmc_n0
-    unit_prefix: k
-    #    method: left
-    round: 2
-
 # Statistiques puissance 
   - platform: statistics
     name: puissance_vmc_niv0_median
     entity_id: sensor.ecocompteur_vmc_niv0_brut
     state_characteristic: median
     sampling_size: 10
+
+# Energie VMC Niv0
+  - platform: integration
+    source: sensor.puissance_vmc_niv0_median
+    name: energy_vmc_n0
+    unit_prefix: k
+    #    method: left
+    round: 2

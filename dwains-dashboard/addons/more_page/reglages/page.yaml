@@ -199,28 +199,31 @@
               name: ECS piloté par Routeur PV
               show_state: false
               type: custom:multiple-entity-row
+#              
             - entities:
-                - entity: sensor.ecs_chauffage_ce_jour
-                  name: Tps Chauffe
-                - entity: binary_sensor.ecs_chauffe
-                  name: Chauffage
-
-              entity: sensor.ecs_chauffage_ce_jour
+              - entity: sensor.energie_ecs_jour
+                name: Conso
+              - entity: sensor.ecs_chauffage_ce_jour
+                name: Tps Chauffe
+              entity: sensor.energie_ecs_jour
               icon: mdi:water-boiler
-              name: Info ECS
+              name: Conso
               show_state: false
               type: custom:multiple-entity-row
-            - entities:
 
-                - entity: switch.cde_relais_ecs
-                  name: Rel ECS
-                - entity: switch.cde_relais_ecs_router_pv
-                  name: Rel PV
+            - entities:
+              - entity: binary_sensor.ecs_chauffe
+                name: Chauffage
+              - entity: switch.cde_relais_ecs
+                name: Rel ECS
+              - entity: switch.cde_relais_ecs_router_pv
+                name: Rel PV
               entity: switch.cde_relais_ecs
               icon: mdi:water-boiler
-              name: Relais
+              name: Cde
               show_state: false
               type: custom:multiple-entity-row              
+
             - entities:
                 - entity: input_datetime.horaire_ecs_debut
                   name: Heure debut tranche ECS
@@ -234,6 +237,7 @@
                 type: section
               padding: 0
               type: custom:fold-entity-row
+
             - entities:
                 - entity: switch.cde_relais_ecs
                   name: Relais ECS

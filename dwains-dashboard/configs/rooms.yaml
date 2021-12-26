@@ -117,16 +117,15 @@ rooms:
 # Cellier
   - name: Cellier
     icon: mdi:home-flood
-    temperature: sensor.esp129_climat_cellier_temperature
-    humidity: sensor.esp129_climat_cellier_humidite
+    temperature: sensor.cellier_temperature
+    humidity: sensor.cellier_humidity
+    pressure: sensor.cellier_pression
     door: binary_sensor.porte_cellier
     light: switch.lumiere_cellier
     more_entities:
       entities:
-        - entity: sensor.esp129_wifi_signal_sensor
-          name: Wifi
-        - entity: binary_sensor.esp129_cellier_status
-          name: Status Connection
+        - entity: sensor.cellier_power
+          name: Batterie
 
 # Cave
   - name: Cave

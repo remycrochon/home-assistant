@@ -1089,35 +1089,25 @@
     default: []
   mode: restart
 - id: '1633416414001'
-  alias: 2_2_4 Alarme_Notification Time Out VP2
+  alias: 2_2_1 Alarme_Notification Time Out VP2
   description: ' '
   trigger:
-  - platform: time_pattern
-    minutes: /6
+  - platform: state
+    entity_id: sensor.vp2_datetime
   condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{% set a=states(''sensor.vp2_datetime'')|int(default=0) %}
-
-          {% set b=states(''input_number.mem_vp2_datetime'')|int(default=0) %}
-
-          {{ a != b }}'
-      sequence:
-      - service: input_number.set_value
-        target:
-          entity_id: input_number.mem_vp2_datetime
-        data_template:
-          value: '{{ states(''sensor.vp2_datetime'')|int(default=0) }}'
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.com_vp2
-    default:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.com_vp2
-  mode: single
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.com_vp2
+  - delay:
+      hours: 0
+      minutes: 6
+      seconds: 0
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.com_vp2
+  mode: restart
 - id: '1633502766002'
   alias: 4_1_3 Volet-Suivi Azimuth Soleil
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
@@ -2064,7 +2054,7 @@
     default: []
   mode: single
 - id: '1634766452141'
-  alias: 2_2_1 Alarme Acquittement Porte Sous Sol
+  alias: 2_2_4 Alarme Acquittement Porte Sous Sol
   description: Ferme la porte du sous sol
   trigger:
   - platform: event
@@ -2161,32 +2151,22 @@
   alias: 2_2_2 Alarme_Notification Time Out Linky
   description: ' '
   trigger:
-  - platform: time_pattern
-    hours: /1
+  - platform: state
+    entity_id: sensor.linky_papp
   condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{% set a=states(''sensor.linky_papp'')|int(default=0) %}
-
-          {% set b=states(''input_number.mem_linky_hphc'')|int(default=0) %}
-
-          {{ a != b }}'
-      sequence:
-      - service: input_number.set_value
-        target:
-          entity_id: input_number.mem_linky_hphc
-        data_template:
-          value: '{{ states(''sensor.linky_papp'')|int(default=0) }}'
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.com_linky
-    default:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.com_linky
-  mode: single
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.com_linky
+  - delay:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.com_linky
+  mode: restart
 - id: '1638119466260'
   alias: 2_1_11 Alarme Blueprints Notification Def Com Linky
   description: Blue Print

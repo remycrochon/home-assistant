@@ -1,0 +1,83 @@
+####################################################
+#                                                  #
+#                     ESP TOTAL                    #
+#                                                  #
+####################################################
+
+
+utility_meter:
+# usage jour  
+  energy_total_usage_daily:
+    source: sensor.pzem_totale_energy
+    cycle: daily
+    tariffs:
+      - hp
+      - hc
+# usage semaine
+  energy_total_usage_weekly:
+    source: sensor.pzem_totale_energy
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc
+# usage mois
+  energy_total_usage_monthly:
+    source: sensor.pzem_totale_energy
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+#usage an
+  energy_total_usage_yearly:
+    source: sensor.pzem_totale_energy
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+
+template:
+# Consommation journalière HP + HC - addition des utility meter
+  - sensor:
+    - name: "Energie Totale Jour"
+      unique_id: "energy_total_daily"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+
+# Consommation semaine HP + HC
+    - name: "energy_total_weekly"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+# Consommation mensuelle HP + HC
+    - name: "energy_total_monthly"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+# Consommation annuelle HP + HC
+    - name: "energy_total_yearly"
+      state: >-
+        {% set p = states('sensor.energy_total_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_total_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+
+
+        

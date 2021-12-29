@@ -8,8 +8,14 @@ esphome:
   name: ${device_name}
   platform: ESP32
   board: mhetesp32minikit
-
-
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      - light.control:
+          id: led1
+          brightness: 0.25
+          state: on
 wifi:
   networks:
     - ssid: !secret wifi_esp
@@ -69,6 +75,26 @@ teleinfo:
   update_interval: 10s
   historical_mode: true
   
+# Led WS2812 RGB  
+light:
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: rgb_led
+        from: 0
+        to: 0
+
+  - platform: neopixelbus
+    num_leds: 1
+    pin: GPIO18
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
+
 sensor:
   - platform: teleinfo
     id: hchc
@@ -93,6 +119,42 @@ sensor:
     unit_of_measurement: "VA"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    on_value:
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              below: 1000
+          then: 
+            - light.control:
+                id: led1
+                red: 0%
+                green: 100% # vert
+                blue: 0%
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              above: 1000
+              below: 3000
+          then: 
+            - light.control:
+                id: led1
+                red: 100%
+                green: 66% # orange
+                blue: 0%
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              above: 3000
+          then: 
+            - light.control:
+                id: led1
+                red: 100% #rouge
+                green: 0%
+                blue: 0%
+           
     
   - platform: teleinfo
     id: isousc
@@ -138,7 +200,7 @@ sensor:
       
   - platform: homeassistant
     name: "HCHP J"
-    unit_of_measurement: "Wh"
+    unit_of_measurement: "kWh"
     entity_id: sensor.energie_totale_linky_jour
     id: hphcj
 
@@ -205,7 +267,7 @@ display:
     address: 0x3C
     brightness: 100%
     lambda: |-
-      it.printf(0,0,id(arial),"PuC=%.0f W",id(papp).state);
+      it.printf(0,0,id(arial),"PuC=%.0f VA",id(papp).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
       it.printf(0,30,id(arial),"I/IMax=%.0f ",id(i100).state);
       it.printf(0,45,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);

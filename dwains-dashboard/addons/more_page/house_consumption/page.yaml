@@ -259,6 +259,8 @@
                   name: I Max
                 - entity: sensor.linky_i_imax
                   name: I/I Max
+                - entity: sensor.linky_ptec
+                  name: PTEC
                 - entity: sensor.energy_total_linky_usage_daily_hc
                   name: Linky HC Jour
                 - entity: sensor.energy_total_linky_usage_daily_hp

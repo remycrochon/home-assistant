@@ -140,9 +140,9 @@ sensor:
           then: 
             - light.control:
                 id: led1
-                red: 100%
-                green: 66% # orange
-                blue: 0%
+                red: 0%
+                green: 0% # bleu
+                blue: 100%
       - if:
           condition:
             sensor.in_range:

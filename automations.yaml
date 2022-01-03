@@ -652,7 +652,7 @@
   description: Mise à jour Position fermé (=0)
   trigger:
   - platform: state
-    entity_id: binary_sensor.volet_buro_droit_ias_zone
+    entity_id: binary_sensor.volet_buro_droit
     to: 'off'
   condition: []
   action:

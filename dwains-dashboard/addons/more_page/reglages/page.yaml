@@ -199,15 +199,27 @@
               name: ECS piloté par Routeur PV
               show_state: false
               type: custom:multiple-entity-row
+#
 #              
             - entities:
+              - entity: sensor.ecocompteur_ecs
+                name: Pu
               - entity: sensor.energie_ecs_jour
                 name: Conso
-              - entity: sensor.ecs_chauffage_ce_jour
-                name: Tps Chauffe
               entity: sensor.energie_ecs_jour
-              icon: mdi:water-boiler
+              icon: mdi:flash
               name: Conso
+              show_state: false
+              type: custom:multiple-entity-row
+
+            - entities:
+              - entity: sensor.esp126_temp_ecs
+                name: T°
+              - entity: sensor.ecs_chauffage_ce_jour
+                name: Tps Ch
+              entity: sensor.energie_ecs_jour
+              icon: mdi:temperature-celsius
+              name: Temp
               show_state: false
               type: custom:multiple-entity-row
 

@@ -1196,13 +1196,18 @@
     id: debut
   - platform: time
     id: fin
-    at: 05:30
+    at: 04:30
   condition:
   - condition: time
     after: 00:20
     before: 05:40
     weekday:
     - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
     - sun
   action:
   - choose:

@@ -78,6 +78,7 @@ sensor:
     unit_prefix: k
     method: left
     round: 2
+    
 # Energie ECS surplus injection
   - platform: integration
     source: sensor.puissance_ecs_surplus_injectee

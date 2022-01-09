@@ -1196,7 +1196,7 @@
     id: debut
   - platform: time
     id: fin
-    at: 04:30
+    at: 05:30
   condition:
   - condition: time
     after: 00:20
@@ -2158,7 +2158,10 @@
   trigger:
   - platform: state
     entity_id: sensor.linky_papp
-  condition: []
+  condition:
+  - condition: state
+    entity_id: input_boolean.inhib_alarme_linky
+    state: 'off'
   action:
   - service: input_boolean.turn_on
     target:

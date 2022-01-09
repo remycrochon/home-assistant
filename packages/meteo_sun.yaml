@@ -188,12 +188,3 @@ input_boolean:
   stop_notif_previ_pluie:
     name: Stop Notif Previ Pluie
 
-input_number:
-  # Utilisé pour calculer le time out de VP2
-  mem_vp2_datetime:
-    name: Mem VP2 DateTime
-    min: 0
-    max: 100000000000
-    unit_of_measurement: ms
-    icon: mdi:timeline-check-outline
-    mode: box

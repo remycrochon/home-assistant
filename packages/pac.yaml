@@ -182,7 +182,7 @@ sensor:
           {% if is_state("sensor.espaltherma_mode_fonctionnement", "Heating")
             and (states('sensor.espaltherma_courant_primaire')|float(default=0) > 0) %}
             {% set cop=((a*0.06*1.16)*(b-c)/(d*e/1000))| float(default=0) | round(2) %}
-            {% if cop>=0 %}
+            {% if (cop>=0) and (cop<10) %}
               {{ cop }}
             {%else%}
               0

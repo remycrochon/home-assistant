@@ -24,10 +24,7 @@
           name:
             - font-weight: 900
         type: 'custom:button-card'
-      - type: entities
-        entities:
-          - entity: sensor.envoy_energie_totale_soutiree_jour
-            name: Energie Totale soutirée jour
+
       - type: custom:apexcharts-card
         chart_type: donut
         header:
@@ -51,7 +48,11 @@
           - entity: sensor.energie_wc_jour
             name: WC            
           - entity: sensor.energie_vmc_jour
-            name: VMC          
+            name: VMC    
+      - type: entities
+        entities:
+          - entity: sensor.envoy_energie_totale_soutiree_jour
+            name: Energie Totale soutirée jour                  
   - type: vertical-stack
     cards:
       - name: Aperçu

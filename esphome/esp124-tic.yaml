@@ -47,12 +47,6 @@ font:
   - file: "fonts/arial.ttf"
     id: arial
     size: 15
-  - file: "fonts/arial.ttf"
-    id: arial30
-    size: 30
-  - file: "fonts/arial.ttf"
-    id: arial10
-    size: 10
 
 i2c:
   sda: GPIO21 #D2=pin 19
@@ -226,6 +220,7 @@ text_sensor:
     
   - platform: teleinfo
     tag_name: "PTEC"
+    id: tarif
     name: "Linky PTEC"
     teleinfo_id: myteleinfo
 
@@ -269,7 +264,11 @@ display:
     lambda: |-
       it.printf(0,0,id(arial),"PuC=%.0f VA",id(papp).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
-      it.printf(0,30,id(arial),"I/IMax=%.0f ",id(i100).state);
+      it.printf(0,30,id(arial),"I/IMax=%.0f %%",id(i100).state);
       it.printf(0,45,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
+#      std::string tarif_ = id(tarif).state;
+#      it.printf(0,45,id(arial), "Tarif: %s", tarif_.c_str());      
+
+
       
    

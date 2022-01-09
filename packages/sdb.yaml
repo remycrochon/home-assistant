@@ -5,7 +5,6 @@
 ####################################################
 
 utility_meter:
-
   energy_sdb_usage_daily:
     source: sensor.pzem_sdb_energie
     cycle: daily

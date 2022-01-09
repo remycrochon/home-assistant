@@ -2097,7 +2097,7 @@
   - service: hassio.addon_stdin
     data:
       addon: a0d7b954_ssh
-      input: /bin/bash /config/ha_gitpush.sh
+      input: /config/ha_gitpush.sh
   mode: single
 - id: '1635590858245'
   alias: 1_4_1 BP Sonof
@@ -2158,6 +2158,10 @@
   trigger:
   - platform: state
     entity_id: sensor.linky_papp
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   condition:
   - condition: state
     entity_id: input_boolean.inhib_alarme_linky

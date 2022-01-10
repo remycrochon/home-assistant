@@ -37,11 +37,5 @@ sensor:
     scan_interval: 120
     unit_of_measurement: s
 
-# Consommation - Energies
-
-  - platform: command_line
-    name: "Linky tarif Courant"
-    command: curl -s 'http://192.168.0.26/data.json' | jq '.tarif_courant'
-    scan_interval: 60
 
 

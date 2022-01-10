@@ -100,9 +100,9 @@ template:
     - name: "Energie Totale Linky Jour"
       unique_id: "energy_total_linky_daily"
       state: >-
-        {% set p = states('sensor.energy_total_linky_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_linky_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
+        {% set hp = states('sensor.energy_total_linky_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set hc = states('sensor.energy_total_linky_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (hp + hc) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
@@ -111,9 +111,9 @@ template:
     - name: "Energie Totale Linky weekly"
       unique_id: "energy_total_linky_weekly"
       state: >-
-        {% set p = states('sensor.energy_total_linky_usage_weekly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_linky_usage_weekly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
+        {% set hp = states('sensor.energy_total_linky_usage_weekly_hp') | float(default=0) | round(2) %}
+        {% set hc = states('sensor.energy_total_linky_usage_weekly_hc') | float(default=0) | round(2) %}
+        {{ (hp + hc) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
@@ -123,9 +123,9 @@ template:
     - name: "Energie Totale Linky Mois"
       unique_id: "energy_total_linky_monthly"
       state: >-
-        {% set p = states('sensor.energy_total_linky_usage_monthly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_linky_usage_monthly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
+        {% set hp = states('sensor.energy_total_linky_usage_monthly_hp') | float(default=0) | round(2) %}
+        {% set hc = states('sensor.energy_total_linky_usage_monthly_hc') | float(default=0) | round(2) %}
+        {{ (hp + hc) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
@@ -134,15 +134,16 @@ template:
     - name: "Energie Totale Linky An"
       unique_id: "energy_total_linky_yearly"
       state: >-
-        {% set p = states('sensor.energy_total_linky_usage_yearly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_linky_usage_yearly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
+        {% set hp = states('sensor.energy_total_linky_usage_yearly_hp') | float(default=0) | round(2) %}
+        {% set hc = states('sensor.energy_total_linky_usage_yearly_hc') | float(default=0) | round(2) %}
+        {{ (hp + hc) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"  
 
 # Cout de l'Energie
-# le kWh HP et HC sont calculés dans excel en fonction des factures recues
+# les couts du kWh HP et HC sont calculés dans excel en fonction des factures recues
+# et saisis manuellement dans HA
 
     - name: "Cout Energy Total Jour HPHC"
       state: >-

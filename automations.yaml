@@ -1454,7 +1454,7 @@
       repeat_delay: 600
       max_alerts: 100
 - id: '1634568011264'
-  alias: 2_1_02 Alarme Blueprints Notification Ping Reseau
+  alias: '2_1_02 Alarme Blueprints Notification Ping Reseau '
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1471,20 +1471,12 @@
             -> Rpi_Adguard est {{states('binary_sensor.ping_rpi_adguard')}}{{-"\n"-}}
             -> Module Adam est {{states('binary_sensor.ping_module_adam')}}{{-"\n"-}}
             -> Wago Piscine est {{states('binary_sensor.ping_module_wago_piscine')}}{{-"\n"-}}
-            -> ESP123 PZEM SdB est {{states('binary_sensor.ping_esp123_pezm_sdb')}}{{-"\n"-}}
-            -> ESP125 Piscine est {{states('binary_sensor.ping_esp125_piscine')}}{{-"\n"-}}
-            -> ESP131 Qualité air est {{states('binary_sensor.ping_esp131_qualite_air')}}{{-"\n"-}}
-            -> ESP132 PEZM Total est {{states('binary_sensor.ping_esp132_pezm_totale')}}{{-"\n"-}}
-            -> ESP133 Congelo {{states('binary_sensor.ping_esp133_congelateur')}}{{-"\n"-}}
-            -> ESP135 Luxmetre est {{states('binary_sensor.ping_esp135_luxmetre')}}{{-"\n"-}}
-            -> ESP137 PEZM Piscine est {{states('binary_sensor.ping_esp137_pzem_piscine')}}{{-"\n"-}}
-            -> ESP139 VMCSSol est {{states('binary_sensor.ping_esp139_vmc_sous_sol')}}{{-"\n"-}}
-            -> Cam Cuisine est {{states('binary_sensor.cam_cuisine')}}{{-"\n"-}} ->
-            Cam Gar Ext est {{states('binary_sensor.cam_garage_ext')}}{{-"\n"-}} ->
-            Cam Gar Int est {{states('binary_sensor.cam_garage_int')}}{{-"\n"-}} ->
-            Cam Piscine est {{states('binary_sensor.cam_piscine')}}{{-"\n"-}} -> Cam
-            Salon est {{states('binary_sensor.cam_salon')}}{{-"\n"-}} -> Cam terrasse
-            est {{states('binary_sensor.cam_terrasse')}}{{-"\n"-}}{{states("sensor.date_time")
+            -> Cam Cuisine est {{states('binary_sensor.ping_cam_cuisine')}}{{-"\n"-}}
+            -> Cam Gar Ext est {{states('binary_sensor.ping_cam_garage_ext')}}{{-"\n"-}}
+            -> Cam Gar Int est {{states('binary_sensor.ping_cam_garage_int')}}{{-"\n"-}}
+            -> Cam Piscine est {{states('binary_sensor.ping_cam_piscine')}}{{-"\n"-}}
+            -> Cam Salon est {{states('binary_sensor.ping_cam_salon')}}{{-"\n"-}}
+            -> Cam terrasse est {{states('binary_sensor.cam_terrasse')}}{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Réseau:!!!
       - service: persistent_notification.create

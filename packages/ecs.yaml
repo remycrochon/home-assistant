@@ -30,7 +30,7 @@ utility_meter:
       - hc
 # Comptabilisation de l'énergie injectée en surplus
   energy_ecs_surplus_usage_daily:
-    source: sensor.energy_ecs_surplus_injectee_kw
+    source: sensor.puissance_ecs_surplus_injectee
     cycle: daily
     tariffs:
       - hp

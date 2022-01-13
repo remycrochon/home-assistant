@@ -6,9 +6,16 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP8266
-  board: d1_mini
-
+  platform: ESP32
+  board: mhetesp32minikit
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      - light.control:
+          id: rgb_led
+          brightness: 0.25
+          state: on
 wifi:
   networks:
     - ssid: !secret wifi_esp
@@ -47,25 +54,40 @@ font:
   - file: "fonts/arial.ttf"
     id: arial10
     size: 10
+
+# Led WS2812 RGB  
+light:
+
+  - platform: neopixelbus
+    num_leds: 3 #1
+    pin: GPIO0
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
     
 i2c:
-  sda: GPIO4 #D2=pin 19
-  scl: GPIO5 #D1=pin 20
+  sda: GPIO21 #
+  scl: GPIO22 #
   scan: True
   id: bus_a
+  
 uart:
   - id: uart_a
-    rx_pin: GPIO2 #D4
+    rx_pin: GPIO25 #
     baud_rate: 9600
 
   - id: uart_b
-    rx_pin: GPIO3
-    tx_pin: GPIO1
+    rx_pin: GPIO16
+    tx_pin: GPIO17
     baud_rate: 9600
+    
 globals:
   - id: bp_mode
     type: int
     initial_value: '1'
+    
 sensor:
   - platform: pmsx003
     uart_id: uart_a
@@ -95,33 +117,45 @@ sensor:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  below: 35
+                  below: 1 #35
               then: 
-                - output.turn_on: gpio_14 #Led verte
-                - output.turn_off: gpio_13 #Led jaune
-                - output.turn_off: gpio_15 #Led rouge
-                
+               - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 0
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
           - if:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  above: 35.001
+                  above: 1
                   below: 85
               then: 
-                  - output.turn_off: gpio_14 #Led verte
-                  - output.turn_on: gpio_13 #Led jaune
-                  - output.turn_off: gpio_15 #Led rouge
-                    
+               - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 1
+                  red: 0%
+                  green: 0%
+                  blue: 100%
+                  color_brightness: 100%
           - if:
               condition:
                 sensor.in_range:
                   id: pm2_5
                   above: 85.001
               then: 
-                  - output.turn_off: gpio_14 #Led verte
-                  - output.turn_off: gpio_13 #Led jaune
-                  - output.turn_on: gpio_15 #Led rouge                    
-            
+               - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 2
+                  red: 100%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 100%
     pm_10_0:
       name: "Concentration de particules <10.0µm"
       id: pm10_0
@@ -225,7 +259,7 @@ binary_sensor:
     name: bp_mod
     id: button
     pin:
-      number: GPIO16
+      number: GPIO14
       inverted: true
     on_click:
       - min_length: 25ms
@@ -251,7 +285,7 @@ interval:
 switch:   
   - platform: gpio
     pin: 
-      number: D3 # GPIO00
+      number: GPIO27 #
     id: val_mes
     name: "${friendly_name} Validation mesure"
     
@@ -265,21 +299,6 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
-
-output:
-
-  - platform: gpio
-    pin: GPIO13 #D7 Jaune
-    id: gpio_13
-  
-  - platform: gpio
-    pin: GPIO14 #D5 Vert
-    id: gpio_14
-    
-  - platform: gpio
-    pin: GPIO15 #D8 rouge
-    id: gpio_15
-    
 # gestion afficheur
 
 display:

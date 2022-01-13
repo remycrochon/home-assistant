@@ -113,43 +113,7 @@ sensor:
     unit_of_measurement: "VA"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    on_value:
-      - if:
-          condition:
-            sensor.in_range:
-              id: papp
-              below: 1000
-          then: 
-            - light.control:
-                id: led1
-                red: 0%
-                green: 100% # vert
-                blue: 0%
-      - if:
-          condition:
-            sensor.in_range:
-              id: papp
-              above: 1000
-              below: 3000
-          then: 
-            - light.control:
-                id: led1
-                red: 0%
-                green: 0% # bleu
-                blue: 100%
-      - if:
-          condition:
-            sensor.in_range:
-              id: papp
-              above: 3000
-          then: 
-            - light.control:
-                id: led1
-                red: 100% #rouge
-                green: 0%
-                blue: 0%
-           
-    
+
   - platform: teleinfo
     id: isousc
     tag_name: "ISOUSC"
@@ -223,6 +187,31 @@ text_sensor:
     id: tarif
     name: "Linky PTEC"
     teleinfo_id: myteleinfo
+    on_value:
+     then:
+      - if:
+          condition:
+            text_sensor.state:
+              id: tarif
+              state: 'HC..'
+              
+          then: 
+            - light.control:
+                id: led1
+                red: 0%
+                green: 100% # vert
+                blue: 0%
+      - if:
+          condition:
+            text_sensor.state:
+              id: tarif
+              state: 'HP..'
+          then: 
+            - light.control:
+                id: led1
+                red: 100% #rouge
+                green: 0%
+                blue: 0%
 
   - platform: template
     name: "${friendly_name} Uptime"
@@ -264,10 +253,10 @@ display:
     lambda: |-
       it.printf(0,0,id(arial),"PuC=%.0f VA",id(papp).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
-      it.printf(0,30,id(arial),"I/IMax=%.0f %%",id(i100).state);
-      it.printf(0,45,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
-#      std::string tarif_ = id(tarif).state;
-#      it.printf(0,45,id(arial), "Tarif: %s", tarif_.c_str());      
+      it.printf(70,15,id(arial),"-%.0f %%",id(i100).state);
+      it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
+      std::string tarif_ = id(tarif).state;
+      it.printf(0,45,id(arial), "Tarif: %s", tarif_.c_str());      
 
 
       

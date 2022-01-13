@@ -59,7 +59,7 @@ uart:
   id: uart_a
   rx_pin: GPIO23
 #  tx_pin: GPIO1
-  baud_rate: 1200
+  baud_rate: 9600
   parity: EVEN
   data_bits: 7
 
@@ -67,7 +67,7 @@ teleinfo:
   id: myteleinfo
   uart_id: uart_a
   update_interval: 10s
-  historical_mode: true
+  historical_mode: false
   
 # Led WS2812 RGB  
 light:
@@ -90,78 +90,144 @@ light:
 
 
 sensor:
+# Energie Active soutirée totale
+  - platform: teleinfo
+    id: hc_hp
+    tag_name: "EAST"
+    name: "Linky HPHC KWH"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      lambda: |-
+        return x/1000;
+
+# Energie Active soutirée Index01
   - platform: teleinfo
     id: hchc
-    tag_name: "HCHC"
+    tag_name: "EASF01"
     name: "Linky HC Wh"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
     
+# Energie Active soutirée Index02    
   - platform: teleinfo
     id: hchp
-    tag_name: "HCHP"
+    tag_name: "EASF02"
     name: "Linky HP Wh"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
- 
+
+#Puissance apparente de référence
+  - platform: teleinfo
+    id: pref
+    tag_name: "PREF"
+    name: "Linky PREF"
+    unit_of_measurement: "kVA"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+#Puissance apparente de coupure
+  - platform: teleinfo
+    id: pcoup
+    tag_name: "PCOUP"
+    name: "Linky PCOUP"
+    unit_of_measurement: "kVA"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+#Puissance apparente instantanée ph1 
   - platform: teleinfo
     id: papp
-    tag_name: "PAPP"
+    tag_name: "SINSTS"
     name: "Linky PAPP"
     unit_of_measurement: "VA"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    on_value:
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              below: 1000
+          then: 
+            - light.control:
+                id: led1
+                red: 0%
+                green: 100% # vert
+                blue: 0%
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              above: 1000
+              below: 3000
+          then: 
+            - light.control:
+                id: led1
+                red: 0%
+                green: 0% # bleu
+                blue: 100%
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              above: 3000
+          then: 
+            - light.control:
+                id: led1
+                red: 100% #rouge
+                green: 0%
+                blue: 0%    
 
+#Tension moyenne ph1
   - platform: teleinfo
-    id: isousc
-    tag_name: "ISOUSC"
-    name: "Linky I Sousc"
-    unit_of_measurement: "A"
+    id: umoy1
+    tag_name: "UMOY1"
+    name: "Linky Umoy"
+    unit_of_measurement: "V"
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
+#Courant efficace ph1
   - platform: teleinfo
     id: iinst
-    tag_name: "IINST"
+    tag_name: "IRMS1"
     name: "Linky I Inst"
     unit_of_measurement: "A"
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
+# Numero du Tarif en cours
   - platform: teleinfo
-    id: imax
-    tag_name: "IMAX"
-    name: "linky I Max"
-    unit_of_measurement: "A"
+    id: ntarif
+    tag_name: "NTARF"
+    name: "linky N Tarif"
+    unit_of_measurement: ""
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
+############### TEMPLATE  ######################"
+# Calcul de la puissance apparente utilisée en % par rapport au contrat
   - platform: template
-    name: "Linky I/Imax"
-    id: i100
+    name: "Linky P/Pref"
+    id: p100
     icon: mdi:flash
     unit_of_measurement: "%"
     accuracy_decimals: 0
     lambda: |-
-      return (id(iinst).state/id(isousc).state*100);
+      return ((id(papp).state/1000)/id(pref).state*100);
 
-  - platform: template
-    name: "Linky HPHC KWH"
-    id: hphc_kwh
-    icon: mdi:flash
-    unit_of_measurement: "kWh"
-    accuracy_decimals: 0
-    lambda: |-
-      return ((id(hchc).state+id(hchp).state)/1000);
-      
+# Lecture dans HA de la conso du jour
   - platform: homeassistant
     name: "HCHP J"
     unit_of_measurement: "kWh"
     entity_id: sensor.energie_totale_linky_jour
     id: hphcj
 
+# Puissance du signal WIFI
   - platform: wifi_signal
     id: wif
     name: "${friendly_name} WiFi Signal Sensor"
@@ -175,43 +241,18 @@ sensor:
     accuracy_decimals: 0
     force_update: false
     icon: mdi:timer
-
+#######################################
 text_sensor:
-  - platform: teleinfo
-    tag_name: "OPTARIF"
-    name: "Linky OPTARIF"
-    teleinfo_id: myteleinfo
-    
-  - platform: teleinfo
-    tag_name: "PTEC"
+
+  - platform: template
     id: tarif
     name: "Linky PTEC"
-    teleinfo_id: myteleinfo
-    on_value:
-     then:
-      - if:
-          condition:
-            text_sensor.state:
-              id: tarif
-              state: 'HC..'
-              
-          then: 
-            - light.control:
-                id: led1
-                red: 0%
-                green: 100% # vert
-                blue: 0%
-      - if:
-          condition:
-            text_sensor.state:
-              id: tarif
-              state: 'HP..'
-          then: 
-            - light.control:
-                id: led1
-                red: 100% #rouge
-                green: 0%
-                blue: 0%
+    lambda: |-
+      if ( id(ntarif).state == 1 ) {
+        return { "HC.." };
+      } else {
+        return { "HP.." };
+      }
 
   - platform: template
     name: "${friendly_name} Uptime"
@@ -239,21 +280,21 @@ text_sensor:
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
-
+# Restart de l'ESP
 switch:   
   - platform: restart
     name: "${friendly_name} Restart"
 
-
+# Affichage
 display:
   - platform: ssd1306_i2c
     model: "SSD1306 128x64"
     address: 0x3C
     brightness: 100%
     lambda: |-
-      it.printf(0,0,id(arial),"PuC=%.0f VA",id(papp).state);
+      it.printf(0,0,id(arial),"P=%.0f VA",id(papp).state);
+      it.printf(75,0,id(arial),"-%.0f %%",id(p100).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
-      it.printf(70,15,id(arial),"-%.0f %%",id(i100).state);
       it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
       std::string tarif_ = id(tarif).state;
       it.printf(0,45,id(arial), "Tarif: %s", tarif_.c_str());      

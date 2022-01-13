@@ -258,8 +258,8 @@
                   name: P inst
                 - entity: sensor.linky_i_inst
                   name: I Max
-                - entity: sensor.linky_i_imax
-                  name: I/I Max
+                - entity: sensor.linky_p_pref
+                  name: P/P Ref
                 - entity: sensor.linky_ptec
                   name: PTEC
                 - entity: sensor.energy_total_linky_usage_daily_hc

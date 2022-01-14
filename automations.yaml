@@ -1831,21 +1831,29 @@
     entity_id: input_boolean.forcage_hc_hp
     from: 'off'
     to: 'on'
-    id: forcage hc
+    id: hc
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
   - platform: state
     entity_id: input_boolean.forcage_hc_hp
     from: 'on'
     to: 'off'
-    id: forcage hp
+    id: hp
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
   - platform: state
-    entity_id: sensor.linky_ptec
+    entity_id: sensor.linky_n_tarif
     id: tarif_hc
-    from: HP..
-    to: HC..
+    from: '2'
+    to: '1'
   - platform: state
-    entity_id: sensor.linky_ptec
-    from: HC..
-    to: HP..
+    entity_id: sensor.linky_n_tarif
+    from: '1'
+    to: '2'
     id: tarif_hp
   condition: []
   action:
@@ -1872,7 +1880,7 @@
             entity_id: input_boolean.com_linky
             state: 'on'
         - condition: trigger
-          id: forcage hc
+          id: hc
       sequence:
       - service: input_boolean.turn_off
         data: {}
@@ -1937,7 +1945,7 @@
           - condition: trigger
             id: tarif_hp
         - condition: trigger
-          id: forcage hp
+          id: hp
       sequence:
       - service: input_boolean.turn_on
         data: {}

@@ -232,7 +232,7 @@ sensor:
     id: wif
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
-    
+# Temps de fonctionnement de l'ESP    
   - platform: uptime
     id: uptime_seconds
     name: "${friendly_name} Uptime"
@@ -241,9 +241,18 @@ sensor:
     accuracy_decimals: 0
     force_update: false
     icon: mdi:timer
+    
 #######################################
 text_sensor:
-
+# Registre de statuts
+  - platform: teleinfo
+    id: stge
+    tag_name: "STGE"
+    name: "linky Statuts"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    
+# Convertion du tarif en cours
   - platform: template
     id: tarif
     name: "Linky PTEC"
@@ -253,7 +262,7 @@ text_sensor:
       } else {
         return { "HP.." };
       }
-
+# Affichage du temps de fonctionnement
   - platform: template
     name: "${friendly_name} Uptime"
     update_interval: 60s

@@ -6,6 +6,7 @@
 
 
 utility_meter:
+# sensor.linky_hphc_kwh vient de Esp Home
 # usage jour  
   energy_total_linky_usage_daily:
     source: sensor.linky_hphc_kwh
@@ -176,16 +177,4 @@ template:
       device_class: "monetary"
       state_class: "total"  
       unique_id: "cout_energy_total_jour_hc"
-
-# Linky: Cumul HP+HC en kWh -> Utilisé dans utility meter
-# sensor.linky_hphc_kwh est calculé dahns l'ESP
-    - name: "Linky Conso Totale HPHC"
-      unique_id: "linky_conso_totale_hphc"
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-      state: >-
-        {% set hphc = states('sensor.linky_hphc_kwh') | float(default=0) | round(0) %}
-        {% if (hphc)>10000 %}
-          {{ (hphc) | round(0) }}
-        {%endif%}          
+      

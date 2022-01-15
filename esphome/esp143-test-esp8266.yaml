@@ -8,6 +8,14 @@ esphome:
   name: ${device_name}
   platform: ESP8266
   board: d1_mini
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      - light.control:
+          id: rgb_led
+          brightness: 0.25
+          state: on  
 
 wifi:
   networks:
@@ -37,17 +45,117 @@ web_server:
   port: 80
 
 
-# Example configuration entry
-dallas:
-  - pin: GPIO2 #D4
-#  - pin: GPIO0 #D3
-    update_interval: 10s
+# Led WS2812 RGB  
+light:
 
-# DS18B20 15/12/2021
+  - platform: neopixelbus
+    method:
+      type: esp8266_dma
+    num_leds: 8 #1
+    pin: GPIO3
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
+
 sensor:
-  - platform: dallas
-    address: 0x28012112F58CF028
-    name: "${friendly_name} T°Combles"
+ # Potentiometre
+  - platform: adc
+    pin: A0
+    id: potar
+    name: "${friendly_name} potar"
+    unit_of_measurement: "%"
+    update_interval: 1s
+    accuracy_decimals: 1
+    filters:
+      - calibrate_linear:
+        - 0. -> 0.0
+        - 1 -> 100.0
+    on_value:
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                below: 25
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 1
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 2
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%   
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 25
+                below: 50
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 3
+                  red: 75%
+                  green: 75%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 4
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%                      
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 50
+                below: 75
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 5
+                  red: 100%
+                  green: 50%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 6
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%                  
+                  color_brightness: 0%                  
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 75
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 7
+                  red: 100%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 100%
+
 
 
 #Etat de la connection
@@ -56,28 +164,7 @@ binary_sensor:
     name: "${friendly_name} Status"
 
 switch:   
-  - platform: gpio
-    name: "${friendly_name} Relais"
-    pin: GPIO05 #D1
-    id: relais
-    
-  - platform: template
-    name: "${friendly_name} Vit_2"
-    id: vit2
-    turn_on_action:
-      - switch.turn_on: relais
-      - delay: 2s
-      - switch.turn_off: relais
 
-  - platform: template
-    name: "${friendly_name} Vit_3"
-    id: vit3
-    turn_on_action:
-      - switch.turn_on: relais
-      - delay: 6s
-      - switch.turn_off: relais      
-
-    
   - platform: restart
     name: "${friendly_name} Restart"
     

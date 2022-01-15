@@ -977,7 +977,7 @@
   - choose:
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.stats_vp2_temp_out
+        entity_id: sensor.vp2_temp_out
         below: input_number.hors_gel_inf_seuil2
       - condition: state
         entity_id: input_select.mode_fonctionnement_piscine
@@ -1021,7 +1021,7 @@
           title: Piscine Hors-Gel Seuil 2 Arret Ppe
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.stats_vp2_temp_out
+        entity_id: sensor.vp2_temp_out
         below: input_number.hors_gel_inf_seuil1
       - condition: state
         entity_id: input_select.mode_fonctionnement_piscine
@@ -1064,8 +1064,9 @@
           message: '{{states("sensor.date_time") }}'
           title: Piscine Hors-Gel Seuil 1 Arret Ppe
     - conditions:
-      - condition: trigger
-        id: hg_deval
+      - condition: state
+        entity_id: input_boolean.hors_gel_valid
+        state: 'off'
       sequence:
       - service: input_select.select_option
         target:
@@ -1088,6 +1089,7 @@
           title: Piscine Hors-Gel devalidé
     default: []
   mode: restart
+  max: 10
 - id: '1633416414001'
   alias: 2_2_1 Alarme_Notification Time Out VP2
   description: ' '

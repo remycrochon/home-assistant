@@ -117,7 +117,7 @@ sensor:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  below: 1 #35
+                  below: 25 #35
               then: 
                - light.addressable_set:
                   id: rgb_led

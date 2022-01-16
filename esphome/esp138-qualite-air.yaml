@@ -48,18 +48,12 @@ font:
   - file: "fonts/arial.ttf"
     id: arial
     size: 15
-  - file: "fonts/arial.ttf"
-    id: arial30
-    size: 30
-  - file: "fonts/arial.ttf"
-    id: arial10
-    size: 10
 
 # Led WS2812 RGB  
 light:
 
   - platform: neopixelbus
-    num_leds: 3 #1
+    num_leds: 8 
     pin: GPIO0
     name: "RGB strip"
     variant: ws2812
@@ -113,49 +107,190 @@ sensor:
             send_first_at: 1
 
       on_value:
+  # de 0 à 85 / 8 leds    
+  # Led 0
           - if:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  below: 25 #35
+                  below: 25
               then: 
-               - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 0
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 0
+                    red: 0%
+                    green: 100%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 1
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%  
+  # led 1                  
           - if:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  above: 1
+                  above: 25
+                  below: 35
+              then: 
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 1
+                    red: 0%
+                    green: 100%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 2
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%  
+  # Led 2              
+          - if:
+              condition:
+                sensor.in_range:
+                  id: pm2_5
+                  above: 35
+                  below: 45
+              then: 
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 2
+                    red: 0%
+                    green: 100%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 3
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%     
+  # led 3                  
+          - if:
+              condition:
+                sensor.in_range:
+                  id: pm2_5
+                  above: 45
+                  below: 55
+              then: 
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 3
+                    red: 75%
+                    green: 75%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 4
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%     
+  # led 4
+          - if:
+              condition:
+                sensor.in_range:
+                  id: pm2_5
+                  above: 55
+                  below: 65
+              then: 
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 4
+                    red: 75%
+                    green: 75%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 5
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%  
+  # led 5
+          - if:
+              condition:
+                sensor.in_range:
+                  id: pm2_5
+                  above: 65
+                  below: 75
+              then: 
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 5
+                    red: 100%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 6
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%      
+  # led 6
+          - if:
+              condition:
+                sensor.in_range:
+                  id: pm2_5
+                  above: 75
                   below: 85
               then: 
-               - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 1
-                  red: 0%
-                  green: 0%
-                  blue: 100%
-                  color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 6
+                    red: 100%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 7
+                    range_to: 7
+                    red: 0%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 0%    
+  # Led 7
           - if:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  above: 85.001
+                  above: 85
               then: 
-               - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 2
-                  red: 100%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 100%
+                - light.addressable_set:
+                    id: rgb_led
+                    range_from: 0
+                    range_to: 7
+                    red: 100%
+                    green: 0%
+                    blue: 0%
+                    color_brightness: 100%
+
     pm_10_0:
       name: "Concentration de particules <10.0µm"
       id: pm10_0

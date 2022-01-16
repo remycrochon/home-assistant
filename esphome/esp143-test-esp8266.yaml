@@ -40,7 +40,22 @@ logger:
 api:
 
 ota:
-
+globals:
+  - id: pm_min
+    type: float
+    initial_value: '300.0'
+  - id: pm_max
+    type: float
+    initial_value: '0.0'
+  - id: co_min
+    type: float
+    initial_value: '5000.0'
+  - id: co_max
+    type: float
+    initial_value: '0.0'
+  - id: co_val
+    type: float
+    initial_value: '0.0'    
 web_server:
   port: 80
 
@@ -73,11 +88,37 @@ sensor:
         - 0. -> 0.0
         - 1 -> 100.0
     on_value:
+# de 0 à 85 / 8 leds    
+# Led 0
         - if:
             condition:
               sensor.in_range:
                 id: potar
                 below: 25
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 0
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 1
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%  
+# led 1                  
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 25
+                below: 35
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -94,13 +135,38 @@ sensor:
                   red: 0%
                   green: 0%
                   blue: 0%
-                  color_brightness: 0%   
+                  color_brightness: 0%  
+# Led 2              
         - if:
             condition:
               sensor.in_range:
                 id: potar
-                above: 25
-                below: 50
+                above: 35
+                below: 45
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 2
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 3
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%     
+# led 3                  
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 45
+                below: 55
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -117,12 +183,37 @@ sensor:
                   red: 0%
                   green: 0%
                   blue: 0%
-                  color_brightness: 0%                      
+                  color_brightness: 0%     
+# led 4
         - if:
             condition:
               sensor.in_range:
                 id: potar
-                above: 50
+                above: 55
+                below: 65
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 4
+                  red: 75%
+                  green: 75%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 5
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%  
+# led 5
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 65
                 below: 75
             then: 
               - light.addressable_set:
@@ -130,7 +221,7 @@ sensor:
                   range_from: 0
                   range_to: 5
                   red: 100%
-                  green: 50%
+                  green: 0%
                   blue: 0%
                   color_brightness: 100%
               - light.addressable_set:
@@ -139,13 +230,38 @@ sensor:
                   range_to: 7
                   red: 0%
                   green: 0%
-                  blue: 0%                  
-                  color_brightness: 0%                  
+                  blue: 0%
+                  color_brightness: 0%      
+# led 6
         - if:
             condition:
               sensor.in_range:
                 id: potar
                 above: 75
+                below: 85
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 6
+                  red: 100%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 7
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%    
+# Led 7
+        - if:
+            condition:
+              sensor.in_range:
+                id: potar
+                above: 85
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -155,8 +271,6 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 100%
-
-
 
 #Etat de la connection
 binary_sensor:

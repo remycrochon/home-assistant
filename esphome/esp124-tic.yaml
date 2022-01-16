@@ -120,15 +120,6 @@ sensor:
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
-#Puissance apparente de référence
-  - platform: teleinfo
-    id: pref
-    tag_name: "PREF"
-    name: "Linky PREF"
-    unit_of_measurement: "kVA"
-    icon: mdi:flash
-    teleinfo_id: myteleinfo
-
 #Puissance apparente de coupure
   - platform: teleinfo
     id: pcoup
@@ -210,15 +201,15 @@ sensor:
     teleinfo_id: myteleinfo
 
 ############### TEMPLATE  ######################"
-# Calcul de la puissance apparente utilisée en % par rapport au contrat
+# Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
   - platform: template
-    name: "Linky P/Pref"
+    name: "Linky P/PCoup"
     id: p100
     icon: mdi:flash
     unit_of_measurement: "%"
     accuracy_decimals: 0
     lambda: |-
-      return ((id(papp).state/1000)/id(pref).state*100);
+      return ((id(papp).state/1000)/id(pcoup).state*100);
 
 # Lecture dans HA de la conso du jour
   - platform: homeassistant

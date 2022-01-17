@@ -181,3 +181,17 @@
                 show_line: false
                 y_axis: secondary
             name: Puissance PAC 24h
+      - type: vertical-stack
+        cards:            
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_pac_jour
+                name: Jour
+            name: Conso PAC 7J
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi:flash
+

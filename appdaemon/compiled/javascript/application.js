@@ -1742,8 +1742,9 @@ function basejavascript(widget_id, url, skin, parameters)
         {
             if ("timeout" in parameters)
             {
-                try {
-                    current_dash = location.pathname.split('/')[1];
+                current_dash = location.pathname.split('/')[1];
+		if (current_dash.length > 0)
+		{
                     if (i == 0)
                     {
                         url = url + "?return=" + current_dash;
@@ -1753,11 +1754,7 @@ function basejavascript(widget_id, url, skin, parameters)
                     {
                         url = url + "&return=" + current_dash;
                         i++
-                    }
-                }
-                catch
-                {
-                    console.log('failled to auto-set return dashboard')
+                     }
                 }
             }
         }

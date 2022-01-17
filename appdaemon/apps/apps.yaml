@@ -2,3 +2,11 @@
 hello_world:
   module: hello
   class: HelloWorld
+first:
+  module: first
+  class: First
+
+door_notifications:
+  module: door_notifications
+  class: DoorMonitor
+  ttl: 15

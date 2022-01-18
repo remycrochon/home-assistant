@@ -87,6 +87,11 @@ input_datetime:
     has_date: false
     has_time: true
 
+input_text:
+  test_status:   
+    name: Statuts Linky
+    initial: 00000000
+
 # Utilisé dans l'affichage des graphiques de puissance permettant de materialiser la zone HC
 binary_sensor:
   - platform: template # = true si HC

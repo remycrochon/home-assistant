@@ -2,11 +2,25 @@
 hello_world:
   module: hello
   class: HelloWorld
+
 first:
   module: first
   class: First
+  
+Doors:
+  class: DoorNotification
+  dependencies: globals
+  module: door_notification
+  sensor: binary_sensor.volet_buro_droit  
 
-door_notifications:
-  module: door_notifications
-  class: DoorMonitor
-  ttl: 15
+Linky:
+  class: LinkyStatuts
+  dependencies: globals
+  module: linky_statuts
+  sensor: sensor.linky_statuts
+  
+  
+#door_notifications:
+#  module: door_notifications
+#  class: DoorMonitor
+#  ttl: 15

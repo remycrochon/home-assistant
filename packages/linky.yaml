@@ -44,7 +44,13 @@ input_boolean:
 
   forcage_hc_hp:
     name: Forcage HC
+    
+  linky_sens_energie_active:
+    name: "Linky Sens Energie Active positive"
     icon: mdi:power-settings
+
+  linky_contact_sec:
+    name: "Linky Contact Sec"
 
 input_number:
 
@@ -88,9 +94,14 @@ input_datetime:
     has_time: true
 
 input_text:
-  test_status:   
-    name: Statuts Linky
-    initial: 00000000
+  # Permet de simuler des Statuts pour les tests unitaires
+  linky_test_status:   
+    name: Test statuts Linky
+  # Mise à jour par AppDaemon
+  linky_organe_de_coupure:
+    name: linky Etat Organe de coupure    
+  linky_sens_energie_active:
+    name: Linky Sens Energie Active
 
 # Utilisé dans l'affichage des graphiques de puissance permettant de materialiser la zone HC
 binary_sensor:

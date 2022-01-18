@@ -17,7 +17,8 @@ Linky:
   class: LinkyStatuts
   dependencies: globals
   module: linky_statuts
-  sensor: sensor.linky_statuts
+  sensor: input_text.linky_test_status
+#  sensor: sensor.linky_statuts
   
   
 #door_notifications:

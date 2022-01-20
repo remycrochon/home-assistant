@@ -2502,3 +2502,48 @@
           - automation.piscine_orp_notifications
     default: []
   mode: single
+- id: '1642614758763'
+  alias: 6_1_1 Energie Changement HP<->HC simplifié
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.linky_n_tarif
+    id: tarif_hc
+    from: '2'
+    to: '1'
+  - platform: state
+    entity_id: sensor.linky_n_tarif
+    from: '1'
+    id: tarif_hp
+    to: '2'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: tarif_hc
+      sequence:
+      - service: utility_meter.select_tariff
+        data:
+          tariff: hc
+        target:
+          entity_id:
+          - utility_meter.energy_total_linky_usage_daily
+          - utility_meter.energy_total_linky_usage_monthly
+          - utility_meter.energy_total_linky_usage_weekly
+          - utility_meter.energy_total_linky_usage_yearly
+    - conditions:
+      - condition: trigger
+        id: tarif_hp
+      sequence:
+      - service: utility_meter.select_tariff
+        data:
+          tariff: hp
+        target:
+          entity_id:
+          - utility_meter.energy_total_linky_usage_daily
+          - utility_meter.energy_total_linky_usage_monthly
+          - utility_meter.energy_total_linky_usage_weekly
+          - utility_meter.energy_total_linky_usage_yearly
+    default: []
+  mode: single

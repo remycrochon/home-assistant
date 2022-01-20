@@ -1,7 +1,15 @@
 ---
+  
 hello_world:
   module: hello
   class: HelloWorld
+
+Linky:
+  class: LinkyStatuts
+  dependencies: globals
+  module: linky_statuts
+#  sensor: input_text.linky_test_status
+  sensor: sensor.linky_statuts
 
 first:
   module: first
@@ -13,13 +21,6 @@ Doors:
   module: door_notification
   sensor: binary_sensor.volet_buro_droit  
 
-Linky:
-  class: LinkyStatuts
-  dependencies: globals
-  module: linky_statuts
-#  sensor: input_text.linky_test_status
-  sensor: sensor.linky_statuts
-  
   
 #door_notifications:
 #  module: door_notifications

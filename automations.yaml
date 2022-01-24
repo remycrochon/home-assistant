@@ -1064,9 +1064,8 @@
           message: '{{states("sensor.date_time") }}'
           title: Piscine Hors-Gel Seuil 1 Arret Ppe
     - conditions:
-      - condition: state
-        entity_id: input_boolean.hors_gel_valid
-        state: 'off'
+      - condition: trigger
+        id: hg_deval
       sequence:
       - service: input_select.select_option
         target:
@@ -2547,3 +2546,38 @@
           - utility_meter.energy_total_linky_usage_yearly
     default: []
   mode: single
+- id: '1642958036645'
+  alias: 2_1_05 Alarme Blueprints Notification Petite Porte Sous Sol
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.detecteur_petite_porte_sous_sol
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Petite Porte Sous-Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes !!!
+      - service: persistent_notification.create
+        data:
+          message: Petite Porte Sous-Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Portes!!!
+      - service: persistent_notification.create
+        data:
+          message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
+            }}
+      notify_message: Alert {{ entity_name }} triggered
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 600
+      resolved_message: Alert {{ entity_name }} resolved
+      max_alerts: 100
+      initial_delay: 300

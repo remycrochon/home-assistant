@@ -72,6 +72,15 @@ template:
         {{ a==True and b=="on" }}
       device_class: "problem"
 
+# Surveillance porte sous-sol petite
+# Sur on si fermée
+    - name: "alarme_petite_porte_sous_sol"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.detecteur_petite_porte_sous_sol") %}
+        {{ a==True and b=="on" }}
+      device_class: "problem"
+
 # Regoupement des alarmes => 
     - name: "Alarmes Importantes"
 #      entity_id: "alarmes_importantes"

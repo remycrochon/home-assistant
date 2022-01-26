@@ -158,6 +158,15 @@ input_select:
       - "Ma F"
       - "At F"
     icon: mdi:pool
+# sert aux tests AppDaemon
+  mode_fonctionnement_piscine_test:
+    name: Mode Fonct Piscine
+    options:
+      - "Ete"
+      - "Hiver"
+      - "Ma F"
+      - "At F"
+    icon: mdi:pool
 sensor:
   # Affichage du temps de fonctionnement de la pompe ce jour
   - platform: history_stats

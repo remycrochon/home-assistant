@@ -1,9 +1,4 @@
 ---
-  
-hello_world:
-  module: hello
-  class: HelloWorld
-
 Linky:
   class: LinkyStatuts
   dependencies: globals
@@ -11,18 +6,18 @@ Linky:
 #  sensor: input_text.linky_test_status
   sensor: sensor.linky_statuts
 
-first:
-  module: first
-  class: First
   
-Doors:
-  class: DoorNotification
-  dependencies: globals
-  module: door_notification
-  sensor: binary_sensor.volet_buro_droit  
+#Doors:
+#  class: DoorNotification
+#  dependencies: globals
+#  module: door_notification
+#  sensor: binary_sensor.volet_buro_droit
 
-  
-#door_notifications:
-#  module: door_notifications
-#  class: DoorMonitor
-#  ttl: 15
+Piscine:
+  class: FiltrationPiscine
+  dependencies: globals
+  module: filtration_piscine
+  temperature_eau: input_number.temp_piscine
+  mode_fonctionnement: input_select.mode_fonctionnement_piscine_test
+
+

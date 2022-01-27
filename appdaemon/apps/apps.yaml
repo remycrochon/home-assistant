@@ -17,7 +17,9 @@ Piscine:
   class: FiltrationPiscine
   dependencies: globals
   module: filtration_piscine
-  temperature_eau: input_number.temp_piscine
+  temperature: input_number.temp_piscine
   mode_fonctionnement: input_select.mode_fonctionnement_piscine_test
+  declencheurs: [input_number.temp_piscine,input_select.mode_fonctionnement_piscine_test]
+
 
 

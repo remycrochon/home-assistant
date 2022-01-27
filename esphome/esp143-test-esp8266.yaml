@@ -278,7 +278,10 @@ binary_sensor:
     name: "${friendly_name} Status"
 
 switch:   
-
+  - platform: gpio
+    pin: GPIO16
+    name: "test_ppe_piscine"
+    
   - platform: restart
     name: "${friendly_name} Restart"
     

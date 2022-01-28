@@ -87,6 +87,16 @@ input_number:
     icon: mdi:clock
     mode: box
 
+# Durée de filtration max en hiver
+  filtration_coeff_abaque:
+    name: Coeff filtration Piscine Abaque
+    min: 60
+    max: 140
+    unit_of_measurement: "%"
+    step: 1.0
+    icon: mdi:percent
+    mode: box
+
 input_datetime:
   heure_ouv_volet_pisc:
     name: Heure Ouv Volet Auto
@@ -138,7 +148,11 @@ input_boolean:
   hors_gel_valid:
     name: Valid Hors Gel Piscine (si=1)
     icon: mdi:snowflake-alert
-    initial: false
+
+  # Calcul du temps de filtration selon Abaque Abacus sinon mode classique
+  calcul_mode_abaque:
+    name: Cacul mode Abaque (si=1)
+    icon: mdi:chart-bar
 
 # selection du mode de fonctionnement de la filtration
 input_select:
@@ -167,6 +181,12 @@ input_select:
       - "Ma F"
       - "At F"
     icon: mdi:pool
+############################  Input text    
+input_text:
+  # Affiche la periode de Filtration
+  piscine_periode_filtration:   
+    name: Periode Filtration
+############################  Sensor
 sensor:
   # Affichage du temps de fonctionnement de la pompe ce jour
   - platform: history_stats

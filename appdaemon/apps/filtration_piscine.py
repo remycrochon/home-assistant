@@ -37,10 +37,10 @@ class FiltrationPiscine(hass.Hass):
         periode_filtration=self.args["periode_filtration"]
                 
         self.log(f'Mode de F= {mode_de_fonctionnement}')
-        self.log(f'Temp_HA= {Temperature_eau}')
+        self.log(f'Temp_Eau= {Temperature_eau}')
 #        self.log(f'h_pivot= {h_pivot}')
         self.log(f'coef= {coef}')
-        self.log(f'Mode_C= {mode_calcul}')
+        self.log(f'Mode_Calcul= {mode_calcul}')
 ######## Définition de fonctions  ######################################
 ######## Fonction de calcul du temps de filtration selon Abaque Abacus
         def duree_abaque(Temperature_eau):

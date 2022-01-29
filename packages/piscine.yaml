@@ -220,7 +220,6 @@ template:
 # mesure de la température de l'eau, permet de basculer facilement en mode simulation
 # en commentant ou decommentant les lignes ci-dessous
   sensor:
-
     - name: "Energie Piscine Jour"
       unique_id: "energy_pisc_daily" 
       state: >-
@@ -267,7 +266,7 @@ template:
         # calcul de l'heure pivot, c'est l'heure autour de laquelle le temps de fonctionnement est réparti
     - name: "heure_pivot_piscine"
       state: >-
-        {{ as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom(' %H %M') }}
+        {{ as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom('%H:%M') }}
       icon: mdi:weather-sunny
 
   # Recopie pression filtre lu dans esphome dans un template

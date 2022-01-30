@@ -69,7 +69,6 @@ binary_sensor:
 #    host: 192.168.0.121
 #    name: "ping_Arduino Piscine"
 
-
   - platform: group
     name: ping_reseau
     all: true
@@ -101,12 +100,12 @@ binary_sensor:
       - binary_sensor.esp131_status
       - binary_sensor.esp132_status
       - binary_sensor.esp133_status
-#      - binary_sensor.esp134_status
       - binary_sensor.esp135_status
       - binary_sensor.esp137_status
       - binary_sensor.esp138_status
       - binary_sensor.esp139_status
-#      - binary_sensor.esp140_status
+      - binary_sensor.esp142_status
+      - binary_sensor.test_reseau
 
   - platform: group
     name: uptime_reseau
@@ -174,4 +173,10 @@ template:
       unique_id: "certificat_motioneye"
       state: >-
         {{(state_attr('sensor.cert_expiry_timestamp_motioneye_rem81_com', 'is_valid'))}}
+      device_class: "connectivity"
+
+    - name: "test reseau"
+      unique_id: "test_reseau"
+      state: >-
+        {{ is_state('input_boolean.test_alert','on')}}
       device_class: "connectivity"

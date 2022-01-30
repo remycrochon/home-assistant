@@ -83,8 +83,8 @@ class FiltrationPiscine(hass.Hass):
             if mode_calcul == "on":
                 temps_filtration = (duree_abaque(Temperature_eau))
                 self.log(f'Temps de Filtration Abaque: {temps_filtration}')
-                h_avant = en_heure(float(temps_filtration/3))
-                h_apres = en_heure(float(temps_filtration*2/3))
+                h_avant = en_heure(float(temps_filtration/2))
+                h_apres = en_heure(float(temps_filtration/2))
             else:
                 temps_filtration = (duree_classique(Temperature_eau))
                 self.log(f'Temps de Filtration Classique: {temps_filtration}')
@@ -101,9 +101,8 @@ class FiltrationPiscine(hass.Hass):
             td2 = timedelta(hours=int(h_apres[:2]), minutes=int(h_apres[3:5]), seconds=int(h_apres[6:8]))
             h_fin = td1 + td2
             self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}')
-            #self.set_textvalue("input_text.piscine_periode_filtration",str("h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}"))  
-            text_affichage =str(h_debut)+"/"+str(h_fin)
-            self.set_textvalue(periode_filtration,text_affichage)
+            affichage_texte =str(h_debut)+"/"+str(h_fin)
+            self.set_textvalue(periode_filtration,affichage_texte)
 
 ## Log de debug           
 #           self.log(str(h_fin)[:5])
@@ -128,7 +127,8 @@ class FiltrationPiscine(hass.Hass):
             td2 = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
             h_fin_f = td1 + td2
             self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}')
-            self.set_textvalue(periode_filtration,'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}')
+            affichage_texte =str(h_debut_h)+"/"+str(h_fin_f)
+            self.set_textvalue(periode_filtration,affichage_texte)
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
                 self.log("Ma Ppe")
                 self.turn_on(pompe)
@@ -140,10 +140,15 @@ class FiltrationPiscine(hass.Hass):
         elif mode_de_fonctionnement == tab_mode[2]:
             self.log("At Ppe")
             self.turn_off(pompe)
+            text_affichage = "At manuel"
+            self.set_textvalue(periode_filtration,text_affichage)
 ### Mode Marche Forcé
         elif mode_de_fonctionnement == tab_mode[3]:
             self.log("Ma Ppe")
             self.turn_on(pompe)
+            text_affichage = "Ma manuel"
+            self.set_textvalue(periode_filtration,text_affichage)
+
 ### Mode Inconnu: revoir le Input_select.mode_de_fonctionnement
         else:
             self.log('Mode de fonctionnement Inconnu: {mode_de_fonctionnement}')

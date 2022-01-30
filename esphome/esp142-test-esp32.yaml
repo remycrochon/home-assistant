@@ -60,10 +60,13 @@ sensor:
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
-    
-  
-switch:
 
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+switch:
   - platform: restart
     name: "${friendly_name}_Restart"
     

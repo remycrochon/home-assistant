@@ -1,7 +1,6 @@
 ---
 Linky:
   class: LinkyStatuts
-  dependencies: globals
   module: linky_statuts
 #  sensor: input_text.linky_test_status
   sensor: sensor.linky_statuts
@@ -15,12 +14,7 @@ Linky:
 
 Piscine:
   class: FiltrationPiscine
-  dependencies: globals
   module: filtration_piscine
-#"  temperature_eau: input_number.temp_piscine
-#  mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
-#  declencheurs: [input_number.temp_piscine,input_select.mode_fonctionnement_piscine_test]
-#  declencheurs:
   #temperature_eau: input_number.temp_piscine
   temperature_eau: sensor.esp136_tdeg_aspiration # Pour tester 
   mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
@@ -28,11 +22,25 @@ Piscine:
   cde_pompe: switch.test_ppe_piscine
   h_debut_hiver: input_datetime.heure_ma_pump_pisc_hiv
   duree_hiver: input_number.duree_filtration_max_mode_hiver
-  nb_heure_fonctionnement: sensor.pool_pump_running_today
   coef: input_number.filtration_coeff_abaque
   mode_calcul: input_boolean.calcul_mode_abaque
-  periode_filtration: input_text.piscine_periode_filtration
+  periode_filtration: input_text.piscine_periode_filtration # Affichage dans HA de la plage de filtration calculée
 
+
+esp_alert:
+  class: GroupeAlerte
+  module: groupe_alerte
+  groupe: binary_sensor.esp_reseau
+
+ping_alert:
+  class: GroupeAlerte
+  module: groupe_alerte
+  groupe: binary_sensor.ping_reseau
+
+uptime_alert:
+  class: GroupeAlerte
+  module: groupe_alerte
+  groupe: binary_sensor.uptime_reseau
 
 
 

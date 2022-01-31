@@ -1,31 +1,9 @@
----
-Linky:
-  class: LinkyStatuts
-  module: linky_statuts
-#  sensor: input_text.linky_test_status
-  sensor: sensor.linky_statuts
 
-  
 #Doors:
 #  class: DoorNotification
 #  dependencies: globals
 #  module: door_notification
 #  sensor: binary_sensor.volet_buro_droit
-
-Piscine:
-  class: FiltrationPiscine
-  module: filtration_piscine
-  #temperature_eau: input_number.temp_piscine
-  temperature_eau: sensor.esp136_tdeg_aspiration # Pour tester 
-  mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
-  h_pivot: input_datetime.heure_pivot_pisc
-  cde_pompe: switch.test_ppe_piscine
-  h_debut_hiver: input_datetime.heure_ma_pump_pisc_hiv
-  duree_hiver: input_number.duree_filtration_max_mode_hiver
-  coef: input_number.filtration_coeff_abaque
-  mode_calcul: input_boolean.calcul_mode_abaque
-  periode_filtration: input_text.piscine_periode_filtration # Affichage dans HA de la plage de filtration calculée
-
 
 esp_alert:
   class: GroupeAlerte

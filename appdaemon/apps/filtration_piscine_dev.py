@@ -4,50 +4,30 @@ import datetime
 from datetime import timedelta
 #from astral.sun import sun
 
-tab_mode = ["Ete", "Hiver", "At F", "Ma F"] # Saisir ici les memes modes que dans ha
-log_ha = "vraif" # Autre valeur que "vrai" désactive les log
+tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
 
 class FiltrationPiscine(hass.Hass):
     def initialize(self):
         self.listen_state(self.change_temp,self.args["temperature_eau"])
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
-        self.listen_state(self.change_coef,self.args["coef"])
-        self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.run_every(self.touteslesminutes, "now", 1 * 60)
-        if log_ha == "vrai":
-            self.log('Initialisation AppDaemon Filtration Piscine.')
+        self.log('Initialisation.......')
         
     def change_temp(self, entity, attribute, old, new, kwargs):
-        if log_ha == "vrai":
-            self.log('Appel traitement changement Temp.')
+        self.log('Appel traitement changement Temp.')
         self.traitement(kwargs)
 
     def change_mode(self, entity, attribute, old, new, kwargs):
         self.log('Appel traitement changement Mode.')
         self.traitement(kwargs)
 
-    def change_coef(self, entity, attribute, old, new, kwargs):
-        if log_ha == "vrai":
-            self.log('Appel traitement changement Coef.')
-        self.traitement(kwargs)
-
-    def ecretage_h_pivot(self, entity, attribute, old, new, kwargs):
-######## Ecretage Heure pivot entre h_pivot_min et h_pivot_max
-        h_pivot= new
-        h_pivot_max="14:00:00"
-        h_pivot_min="11:00:00"
-        if h_pivot>h_pivot_max:
-            self.set_state(self.args["h_pivot"], state = h_pivot_max)
-        if h_pivot<h_pivot_min:
-            self.set_state(self.args["h_pivot"], state = h_pivot_min)
-        self.traitement(kwargs)
-
     def touteslesminutes(self, kwargs):
-        if log_ha == "vrai":
-            self.log('Appel traitement chaque minutes.')
+        self.log('Appel traitement chaque minutes.')
         self.traitement(kwargs)
 
     def traitement(self, kwargs):
+#       self.log("{} is {}".format(self.friendly_name(entity), new))
+#        print ("new temperature:",Temperature_eau)
         Temperature_eau = self.get_state(self.args["temperature_eau"])
         mode_de_fonctionnement = self.get_state(self.args["mode_de_fonctionnement"])
         pompe = self.args["cde_pompe"]
@@ -55,13 +35,12 @@ class FiltrationPiscine(hass.Hass):
         coef=float(self.get_state(self.args["coef"]))/100
         mode_calcul= self.get_state(self.args["mode_calcul"])
         periode_filtration=self.args["periode_filtration"]
-        if log_ha == "vrai":                
-            self.log(f'Mode de F= {mode_de_fonctionnement}')
-            self.log(f'Temp_Eau= {Temperature_eau}')
-            self.log(f'h_pivot= {h_pivot}')
-            self.log(f'coef= {coef}')
-            self.log(f'Mode_Calcul= {mode_calcul}')
-
+                
+        self.log(f'Mode de F= {mode_de_fonctionnement}')
+        self.log(f'Temp_Eau= {Temperature_eau}')
+#        self.log(f'h_pivot= {h_pivot}')
+        self.log(f'coef= {coef}')
+        self.log(f'Mode_Calcul= {mode_calcul}')
 ######## Définition de fonctions  ######################################
 ######## Fonction de calcul du temps de filtration selon Abaque Abacus
         def duree_abaque(Temperature_eau):
@@ -103,85 +82,74 @@ class FiltrationPiscine(hass.Hass):
         if mode_de_fonctionnement == tab_mode[0]:
             if mode_calcul == "on":
                 temps_filtration = (duree_abaque(Temperature_eau))
-                nb_h_avant = en_heure(float(temps_filtration/2))
-                nb_h_apres = en_heure(float(temps_filtration/2))
-                if log_ha == "vrai":
-                    self.log(f'Temps de Filtration Abaque: {temps_filtration}')
-
+                self.log(f'Temps de Filtration Abaque: {temps_filtration}')
+                h_avant = en_heure(float(temps_filtration/2))
+                h_apres = en_heure(float(temps_filtration/2))
             else:
                 temps_filtration = (duree_classique(Temperature_eau))
-                nb_h_avant = en_heure(float(temps_filtration/2))
-                nb_h_apres = en_heure(float(temps_filtration/2))
-                if log_ha == "vrai":
-                    self.log(f'Temps de Filtration Classique: {temps_filtration}')
+                self.log(f'Temps de Filtration Classique: {temps_filtration}')
+                h_avant = en_heure(float(temps_filtration/2))
+                h_apres = en_heure(float(temps_filtration/2))
 
 ## Calcul des heures de début et fin filtration en fontion
 ## du temps de filtration avant et apres l'heure pivot
-            
-            t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
-            t2 = timedelta(hours=int(nb_h_avant[:2]), minutes=int(nb_h_avant[3:5]), seconds=int(nb_h_avant[6:8]))
-            h_debut = t1 - t2
-            t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
-            t2 = timedelta(hours=int(nb_h_apres[:2]), minutes=int(nb_h_apres[3:5]), seconds=int(nb_h_apres[6:8]))
-            h_fin = t1 + t2
+            self.log(f'h_avant:{h_avant}-h_apres:{h_apres}')
+            td1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
+            td2 = timedelta(hours=int(h_avant[:2]), minutes=int(h_avant[3:5]), seconds=int(h_avant[6:8]))
+            h_debut = td1 - td2
+            td1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
+            td2 = timedelta(hours=int(h_apres[:2]), minutes=int(h_apres[3:5]), seconds=int(h_apres[6:8]))
+            h_fin = td1 + td2
+            self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}')
             affichage_texte =str(h_debut)+"/"+str(h_fin)
             self.set_textvalue(periode_filtration,affichage_texte)
-            if log_ha == "vrai":
-                self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}')
-                self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}')
 
 ## Log de debug           
 #           self.log(str(h_fin)[:5])
             if str(h_fin)[:5] == "1 day": # Ecrete à la fin de la journée
                 h_fin = "23:59:59"
             if self.now_is_between(str(h_debut),str(h_fin)):
+                self.log("Ma Ppe")
                 self.turn_on(pompe)
-                if log_ha == "vrai":
-                    self.log("Ma Ppe")
             else:
+                self.log("At Ppe")
                 self.turn_off(pompe)
-                if log_ha == "vrai":
-                    self.log("At Ppe")
+
 ### Mode hiver
 # Heure de Début + Une durée en h
         elif mode_de_fonctionnement == tab_mode[1]:
             h_debut_h= self.get_state(self.args["h_debut_hiver"])
             duree= self.get_state(self.args["duree_hiver"])
+#            self.log(f'Duree:{duree}')
             duree_h=en_heure(float(duree))
+#            self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}')
             td1 = timedelta(hours=int(h_debut_h[:2]), minutes=int(h_debut_h[3:5]), seconds=int(h_debut_h[6:8]))
             td2 = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
             h_fin_f = td1 + td2
+            self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}')
             affichage_texte =str(h_debut_h)+"/"+str(h_fin_f)
             self.set_textvalue(periode_filtration,affichage_texte)
-
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
+                self.log("Ma Ppe")
                 self.turn_on(pompe)
-                if log_ha == "vrai":
-                    self.log("Ma Ppe")
             else:
+                self.log("At Ppe")
                 self.turn_off(pompe)
-                if log_ha == "vrai":
-                    self.log("At Ppe")
-            if log_ha == "vrai":
-                self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}')
 
 ### Mode Arret Forcé
         elif mode_de_fonctionnement == tab_mode[2]:
+            self.log("At Ppe")
             self.turn_off(pompe)
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            if log_ha == "vrai":
-                self.log("At Ppe")
-
 ### Mode Marche Forcé
         elif mode_de_fonctionnement == tab_mode[3]:
+            self.log("Ma Ppe")
             self.turn_on(pompe)
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            if log_ha == "vrai":
-                self.log("MA Ppe")
-            
+
 ### Mode Inconnu: revoir le Input_select.mode_de_fonctionnement
         else:
-            self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}')
+            self.log('Mode de fonctionnement Inconnu: {mode_de_fonctionnement}')
 

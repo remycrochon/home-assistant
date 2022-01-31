@@ -24,11 +24,11 @@ class GroupeAlerte(hass.Hass):
         if new == "off":
             self.log(str(entity) + ' est deconnectee ',log="diag_log")
             self.log(f'Debut tempo pour {friendly_name}')
-            self.timers[timer_key] = self.run_in(self.send_notification, 10, entité_n= friendly_name, timer= timer_key )
+            self.timers[timer_key] = self.run_in(self.send_notification, 60, entité_n= friendly_name, timer= timer_key )
         else:
-            self.log(str(friendly_name) + ' est connectee',log="diag_log")
-            self.call_service('notify/telegram', message=format(heure)+" : Entité <" +format(friendly_name)+" > connectée!")
-            self.call_service('persistent_notification/create', message=format(heure)+" : Entité <" +format(friendly_name)+" > connectée!")
+#            self.log(str(friendly_name) + ' est connectee',log="diag_log")
+#            self.call_service('notify/telegram', message=format(heure)+" : Entité <" +format(friendly_name)+" > connectée!")
+#            self.call_service('persistent_notification/create', message=format(heure)+" : Entité <" +format(friendly_name)+" > connectée!")
             timer = self.timers[timer_key]
             if timer != None:
                 self.log(f'Fin tempo pour {friendly_name}')

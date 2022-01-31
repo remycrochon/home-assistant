@@ -98,6 +98,11 @@ input_number:
     mode: box
 
 input_datetime:
+  heure_pivot_pisc:
+    name: Heure Pivot
+    has_date: false
+    has_time: true
+
   heure_ouv_volet_pisc:
     name: Heure Ouv Volet Auto
     has_date: false

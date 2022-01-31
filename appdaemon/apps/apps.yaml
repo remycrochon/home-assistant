@@ -18,7 +18,7 @@ Piscine:
   #temperature_eau: input_number.temp_piscine
   temperature_eau: sensor.esp136_tdeg_aspiration # Pour tester 
   mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
-  h_pivot: sensor.heure_pivot_piscine
+  h_pivot: input_datetime.heure_pivot_pisc
   cde_pompe: switch.test_ppe_piscine
   h_debut_hiver: input_datetime.heure_ma_pump_pisc_hiv
   duree_hiver: input_number.duree_filtration_max_mode_hiver
@@ -42,5 +42,10 @@ uptime_alert:
   module: groupe_alerte
   groupe: binary_sensor.uptime_reseau
 
-
+tests:
+  class: Test
+  module: test
+  h1: input_datetime.heure_fin_alarme_porte
+  h2: input_datetime.heure_pivot_pisc
+  mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
 

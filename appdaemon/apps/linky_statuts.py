@@ -1,29 +1,31 @@
 import hassapi as hass
 
+# Conversion ASCII vers binaire codé décimal
+def repr_bin2(str):
+    caract = 0
+    decod=""        
+    for caract in str:
+        decod += bin(int(caract,16))[2::].zfill(4)
+    return decod
+
 class LinkyStatuts(hass.Hass):
     def initialize(self):
-        self.listen_state(self.statuts_change, self.args["sensor"])
+        self.listen_state(self.statuts_change, self.args["registre"])
+        self.log("Initialisation Linky..", log="linky_log")
 
     def statuts_change(self, entity, attribute, old, new, kwargs):
         statuts = new
-        if len(statuts) <8:
-            print ("Erreur format registre de statuts= ",statuts)
-            exit()
-        #########   Fonction de conversion ASCII vers binaire codé décimal
-        def repr_bin2(str):
-            caract = 0
-            decod=""        
-            for caract in str:
-                decod += bin(int(caract,16))[2::].zfill(4)
-                # print (caract,"=",decod)
-            return decod
+        if len(statuts)!=8:
+            self.log(f"Erreur format registre de statuts= {statuts}", log="linky_log")
+        else:
+            self.convertion_status(kwargs)
 
-        #########   Lecture et conversion du registre de statuts du Linky
+#  Lecture et conversion du registre de statuts du Linky
+    def convertion_status(self, kwargs):
+        statuts = self.get_state(self.args["registre"])
         statuts_binaire=(repr_bin2(statuts))
-            
-        #########################################################"
+
         # Exploitation des 32 bits du statuts poids forts en tête
-        
         # Bit 0:Contact Sec
         bit_0= statuts_binaire[31]
         if bit_0 == "0":

@@ -2,10 +2,48 @@ import hassapi as hass
 #import appdaemon.plugins.hass.hassapi as hass
 import datetime
 from datetime import timedelta
-#from astral.sun import sun
+import logging
 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"] # Saisir ici les memes modes que dans ha
-log_ha = "vraif" # Autre valeur que "vrai" désactive les log
+log_ha = "vrai" # Autre valeur que "vrai" désactive les log
+
+# Fonction de calcul du temps de filtration selon Abaque Abacus
+def duree_abaque(Temperature_eau):
+    """Advanced calculation method using an abacus.
+    D = a*T^3 + b*T^2 + c*T +d
+    T est forçèe a 10°C minimum
+    Formule découverte dans: https://github.com/scadinot/pool
+    Filtration en heures"""
+    temperature_min: float = max(float(Temperature_eau), 10)
+    duree = (
+            0.00335 * temperature_min ** 3
+            - 0.14953 * temperature_min ** 2
+            + 2.43489 * temperature_min
+            - 10.72859
+    )*coef
+    duree_m = min(float(duree), 23)
+    return duree_m
+
+# Fonction de calcul du temps de filtration "Classique"
+def duree_classique(Temperature_eau):
+    """Methode classique
+    temperature / 2"""
+    temperature_min: float = max(float(Temperature_eau), 10)
+    duree = temperature_min / 2
+    duree_m = min(float(duree), 23)
+    return duree_m
+
+# Fonction de Convertion Int en heure "HH:MM:SS"
+def en_heure(t):
+    h = int(t)
+    # On retire les heures pour ne garder que les minutes.
+    t = (t - h) * 60 # 0.24 * 60 = temps_restant en minutes.
+    m = int(t)
+    # On retire les minutes pour ne garder que les secondes.
+    t = (t - m) * 60
+    s = int(t)
+    return "{:02d}:{:02d}:{:02d}".format(h, m, s)
+
 
 class FiltrationPiscine(hass.Hass):
     def initialize(self):
@@ -14,25 +52,23 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.run_every(self.touteslesminutes, "now", 1 * 60)
-        if log_ha == "vrai":
-            self.log('Initialisation AppDaemon Filtration Piscine.')
-        
+        self.log('Initialisation AppDaemon Filtration Piscine.')
+        self.log('Initialisation AppDaemon Filtration Piscine.', log="piscine_log")
+
     def change_temp(self, entity, attribute, old, new, kwargs):
-        if log_ha == "vrai":
-            self.log('Appel traitement changement Temp.')
+        self.log('Appel traitement changement Temp.', log="piscine_log")
         self.traitement(kwargs)
 
     def change_mode(self, entity, attribute, old, new, kwargs):
-        self.log('Appel traitement changement Mode.')
+        self.log('Appel traitement changement Mode.', log="piscine_log")
         self.traitement(kwargs)
 
     def change_coef(self, entity, attribute, old, new, kwargs):
-        if log_ha == "vrai":
-            self.log('Appel traitement changement Coef.')
+        self.log('Appel traitement changement Coef.', log="piscine_log")
         self.traitement(kwargs)
 
     def ecretage_h_pivot(self, entity, attribute, old, new, kwargs):
-######## Ecretage Heure pivot entre h_pivot_min et h_pivot_max
+        # Ecretage Heure pivot entre h_pivot_min et h_pivot_max
         h_pivot= new
         h_pivot_max="14:00:00"
         h_pivot_min="11:00:00"
@@ -43,8 +79,7 @@ class FiltrationPiscine(hass.Hass):
         self.traitement(kwargs)
 
     def touteslesminutes(self, kwargs):
-        if log_ha == "vrai":
-            self.log('Appel traitement chaque minutes.')
+        self.log('Appel traitement chaque minutes.', log="piscine_log")
         self.traitement(kwargs)
 
     def traitement(self, kwargs):
@@ -55,48 +90,11 @@ class FiltrationPiscine(hass.Hass):
         coef=float(self.get_state(self.args["coef"]))/100
         mode_calcul= self.get_state(self.args["mode_calcul"])
         periode_filtration=self.args["periode_filtration"]
-        if log_ha == "vrai":                
-            self.log(f'Mode de F= {mode_de_fonctionnement}')
-            self.log(f'Temp_Eau= {Temperature_eau}')
-            self.log(f'h_pivot= {h_pivot}')
-            self.log(f'coef= {coef}')
-            self.log(f'Mode_Calcul= {mode_calcul}')
-
-######## Définition de fonctions  ######################################
-######## Fonction de calcul du temps de filtration selon Abaque Abacus
-        def duree_abaque(Temperature_eau):
-            """Advanced calculation method using an abacus.
-            D = a*T^3 + b*T^2 + c*T +d
-            T est forçèe a 10°C minimum
-            Formule découverte dans: https://github.com/scadinot/pool
-            Filtration en heures"""
-            temperature_min: float = max(float(Temperature_eau), 10)
-            duree = (
-                    0.00335 * temperature_min ** 3
-                    - 0.14953 * temperature_min ** 2
-                    + 2.43489 * temperature_min
-                    - 10.72859
-            )*coef
-            duree_m = min(float(duree), 23)
-            return duree_m
-########  Fonction de calcul du temps de filtration "Classique"
-        def duree_classique(Temperature_eau):
-            """Methode classique
-            temperature / 2"""
-            temperature_min: float = max(float(Temperature_eau), 10)
-            duree = temperature_min / 2
-            duree_m = min(float(duree), 23)
-            return duree_m
-########  Fonction de Convertion Int en heure "HH:MM:SS"
-        def en_heure(t):
-            h = int(t)
-            # On retire les heures pour ne garder que les minutes.
-            t = (t - h) * 60 # 0.24 * 60 = temps_restant en minutes.
-            m = int(t)
-            # On retire les minutes pour ne garder que les secondes.
-            t = (t - m) * 60
-            s = int(t)
-            return "{:02d}:{:02d}:{:02d}".format(h, m, s)
+        self.log(f'Mode de F= {mode_de_fonctionnement}', log="piscine_log")
+        self.log(f'Temp_Eau= {Temperature_eau}', log="piscine_log")
+        self.log(f'h_pivot= {h_pivot}', log="piscine_log")
+        self.log(f'coef= {coef}', log="piscine_log")
+        self.log(f'Mode_Calcul= {mode_calcul}', log="piscine_log")
 
 ######## Traitements en fonction du mode de fonctionnement
 ### Mode Ete
@@ -105,15 +103,13 @@ class FiltrationPiscine(hass.Hass):
                 temps_filtration = (duree_abaque(Temperature_eau))
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
-                if log_ha == "vrai":
-                    self.log(f'Temps de Filtration Abaque: {temps_filtration}')
+                self.log(f'Temps de Filtration Abaque: {temps_filtration}', log="piscine_log")
 
             else:
                 temps_filtration = (duree_classique(Temperature_eau))
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
-                if log_ha == "vrai":
-                    self.log(f'Temps de Filtration Classique: {temps_filtration}')
+                self.log(f'Temps de Filtration Classique: {temps_filtration}', log="piscine_log")
 
 ## Calcul des heures de début et fin filtration en fontion
 ## du temps de filtration avant et apres l'heure pivot
@@ -126,22 +122,18 @@ class FiltrationPiscine(hass.Hass):
             h_fin = t1 + t2
             affichage_texte =str(h_debut)+"/"+str(h_fin)
             self.set_textvalue(periode_filtration,affichage_texte)
-            if log_ha == "vrai":
-                self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}')
-                self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}')
+            self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}', log="piscine_log")
+            self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}', log="piscine_log")
 
-## Log de debug           
 #           self.log(str(h_fin)[:5])
             if str(h_fin)[:5] == "1 day": # Ecrete à la fin de la journée
                 h_fin = "23:59:59"
             if self.now_is_between(str(h_debut),str(h_fin)):
                 self.turn_on(pompe)
-                if log_ha == "vrai":
-                    self.log("Ma Ppe")
+                self.log("Ma Ppe", log="piscine_log")
             else:
                 self.turn_off(pompe)
-                if log_ha == "vrai":
-                    self.log("At Ppe")
+                self.log("At Ppe", log="piscine_log")
 ### Mode hiver
 # Heure de Début + Une durée en h
         elif mode_de_fonctionnement == tab_mode[1]:
@@ -156,32 +148,27 @@ class FiltrationPiscine(hass.Hass):
 
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
                 self.turn_on(pompe)
-                if log_ha == "vrai":
-                    self.log("Ma Ppe")
+                self.log("Ma Ppe", log="piscine_log")
             else:
                 self.turn_off(pompe)
-                if log_ha == "vrai":
-                    self.log("At Ppe")
-            if log_ha == "vrai":
-                self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}')
+                self.log("At Ppe")
+            self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}', log="piscine_log")
 
 ### Mode Arret Forcé
         elif mode_de_fonctionnement == tab_mode[2]:
             self.turn_off(pompe)
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            if log_ha == "vrai":
-                self.log("At Ppe")
+            self.log("At Ppe", log="piscine_log")
 
 ### Mode Marche Forcé
         elif mode_de_fonctionnement == tab_mode[3]:
             self.turn_on(pompe)
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            if log_ha == "vrai":
-                self.log("MA Ppe")
+            self.log("MA Ppe")
             
 ### Mode Inconnu: revoir le Input_select.mode_de_fonctionnement
         else:
-            self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}')
+            self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}', log="piscine_log")
 

@@ -220,29 +220,6 @@ class LinkyStatuts(hass.Hass):
         else:
             pointe_mobile = "Pointe mobile indéfinie"
 
-        ###########   Log visible dans le Log de l'Addon   #########
-        ### A supprimer si pas utile
-        print ("Statuts=",statuts)
-        print ("Statuts Binaire=",statuts_binaire)
-        print("bit_0=",bit_0," / Contact Sec=",contact_sec)
-        print("bit_1_3=",bit_1_3," / Organe de coupure=",organe_de_coupure)
-        print("bit_4=",bit_4," / Cache_borne=",cache_borne)
-        print("bit_6=",bit_6," / Surtension=",surtension)
-        print("bit_7=",bit_7," / Dépassement Pref=",dep_pref)
-        print("bit_8=",bit_8," / Fonctionnement=",fonct_prod_conso)
-        print("bit_9=",bit_9," / Sens Energie Active=",sens_energie_act)
-        print("bit_10_13=",bit_10_13," / Tarif fourniture=",tarif_fourniture)
-        print("bit_14_15=",bit_14_15," / Tarif distributeur=",tarif_distributeur)
-        print("bit_16=",bit_16," / Mode dégradé horloge=",mode_horloge)
-        print("bit_17=",bit_17," / Etat TIC=",etat_tic)
-        print("bit_19_20=",bit_19_20," / Com Euridis=",com_euridis)
-        print("bit_21_22=",bit_21_22," / Statut CPL=",statut_cpl)
-        print("bit_23=",bit_23," / Synchro CPL=",synchro_cpl)
-        print("bit_24_25=",bit_24_25," / Couleur Jour tempo=",couleur_j_tempo)
-        print("bit_26_27=",bit_26_27," / Couleur J+1 tempo=",couleur_j1_tempo)
-        print("bit_28_29=",bit_28_29," / Préavis Pointes Mobiles=",préavis_p_mobiles)
-        print("bit_30_31=",bit_30_31," / Pointe Mobile=",pointe_mobile)
-
         ##############  Mise à jour des entités HA   ############################
         # 
 
@@ -264,10 +241,29 @@ class LinkyStatuts(hass.Hass):
 
         ###############  Log de Déboggage        ############################
         ## A commenter ou supprimer si inutile
-        
-        self.log("Statuts Linky:" + format(statuts))
-        self.log("Statuts Binaire: " + format(statuts_binaire))        
-#        self.log("Sens Energie Active:"+ format(sens_energie_act))
+        self.log(f"Statuts={statuts}", log="linky_log")
+        self.log(f"Statuts Binaire={statuts_binaire}", log="linky_log")
+        self.log(f"bit_0={bit_0} / Contact Sec={contact_sec}", log="linky_log")
+        self.log(f"bit_1_3={bit_1_3} / Organe de coupure={organe_de_coupure}", log="linky_log")
+        self.log(f"bit_4={bit_4} / Cache_borne={cache_borne}", log="linky_log")
+        self.log(f"bit_6={bit_6} / Surtension={surtension}", log="linky_log")
+        self.log(f"bit_7={bit_7} / Dépassement Pref={dep_pref}", log="linky_log")
+        self.log(f"bit_8={bit_8} / Fonctionnement={fonct_prod_conso}", log="linky_log")
+        self.log(f"bit_9={bit_9} / Sens Energie Active={sens_energie_act}", log="linky_log")
+        self.log(f"bit_10_13={bit_10_13} / Tarif fourniture={tarif_fourniture}", log="linky_log")
+        self.log(f"bit_14_15={bit_14_15} / Tarif distributeur={tarif_distributeur}", log="linky_log")
+        self.log(f"bit_16={bit_16} / Mode dégradé horloge={mode_horloge}", log="linky_log")
+        self.log(f"bit_17={bit_17} / Etat TIC={etat_tic}", log="linky_log")
+        self.log(f"bit_19_20={bit_19_20} / Com Euridis={com_euridis}", log="linky_log")
+        self.log(f"bit_21_22={bit_21_22} / Statut CPL={statut_cpl}", log="linky_log")
+        self.log(f"bit_23={bit_23} / Synchro CPL={synchro_cpl}", log="linky_log")
+        self.log(f"bit_24_25={bit_24_25} / Couleur Jour tempo={couleur_j_tempo}", log="linky_log")
+        self.log(f"bit_26_27={bit_26_27} / Couleur J+1 tempo={couleur_j1_tempo}", log="linky_log")
+        self.log(f"bit_28_29={bit_28_29} / Préavis Pointes Mobiles={préavis_p_mobiles}", log="linky_log")
+        self.log(f"bit_30_31={bit_30_31} / Pointe Mobile={pointe_mobile}", log="linky_log")        
+        self.log(f"Statuts Linky:{statuts}", log="linky_log")
+        self.log(f"Statuts Binaire: {statuts_binaire}", log="linky_log")
+        self.log(f"Sens Energie Active: {sens_energie_act}", log="linky_log")
     
 #        self.call_service('notify/telegram', message="Statuts Linky:" + format(statuts))
 #        self.call_service('notify/telegram', message="Sens Energie Active: " + format(sens_energie_act))

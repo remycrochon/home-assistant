@@ -13,3 +13,35 @@ http:
 admin:
 api:
 hadashboard:
+
+logs:
+  main_log:
+    filename: /config/log/appdaemon.log
+    
+  access_log:
+    filename: /config/log/access.log
+
+  error_log:
+    filename: /config/log/error.log
+
+  diag_log:
+    filename: /config/log/diag.log
+    format: "{asctime} {levelname:<8} {appname:<10}: {message}"
+
+  piscine_log:
+    name: PiscineLog
+    filename: /config/log/piscine.log
+    log_generations: 3
+    log_size: 100000
+
+  linky_log:
+    name: LinkyLog
+    filename: /config/log/linky.log
+    log_generations: 3
+    log_size: 100000
+
+  test_log:
+    name: TestLog
+    filename: /config/log/test_log.log
+    log_generations: 3
+    log_size: 1024

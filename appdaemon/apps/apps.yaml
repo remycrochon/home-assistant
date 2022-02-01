@@ -5,21 +5,6 @@
 #  module: door_notification
 #  sensor: binary_sensor.volet_buro_droit
 
-esp_alert:
-  class: GroupeAlerte
-  module: groupe_alerte
-  groupe: binary_sensor.esp_reseau
-
-ping_alert:
-  class: GroupeAlerte
-  module: groupe_alerte
-  groupe: binary_sensor.ping_reseau
-
-uptime_alert:
-  class: GroupeAlerte
-  module: groupe_alerte
-  groupe: binary_sensor.uptime_reseau
-
 tests:
   class: Test
   module: test

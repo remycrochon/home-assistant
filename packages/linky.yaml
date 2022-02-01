@@ -52,8 +52,10 @@ input_boolean:
   linky_contact_sec:
     name: "Linky Contact Sec"
 
-input_number:
+  com_linky:
+    name: Comm Linky OK=On
 
+input_number:
   # Calcul des coûts journaliers
   cout_kwh_hp:
     name: Cout du Kwh HP

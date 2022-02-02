@@ -27,6 +27,7 @@ class GroupeAlerte(hass.Hass):
             self.log(f'Debut tempo pour {friendly_name}')
             self.timers[timer_key_off] = self.run_in(self.send_notification_off, 60, entité_n= friendly_name, timer= timer_key_off )
             timer_on = self.timers[timer_key_on]
+#            self.log(f'Surveillance de: {self.timers[timer_key_off]}')
             if timer_on != None:
                 self.log(f'Fin tempo off pour {friendly_name}')
                 self.timers[timer_key_on] = self.cancel_timer(timer_on) 

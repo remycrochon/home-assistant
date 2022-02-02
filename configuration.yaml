@@ -375,3 +375,10 @@ alexa:
 
 shell_command:
   push_to_github: /config/gitpush.sh
+
+sensor:
+  - platform: zwift
+    username: !secret my_zwift_username
+    password: !secret my_zwift_password
+    players:
+      - !secret my_friends_zwift_player_id

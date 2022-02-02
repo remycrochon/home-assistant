@@ -1,8 +1,7 @@
 Piscine:
   class: FiltrationPiscine
   module: filtration_piscine
-  global_dependencies:
-    - sane_app_logging
+
   #temperature_eau: input_number.temp_piscine
   temperature_eau: sensor.esp136_tdeg_aspiration # Pour tester 
   mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test

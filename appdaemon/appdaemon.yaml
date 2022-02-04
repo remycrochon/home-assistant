@@ -45,3 +45,9 @@ logs:
     filename: /config/log/test_log.log
     log_generations: 3
     log_size: 1024
+
+  groupealerte_log:
+    name: GroupeAlertLog
+    filename: /config/log/groupealerte_log.log
+    log_generations: 3
+    log_size: 1024

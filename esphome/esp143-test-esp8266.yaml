@@ -281,6 +281,9 @@ switch:
   - platform: gpio
     pin: GPIO16
     name: "test_ppe_piscine"
+  - platform: gpio
+    pin: GPIO14
+    name: "test_com_out"    
     
   - platform: restart
     name: "${friendly_name} Restart"

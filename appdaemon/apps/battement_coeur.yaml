@@ -1,6 +1,0 @@
-heartbeat:
-  module: battement_coeur
-  class: Heartbeat
-  entite:
-    - entity: sensor.linky_papp
-    - entity: input_text.linky_test_status

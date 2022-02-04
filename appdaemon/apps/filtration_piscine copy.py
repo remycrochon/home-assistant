@@ -81,6 +81,7 @@ class FiltrationPiscine(hass.Hass):
         self.log('Appel traitement chaque minutes.', log="piscine_log")
         self.traitement(kwargs)
 
+""" Traitements en fonction du mode de fonctionnement """
     def traitement(self, kwargs):
         Temperature_eau = self.get_state(self.args["temperature_eau"])
         mode_de_fonctionnement = self.get_state(self.args["mode_de_fonctionnement"])
@@ -94,7 +95,8 @@ class FiltrationPiscine(hass.Hass):
         self.log(f'h_pivot= {h_pivot}', log="piscine_log")
         self.log(f'coef= {coef}', log="piscine_log")
         self.log(f'Mode_Calcul= {mode_calcul}', log="piscine_log")
-        #  Mode Ete
+
+""" Mode Ete """
         if mode_de_fonctionnement == tab_mode[0]:
             if mode_calcul == "on":
                 temps_filtration = (duree_abaque(Temperature_eau))
@@ -106,8 +108,10 @@ class FiltrationPiscine(hass.Hass):
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
                 self.log(f'Temps de Filtration Classique: {temps_filtration}', log="piscine_log")
-            """ Calcul des heures de début et fin filtration en fontion
-            du temps de filtration avant et apres l'heure pivot """
+
+""" Calcul des heures de début et fin filtration en fontion
+du temps de filtration avant et apres l'heure pivot """
+
             t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
             t2 = timedelta(hours=int(nb_h_avant[:2]), minutes=int(nb_h_avant[3:5]), seconds=int(nb_h_avant[6:8]))
             h_debut = t1 - t2
@@ -118,7 +122,8 @@ class FiltrationPiscine(hass.Hass):
             self.set_textvalue(periode_filtration,affichage_texte)
             self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}', log="piscine_log")
             self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}', log="piscine_log")
-            """ self.log(str(h_fin)[:5]) """
+
+"""         self.log(str(h_fin)[:5]) """
             if str(h_fin)[:5] == "1 day": # Ecrete à la fin de la journée
                 h_fin = "23:59:59"
             if self.now_is_between(str(h_debut),str(h_fin)):
@@ -127,8 +132,7 @@ class FiltrationPiscine(hass.Hass):
             else:
                 self.turn_off(pompe)
                 self.log("At Ppe", log="piscine_log")
-
-        #  Mode hiver Heure de Début + Une durée en h 
+"""  Mode hiver Heure de Début + Une durée en h """
         elif mode_de_fonctionnement == tab_mode[1]:
             h_debut_h= self.get_state(self.args["h_debut_hiver"])
             duree= self.get_state(self.args["duree_hiver"])
@@ -144,22 +148,22 @@ class FiltrationPiscine(hass.Hass):
                 self.log("Ma Ppe", log="piscine_log")
             else:
                 self.turn_off(pompe)
-                self.log("At Ppe", log="piscine_log")
+                self.log("At Ppe")
 
-        # Mode Arret Forcé
+""" Mode Arret Forcé """
         elif mode_de_fonctionnement == tab_mode[2]:
             self.turn_off(pompe)
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
             self.log("At Ppe", log="piscine_log")
 
-        # Mode Marche Forcée
+""" Mode Marche Forcé """
         elif mode_de_fonctionnement == tab_mode[3]:
             self.turn_on(pompe)
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.log("MA Ppe", log="piscine_log")
-            
-        # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
+            self.log("MA Ppe")
+
+""" Mode Inconnu: revoir le Input_select.mode_de_fonctionnement """
         else:
             self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}', log="piscine_log")

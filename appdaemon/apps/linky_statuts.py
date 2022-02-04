@@ -29,14 +29,14 @@ class LinkyStatuts(hass.Hass):
         # Bit 0:Contact Sec#
         bit_0= statuts_binaire[31]
         if bit_0 == "0":
-            contact_sec = "Fermé"
+            contact_sec = "Ferme"
         else:
             contact_sec = "Ouvert"
 
         # Bits 1 à 3: Organe de coupure #
         bit_1_3= statuts_binaire[28:31]
         if bit_1_3 == "000":
-            organe_de_coupure = "Fermé"
+            organe_de_coupure = "Ferme"
         elif bit_1_3 == "001":
             organe_de_coupure = "Ouvert sur Surpuissance"
         elif bit_1_3 == "010":
@@ -55,7 +55,7 @@ class LinkyStatuts(hass.Hass):
         # Bit 4: Etat du cache borne #
         bit_4= statuts_binaire[27]
         if bit_4 == "0":
-            cache_borne = "Fermé"
+            cache_borne = "Ferme"
         else:
             cache_borne = "Ouvert"
 
@@ -71,9 +71,9 @@ class LinkyStatuts(hass.Hass):
         # Bit 7: Dépassement Puissance de Référence #
         bit_7= statuts_binaire[24]
         if bit_7 == "0":
-            dep_pref = "Pas de Dépassement"
+            dep_pref = "Pas de Depassement"
         else:
-            dep_pref = "Dépassement en Cours"
+            dep_pref = "Depassement en Cours"
 
         # Bit 8: Producteur ou Consommateur #
         bit_8= statuts_binaire[23]
@@ -92,45 +92,45 @@ class LinkyStatuts(hass.Hass):
         # Bits 10 à 13: Tarif en cours contrat fourniture #
         bit_10_13= statuts_binaire[18:22]
         if bit_10_13 == "0000":
-            tarif_fourniture = "Energie ventilée sur index 1"
+            tarif_fourniture = "Energie ventilee sur index 1"
         elif bit_10_13 == "0001":
-            tarif_fourniture = "Energie ventilée sur index 2"
+            tarif_fourniture = "Energie ventilee sur index 2"
         elif bit_10_13 == "0010":
-            tarif_fourniture = "Energie ventilée sur index 3"
+            tarif_fourniture = "Energie ventilee sur index 3"
         elif bit_10_13 == "0011":
-            tarif_fourniture = "Energie ventilée sur index 4"
+            tarif_fourniture = "Energie ventilee sur index 4"
         elif bit_10_13 == "0100":
-            tarif_fourniture = "Energie ventilée sur index 5"
+            tarif_fourniture = "Energie ventilee sur index 5"
         elif bit_10_13 == "0101":
-            tarif_fourniture = "Energie ventilée sur index 6"
+            tarif_fourniture = "Energie ventilee sur index 6"
         elif bit_10_13 == "0110":
-            tarif_fourniture = "Energie ventilée sur index 7"
+            tarif_fourniture = "Energie ventilee sur index 7"
         elif bit_10_13 == "0111":
-            tarif_fourniture = "Energie ventilée sur index 8"
+            tarif_fourniture = "Energie ventilee sur index 8"
         elif bit_10_13 == "1000":
-            tarif_fourniture = "Energie ventilée sur index 9"
+            tarif_fourniture = "Energie ventilee sur index 9"
         elif bit_10_13 == "1001":
-            tarif_fourniture = "Energie ventilée sur index 10"
+            tarif_fourniture = "Energie ventilee sur index 10"
         else:
             tarif_fourniture = "??"
 
         # Bits 14 à 15: Tarif en cours contrat fourniture #
         bit_14_15= statuts_binaire[16:18]
         if bit_14_15 == "00":
-            tarif_distributeur = "Energie ventilée sur index 1"
+            tarif_distributeur = "Energie ventilee sur index 1"
         elif bit_14_15 == "01":
-            tarif_distributeur = "Energie ventilée sur index 2"
+            tarif_distributeur = "Energie ventilee sur index 2"
         elif bit_14_15 == "10":
-            tarif_distributeur = "Energie ventilée sur index 3"
+            tarif_distributeur = "Energie ventilee sur index 3"
         elif bit_14_15 == "11":
-            tarif_distributeur = "Energie ventilée sur index 4"
+            tarif_distributeur = "Energie ventilee sur index 4"
 
         # Bit 16: Mode dégradé horloge #
         bit_16= statuts_binaire[15]
         if bit_16 == "0":
             mode_horloge = "Horloge correcte"
         else:
-            mode_horloge = "Horloge mode dégradé"
+            mode_horloge = "Horloge mode dégrade"
 
         # Bit 17: Etat TIC #
         bit_17= statuts_binaire[14]
@@ -144,11 +144,11 @@ class LinkyStatuts(hass.Hass):
         # Bits 19 à 20: Etat de la com Euridis #
         bit_19_20= statuts_binaire[11:13]
         if bit_19_20 == "00":
-            com_euridis = "Com désactivée"
+            com_euridis = "Com désactivee"
         elif bit_19_20 == "01":
-            com_euridis = "Com Activé sans sécurité"
+            com_euridis = "Com Active sans sécurite"
         elif bit_19_20 == "11":
-            com_euridis = "Com Activé avec sécurité"
+            com_euridis = "Com Active avec sécurite"
         else:
             com_euridis = "Com ??"
 
@@ -166,9 +166,9 @@ class LinkyStatuts(hass.Hass):
         # Bit 23: Synchro CPL #
         bit_23= statuts_binaire[8]
         if bit_23 == "0":
-            synchro_cpl = "Compteur non synchronisé"
+            synchro_cpl = "Compteur non synchronise"
         else:
-            synchro_cpl = "Compteur synchronisé"
+            synchro_cpl = "Compteur synchronise"
 
         # Bits 24_25: Couleur du jour contrat historique Tempo #
         bit_24_25= statuts_binaire[6:8]
@@ -181,7 +181,7 @@ class LinkyStatuts(hass.Hass):
         elif bit_24_25 == "11":
             couleur_j_tempo = "Rouge"
         else:
-            couleur_j_tempo = "Couleur J tempo indéfinie"
+            couleur_j_tempo = "Couleur J tempo indefinie"
 
         # Bits 26_27: Couleur du J+1 contrat historique Tempo #
         bit_26_27= statuts_binaire[4:6]
@@ -194,20 +194,20 @@ class LinkyStatuts(hass.Hass):
         elif bit_26_27 == "11":
             couleur_j1_tempo = "Rouge"
         else:
-            couleur_j1_tempo = "Couleur J+1 tempo indéfinie"
+            couleur_j1_tempo = "Couleur J+1 tempo indefinie"
 
         # Bits 28_29: Préavis Pointes mobiles #
         bit_28_29= statuts_binaire[2:4]
         if bit_28_29 == "00":
-            préavis_p_mobiles = "pas de préavis en cours"
+            préavis_p_mobiles = "pas de preavis en cours"
         elif bit_28_29 == "01":
-            préavis_p_mobiles = "Préavis PM1 en cours"
+            préavis_p_mobiles = "Preavis PM1 en cours"
         elif bit_28_29 == "10":
-            préavis_p_mobiles = "Préavis PM2 en cours"
+            préavis_p_mobiles = "Preavis PM2 en cours"
         elif bit_28_29 == "11":
-            préavis_p_mobiles = "Préavis PM3 en cours"
+            préavis_p_mobiles = "Preavis PM3 en cours"
         else:
-            préavis_p_mobiles = "Préavis en cours indéfini"
+            préavis_p_mobiles = "Preavis en cours indéfini"
             
         # Bits 30_31: Préavis Pointes mobiles #
         bit_30_31= statuts_binaire[2:4]
@@ -220,7 +220,7 @@ class LinkyStatuts(hass.Hass):
         elif bit_30_31 == "11":
             pointe_mobile = "PM3 en cours"
         else:
-            pointe_mobile = "Pointe mobile indéfinie"
+            pointe_mobile = "Pointe mobile indefinie"
 
         #  Mise à jour des entités HA  #
 

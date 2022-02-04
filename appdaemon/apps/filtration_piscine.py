@@ -21,7 +21,7 @@ def duree_abaque(Temperature_eau):
             - 0.14953 * temperature_min ** 2
             + 2.43489 * temperature_min
             - 10.72859
-    )*coef
+    )
     duree_m = min(float(duree), 23)
     return duree_m
 
@@ -78,7 +78,7 @@ class FiltrationPiscine(hass.Hass):
         self.traitement(kwargs)
 
     def touteslesminutes(self, kwargs):
-        self.log('Appel traitement chaque minutes.', log="piscine_log")
+        self.log('Appel traitement toutes les 5 mn.', log="piscine_log")
         self.traitement(kwargs)
 
     def traitement(self, kwargs):
@@ -97,12 +97,12 @@ class FiltrationPiscine(hass.Hass):
         #  Mode Ete
         if mode_de_fonctionnement == tab_mode[0]:
             if mode_calcul == "on":
-                temps_filtration = (duree_abaque(Temperature_eau))
+                temps_filtration = (duree_abaque(Temperature_eau))*coef
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
                 self.log(f'Temps de Filtration Abaque: {temps_filtration}', log="piscine_log")
             else:
-                temps_filtration = (duree_classique(Temperature_eau))
+                temps_filtration = (duree_classique(Temperature_eau))*coef
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
                 self.log(f'Temps de Filtration Classique: {temps_filtration}', log="piscine_log")
@@ -114,6 +114,7 @@ class FiltrationPiscine(hass.Hass):
             t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
             t2 = timedelta(hours=int(nb_h_apres[:2]), minutes=int(nb_h_apres[3:5]), seconds=int(nb_h_apres[6:8]))
             h_fin = t1 + t2
+            # Affichage plage horaire
             affichage_texte =str(h_debut)+"/"+str(h_fin)
             self.set_textvalue(periode_filtration,affichage_texte)
             self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}', log="piscine_log")
@@ -121,6 +122,7 @@ class FiltrationPiscine(hass.Hass):
             """ self.log(str(h_fin)[:5]) """
             if str(h_fin)[:5] == "1 day": # Ecrete à la fin de la journée
                 h_fin = "23:59:59"
+            # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
                 self.turn_on(pompe)
                 self.log("Ma Ppe", log="piscine_log")
@@ -136,9 +138,11 @@ class FiltrationPiscine(hass.Hass):
             td1 = timedelta(hours=int(h_debut_h[:2]), minutes=int(h_debut_h[3:5]), seconds=int(h_debut_h[6:8]))
             td2 = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
             h_fin_f = td1 + td2
+            # Affichage plage horaire
             affichage_texte =str(h_debut_h)+"/"+str(h_fin_f)
             self.set_textvalue(periode_filtration,affichage_texte)
             self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}', log="piscine_log")
+            # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
                 self.turn_on(pompe)
                 self.log("Ma Ppe", log="piscine_log")

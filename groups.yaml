@@ -40,3 +40,10 @@ portes_garage_rdc:
     - binary_sensor.porte_frigo
     - binary_sensor.porte_garage_ouverte
 
+portes_sous_sol:
+  name: "portes Sous Sol"
+  all: true
+  entities:
+    - binary_sensor.porte_ssol_ouverte
+    - binary_sensor.detecteur_petite_porte_sous_sol
+

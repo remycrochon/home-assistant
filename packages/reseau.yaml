@@ -132,10 +132,6 @@ binary_sensor:
       - binary_sensor.certificat_meteo81000
       - binary_sensor.certificat_motioneye
 
-sensor:
-# External IP - Ip Public
-  - platform: dnsip
-    name: ip_public
     
 template:
   - binary_sensor:

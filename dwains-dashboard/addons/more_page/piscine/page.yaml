@@ -18,6 +18,7 @@
                   red: 30
                 name: Temp Eau
                 needle: true
+#
               - type: gauge
                 entity: sensor.vp2_temp_out
                 max: 45
@@ -28,6 +29,7 @@
                   yellow: -10
                   red: 30
                 needle: true
+#
               - type: gauge
                 entity: sensor.pression_filtre
                 min: 0
@@ -39,6 +41,7 @@
                 name: P Filtre
                 unit: B
                 needle: true
+#
               - type: gauge
                 entity: sensor.ph_piscine_ph
                 min: 6
@@ -49,6 +52,7 @@
                   yellow: 6
                   red: 7.7
                 needle: true
+#
               - type: gauge
                 entity: sensor.orp_piscine_orp
                 min: 0
@@ -59,12 +63,14 @@
                   red: 900
                 needle: true
                 max: 1009
+#
               - type: gauge
                 entity: sensor.e_fc
                 min: 0
                 max: 10
                 name: Fc
                 needle: true
+#
               - type: gauge
                 entity: input_number.temps_cartouche_chlore
                 min: 0
@@ -75,6 +81,7 @@
                   yellow: 30
                   red: 60
                 needle: true
+#
               - type: gauge
                 entity: sensor.pzem_pisc_puissance
                 min: 0
@@ -85,17 +92,19 @@
                   yellow: 350
                   red: 800
                 needle: true
+#
               - aspect_ratio: 1
                 color: auto
-                entity: pool_pump.next_run_schedule
+                entity: input_text.piscine_periode_filtration
                 name: Tranche Horaire
                 hold_action:
                   action: more-info
                 show_state: true
                 type: custom:button-card
+#
               - aspect_ratio: 1
                 color: auto
-                entity: binary_sensor.pool_pump_running
+                entity: binary_sensor.ppe_piscine_en_marche
                 name: Ppe Filtre
                 hold_action:
                   action: more-info
@@ -111,6 +120,7 @@
                         - color: green
                     value: 'on'
                 type: custom:button-card
+#
               - aspect_ratio: 1
                 color: auto
                 entity: automation.piscine_injection_v2
@@ -129,6 +139,7 @@
                         - color: green
                     value: 'on'
                 type: custom:button-card
+#
               - aspect_ratio: 1
                 color: auto
                 entity: cover.volet_piscine
@@ -155,7 +166,7 @@
 # Historiques
           - title: <- 3 jours
             entities:
-              - entity: switch.pool_pump_switch
+              - entity: switch.cde_pompe_filtration
                 name: Ppe filtre
               - entity: switch.cde_ev_eau
                 name: Ev Eau
@@ -170,6 +181,7 @@
       - entities:
           - entity: input_select.mode_fonctionnement_piscine
             name: Mode de Fonctionnement
+#Mesures
           - entities:
               - entity: sensor.pression_piscine_p
                 name: Pression
@@ -184,6 +196,7 @@
             name: Mesures
             show_state: false
             type: custom:multiple-entity-row
+#Ph
           - entities:
               - entity: switch.cde_traitement
                 name: Ppe
@@ -206,6 +219,7 @@
             name: Ph
             show_state: false
             type: custom:multiple-entity-row
+# Chlore
           - entities:
               - entity: switch.cde_ppe_chlore
                 name: Ppe
@@ -228,6 +242,7 @@
             name: Chlore/ORP
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:
               - entity: input_number.temps_cartouche_chlore
                 name: Tps Cartouche
@@ -239,28 +254,31 @@
             name: Chlore cart
             show_state: false
             type: custom:multiple-entity-row
+# Tranche Horaire
           - entities:
-              - entity: pool_pump.next_run_schedule
-                name: 'A venir '
-              - entity: sensor.heure_pivot_piscine
+              - entity: input_boolean.calcul_mode_abaque
+                name: Mode Abaq
+              - entity: input_text.piscine_periode_filtration
+                name: 'Tranch Hor'
+              - entity: input_datetime.heure_pivot_pisc
                 name: Heure pivot
-            entity: pool_pump.next_run_schedule
+            entity: input_text.piscine_periode_filtration
             icon: mdi:clock
             name: Tranche horaire
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:
-              - entity: pool_pump.total_daily_filtering_duration
-                name: Durée Calculée
-              - entity: sensor.pool_pump_running_today
+              - entity: sensor.ma_ppe_piscine_jour
                 name: Fonct. Jour
-              - entity: binary_sensor.pool_pump_running
+              - entity: binary_sensor.ppe_piscine_en_marche
                 name: Etat
-            entity: sensor.pool_pump_running_today
+            entity: input_text.piscine_periode_filtration
             icon: mdi:pump
             name: Pompe Filtration
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:
               - entity: sensor.pzem_pisc_puissance
                 name: Puissance
@@ -271,6 +289,7 @@
             name: Conso Elec
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:
               - entity: input_datetime.heure_ma_pump_pisc_hiv
                 name: MaPpe
@@ -287,6 +306,7 @@
             name: Hiver
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:            
               - entity: input_boolean.volet_piscine_auto
                 name: Auto
@@ -301,6 +321,7 @@
             name: Volet piscine
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:
               - entity: sensor.ev_eau_sur_7j
                 name: 7J
@@ -317,11 +338,11 @@
             name: Appoint Eau
             show_state: false
             type: custom:multiple-entity-row
+#
           - entities:
               - label: Filtration
                 type: section
               - entity: input_number.mem_temp_piscine
-              - entity: input_select.pool_pump_mode
               - entity: input_boolean.piscine_arret_force
               - label: Volet
                 type: section
@@ -408,8 +429,9 @@
               type: section
             padding: 0
             type: custom:fold-entity-row
+#
           - entities:
-              - entity: switch.pool_pump_switch
+              - entity: switch.cde_pompe_filtration
                 name: Relais Pompe Filtre
               - entity: switch.cde_traitement
                 name: Relais pH

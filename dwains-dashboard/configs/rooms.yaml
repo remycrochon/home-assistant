@@ -30,7 +30,7 @@ rooms:
   - name: Sous-Sol
     icon: mdi:garage
     cover: cover.garage_soussol
-    door: binary_sensor.porte_ssol_ouverte
+    door: group.portes_sous_sol
     temperature: sensor.esp130_climat_sous_sol_temperature
     humidity: sensor.esp130_climat_sous_sol_humidite
     light: switch.pc_ht

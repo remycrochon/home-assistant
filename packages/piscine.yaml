@@ -118,17 +118,7 @@ input_datetime:
     has_date: false
     has_time: true
 
-  heure_at_pump_pisc_hiv:
-    name: Heure At Pompe Pisc Hiv
-    has_date: false
-    has_time: true
-
 input_boolean:
-  # inutilisée????????? à verifier
-  pool_water_level_critical:
-    name: Niveau eau critique
-    initial: false
-
   # EV appoint Piscine en mode automatique
   piscine_arret_force:
     name: Piscine Arret Forcé
@@ -161,13 +151,6 @@ input_boolean:
 
 # selection du mode de fonctionnement de la filtration
 input_select:
-  pool_pump_mode:
-    name: Pool Pump mode
-    options:
-      - "Auto"
-      - "On"
-      - "Off"
-    icon: mdi:pool
 
   mode_fonctionnement_piscine:
     name: Mode Fonct Piscine
@@ -195,8 +178,8 @@ input_text:
 sensor:
   # Affichage du temps de fonctionnement de la pompe ce jour
   - platform: history_stats
-    name: Pool Pump running today
-    entity_id: binary_sensor.pool_pump_running
+    name: Ma Ppe Piscine Jour
+    entity_id: binary_sensor.ppe_piscine_en_marche
     state: "on"
     type: time
     start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
@@ -262,18 +245,6 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-    - name: "pool_water_temperature"
-      state: "{{ states('input_number.mem_temp_piscine')|float(default=0)|round(1) }}" # memoire temperature de l'eau avant arret pompe
-        #e_template: "{{ states('input_number.temp_piscine_ph')|float|round(1) }}" # Simulation avec input_numbe
-      icon: mdi:oil-temperature
-      unit_of_measurement: "ºC"
-
-        # calcul de l'heure pivot, c'est l'heure autour de laquelle le temps de fonctionnement est réparti
-    - name: "heure_pivot_piscine"
-      state: >-
-        {{ as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom('%H:%M') }}
-      icon: mdi:weather-sunny
-
   # Recopie pression filtre lu dans esphome dans un template
     - name: "pression_piscine_p"
       state: '{{ states("sensor.pression_filtre") |float(default=0) | round(2) }}'
@@ -281,7 +252,7 @@ template:
 
   binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement
-    - name: "pool_pump_running"
+    - name: "ppe_piscine_en_marche"
       state: >-
         {{states.sensor.pzem_pisc_puissance.state | float(default=0) > 500}}
 
@@ -313,4 +284,3 @@ cover:
             mdi:garage-alert
           {% endif %}
           {% endif %}
-

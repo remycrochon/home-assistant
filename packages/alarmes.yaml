@@ -6,8 +6,6 @@ input_boolean:
   com_vp2:
     name: Comm VP2 OK=On
 
-
-
 # Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple
   inhib_alarme_pac:
     name: Inhib Alarm PAC
@@ -63,7 +61,7 @@ template:
       device_class: "problem"
 
 # Surveillance porte cellier
-# Sur on si fermée
+# Sur off si fermée
     - name: "alarme_porte_cellier"
       state: >-
         {% set a=is_state("sun.sun", "below_horizon") %}
@@ -72,7 +70,7 @@ template:
       device_class: "problem"
 
 # Surveillance porte sous-sol petite
-# Sur on si fermée
+# Sur off si fermée
     - name: "alarme_petite_porte_sous_sol"
       state: >-
         {% set a=is_state("sun.sun", "below_horizon") %}

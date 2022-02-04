@@ -12,7 +12,7 @@ sensor:
       - !secret my_zwift_player_id
       - !secret my_friends_zwift_player_id
 ```
-
+# ligne 299 intervall update 2s
 """
 
 import logging
@@ -296,7 +296,7 @@ class ZwiftData:
         self.players = {}
         self._profile = None
         self.update_interval = update_interval
-        self.online_update_interval = timedelta(seconds=2)
+        self.online_update_interval = timedelta(seconds=3)
         if players:
             for player_id in players:
                 self.add_tracked_player(player_id)

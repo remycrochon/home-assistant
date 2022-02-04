@@ -104,109 +104,6 @@
           option: Auto
     default: []
   mode: single
-- id: '1611515162753'
-  alias: 3_1_1 Piscine-Calcul fonctionnement Pompe Ete/Hiver
-  description: Mode Ete/Hiver/Ma Forcée/At Forcé
-  trigger:
-  - platform: state
-    entity_id: sensor.pool_water_temperature
-    id: temp
-  - platform: state
-    entity_id: input_select.mode_fonctionnement_piscine
-    id: mode
-  - platform: state
-    entity_id: input_boolean.piscine_arret_force
-    id: at_forcé
-  - platform: time_pattern
-    minutes: /5
-    id: 5min
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: state
-          entity_id: input_select.mode_fonctionnement_piscine
-          state: Ete
-        - condition: or
-          conditions:
-          - condition: trigger
-            id: temp
-          - condition: trigger
-            id: at_forcé
-          - condition: state
-            entity_id: input_select.mode_fonctionnement_piscine
-            state: Ete
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: Auto
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine
-        state: Hiver
-      sequence:
-      - choose:
-        - conditions:
-          - condition: time
-            after: input_datetime.heure_ma_pump_pisc_hiv
-          - condition: numeric_state
-            entity_id: sensor.pool_pump_running_today
-            below: input_number.duree_filtration_max_mode_hiver
-          sequence:
-          - service: input_select.select_option
-            target:
-              entity_id: input_select.pool_pump_mode
-            data:
-              option: 'On'
-          - service: homeassistant.turn_on
-            target:
-              entity_id: switch.pool_pump_switch
-        default:
-        - service: input_select.select_option
-          target:
-            entity_id: input_select.pool_pump_mode
-          data:
-            option: 'Off'
-        - service: homeassistant.turn_off
-          target:
-            entity_id: switch.pool_pump_switch
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine
-        state: Ma F
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: 'On'
-      - service: homeassistant.turn_on
-        target:
-          entity_id: switch.pool_pump_switch
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine
-        state: At F
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.pool_pump_mode
-        data:
-          option: 'Off'
-      - service: homeassistant.turn_off
-        target:
-          entity_id: switch.pool_pump_switch
-    - conditions:
-      - condition: trigger
-        id: Start
-      sequence: []
-    default: []
-  - service: pool_pump.check
-  mode: single
 - id: '1614244769739'
   alias: 1_4_2 Lampe Desodo
   description: 'PC1 Lidl '
@@ -273,7 +170,7 @@
     data:
       option: 'Off'
     target:
-      entity_id: input_select.pool_pump_mode
+      entity_id: input_select.mode_fonctionnement_piscine_test
   - service: notify.telegram
     data:
       message: Niveau bas piscine{{-"\n"-}}{{states("sensor.date_time") }}{{-"\n"-}}{{states("sensor.date_time")
@@ -343,7 +240,7 @@
     minutes: /1
   condition:
   - condition: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     state: 'on'
     for: 00:15:00
   action:
@@ -358,7 +255,7 @@
   description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '
   trigger:
   - platform: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     for:
       hours: 0
       minutes: 15
@@ -367,7 +264,7 @@
     from: 'off'
     id: ma_pump
   - platform: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     id: at_pump
     from: 'on'
     to: 'off'
@@ -507,7 +404,7 @@
     data_template:
       entity_id: input_number.temps_cartouche_chlore
       value: '{% set a=states(''input_number.temps_cartouche_chlore'')|float %} {%
-        set b=states(''sensor.pool_pump_running_today'')|float %} {{ (a + b)|round(2)
+        set b=states(''sensor.ma_ppe_piscine_jour'')|float %} {{ (a + b)|round(2)
         }}'
   mode: single
 - id: '1625162846851'
@@ -538,7 +435,7 @@
     minutes: /1
   condition:
   - condition: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     state: 'on'
     for: 00:30:00
   action:
@@ -556,7 +453,7 @@
     minutes: /1
   condition:
   - condition: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     state: 'on'
     for: 00:15:00
   action:
@@ -758,7 +655,7 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: sensor.ip_public
+    entity_id: sensor.myip
   condition: []
   action:
   - service: notify.telegram
@@ -1296,12 +1193,12 @@
   description: Debut, Fin
   trigger:
   - platform: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     from: 'off'
     to: 'on'
     id: ma_ppe
   - platform: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     id: at_ppe
     from: 'on'
     to: 'off'
@@ -1333,14 +1230,14 @@
       sequence:
       - service: notify.telegram
         data:
-          message: 'Temps de filtration:  {{states.sensor.pool_pump_running_today.attributes.value}}{{-"\n"-}}Conso:
+          message: 'Temps de filtration:  {{states.sensor.ma_ppe_piscine_jour.attributes.value}}{{-"\n"-}}Conso:
             {{states(''sensor.energie_piscine_jour'')}} kWh.{{-"\n"-}} Tps Utilisation
             cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}} h {{-"\n"-}}{{states("sensor.date_time")
             }}'
           title: Piscine Rapport Fin de journée
       - service: notify.log_piscine
         data:
-          message: '{{states.sensor.pool_pump_running_today.attributes.value }},{{states(''sensor.energie_piscine_jour'')}}'
+          message: '{{states.sensor.ma_ppe_piscine_jour.attributes.value }},{{states(''sensor.energie_piscine_jour'')}}'
           title: Rapport jour piscine
     default: []
   mode: single
@@ -2022,15 +1919,12 @@
         entity_id: binary_sensor.malaver_en_marche
         state: 'on'
       - condition: state
-        entity_id: binary_sensor.pool_pump_running
+        entity_id: binary_sensor.ppe_piscine_en_marche
         state: 'on'
       sequence:
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.mem_delestage
-      - service: automation.turn_off
-        target:
-          entity_id: automation.check_pool_pump_on_event
       - service: notify.telegram
         data:
           message: Delestage Piscine sur ON{{-"\n"-}}{{states("sensor.date_time")
@@ -2038,7 +1932,7 @@
           title: Energie-Delestage !!!
       - service: homeassistant.turn_off
         target:
-          entity_id: switch.pool_pump_switch
+          entity_id: switch.cde_pompe_filtration
     - conditions:
       - condition: state
         entity_id: input_boolean.mem_delestage
@@ -2049,9 +1943,6 @@
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.mem_delestage
-      - service: automation.turn_on
-        target:
-          entity_id: automation.check_pool_pump_on_event
       - service: notify.telegram
         data:
           message: Delestage Piscine sur OFF{{-"\n"-}}{{states("sensor.date_time")
@@ -2439,7 +2330,7 @@
   description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '
   trigger:
   - platform: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     for:
       hours: 0
       minutes: 15
@@ -2448,7 +2339,7 @@
     from: 'off'
     id: ma_pump
   - platform: state
-    entity_id: binary_sensor.pool_pump_running
+    entity_id: binary_sensor.ppe_piscine_en_marche
     id: at_pump
     from: 'on'
     to: 'off'
@@ -2553,7 +2444,7 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: binary_sensor.detecteur_petite_porte_sous_sol
+      sensor_entity: binary_sensor.alarme_petite_porte_sous_sol
       alert_state: 'on'
       alert_action:
       - service: notify.telegram

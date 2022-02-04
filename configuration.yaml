@@ -179,7 +179,7 @@ modbus:
     host: 192.168.0.101
     port: 502
     switches:
-      - name: pool_pump_switch
+      - name: cde_pompe_filtration
         slave: 1
         address: 12288
         write_type: coil
@@ -347,14 +347,6 @@ notify:
     platform: file
     filename: conso_piscine.csv
     timestamp: True
-
-# déclaration de l'intrégration HACS Pool Pump Manager
-pool_pump:
-  switch_entity_id: switch.pool_pump_switch
-  pool_pump_mode_entity_id: input_select.pool_pump_mode
-  pool_temperature_entity_id: sensor.pool_water_temperature
-  water_level_critical_entity_id: input_boolean.piscine_arret_force
-
 
 livebox:
   host: 192.168.0.1

@@ -130,7 +130,7 @@ class LinkyStatuts(hass.Hass):
         if bit_16 == "0":
             mode_horloge = "Horloge correcte"
         else:
-            mode_horloge = "Horloge mode dégrade"
+            mode_horloge = "Horloge mode degrade"
 
         # Bit 17: Etat TIC #
         bit_17= statuts_binaire[14]
@@ -144,11 +144,11 @@ class LinkyStatuts(hass.Hass):
         # Bits 19 à 20: Etat de la com Euridis #
         bit_19_20= statuts_binaire[11:13]
         if bit_19_20 == "00":
-            com_euridis = "Com désactivee"
+            com_euridis = "Com desactivee"
         elif bit_19_20 == "01":
-            com_euridis = "Com Active sans sécurite"
+            com_euridis = "Com Active sans securite"
         elif bit_19_20 == "11":
-            com_euridis = "Com Active avec sécurite"
+            com_euridis = "Com Active avec securite"
         else:
             com_euridis = "Com ??"
 
@@ -212,7 +212,7 @@ class LinkyStatuts(hass.Hass):
         # Bits 30_31: Préavis Pointes mobiles #
         bit_30_31= statuts_binaire[2:4]
         if bit_30_31 == "00":
-            pointe_mobile = "pas de pointe mobile"
+            pointe_mobile = "Pas de pointe mobile"
         elif bit_30_31 == "01":
             pointe_mobile = "PM1 en cours"
         elif bit_30_31 == "10":
@@ -248,19 +248,19 @@ class LinkyStatuts(hass.Hass):
         self.log(f"bit_1_3={bit_1_3} / Organe de coupure={organe_de_coupure}", log="linky_log")
         self.log(f"bit_4={bit_4} / Cache_borne={cache_borne}", log="linky_log")
         self.log(f"bit_6={bit_6} / Surtension={surtension}", log="linky_log")
-        self.log(f"bit_7={bit_7} / Dépassement Pref={dep_pref}", log="linky_log")
+        self.log(f"bit_7={bit_7} / Depassement Pref={dep_pref}", log="linky_log")
         self.log(f"bit_8={bit_8} / Fonctionnement={fonct_prod_conso}", log="linky_log")
         self.log(f"bit_9={bit_9} / Sens Energie Active={sens_energie_act}", log="linky_log")
         self.log(f"bit_10_13={bit_10_13} / Tarif fourniture={tarif_fourniture}", log="linky_log")
         self.log(f"bit_14_15={bit_14_15} / Tarif distributeur={tarif_distributeur}", log="linky_log")
-        self.log(f"bit_16={bit_16} / Mode dégradé horloge={mode_horloge}", log="linky_log")
+        self.log(f"bit_16={bit_16} / Mode degrade horloge={mode_horloge}", log="linky_log")
         self.log(f"bit_17={bit_17} / Etat TIC={etat_tic}", log="linky_log")
         self.log(f"bit_19_20={bit_19_20} / Com Euridis={com_euridis}", log="linky_log")
         self.log(f"bit_21_22={bit_21_22} / Statut CPL={statut_cpl}", log="linky_log")
         self.log(f"bit_23={bit_23} / Synchro CPL={synchro_cpl}", log="linky_log")
         self.log(f"bit_24_25={bit_24_25} / Couleur Jour tempo={couleur_j_tempo}", log="linky_log")
         self.log(f"bit_26_27={bit_26_27} / Couleur J+1 tempo={couleur_j1_tempo}", log="linky_log")
-        self.log(f"bit_28_29={bit_28_29} / Préavis Pointes Mobiles={préavis_p_mobiles}", log="linky_log")
+        self.log(f"bit_28_29={bit_28_29} / Preavis Pointes Mobiles={préavis_p_mobiles}", log="linky_log")
         self.log(f"bit_30_31={bit_30_31} / Pointe Mobile={pointe_mobile}", log="linky_log")        
         self.log(f"Statuts Linky:{statuts}", log="linky_log")
         self.log(f"Statuts Binaire: {statuts_binaire}", log="linky_log")

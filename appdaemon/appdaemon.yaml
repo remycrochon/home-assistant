@@ -40,14 +40,20 @@ logs:
     log_generations: 3
     log_size: 100000
 
-  test_log:
-    name: TestLog
-    filename: /config/log/test_log.log
+  surveille_log:
+    name: SurveilleLog
+    filename: /config/log/surveille_log.log
     log_generations: 3
     log_size: 1024
 
   groupealerte_log:
     name: GroupeAlertLog
     filename: /config/log/groupealerte_log.log
+    log_generations: 3
+    log_size: 1024
+
+  test_log:
+    name: TestLog
+    filename: /config/log/test_log.log
     log_generations: 3
     log_size: 1024

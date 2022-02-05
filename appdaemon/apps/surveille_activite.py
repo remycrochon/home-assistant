@@ -8,7 +8,7 @@ class SurveilleActivite(hass.Hass):
         duree_tempo=int(self.args["tempo"])
         self.turn_on(self.args["activite_ok"])
         self.tempo[nom_entité]=self.run_in(self.notification, duree_tempo,entité=nom_entité,temps=duree_tempo)
-        self.log(f'Initialisation de: {nom_entité}..pour {duree_tempo}s et {self.tempo[nom_entité]}.', log="test_log")
+        self.log(f'Initialisation de: {nom_entité}..pour {duree_tempo}s et {self.tempo[nom_entité]}.', log="surveille_log")
 
     def change(self, entity, attribute, old, new, kwargs):
         heure = str(self.time())[:8]
@@ -18,12 +18,12 @@ class SurveilleActivite(hass.Hass):
         nouvelle_valeur = new
         # Mise à on de Com_Ok
         self.turn_on(self.args["activite_ok"])
-        self.log(f'Nouvelle valeur de {entity}: {nouvelle_valeur}-Tempo={duree_tempo}', log="test_log")
+        self.log(f'Nouvelle valeur de {entity}: {nouvelle_valeur}-Tempo={duree_tempo}', log="surveille_log")
         cle_tempo = self.tempo[nom_entité]
         if cle_tempo != None:
             self.tempo[nom_entité] = self.cancel_timer(cle_tempo) 
-            #self.log(f'Info tempo: {self.info_timer(cle_tempo)}', log="test_log")
-            self.log(f'Fin tempo {cle_tempo}', log="test_log")
+            #self.log(f'Info tempo: {self.info_timer(cle_tempo)}', log="surveille_log")
+            self.log(f'Fin tempo {cle_tempo}', log="surveille_log")
 
         self.tempo[nom_entité] = self.run_in(self.notification, duree_tempo,entité=nom_entité,temps=duree_tempo)
 
@@ -33,6 +33,6 @@ class SurveilleActivite(hass.Hass):
         duree_temps= kwargs["temps"]
         # Mise à off de Com_Ok
         self.turn_off(self.args["activite_ok"])
-        self.log(f'Alerte! {nom_entité} est out depuis {duree_temps} sec.', log="test_log")
+        self.log(f'Alerte! {nom_entité} est out depuis {duree_temps} sec.', log="surveille_log")
         #self.call_service('notify/telegram', message=format(heure)+"Alerte!"+ format(nom_entité)+"est out depuis: "+format(duree_temps)+" sec.")
         #self.call_service('persistent_notification/create', message=format(heure)+"Alerte!"+ format(nom_entité)+"est out depuis: "+format(duree_temps)+" sec.")        

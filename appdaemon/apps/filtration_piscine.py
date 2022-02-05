@@ -4,11 +4,11 @@ import datetime
 from datetime import timedelta
 import logging
 
-"""  Saisir ici les memes modes que dans HA """
+# Saisir ici les memes modes que dans HA 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
 
 
-""" Fonction de calcul du temps de filtration selon Abaque Abacus """
+# Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):
     """Advanced calculation method using an abacus.
     D = a*T^3 + b*T^2 + c*T +d
@@ -25,7 +25,7 @@ def duree_abaque(Temperature_eau):
     duree_m = min(float(duree), 23)
     return duree_m
 
-""" Fonction de calcul du temps de filtration "Classique" """
+# Fonction de calcul du temps de filtration "Classique" 
 def duree_classique(Temperature_eau):
     """Methode classique temperature / 2"""
     temperature_min: float = max(float(Temperature_eau), 10)
@@ -33,7 +33,7 @@ def duree_classique(Temperature_eau):
     duree_m = min(float(duree), 23)
     return duree_m
 
-""" Fonction de Convertion Int en heure "HH:MM:SS" """
+# Fonction de Convertion Int en heure "HH:MM:SS"
 def en_heure(t):
     h = int(t)
     # On retire les heures pour ne garder que les minutes.
@@ -44,7 +44,7 @@ def en_heure(t):
     s = int(t)
     return "{:02d}:{:02d}:{:02d}".format(h, m, s)
 
-""" programme principal """
+# Programme principal
 class FiltrationPiscine(hass.Hass):
     def initialize(self):
         self.listen_state(self.change_temp,self.args["temperature_eau"])

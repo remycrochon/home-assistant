@@ -93,7 +93,7 @@ class FiltrationPiscine(hass.Hass):
         self.log(f'Temp_Eau= {Temperature_eau}', log="piscine_log")
         self.log(f'h_pivot= {h_pivot}', log="piscine_log")
         self.log(f'coef= {coef}', log="piscine_log")
-        self.log(f'Mode_Calcul= {mode_calcul}', log="piscine_log")
+        self.log(f'Mode Calcul Abaque= {mode_calcul}', log="piscine_log")
         #  Mode Ete
         if mode_de_fonctionnement == tab_mode[0]:
             if mode_calcul == "on":

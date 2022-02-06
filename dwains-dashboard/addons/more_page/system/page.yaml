@@ -489,9 +489,43 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
+        - type: 'custom:uptime-card'
+          entity: binary_sensor.domo_rem81 #<- fill in the right sensor
+          icon: 'fas:safari'
+          name: Domo.rem81
+          hours_to_show: 72
+          status_adaptive_color: true
+          average_text: '% uptime'
+          alias:
+            ok: Online
+            ko: Offline
+          blink:
+            effect: fade
+            target: card
+            speed: 1
+          color:
+            icon: gray
+            ok: '#45C669'
+            ko: '#C6B145'
+            half: '#C66445'
+            none: '#C9C9C9'
+            title: gray
+          show:
+            header: true
+            title: true
+            icon: true
+            footer: true
+            status: true
+            timeline: true
+            average: true
+          tooltip:
+            animation: true
+          #tap_action:
+            #action: url
+            #url_path: 'https://'
 
         - type: 'custom:uptime-card'
-          entity: binary_sensor.vtt #<- fill in the right sensor
+          entity: binary_sensor.kobold #<- fill in the right sensor
           icon: 'fas:safari'
           name: VTT.rem81
           hours_to_show: 72
@@ -771,30 +805,36 @@
               - letter-spacing: 10px
           type: 'custom:button-card'
 
-        - type: entities
-          style: |
-            ha-card {
-              background-color: var(--dwains-theme-primary);
-            }
-          show_header_toggle: false
-          entities:
-            - entity: sensor.cert_expiry_timestamp_domo_rem81_com
-              name: domo
-            - entity: sensor.cert_expiry_timestamp_ha_rem81_com
-              name: ha
-            - entity: sensor.cert_expiry_timestamp_meteo81000_rem81_com
-              name: meteo81
-            - entity: sensor.cert_expiry_timestamp_meteo_rem81_com
-              name: meteo
-            - entity: sensor.cert_expiry_timestamp_motioneye_rem81_com
-              name: Motio Eye
-            - entity: sensor.cert_expiry_timestamp_vtt_rem81_com
-              name: VTT
-            - entity: binary_sensor.certificat_domo
-            - entity: binary_sensor.certificat_ha
-            - entity: binary_sensor.certificat_meteo
-            - entity: binary_sensor.certificat_meteo_81000
-            - entity: binary_sensor.certificat_motion
-            - entity: binary_sensor.certificat_vtt
-            - entity: binary_sensor.certificats_lets
-        
+        - type: custom:auto-entities
+          card:
+            type: entities
+          filter:
+            include:
+              - entity_id: '*certificat*'
+            exclude: []
+            sort:
+              method: state
+
+################################ VERSIONS HASS  ###########################""
+    - type: vertical-stack
+      cards:
+        - name: HASS Etat Version
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+
+        - type: custom:auto-entities
+          card:
+            type: entities
+          filter:
+            include:
+              - entity_id: '*update_available*'
+            exclude: []
+          sort:
+            method: friendly_name

@@ -185,10 +185,8 @@
           - entities:
               - entity: sensor.pression_piscine_p
                 name: Pression
-              - entity: sensor.temp_piscine
+              - entity: input_number.mem_temp_piscine
                 name: T Eau
-              - entity: sensor.pool_water_temperature
-                name: T° At
               - entity: sensor.vp2_temp_out
                 name: T Ext
             entity: sensor.pression_piscine_p
@@ -340,29 +338,7 @@
             type: custom:multiple-entity-row
 #
           - entities:
-              - label: Filtration
-                type: section
-              - entity: input_number.mem_temp_piscine
-              - entity: input_boolean.piscine_arret_force
-              - label: Volet
-                type: section
-              - entity: input_boolean.volet_piscine_auto
-              - entity: input_datetime.heure_ouv_volet_pisc
-              - entity: input_datetime.heure_ferm_volet_pisc
-              - label: Hiver
-                type: section
-              - entity: input_datetime.heure_ma_pump_pisc_hiv
-                name: Heure Marche Ppe
-              - entity: input_number.duree_filtration_max_mode_hiver
-                name: Durée Filtration Max
-              - entity: input_boolean.hors_gel_valid
-                name: Hors Gel Validation
-              - entity: input_number.hors_gel_inf_seuil1
-              - entity: input_number.hors_gel_inf_seuil2
-              - label: Chlore
-                type: section
-              - entity: input_number.temps_cartouche_chlore
-              - entity: input_number.chlore_seuil_max_utilisation
+
               - label: pH
                 type: section
               - entity: sensor.ph_ezo

@@ -16,3 +16,9 @@ uptime_alert:
   module: groupe_alerte
   groupe: binary_sensor.uptime_reseau
   tempo: 300 # Tempo de surveillance en secondes
+
+certicat_alert:
+  class: GroupeAlerte
+  module: groupe_alerte
+  groupe: binary_sensor.certificats_lets
+  tempo: 600 # Tempo de surveillance en secondes

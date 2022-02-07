@@ -1,4 +1,5 @@
 test:
   module: test
   class: Test
-  
+  groupe: binary_sensor.esp_reseau
+  tempo: 10 # Tempo de surveillance en secondes

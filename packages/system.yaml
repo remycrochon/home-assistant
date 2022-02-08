@@ -36,8 +36,8 @@ sensor:
       - type: network_out
         arg: enp3s0
 
-  - platform: cpuspeed
-    name: CPU_Speed
+#  - platform: cpuspeed
+#    name: CPU_Speed
 
   - platform: command_line
     name: processor_temperature_z0

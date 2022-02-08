@@ -27,6 +27,6 @@ class DoorNotification(hass.Hass):
             state = "open"
         else:
             state = "closed"
-        self.log("Duree=", state))
+        self.log(f'Duree= {state}')
     #    self.notify("{} is {}".format(self.friendly_name(entity), state), name=globals.notify)
         self.call_service('notify/telegram', message="{} is {}".format(self.friendly_name(entity), state))

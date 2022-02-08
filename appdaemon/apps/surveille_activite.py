@@ -23,7 +23,7 @@ class SurveilleActivite(hass.Hass):
         if cle_tempo != None:
             self.tempo[nom_entité] = self.cancel_timer(cle_tempo) 
             #self.log(f'Info tempo: {self.info_timer(cle_tempo)}', log="surveille_log")
-            self.log(f'Fin tempo {cle_tempo}', log="surveille_log")
+            #self.log(f'Fin tempo {cle_tempo}', log="surveille_log")
 
         self.tempo[nom_entité] = self.run_in(self.notification, duree_tempo,entité=nom_entité,temps=duree_tempo)
 

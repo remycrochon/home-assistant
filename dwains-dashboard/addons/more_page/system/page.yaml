@@ -420,8 +420,9 @@
               - font-weight: 100
               - letter-spacing: 10px
           type: 'custom:button-card'
+# HA
         - type: 'custom:uptime-card'
-          entity: binary_sensor.ha #<- fill in the right sensor
+          entity: binary_sensor.uptime_ha #<- fill in the right sensor
           icon: 'fas:safari'
           name: HA
           hours_to_show: 72
@@ -454,9 +455,9 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
-
+#Domo
         - type: 'custom:uptime-card'
-          entity: binary_sensor.domo_rem81 #<- fill in the right sensor
+          entity: binary_sensor.uptime_domo_rem81 #<- fill in the right sensor
           icon: 'fas:safari'
           name: Domo.rem81
           hours_to_show: 72
@@ -489,43 +490,9 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
+#VTT
         - type: 'custom:uptime-card'
-          entity: binary_sensor.domo_rem81 #<- fill in the right sensor
-          icon: 'fas:safari'
-          name: Domo.rem81
-          hours_to_show: 72
-          status_adaptive_color: true
-          average_text: '% uptime'
-          alias:
-            ok: Online
-            ko: Offline
-          blink:
-            effect: fade
-            target: card
-            speed: 1
-          color:
-            icon: gray
-            ok: '#45C669'
-            ko: '#C6B145'
-            half: '#C66445'
-            none: '#C9C9C9'
-            title: gray
-          show:
-            header: true
-            title: true
-            icon: true
-            footer: true
-            status: true
-            timeline: true
-            average: true
-          tooltip:
-            animation: true
-          #tap_action:
-            #action: url
-            #url_path: 'https://'
-
-        - type: 'custom:uptime-card'
-          entity: binary_sensor.kobold #<- fill in the right sensor
+          entity: binary_sensor.uptime_vtt #<- fill in the right sensor
           icon: 'fas:safari'
           name: VTT.rem81
           hours_to_show: 72
@@ -558,9 +525,79 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
-
+# Jeedom
         - type: 'custom:uptime-card'
-          entity: binary_sensor.meteoweewx #<- fill in the right sensor
+          entity: binary_sensor.uptime_jeedom #<- fill in the right sensor
+          icon: 'fas:safari'
+          name: Jeedom
+          hours_to_show: 72
+          status_adaptive_color: true
+          average_text: '% uptime'
+          alias:
+            ok: Online
+            ko: Offline
+          blink:
+            effect: fade
+            target: card
+            speed: 1
+          color:
+            icon: gray
+            ok: '#45C669'
+            ko: '#C6B145'
+            half: '#C66445'
+            none: '#C9C9C9'
+            title: gray
+          show:
+            header: true
+            title: true
+            icon: true
+            footer: true
+            status: true
+            timeline: true
+            average: true
+          tooltip:
+            animation: true
+          #tap_action:
+            #action: url
+            #url_path: 'https://'
+# Kobold
+        - type: 'custom:uptime-card'
+          entity: binary_sensor.uptime_kobold #<- fill in the right sensor
+          icon: 'fas:safari'
+          name: kodold.rem81
+          hours_to_show: 72
+          status_adaptive_color: true
+          average_text: '% uptime'
+          alias:
+            ok: Online
+            ko: Offline
+          blink:
+            effect: fade
+            target: card
+            speed: 1
+          color:
+            icon: gray
+            ok: '#45C669'
+            ko: '#C6B145'
+            half: '#C66445'
+            none: '#C9C9C9'
+            title: gray
+          show:
+            header: true
+            title: true
+            icon: true
+            footer: true
+            status: true
+            timeline: true
+            average: true
+          tooltip:
+            animation: true
+          #tap_action:
+            #action: url
+            #url_path: 'https://'
+# Meteo Weewx
+        - type: 'custom:uptime-card'
+          entity: binary_sensor.uptime_meteoweewx #<- fill in the right sensor
           icon: 'fas:safari'
           name: Meteo Weewx
           hours_to_show: 72
@@ -593,9 +630,9 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
-
+# Zimeteo
         - type: 'custom:uptime-card'
-          entity: binary_sensor.meteo81000 #<- fill in the right sensor
+          entity: binary_sensor.uptime_meteo81000 #<- fill in the right sensor
           icon: 'fas:safari'
           name: Zimeteo
           hours_to_show: 72
@@ -628,9 +665,9 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
-
+# Motion
         - type: 'custom:uptime-card'
-          entity: binary_sensor.motioneye #<- fill in the right sensor
+          entity: binary_sensor.uptime_motioneye #<- fill in the right sensor
           icon: 'fas:safari'
           name: Motioneye
           hours_to_show: 72
@@ -663,6 +700,7 @@
           #tap_action:
             #action: url
             #url_path: 'https://'
+  ######################## SPEEDTEST #######################
     - type: vertical-stack
       cards:
         - name: Speed Test

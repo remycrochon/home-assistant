@@ -27,7 +27,7 @@ class GroupeAlerte(hass.Hass):
         #self.log(f'Attention! Etat: {nom_entité} -> {new}/{flag[entity]}', log="test_log")
         self.log(f'Attention! Etat:{nom_entité} est sur {new} depuis {duree} sec', log="groupealerte_log")
         # Formatage du message de notification
-        message_notification= format(heure)+":"+" Attention: "+ format(nom_entité)+" sur OFF " + "depuis: "+ format(duree_temps)+" sec."
+        message_notification= format(heure)+":"+" Attention: "+ format(nom_entité)+" sur OFF depuis: "+ format(duree)+" sec."
         self.call_service('notify/telegram', message=message_notification)
         self.call_service('persistent_notification/create', message=message_notification)     
         

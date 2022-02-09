@@ -112,13 +112,14 @@ binary_sensor:
     all: true
     device_class: "connectivity"
     entities:
-      - binary_sensor.domo_rem81
-      - binary_sensor.jeedom
-      - binary_sensor.meteo81000
-      - binary_sensor.meteoweewx
-      - binary_sensor.ha
-      - binary_sensor.motioneye
-      - binary_sensor.vtt
+      - binary_sensor.uptime_domo_rem81
+      - binary_sensor.uptime_jeedom
+      - binary_sensor.uptime_meteo81000
+      - binary_sensor.uptime_meteoweewx
+      - binary_sensor.uptime_ha
+      - binary_sensor.uptime_motioneye
+      - binary_sensor.uptime_vtt
+      - binary_sensor.uptime_kobold
 
   - platform: group
     name: certificats_lets

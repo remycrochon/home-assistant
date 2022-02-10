@@ -18,7 +18,8 @@
             - entity_id: 'binary_sensor.alarme_status_pac'
             - entity_id: 'binary_sensor.alarme_discord_pac'
             - entity_id: 'binary_sensor.certificats_lets'
-            - entity_id: 'input_boolean.def_com_vp'        
+            - entity_id: 'input_boolean.com_linky'
+            - entity_id: 'input_boolean.com_vp2'
               sort:
                 method: state
                 reverse: true

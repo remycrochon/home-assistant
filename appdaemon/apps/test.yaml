@@ -1,8 +1,0 @@
-test:
-  module: test
-  class: Test
-  #entite: sensor.linky_papp #sensor.linky_umoy #
-  entite: input_text.linky_test_status
-  tempo: 20 # Tempo de surveillance en secondes
-  activite_ok: switch.test_com_out
-

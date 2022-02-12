@@ -44,16 +44,22 @@ logs:
     name: SurveilleLog
     filename: /config/log/surveille_log.log
     log_generations: 3
-    log_size: 1024
+    log_size: 100000
 
   groupealerte_log:
     name: GroupeAlertLog
     filename: /config/log/groupealerte_log.log
     log_generations: 3
-    log_size: 1024
+    log_size: 100000
+
+  fin_certificats_log:
+    name: fincertificats
+    filename: /config/log/fin_certificats_log.log
+    log_generations: 3
+    log_size: 100000
 
   test_log:
     name: TestLog
     filename: /config/log/test_log.log
     log_generations: 3
-    log_size: 1024
+    log_size: 100000

@@ -87,21 +87,27 @@ sensor:
       - calibrate_linear:
         - 0. -> 0.0
         - 1 -> 100.0
+# Lecture dans HA de la conso du jour
+  - platform: homeassistant
+    name: "Prod Inst"
+    unit_of_measurement: "W"
+    entity_id: sensor.envoy_122103023124_current_power_production
+    id: prod
     on_value:
 # de 0 à 85 / 8 leds    
-# Led 0
+# Led 1
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                below: 25
+                id: prod
+                below: 225
             then: 
               - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 0
-                  red: 0%
-                  green: 100%
+                  red: 100%
+                  green: 0%
                   blue: 0%
                   color_brightness: 100%
               - light.addressable_set:
@@ -112,20 +118,20 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%  
-# led 1                  
+# led 2                  
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 25
-                below: 35
+                id: prod
+                above: 225
+                below: 450
             then: 
               - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 1
-                  red: 0%
-                  green: 100%
+                  red: 100%
+                  green: 0%
                   blue: 0%
                   color_brightness: 100%
               - light.addressable_set:
@@ -136,20 +142,20 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%  
-# Led 2              
+# Led 3              
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 35
-                below: 45
+                id: prod
+                above: 450
+                below: 675
             then: 
               - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 2
-                  red: 0%
-                  green: 100%
+                  red: 100%
+                  green: 0%
                   blue: 0%
                   color_brightness: 100%
               - light.addressable_set:
@@ -160,13 +166,13 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%     
-# led 3                  
+# led 4                  
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 45
-                below: 55
+                id: prod
+                above: 675
+                below: 900
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -184,13 +190,13 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%     
-# led 4
+# led 5
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 55
-                below: 65
+                id: prod
+                above: 900
+                below: 1125
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -208,20 +214,20 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%  
-# led 5
+# led 6
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 65
-                below: 75
+                id: prod
+                above: 1125
+                below: 1350
             then: 
               - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 5
-                  red: 100%
-                  green: 0%
+                  red: 0%
+                  green: 100%
                   blue: 0%
                   color_brightness: 100%
               - light.addressable_set:
@@ -232,20 +238,20 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%      
-# led 6
+# led 7
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 75
-                below: 85
+                id: prod
+                above: 1350
+                below: 1575
             then: 
               - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 6
-                  red: 100%
-                  green: 0%
+                  red: 0%
+                  green: 100%
                   blue: 0%
                   color_brightness: 100%
               - light.addressable_set:
@@ -256,19 +262,19 @@ sensor:
                   green: 0%
                   blue: 0%
                   color_brightness: 0%    
-# Led 7
+# Led 8
         - if:
             condition:
               sensor.in_range:
-                id: potar
-                above: 85
+                id: prod
+                above: 1575
             then: 
               - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 7
-                  red: 100%
-                  green: 0%
+                  red: 0%
+                  green: 100%
                   blue: 0%
                   color_brightness: 100%
 

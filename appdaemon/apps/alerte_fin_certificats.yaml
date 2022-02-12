@@ -2,5 +2,5 @@
 alert_fin_certificats:
   class: AlerteFinCertificats
   module: alerte_fin_certificats
-  certif: input_text.linky_test_status,sensor.certificat_ha_fin_nbj,sensor.certificat_vtt_fin_nbj,sensor.certificat_domo_fin_nbj,sensor.certificat_meteo_fin_nbj,sensor.certificat_meteo81000_fin_nbj,sensor.certificat_motioneye_fin_nbj,sensor.certificat_kobold_fin_nbj
+  certif: sensor.certificat_ha_fin_nbj,sensor.certificat_vtt_fin_nbj,sensor.certificat_domo_fin_nbj,sensor.certificat_meteo_fin_nbj,sensor.certificat_meteo81000_fin_nbj,sensor.certificat_motioneye_fin_nbj,sensor.certificat_kobold_fin_nbj
   seuil_bas: 31 # En Jours

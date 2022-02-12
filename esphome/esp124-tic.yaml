@@ -98,6 +98,8 @@ sensor:
     unit_of_measurement: "kWh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"  
     filters:
       lambda: |-
         return x/1000;
@@ -134,7 +136,9 @@ sensor:
     id: papp
     tag_name: "SINSTS"
     name: "Linky PAPP"
-    unit_of_measurement: "VA"
+    unit_of_measurement: "W"
+    device_class: "power"
+    state_class: "measurement"  
     icon: mdi:flash
     teleinfo_id: myteleinfo
     on_value:
@@ -292,7 +296,7 @@ display:
     address: 0x3C
     brightness: 100%
     lambda: |-
-      it.printf(0,0,id(arial),"P=%.0f VA",id(papp).state);
+      it.printf(0,0,id(arial),"P=%.0f W",id(papp).state);
       it.printf(75,0,id(arial),"-%.0f %%",id(p100).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
       it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);

@@ -1010,10 +1010,10 @@
   alias: 4_1_3 Volet-Suivi Azimuth Soleil
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
   trigger:
-  - platform: state
-    entity_id: sensor.sun_azimuth
-    from: '103'
+  - platform: numeric_state
+    entity_id: automation.volets_suivi_soleil
     id: ferme_nord
+    above: '103'
   - platform: numeric_state
     entity_id: sensor.sun_azimuth
     above: '137'
@@ -1044,6 +1044,7 @@
           entity_id:
           - cover.sdb
           - cover.amis_nord
+        data: {}
     - conditions:
       - condition: trigger
         id: ferme_sud
@@ -1056,6 +1057,7 @@
           entity_id:
           - cover.parents_petit
           - cover.amis_sud_petit
+        data: {}
     - conditions:
       - condition: trigger
         id: ouvre_nord
@@ -1063,12 +1065,14 @@
       - service: cover.open_cover
         target:
           entity_id: cover.sdb
+        data: {}
       - condition: state
         entity_id: input_boolean.presence_amis_ch_nord
         state: 'off'
       - service: cover.open_cover
         target:
           entity_id: cover.amis_nord
+        data: {}
     - conditions:
       - condition: trigger
         id: ouvre_sud
@@ -1076,12 +1080,14 @@
       - service: cover.open_cover
         target:
           entity_id: cover.parents_petit
+        data: {}
       - condition: state
         entity_id: input_boolean.presence_amis_ch_sud
         state: 'off'
       - service: cover.open_cover
         target:
           entity_id: cover.amis_sud_petit
+        data: {}
     default: []
   mode: single
 - id: '1634125204090'

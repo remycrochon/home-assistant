@@ -2310,3 +2310,16 @@
       resolved_message: Alert {{ entity_name }} resolved
       max_alerts: 100
       initial_delay: 300
+- id: '1644765337710'
+  alias: 0-0-0 Démarrage System
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition: []
+  action:
+  - service: script.create_all_automations_group
+    data: {}
+  - service: script.create_all_scripts_group
+    data: {}
+  mode: single

@@ -873,6 +873,7 @@
           filter:
             include:
               - entity_id: '*update_available*'
+                state: 'on'
             exclude: []
           sort:
             method: friendly_name

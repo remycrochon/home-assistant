@@ -125,6 +125,9 @@ sensor:
     unit_of_measurement: 'UV'
     value_template: "{{ value_json.UV | round(1) }}"
 
+# lune https://www.home-assistant.io/integrations/moon/
+  - platform: moon
+
   - platform: template
     sensors:
 # Azimuth et elevation soleil sont aussi calculés dans ESP134 mais sujet à coupure
@@ -151,6 +154,259 @@ sensor:
           {{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(' %H %M')}}
         icon_template: mdi:weather-sunset-down
 
+# Integration CClimate
+
+      cc_grass_pollen_index_mod:
+        friendly_name: Pollen Grass climacell
+        icon_template: 'mdi:flower'
+        value_template: >-
+          {% if is_state('sensor.climacell_grass_pollen_index', 'none') %}
+            0
+          {% elif is_state('sensor.climacell_grass_pollen_index','very_low') %}
+            1
+          {% elif is_state('sensor.climacell_grass_pollen_index','low') %}
+            2
+          {% elif is_state('sensor.climacell_grass_pollen_index','medium') %}
+            3
+          {% elif is_state('sensor.climacell_grass_pollen_index','high') %}
+            4
+          {% elif is_state('sensor.climacell_grass_pollen_index','very_high') %}
+            5
+          {% else %}
+            Unknown
+          {% endif %}
+
+      cc_tree_pollen_index_mod:
+        friendly_name: Pollen Tree climacell
+        icon_template: 'mdi:tree'
+        value_template: >-
+          {% if is_state('sensor.climacell_tree_pollen_index', 'none') %}
+            0
+          {% elif is_state('sensor.climacell_tree_pollen_index','very_low') %}
+            1
+          {% elif is_state('sensor.climacell_tree_pollen_index','low') %}
+            2
+          {% elif is_state('sensor.climacell_tree_pollen_index','medium') %}
+            3
+          {% elif is_state('sensor.climacell_tree_pollen_index','high') %}
+            4
+          {% elif is_state('sensor.climacell_tree_pollen_index','very_high') %}
+            5
+          {% else %}
+            Unknown
+          {% endif %}
+          
+
+      cc_weed_pollen_index_mod:
+        friendly_name: Pollen Weed climacell
+        icon_template: 'mdi:sprout'
+        value_template: >-
+          {% if is_state('sensor.climacell_weed_pollen_index', 'none') %}
+            0
+          {% elif is_state('sensor.climacell_weed_pollen_index','very_low') %}
+            1
+          {% elif is_state('sensor.climacell_weed_pollen_index','low') %}
+            2
+          {% elif is_state('sensor.climacell_weed_pollen_index','medium') %}
+            3
+          {% elif is_state('sensor.climacell_weed_pollen_index','high') %}
+            4
+          {% elif is_state('sensor.climacell_weed_pollen_index','very_high') %}
+            5
+          {% else %}
+            Unknown
+          {% endif %}
+
+          
+      cc_temperature:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','temperature') }}
+        unit_of_measurement: °C
+
+      cc_humidity:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','humidity') }}
+
+      cc_pressure:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','pressure') }}
+        unit_of_measurement: hPa
+
+
+
+      cc_current_conditions:
+        value_template: >-
+          {{ states.weather.climacell_daily.state }}
+
+  #        feels_like
+
+      cc_visibility:
+        value_template: >-
+          {{state_attr('weather.climacell_daily','visibility') }}
+
+      cc_wind_bearing:
+        value_template: >-
+          {{state_attr('weather.climacell_daily','wind_bearing') }}
+      
+      cc_wind_speed:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','wind_speed') }}
+
+      cc_o3:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','ozone') }}
+        
+      cc_weather_condition_0d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[0].condition  }}
+      cc_weather_condition_1d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[1].condition }}
+      cc_weather_condition_2d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[2].condition }}
+      cc_weather_condition_3d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[3].condition  }}
+      cc_weather_condition_4d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[4].condition  }}
+
+      cc_temperature_maximum_0d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[0].temperature }}
+        unit_of_measurement: °C
+      cc_temperature_maximum_1d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[1].temperature }}
+        unit_of_measurement: °C
+      cc_temperature_maximum_2d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[2].temperature }}
+        unit_of_measurement: °C
+      cc_temperature_maximum_3d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[3].temperature }}
+        unit_of_measurement: °C
+      cc_temperature_maximum_4d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[4].temperature }}
+        unit_of_measurement: °C
+        
+      cc_temperature_minimum_0d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[0].templow }}
+        unit_of_measurement: °C
+      cc_temperature_minimum_1d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[1].templow }}
+        unit_of_measurement: °C        
+      cc_temperature_minimum_2d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[2].templow }}
+        unit_of_measurement: °C
+      cc_temperature_minimum_3d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[3].templow }}
+        unit_of_measurement: °C
+      cc_temperature_minimum_4d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[4].templow }}
+        unit_of_measurement: °C
+
+      cc_precipitation_intensity_0d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[0].precipitation }}
+
+      cc_precipitation_probability_0d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[0].precipitation_probability }}
+
+      cc_precipitation_probability_1d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[1].precipitation_probability }}
+
+      cc_precipitation_probability_2d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[2].precipitation_probability }}
+
+      cc_precipitation_probability_3d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[3].precipitation_probability }}
+
+      cc_precipitation_probability_4d:
+        value_template: >-
+          {{ state_attr('weather.climacell_daily','forecast')[4].precipitation_probability }}
+
+# Meteo france
+
+      meteo_france_orage:
+        friendly_name: Orages
+        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Orages'') }}'
+      meteo_france_inondation:
+        friendly_name: Inondation
+        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Inondation'') }}'
+      meteo_france_pluie_inondation:
+        friendly_name: Inondation
+        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Pluie-inondation'') }}'       
+      meteo_france_vague:
+        friendly_name: Vagues-submersion
+        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Grand-froid'') }}'         
+      meteo_france_vent:
+        friendly_name: Vent violent
+        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Vent violent'') }}'          
+      meteo_france_neige:
+        friendly_name: Neige-verglas
+        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Neige-verglas'') }}'        
+
+      meteo_france_temperature_maximale_pour_demain:
+        friendly_name: Prévision température maximale
+        value_template: >-
+          {% set start = (now().replace(hour=0,minute=0,second=0)) %}
+          {% set end = (start + timedelta(days=2)) %}
+          {{ state_attr('weather.albi', 'forecast') | selectattr('datetime', '>', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}     
+        unit_of_measurement: '°C'      
+
+      meteo_france_temperature_minimale_pour_demain:
+        friendly_name: Prévision température minimale
+        value_template: >-
+          {% set start = (now().replace(hour=0,minute=0,second=0)) %}
+          {% set end = (start + timedelta(days=2)) %}
+          {{ state_attr('weather.albi', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='templow') | list | max }} 
+        unit_of_measurement: '°C'      
+
+      today_icon:
+          value_template: >-
+            {% if state_attr("weather.albi","forecast")[0].condition =='clear-night' %}
+              3
+            {% elif state_attr("weather.albi","forecast")[0].condition =='cloudy' %}
+              5
+            {% elif state_attr("weather.albi","forecast")[0].condition =='fog' %}
+              16
+            {% elif state_attr("weather.albi","forecast")[0].condition =='hail' %}
+              6
+            {% elif state_attr("weather.albi","forecast")[0].condition =='lightning' %}
+              13
+            {% elif state_attr("weather.albi","forecast")[0].condition =='lightning-rainy' %}
+              17
+            {% elif state_attr("weather.albi","forecast")[0].condition =='partlycloudy' %}
+              8
+            {% elif state_attr("weather.albi","forecast")[0].condition =='pouring' %}
+              18
+            {% elif state_attr("weather.albi","forecast")[0].condition =='rainy' %}
+              9
+            {% elif state_attr("weather.albi","forecast")[0].condition =='snowy' %}
+              11
+            {% elif state_attr("weather.albi","forecast")[0].condition =='snowy-rainy' %}
+              7
+            {% elif state_attr("weather.albi","forecast")[0].condition =='windy' %}
+              14
+            {% elif state_attr("weather.albi","forecast")[0].condition =='windy-variant' %}
+              14
+            {% else %}
+              12
+            {% endif %}
+          friendly_name: Today weather forecast  
 
 # Statistiques Pluviometrie
 # sert à gestion robot tonte
@@ -187,4 +443,6 @@ input_boolean:
   # Validation notitification alerte météo 
   stop_notif_previ_pluie:
     name: Stop Notif Previ Pluie
+
+
 

@@ -7,8 +7,6 @@ house_information:
       name: MH-Z19
     - entity: sensor.concentration_de_particules_2_5um
       name: PMS5003
-    - entity: sensor.concentration_particules_2_5um
-      name: PM1006
 
   addons:
     - name: Alarmes

@@ -8,7 +8,7 @@ global:
   battery_empty_strings:
     - "unavailable" 
   show_covers: open
-  weather: weather.albi # Configure a weather entity see HA docs for more info.
+  weather: weather.climacell_daily #weather.albi # Configure a weather entity see HA docs for more info.
   outside_temperature: sensor.vp2_temp_out # Configure a sensor here!
   outside_humidity: sensor.vp2_humidity_out # Configure a sensor here!
   alarm: alarm_control_panel.alarmo_2 #Alarm panel entity.

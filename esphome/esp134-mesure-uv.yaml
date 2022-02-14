@@ -35,7 +35,7 @@ sensor:
 #ML8511 Mesure UV en mW/Cm²
   - platform: adc
     pin: A0
-    name: "esp134_uv"
+    name: "${friendly_name}_uv"
     unit_of_measurement: "UV"
     update_interval: 60s
     accuracy_decimals: 1

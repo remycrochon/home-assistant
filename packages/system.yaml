@@ -82,3 +82,28 @@ sensor:
             {% endif %}
           {{ text }}
           {% endif %}
+
+      espresence_distance_oneplus5t:
+        unit_of_measurement: "ml"
+        value_template: >-
+          {{state_attr('sensor.espresense_presence_oneplus','distance') }}
+
+
+# One entry for each beacon you want to track
+  - platform: mqtt_room
+    device_id: sd:0xfd64
+    name: 'ESPresense Presence Oneplus'
+    state_topic: espresense/rooms
+    timeout: 60
+    away_timeout: 120
+
+binary_sensor:
+# One entry per sensor node
+  - platform: mqtt
+    name: Salon Mqtt Room
+    state_topic: espresense/rooms/salon/status
+    json_attributes_topic: espresense/rooms/salon/telemetry
+    payload_on: online
+    payload_off: offline
+    device_class: connectivity
+

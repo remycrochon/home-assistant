@@ -1,5 +1,11 @@
+substitutions:
+  device_name: esp134-mesure-solaire
+  adress_ip: "192.168.0.134"
+  friendly_name: esp124
+  time_timezone: "Europe/Paris"
+  
 esphome:
-  name: esp134-mesure-solaire
+  name: ${device_name}
   platform: ESP8266
   board: d1_mini
 
@@ -8,7 +14,7 @@ wifi:
   password: !secret mdpwifi
 
   manual_ip:
-    static_ip: 192.168.0.134
+    static_ip: ${adress_ip}
     gateway: 192.168.0.1
     subnet: 255.255.255.0
   reboot_timeout: 5min
@@ -25,26 +31,6 @@ ota:
 web_server:
   port: 80
 
-
-# Bus I²C
-i2c:
-  sda: GPIO4
-  scl: GPIO5
-  scan: true
-  id: bus_a
-
-sun:
-  latitude: 43.9193
-  longitude: 2.198449722222222
-time:
-  - platform: homeassistant
-    timezone:  Europe/Paris #UTC+0  #Africa/Abidjan #Africa/Algiers #Europe/Paris  #Africa/Algiers
-
-#Etat de la connection
-binary_sensor:
-  - platform: status
-    name: "esp134_Status"
-    
 sensor:
 #ML8511 Mesure UV en mW/Cm²
   - platform: adc
@@ -62,30 +48,53 @@ sensor:
           window_size: 5
           send_every: 5  
 
-  - platform: bme280
-    temperature:
-      name: "Temperature Sous-sol"
-      oversampling: 16x
-    pressure:
-      name: "Pression Sous-sol"
-    humidity:
-      name: "Humidité Sous-sol"
-    address: 0x77
-    update_interval: 60s          
-          
-# Signal du WIFI
+# Puissance du signal WIFI
   - platform: wifi_signal
-    name: "ESP134 WiFi Signal Sensor"
+    id: wif
+    name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
+    
+# Temps de fonctionnement de l'ESP    
+  - platform: uptime
+    id: uptime_seconds
+    name: "${friendly_name} Uptime"
+    update_interval: 60s
+    unit_of_measurement: s
+    accuracy_decimals: 0
+    force_update: false
+    icon: mdi:timer
 
-  - platform: sun
-    name: Sun_Elevation
-    type: elevation
-  - platform: sun
-    name: Sun_Azimuth
-    type: azimuth
 
-# BP Restart
-switch:    
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+    
+# Restart de l'ESP
+switch:   
   - platform: restart
-    name: "ESP134_Restart"
+    name: "${friendly_name} Restart"
+    
+text_sensor:
+# Affichage du temps de fonctionnement
+  - platform: template
+    name: "${friendly_name} Uptime"
+    update_interval: 60s
+    icon: mdi:clock-start
+    lambda: |-
+      int seconds = (id(uptime_seconds).state);
+      int days = seconds / (24 * 3600);
+      seconds = seconds % (24 * 3600);
+      int hours = seconds / 3600;
+      seconds = seconds % 3600;
+      int minutes = seconds /  60;
+      seconds = seconds % 60;
+      if ( days ) {
+        return { (String(days) +"d " + String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
+      } else if ( hours ) {
+        return { (String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
+      } else if ( minutes ) {
+        return { (String(minutes) +"m "+ String(seconds) +"s").c_str() };
+      } else {
+        return { (String(seconds) +"s").c_str() };
+      }

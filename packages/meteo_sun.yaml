@@ -338,6 +338,128 @@ sensor:
         value_template: >-
           {{ state_attr('weather.climacell_daily','forecast')[4].precipitation_probability }}
 
+# Integration Météo France
+
+ 
+          
+      mf_temperature:
+        value_template: >-
+          {{ state_attr('weather.albi','temperature') }}
+        unit_of_measurement: °C
+
+      mf_humidity:
+        value_template: >-
+          {{ state_attr('weather.albi','humidity') }}
+
+      mf_pressure:
+        value_template: >-
+          {{ state_attr('weather.albi','pressure') }}
+        unit_of_measurement: hPa
+
+      mf_current_conditions:
+        value_template: >-
+          {{ states.weather.albi.state }}
+
+  #        feels_like
+
+      mf_visibility:
+        value_template: >-
+          {{state_attr('weather.albi','visibility') }}
+
+      mf_wind_bearing:
+        value_template: >-
+          {{state_attr('weather.albi','wind_bearing') }}
+      
+      mf_wind_speed:
+        value_template: >-
+          {{ state_attr('weather.albi','wind_speed') }}
+
+      mf_o3:
+        value_template: >-
+          {{ state_attr('weather.albi','ozone') }}
+        
+      mf_weather_condition_0d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[0].condition  }}
+      mf_weather_condition_1d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[1].condition }}
+      mf_weather_condition_2d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[2].condition }}
+      mf_weather_condition_3d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[3].condition  }}
+      mf_weather_condition_4d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[4].condition  }}
+
+      mf_temperature_maximum_0d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[0].temperature }}
+        unit_of_measurement: °C
+      mf_temperature_maximum_1d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[1].temperature }}
+        unit_of_measurement: °C
+      mf_temperature_maximum_2d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[2].temperature }}
+        unit_of_measurement: °C
+      mf_temperature_maximum_3d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[3].temperature }}
+        unit_of_measurement: °C
+      mf_temperature_maximum_4d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[4].temperature }}
+        unit_of_measurement: °C
+        
+      mf_temperature_minimum_0d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[0].templow }}
+        unit_of_measurement: °C
+      mf_temperature_minimum_1d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[1].templow }}
+        unit_of_measurement: °C        
+      mf_temperature_minimum_2d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[2].templow }}
+        unit_of_measurement: °C
+      mf_temperature_minimum_3d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[3].templow }}
+        unit_of_measurement: °C
+      mf_temperature_minimum_4d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[4].templow }}
+        unit_of_measurement: °C
+
+      mf_precipitation_intensity_0d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[0].precipitation }}
+
+      mf_precipitation_probability_0d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[0].precipitation }}
+
+      mf_precipitation_probability_1d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[1].precipitation }}
+
+      mf_precipitation_probability_2d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[2].precipitation }}
+
+      mf_precipitation_probability_3d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[3].precipitation }}
+
+      mf_precipitation_probability_4d:
+        value_template: >-
+          {{ state_attr('weather.albi','forecast')[4].precipitation }}
+
 # Meteo france
 
       meteo_france_orage:

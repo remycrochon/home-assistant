@@ -945,16 +945,6 @@
         target:
           entity_id: input_select.mode_fonctionnement_piscine
         data:
-          option: At F
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.mode_fonctionnement_piscine
-        data:
           option: Hiver
       - service: notify.telegram
         data:
@@ -964,16 +954,6 @@
       - condition: trigger
         id: hg_deval
       sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.mode_fonctionnement_piscine
-        data:
-          option: At F
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
       - service: input_select.select_option
         target:
           entity_id: input_select.mode_fonctionnement_piscine

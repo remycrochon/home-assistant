@@ -18,9 +18,7 @@
         alertEntity: sensor.albi_weather_alert
         uvEntity: sensor.vp2_uv
         cloudCoverEntity: sensor.albi_cloud_cover
-        
-    - type: vertical-stack
-      cards:
+
       - type: custom:apexcharts-card
         graph_span: 14d
         span:
@@ -36,3 +34,16 @@
               return entity.attributes.forecast.map((entry) => {
                 return [new Date(entry.datetime).getTime(), entry.precipitation];
               });
+        
+    - type: vertical-stack
+      cards:
+      - type: iframe
+        card_mod:
+          style: |
+            ha-card {
+              margin-top: 1em;
+            }          
+        url: >-
+          https://embed.windy.com/embed2.html?lat=43.91905434993742&lon=2.1979451056884747&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&detailLat=45.522&detailLon=2.373&metricWind=default&metricTemp=default&radarRange=-1
+        aspect_ratio: 100%
+    

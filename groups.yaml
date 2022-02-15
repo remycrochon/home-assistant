@@ -47,3 +47,23 @@ portes_sous_sol:
     - binary_sensor.porte_ssol_ouverte
     - binary_sensor.detecteur_petite_porte_sous_sol
 
+hass_update:
+  name: "HASS Update"
+  all: true
+  entities:
+    - binary_sensor.adguard_home_update_available
+    - binary_sensor.appdaemon_4_update_available
+    - binary_sensor.esphome_update_available
+    - binary_sensor.file_editor_update_available
+    - binary_sensor.ftp_update_available
+    - binary_sensor.glances_update_available
+    - binary_sensor.grafana_update_available
+    - binary_sensor.home_assistant_operating_system_update_available
+    - binary_sensor.influxdb_update_available
+    - binary_sensor.log_viewer_update_available
+    - binary_sensor.mariadb_update_available
+    - binary_sensor.mosquitto_broker_update_available
+    - binary_sensor.network_ups_tools_update_available
+    - binary_sensor.node_red_update_available
+    - binary_sensor.visual_studio_code_update_available
+    

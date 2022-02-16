@@ -1,0 +1,6 @@
+alerte_meteo:
+  class: AlerteMeteo
+  module: alerte_meteo
+  entité: sensor.albi_next_rain
+  alerte: sensor.81_weather_alert
+  

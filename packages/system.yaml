@@ -62,7 +62,7 @@ sensor:
         value_template: >-
           {% set up_time =  as_timestamp(now()) - as_timestamp(states('sensor.uptime')) %}
           {% if up_time == 0 %}
-            Démarrage...
+
           {% else %}
             {% set minutes = (up_time // 60) | int %}
             {% set hours = (minutes // 60) %}

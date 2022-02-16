@@ -106,8 +106,8 @@ class FiltrationPiscine(hass.Hass):
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
                 self.log(f'Temps de Filtration Classique: {temps_filtration}', log="piscine_log")
-            """ Calcul des heures de début et fin filtration en fontion
-            du temps de filtration avant et apres l'heure pivot """
+            # Calcul des heures de début et fin filtration en fontion
+            # du temps de filtration avant et apres l'heure pivot
             t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
             t2 = timedelta(hours=int(nb_h_avant[:2]), minutes=int(nb_h_avant[3:5]), seconds=int(nb_h_avant[6:8]))
             h_debut = t1 - t2
@@ -119,7 +119,7 @@ class FiltrationPiscine(hass.Hass):
             self.set_textvalue(periode_filtration,affichage_texte)
             self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}', log="piscine_log")
             self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}', log="piscine_log")
-            """ self.log(str(h_fin)[:5]) """
+            # self.log(str(h_fin)[:5]) 
             if str(h_fin)[:5] == "1 day": # Ecrete à la fin de la journée
                 h_fin = "23:59:59"
             # Marche pompe si dans plage horaire sinon Arret

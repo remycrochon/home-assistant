@@ -154,6 +154,12 @@ sensor:
           {{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(' %H %M')}}
         icon_template: mdi:weather-sunset-down
 
+# Prevision Pluie
+      h_arrivee_pluie:
+        friendly_name: 'Heure arrivée de la Pluie'
+        value_template: >
+          {{ as_timestamp(states('sensor.albi_next_rain')) | timestamp_custom('%H:%M') }}
+
 # Integration CClimate
 
       cc_grass_pollen_index_mod:

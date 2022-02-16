@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 h_forcast={}
+flag=0
 
 class AlerteMeteo(hass.Hass):
     def initialize(self):
@@ -16,17 +17,20 @@ class AlerteMeteo(hass.Hass):
         self.log(f"Forecast: {forcast}", log="test_log")
         
         infov=self.convert_utc(forcast)
+        infov=self.time()
+        infov=self.get_timezone()
+        infov=self.get_tz_offset()
         self.log(f"infov: {infov}", log="test_log")
         
         # Ecoute une alerte méteo
         self.listen_state(self.change_alerte, self.args["alerte"])
         #alerte_w = self.get_state(self.args["alerte"],attribute="state")
         #self.log(f"Alerte Meteo: {alerte_w}", log="test_log")
-        
 
         #self.notifie_pluie(kwargs=forcast)
 
     def change_pluie(self, entity, attribute, old, new, kwargs):
+        self.log(f'New: {new} Old: {old}', log="test_log")
         dic_forcast = self.get_state(self.args["entité"],attribute="1_hour_forecast")
         h_forcast[0] = dic_forcast['0 min']
         h_forcast[1] = dic_forcast['5 min']
@@ -44,12 +48,16 @@ class AlerteMeteo(hass.Hass):
         #self.log(f'Etat: {etat}', log="test_log")
         h_pluie= etat[11:16] # Extrait l'heure de la chaine de caracteres
 
-        if etat != "unknown":
+        if etat != "unknown" and flag==0:
             message_notification= ": La pluie est attendue a "+ format(h_pluie)
             self.notification(message_notification)
 
-        else:
+        if h_forcast[0] != "Temps sec":
+            flag = 1
+
+        if new=="unknown" and old=="unknown":
             message_notification= ": Plus de pluie attendue."
+            flag=0
             self.notification(message_notification)
 
 
@@ -93,7 +101,6 @@ class AlerteMeteo(hass.Hass):
                 message_notification= ": Fin Alerte Météo "
                 self.notification(message_notification)
                 
-        
     def notification(self,message):
         heure = str(self.time())[:8]
         message_notification= format(heure)+ message

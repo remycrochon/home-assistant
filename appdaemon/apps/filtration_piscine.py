@@ -95,12 +95,12 @@ class FiltrationPiscine(hass.Hass):
         self.log(f'Mode Calcul Abaque= {mode_calcul}', log="piscine_log")
         #  Mode Ete
         if mode_de_fonctionnement == tab_mode[0]:
-            if mode_calcul == "on":
+            if mode_calcul == "on": # Calcul selon Abaque
                 temps_filtration = (duree_abaque(Temperature_eau))*coef
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))
                 self.log(f'Temps de Filtration Abaque: {temps_filtration}', log="piscine_log")
-            else:
+            else: # Calcul selon méthode classique
                 temps_filtration = (duree_classique(Temperature_eau))*coef
                 nb_h_avant = en_heure(float(temps_filtration/2))
                 nb_h_apres = en_heure(float(temps_filtration/2))

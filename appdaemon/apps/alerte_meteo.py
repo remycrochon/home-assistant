@@ -30,7 +30,8 @@ class AlerteMeteo(hass.Hass):
         #self.notifie_pluie(kwargs=forcast)
 
     def change_pluie(self, entity, attribute, old, new, kwargs):
-        self.log(f'New: {new} Old: {old}', log="test_log")
+        global flag
+        self.log(f'New: {new} Old: {old}  Flag={flag}', log="test_log")
         dic_forcast = self.get_state(self.args["entité"],attribute="1_hour_forecast")
         h_forcast[0] = dic_forcast['0 min']
         h_forcast[1] = dic_forcast['5 min']
@@ -74,7 +75,7 @@ class AlerteMeteo(hass.Hass):
         
         if alerte_w != 'Vert' or alerte_w != 'unavailable':
             if Inondation != 'Vert':
-                message_notification= ": Alerte Innondation :"+ inondation
+                message_notification= ": Alerte Innondation :"+ Inondation
                 self.notification(message_notification)
 
             if Grand_Froid != 'Vert':

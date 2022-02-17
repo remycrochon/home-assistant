@@ -230,6 +230,7 @@ class FiltrationPiscine(hass.Hass):
                 self.turn_off(pompe)
                 if journal >=1:
                     self.log("At Ppe", log="piscine_log")
+                    
             if journal >= 2:
                 message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
                 self.log(message_notification, log="piscine_log")

@@ -1,0 +1,23 @@
+Piscine:
+  class: FiltrationPiscine
+  module: filtration_piscine_dev
+# Capteurs
+  temperature_eau: input_number.temp_piscine
+  # Selection du mode fonctionnement de la filtration
+  mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
+  # Heure pivot autour de laquelle le temps de filtration est réparti (50/50)
+  h_pivot: input_datetime.heure_pivot_pisc
+  # Heure de début de filtration en hiver
+  h_debut_hiver: input_datetime.heure_ma_pump_pisc_hiv
+  # Durée de la filtration en hiver
+  duree_hiver: input_number.duree_filtration_max_mode_hiver
+  # Coefficient du temps de filtration entre 60 et 140%
+  coef: input_number.filtration_coeff_abaque
+  # Validation de mode de calcul avec Abaque sion c'est la méthoe classique (T°/2)
+  mode_calcul: input_boolean.calcul_mode_abaque
+
+# actionneurs
+  # Switch de commande de la pompe
+  cde_pompe: switch.test_ppe_piscine
+  # Affichage dans HA des horaires filtration
+  periode_filtration: input_text.test_piscine_periode_filtration

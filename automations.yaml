@@ -232,24 +232,6 @@
       - service: script.volet_piscine_ouverture
     default: []
   mode: single
-- id: '1623911201023'
-  alias: 3_1_4 Piscine-Température Mémorisation avant arrêt
-  description: 'On fait tourner la pompe 15 mn avant prise en compte de la température '
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  condition:
-  - condition: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
-    state: 'on'
-    for: 00:15:00
-  action:
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.mem_temp_piscine
-    data_template:
-      value: '{{ states(''sensor.temp_piscine'')|float }}'
-  mode: single
 - id: '1624083693650'
   alias: 3_2_1 Piscine-pH Validation Automatismes
   description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '

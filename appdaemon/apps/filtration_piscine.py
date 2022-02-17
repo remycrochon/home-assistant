@@ -50,7 +50,7 @@ def en_heure(t):
 class FiltrationPiscine(hass.Hass): 
     def initialize(self):
         global journal, duree_tempo, fin_tempo
-        message_notification= "Initialisation Dev AppDaemon Filtration Piscine."
+        message_notification= "Initialisation AppDaemon Filtration Piscine."
         self.log(message_notification, log="piscine_log")
         self.log(message_notification, log="error_log")
         message_notification= "Jounal Notif niveau:"+str(journal)

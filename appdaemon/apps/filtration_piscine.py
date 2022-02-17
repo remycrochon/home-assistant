@@ -7,7 +7,6 @@ import logging
 # Saisir ici les memes modes que dans HA 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
 
-
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):
     """Advanced calculation method using an abacus.
@@ -51,7 +50,7 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
-        self.run_every(self.touteslesminutes, "now", 5 * 60)
+        self.run_every(self.toutesles5minutes, "now", 5 * 60)
         self.log('Initialisation AppDaemon Filtration Piscine.', log="piscine_log")
 
     def change_temp(self, entity, attribute, old, new, kwargs):
@@ -77,7 +76,7 @@ class FiltrationPiscine(hass.Hass):
             self.set_state(self.args["h_pivot"], state = h_pivot_min)
         self.traitement(kwargs)
 
-    def touteslesminutes(self, kwargs):
+    def toutesles5minutes(self, kwargs):
         self.log('Appel traitement toutes les 5 mn.', log="piscine_log")
         self.traitement(kwargs)
 

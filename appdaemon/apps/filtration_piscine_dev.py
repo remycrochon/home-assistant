@@ -1,13 +1,12 @@
 import hassapi as hass
-#import appdaemon.plugins.hass.hassapi as hass
 import datetime
 from datetime import timedelta
-import logging
 import time
 
 # Saisir ici les memes modes que dans HA 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
-journal=2  # 0=rien ou 1 =info ou 2=debug 
+
+journal=2  # Niveau de journalisation (log): 0=rien ou 1 =info ou 2=debug 
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):
@@ -23,8 +22,9 @@ def duree_abaque(Temperature_eau):
             + 2.43489 * temperature_min
             - 10.72859
     )
-    duree_m = min(float(duree), 23)
-    return duree_m
+#    duree_m = min(float(duree), 23)
+#    return duree_m
+    return duree
 
 # Fonction de calcul du temps de filtration "Classique" 
 def duree_classique(Temperature_eau):
@@ -32,7 +32,9 @@ def duree_classique(Temperature_eau):
     temperature_min: float = max(float(Temperature_eau), 10)
     duree = temperature_min / 2
     duree_m = min(float(duree), 23)
-    return duree_m
+#    duree_m = min(float(duree), 23)
+#    return duree_m
+    return duree
 
 # Fonction de Convertion Int en heure "HH:MM:SS"
 def en_heure(t):
@@ -46,7 +48,7 @@ def en_heure(t):
     return "{:02d}:{:02d}:{:02d}".format(h, m, s)
 
 # Programme principal
-class FiltrationPiscine(hass.Hass):
+class FiltrationPiscineDev(hass.Hass):
     def initialize(self):
         global journal
         self.listen_state(self.change_temp,self.args["temperature_eau"])
@@ -106,19 +108,25 @@ class FiltrationPiscine(hass.Hass):
         mode_calcul= self.get_state(self.args["mode_calcul"])
         periode_filtration=self.args["periode_filtration"]
         if journal >= 2:
-            self.log(f'Mode de F= {mode_de_fonctionnement}', log="piscine_log")
-            self.log(f'Temp_Eau= {Temperature_eau}', log="piscine_log")
-            self.log(f'h_pivot= {pivot}', log="piscine_log")
-            self.log(f'coef= {coef}', log="piscine_log")
-            self.log(f'Mode Calcul Abaque= {mode_calcul}', log="piscine_log")
+            message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
+            self.log(message_notification, log="piscine_log")
+            message_notification=" Temp Eau= "+str(Temperature_eau)
+            self.log(message_notification, log="piscine_log")
+            message_notification="h_pivot= "+str(pivot)
+            self.log(message_notification, log="piscine_log")
+            message_notification="coef= "+str(coef)
+            self.log(message_notification, log="piscine_log")
+
         #  Mode Ete
         if mode_de_fonctionnement == tab_mode[0]:
             if mode_calcul == "on": # Calcul selon Abaque
                 temps_filtration = (duree_abaque(Temperature_eau)) * coef
-                nb_h_avant = en_heure(float(temps_filtration / 3))
-                nb_h_apres = en_heure(float(temps_filtration / 3*2))
+                nb_h_avant = en_heure(float(temps_filtration / 2))
+                nb_h_apres = en_heure(float(temps_filtration / 2))
                 nb_h_total = en_heure(float(temps_filtration))
                 if journal >= 2:
+                    message_notification="Mode Calcul selon Abaque"
+                    self.log(message_notification, log="piscine_log")
                     message_notification= "Duree Filtration Abaque: "+ str(temps_filtration)[:6]+" h"
                     self.log(message_notification, log="piscine_log")
             else: # Calcul selon méthode classique
@@ -127,11 +135,15 @@ class FiltrationPiscine(hass.Hass):
                 nb_h_apres = en_heure(float(temps_filtration / 2))
                 nb_h_total = en_heure(float(temps_filtration))
                 if journal >= 2:
+                    message_notification="Mode Calcul classique"
+                    self.log(message_notification, log="piscine_log")                    
                     message_notification= "Duree Filtration Classique: "+ str(temps_filtration)[:6]+" h"
                     self.log(message_notification, log="piscine_log")
 
             # Calcul des heures de début et fin filtration en fontion
             # du temps de filtration avant et apres l'heure pivot
+            # Adapte l'heure de début de filtration à l'heure actuelle
+            # Limitation de la fin de filtration à 23:59:59
             h_maintenant = timedelta(hours=int(h_locale[:2]), minutes=int(h_locale[3:5]), seconds=int(h_locale[6:8]))
             h_pivot = timedelta(hours=int(pivot[:2]), minutes=int(pivot[3:5]))
             h_avant_t = timedelta(hours=int(nb_h_avant[:2]), minutes=int(nb_h_avant[3:5]), seconds=int(nb_h_avant[6:8]))
@@ -148,7 +160,7 @@ class FiltrationPiscine(hass.Hass):
                 h_fin= min(h_fin,h_max_t)
             
             if journal >=1:
-                message_notification= "h_avant_t: "+str(h_avant_t)+"/h_apres_t: "+str(h_apres_t)+"/h_total_t: "+str(h_total_t)
+                message_notification= "Nbh_avant_t: "+str(h_avant_t)+"/Nbh_apres_t: "+str(h_apres_t)+"/Nbh_total_t: "+str(h_total_t)
                 self.log(message_notification, log="piscine_log")                
                 message_notification="h_debut: "+str(h_debut)+"/h_pivot: "+str(h_pivot)+"/h_fin: "+str(h_fin) 
                 self.log(message_notification, log="piscine_log")
@@ -194,14 +206,16 @@ class FiltrationPiscine(hass.Hass):
             self.turn_off(pompe)
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.log("At Ppe", log="piscine_log")
+            if journal >=1:
+                self.log("At Ppe", log="piscine_log")
 
         # Mode Marche Forcée
         elif mode_de_fonctionnement == tab_mode[3]:
             self.turn_on(pompe)
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.log("MA Ppe", log="piscine_log")
+            if journal >=1:
+                self.log("Ma Ppe", log="piscine_log")
             
         # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
         else:

@@ -1,11 +1,12 @@
 import hassapi as hass
-#import appdaemon.plugins.hass.hassapi as hass
 import datetime
 from datetime import timedelta
-import logging
+import time
 
 # Saisir ici les memes modes que dans HA 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
+
+journal=2  # Niveau de journalisation (log): 0=rien ou 1 =info ou 2=debug 
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):
@@ -21,8 +22,9 @@ def duree_abaque(Temperature_eau):
             + 2.43489 * temperature_min
             - 10.72859
     )
-    duree_m = min(float(duree), 23)
-    return duree_m
+#    duree_m = min(float(duree), 23)
+#    return duree_m
+    return duree
 
 # Fonction de calcul du temps de filtration "Classique" 
 def duree_classique(Temperature_eau):
@@ -30,7 +32,9 @@ def duree_classique(Temperature_eau):
     temperature_min: float = max(float(Temperature_eau), 10)
     duree = temperature_min / 2
     duree_m = min(float(duree), 23)
-    return duree_m
+#    duree_m = min(float(duree), 23)
+#    return duree_m
+    return duree
 
 # Fonction de Convertion Int en heure "HH:MM:SS"
 def en_heure(t):
@@ -46,23 +50,34 @@ def en_heure(t):
 # Programme principal
 class FiltrationPiscine(hass.Hass):
     def initialize(self):
+        global journal
         self.listen_state(self.change_temp,self.args["temperature_eau"])
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
-        self.run_every(self.toutesles5minutes, "now", 5 * 60)
-        self.log('Initialisation AppDaemon Filtration Piscine.', log="piscine_log")
+        self.run_every(self.toutesles5minutes, "now", 1 * 60)
+
+        message_notification= "Initialisation Dev AppDaemon Filtration Piscine."
+        self.log(message_notification, log="piscine_log")
+        message_notification= "Jounal Notif niveau:"+str(journal)
+        self.log(message_notification, log="piscine_log")
 
     def change_temp(self, entity, attribute, old, new, kwargs):
-        self.log('Appel traitement changement Temp.', log="piscine_log")
+        global journal
+        if journal >=2:
+            self.log('Appel traitement changement Temp.', log="piscine_log")
         self.traitement(kwargs)
 
     def change_mode(self, entity, attribute, old, new, kwargs):
-        self.log('Appel traitement changement Mode.', log="piscine_log")
+        global journal
+        if journal >=2:
+            self.log('Appel traitement changement Mode.', log="piscine_log")
         self.traitement(kwargs)
 
     def change_coef(self, entity, attribute, old, new, kwargs):
-        self.log('Appel traitement changement Coef.', log="piscine_log")
+        global journal
+        if journal >=2:
+            self.log('Appel traitement changement Coef.', log="piscine_log")
         self.traitement(kwargs)
 
     def ecretage_h_pivot(self, entity, attribute, old, new, kwargs):
@@ -77,57 +92,91 @@ class FiltrationPiscine(hass.Hass):
         self.traitement(kwargs)
 
     def toutesles5minutes(self, kwargs):
-        self.log('Appel traitement toutes les 5 mn.', log="piscine_log")
+        global journal
+        if journal >=2:
+            self.log('Appel traitement toutes les 5 mn.', log="piscine_log")
         self.traitement(kwargs)
 
     def traitement(self, kwargs):
+        global journal
+        h_locale=time.strftime('%H:%M:%S', time.localtime())
         Temperature_eau = self.get_state(self.args["temperature_eau"])
         mode_de_fonctionnement = self.get_state(self.args["mode_de_fonctionnement"])
         pompe = self.args["cde_pompe"]
-        h_pivot= self.get_state(self.args["h_pivot"])
+        pivot= self.get_state(self.args["h_pivot"])
         coef=float(self.get_state(self.args["coef"]))/100
         mode_calcul= self.get_state(self.args["mode_calcul"])
         periode_filtration=self.args["periode_filtration"]
-        self.log(f'Mode de F= {mode_de_fonctionnement}', log="piscine_log")
-        self.log(f'Temp_Eau= {Temperature_eau}', log="piscine_log")
-        self.log(f'h_pivot= {h_pivot}', log="piscine_log")
-        self.log(f'coef= {coef}', log="piscine_log")
-        self.log(f'Mode Calcul Abaque= {mode_calcul}', log="piscine_log")
+        if journal >= 2:
+            message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
+            self.log(message_notification, log="piscine_log")
+            message_notification=" Temp Eau= "+str(Temperature_eau)
+            self.log(message_notification, log="piscine_log")
+            message_notification="h_pivot= "+str(pivot)
+            self.log(message_notification, log="piscine_log")
+            message_notification="coef= "+str(coef)
+            self.log(message_notification, log="piscine_log")
+
         #  Mode Ete
         if mode_de_fonctionnement == tab_mode[0]:
             if mode_calcul == "on": # Calcul selon Abaque
-                temps_filtration = (duree_abaque(Temperature_eau))*coef
-                nb_h_avant = en_heure(float(temps_filtration/2))
-                nb_h_apres = en_heure(float(temps_filtration/2))
-                self.log(f'Temps de Filtration Abaque: {temps_filtration}', log="piscine_log")
+                temps_filtration = (duree_abaque(Temperature_eau)) * coef
+                nb_h_avant = en_heure(float(temps_filtration / 2))
+                nb_h_apres = en_heure(float(temps_filtration / 2))
+                nb_h_total = en_heure(float(temps_filtration))
+                if journal >= 2:
+                    message_notification="Mode Calcul selon Abaque"
+                    self.log(message_notification, log="piscine_log")
+                    message_notification= "Duree Filtration Abaque: "+ str(temps_filtration)[:6]+" h"
+                    self.log(message_notification, log="piscine_log")
             else: # Calcul selon méthode classique
                 temps_filtration = (duree_classique(Temperature_eau))*coef
-                nb_h_avant = en_heure(float(temps_filtration/2))
-                nb_h_apres = en_heure(float(temps_filtration/2))
-                self.log(f'Temps de Filtration Classique: {temps_filtration}', log="piscine_log")
+                nb_h_avant = en_heure(float(temps_filtration / 2))
+                nb_h_apres = en_heure(float(temps_filtration / 2))
+                nb_h_total = en_heure(float(temps_filtration))
+                if journal >= 2:
+                    message_notification="Mode Calcul classique"
+                    self.log(message_notification, log="piscine_log")                    
+                    message_notification= "Duree Filtration Classique: "+ str(temps_filtration)[:6]+" h"
+                    self.log(message_notification, log="piscine_log")
+
             # Calcul des heures de début et fin filtration en fontion
             # du temps de filtration avant et apres l'heure pivot
-            t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
-            t2 = timedelta(hours=int(nb_h_avant[:2]), minutes=int(nb_h_avant[3:5]), seconds=int(nb_h_avant[6:8]))
-            h_debut = t1 - t2
-            t1 = timedelta(hours=int(h_pivot[:2]), minutes=int(h_pivot[3:5]))
-            t2 = timedelta(hours=int(nb_h_apres[:2]), minutes=int(nb_h_apres[3:5]), seconds=int(nb_h_apres[6:8]))
-            h_fin = t1 + t2
-            # Affichage plage horaire
-            affichage_texte =str(h_debut)+"/"+str(h_fin)
+            # Adapte l'heure de début de filtration à l'heure actuelle
+            # Limitation de la fin de filtration à 23:59:59
+            h_maintenant = timedelta(hours=int(h_locale[:2]), minutes=int(h_locale[3:5]), seconds=int(h_locale[6:8]))
+            h_pivot = timedelta(hours=int(pivot[:2]), minutes=int(pivot[3:5]))
+            h_avant_t = timedelta(hours=int(nb_h_avant[:2]), minutes=int(nb_h_avant[3:5]), seconds=int(nb_h_avant[6:8]))
+            h_apres_t = timedelta(hours=int(nb_h_apres[:2]), minutes=int(nb_h_apres[3:5]), seconds=int(nb_h_apres[6:8]))
+            h_total_t = timedelta(hours=int(nb_h_total[:2]), minutes=int(nb_h_total[3:5]), seconds=int(nb_h_total[6:8]))
+            h_max_t = timedelta(hours=23, minutes=59, seconds=59)
+
+            h_debut = h_pivot - h_avant_t
+            h_fin= h_pivot + h_apres_t
+
+            if h_debut<h_maintenant:
+                h_debut=h_maintenant
+                h_fin=h_maintenant+h_total_t
+                h_fin= min(h_fin,h_max_t)
+            
+            if journal >=1:
+                message_notification= "Nbh_avant_t: "+str(h_avant_t)+"/Nbh_apres_t: "+str(h_apres_t)+"/Nbh_total_t: "+str(h_total_t)
+                self.log(message_notification, log="piscine_log")                
+                message_notification="h_debut: "+str(h_debut)+"/h_pivot: "+str(h_pivot)+"/h_fin: "+str(h_fin) 
+                self.log(message_notification, log="piscine_log")
+
+            affichage_texte =str(h_debut)[:5]+"/"+str(h_pivot)[:5]+"/"+str(h_fin)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
-            self.log(f'nb_h_avant:{nb_h_avant}-nb_h_apres:{nb_h_apres}', log="piscine_log")
-            self.log(f'h_debut:{h_debut}-h_pivot= {h_pivot}-h_fin:{h_fin}', log="piscine_log")
-            # self.log(str(h_fin)[:5]) 
-            if str(h_fin)[:5] == "1 day": # Ecrete à la fin de la journée
-                h_fin = "23:59:59"
+
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
                 self.turn_on(pompe)
-                self.log("Ma Ppe", log="piscine_log")
+                if journal >=1:
+                    self.log("Ma Ppe", log="piscine_log")
             else:
                 self.turn_off(pompe)
-                self.log("At Ppe", log="piscine_log")
+                if journal >=1:
+                    self.log("At Ppe", log="piscine_log")
 
         #  Mode hiver Heure de Début + Une durée en h 
         elif mode_de_fonctionnement == tab_mode[1]:
@@ -138,31 +187,44 @@ class FiltrationPiscine(hass.Hass):
             td2 = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
             h_fin_f = td1 + td2
             # Affichage plage horaire
-            affichage_texte =str(h_debut_h)+"/"+str(h_fin_f)
+            affichage_texte =str(h_debut_h)[:5]+"/"+str(h_fin_f)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
+
             self.log(f'h_debut_h:{h_debut_h}-Duree H:{duree_h}-H fin:{h_fin_f}', log="piscine_log")
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
                 self.turn_on(pompe)
-                self.log("Ma Ppe", log="piscine_log")
+                if journal >=1:
+                    self.log("Ma Ppe", log="piscine_log")
             else:
                 self.turn_off(pompe)
-                self.log("At Ppe", log="piscine_log")
+                if journal >=1:
+                    self.log("At Ppe", log="piscine_log")
 
         # Mode Arret Forcé
         elif mode_de_fonctionnement == tab_mode[2]:
             self.turn_off(pompe)
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.log("At Ppe", log="piscine_log")
+            if journal >=1:
+                self.log("At Ppe", log="piscine_log")
 
         # Mode Marche Forcée
         elif mode_de_fonctionnement == tab_mode[3]:
             self.turn_on(pompe)
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.log("MA Ppe", log="piscine_log")
+            if journal >=1:
+                self.log("Ma Ppe", log="piscine_log")
             
         # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
         else:
             self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}', log="piscine_log")
+    
+    # Fonction Notification
+    def notification(self,message):
+        heure = str(self.time())[:8]
+        message_notification= format(heure)+ message
+        self.log(message_notification, log="test_log")
+        #self.call_service('notify/telegram', message=message_notification)
+        #self.call_service('persistent_notification/create', message=message_notification)

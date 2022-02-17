@@ -8,7 +8,7 @@ tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
 
 # Niveau de journalisation (log): 0=rien ou 1 =info ou 2=debug 
 journal=2 
-#duree_tempo=0.0
+
 fin_tempo=0
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
@@ -119,8 +119,9 @@ class FiltrationPiscineDev(hass.Hass):
         global journal, fin_tempo
         
         # Flag Fin_temporisation
-        message_notification="Fin temporisation pompe"
-        self.log(message_notification, log="piscine_log")
+        if journal >=2:
+            message_notification="Fin temporisation pompe"
+            self.log(message_notification, log="piscine_log")
         
         fin_tempo=1
         if journal >=2:
@@ -158,8 +159,9 @@ class FiltrationPiscineDev(hass.Hass):
         periode_filtration=self.args["periode_filtration"]
 
         # Flag Fin_tempo
-        message_notification="Flag fin tempo= "+str(fin_tempo)
-        self.log(message_notification, log="piscine_log")
+        if journal >=2:
+            message_notification="Flag fin tempo= "+str(fin_tempo)
+            self.log(message_notification, log="piscine_log")
 
         #  Mode Ete
         if mode_de_fonctionnement == tab_mode[0]:
@@ -230,6 +232,16 @@ class FiltrationPiscineDev(hass.Hass):
                 self.turn_off(pompe)
                 if journal >=1:
                     self.log("At Ppe", log="piscine_log")
+# notifications de debug
+            if journal >= 2:
+                message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
+                self.log(message_notification, log="piscine_log")
+                message_notification=" Temp Eau= "+str(Temperature_eau)
+                self.log(message_notification, log="piscine_log")
+                message_notification="h_pivot= "+str(pivot)
+                self.log(message_notification, log="piscine_log")
+                message_notification="coef= "+str(coef)
+                self.log(message_notification, log="piscine_log")
 
         #  Mode hiver Heure de Début + Une durée en h 
         elif mode_de_fonctionnement == tab_mode[1]:
@@ -274,15 +286,6 @@ class FiltrationPiscineDev(hass.Hass):
         else:
             self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}', log="piscine_log")
 
-        if journal >= 2:
-            message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
-            self.log(message_notification, log="piscine_log")
-            message_notification=" Temp Eau= "+str(Temperature_eau)
-            self.log(message_notification, log="piscine_log")
-            message_notification="h_pivot= "+str(pivot)
-            self.log(message_notification, log="piscine_log")
-            message_notification="coef= "+str(coef)
-            self.log(message_notification, log="piscine_log")
     # Fonction Notification
     def notification(self,message):
         heure = str(self.time())[:8]

@@ -15,6 +15,11 @@ Piscine_dev:
   coef: input_number.filtration_coeff_abaque
   # Validation de mode de calcul avec Abaque sion c'est la méthoe classique (T°/2)
   mode_calcul: input_boolean.calcul_mode_abaque
+  # Temps circulation de l'eau avant prise en compte mesure température
+  # cas ou la mesure de température de l'eau se trouve sur le circuit
+  tempo_eau: input_number.tempo_circulation_eau
+  # Memoire de la temperature de l'eau avant arret
+  mem_temp: input_number.mem_temp_piscine
 
 # actionneurs
   # Switch de commande de la pompe

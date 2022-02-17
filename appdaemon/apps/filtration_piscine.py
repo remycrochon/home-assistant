@@ -7,7 +7,7 @@ import time
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
 
 # Niveau de journalisation (log): 0=rien ou 1 =info ou 2=debug 
-journal=2
+journal=0
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):

@@ -34,7 +34,7 @@ utility_meter:
       - hp
       - hc
 input_number:
-  # utilisé pour simuler la température de l'eau pendant les test
+  # utilisé pour simuler la température de l'eau pendant les tests
   temp_piscine:
     name: Temp Eau Simul
     min: -2
@@ -45,14 +45,24 @@ input_number:
 # temperature de l'eau avant arret ppe
   mem_temp_piscine:
     name: Temp Eau avant arret
-    min: -2
-    max: 35
+    min: -5
+    max: 50
     unit_of_measurement: °C
     step: 0.1
     icon: mdi:thermometer
     mode: box
 
-# temperature de l'eau avant arret ppe
+# tempo avant prise en compte de la température de l'eau suite à demarrage marche pompe
+  tempo_circulation_eau:
+    name: Tempo Circulation Eau
+    min: 0
+    max: 3600
+    unit_of_measurement: s
+    step: 0.1
+    icon: mdi:timer
+    mode: box
+
+# temps utilisation cartouche chlore
   temps_cartouche_chlore:
     name: Temps cartouche Chlore
     min: 0

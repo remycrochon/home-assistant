@@ -51,7 +51,7 @@ class FiltrationPiscineDev(hass.Hass):
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
-        self.run_every(self.toutesles5minutes, "now", 1 * 60)
+        self.run_every(self.toutesles5minutes, "now", 5 * 60)
 
         message_notification= "Initialisation Dev AppDaemon Filtration Piscine."
         self.log(message_notification, log="piscine_log")

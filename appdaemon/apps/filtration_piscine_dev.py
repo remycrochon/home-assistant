@@ -22,8 +22,6 @@ def duree_abaque(Temperature_eau):
             + 2.43489 * temperature_min
             - 10.72859
     )
-#    duree_m = min(float(duree), 23)
-#    return duree_m
     return duree
 
 # Fonction de calcul du temps de filtration "Classique" 
@@ -32,8 +30,6 @@ def duree_classique(Temperature_eau):
     temperature_min: float = max(float(Temperature_eau), 10)
     duree = temperature_min / 2
     duree_m = min(float(duree), 23)
-#    duree_m = min(float(duree), 23)
-#    return duree_m
     return duree
 
 # Fonction de Convertion Int en heure "HH:MM:SS"

@@ -6,15 +6,16 @@ import time
 # Saisir ici les memes modes que dans HA 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]
 
-journal=2  # Niveau de journalisation (log): 0=rien ou 1 =info ou 2=debug 
+# Niveau de journalisation (log): 0=rien ou 1 =info ou 2=debug 
+journal=2
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):
-    """Advanced calculation method using an abacus.
-    D = a*T^3 + b*T^2 + c*T +d
-    T est forçèe a 10°C minimum
-    Formule découverte dans: https://github.com/scadinot/pool
-    Filtration en heures"""
+    #Advanced calculation method using an abacus.
+    #D = a*T^3 + b*T^2 + c*T +d
+    #T est forçèe a 10°C minimum
+    #Formule découverte dans: https://github.com/scadinot/pool
+    #Retourne un temps de filtration en heure décimale
     temperature_min: float = max(float(Temperature_eau), 10)
     duree = (
             0.00335 * temperature_min ** 3
@@ -26,7 +27,8 @@ def duree_abaque(Temperature_eau):
 
 # Fonction de calcul du temps de filtration "Classique" 
 def duree_classique(Temperature_eau):
-    """Methode classique temperature / 2"""
+    #Methode classique temperature / 2
+    #Retourne un temps de filtration en heure décimale
     temperature_min: float = max(float(Temperature_eau), 10)
     duree = temperature_min / 2
     duree_m = min(float(duree), 23)
@@ -51,6 +53,7 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
+        self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
         self.run_every(self.toutesles5minutes, "now", 1 * 60)
 
         message_notification= "Initialisation Dev AppDaemon Filtration Piscine."
@@ -74,6 +77,12 @@ class FiltrationPiscine(hass.Hass):
         global journal
         if journal >=2:
             self.log('Appel traitement changement Coef.', log="piscine_log")
+        self.traitement(kwargs)
+        
+    def change_mode_calcul(self, entity, attribute, old, new, kwargs):
+        global journal
+        if journal >=2:
+            self.log('Appel traitement changement mode de calcul.', log="piscine_log")
         self.traitement(kwargs)
 
     def ecretage_h_pivot(self, entity, attribute, old, new, kwargs):

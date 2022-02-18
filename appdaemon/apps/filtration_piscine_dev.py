@@ -211,11 +211,11 @@ class FiltrationPiscineDev(hass.Hass):
             h_debut = h_pivot - h_avant_t
             h_fin= h_pivot + h_apres_t
 
-            if h_debut<h_maintenant:
-                h_debut=h_maintenant
-                h_fin=h_maintenant+h_total_t
-                h_fin= min(h_fin,h_max_t)
-            
+#            if h_debut<h_maintenant:
+#                h_debut=h_maintenant
+#                h_fin=h_maintenant+h_total_t
+#                h_fin= min(h_fin,h_max_t)
+            h_fin= min(h_fin,h_max_t)
             if journal >=1:
                 message_notification= "Nbh_avant_t: "+str(h_avant_t)+"/Nbh_apres_t: "+str(h_apres_t)+"/Nbh_total_t: "+str(h_total_t)
                 self.log(message_notification, log="piscine_log")                

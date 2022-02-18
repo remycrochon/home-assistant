@@ -195,7 +195,6 @@ class FiltrationPiscine(hass.Hass):
 
             # Calcul des heures de début et fin filtration en fontion
             # du temps de filtration avant et apres l'heure pivot
-            # Adapte l'heure de début de filtration à l'heure actuelle
             # Limitation de la fin de filtration à 23:59:59
             h_maintenant = timedelta(hours=int(h_locale[:2]), minutes=int(h_locale[3:5]), seconds=int(h_locale[6:8]))
             h_pivot = timedelta(hours=int(pivot[:2]), minutes=int(pivot[3:5]))

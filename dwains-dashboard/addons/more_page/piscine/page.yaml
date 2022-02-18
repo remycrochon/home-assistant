@@ -278,6 +278,8 @@
             type: custom:multiple-entity-row
 #
           - entities:
+              - entity: sensor.energie_piscine_jour
+                name: Conso J
               - entity: sensor.pzem_pisc_puissance
                 name: Puissance
               - entity: sensor.pzem_pisc_courant

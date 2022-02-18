@@ -2,6 +2,8 @@ import hassapi as hass
 import datetime
 from datetime import timedelta
 import time
+#from homeassistant.helpers.sun import get_astral_event_date, get_astral_event_next
+
 
 # Saisir ici les memes modes que dans HA 
 tab_mode = ["Ete", "Hiver", "At F", "Ma F"]

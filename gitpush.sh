@@ -15,6 +15,8 @@
 #!/bin/bash
 date >> /config/git-last.txt
 cd /config
+git config --global user.email "crochonremy@gmail.com"
+git config --global user.name "remycrochon"
 git add .
 git status
 # Commit changes with message with current date stamp

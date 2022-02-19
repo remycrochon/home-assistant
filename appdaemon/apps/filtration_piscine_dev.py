@@ -104,7 +104,7 @@ class FiltrationPiscineDev(hass.Hass):
             if cle_tempo != None:
                 self.tempo = self.cancel_timer(cle_tempo)   
         
-        self.notification('Appel traitement changement état pompe.',2)
+        self.notification('Appel traitement changement etat pompe.',2)
         self.traitement(kwargs)
 # Appelé sur fin temporisation suit à demarrage de la pompe
     def fin_temporisation_mesure_temp(self,kwargs):

@@ -228,7 +228,7 @@ class FiltrationPiscineDev(hass.Hass):
             affichage_texte =str(h_debut_h)[:5]+"/"+str(h_fin_f)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
 
-            message_notification="h_debut_h"+h_debut_h+"-Duree H:"+duree_h+"-H fin:"+h_fin_f
+            message_notification="h_debut_h"+str(h_debut_h)+"-Duree H:"+str(duree_h)+"-H fin:"+str(h_fin_f)
             self.notification(message_notification,2)
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):

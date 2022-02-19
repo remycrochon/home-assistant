@@ -5,7 +5,7 @@ class AlerteFinCertificats(hass.Hass):
         if "certif" in self.args:
             for certif in self.split_device_list(self.args["certif"]):
                 self.listen_state(self.state_change, certif)
-                self.log(f'Surveillance de: {certif}',log="fin_certificats_log")
+                self.log(f'Surveillance de : {certif}',log="fin_certificats_log")
 
     def state_change(self, entity, attribute, old, new, kwargs):
         heure = str(self.time())[:8]

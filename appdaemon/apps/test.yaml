@@ -1,0 +1,5 @@
+test:
+  module: test
+  class: Test
+  certif: sensor.cert_expiry_timestamp_domo_rem81_com,sensor.cert_expiry_timestamp_vtt_rem81_com,sensor.cert_expiry_timestamp_meteo_rem81_com
+  seuil_bas: 31 # En Jours

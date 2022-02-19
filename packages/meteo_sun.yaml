@@ -222,7 +222,6 @@ sensor:
           {% else %}
             Unknown
           {% endif %}
-
           
       cc_temperature:
         value_template: >-
@@ -237,8 +236,6 @@ sensor:
         value_template: >-
           {{ state_attr('weather.climacell_daily','pressure') }}
         unit_of_measurement: hPa
-
-
 
       cc_current_conditions:
         value_template: >-
@@ -346,8 +343,6 @@ sensor:
 
 # Integration Météo France
 
- 
-          
       mf_temperature:
         value_template: >-
           {{ state_attr('weather.albi','temperature') }}
@@ -568,7 +563,7 @@ sensor:
 
     
 input_boolean:
-  # Validation notitification alerte météo 
+  # Validation notification alerte météo 
   stop_notif_previ_pluie:
     name: Stop Notif Previ Pluie
 

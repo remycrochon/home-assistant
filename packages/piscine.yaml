@@ -52,6 +52,16 @@ input_number:
     icon: mdi:thermometer
     mode: box
 
+# temperature de l'eau avant arret ppe
+  test_mem_temp_piscine:
+    name: Temp Eau avant arret Test
+    min: -5
+    max: 50
+    unit_of_measurement: °C
+    step: 0.1
+    icon: mdi:thermometer
+    mode: box
+
 # tempo avant prise en compte de la température de l'eau suite à demarrage marche pompe
   tempo_circulation_eau:
     name: Tempo Circulation Eau

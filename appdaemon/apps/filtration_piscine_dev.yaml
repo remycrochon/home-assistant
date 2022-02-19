@@ -20,7 +20,7 @@ Piscine_dev:
   # dans le cas où la mesure de température de l'eau se trouve sur le circuit
   tempo_eau: input_number.tempo_circulation_eau
   # Memoire de la temperature de l'eau avant arret
-  mem_temp: input_number.mem_temp_piscine
+  mem_temp: input_number.test_mem_temp_piscine
 
 # Actionneurs
   # Switch de commande de la pompe

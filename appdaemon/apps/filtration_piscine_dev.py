@@ -1,16 +1,15 @@
+# Version du 19/02/2022
 import hassapi as hass
 import datetime
 from datetime import timedelta
 import time
-#from homeassistant.helpers.sun import get_astral_event_date, get_astral_event_next
 
-
+# Variables globales
 # Saisir ici les memes modes que dans HA 
 TAB_MODE = ["Ete", "Hiver", "At F", "Ma F"]
-
-# Niveau de JOURNALisation (log): 0=rien ou 1 =info ou 2=debug 
-JOURNAL=0 
-
+# Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
+JOURNAL=2 
+# RAZ du flag fin_tempo
 FIN_TEMPO = 0
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
@@ -48,15 +47,14 @@ def en_heure(t):
     s = int(t)
     return "{:02d}:{:02d}:{:02d}".format(h, m, s)
 
-# Programme principal
+########## Programme principal ###################
 class FiltrationPiscineDev(hass.Hass): 
     def initialize(self):
-        global JOURNAL, duree_tempo, FIN_TEMPO
+        global JOURNAL, DUREE_TEMPO, FIN_TEMPO
         message_notification= "Initialisation Dev AppDaemon Filtration Piscine."
         self.notification(message_notification,0)
         self.log(message_notification, log="error_log")
-        message_notification= "Jounal Notif niveau:"+str(JOURNAL)
-        self.notification(message_notification,0)
+        self.notification("Jounal Notif niveau:"+str(JOURNAL),0)
         self.listen_state(self.change_temp,self.args["temperature_eau"])
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
         self.listen_state(self.change_coef,self.args["coef"])
@@ -65,45 +63,41 @@ class FiltrationPiscineDev(hass.Hass):
         self.listen_state(self.change_etat_pompe,self.args["cde_pompe"])
         self.run_every(self.touteslesxminutes, "now", 5 * 60)
         
-        # initialisation de la temporisation avant recopie temperatur
-        duree_tempo=float(self.get_state(self.args["tempo_eau"]))
-        
-        message_notification= "Duree tempo:"+str(duree_tempo)
-        self.notification(message_notification,2)
-
+        # initialisation de la temporisation avant recopie temperature
+        DUREE_TEMPO=float(self.get_state(self.args["tempo_eau"]))
+        self.notification("Duree tempo:"+str(DUREE_TEMPO),2)
         nom_entité=self.args["cde_pompe"]
-        self.tempo=self.run_in(self.fin_temporisation_mesure_temp, duree_tempo,entité=nom_entité)
-        # Arret de la pompe afin de 
-        #Mesure_temperature_eau = self.get_state(self.args["temperature_eau"])
-        #self.set_value(self.args["mem_temp"], Mesure_temperature_eau)
+        self.tempo=self.run_in(self.fin_temporisation_mesure_temp, DUREE_TEMPO,entité=nom_entité)
+        # Arret de la pompe sur initalisation
         self.turn_off(self.args["cde_pompe"])
 
+# Appelé sur changement de temperature
     def change_temp(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement Temp.',2)
         self.traitement(kwargs)
-
+# Appelé sur changement de mode de fonctionnement
     def change_mode(self, entity, attribute, old, new, kwargs):
-        global JOURNAL
+        global JOURNAL, FIN_TEMPO
+        FIN_TEMPO = 0
         self.notification('Appel traitement changement Mode.',2)
         self.traitement(kwargs)
-
+# Appelé sur changement de coefficient
     def change_coef(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement Coef.',2)
         self.traitement(kwargs)
-
+# Appelé sur changement de mode de calcul
     def change_mode_calcul(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement mode de calcul.',2)
         self.traitement(kwargs)
-
 # Appelé sur changement d'état de la pompe de filtrage
     def change_etat_pompe(self, entity, attribute, old, new, kwargs):
-        global JOURNAL, FIN_TEMPO ,duree_tempo
+        global JOURNAL, FIN_TEMPO ,DUREE_TEMPO
         nom_entité=self.args["cde_pompe"]
         if new=="on":
-            self.tempo=self.run_in(self.fin_temporisation_mesure_temp, duree_tempo,entité=nom_entité)
+            self.tempo=self.run_in(self.fin_temporisation_mesure_temp, DUREE_TEMPO,entité=nom_entité)
         else:
             FIN_TEMPO = 0
             cle_tempo = self.tempo
@@ -112,7 +106,7 @@ class FiltrationPiscineDev(hass.Hass):
         
         self.notification('Appel traitement changement état pompe.',2)
         self.traitement(kwargs)
-# Appelé sur fin temporisatio suit à demarrage de la pompe
+# Appelé sur fin temporisation suit à demarrage de la pompe
     def fin_temporisation_mesure_temp(self,kwargs):
         global JOURNAL, FIN_TEMPO 
         FIN_TEMPO = 1
@@ -195,10 +189,11 @@ class FiltrationPiscineDev(hass.Hass):
 #                h_fin=h_maintenant+h_total_t
 #                h_fin= min(h_fin,h_max_t)
             h_fin= min(h_fin,h_max_t)
-            message_notification= "Nbh_avant_t: "+str(h_avant_t)+"/Nbh_apres_t: "+str(h_apres_t)+"/Nbh_total_t: "+str(h_total_t)
+            message_notification= "Nb h_avant_t: "+str(h_avant_t)+"/Nb h_apres_t: "+str(h_apres_t)+"/Nb h_total_t: "+str(h_total_t)
             self.notification(message_notification,1)
             message_notification="h_debut: "+str(h_debut)+"/h_pivot: "+str(h_pivot)+"/h_fin: "+str(h_fin) 
             self.notification(message_notification,1)
+            # Affichage plage horaire
             affichage_texte =str(h_debut)[:5]+"/"+str(h_pivot)[:5]+"/"+str(h_fin)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
 
@@ -211,7 +206,7 @@ class FiltrationPiscineDev(hass.Hass):
                 self.turn_off(pompe)
                 if JOURNAL >=1:
                     self.log("At Ppe", log="piscine_log")
-# notifications de debug
+# Notifications de debug
             message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
             self.notification(message_notification,2)
             message_notification=" Temp Eau= "+str(Temperature_eau)
@@ -226,9 +221,9 @@ class FiltrationPiscineDev(hass.Hass):
             h_debut_h= self.get_state(self.args["h_debut_hiver"])
             duree= self.get_state(self.args["duree_hiver"])
             duree_h=en_heure(float(duree))
-            td1 = timedelta(hours=int(h_debut_h[:2]), minutes=int(h_debut_h[3:5]), seconds=int(h_debut_h[6:8]))
-            td2 = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
-            h_fin_f = td1 + td2
+            h_debut_t = timedelta(hours=int(h_debut_h[:2]), minutes=int(h_debut_h[3:5]), seconds=int(h_debut_h[6:8]))
+            duree_t = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
+            h_fin_f = h_debut_t + duree_t
             # Affichage plage horaire
             affichage_texte =str(h_debut_h)[:5]+"/"+str(h_fin_f)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
@@ -259,11 +254,12 @@ class FiltrationPiscineDev(hass.Hass):
             
         # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
         else:
-            self.log('Mode de fonctionnement Piscine Inconnu: {mode_de_fonctionnement}', log="piscine_log")
             message_notification="Mode de fonctionnement Piscine Inconnu: "+mode_de_fonctionnement
             self.notification(message_notification,0)
 
     # Fonction Notification
+    # message =  Texte à afficher
+    # niveau = niveau de journalisation 0,1,2
     def notification(self,message,niveau):
         global JOURNAL
         heure = str(self.time())[:8]

@@ -1,3 +1,4 @@
+# Version du 19/02/2022
 Piscine_dev:
   class: FiltrationPiscineDev
   module: filtration_piscine_dev
@@ -21,7 +22,7 @@ Piscine_dev:
   # Memoire de la temperature de l'eau avant arret
   mem_temp: input_number.mem_temp_piscine
 
-# actionneurs
+# Actionneurs
   # Switch de commande de la pompe
   cde_pompe: switch.test_ppe_piscine
   # Affichage dans HA des horaires filtration

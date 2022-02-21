@@ -4,7 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 import time
 
-# Niveau de log 0,1,
+# Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
 JOURNAL=2 
 
 class AlerteFinCertificats(hass.Hass):

@@ -49,7 +49,7 @@ portes_sous_sol:
 
 hass_update:
   name: "HASS Update"
-  all: true
+  all: false
   entities:
     - binary_sensor.adguard_home_update_available
     - binary_sensor.appdaemon_4_update_available

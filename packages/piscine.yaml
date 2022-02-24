@@ -230,7 +230,7 @@ sensor:
 template:
 # mesure de la température de l'eau, permet de basculer facilement en mode simulation
 # en commentant ou decommentant les lignes ci-dessous
-  sensor:
+  - sensor:
     - name: "Energie Piscine Jour"
       unique_id: "energy_pisc_daily" 
       state: >-
@@ -273,7 +273,7 @@ template:
       state: '{{ states("sensor.pression_filtre") |float(default=0) | round(2) }}'
       unit_of_measurement: "Bars"
 
-  binary_sensor:
+  - binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement
     - name: "ppe_piscine_en_marche"
       state: >-

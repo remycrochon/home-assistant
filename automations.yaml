@@ -1732,9 +1732,7 @@
       milliseconds: 0
   - platform: state
     entity_id: binary_sensor.malaver_en_marche
-    from: 'on'
-    to: 'off'
-    id: at mal
+    id: etat mal
   condition:
   - condition: state
     entity_id: input_boolean.valid_delestage
@@ -1745,31 +1743,25 @@
       - condition: state
         entity_id: binary_sensor.malaver_en_marche
         state: 'on'
-      - condition: state
-        entity_id: binary_sensor.ppe_piscine_en_marche
-        state: 'on'
       sequence:
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.mem_delestage
+        data: {}
       - service: notify.telegram
         data:
           message: Delestage Piscine sur ON{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Energie-Delestage !!!
-      - service: homeassistant.turn_off
-        target:
-          entity_id: switch.cde_pompe_filtration
     - conditions:
       - condition: state
-        entity_id: input_boolean.mem_delestage
-        state: 'on'
-      - condition: trigger
-        id: at mal
+        entity_id: binary_sensor.malaver_en_marche
+        state: 'off'
       sequence:
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.mem_delestage
+        data: {}
       - service: notify.telegram
         data:
           message: Delestage Piscine sur OFF{{-"\n"-}}{{states("sensor.date_time")

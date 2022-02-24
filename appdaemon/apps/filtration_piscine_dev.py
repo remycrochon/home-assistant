@@ -61,6 +61,7 @@ class FiltrationPiscineDev(hass.Hass):
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
         self.listen_state(self.change_etat_pompe,self.args["cde_pompe"])
+        self.listen_state(self.change_arret_force,self.args["arret_force"])
         self.run_every(self.touteslesxminutes, "now", 5 * 60)
         
         # initialisation de la temporisation avant recopie temperature
@@ -91,6 +92,11 @@ class FiltrationPiscineDev(hass.Hass):
     def change_mode_calcul(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement mode de calcul.',2)
+        self.traitement(kwargs)
+# Appelé sur changement arret forcé
+    def change_arret_force(self, entity, attribute, old, new, kwargs):
+        global JOURNAL
+        self.notification('Appel traitement sur arret force.',2)
         self.traitement(kwargs)
 # Appelé sur changement d'état de la pompe de filtrage
     def change_etat_pompe(self, entity, attribute, old, new, kwargs):
@@ -136,6 +142,7 @@ class FiltrationPiscineDev(hass.Hass):
         Mesure_temperature_eau = float(self.get_state(self.args["temperature_eau"]))
         Mem_temperature_eau = float(self.get_state(self.args["mem_temp"]))
         mode_de_fonctionnement = self.get_state(self.args["mode_de_fonctionnement"])
+        arret_force = self.get_state(self.args["arret_force"])
         pompe = self.args["cde_pompe"]
         pivot= self.get_state(self.args["h_pivot"])
         coef=float(self.get_state(self.args["coef"]))/100
@@ -199,13 +206,10 @@ class FiltrationPiscineDev(hass.Hass):
 
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
-                self.turn_on(pompe)
-                if JOURNAL >=1:
-                    self.log("Ma Ppe", log="piscine_log")
+                ma_ppe=1
             else:
-                self.turn_off(pompe)
-                if JOURNAL >=1:
-                    self.log("At Ppe", log="piscine_log")
+                ma_ppe=0
+
 # Notifications de debug
             message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
             self.notification(message_notification,2)
@@ -232,30 +236,39 @@ class FiltrationPiscineDev(hass.Hass):
             self.notification(message_notification,2)
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
-                self.turn_on(pompe)
-                self.notification("Ma Pompe",1)
+                ma_ppe=1
             else:
-                self.turn_off(pompe)
-                self.notification("At Pompe",1)
-
+                ma_ppe=0
+ 
         # Mode Arret Forcé
         elif mode_de_fonctionnement == TAB_MODE[2]:
-            self.turn_off(pompe)
+            ma_ppe=0
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.notification("At Pompe",1)
 
         # Mode Marche Forcée
         elif mode_de_fonctionnement == TAB_MODE[3]:
-            self.turn_on(pompe)
+            ma_ppe=1
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            self.notification("Ma Pompe",1)
             
         # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
         else:
             message_notification="Mode de fonctionnement Piscine Inconnu: "+mode_de_fonctionnement
             self.notification(message_notification,0)
+
+        # Calcul sortie commande pompe filtration
+        # Arret pompe sur arret forcé
+        if arret_force=="on":
+            self.turn_off(pompe) 
+            self.notification("Att sur Delestage",1)
+        else:
+            if ma_ppe==1:
+                self.turn_on(pompe)
+                self.notification("Ma Pompe",1)
+            else:
+                self.turn_off(pompe)
+                self.notification("Arret Pompe",1)
 
     # Fonction Notification
     # message =  Texte à afficher

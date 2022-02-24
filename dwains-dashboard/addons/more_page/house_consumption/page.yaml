@@ -262,6 +262,8 @@
                   name: P/P Coup
                 - entity: sensor.linky_ptec
                   name: PTEC
+                - entity: sensor.linky_umoy
+                  name: U moyen
                 - entity: sensor.energy_total_linky_usage_daily_hc
                   name: Linky HC Jour
                 - entity: sensor.energy_total_linky_usage_daily_hp
@@ -287,6 +289,8 @@
                 - entity: sensor.pzem_totale_courant
                   name: Intensité
                   secondary_info: last-updated
+                - entity: sensor.pzem_totale_puissance
+                  Name: P Inst
                 - entity: sensor.pzem_totale_tension
                   name: Tension
                 - entity: sensor.pzem_totale_factpuiss

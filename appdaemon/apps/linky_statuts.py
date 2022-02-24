@@ -87,7 +87,7 @@ class LinkyStatuts(hass.Hass):
         if bit_9 == "0":
             sens_energie_act = "Energie active positive"
         else:
-            sens_energie_act = "Energie active négative"
+            sens_energie_act = "Energie active negative"
 
         # Bits 10 à 13: Tarif en cours contrat fourniture #
         bit_10_13= statuts_binaire[18:22]

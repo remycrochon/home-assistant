@@ -228,9 +228,7 @@ sensor:
       days: 7
     
 template:
-# mesure de la température de l'eau, permet de basculer facilement en mode simulation
-# en commentant ou decommentant les lignes ci-dessous
-  sensor:
+  - sensor:
     - name: "Energie Piscine Jour"
       unique_id: "energy_pisc_daily" 
       state: >-
@@ -273,7 +271,7 @@ template:
       state: '{{ states("sensor.pression_filtre") |float(default=0) | round(2) }}'
       unit_of_measurement: "Bars"
 
-  binary_sensor:
+  - binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement
     - name: "ppe_piscine_en_marche"
       state: >-
@@ -287,23 +285,26 @@ template:
         {{ (a>97) and (a<290) }}
 
 # Commande du volet roulant via un Cover
+
 cover:
   - platform: template
     covers:
       volet_piscine:
         device_class: garage
-        value_template: "{{is_state('binary_sensor.volet_piscine_ferme', 'off')}}"
+        friendly_name: "Piscine"
+        value_template: >-
+          {% if is_state('binary_sensor.volet_piscine_ferme', 'on') %}
+            closed
+          else:
+            open
+          {% endif %}        
         open_cover:
-          service: script.volet_piscine_ouverture
+          - service: script.volet_piscine_ouverture
         close_cover:
-          service: script.volet_piscine_fermeture
+          - service: script.volet_piscine_fermeture   
         icon_template: >-
           {% if is_state('binary_sensor.volet_piscine_ferme', 'on') %}
             mdi:garage
           {% else %} 
-            {% if is_state('binary_sensor.volet_piscine_ferme', 'off') %}
             mdi:garage-open
-          {% else %}
-            mdi:garage-alert
-          {% endif %}
           {% endif %}

@@ -2,44 +2,32 @@
 import json
 
 from homeassistant.components.select import SelectEntity
-from homeassistant.const import ENTITY_CATEGORY_CONFIG
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .const import DOMAIN, HEADLIGHTMODES
+from .entity import AutomowerEntity
 
 
-async def async_setup_entry(hass, entry, async_add_entities) -> None:
-    """Setup sensor platform."""
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Setup select platform."""
     session = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
         AutomowerSelect(session, idx) for idx, ent in enumerate(session.data["data"])
     )
 
 
-class AutomowerSelect(SelectEntity):
+class AutomowerSelect(SelectEntity, AutomowerEntity):
     """Defining the Headlight Mode Select Entity."""
 
-    def __init__(self, session, idx) -> None:
-        self.session = session
-        self.idx = idx
-        self.mower = self.session.data["data"][self.idx]
-
-        mower_attributes = self.__get_mower_attributes()
-        self.mower_id = self.mower["id"]
-        self.mower_name = mower_attributes["system"]["name"]
-        self.model = mower_attributes["system"]["model"]
-
-        self.session.register_cb(
-            lambda _: self.async_write_ha_state(), schedule_immediately=True
-        )
-
-    def __get_mower_attributes(self) -> dict:
-        return self.session.data["data"][self.idx]["attributes"]
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(identifiers={(DOMAIN, self.mower_id)})
+    _attr_options = HEADLIGHTMODES
+    _attr_icon = "mdi:car-light-high"
+    _attr_entity_category = EntityCategory.CONFIG
 
     @property
     def name(self) -> str:
@@ -52,19 +40,9 @@ class AutomowerSelect(SelectEntity):
         return f"{self.mower_id}_headlight_mode"
 
     @property
-    def options(self) -> list[str]:
-        """Return a set of selectable options."""
-        return HEADLIGHTMODES
-
-    @property
-    def icon(self) -> str:
-        """Return a the icon for the entity."""
-        return "mdi:car-light-high"
-
-    @property
     def current_option(self) -> str:
         """Return a the current option for the entity."""
-        mower_attributes = self.__get_mower_attributes()
+        mower_attributes = AutomowerEntity.get_mower_attributes(self)
         try:
             test = mower_attributes["headlight"]["mode"]  ## return of the websocket
         except KeyError:
@@ -72,11 +50,6 @@ class AutomowerSelect(SelectEntity):
                 "mode"
             ]  ## return from REST, just for start-up
         return test
-
-    @property
-    def entity_category(self) -> str:
-        """Return a unique identifier for this entity."""
-        return ENTITY_CATEGORY_CONFIG
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""

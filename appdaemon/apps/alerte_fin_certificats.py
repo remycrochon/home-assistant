@@ -13,11 +13,12 @@ class AlerteFinCertificats(hass.Hass):
             for certif in self.split_device_list(self.args["certif"]):
                 self.notification('Surveillance de:'+certif,2,"")
         tempo_j = self.run_daily(self.bilan_jour, "00:05:00")
+        self.bilan_jour(self)
         #tempo_j = self.run_every(self.bilan_jour, "now", 1 * 60)
             
     def bilan_jour(self,kwargs):
         s_bas= int(self.args["seuil_bas"])
-        
+        tousvalides=1 # Indicateur que tous les certificats sont valables
         for certif in self.split_device_list(self.args["certif"]):
             self.notification('Lecture de:'+certif,2,"")
             nom_entité =  self.friendly_name(certif)
@@ -27,6 +28,9 @@ class AlerteFinCertificats(hass.Hass):
             self.notification("Etat= "+etat,2,"")
             # Vérifie si le certificat est valide
             if etat !="unknown" or validité == True:
+                binarysensorname="binary_sensor.certificat_"+certif[29:]+"_validite"  #binary_sensor.certificat_ha
+                self.set_state(binarysensorname, state="on", replace=True, attributes= {"icon": "mdi:check","device_class": "connectivity"})
+                self.notification("Binary_SensorName:" + binarysensorname,2,"")
                 ce_jour=datetime.strptime(time.strftime('%Y:%m:%d', time.localtime()),'%Y:%m:%d')
                 self.notification("ce Jour:" + str(ce_jour),2,"")
                 date_de_fin=datetime.strptime(etat[:10],'%Y-%m-%d')
@@ -37,16 +41,36 @@ class AlerteFinCertificats(hass.Hass):
                 else:
                     nb_jour=(date_de_fin-ce_jour).days
                     self.notification("nb Jour:" + str(nb_jour),2,"")
+                    sensorname="sensor.certificat_"+certif[29:]+"_fin_nb_jour"
+                    self.notification("SensorName:" + sensorname,2,"")
+
                     # Vérifie si le nombre de jours est inférieur au seuil bas
                     if nb_jour < s_bas:
+                        # Mise à jour entités HA
                         message_notification= "Attention: Fin du certificat <"+ format(nom_entité)+"> dans "+ format(nb_jour)+" J."
+                        self.set_state(sensorname, state=nb_jour, replace=True, attributes= {"icon": "mdi:alert-octagram", "unit_of_measurement": "J"})
                         self.notification(message_notification,0,"teleg")
                     else:
+                        # Mise à jour entités HA
                         message_notification= "Le certificat <"+ format(nom_entité)+"> est encore valable "+ format(nb_jour)+" J."
+                        self.set_state(sensorname, state=nb_jour, replace=True, attributes= {"icon": "mdi:check", "unit_of_measurement": "J"})
                         self.notification(message_notification,2,"")
             else:
+                tousvalides=0 # Indicateur qu'au moins un certificat n'est plus valable
+                # Mise à jour entité HA
+                binarysensorname="binary_sensor.certificat_"+certif[29:]+"_validite"
+                self.set_state(binarysensorname, state="off", replace=True, attributes= {"icon": "mdi:alert-octagram","device_class": "connectivity"})
                 message_notification= " Attention: Le certificat <"+ format(nom_entité)+"> n'est plus valide."
                 self.notification(message_notification,0,"teleg")
+
+        #  mise à jour dans HA de l'indicateur synthèse que les certificats sont valables
+        if tousvalides==1:
+            self.set_state("binary_sensor.certificat_tous_valides",state="on", replace=True, attributes= {"icon": "mdi:check","device_class": "connectivity"})
+        else:
+            self.set_state("binary_sensor.certificat_tous_valides",state="off", replace=True, attributes= {"icon": "mdi:alert-octagram","device_class": "connectivity"})
+
+
+
                 
     # Fonction Notification
     # message =  Texte à afficher

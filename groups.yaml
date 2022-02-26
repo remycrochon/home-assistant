@@ -8,8 +8,8 @@ volets_bureau:
   name: vol_bureau
   all: true
   entities:
-    - cover.bureau_gauche
-    - cover.bureau_droit
+    - cover.volet_droit_p
+    - cover.volet_gauche_p
 
 volets_parents:
   name: volets_parents

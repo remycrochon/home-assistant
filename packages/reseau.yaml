@@ -13,9 +13,9 @@ binary_sensor:
     host: 192.168.0.14
     name: "ping_pc_jeedom"
 
-  - platform: ping
-    host: 192.168.0.21
-    name: "ping_cam_terrasse"
+#  - platform: ping
+#    host: 192.168.0.21
+#    name: "ping_cam_terrasse"
 
   - platform: ping
     host: 192.168.0.25

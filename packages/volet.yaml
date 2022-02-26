@@ -103,6 +103,29 @@ input_select:
       - Absent
       - Arret
 cover:
+# Inversion montée/descente du volet bureau gauche
+  - platform: template
+    covers:
+      bureau_gauche_inv:
+        friendly_name: "Volet Bureau Gauche"
+        open_cover:
+          service: cover.close_cover
+          data:
+            entity_id: cover.bureau_gauche
+        stop_cover:
+          service: cover.stop_cover
+          data:
+            entity_id: cover.bureau_gauche
+        close_cover:
+          service: cover.open_cover
+          data:
+            entity_id: cover.bureau_gauche
+        icon_template: >-
+          {% if is_state('cover.bureau_gauche', 'close') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage
+          {% endif %} 
 # Convertion TC volet Amis grand en cover
   - platform: template
     covers:
@@ -230,7 +253,7 @@ cover:
             {% endif %}
           {% endif %}
 
-# Volet Proportionnel
+# Volets Proportionnels
 # Bureau Droit
   - platform: cover_rf_time_based
     devices:
@@ -242,9 +265,16 @@ cover:
         stop_script_entity_id: script.volet_bureau_droit_stop
         open_script_entity_id: script.volet_bureau_droit_up
 
-
-
-
+# Bureau Gauche
+  - platform: cover_rf_time_based
+    devices:
+      volet_bureau_gauche_proport:
+        name: Volet Gauche P
+        travelling_time_up: 18
+        travelling_time_down: 17
+        close_script_entity_id: script.volet_bureau_gauche_down
+        stop_script_entity_id: script.volet_bureau_gauche_stop
+        open_script_entity_id: script.volet_bureau_gauche_up
 
 # Moteur pas à Pas en test
 automation:

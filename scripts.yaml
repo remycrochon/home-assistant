@@ -46,9 +46,10 @@ ouverture_volet:
 fermeture_volet:
   alias: fermeture_volet
   sequence:
-  - service: cover.open_cover
+  - service: cover.close_cover
     data: {}
-    entity_id: cover.bureau_gauche
+    target:
+      entity_id: cover.volet_gauche_p
   - delay:
       hours: 0
       minutes: 0
@@ -56,7 +57,8 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.bureau_droit
+    target:
+      entity_id: cover.volet_droit_p
   - delay:
       hours: 0
       minutes: 0
@@ -216,9 +218,10 @@ ouverture_volet_absent:
 fermeture_volet_absent:
   alias: fermeture_volet_absent
   sequence:
-  - service: cover.open_cover
+  - service: cover.close_cover
     data: {}
-    entity_id: cover.bureau_gauche
+    target:
+      entity_id: cover.volet_gauche_p
   - delay:
       hours: 0
       minutes: 0
@@ -226,7 +229,8 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.bureau_droit
+    target:
+      entity_id: cover.volet_droit_p
   - delay:
       hours: 0
       minutes: 0
@@ -370,16 +374,18 @@ volets_bureau:
     entity_id: input_boolean.presence_amis_bureau
     state: 'off'
   - service: cover.open_cover
+    data: {}
     target:
-      entity_id: cover.bureau_droit
+      entity_id: cover.volet_gauche_p
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
+  - service: cover.open_cover
+    data: {}
     target:
-      entity_id: cover.bureau_gauche
+      entity_id: cover.volet_droit_p
   mode: single
 ouverture_volets_chamb_nord:
   alias: Ouverture Volets Chamb Nord
@@ -558,3 +564,28 @@ create_all_scripts_group:
       entities: '{{ states.script | map(attribute=''entity_id'') | join('','') }}     '
   mode: single
   alias: Création Groupe Script
+volet_bureau_gauche_down:
+  alias: volet bureau gauche down
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.bureau_gauche
+  mode: single
+volet_bureau_gauche_stop:
+  alias: volet bureau gauche stop
+  sequence:
+  - service: cover.stop_cover
+    target:
+      entity_id:
+      - cover.bureau_gauche
+    data: {}
+  mode: single
+volet_bureau_gauche_up:
+  alias: volet bureau gauche up
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.bureau_gauche
+  mode: single

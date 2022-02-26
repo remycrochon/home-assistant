@@ -54,7 +54,7 @@ rooms:
     temperature: sensor.temperature_sdb
     humidity: sensor.humidity_sdb
     pressure: sensor.pression_sdb
-    cover: cover.sdb
+    cover: cover.volet_sdb_p
     more_entities:
       entities:
         - entity: sensor.battery_sdb
@@ -72,13 +72,13 @@ rooms:
       entities:
         - entity: sensor.chamb_parents_power
 
-# Chambre nord
+# Chambre Nord
   - name: Chambre Nord
     icon: mdi:bed
     temperature: sensor.chambre_nord_temperature
     humidity: sensor.chambre_nord_humidite
     pressure: sensor.chamb_nord_pression
-    cover: cover.amis_nord
+    cover: cover.volet_amis_nord_p
     more_entities:
       entities:
         - entity: sensor.chambre_nord_power

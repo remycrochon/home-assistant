@@ -589,3 +589,51 @@ volet_bureau_gauche_up:
     target:
       entity_id: cover.bureau_gauche
   mode: single
+volet_sdb_down:
+  alias: volet sdb down
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.sdb
+  mode: single
+volet_sdb_stop:
+  alias: volet sdb stop
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id: cover.sdb
+  mode: single
+volet_sdb_up:
+  alias: volet sdb up
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.sdb
+  mode: single
+volet_amis_nord_down:
+  alias: volet amis nord down
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.amis_nord
+  mode: single
+volet_amis_nord_stop:
+  alias: volet amis nord stop
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id: cover.amis_nord
+  mode: single
+volet_amis_nord_up:
+  alias: volet amis nord up
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.amis_nord
+  mode: single

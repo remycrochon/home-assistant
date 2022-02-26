@@ -1737,6 +1737,9 @@
   - condition: state
     entity_id: input_boolean.valid_delestage
     state: 'on'
+  - condition: state
+    entity_id: binary_sensor.ppe_piscine_en_marche
+    state: ''
   action:
   - choose:
     - conditions:

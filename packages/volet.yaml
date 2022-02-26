@@ -17,7 +17,6 @@ input_boolean:
     name: Nuit=0/Jour=1
     icon: mdi:weather-sunny
 
-
 # Calcul Jour/nuit selon luminosite
   val_automs_soleil:
     name: Valid Automs Volet Soleil
@@ -275,6 +274,30 @@ cover:
         close_script_entity_id: script.volet_bureau_gauche_down
         stop_script_entity_id: script.volet_bureau_gauche_stop
         open_script_entity_id: script.volet_bureau_gauche_up
+
+
+# Salle de bains
+  - platform: cover_rf_time_based
+    devices:
+      volet_sdb_proport:
+        name: Volet SdB P
+        travelling_time_up: 15
+        travelling_time_down: 14
+        close_script_entity_id: script.volet_sdb_down
+        stop_script_entity_id: script.volet_sdb_stop
+        open_script_entity_id: script.volet_sdb_up
+
+# Amis Nord
+  - platform: cover_rf_time_based
+    devices:
+      volet_amis_nord_proport:
+        name: Volet Amis Nord P
+        travelling_time_up: 18
+        travelling_time_down: 17
+        close_script_entity_id: script.volet_amis_nord_down
+        stop_script_entity_id: script.volet_amis_nord_stop
+        open_script_entity_id: script.volet_amis_nord_up
+
 
 # Moteur pas à Pas en test
 automation:

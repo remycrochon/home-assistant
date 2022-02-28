@@ -54,33 +54,6 @@ sensor:
     name: Uptime
     scan_interval: 60
 
-  - platform: template
-    sensors:
-      ha_uptime:
-        friendly_name: 'Uptime'
-        icon_template: mdi:home-assistant
-        value_template: >-
-          {%- set up = now().timestamp()-as_timestamp(states('sensor.uptime')) %}
-
-          {%- macro phrase(name,divisor,mod=None) %}
-            {%- set value = ((up//divisor) % (mod if mod else divisor))|int %}
-            {{- '{} {}{}'.format(value,name,end) if value|int > 0 else ''}}
-          {%- endmacro %}
-
-          {%- set values = [phrase('w',60*60*24*7),
-                            phrase('j',60*60*24,7),
-                            phrase('h',60*60,24),
-                            phrase('m',60),
-                            phrase('s',1,60)]
-                            |select('!=','')|list %}
-          {{values[:-1]|join(', ') ~ ' et ' ~ values[-1] if values|length > 1 else
-            values|first}}
-
-      espresence_distance_oneplus5t:
-        unit_of_measurement: "ml"
-        value_template: >-
-          {{state_attr('sensor.espresense_presence_oneplus','distance') }}
-
 
 # One entry for each beacon you want to track
   - platform: mqtt_room
@@ -99,4 +72,13 @@ binary_sensor:
     payload_on: online
     payload_off: offline
     device_class: connectivity
+
+
+template:
+    - sensor:
+      - name: 'espresence_distance_oneplus5t'
+        unit_of_measurement: "ml"
+        state: >-
+          {{state_attr('sensor.espresense_presence_oneplus','distance') }}
+
 

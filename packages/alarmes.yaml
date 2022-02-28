@@ -17,7 +17,7 @@ input_boolean:
 
 # Surveillance de la temperature du congelateur        
 template:
-  binary_sensor:
+  - binary_sensor:
 # Surveillance de la temperature du congelateur     
 # normalement sur off
     - name: "alarme_temp_congelo_haute"

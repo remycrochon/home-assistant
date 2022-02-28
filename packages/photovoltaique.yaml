@@ -1,6 +1,6 @@
 ####################################################
 #                                                  #
-#                 PHOTO VOLTAIQUE                  #
+#                 PHOTOVOLTAIQUE                   #
 #                                                  #
 ####################################################
 input_boolean:
@@ -95,7 +95,7 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"      
- 
+
 # Envoy: Convertion en kWh de la production energie jour
     - name: "Envoy Energie Totale Produite Jour"
       unique_id: "envoy_energie_totale_prod_jour"

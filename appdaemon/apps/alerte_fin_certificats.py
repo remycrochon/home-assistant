@@ -24,11 +24,13 @@ class AlerteFinCertificats(hass.Hass):
             nom_entité =  self.friendly_name(certif)
             etat = self.get_state(certif, attribute="state")
             validité = self.get_state(certif,attribute="is_valid")
-            
+            self.notification("Friendly_name= "+nom_entité,2,"")
             self.notification("Etat= "+etat,2,"")
             # Vérifie si le certificat est valide
             if etat !="unknown" or validité == True:
-                binarysensorname="binary_sensor.certificat_"+certif[29:]+"_validite"  #binary_sensor.certificat_ha
+                # Création entités dans HA
+                #binarysensorname="binary_sensor.cert_"+certif[29:]+"_validite"  #binary_sensor.certificat_ha
+                binarysensorname="binary_sensor.cert_"+nom_entité+"_validite"  #binary_sensor.certificat_ha
                 self.set_state(binarysensorname, state="on", replace=True, attributes= {"icon": "mdi:check","device_class": "connectivity"})
                 self.notification("Binary_SensorName:" + binarysensorname,2,"")
                 ce_jour=datetime.strptime(time.strftime('%Y:%m:%d', time.localtime()),'%Y:%m:%d')
@@ -41,7 +43,8 @@ class AlerteFinCertificats(hass.Hass):
                 else:
                     nb_jour=(date_de_fin-ce_jour).days
                     self.notification("nb Jour:" + str(nb_jour),2,"")
-                    sensorname="sensor.certificat_"+certif[29:]+"_fin_nb_jour"
+                    #sensorname="sensor.cert_"+certif[29:]+"_fin"
+                    sensorname="sensor.cert_"+nom_entité+"_fin"
                     self.notification("SensorName:" + sensorname,2,"")
 
                     # Vérifie si le nombre de jours est inférieur au seuil bas
@@ -58,7 +61,7 @@ class AlerteFinCertificats(hass.Hass):
             else:
                 tousvalides=0 # Indicateur qu'au moins un certificat n'est plus valable
                 # Mise à jour entité HA
-                binarysensorname="binary_sensor.certificat_"+certif[29:]+"_validite"
+                binarysensorname="binary_sensor.cert_"+nom_entité+"_validite"
                 self.set_state(binarysensorname, state="off", replace=True, attributes= {"icon": "mdi:alert-octagram","device_class": "connectivity"})
                 message_notification= " Attention: Le certificat <"+ format(nom_entité)+"> n'est plus valide."
                 self.notification(message_notification,0,"teleg")
@@ -85,4 +88,5 @@ class AlerteFinCertificats(hass.Hass):
             if notif=="teleg":
                 self.call_service('notify/telegram', message=message_notification)
                 self.call_service('persistent_notification/create', message=message_notification)
+                self.call_service('dwains_dashboard/notification_create', message=message_notification)
     

@@ -74,7 +74,9 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.sdb
+    target:
+      entity_id:
+      - cover.volet_sdb_p
   - delay:
       hours: 0
       minutes: 0
@@ -82,7 +84,9 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.amis_nord
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
   - delay:
       hours: 0
       minutes: 0
@@ -256,7 +260,9 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.sdb
+    target:
+      entity_id:
+      - cover.volet_sdb_p
   - delay:
       hours: 0
       minutes: 0
@@ -264,7 +270,9 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.amis_nord
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
   - delay:
       hours: 0
       minutes: 0

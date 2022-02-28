@@ -155,10 +155,10 @@ sensor:
         icon_template: mdi:weather-sunset-down
 
 # Prevision Pluie
-      h_arrivee_pluie:
-        friendly_name: 'Heure arrivée de la Pluie'
-        value_template: >
-          {{ as_timestamp(states('sensor.albi_next_rain')) | timestamp_custom('%H:%M') }}
+#      h_arrivee_pluie:
+#        friendly_name: 'Heure arrivée de la Pluie'
+#        value_template: >
+#          {{ as_timestamp(states('sensor.albi_next_rain')) | timestamp_custom('%H:%M') }}
 
 # Integration CClimate
 

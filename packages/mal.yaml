@@ -82,7 +82,6 @@ template:
 
 
 sensor:
-
 # Energie PC MàL 
   - platform: integration
     source: sensor.puissance_pc_mal

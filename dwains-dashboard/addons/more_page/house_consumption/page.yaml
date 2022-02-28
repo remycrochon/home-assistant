@@ -139,7 +139,7 @@
               - entities:
                   - color: 'var(--dwains-theme-accent)'
                     entity: sensor.envoy_122103023124_current_power_consumption
-                    name: Conso Tot. (24h)
+                    name: Conso. Tot. (24h)
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2
@@ -160,7 +160,7 @@
               - entities:
                   - color: 'var(--dwains-theme-accent)'
                     entity: sensor.envoy_122103023124_current_power_production
-                    name: Prod PV (24h)
+                    name: Produc. PV (24h)
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2
@@ -254,6 +254,16 @@
                 type: section
                 label: Plus d'Informations Linky
               entities:
+                - entity: sensor.energie_totale_jour
+                  name: Energie Tot J
+                - entity: sensor.energy_total_weekly
+                  name: Energie Tot S                
+                - entity: sensor.energy_total_monthly
+                  name: Energie Tot M
+                - entity: sensor.energy_total_usage_daily_hc
+                  name: Energie Tot HC J
+                - entity: sensor.energy_total_usage_daily_hp
+                  name: Energie Tot HP J
                 - entity: sensor.linky_papp
                   name: P inst
                 - entity: sensor.linky_i_inst
@@ -264,28 +274,12 @@
                   name: PTEC
                 - entity: sensor.linky_umoy
                   name: U moyen
-                - entity: sensor.energy_total_linky_usage_daily_hc
-                  name: Linky HC Jour
-                - entity: sensor.energy_total_linky_usage_daily_hp
-                  name: Linky HP Jour
-                - entity: sensor.energie_totale_linky_jour
-                  name: Linky Jour
 
             - type: custom:fold-entity-row
               head:              
                 type: section
                 label: Plus d'Informations PZEM
               entities:
-                - entity: sensor.energie_totale_jour
-                  name: Energie PZEM jour
-                - entity: sensor.energy_total_weekly
-                  name: Energie PZEM semaine                
-                - entity: sensor.energy_total_monthly
-                  name: Energie PZEM Mois
-                - entity: sensor.energy_total_usage_daily_hc
-                  name: Energie PZEM HC du jour
-                - entity: sensor.energy_total_usage_daily_hp
-                  name: Energie PZEM HP du jour
                 - entity: sensor.pzem_totale_courant
                   name: Intensité
                   secondary_info: last-updated

@@ -8,7 +8,7 @@ global:
   battery_empty_strings:
     - "unavailable" 
   show_covers: open
-  weather: weather.climacell_daily #weather.albi # Configure a weather entity see HA docs for more info.
+  weather: weather.albi # Configure a weather entity see HA docs for more info.
   outside_temperature: sensor.vp2_temp_out # Configure a sensor here!
   outside_humidity: sensor.vp2_humidity_out # Configure a sensor here!
   alarm: alarm_control_panel.alarmo_2 #Alarm panel entity.
@@ -16,6 +16,6 @@ global:
   inside_temperature: sensor.vp2_temp_int #Can be 'climate.' or an 'sensor.' entity.
   favorites_homepage: 'true' #Uncomment this line if you want the house information favorites on your homepage.
 
-#  custom_popups: #Create custom popups for a whole domain. See popup addons in the docs
-#    - domain: cover
-#      path: 'dwains-dashboard/addons/popups/cover/popup.yaml'
+  custom_popups: #Create custom popups for a whole domain. See popup addons in the docs
+    - domain: cover
+      path: 'dwains-dashboard/addons/popups/cover/popup.yaml'

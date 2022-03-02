@@ -222,25 +222,26 @@ class LinkyStatuts(hass.Hass):
         else:
             pointe_mobile = "Pointe mobile indefinie"
 
-        #  Mise à jour des entités HA  #
+        #### Creation et Mise à jour des entités HA  ####
 
         # Etat du contact Sec (= 1 = fermé en Heure Creuse) #
         if bit_0 == "0":
-            self.call_service("input_boolean/turn_on", entity_id = "input_boolean.linky_contact_sec")
+            self.set_state("binary_sensor.linky_contact_sec", state="on", replace=True, attributes= {"icon": "mdi:flash"})  
         else:
-            self.call_service("input_boolean/turn_off", entity_id = "input_boolean.linky_contact_sec")
+            self.set_state("binary_sensor.linky_contact_sec", state="off", replace=True, attributes= {"icon": "mdi:flash"})  
         
         # Etat de l'organe de coupure #
-        self.set_textvalue("input_text.linky_organe_de_coupure", organe_de_coupure)
+        self.set_state("sensor.linky_organe_de_coupure", state=organe_de_coupure, replace=True, attributes= {"icon": "mdi:flash"})
 
         #  Sens de l'énergie #
         if bit_9 == "0":
-            self.call_service("input_boolean/turn_on", entity_id = "input_boolean.linky_sens_energie_active")
+            self.set_state("binary_sensor.linky_sens_energie_active", state="on", replace=True, attributes= {"icon": "mdi:flash"})   
         else:
-            self.call_service("input_boolean/turn_off", entity_id = "input_boolean.linky_sens_energie_active")
-        self.set_textvalue("input_text.linky_sens_energie_active", sens_energie_act)
+            self.set_state("binary_sensor.linky_sens_energie_active", state="off", replace=True, attributes= {"icon": "mdi:flash"})   
+        self.set_state("sensor.linky_sens_energie_active", state=sens_energie_act, replace=True, attributes= {"icon": "mdi:flash"})           
 
-        #   Log de Déboggage   
+
+        ####   Log de Déboggage   
         #    A commenter ou supprimer si inutile #
         self.log(f"Statuts={statuts}", log="linky_log")
         self.log(f"Statuts Binaire={statuts_binaire}", log="linky_log")

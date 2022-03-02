@@ -392,16 +392,6 @@
             - entity: input_select.vmc_ssol
               name: Mode de Fonctionnement
             - entities:
-                - entity: input_datetime.horaire_vmc_ss_debut
-                  name: Heure Marche VMC
-                - entity: input_datetime.horaire_vmc_ss_fin
-                  name: Heure Arret VMC
-              entity: input_datetime.horaire_vmc_ss_debut
-              icon: mdi:clock
-              name: Tranche Horaire Auto
-              show_state: false
-              type: custom:multiple-entity-row
-            - entities:
                 - entity: switch.vmc_ssol
                   name: ' '
               entity: input_datetime.horaire_vmc_ss_debut
@@ -409,20 +399,70 @@
               name: Relais VMC
               show_state: false
               type: custom:multiple-entity-row
-            - entities:
-                - entity: input_datetime.horaire_vmc_ss_debut
-                  name: Heure Marche VMC
-                - entity: input_datetime.horaire_vmc_ss_fin
-                  name: Heure Arret VMC
-                - entity: switch.vmc_ssol
-                  name: Relais VMC
-              head:
-                label: Plus d'Informations
-                type: section
-              padding: 0
-              type: custom:fold-entity-row
+
           how_header_toggle: false
           style: |
             ha-card {
               border: solid 2px var(--primary-color);
             }
+        - type: custom:scheduler-card
+          discover_existing: false
+          display_options:
+            primary_info:
+              - <b>{entity} / {name}</b>
+            secondary_info:
+              - >-
+                <b>Next</b> : {relative-time} ({days} {time}) | <b>Action</b> :
+                {action} ({additional-tasks})
+            icon: mdi:radiator
+          include:
+            - input_select.vmc_ssol
+            - switch.vmc_ssol
+          title: false # VMC SSol
+
+###############################################################            
+# PC SAPIN
+    - type: vertical-stack
+      cards:
+        - name: DIVERS SALON
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+
+        - type: custom:scheduler-card
+          discover_existing: false
+          display_options:
+            primary_info:
+              - <b>{entity} / {name}</b>
+              - '<b>Next</b> : {relative-time} | <b>Action</b> : {action}'
+              - additional-tasks
+            secondary_info:
+              - '{days} {time}'
+            icon: mdi:radiator
+          include:
+            - sensor.bh1750_illuminance
+            - switch.lumiere_salon
+            - switch.pc1_lidl
+          title: Lumiere Salon
+
+        - type: custom:scheduler-card
+          discover_existing: false
+          display_options:
+            primary_info:
+              - <b>{entity} / {name}</b>
+              - '<b>Next</b> : {relative-time} | <b>Action</b> : {action}'
+              - additional-tasks
+            secondary_info:
+              - '{days} {time}'
+            icon: mdi:forest
+          include:
+            - switch.pc1_chacon
+            - switch.tc6_bp1
+          title: Lumiere Sapin
+          exclude: []

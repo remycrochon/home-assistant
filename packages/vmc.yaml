@@ -14,15 +14,6 @@ utility_meter:
       - hc
 
 input_datetime:
-  # Horaire VMC SS
-  horaire_vmc_ss_debut:
-    name: Horaire VMC SS Début
-    has_date: false
-    has_time: true
-  horaire_vmc_ss_fin:
-    name: Horaire VMC SS Fin
-    has_date: false
-    has_time: true
 
   # Horaire VMC Niv0
   heure_vmc_niv0_ma:

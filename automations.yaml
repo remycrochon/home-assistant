@@ -104,35 +104,6 @@
           option: Auto
     default: []
   mode: single
-- id: '1614244769739'
-  alias: 1_4_2 Lampe Desodo
-  description: 'PC1 Lidl '
-  trigger:
-  - platform: time
-    at: '19:30'
-    id: Allume
-  - platform: time
-    at: '23:30'
-    id: Eteint
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: Allume
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.pc1_lidl
-    - conditions:
-      - condition: trigger
-        id: Eteint
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.pc1_lidl
-    default: []
-  mode: single
 - id: '1617185147880'
   alias: 3_4_2 Piscine-Notification Alarme Appoint d'eau
   description: ''
@@ -720,59 +691,6 @@
         id: nuit->jour
       sequence:
       - service: script.fermeture_volet_absent
-    default: []
-  mode: single
-- id: '1632994496716'
-  alias: 1_2_2 VMC Sous_Sol Automatismes
-  description: ' '
-  trigger:
-  - platform: state
-    entity_id: input_select.vmc_ssol
-  - platform: time
-    id: debut
-    at: input_datetime.horaire_vmc_ss_debut
-  - platform: time
-    id: fin
-    at: input_datetime.horaire_vmc_ss_fin
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_ssol
-        state: Auto
-      - condition: trigger
-        id: debut
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.vmc_ssol
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_ssol
-        state: Auto
-      - condition: trigger
-        id: fin
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.vmc_ssol
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_ssol
-        state: Arret
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.vmc_ssol
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_ssol
-        state: Marche
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.vmc_ssol
     default: []
   mode: single
 - id: '1632995598078'
@@ -2031,31 +1949,6 @@
           entity_id:
           - switch.sonoff_vmc_niv0_on_off
     default: []
-  mode: single
-- id: '1639204589929'
-  alias: 1_4_3 Sapin de Noel
-  description: ''
-  trigger:
-  - platform: time
-    at: input_datetime.heure_allum_sapin
-    id: allume
-  - platform: time
-    at: input_datetime.heure_eteint_sapin
-    id: eteint
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: allume
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.tc6_bp1
-    default:
-    - service: switch.turn_off
-      target:
-        entity_id: switch.tc6_bp1
   mode: single
 - id: '1634204887777'
   alias: 3_3_3 Piscine ORP Notifications

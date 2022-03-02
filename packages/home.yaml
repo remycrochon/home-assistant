@@ -7,14 +7,3 @@ input_select:
       - Vacances
       - Absent
 
-#Sapin de Noel
-input_datetime:
-  heure_allum_sapin:
-    name: Heure Allume Sapin
-    has_date: false
-    has_time: true
-
-  heure_eteint_sapin:
-    name: Heure Eteint Sapin
-    has_date: false
-    has_time: true

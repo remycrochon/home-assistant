@@ -135,26 +135,19 @@
               show_state: false
               type: custom:multiple-entity-row
             - entities:
-                - entity: input_datetime.horaire_ete_volet_ouv
-                  name: Heure Ouverture ETE
-                - entity: input_datetime.horaire_ete_volet_ferm
-                  name: Heure Fermeture ETE
-                - entity: input_number.luminosite_seuil_bas
-                  name: Lumin. Seuil bas
-                - entity: input_number.luminosite_seuil_haut
-                  name: Lumin. Seuil Haut
-                - entity: input_boolean.nuit_jour
-                - entity: input_boolean.presence_amis_bureau
-                  name: Presence Amis Bureau
-                - entity: input_boolean.presence_amis_ch_nord
-                  name: Presence Amis Chamb Nord
-                - entity: input_boolean.presence_amis_ch_sud
-                  name: Presence Amis Chamb Sud
-              head:
-                label: Plus d'Informations
-                type: section
-              padding: 0
-              type: custom:fold-entity-row
+                - entity: automation.volets_suivi_soleil
+                  name: Automs
+                - entity: sensor.vp2_radiation
+                  name: Radia
+                - entity: input_number.radiation_seuil_ferm_volet
+                  name: Seuil Ferm
+
+              entity: input_boolean.val_automs_soleil
+              icon: mdi:weather-sunny
+              name: Ass Sol
+              show_state: false
+              type: custom:multiple-entity-row              
+
           how_header_toggle: false
           style: |
             ha-card {
@@ -235,20 +228,6 @@
               name: Cde
               show_state: false
               type: custom:multiple-entity-row              
-
-            - entities:
-                - entity: input_datetime.horaire_ecs_debut
-                  name: Heure debut tranche ECS
-                - entity: input_datetime.horaire_ecs_fin
-                  name: Heure fin tranche ECS
-
-                - entity: input_boolean.ecs_av_pv
-                  name: ECS piloté par Routeur PV
-              head:
-                label: Plus d'Informations
-                type: section
-              padding: 0
-              type: custom:fold-entity-row
 
             - entities:
                 - entity: switch.cde_relais_ecs

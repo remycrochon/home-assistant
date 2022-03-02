@@ -2,7 +2,6 @@
 
 house_information:
   favorites:
-    - entity: binary_sensor.alarmes_importantes
     - entity: sensor.mh_z19_co2_value
       name: MH-Z19
     - entity: sensor.concentration_de_particules_2_5um

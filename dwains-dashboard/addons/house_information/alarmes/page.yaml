@@ -1,74 +1,28 @@
 - type: custom:dwains-flexbox-card
   items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
   cards:
-#    cards:
-      - type: custom:auto-entities
-        title: Ping 1
-        card:
-          type: entities
-          show_header_toggle: true
-          state_color: false
-          show_empty: false
-          title: 'Alarmes 1'
-        filter:
-          include:
-            - entity_id: '*ping_*'
-            - entity_id: '*esp*_status'
-            - entity_id: 'binary_sensor.uptime_reseau'    
-            - entity_id: 'binary_sensor.alarme_status_pac'
-            - entity_id: 'binary_sensor.alarme_discord_pac'
-            - entity_id: 'binary_sensor.certificat_tous_valides'
-            - entity_id: 'input_boolean.com_linky'
-            - entity_id: 'input_boolean.com_vp2'
-              sort:
-                method: state
-                reverse: true
-                numeric: true
-          exclude:
-            - entity_id: "*blueprints_*"
-            - entity_id: "*134*"
-            - entity_id: "*141*"
-            - entity_id: "binary_sensor.ping_arduino_piscine"
-            - entity_id: "binary_sensor.ping_nas_dlink"
-            - entity_id: "binary_sensor.ping_cam_terrasse"
-            - state: "on"
-            - state: Online
-      - type: custom:auto-entities
-        title: Ping 2
-        card:
-          type: entities
-          show_header_toggle: true
-          state_color: false
-          show_empty: false
-          title: 'Alarmes 2'
-        filter:
-          include:
-            - entity_id: 'binary_sensor.alarme_porte_cellier'
-            - entity_id: 'binary_sensor.alarme_porte_garage'
-            - entity_id: 'binary_sensor.alarme_porte_sous_sol'
-            - entity_id: 'binary_sensor.detecteur_petite_porte_sous_sol'
-            - entity_id: 'binary_sensor.alarme_temp_congelo_haute'
-              sort:
-                method: state
-                reverse: true
-                numeric: true
-          exclude:
-            - state: "off"
-      - type: custom:auto-entities
-        title: Ping 3
-        card:
-          type: entities
-          show_header_toggle: true
-          state_color: false
-          show_empty: false
-          title: 'Alarmes 3'
-        filter:
-          include:
-            - entity_id: 'binary_sensor.porte_frigo'
-              sort:
-                method: state
-                reverse: true
-                numeric: true
-          exclude:
-            - state: "off"
-#      type: vertical-stack
+    - type: entities
+      entities:
+        - sensor.81_weather_alert
+        - sensor.albi_cloud_cover
+        - sensor.albi_daily_original_condition
+        - sensor.albi_daily_precipitation
+        - sensor.albi_freeze_chance
+        - sensor.albi_next_rain
+        - sensor.albi_original_condition
+        - sensor.albi_pressure
+        - sensor.albi_rain_chance
+        - sensor.albi_snow_chance
+        - sensor.albi_temperature
+        - sensor.albi_uv
+        - sensor.albi_wind_gust
+        - sensor.albi_wind_speed
+      title: Météo-France Albi
+    - type: custom:auto-entities
+      card:
+        type: entities
+        title: Meteo France Alertes
+      filter:
+        include:
+          - entity_id: '*meteo_f*'
+        exclude: []

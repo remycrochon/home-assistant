@@ -1,187 +1,235 @@
 - type: custom:dwains-flexbox-card
 # items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
 # items_classes: 'col-xs-12 col-sm-3 col-sm-6 col-md-3'
-  items_classes: 'col-xs-12 col-sm-6 col-md-6 col-lg-6'
+  items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
   padding: true
   cards:
-      - type: vertical-stack
+    - type: vertical-stack
+      cards:
+      - name: MESURES
+        styles:
+          card:
+            - text-transform: uppercase
+            - font-size: 125%
+            - color: 'var(--dwains-theme-accent)'
+            - border-radius: 0%
+            - font-weight: 100
+            - letter-spacing: 10px
+        type: 'custom:button-card'
+
+      - type: grid
         cards:
-          - type: grid
-            cards:
-              - type: gauge
-                entity: input_number.mem_temp_piscine
-                min: 0
-                max: 40
-                severity:
-                  green: 27
-                  yellow: 0
-                  red: 30
-                name: Temp Eau
-                needle: true
-#
-              - type: gauge
-                entity: sensor.vp2_temp_out
-                max: 45
-                name: T° Ext
-                min: -10
-                severity:
-                  green: 15
-                  yellow: -10
-                  red: 30
-                needle: true
-#
-              - type: gauge
-                entity: sensor.pression_filtre
-                min: 0
-                max: 2
-                severity:
-                  green: 0
-                  yellow: 0.9
-                  red: 1
-                name: P Filtre
-                unit: B
-                needle: true
-#
-              - type: gauge
-                entity: sensor.ph_piscine_ph
-                min: 6
-                max: 9
-                name: pH
-                severity:
-                  green: 7.1
-                  yellow: 6
-                  red: 7.7
-                needle: true
-#
-              - type: gauge
-                entity: sensor.orp_piscine_orp
-                min: 0
-                name: ORP
-                severity:
-                  green: 750
-                  yellow: 0
-                  red: 900
-                needle: true
-                max: 1009
-#
-              - type: gauge
-                entity: sensor.e_fc
-                min: 0
-                max: 10
-                name: Fc
-                needle: true
-#
-              - type: gauge
-                entity: input_number.temps_cartouche_chlore
-                min: 0
-                max: 70
-                name: Cart Chlore
-                severity:
-                  green: 0
-                  yellow: 30
-                  red: 60
-                needle: true
-#
-              - type: gauge
-                entity: sensor.pzem_pisc_puissance
-                min: 0
-                max: 900
-                name: Puissance
-                severity:
-                  green: 0
-                  yellow: 350
-                  red: 800
-                needle: true
-#
-              - aspect_ratio: 1
-                color: auto
-                entity: input_text.piscine_periode_filtration
-                name: Tranche Horaire
-                hold_action:
-                  action: more-info
-                show_state: true
-                type: custom:button-card
-#
-              - aspect_ratio: 1
-                color: auto
-                entity: binary_sensor.ppe_piscine_en_marche
-                name: Ppe Filtre
-                hold_action:
-                  action: more-info
-                show_last_changed: true
-                show_state: true
-                state:
-                  - styles:
-                      icon:
-                        - color: red
-                    value: 'off'
-                  - styles:
-                      icon:
-                        - color: green
-                    value: 'on'
-                type: custom:button-card
-#
-              - aspect_ratio: 1
-                color: auto
-                entity: automation.piscine_injection_v2
-                name: Injection pH
-                hold_action:
-                  action: more-info
-                show_last_changed: true
-                show_state: true
-                state:
-                  - styles:
-                      icon:
-                        - color: red
-                    value: 'off'
-                  - styles:
-                      icon:
-                        - color: green
-                    value: 'on'
-                type: custom:button-card
-#
-              - aspect_ratio: 1
-                color: auto
-                entity: cover.volet_piscine
-                name: Volet Piscine
-                hold_action:
-                  action: more-info
-                show_last_changed: true
-                show_state: true
-                confirmation:
-                  text: >-
-                    [[[ return `Etes vous sur ${entity.attributes.friendly_name}?`
-                    ]]]
-                state:
-                  - styles:
-                      icon:
-                        - color: red
-                    value: open
-                  - styles:
-                      icon:
-                        - color: green
-                    value: closed
-                type: custom:button-card
-            square: true
-# Historiques
-          - title: <- 3 jours
-            entities:
-              - entity: switch.cde_pompe_filtration
-                name: Ppe filtre
-              - entity: switch.cde_ev_eau
-                name: Ev Eau
-              - entity: switch.cde_traitement
-                name: Ppe pH
-              - entity: switch.cde_ppe_chlore
-                name: Ppe Ch
-            type: history-graph
-            hours_to_show: 72
-            refresh_interval: 0
-# Affichage mesures et parametres
-      - entities:
+          - type: gauge
+            entity: input_number.mem_temp_piscine
+            min: 0
+            max: 40
+            severity:
+              green: 27
+              yellow: 0
+              red: 30
+            name: Temp Eau
+            needle: true
+          #
+          - type: gauge
+            entity: sensor.vp2_temp_out
+            max: 45
+            name: T° Ext
+            min: -10
+            severity:
+              green: 15
+              yellow: -10
+              red: 30
+            needle: true
+          #
+          - type: gauge
+            entity: sensor.pression_filtre
+            min: 0
+            max: 2
+            severity:
+              green: 0
+              yellow: 0.9
+              red: 1
+            name: P Filtre
+            unit: B
+            needle: true
+          #     
+          - type: gauge
+            entity: sensor.ph_piscine_ph
+            min: 6
+            max: 9
+            name: pH
+            severity:
+              green: 7.1
+              yellow: 6
+              red: 7.7
+            needle: true
+          #
+          - type: gauge
+            entity: sensor.orp_piscine_orp
+            min: 0
+            name: ORP
+            severity:
+              green: 750
+              yellow: 0
+              red: 900
+            needle: true
+            max: 1009
+          #
+          - type: gauge
+            entity: sensor.e_fc
+            min: 0
+            max: 10
+            name: Fc
+            needle: true
+          #
+          - type: gauge
+            entity: input_number.temps_cartouche_chlore
+            min: 0
+            max: 70
+            name: Cart Chlore
+            severity:
+              green: 0
+              yellow: 30
+              red: 60
+            needle: true
+          #
+          - type: gauge
+            entity: sensor.pzem_pisc_puissance
+            min: 0
+            max: 900
+            name: Puissance
+            severity:
+              green: 0
+              yellow: 350
+              red: 800
+            needle: true
+          #   
+          - aspect_ratio: 1
+            color: auto
+            entity: input_text.piscine_periode_filtration
+            name: Tranche Horaire
+            hold_action:
+              action: more-info
+            show_state: true
+            type: custom:button-card
+          #
+          - aspect_ratio: 1
+            color: auto
+            entity: binary_sensor.ppe_piscine_en_marche
+            name: Ppe Filtre
+            hold_action:
+              action: more-info
+            show_last_changed: true
+            show_state: true
+            state:
+              - styles:
+                  icon:
+                    - color: red
+                value: 'off'
+              - styles:
+                  icon:
+                    - color: green
+                value: 'on'
+            type: custom:button-card
+            #
+          - aspect_ratio: 1
+            color: auto
+            entity: automation.piscine_injection_v2
+            name: Injection pH
+            hold_action:
+              action: more-info
+            show_last_changed: true
+            show_state: true
+            state:
+              - styles:
+                  icon:
+                    - color: red
+                value: 'off'
+              - styles:
+                  icon:
+                    - color: green
+                value: 'on'
+            type: custom:button-card
+          #
+          - aspect_ratio: 1
+            color: auto
+            entity: cover.volet_piscine
+            name: Volet Piscine
+            hold_action:
+              action: more-info
+            show_last_changed: true
+            show_state: true
+            confirmation:
+              text: >-
+                [[[ return `Etes vous sur ${entity.attributes.friendly_name}?`
+                ]]]
+            state:
+              - styles:
+                  icon:
+                    - color: red
+                value: open
+              - styles:
+                  icon:
+                    - color: green
+                value: closed
+            type: custom:button-card
+        square: true
+    # Historiques
+    - type: vertical-stack
+      cards:
+      - name: 'HISTORIQUES'
+        styles:
+          card:
+            - padding: '2% 0px'
+            - text-transform: uppercase
+            - color: 'var(--dwains-theme-accent)'
+            - font-size: 125%
+            - border-radius: 0%
+            - font-weight: 100
+            - letter-spacing: 10px
+            - --mdc-ripple-press-opacity: 0
+            - cursor: initial
+          name:
+            - font-weight: 900
+        type: 'custom:button-card'
+
+      - title: <- 3 jours
+        entities:
+          - entity: switch.cde_pompe_filtration
+            name: Ppe filtre
+          - entity: switch.cde_ev_eau
+            name: Ev Eau
+          - entity: switch.cde_traitement
+            name: Ppe pH
+          - entity: switch.cde_ppe_chlore
+            name: Ppe Ch
+        type: history-graph
+        hours_to_show: 72
+        refresh_interval: 0
+
+    - type: vertical-stack
+      cards:
+      - name: 'PARAMETRES'
+        styles:
+          card:
+            - padding: '2% 0px'
+            - text-transform: uppercase
+            - color: 'var(--dwains-theme-accent)'
+            - font-size: 125%
+            - border-radius: 0%
+            - font-weight: 100
+            - letter-spacing: 10px
+            - --mdc-ripple-press-opacity: 0
+            - cursor: initial
+          name:
+            - font-weight: 900
+        type: 'custom:button-card'
+      #
+      - type: entities
+        entities:
           - entity: input_select.mode_fonctionnement_piscine
             name: Mode de Fonctionnement
-#Mesures
+          #Mesures
           - entities:
               - entity: sensor.pression_piscine_p
                 name: Pression
@@ -194,7 +242,7 @@
             name: Mesures
             show_state: false
             type: custom:multiple-entity-row
-#Ph
+          #Ph
           - entities:
               - entity: switch.cde_traitement
                 name: Ppe
@@ -217,7 +265,7 @@
             name: Ph
             show_state: false
             type: custom:multiple-entity-row
-# Chlore
+          # Chlore
           - entities:
               - entity: switch.cde_ppe_chlore
                 name: Ppe
@@ -240,7 +288,7 @@
             name: Chlore/ORP
             show_state: false
             type: custom:multiple-entity-row
-#
+          #
           - entities:
               - entity: input_number.temps_cartouche_chlore
                 name: Tps Cartouche
@@ -252,7 +300,7 @@
             name: Chlore cart
             show_state: false
             type: custom:multiple-entity-row
-# Tranche Horaire
+          # Tranche Horaire
           - entities:
               - entity: input_boolean.calcul_mode_abaque
                 name: Mode Abaq
@@ -265,7 +313,7 @@
             name: Tranche horaire
             show_state: false
             type: custom:multiple-entity-row
-#
+          #
           - entities:
               - entity: sensor.ma_ppe_piscine_jour
                 name: Fonct. Jour
@@ -276,7 +324,7 @@
             name: Pompe Filtration
             show_state: false
             type: custom:multiple-entity-row
-#
+          #
           - entities:
               - entity: sensor.energie_piscine_jour
                 name: Conso J
@@ -289,7 +337,7 @@
             name: Conso Elec
             show_state: false
             type: custom:multiple-entity-row
-#
+          #
           - entities:
               - entity: input_datetime.heure_ma_pump_pisc_hiv
                 name: MaPpe
@@ -306,22 +354,7 @@
             name: Hiver
             show_state: false
             type: custom:multiple-entity-row
-#
-          - entities:            
-              - entity: input_boolean.volet_piscine_auto
-                name: Auto
-              - entity: cover.volet_piscine
-                name: Volet
-              - entity: input_datetime.heure_ouv_volet_pisc
-                name: Ouv
-              - entity: input_datetime.heure_ferm_volet_pisc
-                name: Ferm
-            entity: cover.volet_piscine
-            icon: mdi:window-shutter
-            name: Volet piscine
-            show_state: false
-            type: custom:multiple-entity-row
-#
+          #
           - entities:
               - entity: sensor.ev_eau_sur_7j
                 name: 7J
@@ -338,9 +371,8 @@
             name: Appoint Eau
             show_state: false
             type: custom:multiple-entity-row
-#
+          #
           - entities:
-
               - label: pH
                 type: section
               - entity: sensor.ph_ezo
@@ -407,7 +439,7 @@
               type: section
             padding: 0
             type: custom:fold-entity-row
-#
+          #
           - entities:
               - entity: switch.cde_pompe_filtration
                 name: Relais Pompe Filtre
@@ -429,10 +461,47 @@
               type: section
             padding: 0
             type: custom:fold-entity-row
+        how_header_toggle: false
         style: |
           ha-card {
             border: solid 2px var(--primary-color);
           }
-        show_header_toggle: false
-        title: Piscine
-        type: entities
+
+
+    - type: vertical-stack
+      cards:
+        - name: 'VOLET'
+          styles:
+            card:
+              - padding: '2% 0px'
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+              - --mdc-ripple-press-opacity: 0
+              - cursor: initial
+            name:
+              - font-weight: 900
+          type: 'custom:button-card'
+
+        - type: custom:scheduler-card
+          discover_existing: false
+          display_options:
+            primary_info:
+              - <b>{entity} / {name}</b>
+              - '<b>Next</b> : {relative-time} | <b>Action</b> : {action}'
+              - additional-tasks
+            secondary_info:
+              - '{days} {time}'
+          include:
+            - script.volet_piscine_fermeture
+            - script.volet_piscine_ouverture
+          title: Volet Piscine
+          exclude: []
+          sort_by:
+            - relative-time
+          show_header_toggle: true
+
+ 

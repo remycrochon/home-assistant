@@ -54,7 +54,7 @@ class FiltrationPiscineDev(hass.Hass):
         message_notification= "Initialisation Dev AppDaemon Filtration Piscine."
         self.notification(message_notification,0)
         self.log(message_notification, log="error_log")
-        self.notification("Jounal Notif niveau:"+str(JOURNAL),0)
+        self.notification("Journal Notif niveau:"+str(JOURNAL),0)
         self.listen_state(self.change_temp,self.args["temperature_eau"])
         self.listen_state(self.change_mode,self.args["mode_de_fonctionnement"])
         self.listen_state(self.change_coef,self.args["coef"])

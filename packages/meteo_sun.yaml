@@ -1,3 +1,12 @@
+input_boolean:
+  # Validation notification alerte météo 
+  stop_notif_previ_pluie:
+    name: Stop Notif Previ Pluie
+
+  com_vp2:
+    name: Comm VP2 OK=On
+
+
 sensor:
 # Vantage Pro2 -> WEEXWX
   - platform: mqtt
@@ -35,7 +44,6 @@ sensor:
     value_template: >-
       {% set a=value_json.rain_cm|float(default=0)%}
       {{ (a*10)|round(3) }}     
-    
 
   - platform: mqtt
     name: "VP2_Rain24"
@@ -127,6 +135,8 @@ sensor:
 
 # lune https://www.home-assistant.io/integrations/moon/
   - platform: moon
+
+  - platform: season  
 
   - platform: template
     sensors:
@@ -560,12 +570,6 @@ sensor:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_standard_deviation
     state_characteristic: standard_deviation
-
-    
-input_boolean:
-  # Validation notification alerte météo 
-  stop_notif_previ_pluie:
-    name: Stop Notif Previ Pluie
 
 
 

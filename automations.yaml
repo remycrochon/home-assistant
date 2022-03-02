@@ -616,7 +616,7 @@
       message: 'Nouvelle IP: {{ states(''sensor.ip_public'')}} {{-"\n"-}}{{states("sensor.date_time")
         }}'
       title: Réseau:!!!
-  - service: persistent_notification.create
+  - service: dwains_dashboard.notification_create
     data:
       message: Nouvelle IP
   mode: single
@@ -1192,7 +1192,7 @@
         data:
           message: PAC Off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: PAC Off Line {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
@@ -1200,7 +1200,7 @@
         data:
           message: PAC On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alert {{ entity_name }} triggered
@@ -1225,7 +1225,7 @@
           message: Porte Cellier ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Cellier ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1234,7 +1234,7 @@
         data:
           message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alert {{ entity_name }} triggered
@@ -1260,7 +1260,7 @@
           data:
             inline_keyboard:
             - Ferme porte:/ferme_soussol, Cancel:/cancel
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Sous Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1269,7 +1269,7 @@
         data:
           message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Porte Sous _Sol Ouverte
@@ -1297,7 +1297,7 @@
           data:
             inline_keyboard:
             - Ferme Porte:/ferme_garage, Cancel:/cancel
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Garage ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1306,7 +1306,7 @@
         data:
           message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alert {{ entity_name }} triggered
@@ -1332,7 +1332,7 @@
             Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat PAC !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Discordance PAC=> PU= {{states("sensor.puissance_pac_rpac")}} et
             Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
@@ -1343,7 +1343,7 @@
           message: PAC OK=> PU= {{states("sensor.puissance_pac_rpac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat PAC !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: PAC OK=> PU= {{states("sensor.puissance_pac_rpac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
@@ -1369,7 +1369,7 @@
           message: Porte Frigo Garage Ouverte {{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Frigo Garage Ouverte {{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1379,7 +1379,7 @@
           message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1404,7 +1404,7 @@
           message: T° Haute Congelo = {{states("sensor.temp_congelo_garage_2") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: T° Haute Congelo = {{states("sensor.temp_congelo_garage_2") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
@@ -1414,7 +1414,7 @@
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
@@ -1438,7 +1438,7 @@
         data:
           message: VP2 Off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: VP2 Off Line {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
@@ -1446,7 +1446,7 @@
         data:
           message: VP2 On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: VP2 On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
@@ -1454,6 +1454,7 @@
       initial_delay: 1
       max_alerts: 100
       resolved_message: Alert {{ entity_name }} resolved
+      notify_message: Alert {{ entity_name }} triggered
 - id: '1634706860525'
   alias: 6_1_1 Energie Changement HP<->HC
   description: ''
@@ -1795,7 +1796,7 @@
         data:
           message: Com Linky off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Com Linky Off Line {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
@@ -1803,7 +1804,7 @@
         data:
           message: Com Linky On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Com Linky On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
@@ -2140,7 +2141,7 @@
           message: Petite Porte Sous-Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Petite Porte Sous-Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -2150,7 +2151,7 @@
           message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes!!!
-      - service: persistent_notification.create
+      - service: dwains_dashboard.notification_create
         data:
           message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
             }}

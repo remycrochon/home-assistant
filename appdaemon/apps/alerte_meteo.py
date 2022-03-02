@@ -114,4 +114,5 @@ class AlerteMeteo(hass.Hass):
             self.log(message_notification, log="test_log")
             if notif=="teleg":
                 self.call_service('notify/telegram', message=message_notification)
-                self.call_service('persistent_notification/create', message=message_notification)
+                self.call_service('dwains_dashboard/notification_create', message=message_notification)
+                #self.call_service('persistent_notification.create', message=message_notification)

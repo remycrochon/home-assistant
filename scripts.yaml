@@ -19,7 +19,9 @@ ouverture_volet:
       milliseconds: 0
   - service: cover.open_cover
     data: {}
-    entity_id: cover.sdb
+    target:
+      entity_id:
+      - cover.volet_sdb_p
   - delay:
       hours: 0
       minutes: 0
@@ -29,18 +31,21 @@ ouverture_volet:
     data: {}
     entity_id: cover.volet_sam
   - service: script.volets_bureau
+    data: {}
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
   - service: script.ouverture_volets_chamb_nord
+    data: {}
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
   - service: script.ouverture_volet_chamb_sud
+    data: {}
   mode: single
   icon: mdi:shuttle
 fermeture_volet:
@@ -403,7 +408,9 @@ ouverture_volets_chamb_nord:
     state: 'off'
   - service: cover.open_cover
     target:
-      entity_id: cover.amis_nord
+      entity_id:
+      - cover.volet_amis_nord_p
+    data: {}
   mode: single
 ouverture_volet_chamb_sud:
   alias: Ouverture Volet Chamb Sud

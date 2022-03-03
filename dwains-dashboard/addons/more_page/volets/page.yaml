@@ -488,3 +488,105 @@
                 position: sidebar
           square: true
           columns: 6
+
+
+###############################################################
+# 
+###############################################################    
+## volets
+    - type: vertical-stack
+      cards:
+        - name: VOLETS
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+        - type: entities
+          entities:
+            - entity: input_select.volets
+              name: Mode de Fonctionnement
+            - entities:
+                - entity: sun.sun
+                  name: Position              
+                - entity: sensor.heure_leve_soleil
+                  name: Levé
+                - entity: sensor.heure_couche_soleil
+                  name: Couché
+              entity: sensor.heure_leve_soleil
+              icon: mdi:weather-sunny
+              name: Soleil
+              show_state: false
+              type: custom:multiple-entity-row
+            - entities:
+                - entity: sensor.bh1750_illuminance
+                  name: mesure
+                - entity: input_number.luminosite_seuil_bas
+                  name: Bas
+                - entity: input_number.luminosite_seuil_haut
+                  name: Haut
+              entity: input_number.luminosite_seuil_bas
+              icon: mdi:weather-sunny
+              name: Auto Hiver
+              show_state: false
+              type: custom:multiple-entity-row
+
+            - entities:
+                - entity: input_datetime.horaire_ete_volet_ouv
+                  name: Ouv
+                - entity: input_datetime.horaire_ete_volet_ferm
+                  name: Ferm
+              entity: input_datetime.horaire_ete_volet_ouv
+              icon: mdi:clock
+              name: Auto Ete
+              show_state: false
+              type: custom:multiple-entity-row
+
+            - entities:
+                - entity: input_boolean.nuit_jour
+                  name: N/J (Actif)
+                - entity: input_boolean.presence_amis_bureau
+                  name: Amis Bur
+                - entity: input_boolean.presence_amis_ch_nord
+                  name: Amis Nord
+                - entity: input_boolean.presence_amis_ch_sud
+                  name: Amis Sud
+              entity: input_boolean.nuit_jour
+              icon: mdi:account
+              name: Communs
+              show_state: false
+              type: custom:multiple-entity-row
+
+            - entities:
+                - entity: automation.volets_suivi_soleil
+                  name: Automs
+                - entity: sensor.vp2_radiation
+                  name: Radia
+                - entity: input_number.radiation_seuil_ferm_volet
+                  name: Seuil Ferm
+              entity: input_boolean.val_automs_soleil
+              icon: mdi:weather-sunny
+              name: Ass Sol
+              show_state: false
+              type: custom:multiple-entity-row              
+
+            - entities:
+                - entity: sensor.sun_azimuth
+                  name: Azim
+                - entity: sensor.sun_elevation
+                  name: Elev
+              entity: sensor.sun_elevation
+              icon: mdi:weather-sunny
+              name: Position Sol
+              show_state: false
+              type: custom:multiple-entity-row    
+
+          how_header_toggle: false
+          style: |
+            ha-card {
+              border: solid 2px var(--primary-color);
+            }

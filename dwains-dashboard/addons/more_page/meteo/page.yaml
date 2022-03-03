@@ -170,17 +170,6 @@
                     #Voorspelling 
                   - type: vertical-stack
                     cards:
-                      - type: custom:meteo-france-weather-card
-                        name: Albi
-                        entity: weather.albi
-                        rainForecastEntity: sensor.albi_next_rain
-                        freezeChanceEntity: sensor.albi_freeze_chance
-                        rainChanceEntity: sensor.albi_rain_chance
-                        snowChanceEntity: sensor.albi_snow_chance
-                        thunderChanceEntity: sensor.albi_thunder_chance
-                        alertEntity: sensor.albi_weather_alert
-                        uvEntity: sensor.vp2_uv
-                        cloudCoverEntity: sensor.albi_cloud_cover
                                         
                       - type: 'custom:mini-graph-card'
                         title: Derniere 24h # <- translate this line

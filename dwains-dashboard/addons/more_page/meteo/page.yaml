@@ -3,10 +3,12 @@
 ## More-page add-on: Weather Dashboard
 ## Version: 3.0.1
 - type: custom:dwains-flexbox-card
-  items_classes: 'col-xs-12'
+  #items_classes: 'col-xs-12 col-sm-6 col-md-6 col-lg-6'
+  #items_classes: 'col-xs-12'
+  items_classes: 'col-md-6'
   cards:
     - type: vertical-stack
-      item_classes: 'col-xs-12 col-sm-9'
+      #item_classes: 'col-xs-12 col-sm-6'
       cards:         
           #Start of rooms and devices
           - type: custom:dwains-hash-switch-card
@@ -554,12 +556,10 @@
                                 name: false
                           
 
-
- 
 #RADAR VIEWS
-        
     - type: vertical-stack
-      item_classes: 'col-xs-12 col-sm-8'
+      #item_classes: 'col-xs-12 col-sm-8'
+      item_classes: 'col-md-6'
       cards:         
           #Start of rooms and devices
           - type: custom:dwains-hash-switch-card

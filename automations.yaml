@@ -1203,10 +1203,10 @@
       - service: dwains_dashboard.notification_create
         data:
           message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
+      notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
-      resolved_message: Alert {{ entity_name }} resolved
+      resolved_message: Alerte {{ entity_name }} Résolu
       initial_delay: 300
       max_alerts: 100
       condition_entity: input_boolean.inhib_alarme_pac
@@ -1237,10 +1237,10 @@
       - service: dwains_dashboard.notification_create
         data:
           message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
+      notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
-      resolved_message: Alert {{ entity_name }} resolved
+      resolved_message: Alerte {{ entity_name }} Résolu
       max_alerts: 100
       initial_delay: 300
 - id: '1634569751638'
@@ -1309,10 +1309,10 @@
       - service: dwains_dashboard.notification_create
         data:
           message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
+      notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
-      resolved_message: Alert {{ entity_name }} resolved
+      resolved_message: Alerte {{ entity_name }} Résolu
       initial_delay: 300
       max_alerts: 100
 - id: '1634570304569'
@@ -1352,8 +1352,8 @@
       max_alerts: 100
       initial_delay: 1200
       dismiss_entity: input_boolean.inhib_alarme_pac
-      resolved_message: Alert {{ entity_name }} resolved
-      notify_message: Alert {{ entity_name }} triggered
+      resolved_message: Alerte {{ entity_name }} Résolu
+      notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634571065075'
   alias: 2_1_09 Alarme Blueprints Notification Porte frigo garage ouverte
   description: '# Alarme porte frigo garage ouverte   '
@@ -1383,10 +1383,10 @@
         data:
           message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
             }}
-      notify_message: Alert {{ entity_name }} triggered
+      notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 60
-      resolved_message: Alert {{ entity_name }} resolved
+      resolved_message: Alerte {{ entity_name }} Résolu
       initial_delay: 60
       max_alerts: 100
 - id: '1634571983587'
@@ -1418,10 +1418,10 @@
         data:
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
-      notify_message: Alert {{ entity_name }} triggered
+      notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
-      resolved_message: Alert {{ entity_name }} resolved
+      resolved_message: Alerte {{ entity_name }} Résolu
       initial_delay: 300
       max_alerts: 100
 - id: '1634621594490'
@@ -1453,8 +1453,8 @@
       repeat_delay: 300
       initial_delay: 1
       max_alerts: 100
-      resolved_message: Alert {{ entity_name }} resolved
-      notify_message: Alert {{ entity_name }} triggered
+      resolved_message: Alerte {{ entity_name }} Résolu
+      notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634706860525'
   alias: 6_1_1 Energie Changement HP<->HC
   description: ''
@@ -1811,8 +1811,8 @@
       repeat_delay: 300
       initial_delay: 1
       max_alerts: 100
-      resolved_message: Alert {{ entity_name }} resolved
-      notify_message: Alert {{ entity_name }} triggered
+      resolved_message: Alerte {{ entity_name }} Résolu
+      notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1638433932226'
   alias: 1_2_1 VMC Niv0 Automatismes
   description: ' '
@@ -2155,10 +2155,10 @@
         data:
           message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
             }}
-      notify_message: Alert {{ entity_name }} triggered
+      notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 600
-      resolved_message: Alert {{ entity_name }} resolved
+      resolved_message: Alerte {{ entity_name }} Résolu
       max_alerts: 100
       initial_delay: 300
 - id: '1644765337710'

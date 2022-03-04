@@ -15,9 +15,9 @@ input_boolean:
 
 # Surveillance de la temperature du congelateur        
 template:
-  - binary_sensor:
 # Surveillance de la temperature du congelateur     
 # normalement sur off
+  - binary_sensor:
     - name: "alarme_temp_congelo_haute"
       state: >-
         {{ states('sensor.temp_congelo_garage')|float(default=0)>-10 }}

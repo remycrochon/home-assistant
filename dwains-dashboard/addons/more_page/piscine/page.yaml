@@ -1,7 +1,10 @@
 - type: custom:dwains-flexbox-card
-# items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
-# items_classes: 'col-xs-12 col-sm-3 col-sm-6 col-md-3'
-  items_classes: 'col-xs-12 col-sm-6 col-sm-6 col-md-3'
+#items_classes: 'col-xs si<576px-Largeur Maxi du contenaire: Aucun  PORTABLE
+#items_classes: 'col-sm- si>576px-Largeur Maxi du contenaire: 540px 
+#items_classes: 'col-md- si>768px-Largeur Maxi du contenaire: 720px TABLETTE
+#items_classes: 'col-lg- si>992px Largeur Maxi du contenaire: 960px pour mon PC
+#items_classes: 'col-xl- si>1200 Largeur Maxi du contenaire: 1140px
+  items_classes: 'col-xs-11 col-sm-6 col-md-4 col-lg-4'
   padding: true
   cards:
     - type: vertical-stack
@@ -174,38 +177,7 @@
                 value: closed
             type: custom:button-card
         square: true
-    # Historiques
-    - type: vertical-stack
-      cards:
-      - name: 'HISTORIQUES'
-        styles:
-          card:
-            - padding: '2% 0px'
-            - text-transform: uppercase
-            - color: 'var(--dwains-theme-accent)'
-            - font-size: 125%
-            - border-radius: 0%
-            - font-weight: 100
-            - letter-spacing: 10px
-            - --mdc-ripple-press-opacity: 0
-            - cursor: initial
-          name:
-            - font-weight: 900
-        type: 'custom:button-card'
 
-      - title: <- 3 jours
-        entities:
-          - entity: switch.cde_pompe_filtration
-            name: Ppe filtre
-          - entity: switch.cde_ev_eau
-            name: Ev Eau
-          - entity: switch.cde_traitement
-            name: Ppe pH
-          - entity: switch.cde_ppe_chlore
-            name: Ppe Ch
-        type: history-graph
-        hours_to_show: 72
-        refresh_interval: 0
 
     - type: vertical-stack
       cards:
@@ -467,41 +439,68 @@
             border: solid 2px var(--primary-color);
           }
 
-
+    # Historiques
     - type: vertical-stack
       cards:
-        - name: 'VOLET'
-          styles:
-            card:
-              - padding: '2% 0px'
-              - text-transform: uppercase
-              - color: 'var(--dwains-theme-accent)'
-              - font-size: 125%
-              - border-radius: 0%
-              - font-weight: 100
-              - letter-spacing: 10px
-              - --mdc-ripple-press-opacity: 0
-              - cursor: initial
-            name:
-              - font-weight: 900
-          type: 'custom:button-card'
+      - name: 'HISTORIQUES'
+        styles:
+          card:
+            - padding: '2% 0px'
+            - text-transform: uppercase
+            - color: 'var(--dwains-theme-accent)'
+            - font-size: 125%
+            - border-radius: 0%
+            - font-weight: 100
+            - letter-spacing: 10px
+            - --mdc-ripple-press-opacity: 0
+            - cursor: initial
+          name:
+            - font-weight: 900
+        type: 'custom:button-card'
 
-        - type: custom:scheduler-card
-          discover_existing: false
-          display_options:
-            primary_info:
-              - <b>{entity} / {name}</b>
-              - '<b>Next</b> : {relative-time} | <b>Action</b> : {action}'
-              - additional-tasks
-            secondary_info:
-              - '{days} {time}'
-          include:
-            - script.volet_piscine_fermeture
-            - script.volet_piscine_ouverture
-          title: Volet Piscine
-          exclude: []
-          sort_by:
-            - relative-time
-          show_header_toggle: true
+      - title: <- 3 jours
+        entities:
+          - entity: switch.cde_pompe_filtration
+            name: Ppe filtre
+          - entity: switch.cde_ev_eau
+            name: Ev Eau
+          - entity: switch.cde_traitement
+            name: Ppe pH
+          - entity: switch.cde_ppe_chlore
+            name: Ppe Ch
+        type: history-graph
+        hours_to_show: 72
+        refresh_interval: 0
+      - name: 'VOLET'
+        styles:
+          card:
+            - padding: '2% 0px'
+            - text-transform: uppercase
+            - color: 'var(--dwains-theme-accent)'
+            - font-size: 125%
+            - border-radius: 0%
+            - font-weight: 100
+            - letter-spacing: 10px
+            - --mdc-ripple-press-opacity: 0
+            - cursor: initial
+          name:
+            - font-weight: 900
+        type: 'custom:button-card'
 
- 
+      - type: custom:scheduler-card
+        discover_existing: false
+        display_options:
+          primary_info:
+            - <b>{entity} / {name}</b>
+            - '<b>Next</b> : {relative-time} | <b>Action</b> : {action}'
+            - additional-tasks
+          secondary_info:
+            - '{days} {time}'
+        include:
+          - script.volet_piscine_fermeture
+          - script.volet_piscine_ouverture
+        title: Volet Piscine
+        exclude: []
+        sort_by:
+          - relative-time
+        show_header_toggle: true

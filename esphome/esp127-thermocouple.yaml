@@ -1,0 +1,71 @@
+substitutions:
+  device_name: esp127-thermocouple
+  adress_ip: "192.168.0.127"
+  friendly_name: esp127
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  networks:
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
+      priority: 2    
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 0
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 1
+  reboot_timeout: 5min
+  
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+logger:
+api:
+ota:
+web_server:
+  port: 80
+  
+spi:
+  miso_pin: D0
+  clk_pin: D1
+
+sensor:
+  - platform: max31855
+    name: "${friendly_name} Temperature"
+    cs_pin: D2
+    update_interval: 1s
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 30
+          send_every: 30
+          send_first_at: 1
+    
+  - platform: wifi_signal
+    id: wif
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: uptime
+    id: up
+    name: "${friendly_name} Uptime Sensor"
+    update_interval: 60s
+    
+#Etat de la connection
+binary_sensor:
+
+  - platform: status
+    name: "${friendly_name} Status"
+
+switch:    
+
+  - platform: restart
+    name: "${friendly_name} Restart"

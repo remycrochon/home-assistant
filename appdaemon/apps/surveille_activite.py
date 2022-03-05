@@ -33,6 +33,6 @@ class SurveilleActivite(hass.Hass):
         # Mise à off de Com_Ok
         self.turn_off(self.args["activite_ok"])
         self.log(f'Alerte! {nom_entité} est out depuis {duree_temps} sec.', log="surveille_log")
-        message_notification=format(heure)+"Alerte!"+ format(nom_entité)+"est out depuis: "+format(duree_temps)+" sec."
-        self.call_service('notify/telegram', message_notification)
-        self.call_service('dwains_dashboard/notification_create', message=message_notification)
+        #message_notification=format(heure)+"Alerte!"+ format(nom_entité)+"est out depuis: "+format(duree_temps)+" sec."
+        #self.call_service('notify/telegram', message_notification)
+        #self.call_service('dwains_dashboard/notification_create', message=message_notification)

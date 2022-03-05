@@ -276,8 +276,12 @@
   trigger:
   - platform: numeric_state
     entity_id: sensor.pression_piscine_p
-    above: '1.0'
-    for: 00:15:00
+    above: '1'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
   condition: []
   action:
   - service: notify.telegram
@@ -1658,7 +1662,7 @@
     state: 'on'
   - condition: state
     entity_id: binary_sensor.ppe_piscine_en_marche
-    state: ''
+    state: 'on'
   action:
   - choose:
     - conditions:

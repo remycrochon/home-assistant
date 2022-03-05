@@ -38,13 +38,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Stats # <- translate the button name
                             template: partials_heading_switch
@@ -53,6 +53,97 @@
                               navigation_path: "#stats"
                   - type: vertical-stack
                     cards:
+                      - type: custom:ha-card-weather-conditions
+                        name: Albi MF
+                        language: fr
+                        animation: true
+                        pollen:
+                          weed:
+                            entity: sensor.weed_pollen_index_mod
+                            min: 0
+                            max: 3
+                            low: 1
+                            high: 2
+                          grass:
+                            entity: sensor.grass_pollen_index_mod
+                            min: 0
+                            max: 3
+                            low: 1
+                            high: 2
+                          tree:
+                            entity: sensor.tree_pollen_index_mod
+                            min: 0
+                            max: 3
+                            low: 1
+                            high: 2
+                        weather:
+                          icons_model: defaulthass
+                          current:
+                            sun: sun.sun
+                            moon_phase: sensor.moon
+                            current_conditions: sensor.mf_weather_condition_0d
+                            temperature: sensor.vp2_temp_out
+                            humidity: sensor.vp2_humidity_out
+                            pressure: sensor.vp2_barometer
+                            visibility: sensor.cc_visibility
+                            wind_bearing: sensor.vp2_win_dir
+                            wind_speed: sensor.vp2_win_speed
+                            forecast: true
+                          forecast:
+                            icons:
+                              day_1: sensor.mf_weather_condition_0d
+                              day_2: sensor.mf_weather_condition_1d
+                              day_3: sensor.mf_weather_condition_2d
+                              day_4: sensor.mf_weather_condition_3d
+                              day_5: sensor.mf_weather_condition_4d
+                            temperature_high:
+                              day_1: sensor.mf_temperature_maximum_0d
+                              day_2: sensor.mf_temperature_maximum_1d
+                              day_3: sensor.mf_temperature_maximum_2d
+                              day_4: sensor.mf_temperature_maximum_3d
+                              day_5: sensor.mf_temperature_maximum_4d
+                            temperature_low:
+                              day_1: sensor.mf_temperature_minimum_0d
+                              day_2: sensor.mf_temperature_minimum_1d
+                              day_3: sensor.mf_temperature_minimum_2d
+                              day_4: sensor.mf_temperature_minimum_3d
+                              day_5: sensor.mf_temperature_minimum_4d
+                            precipitation_probability:
+                              day_1: sensor.mf_precipitation_probability_0d
+                              day_2: sensor.mf_precipitation_probability_1d
+                              day_3: sensor.mf_precipitation_probability_2d
+                              day_4: sensor.mf_precipitation_probability_3d
+                              day_5: sensor.mf_precipitation_probability_4d
+                            precipitation_intensity:
+                              day_1: sensor.mf_precipitation_intensity_0d
+                        air_quality:
+                          o3: sensor.cc_o3
+                          pm25: sensor.concentration_de_particules_2_5um
+                          pm10: sensor.concentration_de_particules_10_0um
+                          no2: sensor.air_quality_nitrogen_dioxide
+                          co: sensor.mh_z19_co2_value
+                          so2: sensor.air_quality_sulphur_dioxide
+                          epa_aqi: sensor.air_quality_air_quality_index
+                          epa_health_concern: sensor.air_quality_ozone
+                        alert:
+                          wind_risk:
+                            entity: sensor.meteo_france_vent
+                            icon: mdi:windsock
+                          thunderstorms_risk:
+                            entity: sensor.meteo_france_orage
+                            icon: mdi:weather-lightning
+                          hydraulic_risk:
+                            entity: sensor.meteo_france_inondation
+                            icon: mdi:home-flood
+                          hydrogeological_risk:
+                            entity: sensor.meteo_france_vague
+                            icon: mdi:waves
+                          neige_risk:
+                            entity: sensor.meteo_france_neige
+                            icon: mdi:snowflake-alert
+
+
+                      #######""""
                       - type: custom:meteo-france-weather-card
                         style: |
                           ha-card {
@@ -133,7 +224,7 @@
                               }); 
                                         
             #Pluvio
-              neerslag:
+              précipitation:
                 type: vertical-stack
                 cards:
                   - type: custom:dwains-flexbox-card
@@ -153,7 +244,7 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                             styles:
                               name:
                                 - color: var(--dwains-theme-accent)
@@ -162,7 +253,7 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Stats # <- translate the button name
                             template: partials_heading_switch
@@ -262,7 +353,7 @@
                           average: true   
 
             #TEMP VIEW
-              temperatuur:
+              temperature:
                 type: vertical-stack
                 cards:
                   - type: custom:dwains-flexbox-card
@@ -282,13 +373,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                             styles:
                               name:
                                 - color: var(--dwains-theme-accent)
@@ -450,13 +541,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Stats # <- translate the button name
                             template: partials_heading_switch
@@ -469,7 +560,7 @@
                   - type: vertical-stack
                     cards:
                       - type: entities
-                        title: Statistieken
+                        title: Statistiques
                         style: |
                           ha-card {
                             border-radius: 10px;
@@ -510,7 +601,6 @@
                               - entity: sensor.vp2_win_dir # <- fill in the right sensor
                                 name: Direction
                                 icon: 'mdi:compass'
-
                         
                                     
                       - type: entities
@@ -589,13 +679,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Vents # <- translate the button name
                             template: partials_heading_switch
@@ -631,13 +721,13 @@
                         color: darkgray !important;
                         margin-left: 2px !important;
                       }
-                    aspect_ratio: 80%
+                    aspect_ratio: 70%
                     url: >-
                       https://embed.windy.com/embed2.html?lat=43.91905434993742&lon=2.1979451056884747&detailLat=51.841&detailLon=5.955&width=750&height=800&zoom=7&level=surface&overlay=radar&product=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1
                     name: Windy.com
                     show_state: false
               #REGEN VIEW 
-              neerslag:
+              précipitation:
                 type: vertical-stack
                 cards:
                   - type: custom:dwains-flexbox-card
@@ -657,7 +747,7 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                             styles:
                               name:
                                 - color: var(--dwains-theme-accent)
@@ -666,7 +756,7 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Vents # <- translate the button name
                             template: partials_heading_switch
@@ -730,13 +820,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Vents # <- translate the button name
                             template: partials_heading_switch
@@ -784,7 +874,7 @@
                     show_name: false
  
               #TEMP VIEW 
-              temperatuur:
+              temperature:
                 type: vertical-stack
                 cards:
                   - type: custom:dwains-flexbox-card
@@ -804,13 +894,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                             styles:
                               name:
                                 - color: var(--dwains-theme-accent)
@@ -878,13 +968,13 @@
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#neerslag"
+                              navigation_path: "#précipitation"
                           - type: custom:button-card
                             name: Temp # <- translate the button name
                             template: partials_heading_switch
                             tap_action: 
                               action: navigate
-                              navigation_path: "#temperatuur"
+                              navigation_path: "#temperature"
                           - type: custom:button-card
                             name: Vents # <- translate the button name
                             template: partials_heading_switch

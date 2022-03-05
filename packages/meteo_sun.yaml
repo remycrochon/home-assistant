@@ -170,186 +170,97 @@ sensor:
 #        value_template: >
 #          {{ as_timestamp(states('sensor.albi_next_rain')) | timestamp_custom('%H:%M') }}
 
-# Integration CClimate
+# Direction du vent
+      direction_vent:
+        friendly_name: "Direction Du vent"
+        value_template: >
+          {% set dv=state_attr('weather.albi','wind_bearing')|float(default=0)%}
+          {% if dv<11 %}
+            {{'N'}}
+          {% elif dv<34 %}
+            {{'NNE'}}
+          {% elif dv<57 %}
+            {{'NE'}}
+          {% elif dv<79 %}
+            {{'ENE'}}
+          {% elif dv<101 %}
+            {{'E'}}
+          {% elif dv<124 %}
+            {{'ESE'}}
+          {% elif dv<146 %}
+            {{'SE'}}
+          {% elif dv<169 %}
+            {{'SSE'}}
+          {% elif dv<191 %}
+            {{'S'}}
+          {% elif dv<214 %}
+            {{'SSO'}}
+          {% elif dv<236 %}
+            {{'SO'}}
+          {% elif dv<259 %}
+            {{'OSO'}}
+          {% elif dv<281 %}
+            {{'O'}}
+          {% elif dv<304 %}
+            {{'ONO'}}
+          {% elif dv<326 %}
+            {{'NO'}}
+          {% elif dv<349 %}
+            {{'NNO'}}
+          {% else %}
+            {{'N'}}
+          {%endif%}        
 
-      cc_grass_pollen_index_mod:
-        friendly_name: Pollen Grass climacell
+# Integration Amber
+
+      grass_pollen_index_mod:
+        friendly_name: Pollen Grass Amber
         icon_template: 'mdi:flower'
         value_template: >-
-          {% if is_state('sensor.climacell_grass_pollen_index', 'none') %}
+          {% if is_state('sensor.pollen_grass_risk', 'low') %}
             0
-          {% elif is_state('sensor.climacell_grass_pollen_index','very_low') %}
+          {% elif is_state('sensor.pollen_grass_risk','moderate') %}
             1
-          {% elif is_state('sensor.climacell_grass_pollen_index','low') %}
+          {% elif is_state('sensor.pollen_grass_risk','high') %}
             2
-          {% elif is_state('sensor.climacell_grass_pollen_index','medium') %}
+          {% elif is_state('sensor.pollen_grass_risk','very_high') %}
             3
-          {% elif is_state('sensor.climacell_grass_pollen_index','high') %}
-            4
-          {% elif is_state('sensor.climacell_grass_pollen_index','very_high') %}
-            5
           {% else %}
             Unknown
           {% endif %}
 
-      cc_tree_pollen_index_mod:
-        friendly_name: Pollen Tree climacell
+      tree_pollen_index_mod:
+        friendly_name: Pollen Tree Amber
         icon_template: 'mdi:tree'
         value_template: >-
-          {% if is_state('sensor.climacell_tree_pollen_index', 'none') %}
+          {% if is_state('sensor.pollen_tree_risk', 'low') %}
             0
-          {% elif is_state('sensor.climacell_tree_pollen_index','very_low') %}
+          {% elif is_state('sensor.pollen_tree_risk','moderate') %}
             1
-          {% elif is_state('sensor.climacell_tree_pollen_index','low') %}
+          {% elif is_state('sensor.pollen_tree_risk','high') %}
             2
-          {% elif is_state('sensor.climacell_tree_pollen_index','medium') %}
+          {% elif is_state('sensor.pollen_tree_risk','very_high') %}
             3
-          {% elif is_state('sensor.climacell_tree_pollen_index','high') %}
-            4
-          {% elif is_state('sensor.climacell_tree_pollen_index','very_high') %}
-            5
           {% else %}
             Unknown
-          {% endif %}
-          
+          {% endif %}     
 
-      cc_weed_pollen_index_mod:
-        friendly_name: Pollen Weed climacell
+      weed_pollen_index_mod:
+        friendly_name: Pollen Weed Amber
         icon_template: 'mdi:sprout'
         value_template: >-
-          {% if is_state('sensor.climacell_weed_pollen_index', 'none') %}
+          {% if is_state('sensor.pollen_weed_risk', 'low') %}
             0
-          {% elif is_state('sensor.climacell_weed_pollen_index','very_low') %}
+          {% elif is_state('sensor.pollen_weed_risk','moderate') %}
             1
-          {% elif is_state('sensor.climacell_weed_pollen_index','low') %}
+          {% elif is_state('sensor.pollen_weed_risk','high') %}
             2
-          {% elif is_state('sensor.climacell_weed_pollen_index','medium') %}
+          {% elif is_state('sensor.pollen_weed_risk','very_high') %}
             3
-          {% elif is_state('sensor.climacell_weed_pollen_index','high') %}
-            4
-          {% elif is_state('sensor.climacell_weed_pollen_index','very_high') %}
-            5
           {% else %}
             Unknown
           {% endif %}
-          
-      cc_temperature:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','temperature') }}
-        unit_of_measurement: °C
 
-      cc_humidity:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','humidity') }}
-
-      cc_pressure:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','pressure') }}
-        unit_of_measurement: hPa
-
-      cc_current_conditions:
-        value_template: >-
-          {{ states.weather.climacell_daily.state }}
-
-  #        feels_like
-
-      cc_visibility:
-        value_template: >-
-          {{state_attr('weather.climacell_daily','visibility') }}
-
-      cc_wind_bearing:
-        value_template: >-
-          {{state_attr('weather.climacell_daily','wind_bearing') }}
-      
-      cc_wind_speed:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','wind_speed') }}
-
-      cc_o3:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','ozone') }}
-        
-      cc_weather_condition_0d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[0].condition  }}
-      cc_weather_condition_1d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[1].condition }}
-      cc_weather_condition_2d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[2].condition }}
-      cc_weather_condition_3d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[3].condition  }}
-      cc_weather_condition_4d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[4].condition  }}
-
-      cc_temperature_maximum_0d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[0].temperature }}
-        unit_of_measurement: °C
-      cc_temperature_maximum_1d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[1].temperature }}
-        unit_of_measurement: °C
-      cc_temperature_maximum_2d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[2].temperature }}
-        unit_of_measurement: °C
-      cc_temperature_maximum_3d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[3].temperature }}
-        unit_of_measurement: °C
-      cc_temperature_maximum_4d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[4].temperature }}
-        unit_of_measurement: °C
-        
-      cc_temperature_minimum_0d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[0].templow }}
-        unit_of_measurement: °C
-      cc_temperature_minimum_1d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[1].templow }}
-        unit_of_measurement: °C        
-      cc_temperature_minimum_2d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[2].templow }}
-        unit_of_measurement: °C
-      cc_temperature_minimum_3d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[3].templow }}
-        unit_of_measurement: °C
-      cc_temperature_minimum_4d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[4].templow }}
-        unit_of_measurement: °C
-
-      cc_precipitation_intensity_0d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[0].precipitation }}
-
-      cc_precipitation_probability_0d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[0].precipitation_probability }}
-
-      cc_precipitation_probability_1d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[1].precipitation_probability }}
-
-      cc_precipitation_probability_2d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[2].precipitation_probability }}
-
-      cc_precipitation_probability_3d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[3].precipitation_probability }}
-
-      cc_precipitation_probability_4d:
-        value_template: >-
-          {{ state_attr('weather.climacell_daily','forecast')[4].precipitation_probability }}
 
 # Integration Météo France
 
@@ -372,15 +283,15 @@ sensor:
           {{ states.weather.albi.state }}
 
   #        feels_like
-
       mf_visibility:
         value_template: >-
           {{state_attr('weather.albi','visibility') }}
-
+      
       mf_wind_bearing:
         value_template: >-
           {{state_attr('weather.albi','wind_bearing') }}
-      
+        # {{states('sensor.vp2_win_dir')}}
+
       mf_wind_speed:
         value_template: >-
           {{ state_attr('weather.albi','wind_speed') }}

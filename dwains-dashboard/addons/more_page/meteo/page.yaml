@@ -49,6 +49,7 @@
         - type: custom:state-switch
           entity: hash
           default: forecast
+          transition: flip
           states:
             # Vue Previsions
             forecast:

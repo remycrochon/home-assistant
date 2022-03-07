@@ -2184,7 +2184,7 @@
   trigger:
   - platform: numeric_state
     entity_id: sensor.tablette_niveau_charge
-    below: '50'
+    below: '20'
     id: niv_bas
   - platform: numeric_state
     entity_id: sensor.tablette_niveau_charge

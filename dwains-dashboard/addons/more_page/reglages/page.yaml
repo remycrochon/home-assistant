@@ -251,7 +251,7 @@
                   name: Vit2
                 - entity: switch.esp136_vit_3
                   name: Vit3
-              entity: input_datetime.horaire_vmc_ss_debut
+              entity: switch.sonoff_vmc_niv0_on_off
               icon: mdi:fan-speed-3
               name: Relais VMC
               show_state: false
@@ -292,7 +292,7 @@
             - entities:
                 - entity: switch.vmc_ssol
                   name: ' '
-              entity: input_datetime.horaire_vmc_ss_debut
+              entity: switch.vmc_ssol
               icon: mdi:fan-speed-3
               name: Relais VMC
               show_state: false

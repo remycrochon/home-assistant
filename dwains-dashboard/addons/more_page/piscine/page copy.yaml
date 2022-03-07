@@ -4,7 +4,7 @@
 #items_classes: 'col-md- si>768px-Largeur Maxi du contenaire: 720px TABLETTE
 #items_classes: 'col-lg- si>992px Largeur Maxi du contenaire: 960px pour mon PC
 #items_classes: 'col-xl- si>1200 Largeur Maxi du contenaire: 1140px
-  items_classes: 'col-xs-11 col-sm-6 col-md-4 col-lg-6'
+  items_classes: 'col-xs-11 col-sm-6 col-md-4 col-lg-4'
   padding: true
   cards:
     - type: vertical-stack
@@ -129,33 +129,6 @@
                     - color: green
                 value: closed
             type: custom:button-card
-                    # Historiques
-      - type: vertical-stack
-        cards:
-        - name: HISTORIQUES
-          styles:
-            card:
-              - text-transform: uppercase
-              - font-size: 125%
-              - color: 'var(--dwains-theme-accent)'
-              - border-radius: 0%
-              - font-weight: 100
-              - letter-spacing: 10px
-          type: 'custom:button-card'
-
-        - title: <- 3 jours
-          entities:
-            - entity: switch.cde_pompe_filtration
-              name: Ppe filtre
-            - entity: switch.cde_ev_eau
-              name: Ev Eau
-            - entity: switch.cde_traitement
-              name: Ppe pH
-            - entity: switch.cde_ppe_chlore
-              name: Ppe Ch
-          type: history-graph
-          hours_to_show: 72
-          refresh_interval: 0
         square: true
 
 
@@ -414,7 +387,33 @@
             border: solid 2px var(--primary-color);
           }
 
+    # Historiques
+    - type: vertical-stack
+      cards:
+      - name: HISTORIQUES
+        styles:
+          card:
+            - text-transform: uppercase
+            - font-size: 125%
+            - color: 'var(--dwains-theme-accent)'
+            - border-radius: 0%
+            - font-weight: 100
+            - letter-spacing: 10px
+        type: 'custom:button-card'
 
+      - title: <- 3 jours
+        entities:
+          - entity: switch.cde_pompe_filtration
+            name: Ppe filtre
+          - entity: switch.cde_ev_eau
+            name: Ev Eau
+          - entity: switch.cde_traitement
+            name: Ppe pH
+          - entity: switch.cde_ppe_chlore
+            name: Ppe Ch
+        type: history-graph
+        hours_to_show: 72
+        refresh_interval: 0
       - name: 'VOLET'
         styles:
           card:

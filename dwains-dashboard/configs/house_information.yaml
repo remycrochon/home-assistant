@@ -6,7 +6,8 @@ house_information:
       name: MH-Z19
     - entity: sensor.concentration_de_particules_2_5um
       name: PMS5003
-
+    - entity: sensor.tablette_niveau_charge
+      name: Ch Tablette
   addons:
     - name: Alarmes
       icon: mdi:lan-disconnect

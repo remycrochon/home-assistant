@@ -63,12 +63,13 @@ sensor:
     timeout: 60
     away_timeout: 120
 
-# 
 # Tablette
   - platform: mqtt
     name: "Tablette niveau charge"
+    unique_id: "tablette_niveau_charge"
     state_topic: "wallpanel/mywallpanel/sensor/battery"
     unit_of_measurement: "%"
+    device_class: "battery"
     value_template: "{{ value_json.value | round(2) }}"
 
 binary_sensor:
@@ -81,15 +82,25 @@ binary_sensor:
     payload_off: offline
     device_class: connectivity
 
-  - platform: mqtt
-    name: "Tablette_etat_charge"
-    state_topic: "wallpanel/mywallpanel/sensor/battery"
-    value_template: "{{ value_json.charging == 'true' }}"
-
+    # Tablette
   - platform: mqtt
     name: "Tablette_etat_usb"
+    unique_id: "tablette_etat_usb"
     state_topic: "wallpanel/mywallpanel/sensor/battery"
-    value_template: "{{ value_json.usbPlugged == 'true' }}"
+    payload_on: 'True'
+    payload_off: 'False'
+    value_template: "{{ value_json.charging }}"
+    device_class: "battery_charging"
+    
+
+  - platform: mqtt
+    name: "Tablette_etat_charge"
+    unique_id: "tablette_etat_charge"
+    state_topic: "wallpanel/mywallpanel/sensor/battery"
+    payload_on: 'True'
+    payload_off: 'False'
+    value_template: "{{ value_json.acPlugged }}"
+    device_class: "battery_charging"
 
 
 template:
@@ -98,4 +109,5 @@ template:
         unit_of_measurement: "ml"
         state: >-
           {{state_attr('sensor.espresense_presence_oneplus','distance') }}
+
 

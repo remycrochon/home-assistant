@@ -3,13 +3,13 @@ esp_alert:
   class: GroupeAlerte
   module: groupe_alerte
   groupe: binary_sensor.esp_reseau
-  tempo: 60 # Tempo de surveillance en secondes
+  tempo: 240 # Tempo de surveillance en secondes
 
 ping_alert:
   class: GroupeAlerte
   module: groupe_alerte
   groupe: binary_sensor.ping_reseau
-  tempo: 60 # Tempo de surveillance en secondes
+  tempo: 120 # Tempo de surveillance en secondes
 
 uptime_alert:
   class: GroupeAlerte

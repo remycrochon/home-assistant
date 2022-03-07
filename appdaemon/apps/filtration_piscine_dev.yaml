@@ -3,7 +3,7 @@ Piscine_dev:
   class: FiltrationPiscineDev
   module: filtration_piscine_dev
 # Capteurs
-  temperature_eau: sensor.vp2_temp_out # input_number.temp_piscine
+  temperature_eau: input_number.temp_piscine
   # Selection du mode fonctionnement de la filtration
   mode_de_fonctionnement: input_select.mode_fonctionnement_piscine_test
   # Heure pivot autour de laquelle le temps de filtration est réparti (50/50)

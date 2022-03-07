@@ -29,7 +29,7 @@ class GroupeAlerte(hass.Hass):
         # Formatage du message de notification
         message_notification= format(heure)+": Attention: "+ format(nom_entité)+" sur OFF depuis: "+ format(duree)+" sec."
         self.call_service('notify/telegram', message=message_notification)
-        self.call_service('persistent_notification/create', message=message_notification)
+        #self.call_service('persistent_notification/create', message=message_notification)
         self.call_service('dwains_dashboard/notification_create', message=message_notification)
         
     def change_on(self, entity, attribute, old, new, kwargs):
@@ -41,7 +41,7 @@ class GroupeAlerte(hass.Hass):
             # Formatage du message de notification
             message_notification= format(heure)+":"+" Retour a la normale: "+ format(nom_entité)+" sur ON"
             self.call_service('notify/telegram', message=message_notification)
-            self.call_service('persistent_notification/create', message=message_notification)  
+            #self.call_service('persistent_notification/create', message=message_notification)  
             self.call_service('dwains_dashboard/notification_create', message=message_notification)   
             FLAG[entity] = "on" # mise à jour du FLAG
 

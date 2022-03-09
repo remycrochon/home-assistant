@@ -1669,6 +1669,9 @@
       - condition: state
         entity_id: binary_sensor.malaver_en_marche
         state: 'on'
+      - condition: state
+        entity_id: input_boolean.mem_delestage
+        state: 'off'
       sequence:
       - service: input_boolean.turn_on
         target:
@@ -1683,6 +1686,9 @@
       - condition: state
         entity_id: binary_sensor.malaver_en_marche
         state: 'off'
+      - condition: state
+        entity_id: input_boolean.mem_delestage
+        state: 'on'
       sequence:
       - service: input_boolean.turn_off
         target:

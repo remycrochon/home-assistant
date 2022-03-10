@@ -28,14 +28,32 @@ utility_meter:
     tariffs:
       - hp
       - hc
-# Comptabilisation de l'énergie injectée en surplus
+# Comptabilisation de l'énergie en surplus injectée dans l'ECS
   energy_ecs_surplus_usage_daily:
     source: sensor.puissance_ecs_surplus_injectee
     cycle: daily
     tariffs:
       - hp
       - hc
-      
+  energy_ecs_surplus_usage_weekly:
+    source: sensor.puissance_ecs_surplus_injectee
+    cycle: weekly
+    tariffs:
+      - hp
+      - hc    
+  energy_ecs_surplus_usage_monthly:
+    source: sensor.puissance_ecs_surplus_injectee
+    cycle: monthly
+    tariffs:
+      - hp
+      - hc
+  energy_ecs_surplus_usage_yearly:
+    source: sensor.puissance_ecs_surplus_injectee
+    cycle: yearly
+    tariffs:
+      - hp
+      - hc
+
 input_datetime:
   # Horaire Chauffe ECS
   horaire_ecs_debut:
@@ -78,15 +96,14 @@ sensor:
     unit_prefix: k
     method: left
     round: 2
-    
+
 # Energie ECS surplus injection
   - platform: integration
-    source: sensor.puissance_ecs_surplus_injectee
-    name: energy_ecs_surplus_injectee_kw
+    source: sensor.puissance_ecs_surplus_injectee_w
+    name: energy_ecs_surplus_injectee
     unit_prefix: k
     method: left
     round: 2
-
 
 template:
 ####################################
@@ -138,7 +155,7 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-# Puissance produite en surplus et injectée dans l'ECS
+# Puissance produite en surplus et injectée dans l'ECS EN kW
     - name: puissance_ecs_surplus_injectee
       unique_id: "puissance_ecs_surplus_injectee"
       device_class: "power"
@@ -152,5 +169,21 @@ template:
         {%else%}
           0
         {%endif%}
+
+# Puissance produite en surplus et injectée dans l'ECS en W
+    - name: puissance_ecs_surplus_injectee_w
+      unique_id: "puissance_ecs_surplus_injectee_w"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "W"
+      state: >-
+        {% set a=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set b=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
+        {% if (a>0) and (b>10) %}          
+          {{ a }}
+        {%else%}
+          0
+        {%endif%}
         
+
 

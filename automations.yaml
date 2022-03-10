@@ -2190,12 +2190,16 @@
   trigger:
   - platform: numeric_state
     entity_id: sensor.tablette_niveau_charge
-    below: '20'
+    below: '25'
     id: niv_bas
   - platform: numeric_state
     entity_id: sensor.tablette_niveau_charge
     id: niv_haut
     above: '95'
+  - platform: numeric_state
+    entity_id: sensor.tablette_niveau_charge
+    below: '15'
+    id: niv tres bas
   condition: []
   action:
   - choose:
@@ -2212,6 +2216,14 @@
         id: niv_haut
       sequence:
       - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.pc2_lidl
+    - conditions:
+      - condition: trigger
+        id: niv tres bas
+      sequence:
+      - service: switch.turn_on
         data: {}
         target:
           entity_id: switch.pc2_lidl

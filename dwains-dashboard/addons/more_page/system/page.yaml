@@ -858,6 +858,44 @@
             sort:
               method: state
 
+
+################################ NIVEAUX IMP COULEUR  ###########################
+        - type: custom:bar-card
+          direction: up
+          entities:
+            - color: MediumTurquoise
+              entity: sensor.mfc_j5330dw_cyan_ink_remaining
+              name: Cyan
+            - color: MediumOrchid
+              entity: sensor.mfc_j5330dw_magenta_ink_remaining
+              name: Magenta
+            - color: Gold
+              entity: sensor.mfc_j5330dw_yellow_ink_remaining
+              name: Jaune
+            - color: Grey
+              entity: sensor.mfc_j5330dw_black_ink_remaining
+              name: Noir
+          height: 200px
+          positions:
+            icon: inside
+            title: outside
+          max: 100
+          min: 0
+          padding: 2px
+          target: 20
+          unit_of_measurement: '%'
+          stack: horizontal
+          title: Brother J5330DW
+          card_mod:
+            style: |
+              bar-card-title {
+                text-shadow: 1px 1px 5px black;
+              }
+              bar-card-value {
+                text-shadow: 1px 1px 5px black;
+              } 
+
+
 ################################ VERSIONS HASS  ###########################""
     - type: vertical-stack
       cards:

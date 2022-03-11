@@ -11,7 +11,7 @@
 #items_classes: 'col-xl- si>1200 Largeur Maxi du contenaire: 1140px
 
 - type: custom:dwains-flexbox-card
-  items_classes: 'col-xs-9 col-sm-4 col-md-6' # col-lg-6' #fonctionne
+  items_classes: 'col-xs-12 col-sm-4 col-md-6' # col-lg-6' #fonctionne
   padding: true
   cards:
     - type: vertical-stack
@@ -23,28 +23,34 @@
           cards:
             - type: custom:button-card
               name: Prévisions # <- translate the button name
-              template: partials_heading_switch
+#              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#forecast"
             - type: custom:button-card
               name: Pluvio # <- translate the button name
-              template: partials_heading_switch
+#              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#precipitation1"
             - type: custom:button-card
               name: Temp # <- translate the button name
-              template: partials_heading_switch
+#"              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#temperature1"
             - type: custom:button-card
-              name: Stats # <- translate the button name
-              template: partials_heading_switch
+              name: Stat # <- translate the button name
+#              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#stats"
+            - type: custom:button-card
+              name: Vent # <- translate the button name
+#              template: partials_heading_switch
+              tap_action: 
+                action: navigate
+                navigation_path: "#vent"                
         - type: custom:state-switch
           entity: hash
           default: forecast
@@ -308,6 +314,49 @@
                     extrema: true
                     average: true       
             #STATS VIEW
+            vent:
+              type: vertical-stack
+              cards:
+                - type: entities
+                  name: Vents
+                  entities:
+                    - entity: sensor.vp2_rafale
+                      name: Rafales de Vent
+                - type: horizontal-stack
+                  cards:
+                    - type: custom:compass-card
+                      header:
+                        title:
+                          value: Vent Albi
+                      indicator_sensors:
+                        - sensor: sensor.vp2_win_dir
+                      value_sensors:
+                        - sensor: sensor.vp2_win_speed
+
+                    - type : custom:compass-card 
+                      header:
+                        title:
+                          value: Soleil
+                      indicator_sensors:
+                        - sensor: sun.sun
+                          attribute: azimuth
+                          indicator:
+                            type: circle
+                      value_sensors:
+                        - sensor: sun.sun
+                          attribute: elevation
+                      compass:
+                        north:
+                          show: true
+                          offset: -30
+                        east:
+                          show: true
+                        west:
+                          show: true
+                        south:
+                          show: true
+
+          #STATS VIEW
             stats:
               type: vertical-stack
               cards:
@@ -326,11 +375,7 @@
                         - entity: sensor.vp2_barometer # <- fill in the right sensor
                         - entity: sensor.vp2_humidity_out # <- fill in the right sensor
                         - entity: sensor.vp2_radiation # <- fill in the right sensor
-                        - entity: sensor.vp2_win_speed # <- fill in the right sensor
-                          name: Vitesse du Vent
-                        - entity: sensor.vp2_win_dir # <- fill in the right sensor
-                          name: Direction
-                          icon: 'mdi:compass'
+
                 - type: entities
                   title: Pollen
                   entities:
@@ -349,44 +394,37 @@
                       type: 'custom:multiple-entity-row'
                       entities:
                         - entity: sensor.pollen_weed_risk
-                          name: false
-                    
+                          name: false                    
 #RADAR VIEWS
     - type: vertical-stack
-      #items_classes: 'col-xs-9 col-sm-4 col-md-6 col-lg-8'
       cards:
         - type: horizontal-stack
           cards:
             - type: custom:button-card
               name: Radar # <- translate the button name
-              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#forecast2"
             - type: custom:button-card
               name: Pluie # <- translate the button name
-              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#precipitation2"
             - type: custom:button-card
               name: Temp # <- translate the button name
-              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#temp2"
             - type: custom:button-card
               name: Vents # <- translate the button name
-              template: partials_heading_switch
               tap_action: 
                 action: navigate
                 navigation_path: "#Vents2"
-            - type: custom:button-card
+#            - type: custom:button-card
               #name: Stats # <- DONT CHANGE THIS LINE
-              template: partials_heading_switch
-              tap_action: 
-                action: navigate
-                navigation_path: "#stats2"         
+#              tap_action: 
+#                action: navigate
+#                navigation_path: "#stats2"         
           #Start of rooms and devices
         - type: custom:state-switch
           entity: hash

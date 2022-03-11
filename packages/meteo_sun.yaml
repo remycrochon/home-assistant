@@ -11,24 +11,28 @@ sensor:
 # Vantage Pro2 -> WEEXWX
   - platform: mqtt
     name: "VP2_DateTime"
+    unique_id: VP2_DateTime" 
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'ms'
     value_template: "{{ value_json.dateTime | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Temp_Out"
+    unique_id: "VP2_Temp_Out"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.outTemp_C | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Humidity_Out"
+    unique_id: "VP2_Humidity_Out"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '%'
     value_template: "{{ value_json.outHumidity | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Barometer"
+    unique_id: "VP2_Barometer"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'mbar'
     value_template: "{{ value_json.barometer_mbar | round(1) }}"
@@ -38,6 +42,7 @@ sensor:
 #Toutes les précipitations cumulées depuis les 24 dernières heures sont affichées dans le bandeau déroulant au bas de l'écran.
   - platform: mqtt
     name: "VP2_Rain"
+    unique_id: "VP2_Rain"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'mm'
     force_update: true
@@ -47,6 +52,7 @@ sensor:
 
   - platform: mqtt
     name: "VP2_Rain24"
+    unique_id: "VP2_Rain24"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'mm'
     force_update: true
@@ -58,6 +64,7 @@ sensor:
 # deux basculements du pluviomètre ne sont pas survenus dans une période de 15 minutes.
   - platform: mqtt
     name: "VP2_Rain_Rate"
+    unique_id: "VP2_Rain_Rate"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'mm/h'
     force_update: true
@@ -72,6 +79,7 @@ sensor:
 #Le cumul de pluie peut être affiché en pouces (in) ou millimètres (mm).    
   - platform: mqtt
     name: "VP2_Rain_Storm"
+    unique_id: "VP2_Rain_Storm"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'mm'
     force_update: true
@@ -81,54 +89,63 @@ sensor:
 
   - platform: mqtt
     name: "VP2_Rafale"
+    unique_id: "VP2_Rafale"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'km/h'
     value_template: "{{ value_json.windGust_kph | round(2) }}"
 
   - platform: mqtt
     name: "VP2_Win_Speed"
+    unique_id: "VP2_Win_Speed"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'km/h'
     value_template: "{{ value_json.windSpeed_kph | round(2) }}"
 
   - platform: mqtt
     name: "VP2_Win_Dir"
+    unique_id: "VP2_Win_Dir"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°'
     value_template: "{{ value_json.windDir | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Temp_In"
+    unique_id: "VP2_Temp_In"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.inTemp_C | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Humidté_In"
+    unique_id: "VP2_Humidté_In"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '%'
     value_template: "{{ value_json.inHumidity | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Ressenti"
+    unique_id: "VP2_Ressenti"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.windchill_C | round(1) }}"
 
   - platform: mqtt
     name: "VP2_HeatIndex"
+    unique_id: "VP2_HeatIndex"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.heatindex_C | round(1) }}"
 
   - platform: mqtt
     name: "VP2_Radiation"
+    unique_id: "VP2_Radiation"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'W/m²'
     value_template: "{{ value_json.radiation_Wpm2 | round(0) }}"
 
   - platform: mqtt
     name: "VP2_UV"
+    unique_id: "VP2_UV"
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'UV'
     value_template: "{{ value_json.UV | round(1) }}"
@@ -171,8 +188,9 @@ sensor:
 #          {{ as_timestamp(states('sensor.albi_next_rain')) | timestamp_custom('%H:%M') }}
 
 # Direction du vent
-      direction_vent:
-        friendly_name: "Direction Du vent"
+      vp2_direction_du_vent:
+        friendly_name: "Vp2 Direction Du vent"
+        unique_id: "vp2_direction_du_vent"
         value_template: >
           {% set dv=state_attr('weather.albi','wind_bearing')|float(default=0)%}
           {% if dv<11 %}
@@ -209,9 +227,10 @@ sensor:
             {{'NNO'}}
           {% else %}
             {{'N'}}
-          {%endif%}        
+          {%endif%}
 
-# Integration Amber
+
+# Integration Amber -> Pollen
 
       grass_pollen_index_mod:
         friendly_name: Pollen Grass Amber
@@ -452,10 +471,11 @@ sensor:
             {% endif %}
           friendly_name: Today weather forecast  
 
-# Statistiques Pluviometrie
-# sert à gestion robot tonte
+# Statistiques
+  # Pluviometrie - sert à gestion robot tonte
   - platform: statistics
     entity_id: sensor.vp2_rain24
+    unique_id: vp2_pluviometrie_min
     max_age:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_min
@@ -463,6 +483,7 @@ sensor:
 
   - platform: statistics
     entity_id: sensor.vp2_rain24
+    unique_id: vp2_pluviometrie_max
     max_age:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_max
@@ -470,6 +491,7 @@ sensor:
 
   - platform: statistics
     entity_id: sensor.vp2_rain24
+    unique_id: vp2_pluviometrie_moyenne
     max_age:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_moyenne
@@ -477,10 +499,18 @@ sensor:
 
   - platform: statistics
     entity_id: sensor.vp2_rain24
+    unique_id: vp2_pluviometrie_standard_deviation
     max_age:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_standard_deviation
     state_characteristic: standard_deviation
 
-
+  # Vents
+  - platform: statistics
+    entity_id: sensor.vp2_rafale
+    unique_id: vp2_rafales_max
+    max_age:
+      minutes: 1660 # sur 24h
+    name: vp2_rafales_max
+    state_characteristic: value_max
 

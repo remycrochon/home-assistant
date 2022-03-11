@@ -383,6 +383,7 @@
 
         - type: entities
           entities:
+            - entity: automation.robot_stop_pluie
             - entity: input_boolean.robot_valide
             - entity: vacuum.am435x_awd
             - entity: device_tracker.am435x_awd
@@ -391,7 +392,5 @@
             - entity: select.am435x_awd_headlight_mode
             - entity: input_number.seuil_pluie_stop_robot
             - entity: sensor.vp2_pluviometrie_moyenne
-            - entity: automation.robot_stop_pluie
-
           show_header_toggle: false
           state_color: true

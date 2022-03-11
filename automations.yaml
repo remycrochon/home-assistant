@@ -493,8 +493,16 @@
   action:
   - service: vacuum.return_to_base
     target:
-      entity_id: vacuum.automower_r_435x_am435x_awd
+      entity_id:
+      - vacuum.am435x_awd
+    data: {}
   - service: notify.telegram
+    data:
+      message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
+        mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
+        mm {{-"\n"-}}{{states("sensor.date_time") }}
+      title: Alerte Meteo Pluie !!!
+  - service: dwains_dashboard.notification_create
     data:
       message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
         mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}

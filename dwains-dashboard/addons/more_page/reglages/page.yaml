@@ -364,3 +364,34 @@
             - switch.tc6_bp1
           title: Lumiere Sapin
           exclude: []
+
+
+###############################################################            
+# ROBOT TONDEUSE
+    - type: vertical-stack
+      cards:
+        - name: ROBOT AM435 AWD
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
+
+        - type: entities
+          entities:
+            - entity: input_boolean.robot_valide
+            - entity: vacuum.am435x_awd
+            - entity: device_tracker.am435x_awd
+            - entity: calendar.am435x_awd
+            - entity: number.am435x_awd_cutting_height
+            - entity: select.am435x_awd_headlight_mode
+            - entity: input_number.seuil_pluie_stop_robot
+            - entity: sensor.vp2_pluviometrie_moyenne
+            - entity: automation.robot_stop_pluie
+
+          show_header_toggle: false
+          state_color: true

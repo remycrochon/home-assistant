@@ -2,18 +2,17 @@
 ## https://github.com/LRvdLinden
 ## More-page add-on: Weather Dashboard
 ## Version: 3.0.1
+
+# https://devstory.net/11963/bootstrap-grid-system
+#items_classes: 'col-xs si<576px-Largeur Maxi du contenaire: Aucun  PORTABLE
+#items_classes: 'col-sm- si>576px-Largeur Maxi du contenaire: 540px 
+#items_classes: 'col-md- si>768px-Largeur Maxi du contenaire: 720px TABLETTE
+#items_classes: 'col-lg- si>992px Largeur Maxi du contenaire: 960px pour mon PC
+#items_classes: 'col-xl- si>1200 Largeur Maxi du contenaire: 1140px
+
 - type: custom:dwains-flexbox-card
-  # items_classes: 'col-xs-9' # col-sm-4 col-md-6'
   items_classes: 'col-xs-9 col-sm-4 col-md-6' # col-lg-6' #fonctionne
   padding: true
-  # https://devstory.net/11963/bootstrap-grid-system
-  #items_classes: 'col-xs si<576px-Largeur Maxi du contenaire: Aucun  PORTABLE
-  #items_classes: 'col-sm- si>576px-Largeur Maxi du contenaire: 540px 
-  #items_classes: 'col-md- si>768px-Largeur Maxi du contenaire: 720px TABLETTE
-  #items_classes: 'col-lg- si>992px Largeur Maxi du contenaire: 960px pour mon PC
-  #items_classes: 'col-xl- si>1200 Largeur Maxi du contenaire: 1140px
-  
-  #items_classes: 'col-md-6'
   cards:
     - type: vertical-stack
       # items_classes: 'col-xs-9 col-sm-4 col-md-6 col-lg-4'
@@ -146,9 +145,7 @@
                 #######""""
                 - type: custom:meteo-france-weather-card
                   entity: weather.albi # <- fill in the right sensor
-                #- type: custom:meteo-france-weather-card
                   name: Albi
-                #  entity: weather.albi
                   rainForecastEntity: sensor.albi_next_rain
                   freezeChanceEntity: sensor.albi_freeze_chance
                   rainChanceEntity: sensor.albi_rain_chance

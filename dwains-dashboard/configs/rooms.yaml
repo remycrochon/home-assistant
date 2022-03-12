@@ -9,7 +9,7 @@ rooms:
     door: group.portes_sous_sol
     temperature: sensor.esp130_climat_sous_sol_temperature
     humidity: sensor.esp130_climat_sous_sol_humidite
-    light: switch.pc_ht
+    
 
 # Garage          
   - name: Garage
@@ -44,6 +44,7 @@ rooms:
 #       camera: camera.rockrobo_map
 #     plant: plant.hallway_plant
 #     media_player: media_player.awesome_hallway_tv
+    light: group.switch_salon
     more_entities:
       entities:
         - entity: sensor.power_salon_zb

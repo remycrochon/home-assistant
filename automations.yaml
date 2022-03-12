@@ -2189,7 +2189,7 @@
     data: {}
   mode: single
 - id: '1646593365342'
-  alias: 0-0-1 Alim TabletteNouvelle automatisation
+  alias: 0-0-1 Alim Tablette
   description: ''
   trigger:
   - platform: numeric_state
@@ -2214,7 +2214,8 @@
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.pc2_lidl
+          entity_id:
+          - switch.pc2_tablette
     - conditions:
       - condition: trigger
         id: niv_haut
@@ -2222,7 +2223,7 @@
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.pc2_lidl
+          entity_id: switch.pc2_tablette
     - conditions:
       - condition: trigger
         id: niv tres bas
@@ -2230,6 +2231,7 @@
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.pc2_lidl
+          entity_id:
+          - switch.pc2_tablette
     default: []
   mode: single

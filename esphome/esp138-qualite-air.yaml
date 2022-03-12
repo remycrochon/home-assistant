@@ -8,6 +8,8 @@ esphome:
   name: ${device_name}
   platform: ESP32
   board: mhetesp32minikit
+  #board: wemos_d1_mini32
+  
   platformio_options:
     lib_deps: NeoPixelBus@2.6.0
   on_boot:
@@ -54,7 +56,7 @@ light:
 
   - platform: neopixelbus
     num_leds: 8 
-    pin: GPIO0
+    pin: GPIO4 #gpio0
     name: "RGB strip"
     variant: ws2812
     id: rgb_led
@@ -73,9 +75,11 @@ uart:
     baud_rate: 9600
 
   - id: uart_b
-    rx_pin: GPIO16
-    tx_pin: GPIO17
+    rx_pin: GPIO16 # GPIO16
+    tx_pin: GPIO17 # GPIO17
     baud_rate: 9600
+#    debug:
+#      direction: BOTH
     
 globals:
   - id: bp_mode
@@ -136,8 +140,8 @@ sensor:
               condition:
                 sensor.in_range:
                   id: pm2_5
-                  above: 25
-                  below: 35
+                  above: 25 
+                  below: 35 
               then: 
                 - light.addressable_set:
                     id: rgb_led
@@ -394,8 +398,11 @@ binary_sensor:
     name: bp_mod
     id: button
     pin:
-      number: GPIO14
+      number: GPIO14 # GPIO 15TMS
       inverted: true
+      mode:
+        input: true
+        pullup: true
     on_click:
       - min_length: 25ms
         max_length: 500ms
@@ -403,13 +410,17 @@ binary_sensor:
           - lambda: |-
               if (id(bp_mode) < 3) { id(bp_mode) += 1; }
               else { id(bp_mode) = 1; }
+              
   - platform: gpio
     name: bp_mod2
     id: button2
     pin:
-      number: GPIO13
+      number: GPIO13 # TCK
       inverted: true
-
+      mode:
+        input: true
+        pullup: true
+        
 #Etat de la connection
   - platform: status
     name: "${friendly_name} Status"
@@ -419,6 +430,7 @@ interval:
     then:
       - switch.turn_on: val_mes
       - delay: 10s
+#     - switch.turn_on: val_mes
       - switch.turn_off: val_mes
       - delay: 30s
 

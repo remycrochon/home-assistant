@@ -66,4 +66,11 @@ hass_update:
     - binary_sensor.network_ups_tools_update_available
     - binary_sensor.node_red_update_available
     - binary_sensor.visual_studio_code_update_available
+
+switch_salon:
+  name: "pc_salon"
+  all: true
+  entities:
+    - switch.pc2_tablette
+    - switch.pc1_lidl
     

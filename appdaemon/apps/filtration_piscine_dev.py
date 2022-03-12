@@ -262,6 +262,8 @@ class FiltrationPiscineDev(hass.Hass):
         if arret_force=="on":
             self.turn_off(pompe) 
             self.notification("Att sur Delestage",1)
+            text_affichage = "Arret Forcé"
+            self.set_textvalue(periode_filtration,text_affichage)
         else:
             if ma_ppe==1:
                 self.turn_on(pompe)

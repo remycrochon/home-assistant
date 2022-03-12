@@ -1652,15 +1652,8 @@
   description: Arret piscine si prod superieur au seuil et piscine sur on et MaL en
     marche
   trigger:
-  - platform: numeric_state
+  - platform: state
     entity_id: sensor.envoy_122103023124_current_power_production
-    id: mal on
-    above: input_number.seuil_delestage_pv
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
   - platform: state
     entity_id: binary_sensor.malaver_en_marche
     id: etat mal
@@ -1680,6 +1673,9 @@
       - condition: state
         entity_id: input_boolean.mem_delestage
         state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.envoy_122103023124_current_power_production
+        above: input_number.seuil_delestage_pv
       sequence:
       - service: input_boolean.turn_on
         target:

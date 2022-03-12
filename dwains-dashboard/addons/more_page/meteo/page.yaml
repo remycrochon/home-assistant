@@ -313,7 +313,7 @@
                     graph: line
                     extrema: true
                     average: true       
-            #STATS VIEW
+            # VENT
             vent:
               type: vertical-stack
               cards:
@@ -322,6 +322,8 @@
                   entities:
                     - entity: sensor.vp2_rafale
                       name: Rafales de Vent
+                    - entity: sensor.vp2_rafales_max
+                      name: Rafales Max 24h
                 - type: horizontal-stack
                   cards:
                     - type: custom:compass-card

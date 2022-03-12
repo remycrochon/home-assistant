@@ -262,6 +262,8 @@
             type: custom:multiple-entity-row
           #
           - entities:
+              - entity: input_boolean.mem_delestage
+                name: Delest.
               - entity: sensor.ma_ppe_piscine_jour
                 name: Fonct. Jour
               - entity: binary_sensor.ppe_piscine_en_marche

@@ -257,6 +257,7 @@
               show_state: false
               type: custom:multiple-entity-row
             - entities:
+                - entity: automation.vmc_niv0_automatismes
                 - entity: sensor.energy_vmc_usage_daily_hc
                 - entity: sensor.energy_vmc_usage_daily_hp
               head:

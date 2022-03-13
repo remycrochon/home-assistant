@@ -111,7 +111,7 @@ sensor:
             send_first_at: 1
 
       on_value:
-  # de 0 à 85 / 8 leds    
+  # de 0 à 7 / 8 leds    
   # Led 0
           - if:
               condition:

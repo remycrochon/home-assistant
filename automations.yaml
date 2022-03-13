@@ -2192,24 +2192,19 @@
   alias: 0-0-1 Alim Tablette
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id: sensor.tablette_niveau_charge
-    below: '25'
+  - platform: time_pattern
     id: niv_bas
-  - platform: numeric_state
-    entity_id: sensor.tablette_niveau_charge
-    id: niv_haut
-    above: '95'
-  - platform: numeric_state
-    entity_id: sensor.tablette_niveau_charge
-    below: '15'
-    id: niv tres bas
+    minutes: /1
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: trigger
-        id: niv_bas
+      - condition: numeric_state
+        entity_id: sensor.tablette_niveau_charge
+        below: '25'
+      - condition: state
+        entity_id: switch.pc2_tablette
+        state: 'off'
       sequence:
       - service: switch.turn_on
         data: {}
@@ -2217,21 +2212,16 @@
           entity_id:
           - switch.pc2_tablette
     - conditions:
-      - condition: trigger
-        id: niv_haut
+      - condition: numeric_state
+        entity_id: sensor.tablette_niveau_charge
+        above: '95'
+      - condition: state
+        entity_id: switch.pc2_tablette
+        state: 'on'
       sequence:
       - service: switch.turn_off
         data: {}
         target:
           entity_id: switch.pc2_tablette
-    - conditions:
-      - condition: trigger
-        id: niv tres bas
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id:
-          - switch.pc2_tablette
     default: []
   mode: single

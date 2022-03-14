@@ -191,6 +191,7 @@ sensor:
       vp2_direction_du_vent:
         friendly_name: "Vp2 Direction Du vent"
         unique_id: "vp2_direction_du_vent"
+        unit_of_measurement: 'card'
         value_template: >
           {% set dv=state_attr('weather.albi','wind_bearing')|float(default=0)%}
           {% if dv<11 %}

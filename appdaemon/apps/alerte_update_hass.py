@@ -18,11 +18,11 @@ class AlerteUpdateHass(hass.Hass):
         heure = str(self.time())[:8]
         nom_entité = kwargs["nom"]
         #self.log(f'Etat: {nom_entité} = {new}/{flag[entity]}', log="groupealerte")
-        self.log(f'Mise à jour: {nom_entité} nécessaire', log="groupealerte_log")
+        self.log(f'Mise a jour: {nom_entité} necessaire', log="groupealerte_log")
         # Formatage du message de notification
         message_notification= format(heure)+": Mise à jour de: "+ format(nom_entité)+" nécessaire"
         self.call_service('notify/telegram', message=message_notification)
-        self.call_service('persistent_notification/create', message=message_notification)
+        #self.call_service('persistent_notification/create', message=message_notification)
         self.call_service('dwains_dashboard/notification_create', message=message_notification)
 
         

@@ -144,9 +144,6 @@
               - entity: switch.altherma
             hours_to_show: 24
             refresh_interval: 0
-
-      - type: horizontal-stack
-        cards: 
           - type: custom:mini-graph-card
             color_thresholds:
               - color: '#00FF00'
@@ -188,7 +185,9 @@
                 name: HC
                 show_line: false
                 y_axis: secondary
-            name: Puissance PAC 24h           
+            name: Puissance PAC 24h
+      - type: vertical-stack
+        cards:            
           - type: custom:mini-graph-card
             entities:
               - entity: sensor.energie_pac_jour

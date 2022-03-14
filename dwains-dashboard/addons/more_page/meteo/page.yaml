@@ -210,7 +210,7 @@
               cards:
                 - type: 'custom:mini-graph-card'
                   name: Derniere 24h # <- translate this line
-                  icon: 'ios:cloud-rain'
+                  icon: 'mdi:weather-pouring'
                   entities:
                     - sensor.vp2_rain24 # <- fill in the right sensor
                   line_color: '#299ec2'
@@ -232,7 +232,7 @@
                     
                 - type: 'custom:mini-graph-card'
                   name: Derniere heure # <- translate this line
-                  icon: 'ios:cloud-rain'
+                  icon: 'mdi:weather-pouring'
                   entities:
                     - sensor.vp2_rain # <- fill in the right sensor
                   line_color: '#299ec2'

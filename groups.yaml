@@ -53,19 +53,26 @@ hass_update:
   entities:
     - binary_sensor.adguard_home_update_available
     - binary_sensor.appdaemon_4_update_available
+    - binary_sensor.check_home_assistant_configuration_update_available
     - binary_sensor.esphome_update_available
     - binary_sensor.file_editor_update_available
     - binary_sensor.ftp_update_available
     - binary_sensor.glances_update_available
     - binary_sensor.grafana_update_available
+    - binary_sensor.home_assistant_google_drive_backup_update_available
     - binary_sensor.home_assistant_operating_system_update_available
+    - binary_sensor.home_assistant_versions_update_available
+    - binary_sensor.home_assistant_versions_update_available
     - binary_sensor.influxdb_update_available
     - binary_sensor.log_viewer_update_available
     - binary_sensor.mariadb_update_available
     - binary_sensor.mosquitto_broker_update_available
     - binary_sensor.network_ups_tools_update_available
     - binary_sensor.node_red_update_available
+    - binary_sensor.samba_share_update_available
+    - binary_sensor.ssh_web_terminal_update_available
     - binary_sensor.visual_studio_code_update_available
+    - binary_sensor.terminal_ssh_update_available
 
 switch_salon:
   name: "pc_salon"

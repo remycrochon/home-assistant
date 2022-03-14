@@ -219,7 +219,7 @@ sensor:
   - platform: homeassistant
     name: "HCHP J"
     unit_of_measurement: "kWh"
-    entity_id: sensor.energie_totale_linky_jour
+    entity_id: sensor.energie_totale_jour
     id: hphcj
 
 # Puissance du signal WIFI

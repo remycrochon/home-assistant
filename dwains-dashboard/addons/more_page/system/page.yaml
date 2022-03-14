@@ -853,13 +853,26 @@
             type: entities
           filter:
             include:
-              - entity_id: '*certificat*'
-            exclude: []
-            sort:
-              method: state
+              - entity_id: sensor.cert*
+            exclude: 
+              - entity_id: sensor.cert_exp*
+          sort:
+            method: state
+            numeric: false
+            reverse: false
 
 
 ################################ NIVEAUX IMP COULEUR  ###########################
+        - name: IMP Brother J5330DW
+          styles:
+            card:
+              - text-transform: uppercase
+              - color: 'var(--dwains-theme-accent)'
+              - font-size: 125%
+              - border-radius: 0%
+              - font-weight: 100
+              - letter-spacing: 10px
+          type: 'custom:button-card'
         - type: custom:bar-card
           direction: up
           entities:
@@ -885,7 +898,7 @@
           target: 20
           unit_of_measurement: '%'
           stack: horizontal
-          title: Brother J5330DW
+          #title: Brother J5330DW
           card_mod:
             style: |
               bar-card-title {

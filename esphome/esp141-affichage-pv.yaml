@@ -1,0 +1,339 @@
+substitutions:
+  device_name: esp141-affichage-pv
+  adress_ip: "192.168.0.141"
+  friendly_name: esp141
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP8266
+  board: d1_mini
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      - light.control:
+          id: rgb_led
+          brightness: 0.25
+          state: on  
+
+wifi:
+  networks:
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
+      priority: 2    
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+  
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+logger:
+api:
+ota:
+web_server:
+  port: 80
+
+time:
+  - platform: homeassistant
+    timezone:  ${time_timezone} 
+
+font:
+  - file: "fonts/arial.ttf"
+    id: arial
+    size: 15
+  - file: "fonts/arial.ttf"
+    id: arial30
+    size: 30
+  - file: "fonts/arial.ttf"
+    id: arial10
+    size: 10
+#uart:
+#  rx_pin: GPIO3 # RX=pin 21
+#  tx_pin: GPIO1 # TX=pin 22
+#  baud_rate: 9600
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: True
+  id: bus_a
+
+uart:
+  rx_pin: GPIO2 #D4
+  baud_rate: 9600
+
+#i2c:
+#  sda: GPIO00 #
+#  scl: GPIO02 #
+#  scan: true
+#  id: bus_a
+
+# Led WS2812 RGB  
+light:
+
+  - platform: neopixelbus
+    method:
+      type: esp8266_dma
+    num_leds: 8 #1
+    pin: GPIO3
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
+#Etat de la connection
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO16
+      inverted: True
+    name: bp_raz
+
+  - platform: status
+    name: "${friendly_name} Status"
+
+switch:    
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+sensor:
+  - platform: homeassistant
+    name: "Conso"
+    entity_id: sensor.envoy_122103023124_current_power_consumption
+    id: conso
+
+  - platform: homeassistant
+    name: "Sout"
+    entity_id: sensor.envoy_puissance_soutiree_reseau
+    id: sout
+    
+  - platform: homeassistant
+    name: "Inj"
+    entity_id: sensor.envoy_puissance_injectee_reseau
+    id: inj
+
+# Lecture dans HA de la conso du jour
+  - platform: homeassistant
+    name: "Prod Inst"
+    unit_of_measurement: "W"
+    entity_id: sensor.envoy_122103023124_current_power_production
+    id: prod
+    on_value:
+# de 0 à 85 / 8 leds    
+# Led 1
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                below: 225
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 0
+                  red: 100%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 1
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%  
+# led 2                  
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 225
+                below: 450
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 1
+                  red: 100%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 2
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%  
+# Led 3              
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 450
+                below: 675
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 2
+                  red: 100%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 3
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%     
+# led 4                  
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 675
+                below: 900
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 3
+                  red: 75%
+                  green: 75%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 4
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%     
+# led 5
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 900
+                below: 1125
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 4
+                  red: 75%
+                  green: 75%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 5
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%  
+# led 6
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 1125
+                below: 1350
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 5
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 6
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%      
+# led 7
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 1350
+                below: 1575
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 6
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 7
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+                  color_brightness: 0%    
+# Led 8
+        - if:
+            condition:
+              sensor.in_range:
+                id: prod
+                above: 1575
+            then: 
+              - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 7
+                  red: 0%
+                  green: 100%
+                  blue: 0%
+                  color_brightness: 100%
+    
+  - platform: wifi_signal
+    id: wif
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: uptime
+    id: up
+    name: "${friendly_name} Uptime Sensor"
+    update_interval: 60s
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 64x48"
+    reset_pin: D0
+    address: 0x3C
+    brightness: 100%
+    rotation: 0
+    lambda: |-
+      it.printf(0, 0, id(arial10),"P:%.0f W",id(prod).state);
+      it.printf(0, 10, id(arial10),"C:%.0f W",id(conso).state);
+      it.printf(0, 20, id(arial10),"S:%.0f W",id(sout).state);
+      it.printf(0, 30, id(arial10),"I:%.0f W",id(inj).state);      
+
+#      it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
+#          it.printf(0, 0, id(arial), "%.1f C", id(temp).state);
+

@@ -4,7 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 import time
 
-# Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
+#  Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
 JOURNAL=2 
 
 class AlerteFinCertificats(hass.Hass):
@@ -15,6 +15,8 @@ class AlerteFinCertificats(hass.Hass):
         tempo_j = self.run_daily(self.bilan_jour, "00:05:00")
         self.bilan_jour(self)
         #tempo_j = self.run_every(self.bilan_jour, "now", 1 * 60)
+        self.log("Initialisation Alert_fin_certificat.py", log="fin_certificats_log")
+        self.log("Initialisation Alert_fin_certificat.py", log="error_log")
             
     def bilan_jour(self,kwargs):
         s_bas= int(self.args["seuil_bas"])
@@ -22,6 +24,7 @@ class AlerteFinCertificats(hass.Hass):
         for certif in self.split_device_list(self.args["certif"]):
             self.notification('Lecture de:'+certif,2,"")
             nom_entité =  self.friendly_name(certif)
+            
             etat = self.get_state(certif, attribute="state")
             validité = self.get_state(certif,attribute="is_valid")
             self.notification("Friendly_name= "+nom_entité,2,"")
@@ -29,8 +32,8 @@ class AlerteFinCertificats(hass.Hass):
             # Vérifie si le certificat est valide
             if etat !="unknown" or validité == True:
                 # Création entités dans HA
-                #binarysensorname="binary_sensor.cert_"+certif[29:]+"_validite"  #binary_sensor.certificat_ha
-                binarysensorname="binary_sensor.cert_"+nom_entité+"_validite"  #binary_sensor.certificat_ha
+                binarysensorname="binary_sensor.cert_"+certif[29:]+"_validite"  #binary_sensor.certificat_ha
+                #binarysensorname="binary_sensor.cert_"+nom_entité+"_validite"  #binary_sensor.certificat_ha
                 self.set_state(binarysensorname, state="on", replace=True, attributes= {"icon": "mdi:check","device_class": "connectivity"})
                 self.notification("Binary_SensorName:" + binarysensorname,2,"")
                 ce_jour=datetime.strptime(time.strftime('%Y:%m:%d', time.localtime()),'%Y:%m:%d')
@@ -43,8 +46,8 @@ class AlerteFinCertificats(hass.Hass):
                 else:
                     nb_jour=(date_de_fin-ce_jour).days
                     self.notification("nb Jour:" + str(nb_jour),2,"")
-                    #sensorname="sensor.cert_"+certif[29:]+"_fin"
-                    sensorname="sensor.cert_"+nom_entité+"_fin"
+                    sensorname="sensor.cert_"+certif[29:]+"_fin"
+                    #sensorname="sensor.cert_"+nom_entité+"_fin"
                     self.notification("SensorName:" + sensorname,2,"")
 
                     # Vérifie si le nombre de jours est inférieur au seuil bas

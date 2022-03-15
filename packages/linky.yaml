@@ -40,9 +40,6 @@ input_boolean:
   hc_hp:
     name: Tarif HC-HP
     icon: mdi:power-settings
-
-  forcage_hc_hp:
-    name: Forcage HC
     
   com_linky:
     name: Comm Linky OK=On
@@ -66,26 +63,6 @@ input_number:
     icon: mdi:currency-eur
     step: 0.00001
     mode: box
-
-input_datetime:
-  # Horaire HC/HP
-  horaire_hc_debut_1:
-    name: Horaire HC Début 1
-    has_date: false
-    has_time: true
-  horaire_hc_debut_2:
-    name: Horaire HC Début 2
-    has_date: false
-    has_time: true
-
-  horaire_hp_debut_1:
-    name: Horaire HP Début 1
-    has_date: false
-    has_time: true
-  horaire_hp_debut_2:
-    name: Horaire HP Début 2
-    has_date: false
-    has_time: true
 
 input_text:
   # Permet de simuler des Statuts pour les tests unitaires

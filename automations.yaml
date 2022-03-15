@@ -486,10 +486,7 @@
   - platform: numeric_state
     entity_id: sensor.vp2_pluviometrie_moyenne
     above: input_number.seuil_pluie_stop_robot
-  condition:
-  - condition: state
-    entity_id: input_boolean.robot_valide
-    state: 'on'
+  condition: []
   action:
   - service: vacuum.return_to_base
     target:
@@ -522,98 +519,6 @@
     data:
       entity_id: cover.volet_droit_p
       position: 0
-  mode: single
-- id: '1629817943890'
-  alias: 7_1_1 Meteo Alerte quand pluie attendue
-  description: Envoie des notifications quand la pluie est attendue dans l'heure
-  trigger:
-  - platform: state
-    entity_id: sensor.albi_next_rain
-  action:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ trigger.to_state.state != "unknown" }}'
-      - condition: state
-        entity_id: input_boolean.stop_notif_previ_pluie
-        state: 'off'
-      sequence:
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ trigger.to_state.state != trigger.from_state.state
-              }}'
-          sequence:
-          - service: notify.telegram
-            data:
-              message: 'La pluie est attendue à {{ as_timestamp(states(''sensor.albi_next_rain''))
-                | timestamp_custom(''%H:%M'', True) }}.
-
-                '
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ state_attr("sensor.albi_next_rain", "1_hour_forecast")["0
-              min"] != "Temps sec" }}'
-          sequence:
-          - service: input_boolean.turn_on
-            data:
-              entity_id: input_boolean.stop_notif_previ_pluie
-          - condition: time
-            before: '21:30'
-            after: '10:00:00'
-    - conditions:
-      - condition: template
-        value_template: '{{ trigger.to_state.state == "unknown" }}'
-      - condition: template
-        value_template: '{{ trigger.from_state.state != "unknown" }}'
-      sequence:
-      - service: notify.telegram
-        data:
-          message: Plus de pluie attendue dans la prochaine heure.
-      - service: input_boolean.turn_off
-        data:
-          entity_id: input_boolean.stop_notif_previ_pluie
-  mode: single
-- id: '1629792204665'
-  alias: 7_1_2 Meteo Notification si alerte météo en cours
-  description: Envoie une notification sur Telegram si une alerte météo est levée
-    par Météo-France
-  trigger:
-  - platform: state
-    entity_id: sensor.81_weather_alert
-  condition:
-  - condition: template
-    value_template: '{% if (is_state(''sensor.81_weather_alert'', ''Vert'') or is_state(''sensor.81_weather_alert'',
-      ''unavailable'') )  %}false{% else %}true{% endif %}'
-  action:
-  - service: notify.telegram
-    data:
-      message: "Alerte météo {{states('sensor.81_weather_alert')}} en cours:\n {%-\
-        \ for attr in ['Vent violent', 'Pluie-inondation', 'Orages', 'Inondation',\
-        \ 'Neige-verglas', 'Canicule', 'Grand-froid', 'Avalanches', 'Vagues-submersion']\
-        \ -%} {%- if state_attr('sensor.81_weather_alert', attr) != 'Vert' and state_attr('sensor.81_weather_alert',\
-        \ attr) != None %}\n - {{attr}}: {{state_attr('sensor.81_weather_alert', attr)}}\
-        \ {%- endif -%} {%- endfor -%}{{-\"\\n\"-}}{{states(\"sensor.date_time\")\
-        \ }}"
-  mode: single
-- id: '1629792266535'
-  alias: 7_1_3 Meteo Notification si alerte météo terminée
-  description: Envoie un notification sur Telegram si toutes les alertes météos sont
-    terminées
-  trigger:
-  - platform: state
-    entity_id: sensor.81_weather_alert
-    to: Vert
-  condition:
-  - condition: template
-    value_template: '{% if trigger.from_state.state != ''unavailable'' %}true{% endif
-      %}'
-  action:
-  - service: notify.telegram
-    data:
-      message: Fin alerte météo {{-"\n"-}} {{states("sensor.date_time") }}
-      title: Réseau:!!!
   mode: single
 - id: '1632232387237'
   alias: 5_1_1 Reseau Notification Nouvelle IP
@@ -1467,188 +1372,8 @@
       max_alerts: 100
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
-- id: '1634706860525'
-  alias: 6_1_1 Energie Changement HP<->HC
-  description: ''
-  trigger:
-  - platform: time
-    at: input_datetime.horaire_hc_debut_1
-    id: hc1
-  - platform: time
-    at: input_datetime.horaire_hc_debut_2
-    id: hc2
-  - platform: time
-    at: input_datetime.horaire_hp_debut_1
-    id: hp1
-  - platform: time
-    at: input_datetime.horaire_hp_debut_2
-    id: hp2
-  - platform: state
-    entity_id: input_boolean.forcage_hc_hp
-    from: 'off'
-    to: 'on'
-    id: hc
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  - platform: state
-    entity_id: input_boolean.forcage_hc_hp
-    from: 'on'
-    to: 'off'
-    id: hp
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  - platform: state
-    entity_id: sensor.linky_n_tarif
-    id: tarif_hc
-    from: '2'
-    to: '1'
-  - platform: state
-    entity_id: sensor.linky_n_tarif
-    from: '1'
-    to: '2'
-    id: tarif_hp
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: and
-          conditions:
-          - condition: state
-            entity_id: input_boolean.com_linky
-            state: 'off'
-          - condition: or
-            conditions:
-            - condition: trigger
-              id: hc1
-            - condition: trigger
-              id: hc2
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: tarif_hc
-          - condition: state
-            entity_id: input_boolean.com_linky
-            state: 'on'
-        - condition: trigger
-          id: hc
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        entity_id: input_boolean.hc_hp
-      - service: utility_meter.select_tariff
-        data:
-          tariff: hc
-        target:
-          entity_id:
-          - utility_meter.energy_total_usage_daily
-          - utility_meter.energy_total_usage_weekly
-          - utility_meter.energy_total_usage_monthly
-          - utility_meter.energy_total_usage_yearly
-          - utility_meter.energy_pisc_usage_daily
-          - utility_meter.energy_pisc_usage_weekly
-          - utility_meter.energy_pisc_usage_monthly
-          - utility_meter.energy_pisc_usage_yearly
-          - utility_meter.energy_sdb_usage_daily
-          - utility_meter.energy_sdb_usage_weekly
-          - utility_meter.energy_sdb_usage_monthly
-          - utility_meter.energy_sdb_usage_yearly
-          - utility_meter.energy_ecs1_usage_daily
-          - utility_meter.energy_ecs1_usage_weekly
-          - utility_meter.energy_ecs1_usage_monthly
-          - utility_meter.energy_ecs1_usage_yearly
-          - utility_meter.energy_pac1_usage_daily
-          - utility_meter.energy_pac1_usage_weekly
-          - utility_meter.energy_pac1_usage_monthly
-          - utility_meter.energy_pac1_usage_yearly
-          - utility_meter.energy_mal_usage_daily
-          - utility_meter.energy_mal_usage_monthly
-          - utility_meter.energy_mal_usage_weekly
-          - utility_meter.energy_mal_usage_yearly
-          - utility_meter.energy_autres_usage_daily
-          - utility_meter.energy_autres_usage_monthly
-          - utility_meter.energy_autres_usage_weekly
-          - utility_meter.energy_autres_usage_yearly
-          - utility_meter.energy_vmc_usage_daily
-          - utility_meter.energy_total_linky_usage_daily
-          - utility_meter.energy_total_linky_usage_monthly
-          - utility_meter.energy_total_linky_usage_weekly
-          - utility_meter.energy_total_linky_usage_yearly
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: and
-          conditions:
-          - condition: state
-            entity_id: input_boolean.com_linky
-            state: 'off'
-          - condition: or
-            conditions:
-            - condition: trigger
-              id: hp1
-            - condition: trigger
-              id: hp2
-        - condition: and
-          conditions:
-          - condition: state
-            entity_id: input_boolean.com_linky
-            state: 'on'
-          - condition: trigger
-            id: tarif_hp
-        - condition: trigger
-          id: hp
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        entity_id: input_boolean.hc_hp
-      - service: utility_meter.select_tariff
-        data:
-          tariff: hp
-        target:
-          entity_id:
-          - utility_meter.energy_total_usage_daily
-          - utility_meter.energy_total_usage_weekly
-          - utility_meter.energy_total_usage_monthly
-          - utility_meter.energy_total_usage_yearly
-          - utility_meter.energy_pisc_usage_daily
-          - utility_meter.energy_pisc_usage_weekly
-          - utility_meter.energy_pisc_usage_monthly
-          - utility_meter.energy_pisc_usage_yearly
-          - utility_meter.energy_sdb_usage_daily
-          - utility_meter.energy_sdb_usage_weekly
-          - utility_meter.energy_sdb_usage_monthly
-          - utility_meter.energy_sdb_usage_yearly
-          - utility_meter.energy_ecs1_usage_daily
-          - utility_meter.energy_ecs1_usage_weekly
-          - utility_meter.energy_ecs1_usage_monthly
-          - utility_meter.energy_ecs1_usage_yearly
-          - utility_meter.energy_pac1_usage_daily
-          - utility_meter.energy_pac1_usage_weekly
-          - utility_meter.energy_pac1_usage_monthly
-          - utility_meter.energy_pac1_usage_yearly
-          - utility_meter.energy_mal_usage_daily
-          - utility_meter.energy_mal_usage_monthly
-          - utility_meter.energy_mal_usage_weekly
-          - utility_meter.energy_mal_usage_yearly
-          - utility_meter.energy_autres_usage_daily
-          - utility_meter.energy_autres_usage_monthly
-          - utility_meter.energy_autres_usage_weekly
-          - utility_meter.energy_autres_usage_yearly
-          - utility_meter.energy_wc_usage_daily
-          - utility_meter.energy_vmc_usage_daily
-          - utility_meter.energy_total_linky_usage_daily
-          - utility_meter.energy_total_linky_usage_monthly
-          - utility_meter.energy_total_linky_usage_weekly
-          - utility_meter.energy_total_linky_usage_yearly
-    default: []
-  mode: single
 - id: '1634708878890'
-  alias: '6_1_2 Energie Delestage '
+  alias: '6_1_1 Energie Delestage '
   description: Arret piscine si prod superieur au seuil et piscine sur on et MaL en
     marche
   trigger:
@@ -2096,7 +1821,7 @@
     default: []
   mode: single
 - id: '1642614758763'
-  alias: 6_1_1 Energie Changement HP<->HC simplifié
+  alias: 6_1_0 Energie Changement HP<->HC
   description: ''
   trigger:
   - platform: state
@@ -2121,10 +1846,35 @@
           tariff: hc
         target:
           entity_id:
-          - utility_meter.energy_total_linky_usage_daily
-          - utility_meter.energy_total_linky_usage_monthly
-          - utility_meter.energy_total_linky_usage_weekly
-          - utility_meter.energy_total_linky_usage_yearly
+          - utility_meter.energy_total_usage_daily
+          - utility_meter.energy_total_usage_weekly
+          - utility_meter.energy_total_usage_monthly
+          - utility_meter.energy_total_usage_yearly
+          - utility_meter.energy_pisc_usage_daily
+          - utility_meter.energy_pisc_usage_weekly
+          - utility_meter.energy_pisc_usage_monthly
+          - utility_meter.energy_pisc_usage_yearly
+          - utility_meter.energy_sdb_usage_daily
+          - utility_meter.energy_sdb_usage_weekly
+          - utility_meter.energy_sdb_usage_monthly
+          - utility_meter.energy_sdb_usage_yearly
+          - utility_meter.energy_ecs1_usage_daily
+          - utility_meter.energy_ecs1_usage_weekly
+          - utility_meter.energy_ecs1_usage_monthly
+          - utility_meter.energy_ecs1_usage_yearly
+          - utility_meter.energy_pac1_usage_daily
+          - utility_meter.energy_pac1_usage_weekly
+          - utility_meter.energy_pac1_usage_monthly
+          - utility_meter.energy_pac1_usage_yearly
+          - utility_meter.energy_mal_usage_daily
+          - utility_meter.energy_mal_usage_monthly
+          - utility_meter.energy_mal_usage_weekly
+          - utility_meter.energy_mal_usage_yearly
+          - utility_meter.energy_autres_usage_daily
+          - utility_meter.energy_autres_usage_monthly
+          - utility_meter.energy_autres_usage_weekly
+          - utility_meter.energy_autres_usage_yearly
+          - utility_meter.energy_vmc_usage_daily
     - conditions:
       - condition: trigger
         id: tarif_hp
@@ -2134,10 +1884,35 @@
           tariff: hp
         target:
           entity_id:
-          - utility_meter.energy_total_linky_usage_daily
-          - utility_meter.energy_total_linky_usage_monthly
-          - utility_meter.energy_total_linky_usage_weekly
-          - utility_meter.energy_total_linky_usage_yearly
+          - utility_meter.energy_total_usage_daily
+          - utility_meter.energy_total_usage_weekly
+          - utility_meter.energy_total_usage_monthly
+          - utility_meter.energy_total_usage_yearly
+          - utility_meter.energy_pisc_usage_daily
+          - utility_meter.energy_pisc_usage_weekly
+          - utility_meter.energy_pisc_usage_monthly
+          - utility_meter.energy_pisc_usage_yearly
+          - utility_meter.energy_sdb_usage_daily
+          - utility_meter.energy_sdb_usage_weekly
+          - utility_meter.energy_sdb_usage_monthly
+          - utility_meter.energy_sdb_usage_yearly
+          - utility_meter.energy_ecs1_usage_daily
+          - utility_meter.energy_ecs1_usage_weekly
+          - utility_meter.energy_ecs1_usage_monthly
+          - utility_meter.energy_ecs1_usage_yearly
+          - utility_meter.energy_pac1_usage_daily
+          - utility_meter.energy_pac1_usage_weekly
+          - utility_meter.energy_pac1_usage_monthly
+          - utility_meter.energy_pac1_usage_yearly
+          - utility_meter.energy_mal_usage_daily
+          - utility_meter.energy_mal_usage_monthly
+          - utility_meter.energy_mal_usage_weekly
+          - utility_meter.energy_mal_usage_yearly
+          - utility_meter.energy_autres_usage_daily
+          - utility_meter.energy_autres_usage_monthly
+          - utility_meter.energy_autres_usage_weekly
+          - utility_meter.energy_autres_usage_yearly
+          - utility_meter.energy_vmc_usage_daily
     default: []
   mode: single
 - id: '1642958036645'

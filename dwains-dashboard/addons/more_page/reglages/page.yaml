@@ -29,6 +29,8 @@
             - entities:
                 - entity: sensor.linky_ptec
                   name: Tarif
+                - entity: input_boolean.hc_hp
+                  name: HC / HP si actif
                 - entity: input_boolean.com_linky  
                   name: Com 
               entity: sensor.linky_ptec
@@ -36,37 +38,6 @@
               name: Linky
               show_state: false
               type: custom:multiple-entity-row
-            - entities:
-                - entity: input_datetime.horaire_hc_debut_1
-                  name: Déb
-                - entity: input_datetime.horaire_hp_debut_1
-                  name: Fin
-              entity: input_datetime.horaire_hc_debut_1
-              icon: mdi:clock
-              name: Tranche 1 HC
-              show_state: false
-              type: custom:multiple-entity-row
-            - entities:
-                - entity: input_datetime.horaire_hc_debut_2
-                  name: Déb
-                - entity: input_datetime.horaire_hp_debut_2
-                  name: Fin
-              entity: input_datetime.horaire_hc_debut_1
-              icon: mdi:clock
-              name: Tranche 2 HC
-              show_state: false
-              type: custom:multiple-entity-row              
-            - entities:
-                - entity: input_boolean.hc_hp
-                  name: HC / HP si actif
-                - entity: input_boolean.forcage_hc_hp
-                  name: Forcage en HC                  
-              entity: input_boolean.hc_hp
-              icon: mdi:clock
-              name: HC / HP si actif
-              show_state: false
-              type: custom:multiple-entity-row
-
           how_header_toggle: false
           style: |
             ha-card {
@@ -97,7 +68,7 @@
                   name: Debut
                 - entity: input_datetime.horaire_ecs_fin
                   name: Fin
-              entity: input_datetime.horaire_hc_debut_1
+              entity: input_datetime.horaire_ecs_debut
               icon: mdi:clock
               name: Hor ECS
               show_state: false
@@ -385,7 +356,6 @@
         - type: entities
           entities:
             - entity: automation.robot_stop_pluie
-            - entity: input_boolean.robot_valide
             - entity: vacuum.am435x_awd
             - entity: device_tracker.am435x_awd
             - entity: calendar.am435x_awd

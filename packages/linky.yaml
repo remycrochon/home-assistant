@@ -64,15 +64,15 @@ input_text:
   linky_test_status:   
     name: Test statuts Linky
 
-# Utilisé dans l'affichage des graphiques de puissance permettant de materialiser la zone HC
-binary_sensor:
-  - platform: template # = true si HC
-    sensors:
-      display_hp_hc:
-        friendly_name: "HC"
-        value_template: "{{ (states.sensor.linky_n_tarif.state == '1') }}" # =1 si HC =2 si HP
-
 template:
+  - binary_sensor:
+    # Utilisé dans l'affichage des graphiques de puissance permettant de materialiser la zone HC
+    # = true si HC
+    - name: "display_hp_hc"
+      unique_id: "display_hp_hc"
+      state: >-
+        {{ (states.sensor.linky_n_tarif.state == '1') }}" # =1 si HC =2 si H
+
 # Consommation journalière HP + HC - addition des utility meter
   - sensor:
     - name: "Energie Totale Jour"

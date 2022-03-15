@@ -36,11 +36,6 @@ utility_meter:
       - hc
 ## 
 input_boolean:
-  # H pleine/creuse
-  hc_hp:
-    name: Tarif HC-HP
-    icon: mdi:power-settings
-    
   com_linky:
     name: Comm Linky OK=On
 
@@ -75,7 +70,7 @@ binary_sensor:
     sensors:
       display_hp_hc:
         friendly_name: "HC"
-        value_template: "{{ (states.input_boolean.hc_hp.state == 'off') }}"
+        value_template: "{{ (states.sensor.linky_n_tarif.state == '1') }}" # =1 si HC =2 si HP
 
 template:
 # Consommation journalière HP + HC - addition des utility meter

@@ -29,8 +29,6 @@
             - entities:
                 - entity: sensor.linky_ptec
                   name: Tarif
-                - entity: input_boolean.hc_hp
-                  name: HC / HP si actif
                 - entity: input_boolean.com_linky  
                   name: Com 
               entity: sensor.linky_ptec

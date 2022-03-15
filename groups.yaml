@@ -62,7 +62,6 @@ hass_update:
     - binary_sensor.home_assistant_google_drive_backup_update_available
     - binary_sensor.home_assistant_operating_system_update_available
     - binary_sensor.home_assistant_versions_update_available
-    - binary_sensor.home_assistant_versions_update_available
     - binary_sensor.influxdb_update_available
     - binary_sensor.log_viewer_update_available
     - binary_sensor.mariadb_update_available

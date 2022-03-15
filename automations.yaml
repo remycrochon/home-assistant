@@ -1989,7 +1989,7 @@
     - conditions:
       - condition: numeric_state
         entity_id: sensor.tablette_niveau_charge
-        above: '95'
+        above: '98'
       - condition: state
         entity_id: switch.pc2_tablette
         state: 'on'

@@ -135,51 +135,80 @@
                 - --mdc-ripple-press-opacity: 0
                 - cursor: initial
             type: 'custom:button-card'
+
           - cards:
-              - entities:
-                  - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.envoy_122103023124_current_power_consumption
-                    name: Conso. Tot. (24h)
-                font_size: 80
-                hours_to_show: 24
-                line_width: 2
-                hour24: true
-                points_per_hour: 2
-                decimals: 0
-                show:
-                  animate: true
-                  fill: true
-                  icon: false
-                  labels: false
-                  name: true
-                  graph: bar
-                  extrema: true
-                  average: true
-                theme: ios-dark-mode-blue-red
-                type: 'custom:mini-graph-card'
-              - entities:
-                  - color: 'var(--dwains-theme-accent)'
-                    entity: sensor.envoy_122103023124_current_power_production
-                    name: Produc. PV (24h)
-                font_size: 80
-                hours_to_show: 24
-                line_width: 2
-                hour24: true
-                points_per_hour: 2
-                decimals: 0
-                show:
-                  animate: true
-                  fill: true
-                  icon: false
-                  labels: false
-                  name: true
-                  graph: bar
-                  extrema: true
-                  average: true
-                theme: ios-dark-mode-blue-red
-                type: 'custom:mini-graph-card'
-            type: horizontal-stack
+
+            # Affichage Puissance totale consommée
+            - entities:
+                - color: 'var(--dwains-theme-accent)'
+                  entity: sensor.envoy_122103023124_current_power_consumption
+                  name: Conso. Tot. (24h)
+                  show_line: true
+                - color: '#CCC0cCC'
+                  entity: binary_sensor.display_hp_hc
+                  name: HC
+                  show_line: true
+                  y_axis: secondary
+              color_thresholds_transition: hard
+              color_thresholds:
+                - color: '#00FF00'
+                  value: 0
+                - color: '#FF9900'
+                  value: 4000
+                - color: '#EA9999'
+                  value: 6000
+                - color: '#CC0000'
+                  value: 10000
+              state_map:
+                - label: hp
+                  value: 'off'
+                - label: hc
+                  value: 'on'
+
+              font_size: 80
+              hours_to_show: 24
+              line_width: 2
+              hour24: true
+              points_per_hour: 2
+              decimals: 0
+              show:
+                animate: true
+                fill: true
+                icon: false
+                labels: false
+                name: true
+                graph: line
+                extrema: true
+                average: true
+              theme: ios-dark-mode-blue-red
+              type: 'custom:mini-graph-card'
+
+            # Affichage Puissance totale produite par PV
+            - entities:
+                - color: 'var(--dwains-theme-accent)'
+                  entity: sensor.envoy_122103023124_current_power_production
+                  name: Produc. PV (24h)
+              font_size: 80
+              hours_to_show: 24
+              line_width: 2
+              hour24: true
+              points_per_hour: 2
+              decimals: 0
+              show:
+                animate: true
+                fill: true
+                icon: false
+                labels: false
+                name: true
+                graph: line
+                extrema: true
+                average: true
+              theme: ios-dark-mode-blue-red
+              type: 'custom:mini-graph-card'
+            type: vertical-stack
+
           - cards:
+              # Puissance soutirée
               - entities:
                   - color: 'var(--dwains-theme-accent)'
                     entity: sensor.envoy_puissance_soutiree_reseau
@@ -196,11 +225,13 @@
                   icon: false
                   labels: false
                   name: true
-                  graph: bar
+                  graph: line
                   extrema: true
                   average: true
                 theme: ios-dark-mode-blue-red
                 type: 'custom:mini-graph-card'
+
+              # Puissance injectée
               - entities:
                   - color: 'var(--dwains-theme-accent)'
                     entity: sensor.envoy_puissance_injectee_reseau
@@ -217,13 +248,16 @@
                   icon: false
                   labels: false
                   name: true
-                  graph: bar
+                  graph: line
                   extrema: true
                   average: true
                 theme: ios-dark-mode-blue-red
                 type: 'custom:mini-graph-card'
             type: horizontal-stack
+          # 
           - entities:
+            - entity: sensor.linky_ptec
+              name: Tarif
             - entity: sensor.cout_energy_total_jour_hphc
               name: Coût Tot Jour
             - entity: sensor.envoy_122103023124_today_s_energy_production
@@ -232,6 +266,33 @@
             - entity: sensor.envoy_122103023124_today_s_energy_consumption
               name: Conso Total Jour
               secondary_info: last-updated
+            # Informations complémentaires LINKY
+            - type: custom:fold-entity-row
+              head:              
+                type: section
+                label: Plus d'Informations Linky
+              entities:
+                - entity: sensor.linky_papp
+                  name: P inst
+                - entity: sensor.linky_i_inst
+                  name: I Max
+                - entity: sensor.linky_p_pcoup
+                  name: P/P Coup
+                - entity: sensor.linky_umoy
+                  name: U moyen
+                - entity: input_boolean.com_linky  
+                  name: Com 
+                - entity: sensor.energie_totale_jour
+                  name: Energie Tot J
+                - entity: sensor.energy_total_weekly
+                  name: Energie Tot S                
+                - entity: sensor.energy_total_monthly
+                  name: Energie Tot M
+                - entity: sensor.energy_total_usage_daily_hc
+                  name: Energie Tot HC J
+                - entity: sensor.energy_total_usage_daily_hp
+                  name: Energie Tot HP J   
+            # Informations complémentaires PV           
             - type: custom:fold-entity-row
               head:
                 type: section
@@ -249,32 +310,7 @@
                 - entity: sensor.envoy_122103023124_lifetime_energy_consumption
                   name: Conso Totale
                   secondary_info: last-updated
-            - type: custom:fold-entity-row
-              head:              
-                type: section
-                label: Plus d'Informations Linky
-              entities:
-                - entity: sensor.energie_totale_jour
-                  name: Energie Tot J
-                - entity: sensor.energy_total_weekly
-                  name: Energie Tot S                
-                - entity: sensor.energy_total_monthly
-                  name: Energie Tot M
-                - entity: sensor.energy_total_usage_daily_hc
-                  name: Energie Tot HC J
-                - entity: sensor.energy_total_usage_daily_hp
-                  name: Energie Tot HP J
-                - entity: sensor.linky_papp
-                  name: P inst
-                - entity: sensor.linky_i_inst
-                  name: I Max
-                - entity: sensor.linky_p_pcoup
-                  name: P/P Coup
-                - entity: sensor.linky_ptec
-                  name: PTEC
-                - entity: sensor.linky_umoy
-                  name: U moyen
-
+            # Informations complémentaires PZEM
             - type: custom:fold-entity-row
               head:              
                 type: section
@@ -311,10 +347,33 @@
                 - cursor: initial
             type: 'custom:button-card'
           - cards:
+              # Puissance autre
               - entities:
                   - color: 'var(--dwains-theme-accent)'
                     entity: sensor.puissance_autres
                     name: Puissance 24h
+                    show_line: true
+                  - color: '#CCC0cCC'
+                    entity: binary_sensor.display_hp_hc
+                    name: HC
+                    show_line: true
+                    y_axis: secondary
+                color_thresholds_transition: hard
+                color_thresholds:
+                  - color: '#00FF00'
+                    value: 0
+                  - color: '#FF9900'
+                    value: 4000
+                  - color: '#EA9999'
+                    value: 6000
+                  - color: '#CC0000'
+                    value: 10000
+                state_map:
+                  - label: hp
+                    value: 'off'
+                  - label: hc
+                    value: 'on'
+
                 font_size: 80
                 hours_to_show: 24
                 line_width: 2
@@ -327,7 +386,7 @@
                   icon: false
                   labels: false
                   name: true
-                  graph: bar
+                  graph: line
                   extrema: true
                   average: true
                 theme: ios-dark-mode-blue-red

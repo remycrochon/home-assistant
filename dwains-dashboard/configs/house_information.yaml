@@ -8,11 +8,7 @@ house_information:
       name: PMS5003
     - entity: sensor.tablette_niveau_charge
       name: Ch Tablette
-  addons:
-    - name: Alarmes
-      icon: mdi:lan-disconnect
-      path: 'dwains-dashboard/addons/house_information/alarmes/page.yaml'
-      main_menu: 'true' #Show this addon in the main navigation bar!
+
 
 
   # addons:

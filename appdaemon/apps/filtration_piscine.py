@@ -75,8 +75,9 @@ class FiltrationPiscine(hass.Hass):
 # Appelé sur changement de temperature
     def change_temp(self, entity, attribute, old, new, kwargs):
         global JOURNAL
-        self.notification('Appel traitement changement Temp.',2)
-        self.traitement(kwargs)
+        if new!= "unavailable":
+            self.notification('Appel traitement changement Temp.',2)
+            self.traitement(kwargs)
 # Appelé sur changement de mode de fonctionnement
     def change_mode(self, entity, attribute, old, new, kwargs):
         global JOURNAL, FIN_TEMPO
@@ -166,8 +167,8 @@ class FiltrationPiscine(hass.Hass):
 
             if mode_calcul == "on": # Calcul selon Abaque
                 temps_filtration = (duree_abaque(Temperature_eau)) * coef
-                nb_h_avant = en_heure(float(temps_filtration / 2))
-                nb_h_apres = en_heure(float(temps_filtration / 2))
+                nb_h_avant = en_heure(float(temps_filtration / 3))
+                nb_h_apres = en_heure(float(temps_filtration / 3*2))
                 nb_h_total = en_heure(float(temps_filtration))
                 self.notification("Duree Filtration Mode Abaque: "+ str(temps_filtration)[:6]+" h",2)
             

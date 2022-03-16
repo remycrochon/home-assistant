@@ -181,6 +181,7 @@ sensor:
           {{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(' %H %M')}}
         icon_template: mdi:weather-sunset-down
 
+
 # Prevision Pluie
 #      h_arrivee_pluie:
 #        friendly_name: 'Heure arrivée de la Pluie'

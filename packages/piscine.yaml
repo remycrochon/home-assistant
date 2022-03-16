@@ -229,6 +229,12 @@ sensor:
     
 template:
   - sensor:
+    - name: "Heure pivot Soleil"
+      unique_id: "heure_pivot_soleil"
+      state: >
+        {{ as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom(' %H %M')}}
+      icon: mdi:weather-sunset
+
     - name: "Energie Piscine Jour"
       unique_id: "energy_pisc_daily" 
       state: >-

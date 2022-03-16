@@ -102,14 +102,15 @@ class FiltrationPiscine(hass.Hass):
     def change_etat_pompe(self, entity, attribute, old, new, kwargs):
         global JOURNAL, FIN_TEMPO ,DUREE_TEMPO
         nom_entité=self.args["cde_pompe"]
+        FIN_TEMPO = 0
         if new=="on":
             self.tempo=self.run_in(self.fin_temporisation_mesure_temp, DUREE_TEMPO,entité=nom_entité)
         else:
-            FIN_TEMPO = 0
             cle_tempo = self.tempo
             if cle_tempo != None:
                 self.tempo = self.cancel_timer(cle_tempo)   
-        
+                self.log(f'Info tempo pompe: {self.info_timer(cle_tempo)}', log="piscine_log")
+                self.log(f'Fin tempo pompe {cle_tempo}', log="piscine_log")       
         self.notification('Appel traitement changement etat pompe.',2)
         self.traitement(kwargs)
 # Appelé sur fin temporisation suit à demarrage de la pompe

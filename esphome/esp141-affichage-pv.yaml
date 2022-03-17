@@ -8,6 +8,9 @@ esphome:
   name: ${device_name}
   platform: ESP8266
   board: d1_mini
+  project:
+    name: "rem81.Affichage_Pv"
+    version: "1.0.0"
   platformio_options:
     lib_deps: NeoPixelBus@2.6.0
   on_boot:
@@ -21,13 +24,13 @@ wifi:
   networks:
     - ssid: !secret wifi_mi4
       password: !secret mdpwifi_mi4
-      priority: 2    
+      priority: 0    
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 1
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 0
+      priority: 2
   reboot_timeout: 5min
   
   manual_ip:

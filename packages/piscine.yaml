@@ -139,7 +139,7 @@ input_datetime:
     has_time: true
 
 input_boolean:
-  # EV appoint Piscine en mode automatique
+  # Force la Ppe de filtration à l'arret
   piscine_arret_force:
     name: Piscine Arret Forcé
     icon: mdi:head-snowflake
@@ -279,9 +279,12 @@ template:
 
   - binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement
+    # ou tester le switch de la ppe de filtration si pas de mesure de puissance
+    # {{ is_state('switch.ppe_filtration', 'on') }}
     - name: "ppe_piscine_en_marche"
       state: >-
-        {{states.sensor.pzem_pisc_puissance.state | float(default=0) > 500}}
+        {{states.sensor.pzem_pisc_puissance.state | float(default=0) > 500}} 
+
 
   # Calcul en fonction de la position du soleil
   # Sun Azimtuh est calculé dans Meteo

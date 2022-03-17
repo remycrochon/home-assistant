@@ -111,7 +111,7 @@ class FiltrationPiscine(hass.Hass):
             if cle_tempo != None:
                 cle_tempo = self.tempo
                 self.tempo = self.cancel_timer(cle_tempo)
-       
+
         self.notification('Appel traitement changement etat pompe.',2)
         self.traitement(kwargs)
 # Appelé sur fin temporisation suit à demarrage de la pompe
@@ -167,8 +167,10 @@ class FiltrationPiscine(hass.Hass):
 
             if mode_calcul == "on": # Calcul selon Abaque
                 temps_filtration = (duree_abaque(Temperature_eau)) * coef
-                nb_h_avant = en_heure(float(temps_filtration / 3))
-                nb_h_apres = en_heure(float(temps_filtration / 3*2))
+                nb_h_avant = en_heure(float(temps_filtration / 2))
+                nb_h_apres = en_heure(float(temps_filtration / 2))
+                # nb_h_avant = en_heure(float(temps_filtration / 3)) Répartition 1/3-2/3
+                # nb_h_apres = en_heure(float(temps_filtration / 3*2))
                 nb_h_total = en_heure(float(temps_filtration))
                 self.notification("Duree Filtration Mode Abaque: "+ str(temps_filtration)[:6]+" h",2)
             

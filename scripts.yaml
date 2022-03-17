@@ -47,7 +47,7 @@ ouverture_volet:
   - service: script.ouverture_volet_chamb_sud
     data: {}
   mode: single
-  icon: mdi:shuttle
+  icon: mdi:badminton
 fermeture_volet:
   alias: fermeture_volet
   sequence:
@@ -347,15 +347,21 @@ volet_piscine_ouverture:
   sequence:
   - service: switch.turn_off
     data: {}
-    entity_id: switch.cde_volet_fermeture
+    target:
+      entity_id:
+      - switch.cde_ferm_volet_piscine
   - delay: 00:00:02
   - service: switch.turn_on
     data: {}
-    entity_id: switch.cde_volet_ouverture
+    target:
+      entity_id:
+      - switch.cde_ouv_volet_piscine
   - delay: 00:00:05
   - service: switch.turn_off
     data: {}
-    entity_id: switch.cde_volet_ouverture
+    target:
+      entity_id:
+      - switch.cde_ouv_volet_piscine
   mode: single
   icon: mdi:garage-open
 volet_piscine_fermeture:
@@ -363,21 +369,31 @@ volet_piscine_fermeture:
   sequence:
   - service: switch.turn_off
     data: {}
-    entity_id: switch.cde_volet_ouverture
+    target:
+      entity_id:
+      - switch.cde_ouv_volet_piscine
   - delay: 00:00:02
   - service: switch.turn_on
     data: {}
-    entity_id: switch.cde_volet_fermeture
+    target:
+      entity_id:
+      - switch.cde_ferm_volet_piscine
   - service: switch.turn_on
     data: {}
-    entity_id: switch.cde_eclairage
+    target:
+      entity_id:
+      - switch.cde_ecl_piscine
   - delay: 00:01:30
   - service: switch.turn_off
     data: {}
-    entity_id: switch.cde_volet_fermeture
+    target:
+      entity_id:
+      - switch.cde_ferm_volet_piscine
   - service: switch.turn_off
     data: {}
-    entity_id: switch.cde_eclairage
+    target:
+      entity_id:
+      - switch.cde_ecl_piscine
   mode: single
   icon: mdi:garage
 volets_bureau:

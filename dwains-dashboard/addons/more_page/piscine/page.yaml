@@ -195,12 +195,6 @@
                 name: Ppe
               - entity: input_boolean.regul_ph
                 name: Valid
-              - entity: sensor.ph_ezo
-                name: Ezo
-                unit: false
-              - entity: sensor.ph_piscine_ph
-                name: Filtré
-                unit: false
               - entity: input_number.ph_cible
                 name: Cible
                 unit: false
@@ -218,12 +212,6 @@
                 name: Ppe
               - entity: input_boolean.regul_chlore
                 name: Valid
-              - entity: sensor.orp_ezo
-                name: Ezo
-                unit: false
-              - entity: sensor.orp_piscine_orp
-                name: Filtré
-                unit: false
               - entity: input_number.chlore_cible
                 name: Cible
                 unit: false
@@ -249,8 +237,7 @@
             type: custom:multiple-entity-row
           # Tranche Horaire
           - entities:
-              - entity: input_boolean.calcul_mode_abaque
-                name: Mode Abaq
+
               - entity: input_text.piscine_periode_filtration
                 name: 'Tranch Hor'
               - entity: input_datetime.heure_pivot_pisc
@@ -262,12 +249,12 @@
             type: custom:multiple-entity-row
           #
           - entities:
+              - entity: binary_sensor.ppe_piscine_en_marche
+                name: Etat
               - entity: input_boolean.mem_delestage
                 name: Delest.
               - entity: sensor.ma_ppe_piscine_jour
                 name: Fonct. Jour
-              - entity: binary_sensor.ppe_piscine_en_marche
-                name: Etat
             entity: input_text.piscine_periode_filtration
             icon: mdi:pump
             name: Pompe Filtration
@@ -294,10 +281,7 @@
                 name: Tps F
               - entity: input_boolean.hors_gel_valid
                 name: HG Valid
-              - entity: input_number.hors_gel_inf_seuil1
-                name: T°Inf S1
-              - entity: input_number.hors_gel_inf_seuil2
-                name: T°Inf S2
+
             entity: input_boolean.hors_gel_valid
             icon: mdi:snowflake-alert
             name: Hiver
@@ -322,6 +306,22 @@
             type: custom:multiple-entity-row
           #
           - entities:
+              - label: Hiver
+                type: section
+              - entity: input_number.hors_gel_inf_seuil1
+                name: T°Inf S1
+              - entity: input_number.hors_gel_inf_seuil2
+                name: T°Inf S2
+
+              - label: Filtration
+                type: section
+              - entity: input_boolean.calcul_mode_abaque
+                name: Mode Abaque
+              - entity: input_number.filtration_coeff_abaque
+                name: Coef
+              - entity: input_number.tempo_circulation_eau
+                name: Tempo Circulation 
+
               - label: pH
                 type: section
               - entity: sensor.ph_ezo
@@ -348,6 +348,7 @@
               - entity: sensor.ph_tps_inject_s
               - entity: input_number.ph_duree_inject_mn
               - entity: input_number.ph_duree_inject_s
+
               - label: Chlore/ORP
                 type: section
               - entity: sensor.orp_ezo
@@ -374,6 +375,7 @@
               - entity: sensor.chlore_tps_inject_s
               - entity: input_number.chlore_duree_inject_mn
               - entity: input_number.chlore_duree_inject_s
+
               - label: Commutateurs
                 type: section
               - entity: cover.volet_piscine
@@ -384,25 +386,25 @@
                 name: EV Eau appoint en auto si actif
             show_state: false
             head:
-              label: PARAMETRES & COMMUTATEURS
+              label: PARAMETRES
               type: section
             padding: 0
             type: custom:fold-entity-row
           #
           - entities:
-              - entity: switch.cde_pompe_filtration
+              - entity: switch.ppe_filtration
                 name: Relais Pompe Filtre
-              - entity: switch.cde_traitement
+              - entity: switch.ppe_ph
                 name: Relais pH
-              - entity: switch.cde_ppe_chlore
+              - entity: switch.ppe_chlore
                 name: Relais Chlore
-              - entity: switch.cde_volet_ouverture
+              - entity: switch.cde_ouv_volet_piscine
                 name: Relais Ouverture Volet
-              - entity: switch.cde_volet_fermeture
+              - entity: switch.cde_ferm_volet_piscine
                 name: Relais fermeture Volet
-              - entity: switch.cde_eclairage
+              - entity: switch.cde_ecl_piscine
                 name: Relais Eclairage
-              - entity: switch.cde_ev_eau
+              - entity: switch.ev_eau
                 name: EV Eau
             show_state: false
             head:

@@ -179,37 +179,44 @@ modbus:
     host: 192.168.0.101
     port: 502
     switches:
-      - name: cde_pompe_filtration
+      - name: Ppe filtration
+        unique_id: "cde_pompe_filtration" 
         slave: 1
         address: 12288
         write_type: coil
 
-      - name: cde_traitement
+      - name: Ppe pH
+        unique_id: "cde_ppe_ph"
         slave: 1
         address: 12289
         write_type: coil
 
-      - name: cde_eclairage
+      - name: Cde Ecl Piscine
+        unique_id: "cde_eclairage"
         slave: 1
         address: 12290
         write_type: coil
 
-      - name: cde_volet_ouverture
+      - name: Cde Ouv Volet Piscine
+        unique_id: "cde_volet_ouverture"
         slave: 1
         address: 12291
         write_type: coil
 
-      - name: cde_volet_fermeture
+      - name: Cde Ferm Volet Piscine
+        unique_id: "cde_volet_fermeture"
         slave: 1
         address: 12292
         write_type: coil
 
-      - name: cde_ev_eau
+      - name: Ev Eau
+        unique_id: "cde_ev_eau"
         slave: 1
         address: 12293
         write_type: coil
 
-      - name: cde_ppe_chlore
+      - name: Ppe chlore
+        unique_id: "cde_ppe_chlore"
         slave: 1
         address: 12294
         write_type: coil

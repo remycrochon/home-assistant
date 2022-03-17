@@ -120,7 +120,7 @@
       title: Alarme EV Appoint d'eau Piscine
   - service: switch.turn_off
     target:
-      entity_id: switch.cde_ev_eau
+      entity_id: switch.ev_eau
   mode: single
 - id: '1617199790692'
   alias: 3_4_3 Piscine-Notification alarme niveau bas
@@ -323,7 +323,7 @@
   - service: switch.turn_on
     target:
       entity_id:
-      - switch.cde_traitement
+      - switch.ppe_ph
   - service: notify.telegram
     data:
       message: pH sonde= {{states('sensor.ph_piscine_ph')}} {{-"\n"-}}{{states("sensor.date_time")
@@ -339,7 +339,7 @@
         %} {{a+( (b*((d*60)+c)/3600))|round(2) }}'
   - service: switch.turn_off
     target:
-      entity_id: switch.cde_traitement
+      entity_id: switch.ppe_ph
   - service: notify.telegram
     data:
       message: pH sonde= {{states('sensor.ph_piscine_ph')}}{{-"\n"-}} Vol Injecté
@@ -453,7 +453,7 @@
   - service: switch.turn_on
     target:
       entity_id:
-      - switch.cde_ppe_chlore
+      - switch.ppe_chlore
   - service: notify.telegram
     data:
       message: ORP sonde= {{states('sensor.orp_piscine_orp')}} {{-"\n"-}}{{states("sensor.date_time")
@@ -470,7 +470,7 @@
         (b*((d*60)+c)/3600))|round(2) }}'
   - service: switch.turn_off
     target:
-      entity_id: switch.cde_ppe_chlore
+      entity_id: switch.ppe_chlore
   - service: notify.telegram
     data:
       message: ORP sonde= {{states('sensor.orp_piscine_orp')}}{{-"\n"-}} Vol Injecté
@@ -1070,14 +1070,14 @@
       sequence:
       - service: switch.turn_on
         target:
-          entity_id: switch.cde_ev_eau
+          entity_id: switch.ev_eau
       - service: notify.telegram
         data:
           message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
           title: Piscine Appoint Eau!
     - conditions:
       - condition: state
-        entity_id: switch.cde_ev_eau
+        entity_id: switch.ev_eau
         state: 'on'
       - condition: or
         conditions:
@@ -1088,7 +1088,7 @@
       sequence:
       - service: switch.turn_off
         target:
-          entity_id: switch.cde_ev_eau
+          entity_id: switch.ev_eau
       - service: notify.telegram
         data:
           message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}

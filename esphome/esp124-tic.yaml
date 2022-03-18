@@ -8,6 +8,9 @@ esphome:
   name: ${device_name}
   platform: ESP32
   board: mhetesp32minikit
+  project:
+    name: "rem81.esp124-TIC"
+    version: "1.0.1"
   platformio_options:
     lib_deps: NeoPixelBus@2.6.0
   on_boot:

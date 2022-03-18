@@ -202,40 +202,6 @@
             icon: mdi:flash
       - type: vertical-stack
         cards:
-          - type: picture-elements
-            elements:
-              - type: state-badge
-                entity: sensor.espaltherma_temp_eau_depart
-                style:
-                  top: 40%
-                  left: 90%
-              - type: state-badge
-                entity: sensor.espaltherma_temp_eau_depart_echangeur_plaque
-                style:
-                  top: 43%
-                  left: 77%
-              - type: state-badge
-                entity: sensor.espaltherma_signal_ppe_eau
-                style:
-                  top: 25%
-                  left: 65%
-              - type: state-badge
-                entity: sensor.espaltherma_capteur_debit
-                style:
-                  top: 25%
-                  left: 52%
-              - type: state-badge
-                entity: sensor.espaltherma_temp_eau_retour_rt4
-                style:
-                  top: 89%
-                  left: 90%
-              - type: state-badge
-                entity: sensor.espaltherma_temp_liquid_r3t
-                style:
-                  top: 40%
-                  left: 27%
-            image: /local/images/pac4.png
-
           - type: entities
             entities:
               - entity: sensor.espaltherma_mode_fonctionnement
@@ -255,5 +221,4 @@
               - entity: switch.altherma
               - entity: sensor.espaltherma_thermostat
             title: Altherma
-          
 

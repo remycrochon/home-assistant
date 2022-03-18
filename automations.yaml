@@ -1968,7 +1968,6 @@
   description: ''
   trigger:
   - platform: time_pattern
-    id: niv_bas
     minutes: /1
   condition: []
   action:
@@ -2000,3 +1999,35 @@
           entity_id: switch.pc2_tablette
     default: []
   mode: single
+- id: '1647538159020'
+  alias: 2_1_12 Alarme Blueprints Notification Def Alim Tablette
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: input_boolean.alim_tablette_ok
+      alert_state: 'off'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Alim Tablette en defaut {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat Systeme !!!
+      - service: dwains_dashboard.notification_create
+        data:
+          message: Alim Tablette en defaut {{-"\n"-}}{{states("sensor.date_time")
+            }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Alim Tablette OK{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat SYSTEME!!!
+      - service: dwains_dashboard.notification_create
+        data:
+          message: Alim Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 120
+      initial_delay: 1
+      max_alerts: 100
+      resolved_message: Alerte {{ entity_name }} Résolu
+      notify_message: Alerte {{ entity_name }}Déclenché

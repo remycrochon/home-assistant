@@ -240,8 +240,7 @@
 
               - entity: input_text.piscine_periode_filtration
                 name: 'Tranch Hor'
-              - entity: input_datetime.heure_pivot_pisc
-                name: Heure pivot
+
             entity: input_text.piscine_periode_filtration
             icon: mdi:clock
             name: Tranche horaire
@@ -306,13 +305,14 @@
             type: custom:multiple-entity-row
           #
           - entities:
+              # Label HIVER
               - label: Hiver
                 type: section
               - entity: input_number.hors_gel_inf_seuil1
                 name: T°Inf S1
               - entity: input_number.hors_gel_inf_seuil2
                 name: T°Inf S2
-
+              # Label FILTRATION
               - label: Filtration
                 type: section
               - entity: input_boolean.calcul_mode_abaque
@@ -321,7 +321,11 @@
                 name: Coef
               - entity: input_number.tempo_circulation_eau
                 name: Tempo Circulation 
-
+              - entity: input_datetime.heure_pivot_pisc
+                name: Heure pivot
+              - entity: sensor.heure_pivot_soleil
+                name: H Pivot Sun
+              # label pH
               - label: pH
                 type: section
               - entity: sensor.ph_ezo
@@ -348,7 +352,7 @@
               - entity: sensor.ph_tps_inject_s
               - entity: input_number.ph_duree_inject_mn
               - entity: input_number.ph_duree_inject_s
-
+              # Label Chlore
               - label: Chlore/ORP
                 type: section
               - entity: sensor.orp_ezo
@@ -375,7 +379,7 @@
               - entity: sensor.chlore_tps_inject_s
               - entity: input_number.chlore_duree_inject_mn
               - entity: input_number.chlore_duree_inject_s
-
+              # label Commutateurs
               - label: Commutateurs
                 type: section
               - entity: cover.volet_piscine

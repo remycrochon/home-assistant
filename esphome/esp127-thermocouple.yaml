@@ -13,13 +13,13 @@ wifi:
   networks:
     - ssid: !secret wifi_mi4
       password: !secret mdpwifi_mi4
-      priority: 0    
+      priority: 2    
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 2
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 1
+      priority: 0
   reboot_timeout: 5min
   
   manual_ip:

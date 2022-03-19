@@ -2017,6 +2017,10 @@
         data:
           message: Alim Tablette en defaut {{-"\n"-}}{{states("sensor.date_time")
             }}
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.pc2_tablette
       resolved_action:
       - service: notify.telegram
         data:

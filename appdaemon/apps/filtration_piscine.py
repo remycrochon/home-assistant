@@ -78,27 +78,32 @@ class FiltrationPiscine(hass.Hass):
         if new!= "unavailable":
             self.notification('Appel traitement changement Temp.',2)
             self.traitement(kwargs)
+
 # Appelé sur changement de mode de fonctionnement
     def change_mode(self, entity, attribute, old, new, kwargs):
         global JOURNAL, FIN_TEMPO
         FIN_TEMPO = 0
         self.notification('Appel traitement changement Mode.',2)
         self.traitement(kwargs)
+
 # Appelé sur changement de coefficient
     def change_coef(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement Coef.',2)
         self.traitement(kwargs)
+
 # Appelé sur changement de mode de calcul
     def change_mode_calcul(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement mode de calcul.',2)
         self.traitement(kwargs)
+
 # Appelé sur changement arret forcé
     def change_arret_force(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement sur arret force.',2)
         self.traitement(kwargs)
+
 # Appelé sur changement d'état de la pompe de filtrage
     def change_etat_pompe(self, entity, attribute, old, new, kwargs):
         global JOURNAL, FIN_TEMPO ,DUREE_TEMPO
@@ -113,13 +118,14 @@ class FiltrationPiscine(hass.Hass):
                 self.tempo = self.cancel_timer(cle_tempo)
 
         self.notification('Appel traitement changement etat pompe.',2)
-        self.traitement(kwargs)
+        #self.traitement(kwargs)
+        
 # Appelé sur fin temporisation suit à demarrage de la pompe
     def fin_temporisation_mesure_temp(self,kwargs):
         global JOURNAL, FIN_TEMPO 
         FIN_TEMPO = 1
         self.notification('Fin temporisation circulation eau.',2)
-        self.traitement(kwargs)
+        #self.traitement(kwargs)
 
 # Ecretage Heure pivot entre h_pivot_min et h_pivot_max
     def ecretage_h_pivot(self, entity, attribute, old, new, kwargs):

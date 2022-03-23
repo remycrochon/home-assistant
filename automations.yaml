@@ -568,6 +568,7 @@
         id: jour->nuit
       sequence:
       - service: script.fermeture_volet
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.volets
@@ -576,6 +577,7 @@
         id: nuit->jour
       sequence:
       - service: script.ouverture_volet
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.volets
@@ -584,14 +586,16 @@
         id: ouv
       sequence:
       - service: script.ouverture_volet
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.volets
         state: Auto Ete
       - condition: trigger
-        id: ferm
+        id: jour->nuit
       sequence:
       - service: script.fermeture_volet
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.volets
@@ -600,6 +604,7 @@
         id: jour->nuit
       sequence:
       - service: script.fermeture_volet_absent
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.volets
@@ -608,6 +613,7 @@
         id: nuit->jour
       sequence:
       - service: script.fermeture_volet_absent
+        data: {}
     default: []
   mode: single
 - id: '1632995598078'
@@ -2030,8 +2036,8 @@
         data:
           message: Alim Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
-      repeat_delay: 120
+      repeat_delay: 600
       initial_delay: 1
-      max_alerts: 100
+      max_alerts: 20
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché

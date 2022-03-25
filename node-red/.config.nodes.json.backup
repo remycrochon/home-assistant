@@ -485,13 +485,14 @@
     },
     "node-red-contrib-home-assistant-websocket": {
         "name": "node-red-contrib-home-assistant-websocket",
-        "version": "0.43.0",
+        "version": "0.43.1",
         "local": false,
         "user": false,
         "nodes": {
             "all": {
                 "name": "all",
                 "types": [
+                    "ha_entity_filter",
                     "ha-api",
                     "ha-button",
                     "api-call-service",

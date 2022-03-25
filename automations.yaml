@@ -2014,11 +2014,6 @@
       sensor_entity: input_boolean.alim_tablette_ok
       alert_state: 'off'
       alert_action:
-      - service: notify.telegram
-        data:
-          message: Alim Tablette en defaut {{-"\n"-}}{{states("sensor.date_time")
-            }}
-          title: Etat Systeme !!!
       - service: dwains_dashboard.notification_create
         data:
           message: Alim Tablette en defaut {{-"\n"-}}{{states("sensor.date_time")
@@ -2028,15 +2023,11 @@
         target:
           entity_id: switch.pc2_tablette
       resolved_action:
-      - service: notify.telegram
-        data:
-          message: Alim Tablette OK{{-"\n"-}} {{states("sensor.date_time") }}
-          title: Etat SYSTEME!!!
       - service: dwains_dashboard.notification_create
         data:
           message: Alim Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
-      repeat_delay: 600
+      repeat_delay: 300
       initial_delay: 1
       max_alerts: 20
       resolved_message: Alerte {{ entity_name }} Résolu

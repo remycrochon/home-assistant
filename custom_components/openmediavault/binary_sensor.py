@@ -8,7 +8,7 @@ from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME, CONF_HOST
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-
+from .helper import format_attribute
 from .const import (
     ATTRIBUTION,
     DOMAIN,
@@ -19,19 +19,6 @@ from .binary_sensor_types import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-# ---------------------------
-#   format_attribute
-# ---------------------------
-def format_attribute(attr):
-    """Format state attributes"""
-    res = attr.replace("-", " ")
-    res = res.capitalize()
-    res = res.replace(" ip ", " IP ")
-    res = res.replace(" mac ", " MAC ")
-    res = res.replace(" mtu", " MTU")
-    return res
 
 
 # ---------------------------
@@ -61,6 +48,35 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 def update_items(inst, config_entry, omv_controller, async_add_entities, sensors):
     """Update sensor state from controller."""
     new_sensors = []
+
+    for sensor, sid_func in zip(
+        # Sensor type name
+        [
+            "service",
+        ],
+        # Entity function
+        [
+            OMVBinarySensor,
+        ],
+    ):
+        uid_sensor = SENSOR_TYPES[sensor]
+        for uid in omv_controller.data[uid_sensor.data_path]:
+            uid_data = omv_controller.data[uid_sensor.data_path]
+            item_id = f"{inst}-{sensor}-{str(uid_data[uid][uid_sensor.data_reference]).lower()}"
+            _LOGGER.debug("Updating sensor %s", item_id)
+            if item_id in sensors:
+                if sensors[item_id].enabled:
+                    sensors[item_id].async_schedule_update_ha_state()
+                continue
+
+            sensors[item_id] = sid_func(
+                inst=inst,
+                uid=uid,
+                omv_controller=omv_controller,
+                entity_description=uid_sensor,
+                config_entry=config_entry,
+            )
+            new_sensors.append(sensors[item_id])
 
     for sensor in SENSOR_TYPES:
         if sensor.startswith("system_"):

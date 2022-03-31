@@ -43,7 +43,7 @@ DEVICE_ATTRIBUTES_DISK = [
 
 @dataclass
 class OMVSensorEntityDescription(SensorEntityDescription):
-    """Class describing mikrotik entities."""
+    """Class describing OMV entities."""
 
     ha_group: str = ""
     ha_connection: str = ""
@@ -113,7 +113,7 @@ SENSOR_TYPES = {
         ha_group="Filesystem",
         data_path="fs",
         data_attribute="percentage",
-        data_name="label",
+        data_name="mountpoint",
         data_uid="",
         data_reference="uuid",
         data_attributes_list=DEVICE_ATTRIBUTES_FS,

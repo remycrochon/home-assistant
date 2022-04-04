@@ -136,7 +136,28 @@
                         }
                       entity: sensor.omv_memory
                       name: RAM usage
-
+                    - type: custom:bar-card
+                      title_position: inside
+                      show_icon: true
+                      align: split
+                      columns: 1
+                      max: 100
+                      unit_of_measurement: '%'
+                      severity:
+                        - value: 50
+                          color: '#3498db'
+                        - value: 75
+                          color: '#f39c12'
+                        - value: 100
+                          color: '#e45e65'
+                      style: |
+                        ha-card { 
+                          --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                          --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                          --ha-card-box-shadow: 'none';
+                        }
+                      entity: sensor.glances_cpu_load
+                      name: Charge CPU
                 - type: custom:mini-graph-card
                   height: 130
                   line_width: 3

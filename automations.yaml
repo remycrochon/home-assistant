@@ -530,12 +530,13 @@
   action:
   - service: notify.telegram
     data:
-      message: 'Nouvelle IP: {{ states(''sensor.ip_public'')}} {{-"\n"-}}{{states("sensor.date_time")
+      message: 'Nouvelle IP: {{ states("sensor.myip")}} {{-"\n"-}}{{states("sensor.date_time")
         }}'
       title: Réseau:!!!
   - service: dwains_dashboard.notification_create
     data:
-      message: Nouvelle IP
+      message: Nouvelle IP {{ states("sensor.myip")}}
+      title: Reseau
   mode: single
 - id: '1632989157968'
   alias: 4_1_1 Volet Automatismes

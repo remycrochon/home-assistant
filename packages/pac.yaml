@@ -37,8 +37,8 @@ climate:
   - platform: generic_thermostat
     name: Altherma
     heater: switch.altherma
-    target_sensor: sensor.temperature_salon_zb
-#    target_sensor: sensor.espaltherma_temp_ambiante_int_r1t
+#    target_sensor: sensor.temperature_salon_zb
+    target_sensor: sensor.espaltherma_temp_ambiante_int_r1t
     min_temp: 15
     max_temp: 25
     cold_tolerance: 0.3

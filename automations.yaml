@@ -2033,3 +2033,37 @@
       max_alerts: 20
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
+- id: '16101849668775'
+  alias: 0_0_1 Essai à supprimer
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) >
+      states(''input_number.luminosite_seuil_haut'')|float(default=0) and is_state("sun.sun",
+      "above_horizon") }}'
+    id: nuit->jour
+  - platform: template
+    value_template: '{{ states(''sensor.bh1750_illuminance'')|float(default=0) < states(''input_number.luminosite_seuil_bas'')|float(default=0)
+      and is_state("sun.sun", "below_horizon") }}'
+    id: jour->nuit
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.nuit_jour
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.nuit_jour
+        data: {}
+    default: []
+  mode: single

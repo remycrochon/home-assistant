@@ -254,7 +254,16 @@
                 theme: ios-dark-mode-blue-red
                 type: 'custom:mini-graph-card'
             type: horizontal-stack
-          # 
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_totale_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash  
           - entities:
             - entity: sensor.linky_ptec
               name: Tarif
@@ -391,11 +400,19 @@
                   average: true
                 theme: ios-dark-mode-blue-red
                 type: 'custom:mini-graph-card'
-
             type: horizontal-stack
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_autres_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash              
           - entities:
-            - entity: sensor.energie_autres_jour
-              name: Energie du jour
+
             - entity: sensor.energy_autres_weekly
               name: Energie semaine                
             - entity: sensor.energy_autres_monthly
@@ -478,9 +495,18 @@
                     - font: bold
                 type: 'custom:button-card'
             type: horizontal-stack
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_piscine_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash              
           - entities:
-            - entity: sensor.energie_piscine_jour
-              name: Energie jour
+
             - entity: sensor.energy_pisc_weekly
               name: Energie semaine
             - entity: sensor.energy_pisc_monthly
@@ -574,9 +600,18 @@
                     - font: bold
                 type: 'custom:button-card'
             type: horizontal-stack
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_pac_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash              
           - entities:
-            - entity: sensor.energie_pac_jour
-              name: Energie du jour
+
             - entity: sensor.energy_pac1_weekly
               name: Energie semaine              
             - entity: sensor.energy_pac1_monthly
@@ -680,9 +715,18 @@
                     - font: bold
                 type: 'custom:button-card'
             type: horizontal-stack
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_ecs_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash              
           - entities:
-            - entity: sensor.energie_ecs_jour
-              name: Energie du jour
+
             - entity: sensor.energy_ecs1_weekly
               name: Energie semaine                 
             - entity: sensor.energy_ecs1_monthly
@@ -763,6 +807,16 @@
                     - font: bold
                 type: 'custom:button-card'
             type: horizontal-stack
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_sdb_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash              
           - entities:
             - entity: sensor.energie_sdb_jour
               name: Energie du jour
@@ -857,9 +911,17 @@
                     - font: bold
                 type: 'custom:button-card'
             type: horizontal-stack
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.energie_mal_jour
+            name: Conso 7j
+            hours_to_show: 168
+            aggregate_func: max
+            group_by: date
+            show:
+              graph: bar
+            icon: mdi-flash            
           - entities:
-            - entity: sensor.energie_mal_jour
-              name: Energie du jour
             - entity: sensor.energy_mal_weekly
               name: Energie semaine                
             - entity: sensor.energy_mal_monthly
@@ -874,8 +936,10 @@
                 - entity: sensor.energy_mal_usage_daily_hp
                   name: Energie HP du jour
             type: entities
+
+
         type: vertical-stack    
-# machine à Laver
+# onduleur
       - cards:
           - type: vertical-stack
             cards:

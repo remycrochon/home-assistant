@@ -102,7 +102,7 @@ input_select:
       - Absent
       - Arret
 cover:
-# Convertion TC volet Amis grand en cover
+# Convertion TC volet Amis sud grand en cover
   - platform: template
     covers:
       volet_amis_sud_grand:
@@ -115,6 +115,7 @@ cover:
           service: switch.turn_off
           data:
             entity_id: switch.tc_volet_amis_grand
+
         icon_template: >-
           {% if is_state('switch.tc_volet_amis_grand', 'on') %}
             mdi:garage-open
@@ -275,16 +276,29 @@ cover:
         open_script_entity_id: script.volet_amis_nord_up
 
 
-# Moteur pas à Pas en test
-automation:
-  - alias: Write Stepper Value to ESP
-    trigger:
-      platform: state
-      entity_id: input_number.stepper_control
-    action:
-      # Replace livingroom with the name you gave the ESP
-      - service: esphome.esp140_test_control_stepper
-        data_template:
-          target: '{{ trigger.to_state.state | int }}'
+# ch parent petit
+  - platform: cover_rf_time_based
+    devices:
+      volet_ch_parent_proport:
+        name: Volet ch parent P
+        travelling_time_up: 18
+        travelling_time_down: 17
+        close_script_entity_id: script.volet_ch_parent_down
+        stop_script_entity_id: script.volet_ch_parent_stop
+        open_script_entity_id: script.volet_ch_parent_up
+
+
+# ch amis sud
+  - platform: cover_rf_time_based
+    devices:
+      volet_amis_sud_proport:
+        name: Volet amis sud P
+        travelling_time_up: 18
+        travelling_time_down: 17
+        close_script_entity_id: script.volet_amis_sud_down
+        stop_script_entity_id: script.volet_amis_sud_stop
+        open_script_entity_id: script.volet_amis_sud_up
+
+
 
 

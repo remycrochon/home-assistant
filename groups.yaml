@@ -16,13 +16,13 @@ volets_parents:
   all: true
   entities:
     - cover.volet_parents_grand
-    - cover.parents_petit
+    - cover.volet_ch_parent_p
 
 volets_amis_sud:
   name: volets_amis_sud
   all: true
   entities:
-    - cover.amis_sud_petit
+    - cover.volet_amis_sud_p
     - cover.volet_amis_sud_grand
 
 volets_salon_cuisine:

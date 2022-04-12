@@ -515,4 +515,13 @@ sensor:
       minutes: 1660 # sur 24h
     name: vp2_rafales_max
     state_characteristic: value_max
+    
+  # Ensoleillement
+  - platform: statistics
+    entity_id: sensor.vp2_radiation
+    unique_id: vp2_radiation_moyenne
+    max_age:
+      minutes: 60 # sur 1h
+    name: vp2_radiation_moyenne
+    state_characteristic: median
 

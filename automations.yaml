@@ -794,22 +794,26 @@
   alias: 4_1_3 Volet-Suivi Azimuth Soleil
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
   trigger:
-  - platform: numeric_state
-    entity_id: automation.volets_suivi_soleil
-    id: ferme_nord
-    above: '103'
-  - platform: numeric_state
-    entity_id: sensor.sun_azimuth
-    above: '137'
-    id: ferme_sud
-  - platform: numeric_state
-    entity_id: sensor.sun_azimuth
-    above: '160'
-    id: ouvre_nord
-  - platform: numeric_state
-    entity_id: sensor.sun_azimuth
-    above: '266'
-    id: ouvre_sud
+  - platform: state
+    entity_id: binary_sensor.position_soleil_matin
+    id: ferme_matin
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.position_soleil_matin
+    id: ouvre_matin
+    from: 'on'
+    to: 'off'
+  - platform: state
+    entity_id: binary_sensor.position_soleil_am
+    id: ferme_am
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.position_soleil_am
+    id: ouvre_am
+    from: 'on'
+    to: 'off'
   condition:
   - condition: state
     entity_id: input_boolean.val_automs_soleil
@@ -818,60 +822,64 @@
   - choose:
     - conditions:
       - condition: trigger
-        id: ferme_nord
+        id: ferme_matin
       - condition: numeric_state
         entity_id: sensor.vp2_radiation
         above: input_number.radiation_seuil_ferm_volet
       sequence:
-      - service: cover.close_cover
+      - service: cover.set_cover_position
+        data:
+          position: 20
         target:
           entity_id:
-          - cover.sdb
-          - cover.amis_nord
-        data: {}
+          - cover.volet_sdb_p
+          - cover.volet_amis_nord_p
     - conditions:
       - condition: trigger
-        id: ferme_sud
-      - condition: numeric_state
-        entity_id: sensor.sun_azimuth
-        above: input_number.radiation_seuil_ferm_volet
-      sequence:
-      - service: cover.close_cover
-        target:
-          entity_id:
-          - cover.parents_petit
-          - cover.amis_sud_petit
-        data: {}
-    - conditions:
-      - condition: trigger
-        id: ouvre_nord
+        id: ouvre_matin
       sequence:
       - service: cover.open_cover
-        target:
-          entity_id: cover.sdb
         data: {}
+        target:
+          entity_id: cover.volet_sdb_p
       - condition: state
         entity_id: input_boolean.presence_amis_ch_nord
         state: 'off'
       - service: cover.open_cover
         target:
-          entity_id: cover.amis_nord
+          entity_id:
+          - cover.volet_amis_nord_p
         data: {}
+    - conditions:
+      - condition: trigger
+        id: ferme_am
+      - condition: numeric_state
+        entity_id: sensor.sun_azimuth
+        above: input_number.radiation_seuil_ferm_volet
+      sequence:
+      - service: cover.set_cover_position
+        data:
+          position: 20
+        target:
+          entity_id:
+          - cover.volet_amis_sud_p
+          - cover.volet_ch_parent_p
     - conditions:
       - condition: trigger
         id: ouvre_sud
       sequence:
       - service: cover.open_cover
         target:
-          entity_id: cover.parents_petit
+          entity_id:
+          - cover.volet_ch_parent_p
         data: {}
       - condition: state
         entity_id: input_boolean.presence_amis_ch_sud
         state: 'off'
       - service: cover.open_cover
-        target:
-          entity_id: cover.amis_sud_petit
         data: {}
+        target:
+          entity_id: cover.volet_amis_sud_p
     default: []
   mode: single
 - id: '1634125204090'
@@ -2065,5 +2073,80 @@
         target:
           entity_id: input_boolean.nuit_jour
         data: {}
+    default: []
+  mode: single
+- id: '1649766635520'
+  alias: 4_1_3 Volet-Suivi Azimuth Soleil V2
+  description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
+  trigger:
+  - platform: time_pattern
+    minutes: /15
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.position_soleil_matin
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.vp2_radiation_moyenne
+        above: input_number.radiation_seuil_ferm_volet
+      sequence:
+      - service: cover.set_cover_position
+        data:
+          position: 20
+        target:
+          entity_id:
+          - cover.volet_sdb_p
+          - cover.volet_amis_nord_p
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.position_soleil_midi
+        state: 'on'
+      sequence:
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.volet_sdb_p
+      - condition: state
+        entity_id: input_boolean.presence_amis_ch_nord
+        state: 'off'
+      - service: cover.open_cover
+        target:
+          entity_id:
+          - cover.volet_amis_nord_p
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.position_soleil_am
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.vp2_radiation_moyenne
+        above: input_number.radiation_seuil_ferm_volet
+      sequence:
+      - service: cover.set_cover_position
+        data:
+          position: 20
+        target:
+          entity_id:
+          - cover.volet_amis_sud_p
+          - cover.volet_ch_parent_p
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.position_soleil_soir
+        state: 'on'
+      sequence:
+      - service: cover.open_cover
+        target:
+          entity_id:
+          - cover.volet_ch_parent_p
+        data: {}
+      - condition: state
+        entity_id: input_boolean.presence_amis_ch_sud
+        state: 'off'
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.volet_amis_sud_p
     default: []
   mode: single

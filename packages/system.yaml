@@ -54,9 +54,6 @@ sensor:
       - 'time_utc'
       - 'beat'
 
-  - platform: uptime
-    name: Uptime
-    scan_interval: 60
 
 
 # One entry for each beacon you want to track

@@ -81,11 +81,4 @@ template:
           {{ states('sensor.puissance_pc_mal')|float(default=0) > 15 }}
 
 
-sensor:
-# Energie PC MàL 
-  - platform: integration
-    source: sensor.puissance_pc_mal
-    name: energy_pc_mal
-    unit_prefix: k
-    method: left
-    round: 2
+

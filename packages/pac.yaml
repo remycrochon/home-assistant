@@ -218,24 +218,6 @@ sensor:
     name: "ESP_altherma status"
     state_topic: "espaltherma/LWT"
 
-# Energie PAC mesurée avec integration 
-  - platform: integration
-    source: sensor.puissance_pac_rpac
-    name: energy_pac_p_kw
-    unit_prefix: k
-    method: left
-    round: 2    
-
-# Antipication du changement de Température Exterieure
-# Utilisation ????????
-# https://www.home-assistant.io/integrations/derivative/
-  - platform: derivative
-    source: sensor.vp2_temp_out
-    name: Temp Ext change par heure
-    round: 1
-    unit_time: h 
-    time_window: "00:30:00" 
-    unit: "°C"
 # 
 input_boolean:
   thermostat_pac:

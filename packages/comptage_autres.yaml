@@ -88,15 +88,7 @@ template:
       device_class: "power"
       state_class: "measurement"  
 
-  
-sensor:
-# Energie Puissance autres 
-  - platform: integration
-    source: sensor.puissance_autres
-    name: energy_autres
-    unit_prefix: k
-    #    method: left
-    round: 2
+
 
 
 

@@ -99,7 +99,9 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.parents_petit
+    target:
+      entity_id:
+      - cover.volet_ch_parent_p
   - delay:
       hours: 0
       minutes: 0
@@ -115,7 +117,9 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.amis_sud_petit
+    target:
+      entity_id:
+      - cover.volet_amis_sud_p
   - delay:
       hours: 0
       minutes: 0
@@ -285,7 +289,9 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.parents_petit
+    target:
+      entity_id:
+      - cover.volet_ch_parent_p
   - delay:
       hours: 0
       minutes: 0
@@ -301,7 +307,9 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.amis_sud_petit
+    target:
+      entity_id:
+      - cover.volet_amis_sud_p
   - delay:
       hours: 0
       minutes: 0
@@ -437,6 +445,7 @@ ouverture_volet_chamb_sud:
   - service: cover.open_cover
     target:
       entity_id: cover.volet_amis_sud_grand
+    data: {}
   - delay:
       hours: 0
       minutes: 0
@@ -444,7 +453,9 @@ ouverture_volet_chamb_sud:
       milliseconds: 0
   - service: cover.open_cover
     target:
-      entity_id: cover.amis_sud_petit
+      entity_id:
+      - cover.volet_amis_sud_p
+    data: {}
   mode: single
 '1619887011976':
   alias: Alarm Siren
@@ -667,4 +678,55 @@ volet_amis_nord_up:
     data: {}
     target:
       entity_id: cover.amis_nord
+  mode: single
+volet_ch_parent_down:
+  alias: volet ch parent down
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.parents_petit
+  mode: single
+volet_ch_parent_stop:
+  alias: volet ch parent stop
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.parents_petit
+  mode: single
+volet_ch_parent_up:
+  alias: volet ch parent up
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.parents_petit
+  mode: single
+volet_amis_sud_down:
+  alias: volet amis sud down
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.amis_sud_petit
+  mode: single
+volet_amis_sud_stop:
+  alias: volet amis sud stop
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id: cover.amis_sud_petit
+  mode: single
+volet_amis_sud_up:
+  alias: volet amis sud up
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.amis_sud_petit
   mode: single

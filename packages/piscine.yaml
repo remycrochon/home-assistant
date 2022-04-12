@@ -287,15 +287,7 @@ template:
         {{states.sensor.pzem_pisc_puissance.state | float(default=0) > 500}} 
 
 
-  # Calcul en fonction de la position du soleil
-  # Sun Azimtuh est calculé dans Meteo
-    - name: "soleil_volet_piscine"
-      state: >-
-        {% set a=states('sensor.sun_azimuth_2')|float(default=0) %}
-        {{ (a>97) and (a<290) }}
-
 # Commande du volet roulant via un Cover
-
 cover:
   - platform: template
     covers:

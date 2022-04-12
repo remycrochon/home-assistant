@@ -147,10 +147,3 @@ sensor:
     state_characteristic: median
     sampling_size: 10
 
-# Energie VMC Niv0
-  - platform: integration
-    source: sensor.puissance_vmc_niv0_median
-    name: energy_vmc_n0
-    unit_prefix: k
-    #    method: left
-    round: 2

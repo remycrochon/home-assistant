@@ -6,6 +6,7 @@
   padding: true
   cards:
     - type: vertical-stack
+
       cards:
         - type: grid
           cards:
@@ -123,7 +124,6 @@
                 target:
                   entity_id:
                     - cover.salon_petit
-                    - cover.volet_sam
                     - cover.cuisine
               icon: mdi:pause
               name: Stop
@@ -260,7 +260,7 @@
               entity: cover.volet_amis_nord_p
               hold_action:
                 action: none
-              name: Ch Nd
+              name: Am Nord
             - type: button
               tap_action:
                 action: call-service
@@ -336,7 +336,7 @@
               entity: group.volets_parents
               hold_action:
                 action: none
-              name: Par.
+              name: Parents
             - type: button
               tap_action:
                 action: call-service
@@ -345,7 +345,7 @@
                 target:
                   entity_id:
                     - cover.volet_parents_grand
-                    - cover.parents_petit
+                    - cover.volet_ch_parent_p
               icon: mdi:arrow-up-bold
               name: Ouvrir
               show_icon: true
@@ -357,8 +357,7 @@
                 service_data: {}
                 target:
                   entity_id:
-                    - cover.parents_petit
-                    - cover.volet_parents_grand
+                    - cover.volet_ch_parent_p
               icon: mdi:pause
               name: Stop
               show_name: false
@@ -369,8 +368,8 @@
                 service_data: {}
                 target:
                   entity_id:
-                    - cover.parents_petit
                     - cover.volet_parents_grand
+                    - cover.volet_ch_parent_p
               icon: mdi:arrow-down-bold
               name: Fermer
               show_name: false
@@ -381,9 +380,7 @@
                 service_data:
                   position: 20
                 target:
-                  entity_id:
-                    - cover.volet_parents_grand
-                    - cover.parents_petit
+                  entity_id: cover.volet_ch_parent_p
               icon: mdi:weather-sunset-up
               name: Soleil
               show_name: false
@@ -391,7 +388,7 @@
               image: /local/images/carre_orange.png
               elements:
                 - type: state-label
-                  entity: cover.sdb
+                  entity: cover.volet_ch_parent_p
                   attribute: current_position
                   suffix: '%'
                   tap_action:
@@ -418,7 +415,7 @@
               entity: group.volets_amis_sud
               hold_action:
                 action: none
-              name: C Sud
+              name: Am Sud
             - type: button
               tap_action:
                 action: call-service
@@ -426,8 +423,8 @@
                 service_data: {}
                 target:
                   entity_id:
-                    - cover.amis_sud_petit
                     - cover.volet_amis_sud_grand
+                    - cover.volet_amis_sud_p
               icon: mdi:arrow-up-bold
               name: Ouvrir
               show_icon: true
@@ -439,8 +436,7 @@
                 service_data: {}
                 target:
                   entity_id:
-                    - cover.amis_sud_petit
-                    - cover.volet_amis_sud_grand
+                    - cover.volet_amis_sud_p
               icon: mdi:pause
               name: Stop
               show_name: false
@@ -451,8 +447,8 @@
                 service_data: {}
                 target:
                   entity_id:
-                    - cover.amis_sud_petit
                     - cover.volet_amis_sud_grand
+                    - cover.volet_amis_sud_p
               icon: mdi:arrow-down-bold
               name: Fermer
               show_name: false
@@ -464,8 +460,7 @@
                   position: 20
                 target:
                   entity_id:
-                    - cover.amis_sud_petit
-                    - cover.volet_amis_sud_grand
+                    - cover.volet_amis_sud_p
               icon: mdi:weather-sunset-up
               name: Soleil
               show_name: false
@@ -473,7 +468,7 @@
               image: /local/images/carre_orange.png
               elements:
                 - type: state-label
-                  entity: cover.sdb
+                  entity: cover.volet_amis_sud_p
                   attribute: current_position
                   suffix: '%'
                   tap_action:
@@ -564,7 +559,7 @@
             - entities:
                 - entity: automation.volets_suivi_soleil
                   name: Automs
-                - entity: sensor.vp2_radiation
+                - entity: sensor.vp2_radiation_moyenne
                   name: Radia
                 - entity: input_number.radiation_seuil_ferm_volet
                   name: Seuil Ferm
@@ -575,6 +570,14 @@
               type: custom:multiple-entity-row              
 
             - entities:
+                - entity: binary_sensor.position_soleil_matin
+                  name: Mat
+                - entity: binary_sensor.position_soleil_midi
+                  name: Mid
+                - entity: binary_sensor.position_soleil_am
+                  name: AM
+                - entity: binary_sensor.position_soleil_soir
+                  name: Soir
                 - entity: sensor.sun_azimuth
                   name: Azim
                 - entity: sensor.sun_elevation

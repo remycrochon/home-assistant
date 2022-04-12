@@ -17,11 +17,6 @@ input_boolean:
     name: Nuit=0/Jour=1
     icon: mdi:weather-sunny
 
-# Calcul Jour/nuit selon luminosite
-  val_automs_soleil:
-    name: Valid Automs Volet Soleil
-    icon: mdi:weather-sunny
-
 input_datetime:
   # Horaires Volets ete
   horaire_ete_volet_ouv:

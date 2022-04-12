@@ -71,7 +71,7 @@ template:
     - name: "display_hp_hc"
       unique_id: "display_hp_hc"
       state: >-
-        {{ (states.sensor.linky_n_tarif.state == '1') }}" # =1 si HC =2 si H
+        {{ states('sensor.linky_n_tarif')|int(default=0) == 1 }} # =1 si HC =2 si HP
 
 # Consommation journalière HP + HC - addition des utility meter
   - sensor:

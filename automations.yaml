@@ -790,139 +790,6 @@
     default: []
   mode: restart
   max: 10
-- id: '1633502766002'
-  alias: 4_1_3 Volet-Suivi Azimuth Soleil
-  description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.position_soleil_matin
-    id: ferme_matin
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: binary_sensor.position_soleil_matin
-    id: ouvre_matin
-    from: 'on'
-    to: 'off'
-  - platform: state
-    entity_id: binary_sensor.position_soleil_am
-    id: ferme_am
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: binary_sensor.position_soleil_am
-    id: ouvre_am
-    from: 'on'
-    to: 'off'
-  condition:
-  - condition: state
-    entity_id: input_boolean.val_automs_soleil
-    state: 'on'
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: ferme_matin
-      - condition: numeric_state
-        entity_id: sensor.vp2_radiation
-        above: input_number.radiation_seuil_ferm_volet
-      sequence:
-      - service: cover.set_cover_position
-        data:
-          position: 20
-        target:
-          entity_id:
-          - cover.volet_sdb_p
-          - cover.volet_amis_nord_p
-    - conditions:
-      - condition: trigger
-        id: ouvre_matin
-      sequence:
-      - service: cover.open_cover
-        data: {}
-        target:
-          entity_id: cover.volet_sdb_p
-      - condition: state
-        entity_id: input_boolean.presence_amis_ch_nord
-        state: 'off'
-      - service: cover.open_cover
-        target:
-          entity_id:
-          - cover.volet_amis_nord_p
-        data: {}
-    - conditions:
-      - condition: trigger
-        id: ferme_am
-      - condition: numeric_state
-        entity_id: sensor.sun_azimuth
-        above: input_number.radiation_seuil_ferm_volet
-      sequence:
-      - service: cover.set_cover_position
-        data:
-          position: 20
-        target:
-          entity_id:
-          - cover.volet_amis_sud_p
-          - cover.volet_ch_parent_p
-    - conditions:
-      - condition: trigger
-        id: ouvre_sud
-      sequence:
-      - service: cover.open_cover
-        target:
-          entity_id:
-          - cover.volet_ch_parent_p
-        data: {}
-      - condition: state
-        entity_id: input_boolean.presence_amis_ch_sud
-        state: 'off'
-      - service: cover.open_cover
-        data: {}
-        target:
-          entity_id: cover.volet_amis_sud_p
-    default: []
-  mode: single
-- id: '1634125204090'
-  alias: '5_1_2 Reseau NAS_ Alim Dlink '
-  description: Alimentation du Switch Dlink NAS Dlink uniquement lors des sauvegardes
-    du dimanche et du lundi
-  trigger:
-  - platform: time
-    at: 00:30
-    id: debut
-  - platform: time
-    id: fin
-    at: 05:30
-  condition:
-  - condition: time
-    after: 00:20
-    before: 05:40
-    weekday:
-    - mon
-    - tue
-    - wed
-    - thu
-    - fri
-    - sat
-    - sun
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: debut
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.pc2_lidl
-    - conditions:
-      - condition: trigger
-        id: fin
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.pc2_lidl
-    default: []
-  mode: single
 - id: '1634204887702'
   alias: 3_2_3 Piscine-pH Notifications
   description: Notifie Ph bas, haut, anormal, bidon bas
@@ -1861,35 +1728,35 @@
           option: hc
         target:
           entity_id:
-          - utility_meter.energy_total_usage_daily
-          - utility_meter.energy_total_usage_weekly
-          - utility_meter.energy_total_usage_monthly
-          - utility_meter.energy_total_usage_yearly
-          - utility_meter.energy_pisc_usage_daily
-          - utility_meter.energy_pisc_usage_weekly
-          - utility_meter.energy_pisc_usage_monthly
-          - utility_meter.energy_pisc_usage_yearly
-          - utility_meter.energy_sdb_usage_daily
-          - utility_meter.energy_sdb_usage_weekly
-          - utility_meter.energy_sdb_usage_monthly
-          - utility_meter.energy_sdb_usage_yearly
-          - utility_meter.energy_ecs1_usage_daily
-          - utility_meter.energy_ecs1_usage_weekly
-          - utility_meter.energy_ecs1_usage_monthly
-          - utility_meter.energy_ecs1_usage_yearly
-          - utility_meter.energy_pac1_usage_daily
-          - utility_meter.energy_pac1_usage_weekly
-          - utility_meter.energy_pac1_usage_monthly
-          - utility_meter.energy_pac1_usage_yearly
-          - utility_meter.energy_mal_usage_daily
-          - utility_meter.energy_mal_usage_monthly
-          - utility_meter.energy_mal_usage_weekly
-          - utility_meter.energy_mal_usage_yearly
-          - utility_meter.energy_autres_usage_daily
-          - utility_meter.energy_autres_usage_monthly
-          - utility_meter.energy_autres_usage_weekly
-          - utility_meter.energy_autres_usage_yearly
-          - utility_meter.energy_vmc_usage_daily
+          - select.energy_total_usage_daily
+          - select.energy_total_usage_weekly
+          - select.energy_total_usage_monthly
+          - select.energy_total_usage_yearly
+          - select.energy_pisc_usage_daily
+          - select.energy_pisc_usage_weekly
+          - select.energy_pisc_usage_monthly
+          - select.energy_pisc_usage_yearly
+          - select.energy_sdb_usage_daily
+          - select.energy_sdb_usage_weekly
+          - select.energy_sdb_usage_monthly
+          - select.energy_sdb_usage_yearly
+          - select.energy_ecs1_usage_daily
+          - select.energy_ecs1_usage_weekly
+          - select.energy_ecs1_usage_monthly
+          - select.energy_ecs1_usage_yearly
+          - select.energy_pac1_usage_daily
+          - select.energy_pac1_usage_weekly
+          - select.energy_pac1_usage_monthly
+          - select.energy_pac1_usage_yearly
+          - select.energy_mal_usage_daily
+          - select.energy_mal_usage_monthly
+          - select.energy_mal_usage_weekly
+          - select.energy_mal_usage_yearly
+          - select.energy_autres_usage_daily
+          - select.energy_autres_usage_monthly
+          - select.energy_autres_usage_weekly
+          - select.energy_autres_usage_yearly
+          - select.energy_vmc_usage_daily
     - conditions:
       - condition: trigger
         id: tarif_hp
@@ -1899,35 +1766,35 @@
           option: hp
         target:
           entity_id:
-          - utility_meter.energy_total_usage_daily
-          - utility_meter.energy_total_usage_weekly
-          - utility_meter.energy_total_usage_monthly
-          - utility_meter.energy_total_usage_yearly
-          - utility_meter.energy_pisc_usage_daily
-          - utility_meter.energy_pisc_usage_weekly
-          - utility_meter.energy_pisc_usage_monthly
-          - utility_meter.energy_pisc_usage_yearly
-          - utility_meter.energy_sdb_usage_daily
-          - utility_meter.energy_sdb_usage_weekly
-          - utility_meter.energy_sdb_usage_monthly
-          - utility_meter.energy_sdb_usage_yearly
-          - utility_meter.energy_ecs1_usage_daily
-          - utility_meter.energy_ecs1_usage_weekly
-          - utility_meter.energy_ecs1_usage_monthly
-          - utility_meter.energy_ecs1_usage_yearly
-          - utility_meter.energy_pac1_usage_daily
-          - utility_meter.energy_pac1_usage_weekly
-          - utility_meter.energy_pac1_usage_monthly
-          - utility_meter.energy_pac1_usage_yearly
-          - utility_meter.energy_mal_usage_daily
-          - utility_meter.energy_mal_usage_monthly
-          - utility_meter.energy_mal_usage_weekly
-          - utility_meter.energy_mal_usage_yearly
-          - utility_meter.energy_autres_usage_daily
-          - utility_meter.energy_autres_usage_monthly
-          - utility_meter.energy_autres_usage_weekly
-          - utility_meter.energy_autres_usage_yearly
-          - utility_meter.energy_vmc_usage_daily
+          - select.energy_total_usage_daily
+          - select.energy_total_usage_weekly
+          - select.energy_total_usage_monthly
+          - select.energy_total_usage_yearly
+          - select.energy_pisc_usage_daily
+          - select.energy_pisc_usage_weekly
+          - select.energy_pisc_usage_monthly
+          - select.energy_pisc_usage_yearly
+          - select.energy_sdb_usage_daily
+          - select.energy_sdb_usage_weekly
+          - select.energy_sdb_usage_monthly
+          - select.energy_sdb_usage_yearly
+          - select.energy_ecs1_usage_daily
+          - select.energy_ecs1_usage_weekly
+          - select.energy_ecs1_usage_monthly
+          - select.energy_ecs1_usage_yearly
+          - select.energy_pac1_usage_daily
+          - select.energy_pac1_usage_weekly
+          - select.energy_pac1_usage_monthly
+          - select.energy_pac1_usage_yearly
+          - select.energy_mal_usage_daily
+          - select.energy_mal_usage_monthly
+          - select.energy_mal_usage_weekly
+          - select.energy_mal_usage_yearly
+          - select.energy_autres_usage_daily
+          - select.energy_autres_usage_monthly
+          - select.energy_autres_usage_weekly
+          - select.energy_autres_usage_yearly
+          - select.energy_vmc_usage_daily
     default: []
   mode: single
 - id: '1642958036645'
@@ -2041,42 +1908,8 @@
       max_alerts: 20
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
-- id: '16101849668775'
-  alias: 0_0_1 Essai à supprimer
-  description: ''
-  trigger:
-  - platform: template
-    value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) >
-      states(''input_number.luminosite_seuil_haut'')|float(default=0) and is_state("sun.sun",
-      "above_horizon") }}'
-    id: nuit->jour
-  - platform: template
-    value_template: '{{ states(''sensor.bh1750_illuminance'')|float(default=0) < states(''input_number.luminosite_seuil_bas'')|float(default=0)
-      and is_state("sun.sun", "below_horizon") }}'
-    id: jour->nuit
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: nuit->jour
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.nuit_jour
-        data: {}
-    - conditions:
-      - condition: trigger
-        id: jour->nuit
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.nuit_jour
-        data: {}
-    default: []
-  mode: single
 - id: '1649766635520'
-  alias: 4_1_3 Volet-Suivi Azimuth Soleil V2
+  alias: 4_1_3 Volet-Suivi Azimuth Soleil
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
   trigger:
   - platform: time_pattern

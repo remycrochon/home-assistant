@@ -1848,9 +1848,9 @@
       - condition: trigger
         id: tarif_hc
       sequence:
-      - service: utility_meter.select_tariff
+      - service: select.select_option
         data:
-          tariff: hc
+          option: hc
         target:
           entity_id:
           - utility_meter.energy_total_usage_daily
@@ -1886,9 +1886,9 @@
       - condition: trigger
         id: tarif_hp
       sequence:
-      - service: utility_meter.select_tariff
+      - service: select.select_option
         data:
-          tariff: hp
+          option: hp
         target:
           entity_id:
           - utility_meter.energy_total_usage_daily

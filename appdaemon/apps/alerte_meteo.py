@@ -65,7 +65,7 @@ class AlerteMeteo(hass.Hass):
     def change_alerte(self, entity, attribute, old, new, kwargs):
         heure = str(self.time())[:8]
         alerte_w = self.get_state(self.args["alerte"],attribute="state")
-#        Inondation= self.get_state(self.args["alerte"],attribute="Inondation")
+        Inondation= self.get_state(self.args["alerte"],attribute="Inondation")
 #        Grand_Froid= self.get_state(self.args["alerte"],attribute="Grand-froid")
         Neige_Verglas= self.get_state(self.args["alerte"],attribute="Neige-verglas")
         Orages= self.get_state(self.args["alerte"],attribute="Orages")

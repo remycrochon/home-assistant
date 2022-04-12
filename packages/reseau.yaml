@@ -5,13 +5,10 @@
 ####################################################
 
 binary_sensor:
-  - platform: ping
-    host: 192.168.0.11
-    name: "ping_NAS_Dlink"
 
   - platform: ping
     host: 192.168.0.14
-    name: "ping_pc_jeedom"
+    name: "ping_pc_motion"
 
 #  - platform: ping
 #    host: 192.168.0.21

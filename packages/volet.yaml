@@ -161,9 +161,7 @@ cover:
           {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
             closed
           {% else %}
-            {% if is_state('binary_sensor.porte_garage_ouverte', 'on') %}
-              open
-            {% endif %}
+            open
           {% endif %}     
         open_cover:
           - condition: state
@@ -197,9 +195,7 @@ cover:
           {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
             closed
           {% else %}
-            {% if is_state('binary_sensor.porte_ssol_ouverte', 'on') %}
-              open
-            {% endif %}
+            open
           {% endif %}        
         open_cover:
           - condition: state

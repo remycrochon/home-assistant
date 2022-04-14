@@ -1019,19 +1019,19 @@
                               - from: '0'
                                 to: '40'
                                 color: Red
-                                icon: fas:empty
+                                icon: mdi:battery-charging-10
                               - from: '41'
                                 to: '60'
                                 color: Orange
-                                icon: fas:battery-half
+                                icon: mdi:battery-charging-40
                               - from: '61'
                                 color: Blue
                                 to: '80'
-                                icon: fas:battery-three-quarters
+                                icon: mdi:battery-charging-80
                               - from: '81'
                                 to: '100'
                                 color: Green
-                                icon: mdi:gauge
+                                icon: mdi:battery-charging-100
                       - type: horizontal-stack
                         cards:
                           - type: custom:bar-card
@@ -1039,21 +1039,19 @@
                             show_icon: true
                             align: split
                             columns: 1
-                            max: 100
+                            max: 1200
                             unit_of_measurement: s
                             severity:
-                              - value: 50
-                                color: '#3498db'
-                              - value: 75
-                                color: '#f39c12'
-                              - value: 100
-                                color: '#e45e65'
-                            style: |
-                              ha-card { 
-                                --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
-                                --ha-card-background: "rgba(0, 0, 0, 0.0)";
-                                --ha-card-box-shadow: 'none';
-                              }
+                              - color: Red
+                                from: 0
+                                to: 400
+                              - color: Orange
+                                from: 401
+                                to: 800
+                              - color: Green
+                                from: 801
+                                to: 1200 
+
                             entity: sensor.myups_battery_runtime
                             name: Autonomie Batterie
                       - entities:

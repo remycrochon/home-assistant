@@ -4,7 +4,7 @@
 #items_classes: 'col-md- si>768px-Largeur Maxi du contenaire: 720px TABLETTE
 #items_classes: 'col-lg- si>992px Largeur Maxi du contenaire: 960px pour mon PC
 #items_classes: 'col-xl- si>1200 Largeur Maxi du contenaire: 1140px
-  items_classes: 'col-xs-12 col-sm-6 col-md-4 col-lg-4'
+  items_classes: 'col-xs-11 col-sm-6 col-md-4 col-lg-4'
   cards:
 ###############################  OMV  ########################################""
     - type: vertical-stack
@@ -20,10 +20,6 @@
               - letter-spacing: 10px
           type: 'custom:button-card'
         - type: entities
-#          title: NAS DS218
-#          show_header_toggle: false
-#          style: |
-#            ha-card { border-radius: 20px; }
           entities:
             - type: custom:hui-vertical-stack-card
               cards:
@@ -98,12 +94,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -122,12 +121,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -144,12 +146,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -291,12 +296,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -315,12 +323,16 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                      severity:
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -337,12 +349,16 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                      severity:
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -485,12 +501,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -507,12 +526,15 @@
                   max: 100
                   unit_of_measurement: '%'
                   severity:
-                    - value: 50
-                      color: '#3498db'
-                    - value: 75
-                      color: '#f39c12'
-                    - value: 100
-                      color: '#e45e65'
+                    - color: Green
+                      from: 0
+                      to: 25
+                    - color: Orange
+                      from: 26
+                      to: 50
+                    - color: Red
+                      from: 51
+                      to: 100  
                   style: |
                     ha-card { 
                       --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -531,12 +553,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
@@ -553,12 +578,15 @@
                       max: 100
                       unit_of_measurement: '%'
                       severity:
-                        - value: 50
-                          color: '#3498db'
-                        - value: 75
-                          color: '#f39c12'
-                        - value: 100
-                          color: '#e45e65'
+                        - color: Green
+                          from: 0
+                          to: 25
+                        - color: Orange
+                          from: 26
+                          to: 50
+                        - color: Red
+                          from: 51
+                          to: 100  
                       style: |
                         ha-card { 
                           --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';

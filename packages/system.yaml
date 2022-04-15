@@ -31,18 +31,6 @@ sensor:
       - type: network_out
         arg: enp3s0
 
-  - platform: command_line
-    name: processor_temperature_z0
-    command: "cat /sys/class/thermal/thermal_zone0/temp"
-    unit_of_measurement: "°C"
-    value_template: '{{ value | multiply(0.001) | round(1) }}'
-    
-  - platform: command_line
-    name: processor_temperature_z1
-    command: "cat /sys/class/thermal/thermal_zone1/temp"
-    unit_of_measurement: "°C"
-    value_template: '{{ value | multiply(0.001) | round(1) }}'
-
   - platform: time_date
     display_options:
       - 'time'
@@ -54,7 +42,17 @@ sensor:
       - 'time_utc'
       - 'beat'
 
-
+  - platform: command_line
+    name: processor_temperature_z0
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
+    
+  - platform: command_line
+    name: processor_temperature_z1
+    command: "cat /sys/class/thermal/thermal_zone1/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
 
 # One entry for each beacon you want to track
   - platform: mqtt_room

@@ -71,13 +71,23 @@ rest:
         - os_version
         - hr_name
 
+  - scan_interval: 360
+    resource: http://192.168.0.153:61208/api/3/load
+    sensor:
+      - name: Glances OMV-SERVER-LOAD1
+        value_template: '{{ value_json.min1 }}'
+    
+      - name: Glances OMV-SERVER-LOAD5
+        value_template: '{{ value_json.min5 }}'
+    
+
   - scan_interval: 120
     resource: http://192.168.0.153:61208/api/3/sensors 
     sensor: 
-      name: Glances OMV- SERVER - CPU - Temperature
-      device_class: temperature
-      unit_of_measurement: "°C"
-      value_template: '{{ value_json[0].value }}'
+      - name: Glances OMV- SERVER - CPU - Temperature
+        device_class: temperature
+        unit_of_measurement: "°C"
+        value_template: '{{ value_json[0].value }}'
 
 template:
   - sensor:

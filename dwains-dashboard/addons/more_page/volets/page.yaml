@@ -578,8 +578,7 @@
                   name: AM
                 - entity: binary_sensor.position_soleil_soir
                   name: Soir
-                - entity: sensor.sun_azimuth
-                  name: Azim
+
                 - entity: sensor.sun_elevation
                   name: Elev
               entity: sensor.sun_elevation
@@ -588,8 +587,34 @@
               show_state: false
               type: custom:multiple-entity-row    
 
+            - type: custom:bar-card
+              title_position: inside
+              show_icon: true
+              align: split
+              columns: 1
+              max: '360'
+              unit_of_measurement: °
+              severity:
+                - color: green
+                  from: '103'
+                  to: '137'
+                - color: green
+                  from: 160
+                  to: 239
+              style: |
+                ha-card { 
+                  --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                  --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                  --ha-card-box-shadow: 'none';
+                }
+              name: Azimuth
+              entities:
+                - entity: sensor.sun_azimuth
+              color: grey
+
           how_header_toggle: false
           style: |
             ha-card {
               border: solid 2px var(--primary-color);
             }
+        

@@ -72,25 +72,10 @@
         type: 'custom:button-card'
       - type: custom:auto-entities
         card:
-          type: custom:bar-card
-          icon: mdi:battery
-          max: 1000
-          positions:
-            icon: 'off'
-            indicator: inside
-            name: inside
-          severity:
-            - color: green
-              from: 0
-              to: 50
-            - color: Orange
-              from: 50
-              to: 500
-            - color: red
-              from: 500
-              to: 1000
-          columns: 1
-        show_empty: false
+          type: entities
+          show_header_toggle: false
+          state_color: false
+          title: Puissances Instantanées
         filter:
           include:
             - entity_id: sensor.envoy_122103023124_current_energy_consumption
@@ -113,7 +98,6 @@
           method: state
           reverse: true
           numeric: true
-
 #          exclude:
 #            - state: "< 1.81"
 

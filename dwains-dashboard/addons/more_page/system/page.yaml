@@ -140,7 +140,9 @@
                           name: RAM usage
                         - entity: sensor.glances_omv_server_swap_ratio
                           name: SWAP usage
-
+                - type: entities
+                  entities:
+                    - entity: binary_sensor.omv_update_available
                 - type: markdown
                   content: >+
 
@@ -151,11 +153,11 @@
                     "hr_name") }}
 
                     **Raid**: {{ state_attr("sensor.glances_omv_server_raid", "status") }} -
-                    **Valide**:{{ state_attr("sensor.glances_omv_server_raid", "available") }}
-                    - **Utilisé**:{{ state_attr("sensor.glances_omv_server_raid", "used") }}
-                - type: entities
-                  entities:
-                    - entity: binary_sensor.omv_update_available
+                    **Valide**: {{ state_attr("sensor.glances_omv_server_raid", "available") }}
+                    - **Utilisé**: {{ state_attr("sensor.glances_omv_server_raid", "used") }}
+
+                    **RAM**: {{states("sensor.glances_omv_server_ram_used")}} Go / {{states("sensor.glances_omv_server_ram_total")}} Go
+
 
 ###############################  NAS DS218  ########################################""
     - type: vertical-stack
@@ -171,10 +173,7 @@
               - letter-spacing: 10px
           type: 'custom:button-card'
         - type: entities
-#          title: NAS DS218
-#          show_header_toggle: false
-#          style: |
-#            ha-card { border-radius: 20px; }
+
           entities:
             - type: custom:hui-vertical-stack-card
               cards:
@@ -311,11 +310,19 @@
                         --ha-card-background: "rgba(0, 0, 0, 0.0)";
                         --ha-card-box-shadow: 'none';
                     }
+                - type: markdown
+                  content: >+
+
+                    **Dernier boot:** {{ states("sensor.nas_ds218_last_boot") }}
+
+                    **Update:** {{ states("binary_sensor.nas_ds218_update_available") }}
+
+                    **RAM**: {{states("sensor.nas_ds218_memory_available_real")}} Mo / {{states("sensor.nas_ds218_memory_total_real")}} Mo
 
 ###################################  LENOVO  #########################################                    
     - type: vertical-stack
       cards:
-        - name: LENOVO M73
+        - name: HA-LENOVO M73
           styles:
             card:
               - text-transform: uppercase
@@ -327,10 +334,6 @@
           type: 'custom:button-card'
 
         - type: entities
-#          title: 'NUC5CPYH'
-#          show_header_toggle: false
-#          style: |
-#            ha-card { border-radius: 20px; }
           entities:
             - type: custom:hui-vertical-stack-card
               cards:
@@ -451,6 +454,15 @@
                           name: RAM usage
                         - entity: sensor.swap_use_percent
                           name: SWAP usage
+                - type: markdown
+                  content: >+
+                    **Dernier Boot**: {{ states("sensor.last_boot") }}
+                    
+                    **Uptime:** {{ states("sensor.uptime") }}
+
+                    **Disque**: Use: {{states("sensor.disk_use")}} Mo / Free: {{states("sensor.disk_free")}} Mo
+
+                    **RAM**: Use: {{states("sensor.memory_use")}} Mo / Free: {{states("sensor.memory_free")}} Mo
 ###############################  MOTION  ########################################""
     - type: vertical-stack
       cards:
@@ -594,12 +606,8 @@
                     **System:** {{ state_attr("sensor.glances_motion_server_system",
                     "os_version") }} - {{ state_attr("sensor.glances_motion_server_system",
                     "hr_name") }}
-
-                    **Raid**: {{ state_attr("sensor.glances_motion_server_raid", "status") }} -
-                    **Valide**:{{ state_attr("sensor.glances_motion_server_raid", "available") }}
-                    - **Utilisé**:{{ state_attr("sensor.glances_motion_server_raid", "used") }}
-
-
+                    
+                    **RAM**: {{states("sensor.glances_motion_server_ram_used")}} Go / {{states("sensor.glances_motion_server_ram_total")}} Go
 ################################### UPTIME #######################################""
     - type: vertical-stack
       cards:

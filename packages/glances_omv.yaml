@@ -95,19 +95,19 @@ template:
         unique_id: glances_omv_server_cpu_used_pct
         unit_of_measurement: "%"
         state: >-
-          {{ state_attr("sensor.glances_omv_server_cpu", "total") }}
+          {{ state_attr("sensor.glances_omv_server_cpu", "total")| float(0) }}
 
       - name: "Glances OMV- SERVER - RAM Used"
         unique_id: glances_omv_server_ram_used_mb
-        unit_of_measurement: "MB"
+        unit_of_measurement: "Go"
         state: >-
-          {{ (state_attr("sensor.glances_omv_server_ram", "used") | float / 1024/1024) | round(0) }}
+          {{ (state_attr("sensor.glances_omv_server_ram", "used") | float(0) / 1024/1024/1024) | round(2) }}
 
       - name: "Glances OMV- SERVER - RAM Total"
         unique_id: glances_omv_server_ram_total_mb
-        unit_of_measurement: "MB"
+        unit_of_measurement: "Go"
         state: >-
-          {{ (state_attr("sensor.glances_omv_server_ram", "total") | float / 1024/1024) | round(0) }}
+          {{ (state_attr("sensor.glances_omv_server_ram", "total") | float(0) / 1024/1024/1024) | round(2) }}
 
       - name: "Glances OMV- SERVER - RAM Ratio"
         unique_id: glances_omv_server_ram_total_ratio
@@ -117,21 +117,21 @@ template:
 
       - name: "Glances OMV- SERVER - Disk Used"
         unique_id: glances_omv_server_disk_used_gb
-        unit_of_measurement: "GB"
+        unit_of_measurement: "Go"
         state: >-
-          {{ (state_attr("sensor.glances_omv_server_disk", "used") | float / 1024/1024/1024) | round(2) }}
+          {{ (state_attr("sensor.glances_omv_server_disk", "used") | float(0) / 1024/1024/1024) | round(2) }}
 
       - name: "Glances OMV- SERVER - Disk Free"
         unique_id: glances_omv_server_disk_free_gb
-        unit_of_measurement: "GB"
+        unit_of_measurement: "Go"
         state: >-
-          {{ (state_attr("sensor.glances_omv_server_disk", "free") | float / 1024/1024/1024) | round(2) }}
+          {{ (state_attr("sensor.glances_omv_server_disk", "free") | float(0) / 1024/1024/1024) | round(2) }}
 
       - name: "Glances OMV- SERVER - Disk Size"
         unique_id: glances_omv_server_disk_size_gb
-        unit_of_measurement: "GB"
+        unit_of_measurement: "Go"
         state: >-
-          {{ (state_attr("sensor.glances_omv_server_disk", "size") | float / 1024/1024/1024) | round(2) }}
+          {{ (state_attr("sensor.glances_omv_server_disk", "size") | float(0) / 1024/1024/1024) | round(2) }}
 
       - name: "Glances OMV- SERVER - Disk Ratio"
         unique_id: glances_omv_server_disk_ratio

@@ -106,8 +106,10 @@
                           --ha-card-box-shadow: 'none';
                         }
                       entities:
+                        - entity: sensor.omv_srv_dev_disk_by_uuid_4b42f328_0410_4873_86f7_c709b89da520
+                          name: Dk Raid use
                         - entity: sensor.glances_omv_server_disk_ratio
-                          name: Disk usage 960 Gb
+                          name: Dk Syst use
 
                 - type: horizontal-stack
                   cards:
@@ -157,6 +159,8 @@
                     - **Utilisé**: {{ state_attr("sensor.glances_omv_server_raid", "used") }}
 
                     **RAM**: {{states("sensor.glances_omv_server_ram_used")}} Go / {{states("sensor.glances_omv_server_ram_total")}} Go
+
+                    Disk Raid->960 Go - Disk Systeme->226 Go
 
 
 ###############################  NAS DS218  ########################################""
@@ -315,9 +319,11 @@
 
                     **Dernier boot:** {{ states("sensor.nas_ds218_last_boot") }}
 
-                    **Update:** {{ states("binary_sensor.nas_ds218_update_available") }}
+                    **Status:** {{ states("sensor.nas_ds218_disque_1_status") }}
 
                     **RAM**: {{states("sensor.nas_ds218_memory_available_real")}} Mo / {{states("sensor.nas_ds218_memory_total_real")}} Mo
+
+                    **Update**: {{states("update.nas_ds218_dsm_update")}}
 
 ###################################  LENOVO  #########################################                    
     - type: vertical-stack

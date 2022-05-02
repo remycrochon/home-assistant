@@ -32,9 +32,10 @@ async def async_setup_entry(
 class AutomowerNumber(NumberEntity, AutomowerEntity):
     """Defining the CuttingHeight Entity."""
 
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_icon = "mdi:grass"
     _attr_min_value = 1
     _attr_max_value = 9
-    _attr_entity_category = EntityCategory.CONFIG
 
     @property
     def name(self) -> str:
@@ -50,13 +51,7 @@ class AutomowerNumber(NumberEntity, AutomowerEntity):
     def value(self) -> int:
         """Return the entity value."""
         mower_attributes = AutomowerEntity.get_mower_attributes(self)
-        try:
-            test = mower_attributes["cuttingHeight"]  ## return of the websocket
-        except KeyError:
-            test = mower_attributes["settings"][
-                "cuttingHeight"
-            ]  ## return from REST, just for start-up
-        return test
+        return mower_attributes["cuttingHeight"]
 
     async def async_set_value(self, value: float) -> None:
         """Change the value."""

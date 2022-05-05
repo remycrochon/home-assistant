@@ -293,3 +293,31 @@ cover:
 
 
 
+  - platform: template
+    covers:
+      volet_salon:
+        device_class: shutter
+        friendly_name: "volet du salon zb"
+        position_template: ->
+          {{ (100 - state_attr('cover.volet_salon_zb', 'position')| float(0) )|int }}
+        open_cover:
+          service: cover.open_cover
+          data: {} 
+          target:
+            entity_id: cover.volet_salon_zb
+        close_cover:
+          service: cover.close_cover
+          data: {}
+          target:
+            entity_id: cover.volet_salon_zb
+        stop_cover:
+          service: cover.stop_cover
+          data: {}
+          target:
+            entity_id: cover.volet_salon_zb
+        set_cover_position:                   
+          service: cover.set_cover_position         
+          data:
+            position: "{{ ( 100 - position )| int  }}"
+          target:
+            entity_id: cover.volet_salon_zb

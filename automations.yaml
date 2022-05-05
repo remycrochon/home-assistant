@@ -1927,7 +1927,7 @@
       sequence:
       - service: cover.set_cover_position
         data:
-          position: 20
+          position: 25
         target:
           entity_id:
           - cover.volet_sdb_p
@@ -1959,7 +1959,7 @@
       sequence:
       - service: cover.set_cover_position
         data:
-          position: 20
+          position: 25
         target:
           entity_id:
           - cover.volet_amis_sud_p

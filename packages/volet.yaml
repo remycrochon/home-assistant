@@ -135,23 +135,6 @@ cover:
           {% else %}
             mdi:garage
           {% endif %} 
-  # Convertion TC parents grand
-      volet_parents_grand:
-        friendly_name: "Volet Parents Grand"
-        open_cover:
-          service: switch.turn_on
-          data:
-            entity_id: switch.tc_chamb_parents
-        close_cover:
-          service: switch.turn_off
-          data:
-            entity_id: switch.tc_chamb_parents
-        icon_template: >-
-          {% if is_state('switch.tc_chamb_parents', 'on') %}
-            mdi:garage-open
-          {% else %}
-            mdi:garage
-          {% endif %}
 
 # porte de garage RDC
       garage_rdc:
@@ -293,31 +276,3 @@ cover:
 
 
 
-  - platform: template
-    covers:
-      volet_salon:
-        device_class: shutter
-        friendly_name: "volet du salon zb"
-        position_template: ->
-          {{ (100 - state_attr('cover.volet_salon_zb', 'position')| float(0) )|int }}
-        open_cover:
-          service: cover.open_cover
-          data: {} 
-          target:
-            entity_id: cover.volet_salon_zb
-        close_cover:
-          service: cover.close_cover
-          data: {}
-          target:
-            entity_id: cover.volet_salon_zb
-        stop_cover:
-          service: cover.stop_cover
-          data: {}
-          target:
-            entity_id: cover.volet_salon_zb
-        set_cover_position:                   
-          service: cover.set_cover_position         
-          data:
-            position: "{{ ( 100 - position )| int  }}"
-          target:
-            entity_id: cover.volet_salon_zb

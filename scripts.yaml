@@ -47,7 +47,7 @@ ouverture_volet:
   - service: script.ouverture_volet_chamb_sud
     data: {}
   mode: single
-  icon: mdi:badminton
+  icon: mdi:window-shutter-open
 fermeture_volet:
   alias: fermeture_volet
   sequence:
@@ -109,7 +109,7 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.volet_parents_grand
+    entity_id: cover.volet_ch_parents_zb
   - delay:
       hours: 0
       minutes: 0
@@ -129,7 +129,7 @@ fermeture_volet:
     data: {}
     entity_id: cover.volet_amis_sud_grand
   mode: single
-  icon: mdi:shuttle
+  icon: mdi:window-shutter
 ouverture_volet_absent:
   alias: ouverture_volet_absent
   sequence:
@@ -145,6 +145,7 @@ ouverture_volet_absent:
   - service: cover.close_cover
     target:
       entity_id: cover.bureau_gauche
+    data: {}
   - delay:
       hours: 0
       minutes: 0
@@ -198,7 +199,7 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.volet_parents_grand
+      entity_id: cover.volet_ch_parents_zb
   - delay:
       hours: 0
       minutes: 0
@@ -227,7 +228,7 @@ ouverture_volet_absent:
     target:
       entity_id: cover.amis_sud_petit
   mode: single
-  icon: mdi:shuttle
+  icon: mdi:window-shutter-open
 fermeture_volet_absent:
   alias: fermeture_volet_absent
   sequence:
@@ -291,7 +292,7 @@ fermeture_volet_absent:
     data: {}
     target:
       entity_id:
-      - cover.volet_ch_parent_p
+      - cover.volet_ch_parents_zb
   - delay:
       hours: 0
       minutes: 0
@@ -327,7 +328,7 @@ fermeture_volet_absent:
     data: {}
     entity_id: cover.volet_sam
   mode: single
-  icon: mdi:shuttle
+  icon: mdi:window-shutter
 cde2_porte_sous_sol:
   alias: cde_ouv_porte_sous_Sol
   sequence:
@@ -340,6 +341,7 @@ cde2_porte_sous_sol:
       - service: switch.turn_on
         target:
           entity_id: switch.cde_porte_ssol
+        data: {}
       - delay:
           hours: 0
           minutes: 0
@@ -348,8 +350,10 @@ cde2_porte_sous_sol:
       - service: switch.turn_off
         target:
           entity_id: switch.cde_porte_ssol
+        data: {}
     default: []
   mode: single
+  icon: mdi:garage-open
 volet_piscine_ouverture:
   alias: volet_piscine_ouverture
   sequence:
@@ -424,6 +428,7 @@ volets_bureau:
     target:
       entity_id: cover.volet_droit_p
   mode: single
+  icon: mdi:window-shutter-open
 ouverture_volets_chamb_nord:
   alias: Ouverture Volets Chamb Nord
   sequence:
@@ -436,6 +441,7 @@ ouverture_volets_chamb_nord:
       - cover.volet_amis_nord_p
     data: {}
   mode: single
+  icon: mdi:window-shutter-open
 ouverture_volet_chamb_sud:
   alias: Ouverture Volet Chamb Sud
   sequence:
@@ -457,6 +463,7 @@ ouverture_volet_chamb_sud:
       - cover.volet_amis_sud_p
     data: {}
   mode: single
+  icon: mdi:window-shutter-open
 '1619887011976':
   alias: Alarm Siren
   sequence:
@@ -472,6 +479,7 @@ ecs_on:
   - service: switch.turn_off
     target:
       entity_id: switch.cde_relais_ecs_router_pv
+    data: {}
   - delay:
       hours: 0
       minutes: 0
@@ -480,13 +488,16 @@ ecs_on:
   - service: switch.turn_on
     target:
       entity_id: switch.cde_relais_ecs
+    data: {}
   mode: single
   alias: Ecs_On
+  icon: mdi:water-boiler
 ecs_off:
   sequence:
   - service: switch.turn_off
     target:
       entity_id: switch.cde_relais_ecs
+    data: {}
   - delay:
       hours: 0
       minutes: 0
@@ -500,8 +511,10 @@ ecs_off:
   - service: switch.turn_on
     target:
       entity_id: switch.cde_relais_ecs_router_pv
+    data: {}
   mode: single
   alias: Ecs_Off
+  icon: mdi:water-boiler-off
 volet_bureau_droit_up:
   alias: volet bureau droit up
   sequence:
@@ -535,6 +548,7 @@ ferm_porte_sous_sol:
       - service: switch.turn_on
         target:
           entity_id: switch.cde_porte_ssol
+        data: {}
       - delay:
           hours: 0
           minutes: 0
@@ -543,8 +557,10 @@ ferm_porte_sous_sol:
       - service: switch.turn_off
         target:
           entity_id: switch.cde_porte_ssol
+        data: {}
     default: []
   mode: single
+  icon: mdi:garage
 cde_ferm_porte_garage:
   alias: cde_ferm_porte_garage
   sequence:
@@ -557,6 +573,7 @@ cde_ferm_porte_garage:
       - service: switch.turn_on
         target:
           entity_id: switch.cde_porte_garage
+        data: {}
       - delay:
           hours: 0
           minutes: 0
@@ -565,8 +582,10 @@ cde_ferm_porte_garage:
       - service: switch.turn_off
         target:
           entity_id: switch.cde_porte_garage
+        data: {}
     default: []
   mode: single
+  icon: mdi:garage
 cde_ouv_porte_garage:
   alias: cde_ouv_porte_garage
   sequence:
@@ -579,6 +598,7 @@ cde_ouv_porte_garage:
       - service: switch.turn_on
         target:
           entity_id: switch.cde_porte_garage
+        data: {}
       - delay:
           hours: 0
           minutes: 0
@@ -587,8 +607,10 @@ cde_ouv_porte_garage:
       - service: switch.turn_off
         target:
           entity_id: switch.cde_porte_garage
+        data: {}
     default: []
   mode: single
+  icon: mdi:garage-open
 create_all_automations_group:
   sequence:
   - service: group.set

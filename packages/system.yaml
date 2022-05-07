@@ -90,7 +90,6 @@ binary_sensor:
     payload_off: 'False'
     value_template: "{{ value_json.charging }}"
     device_class: "battery_charging"
-    
 
   - platform: mqtt
     name: "Tablette_etat_charge"
@@ -101,6 +100,12 @@ binary_sensor:
     value_template: "{{ value_json.acPlugged }}"
     device_class: "battery_charging"
 
+  - platform: mqtt
+    name: "Tablette etat connection"
+    state_topic: wallpanel/mywallpanel/connection
+    payload_on: online
+    payload_off: offline
+    device_class: connectivity
 
 template:
     - sensor:

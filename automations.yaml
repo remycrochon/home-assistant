@@ -1858,9 +1858,6 @@
       - condition: numeric_state
         entity_id: sensor.tablette_niveau_charge
         below: '25'
-      - condition: state
-        entity_id: switch.pc2_tablette
-        state: 'off'
       sequence:
       - service: switch.turn_on
         data: {}
@@ -1871,9 +1868,6 @@
       - condition: numeric_state
         entity_id: sensor.tablette_niveau_charge
         above: '98'
-      - condition: state
-        entity_id: switch.pc2_tablette
-        state: 'on'
       sequence:
       - service: switch.turn_off
         data: {}

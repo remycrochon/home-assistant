@@ -13,9 +13,9 @@ surveille_com_vp2:
   tempo: 360 # Tempo de surveillance en secondes
   activite_ok: input_boolean.com_vp2
 
-surveille_alim_tablette:
-  module: surveille_activite
-  class: SurveilleActivite
-  entite: sensor.tablette_niveau_charge
-  tempo: 600 # Tempo de surveillance en secondes
-  activite_ok: input_boolean.alim_tablette_ok  
+#surveille_alim_tablette:
+  #module: surveille_activite
+  #class: SurveilleActivite
+  #entite: sensor.tablette_niveau_charge
+  #tempo: 600 # Tempo de surveillance en secondes
+  #activite_ok: input_boolean.alim_tablette_ok  

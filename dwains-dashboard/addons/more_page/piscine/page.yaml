@@ -237,7 +237,8 @@
             type: custom:multiple-entity-row
           # Tranche Horaire
           - entities:
-
+              - entity: input_number.duree_filtration_ete
+                name: Durée
               - entity: input_text.piscine_periode_filtration
                 name: 'Tranch Hor'
 
@@ -288,17 +289,13 @@
             type: custom:multiple-entity-row
           #
           - entities:
-              - entity: sensor.ev_eau_sur_7j
-                name: 7J
-              - entity: sensor.ev_eau_tps_ouverture_jour
-                name: 1J
-              - entity: switch.cde_ev_eau
+              - entity: switch.ev_eau
                 name: Cde EV
               - entity: binary_sensor.tp_plein_lsh
                 name: Niv H
               - entity: binary_sensor.tp_plein_lsl
                 name: Niv B
-            entity: sensor.ev_eau_tps_ouverture_jour
+            entity: switch.ev_eau
             icon: mdi:water
             name: Appoint Eau
             show_state: false
@@ -325,6 +322,17 @@
                 name: Heure pivot
               - entity: sensor.heure_pivot_soleil
                 name: H Pivot Sun
+
+               # Label Appoint Eau
+              - label: Appoint Eau
+                type: section
+              - entity: automation.piscine_ev_appoint_eau 
+                name: Automs
+              - entity: sensor.ev_eau_sur_7j
+                name: 7J
+              - entity: sensor.ev_eau_tps_ouverture_jour
+                name: 1J
+
               # label pH
               - label: pH
                 type: section

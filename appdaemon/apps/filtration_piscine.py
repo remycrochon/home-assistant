@@ -159,17 +159,18 @@ class FiltrationPiscine(hass.Hass):
 
         # Flag FIN_TEMPO
         self.notification("Flag fin tempo= "+str(FIN_TEMPO),2)
+        # Temporisation avant prise en compte de la mesure de la temperature
+        # sinon on travaille avec la memoire de la 
+        # temperature avant arret de la pompe
+        # mémorise la température eau de la veille.
+        if FIN_TEMPO == 1:
+            Temperature_eau=Mesure_temperature_eau
+            self.set_value(self.args["mem_temp"], Mesure_temperature_eau)
+        else:
+            Temperature_eau=Mem_temperature_eau
 
         #  Mode Ete
         if mode_de_fonctionnement == TAB_MODE[0]:
-            # Temporisation avant prise en compte de la mesure de la temperature
-            # sinon on travaille avec la memoire de la temperature avant arret de la pompe
-            # mémorise la température eau de la veille.
-            if FIN_TEMPO == 1:
-                Temperature_eau=Mesure_temperature_eau
-                self.set_value(self.args["mem_temp"], Mesure_temperature_eau)
-            else:
-                Temperature_eau=Mem_temperature_eau
 
             if mode_calcul == "on": # Calcul selon Abaque
                 temps_filtration = (duree_abaque(Temperature_eau)) * coef
@@ -213,7 +214,9 @@ class FiltrationPiscine(hass.Hass):
             # Affichage plage horaire
             affichage_texte =str(h_debut)[:5]+"/"+str(h_pivot)[:5]+"/"+str(h_fin)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
-
+            # Ajouté le 5 mai 2022
+            self.set_value("input_number.duree_filtration_ete",round(temps_filtration,2))
+            # fin ajout
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
                 ma_ppe=1

@@ -24,10 +24,12 @@ Piscine:
 # Arret forcé filtration- Bloque la filtration si = on
   #arret_force: input_boolean.piscine_arret_force # à utiliser par défaut
   arret_force: input_boolean.mem_delestage
-
+# Ajouté le 9 mai 2022
+  # Durée de la filtration en hiver
+  duree_filtration_ete: input_number.duree_filtration_ete
 
 # Actionneurs
   # Switch de commande de la pompe
   cde_pompe: switch.ppe_filtration
-  # Affichage dans HA des horaires filtration
+  # Affichage dans HA des heures de filtration
   periode_filtration: input_text.piscine_periode_filtration

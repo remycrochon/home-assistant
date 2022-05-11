@@ -315,6 +315,8 @@ cover:
           - service: script.volet_piscine_ouverture
         close_cover:
           - service: script.volet_piscine_fermeture   
+        stop_cover:
+          service: script.volet_piscine_stop
         icon_template: >-
           {% if is_state('binary_sensor.volet_piscine_ferme', 'on') %}
             mdi:garage

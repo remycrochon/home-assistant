@@ -61,13 +61,23 @@ sensor:
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 60s
+    update_interval: 15s
 # moyenne sur 15 mn
-    filters:
-      - sliding_window_moving_average:
-          window_size: 15
-          send_every: 15  
-#      - lambda: return id(esp125_ph_ezo).set_tempcomp_value(temp_piscine);
+#    filters:
+#      - sliding_window_moving_average:
+#          window_size: 30
+#          send_every: 30  
+
+
+############### TEMPLATE  ######################"
+# Affichage du pH brut (avant filtrage et moyenne)
+  - platform: template
+    name: "esp125_ph_brut"
+    id: ph_brut
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    lambda: |-
+      return (id(esp125_ph_ezo).state);
 
 # Mesure de l'ORP
   - platform: ezo

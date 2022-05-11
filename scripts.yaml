@@ -752,3 +752,28 @@ volet_amis_sud_up:
     target:
       entity_id: cover.amis_sud_petit
   mode: single
+volet_piscine_stop:
+  alias: volet_piscine_stop
+  sequence:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.cde_ferm_volet_piscine
+      - switch.cde_ouv_volet_piscine
+  - delay: 00:00:02
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.cde_ferm_volet_piscine
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.cde_ferm_volet_piscine
+  mode: single
+  icon: mdi:garage-open

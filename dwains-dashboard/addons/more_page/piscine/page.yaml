@@ -356,10 +356,9 @@
               - entity: input_number.ph_seuil_bas_bidon
               - entity: input_number.ph_vol_injecte
               - entity: binary_sensor.ph_niveau_bas_bidon
-              - entity: sensor.ph_tps_inject_mn
-              - entity: sensor.ph_tps_inject_s
               - entity: input_number.ph_duree_inject_mn
               - entity: input_number.ph_duree_inject_s
+
               # Label Chlore
               - label: Chlore/ORP
                 type: section

@@ -139,7 +139,7 @@ input_boolean:
 sensor:
   - platform: history_stats
     name: pH_derniere_heure
-    entity_id: switch.cde_traitement
+    entity_id: switch.ppe_ph
     state: 'on'
     type: time
     end: '{{now().replace(minute=0).replace(second=0)}}'
@@ -147,7 +147,7 @@ sensor:
 
   - platform: history_stats
     name: pH_derniere__48h
-    entity_id: switch.cde_traitement
+    entity_id: switch.ppe_ph
     state: 'on'
     type: time
     end: '{{now()}}'
@@ -204,40 +204,6 @@ template:
         {{ (a-b)|round(2) }}   
       icon: mdi:flask-empty-minus-outline
       unit_of_measurement: "l"
-
-  # temps d'injection en mn
-    - name: "ph tps inject mn"
-      unique_id: "ph_tps_inject_mn"
-      state: >-
-        {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
-        {% set x=states('input_number.simul_ph') | float(default=0) %}
-        {% set b=states('input_number.ph_cible') | float(default=0) %}
-        {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
-        {% set e=states('input_number.ph_concentration') | float(default=0) %}
-        {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
-        {% if r < 0 %}
-          {{ 0 }}
-        {% else %}
-          {{ (r//60)|int(default=0) }}
-        {% endif %}
-      unit_of_measurement: "mn"
-  # temps d'injection en s
-    - name: "ph tps inject s"
-      unique_id: "ph_tps_inject_s"
-      state: >-
-        {% set a=states('sensor.ph_piscine_ph') | float(default=0) %}
-        {% set x=states('input_number.simul_ph') | float(default=0) %}
-        {% set b=states('input_number.ph_cible') | float(default=0) %}
-        {% set d=states('input_number.ph_debit_ppe') | float(default=0) %}
-        {% set e=states('input_number.ph_concentration') | float(default=0) %}
-        {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} 
-        {% if r < 0 %}
-          {{ 0 }}
-        {% else %}
-          {{ (r%60)|int(default=0) }}
-        {% endif %}
-      unit_of_measurement: "s"
-
 
 
 

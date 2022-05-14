@@ -103,14 +103,15 @@ sensor:
     pin: GPIO39
     id: potar
     name: "${friendly_name} potar"
-    unit_of_measurement: "%"
+    unit_of_measurement: "bar"
     update_interval: 1s
-    accuracy_decimals: 1
+    accuracy_decimals: 3
     attenuation: 11db
-    filters:
-      - calibrate_linear:
-        - 0. -> 0.0
-        - 3.2 -> 10.0
+ #   filters:
+#      - calibrate_linear:
+#        - 0.5 -> 0.0
+#        - 1.83 -> 1.03421
+#        - 3.3 -> 2.03843
         
   - platform: uptime
     name: "${friendly_name} Uptime Sensor"
@@ -120,6 +121,24 @@ sensor:
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
+
+  - platform: homeassistant
+    name: "Pression Ext"
+    id: p_ext
+    entity_id: sensor.vp2_barometer
+
+
+############### TEMPLATE  ######################"
+# Calcul de la pression relative
+  - platform: template
+    name: "Pression"
+    id: pression
+    icon: mdi:flash
+    unit_of_measurement: "bar"
+    accuracy_decimals: 3
+    update_interval: 1s
+    lambda: |-
+      return ((id(potar).state)-((id(p_ext).state)/1000));
 
 #Etat de la connection
 binary_sensor:

@@ -278,7 +278,7 @@
   description: ''
   trigger:
   - platform: numeric_state
-    entity_id: sensor.pression_piscine_p
+    entity_id: sensor.pression_filtre
     above: '1'
     for:
       hours: 0

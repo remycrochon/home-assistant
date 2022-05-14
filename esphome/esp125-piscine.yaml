@@ -61,12 +61,12 @@ sensor:
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 15s
-# moyenne sur 15 mn
-#    filters:
-#      - sliding_window_moving_average:
-#          window_size: 30
-#          send_every: 30  
+    update_interval: 60s
+  #  moyenne sur 15 mn
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 5  
 
 
 ############### TEMPLATE  ######################"
@@ -88,10 +88,10 @@ sensor:
     accuracy_decimals: 1
     update_interval: 60s
 # moyenne sur 15 mn
-#    filters:
-#      - sliding_window_moving_average:
-#          window_size: 15
-#          send_every: 15           
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 5           
 
 # Mesure de la pression filtre
   - platform: adc
@@ -104,11 +104,11 @@ sensor:
     filters:
       - calibrate_linear:
         - 0.5 -> 0.0
-        - 0.808 -> 0.85
-# moyenne sur 30 mn
-#      - sliding_window_moving_average:
-#          window_size: 30
-#          send_every: 30
+        - 2.21 -> 0.8
+# moyenne sur 30 mn + affichage toutes les mn
+      - sliding_window_moving_average:
+          window_size: 30
+          send_every: 1
          
 
   - platform: wifi_signal
@@ -119,6 +119,7 @@ sensor:
     name: "T° Eau Piscine"
     id: temp_piscine
     entity_id: sensor.temp_piscine
+
 
 # gestion afficheur
 display:

@@ -62,22 +62,13 @@ sensor:
     unit_of_measurement: "pH"
     accuracy_decimals: 2
     update_interval: 60s
-  #  moyenne sur 15 mn
+  #  moyenne sur 15 mn-affichage toutes les 5mn
     filters:
       - sliding_window_moving_average:
           window_size: 15
-          send_every: 5  
+          send_every: 5
+          send_first_at: 1
 
-
-############### TEMPLATE  ######################"
-# Affichage du pH brut (avant filtrage et moyenne)
-  - platform: template
-    name: "esp125_ph_brut"
-    id: ph_brut
-    unit_of_measurement: "pH"
-    accuracy_decimals: 2
-    lambda: |-
-      return (id(esp125_ph_ezo).state);
 
 # Mesure de l'ORP
   - platform: ezo
@@ -87,11 +78,12 @@ sensor:
     unit_of_measurement: "mV"
     accuracy_decimals: 1
     update_interval: 60s
-# moyenne sur 15 mn
+# moyenne sur 15 mn-affichage toutes les 5mn
     filters:
       - sliding_window_moving_average:
           window_size: 15
-          send_every: 5           
+          send_every: 5
+          send_first_at: 1
 
 # Mesure de la pression filtre
   - platform: adc
@@ -103,13 +95,22 @@ sensor:
     attenuation: 11db
     filters:
       - calibrate_linear:
-        - 0.5 -> 0.0
-        - 2.21 -> 0.8
+        - 0.58 -> 0.0
+        - 0.82 -> 0.8
 # moyenne sur 30 mn + affichage toutes les mn
       - sliding_window_moving_average:
           window_size: 30
           send_every: 1
-         
+# Avec le 30PSI
+#    filters:
+#      - calibrate_linear:
+#        - 0.5 -> 0.0
+#""        - 2.21 -> 0.8
+# moyenne sur 30 mn + affichage toutes les mn
+#      - sliding_window_moving_average:
+#          window_size: 30
+#          send_every: 1
+
 
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
@@ -129,8 +130,9 @@ display:
     update_interval: 5s
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(esp125_ph_ezo).state);
-      it.printf(0,1,"Orp=%.2f",id(esp125_orp_ezo).state);
+      it.printf(0,1,"Or=%.2f",id(esp125_orp_ezo).state);
       it.printf(8,0,"P=%.3f",id(esp125_pression_filtre).state);
+      it.printf(8,1,"T=%.1f",id(temp_piscine).state);
 
 
 switch:    

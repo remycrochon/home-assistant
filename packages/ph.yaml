@@ -135,7 +135,6 @@ input_boolean:
   regul_ph:
     name: pH validation Regul
 
-
 sensor:
   - platform: history_stats
     name: pH_derniere_heure
@@ -157,6 +156,7 @@ sensor:
   - platform: statistics
     name: ph_stat_median
     entity_id: sensor.ph_piscine_ph
+    unique_id: ph_median
     state_characteristic: median
     sampling_size: 30
     #max_age:
@@ -164,6 +164,7 @@ sensor:
   - platform: statistics
     name: ph_stat_moyenne
     entity_id: sensor.ph_piscine_ph
+    unique_id: ph_moyen
     state_characteristic: average_step
     sampling_size: 30
     #max_age:
@@ -171,10 +172,13 @@ sensor:
   - platform: statistics
     name: ph_stat_standard_deviation
     entity_id: sensor.ph_piscine_ph
+    unique_id: ph_std
     state_characteristic: standard_deviation
     sampling_size: 30
     #max_age:
       # minutes: 30      
+
+
 
 template:
 ####################################
@@ -189,7 +193,7 @@ template:
 
 ####################################
   - sensor:
-# Recopie mémoire pH dans le sensor pour calcul qt à injecter
+# Recopie mémoire pH dans le sensor
     - name: "pH_piscine_ph"
       unique_id: "ph_piscine_ph"
       state: >-

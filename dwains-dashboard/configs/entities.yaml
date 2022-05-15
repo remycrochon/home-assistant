@@ -1,10 +1,98 @@
+binary_sensor.call_missed:
+  disabled: true
+  hidden: true
+binary_sensor.esp142_status:
+  disabled: true
+  hidden: true
+binary_sensor.esp143_status:
+  disabled: true
+  hidden: true
+binary_sensor.espresense_bureau:
+  disabled: true
+  hidden: true
+binary_sensor.home_assistant_versions_update_available:
+  disabled: true
+  hidden: true
+binary_sensor.nas_ds218_disque_1_below_min_remaining_life:
+  disabled: true
+  hidden: true
+binary_sensor.nas_ds218_disque_1_exceeded_max_bad_sectors:
+  disabled: true
+  hidden: true
+binary_sensor.nas_ds218_disque_2_below_min_remaining_life:
+  disabled: true
+  hidden: true
+binary_sensor.nas_ds218_disque_2_exceeded_max_bad_sectors:
+  disabled: true
+  hidden: true
+binary_sensor.nas_ds218_security_status:
+  disabled: true
+  hidden: true
+binary_sensor.nas_ds218_update_available:
+  disabled: true
+  hidden: true
+binary_sensor.tc_volet_amis_grand:
+  hidden: true
+binary_sensor.uptime_domo_rem81:
+  disabled: true
+  hidden: true
+binary_sensor.uptime_ha:
+  disabled: true
+  hidden: true
+binary_sensor.uptime_jeedom:
+  disabled: true
+  hidden: true
+binary_sensor.uptime_kobold:
+  disabled: true
+  hidden: true
+binary_sensor.uptime_meteo81000:
+  disabled: true
+  hidden: true
+binary_sensor.uptime_meteoweewx:
+  disabled: true
+  hidden: true
+binary_sensor.uptime_motioneye:
+  disabled: true
+  hidden: true
+binary_sensor.volet_amis_sud_petit:
+  hidden: true
+binary_sensor.wan_status:
+  disabled: true
+  hidden: true
+button.espresense_bureau_restart:
+  disabled: true
+  hidden: true
 button.espresense_salon_restart:
   hidden: true
+button.livebox_restart:
+  disabled: true
+  hidden: true
+button.lumi_lumi_weather_88655f07_identify:
+  disabled: true
+  hidden: true
+button.nas_ds218_reboot:
+  disabled: true
+  hidden: true
+button.nas_ds218_shutdown:
+  disabled: true
+  excluded: true
+  hidden: true
+button.ring_your_phone:
+  disabled: true
+  hidden: true
+button.tz3000_49qchf10_ts0502a_621ec8fe_identify:
+  disabled: true
+  hidden: true
+button.tz3000_wamqdr3f_ts011f_8dc890fe_identify:
+  disabled: true
+  hidden: true
+climate.pid_controller:
+  disabled: true
 cover.bureau_gauche:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
@@ -13,9 +101,265 @@ cover.bureau_gauche:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+light.rgb_strip_3:
+  disabled: true
+light.tz3000_49qchf10_ts0502a_level_light_color_on_off:
+  disabled: true
+media_player.aftt_es_192_168_0_44:
+  disabled: true
+  excluded: true
+  hidden: true
+media_player.cuisine:
+  hidden: true
+number.espresense_bureau_max_distance:
+  disabled: true
+  excluded: true
+  hidden: true
 number.espresense_salon_absorption:
   hidden: true
 number.espresense_salon_max_distance:
+  disabled: true
+sensor.adguard_average_processing_speed:
+  disabled: true
+sensor.adguard_dns_queries:
+  disabled: true
+sensor.adguard_dns_queries_blocked:
+  disabled: true
+sensor.adguard_dns_queries_blocked_ratio:
+  disabled: true
+sensor.adguard_parental_control_blocked:
+  disabled: true
+sensor.adguard_safe_browsing_blocked:
+  disabled: true
+sensor.adguard_safe_searches_enforced:
+  disabled: true
+sensor.brother_mfc_j5330dw:
+  disabled: true
+  hidden: true
+sensor.brother_mfc_j5330dw_bk:
+  disabled: true
+  hidden: true
+sensor.brother_mfc_j5330dw_c:
+  disabled: true
+  hidden: true
+sensor.brother_mfc_j5330dw_driverless_cups_filters_1_27_4:
+  disabled: true
+sensor.brother_mfc_j5330dw_m:
+  disabled: true
+  hidden: true
+sensor.brother_mfc_j5330dw_uptime:
+  disabled: true
+  hidden: true
+sensor.brother_mfc_j5330dw_y:
+  disabled: true
+  hidden: true
+sensor.bureau_humidite:
+  disabled: false
+sensor.bureau_power:
+  disabled: false
+sensor.bureau_pression:
+  disabled: false
+sensor.bureau_temperature:
+  disabled: false
+sensor.esp142_connected_bssid:
+  disabled: true
+sensor.esp142_connected_ssid:
+  disabled: true
+sensor.esp142_esphome_version:
+  disabled: true
+sensor.esp142_ip_address:
+  disabled: true
+sensor.esp142_potar:
+  disabled: true
+sensor.esp142_uptime_sensor:
+  disabled: true
+sensor.esp142_wifi_signal_sensor:
+  disabled: true
+sensor.esp143_potar:
+  disabled: true
+sensor.espresense_bureau_free_memory:
+  disabled: true
+sensor.espresense_bureau_uptime:
+  disabled: true
+sensor.hacs:
+  disabled: true
+sensor.home_assistant_versions:
+  disabled: true
+sensor.measured_current:
+  disabled: true
+sensor.myups_battery_charge:
+  disabled: true
+sensor.myups_battery_chemistry:
+  disabled: true
+sensor.myups_battery_runtime:
+  disabled: true
+sensor.myups_beeper_status:
+  disabled: true
+sensor.myups_high_voltage_transfer:
+  disabled: true
+sensor.myups_load:
+  disabled: true
+sensor.myups_load_restart_delay:
+  disabled: true
+sensor.myups_load_shutdown_timer:
+  disabled: true
+sensor.myups_load_start_timer:
+  disabled: true
+sensor.myups_low_battery_setpoint:
+  disabled: true
+sensor.myups_low_voltage_transfer:
+  disabled: true
+sensor.myups_nominal_output_frequency:
+  disabled: true
+sensor.myups_nominal_output_voltage:
+  disabled: true
+sensor.myups_nominal_power:
+  disabled: true
+sensor.myups_output_voltage:
+  disabled: true
+sensor.myups_status:
+  disabled: true
+sensor.myups_status_data:
+  disabled: true
+sensor.myups_ups_shutdown_delay:
+  disabled: true
+sensor.nas_ds218_cpu_load_average_15_min:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_cpu_load_average_1_min:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_cpu_load_average_5_min:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_cpu_utilization_total:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_cpu_utilization_user:
+  disabled: true
+sensor.nas_ds218_disque_1_status:
+  disabled: true
+sensor.nas_ds218_disque_1_status_smart:
+  disabled: true
+sensor.nas_ds218_disque_1_temperature:
+  disabled: true
+sensor.nas_ds218_disque_2_status:
+  disabled: true
+sensor.nas_ds218_disque_2_status_smart:
+  disabled: true
+sensor.nas_ds218_disque_2_temperature:
+  disabled: true
+sensor.nas_ds218_download_throughput:
+  disabled: true
+sensor.nas_ds218_last_boot:
+  disabled: true
+sensor.nas_ds218_memory_available_real:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_memory_available_swap:
+  disabled: true
+sensor.nas_ds218_memory_total_real:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_memory_total_swap:
+  disabled: true
+sensor.nas_ds218_memory_usage_real:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_temperature:
+  disabled: true
+sensor.nas_ds218_upload_throughput:
+  disabled: true
+  hidden: true
+sensor.nas_ds218_volume_1_average_disk_temp:
+  disabled: true
+sensor.nas_ds218_volume_1_maximum_disk_temp:
+  disabled: true
+sensor.nas_ds218_volume_1_status:
+  disabled: true
+sensor.nas_ds218_volume_1_total_size:
+  disabled: true
+sensor.nas_ds218_volume_1_used_space:
+  disabled: true
+sensor.nas_ds218_volume_1_volume_used:
+  disabled: true
+sensor.orange_livebox_download_speed:
+  disabled: true
+sensor.orange_livebox_upload_speed:
+  disabled: true
+sensor.pid_pv_cool:
+  disabled: true
+sensor.pid_pv_heat:
+  disabled: true
+sensor.pid_pv_result:
+  disabled: true
+sensor.pression:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: ''
+  hidden: false
+  row_span: '2'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.pression_ext_2:
+  custom_card: true
+  disabled: false
+sensor.prod_inst:
+  disabled: true
+sensor.remote_printer_hp_laserjet_400_m401dne_postscript_recommended:
+  disabled: true
+sensor.remycrochon_home_assistant_discussions:
+  disabled: true
+sensor.remycrochon_home_assistant_issues:
+  disabled: true
+sensor.remycrochon_home_assistant_latest_discussion:
+  disabled: true
+sensor.remycrochon_home_assistant_latest_release:
+  disabled: true
+sensor.remycrochon_home_assistant_latest_tag:
+  disabled: true
+sensor.speedtest_download:
+  disabled: true
+sensor.speedtest_ping:
+  disabled: true
+sensor.speedtest_upload:
+  disabled: true
+sensor.uptime_domo_rem81:
+  disabled: true
+sensor.uptime_ha:
+  disabled: true
+sensor.uptime_jeedom:
+  disabled: true
+sensor.uptime_kobold:
+  disabled: true
+sensor.uptime_meteo81000:
+  disabled: true
+sensor.uptime_meteoweewx:
+  disabled: true
+switch.adguard_filtering:
+  disabled: true
+switch.adguard_parental_control:
+  disabled: true
+switch.adguard_protection:
+  disabled: true
+switch.adguard_safe_browsing:
+  disabled: true
+switch.adguard_safe_search:
+  disabled: true
+switch.domo_rem81_active:
+  disabled: true
+switch.esp142_restart:
+  disabled: true
+switch.esp143_restart:
+  disabled: true
+switch.espresense_bureau_active_scan:
+  disabled: true
+switch.espresense_bureau_status_led:
   disabled: true
 switch.espresense_salon_arduino_ota:
   disabled: true
@@ -25,3 +369,44 @@ switch.espresense_salon_prerelease:
   disabled: true
 switch.espresense_salon_query:
   disabled: true
+switch.ha_active:
+  disabled: true
+switch.jeedom_active:
+  disabled: true
+switch.kobold_active:
+  disabled: true
+switch.meteo81000_active:
+  disabled: true
+switch.meteoweewx_active:
+  disabled: true
+switch.pc2_tablette:
+  disabled: true
+switch.pid_climate_autotune:
+  disabled: true
+switch.schedule_023fc8:
+  disabled: true
+switch.schedule_0ce6b6:
+  disabled: true
+switch.schedule_2af696:
+  disabled: true
+switch.schedule_752fd2:
+  disabled: true
+switch.schedule_86f717:
+  disabled: true
+switch.schedule_89c918:
+  disabled: true
+switch.schedule_9c48fc:
+  disabled: true
+switch.schedule_b2e421:
+  disabled: true
+switch.schedule_c49e0d:
+  disabled: true
+switch.test_com_out:
+  disabled: true
+switch.test_ppe_piscine:
+  disabled: true
+switch.wifi_switch:
+  disabled: true
+update.nas_ds218_dsm_update:
+  disabled: true
+  hidden: true

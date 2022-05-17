@@ -357,7 +357,10 @@
   - condition: state
     entity_id: binary_sensor.ppe_piscine_en_marche
     state: 'on'
-    for: 00:15:00
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
   action:
   - service: input_number.set_value
     target:
@@ -373,11 +376,11 @@
     hours: /1
   condition:
   - condition: template
-    value_template: '{% set a=states(''sensor.orp_piscine_orp'') | float %}
+    value_template: '{% set m=states(''sensor.orp_piscine_orp'') | float %}
 
-      {% set b=states(''input_number.orp_cible'') | float %}
+      {% set c=states(''input_number.orp_cible'') | float %}
 
-      {{ a > b }}'
+      {{ m < c }}'
   - condition: numeric_state
     entity_id: sensor.orp_piscine_orp
     above: '0'
@@ -389,16 +392,30 @@
     target:
       entity_id: input_number.chlore_duree_inject_s
     data_template:
-      value: '{{ states(''sensor.chlore_tps_inject_s'')|float }}'
+      value: "{% set m=states('sensor.orp_piscine_orp') | float(default=0) %} {% set\
+        \ x=states('input_number.simul_orp') | float(default=0) %} {% set c=states('input_number.orp_cible')\
+        \ | float(default=0) %} {% set d=states('input_number.chlore_debit_ppe') |\
+        \ float(default=0) %} {% set e=states('input_number.chlore_concentration')\
+        \ | float(default=0) %} {% set r=(((c-m)/(e/100))/d)*3600|round(2)|int(default=0)\
+        \ %}  {% if r < 0 %}\n  {{ 0 }}\n{% else %}\n  {{ (r%60)|int(default=0) }}\n\
+        {% endif %}"
   - service: input_number.set_value
     target:
       entity_id: input_number.chlore_duree_inject_mn
     data_template:
-      value: '{{ states(''sensor.chlore_tps_inject_mn'')|float }}'
+      value: "{% set m=states('sensor.orp_piscine_orp') | float(default=0) %} {% set\
+        \ y=state_attr(\"sensor.orp_stat\", \"mean\") | float(default=0) %} {% set\
+        \ x=states('input_number.simul_orp') | float(default=0) %} {% set c=states('input_number.orp_cible')\
+        \ | float(default=0) %} {% set d=states('input_number.chlore_debit_ppe') |\
+        \ float(default=0) %} {% set e=states('input_number.chlore_concentration')\
+        \ | float(default=0) %} {% set r=(((c-m)/(e/100))/d)*3600|round(2)|int(default=0)\
+        \ %}  {% if r < 0 %}\n  {{ 0 }}\n{% else %}\n  {{ (r//60)|int(default=0) }}\n\
+        {% endif %}"
   - service: switch.turn_on
     target:
       entity_id:
       - switch.ppe_chlore
+    data: {}
   - service: notify.telegram
     data:
       message: ORP sonde= {{states('sensor.orp_piscine_orp')}} {{-"\n"-}}{{states("sensor.date_time")
@@ -416,6 +433,7 @@
   - service: switch.turn_off
     target:
       entity_id: switch.ppe_chlore
+    data: {}
   - service: notify.telegram
     data:
       message: ORP sonde= {{states('sensor.orp_piscine_orp')}}{{-"\n"-}} Vol Injecté
@@ -856,8 +874,9 @@
   description: 'Appoint EAU uniquement si volet ouvert depuis 15 mn  '
   trigger:
   - platform: state
-    entity_id: cover.volet_piscine
-    to: 'on'
+    entity_id:
+    - cover.volet_piscine
+    to: open
     for:
       hours: 0
       minutes: 15
@@ -898,6 +917,7 @@
       - service: switch.turn_on
         target:
           entity_id: switch.ev_eau
+        data: {}
       - service: notify.telegram
         data:
           message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
@@ -916,6 +936,7 @@
       - service: switch.turn_off
         target:
           entity_id: switch.ev_eau
+        data: {}
       - service: notify.telegram
         data:
           message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
@@ -1930,11 +1951,11 @@
     hours: /1
   condition:
   - condition: template
-    value_template: '{% set a=states(''sensor.ph_piscine_ph'') | float %}
+    value_template: '{% set m=states(''sensor.ph_piscine_ph'') | float %}
 
-      {% set b=states(''input_number.ph_cible'') | float %}
+      {% set c=states(''input_number.ph_cible'') | float %}
 
-      {{ a > b }}'
+      {{ m > c }}'
   - condition: numeric_state
     entity_id: sensor.ph_piscine_ph
     above: '0'

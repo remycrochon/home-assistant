@@ -1,6 +1,17 @@
+alarm_control_panel.alarmo_2:
+  disabled: true
+binary_sensor.bp_mod:
+  disabled: true
+binary_sensor.bp_mod2:
+  disabled: true
 binary_sensor.call_missed:
   disabled: true
   hidden: true
+binary_sensor.detecteur_porte_entree:
+  disabled: false
+  sort_order: 5
+binary_sensor.esp138_status:
+  disabled: true
 binary_sensor.esp142_status:
   disabled: true
   hidden: true
@@ -31,6 +42,10 @@ binary_sensor.nas_ds218_security_status:
 binary_sensor.nas_ds218_update_available:
   disabled: true
   hidden: true
+binary_sensor.rfy_010205_1:
+  disabled: true
+binary_sensor.tc_6bp_3:
+  disabled: true
 binary_sensor.tc_volet_amis_grand:
   hidden: true
 binary_sensor.uptime_domo_rem81:
@@ -56,6 +71,8 @@ binary_sensor.uptime_motioneye:
   hidden: true
 binary_sensor.volet_amis_sud_petit:
   hidden: true
+binary_sensor.volet_salon:
+  disabled: true
 binary_sensor.wan_status:
   disabled: true
   hidden: true
@@ -63,10 +80,17 @@ button.espresense_bureau_restart:
   disabled: true
   hidden: true
 button.espresense_salon_restart:
+  disabled: true
   hidden: true
+button.ewelink_ds01_a601fb22_identify:
+  disabled: true
+button.ewelink_wb01_4d594222_identify:
+  disabled: true
 button.livebox_restart:
   disabled: true
   hidden: true
+button.lumi_lumi_weather_1705a004_identify:
+  disabled: true
 button.lumi_lumi_weather_88655f07_identify:
   disabled: true
   hidden: true
@@ -86,6 +110,8 @@ button.tz3000_49qchf10_ts0502a_621ec8fe_identify:
 button.tz3000_wamqdr3f_ts011f_8dc890fe_identify:
   disabled: true
   hidden: true
+button.tz3000_wamqdr3f_ts011f_f6bf65fe_identify:
+  disabled: true
 climate.pid_controller:
   disabled: true
 cover.bureau_gauche:
@@ -101,6 +127,14 @@ cover.bureau_gauche:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+cover.cuisine:
+  disabled: false
+  sort_order: 1
+cover.salon_petit:
+  disabled: false
+  sort_order: 6
+light.rgb_strip_2:
+  disabled: true
 light.rgb_strip_3:
   disabled: true
 light.tz3000_49qchf10_ts0502a_level_light_color_on_off:
@@ -116,6 +150,7 @@ number.espresense_bureau_max_distance:
   excluded: true
   hidden: true
 number.espresense_salon_absorption:
+  disabled: true
   hidden: true
 number.espresense_salon_max_distance:
   disabled: true
@@ -132,6 +167,8 @@ sensor.adguard_parental_control_blocked:
 sensor.adguard_safe_browsing_blocked:
   disabled: true
 sensor.adguard_safe_searches_enforced:
+  disabled: true
+sensor.bp1_sonof_4d594222_power:
   disabled: true
 sensor.brother_mfc_j5330dw:
   disabled: true
@@ -161,6 +198,21 @@ sensor.bureau_pression:
   disabled: false
 sensor.bureau_temperature:
   disabled: false
+sensor.concentration_de_particules_10_0um:
+  disabled: true
+sensor.concentration_de_particules_1_0um:
+  disabled: true
+sensor.concentration_de_particules_2_5um:
+  disabled: false
+  sort_order: 2
+sensor.concentration_de_particules_2_5um_median:
+  disabled: true
+sensor.detecteur_porte_entree_power:
+  disabled: true
+sensor.esp138_uptime_sensor:
+  disabled: true
+sensor.esp138_wifi_signal_sensor:
+  disabled: true
 sensor.esp142_connected_bssid:
   disabled: true
 sensor.esp142_connected_ssid:
@@ -181,11 +233,23 @@ sensor.espresense_bureau_free_memory:
   disabled: true
 sensor.espresense_bureau_uptime:
   disabled: true
+sensor.espresense_salon_free_memory:
+  disabled: true
+sensor.espresense_salon_uptime:
+  disabled: true
 sensor.hacs:
   disabled: true
 sensor.home_assistant_versions:
   disabled: true
+sensor.humidite_salon_zb:
+  disabled: false
+  sort_order: 7
 sensor.measured_current:
+  disabled: true
+sensor.mh_z19_co2_value:
+  disabled: false
+  sort_order: 3
+sensor.mh_z19_temperature:
   disabled: true
 sensor.myups_battery_charge:
   disabled: true
@@ -283,6 +347,18 @@ sensor.nas_ds218_volume_1_used_space:
   disabled: true
 sensor.nas_ds218_volume_1_volume_used:
   disabled: true
+sensor.nb_de_particules_0_3:
+  disabled: true
+sensor.nb_de_particules_0_5:
+  disabled: true
+sensor.nb_de_particules_10_0:
+  disabled: true
+sensor.nb_de_particules_1_0:
+  disabled: true
+sensor.nb_de_particules_2_5:
+  disabled: true
+sensor.nb_de_particules_5_0:
+  disabled: true
 sensor.orange_livebox_download_speed:
   disabled: true
 sensor.orange_livebox_upload_speed:
@@ -292,6 +368,8 @@ sensor.pid_pv_cool:
 sensor.pid_pv_heat:
   disabled: true
 sensor.pid_pv_result:
+  disabled: true
+sensor.power_salon_zb:
   disabled: true
 sensor.pression:
   col_span: '1'
@@ -309,6 +387,9 @@ sensor.pression:
 sensor.pression_ext_2:
   custom_card: true
   disabled: false
+sensor.pression_salon_zb:
+  disabled: false
+  sort_order: 9
 sensor.prod_inst:
   disabled: true
 sensor.remote_printer_hp_laserjet_400_m401dne_postscript_recommended:
@@ -329,6 +410,11 @@ sensor.speedtest_ping:
   disabled: true
 sensor.speedtest_upload:
   disabled: true
+sensor.tc_6bp_3_rssi_numeric:
+  disabled: true
+sensor.temperature_salon_zb:
+  disabled: false
+  sort_order: 8
 sensor.uptime_domo_rem81:
   disabled: true
 sensor.uptime_ha:
@@ -351,7 +437,13 @@ switch.adguard_safe_browsing:
   disabled: true
 switch.adguard_safe_search:
   disabled: true
+switch.calibration_zero_mh_z19_co2:
+  disabled: true
 switch.domo_rem81_active:
+  disabled: true
+switch.esp138_restart:
+  disabled: true
+switch.esp138_validation_mesure:
   disabled: true
 switch.esp142_restart:
   disabled: true
@@ -361,7 +453,11 @@ switch.espresense_bureau_active_scan:
   disabled: true
 switch.espresense_bureau_status_led:
   disabled: true
+switch.espresense_salon_active_scan:
+  disabled: true
 switch.espresense_salon_arduino_ota:
+  disabled: true
+switch.espresense_salon_auto_update:
   disabled: true
 switch.espresense_salon_ota_update:
   disabled: true
@@ -369,19 +465,29 @@ switch.espresense_salon_prerelease:
   disabled: true
 switch.espresense_salon_query:
   disabled: true
+switch.espresense_salon_status_led:
+  disabled: true
 switch.ha_active:
   disabled: true
 switch.jeedom_active:
   disabled: true
 switch.kobold_active:
   disabled: true
+switch.lumiere_salon:
+  disabled: true
 switch.meteo81000_active:
   disabled: true
 switch.meteoweewx_active:
   disabled: true
+switch.pc1_lidl:
+  disabled: true
 switch.pc2_tablette:
   disabled: true
+switch.pc_ht:
+  disabled: true
 switch.pid_climate_autotune:
+  disabled: true
+switch.rfy_010205_1:
   disabled: true
 switch.schedule_023fc8:
   disabled: true
@@ -401,10 +507,15 @@ switch.schedule_b2e421:
   disabled: true
 switch.schedule_c49e0d:
   disabled: true
+switch.tc_volet_amis_grand:
+  disabled: true
 switch.test_com_out:
   disabled: true
 switch.test_ppe_piscine:
   disabled: true
+switch.volet_salon:
+  disabled: false
+  sort_order: 4
 switch.wifi_switch:
   disabled: true
 update.nas_ds218_dsm_update:

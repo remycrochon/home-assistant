@@ -16,6 +16,7 @@ cards:
       min: 0
       name: Temp Eau
       needle: true
+      secondary_info: last-updated
       severity:
         green: 27
         red: 30
@@ -214,7 +215,7 @@ cards:
         name: Ppe
       - entity: input_boolean.regul_chlore
         name: Valid
-      - entity: input_number.chlore_cible
+      - entity: input_number.orp_cible
         name: Cible
         unit: false
       - entity: sensor.chlore_volume_restant_bidon

@@ -101,6 +101,7 @@ cover:
   - platform: template
     covers:
       volet_amis_sud_grand:
+        unique_id: "Volet Amis Sud grand"
         friendly_name: "Volet amis sud grand"
         open_cover:
           service: switch.turn_on

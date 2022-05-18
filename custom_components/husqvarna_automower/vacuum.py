@@ -1,5 +1,4 @@
 """Creates a vacuum entity for the mower"""
-from datetime import datetime
 import json
 import logging
 
@@ -22,9 +21,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConditionErrorMessage
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, ERRORCODES, HUSQVARNA_URL, ICON
+from .const import DOMAIN, ERRORCODES
 from .entity import AutomowerEntity
 
 SUPPORT_STATE_SERVICES = (
@@ -91,20 +89,20 @@ async def async_setup_entry(
 class HusqvarnaAutomowerEntity(StateVacuumEntity, AutomowerEntity):
     """Defining each mower Entity."""
 
-    @property
-    def device_class(self) -> str:
-        """Return the name of the mower."""
-        return f"{DOMAIN}__mower"
+    _attr_device_class = f"{DOMAIN}__mower"
+    _attr_icon = "mdi:robot-mower"
+    _attr_supported_features = SUPPORT_STATE_SERVICES
+
+    def __init__(self, session, idx):
+        super().__init__(session, idx)
+        self._attr_name = self.mower_name
+        self._attr_unique_id = self.session.data["data"][self.idx]["id"]
 
     @property
-    def name(self) -> str:
-        """Return the name of the mower."""
-        return self.mower_name
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID to use for this mower."""
-        return self.session.data["data"][self.idx]["id"]
+    def available(self) -> bool:
+        """Return True if the device is available."""
+        available = self.get_mower_attributes()["metadata"]["connected"]
+        return available
 
     @property
     def state(self) -> str:
@@ -152,16 +150,6 @@ class HusqvarnaAutomowerEntity(StateVacuumEntity, AutomowerEntity):
         return ""
 
     @property
-    def icon(self) -> str:
-        """Return the icon of the mower."""
-        return ICON
-
-    @property
-    def supported_features(self) -> int:
-        """Flag supported features."""
-        return SUPPORT_STATE_SERVICES
-
-    @property
     def battery_level(self) -> int:
         """Return the current battery level of the mower."""
         return max(
@@ -176,8 +164,8 @@ class HusqvarnaAutomowerEntity(StateVacuumEntity, AutomowerEntity):
         mower_attributes = AutomowerEntity.get_mower_attributes(self)
         next_start_short = ""
         if mower_attributes["planner"]["nextStartTimestamp"] != 0:
-            next_start_dt_obj = self.__datetime_object(
-                mower_attributes["planner"]["nextStartTimestamp"]
+            next_start_dt_obj = AutomowerEntity.datetime_object(
+                self, mower_attributes["planner"]["nextStartTimestamp"]
             )
             next_start_short = next_start_dt_obj.strftime(", next start: %a %H:%M")
         if mower_attributes["mower"]["state"] == "UNKNOWN":
@@ -230,46 +218,15 @@ class HusqvarnaAutomowerEntity(StateVacuumEntity, AutomowerEntity):
             return ERRORCODES.get(mower_attributes["mower"]["errorCode"])
         return "Unknown"
 
-    def __datetime_object(self, timestamp) -> datetime:
-        """Converts the mower local timestamp to a UTC datetime object"""
-        naive = datetime.utcfromtimestamp(timestamp / 1000)
-        local = dt_util.as_local(naive)
-        return local
-
     @property
     def extra_state_attributes(self) -> dict:
         """Return the specific state attributes of this mower."""
         mower_attributes = AutomowerEntity.get_mower_attributes(self)
-        error_message = None
-        error_time = None
-        if mower_attributes["mower"]["state"] in [
-            "ERROR",
-            "FATAL_ERROR",
-            "ERROR_AT_POWER_UP",
-        ]:
-            error_message = ERRORCODES.get(mower_attributes["mower"]["errorCode"])
-
-            error_time = self.__datetime_object(
-                mower_attributes["mower"]["errorCodeTimestamp"]
-            )
-
-        next_start = None
-
-        if mower_attributes["planner"]["nextStartTimestamp"] != 0:
-            next_start = self.__datetime_object(
-                mower_attributes["planner"]["nextStartTimestamp"]
-            )
-
         return {
             ATTR_STATUS: self.__get_status(),
             "mode": mower_attributes["mower"]["mode"],
             "activity": mower_attributes["mower"]["activity"],
-            "state": mower_attributes["mower"]["state"],
-            "errorMessage": error_message,
-            "errorTime": error_time,
-            "nextStart": next_start,
             "action": mower_attributes["planner"]["override"]["action"],
-            "restrictedReason": mower_attributes["planner"]["restrictedReason"],
         }
 
     async def async_start(self) -> None:

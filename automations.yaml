@@ -1874,6 +1874,18 @@
   trigger:
   - platform: time_pattern
     minutes: /15
+  - platform: state
+    entity_id:
+    - binary_sensor.position_soleil_midi
+    id: posmidi
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.position_soleil_soir
+    id: possoir
+    from: 'off'
+    to: 'on'
   condition: []
   action:
   - choose:
@@ -1893,9 +1905,8 @@
           - cover.volet_sdb_p
           - cover.volet_amis_nord_p
     - conditions:
-      - condition: state
-        entity_id: binary_sensor.position_soleil_midi
-        state: 'on'
+      - condition: trigger
+        id: posmidi
       sequence:
       - service: cover.open_cover
         data: {}
@@ -1925,9 +1936,8 @@
           - cover.volet_amis_sud_p
           - cover.volet_ch_parent_p
     - conditions:
-      - condition: state
-        entity_id: binary_sensor.position_soleil_soir
-        state: 'on'
+      - condition: trigger
+        id: possoir
       sequence:
       - service: cover.open_cover
         target:

@@ -71,8 +71,12 @@ binary_sensor.uptime_motioneye:
   hidden: true
 binary_sensor.volet_amis_sud_petit:
   hidden: true
+binary_sensor.volet_parents_petit:
+  hidden: true
 binary_sensor.volet_salon:
   disabled: true
+binary_sensor.volet_sdb:
+  hidden: true
 binary_sensor.wan_status:
   disabled: true
   hidden: true
@@ -91,8 +95,12 @@ button.livebox_restart:
   hidden: true
 button.lumi_lumi_weather_1705a004_identify:
   disabled: true
+button.lumi_lumi_weather_79615f07_identify:
+  hidden: true
 button.lumi_lumi_weather_88655f07_identify:
   disabled: true
+  hidden: true
+button.lumi_lumi_weather_d2088504_identify:
   hidden: true
 button.nas_ds218_reboot:
   disabled: true
@@ -114,6 +122,19 @@ button.tz3000_wamqdr3f_ts011f_f6bf65fe_identify:
   disabled: true
 climate.pid_controller:
   disabled: true
+cover.amis_sud_petit:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Volet Amis Sud
+  hidden: true
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 cover.bureau_gauche:
   col_span: '1'
   col_span_lg: '1'
@@ -128,11 +149,73 @@ cover.bureau_gauche:
   row_span_lg: '1'
   row_span_xl: '1'
 cover.cuisine:
+  custom_card: true
   disabled: false
+  grouped_sort_order: 2
   sort_order: 1
-cover.salon_petit:
+cover.parents_petit:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
   disabled: false
+  excluded: false
+  friendly_name: Petit Volet
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.salon_petit:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Salon petit
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 6
+cover.sdb:
+  custom_card: true
+cover.volet_amis_sud_grand:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Grand Volet
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_amis_sud_p:
+  custom_card: true
+cover.volet_ch_parents_zb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Grand Volet
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_sam:
+  custom_card: true
+  grouped_sort_order: 3
+input_boolean.presence_amis_ch_sud:
+  grouped_sort_order: 1
 light.rgb_strip_2:
   disabled: true
 light.rgb_strip_3:
@@ -198,6 +281,10 @@ sensor.bureau_pression:
   disabled: false
 sensor.bureau_temperature:
   disabled: false
+sensor.chambre_sud_humidity_status:
+  hidden: true
+sensor.chambre_sud_rssi_numeric:
+  hidden: true
 sensor.concentration_de_particules_10_0um:
   disabled: true
 sensor.concentration_de_particules_1_0um:
@@ -412,6 +499,8 @@ sensor.speedtest_upload:
   disabled: true
 sensor.tc_6bp_3_rssi_numeric:
   disabled: true
+sensor.tc_volet_amis_grand_rssi_numeric:
+  hidden: true
 sensor.temperature_salon_zb:
   disabled: false
   sort_order: 8
@@ -474,7 +563,7 @@ switch.jeedom_active:
 switch.kobold_active:
   disabled: true
 switch.lumiere_salon:
-  disabled: true
+  disabled: false
 switch.meteo81000_active:
   disabled: true
 switch.meteoweewx_active:
@@ -513,9 +602,15 @@ switch.test_com_out:
   disabled: true
 switch.test_ppe_piscine:
   disabled: true
+switch.volet_amis_sud_petit:
+  hidden: true
+switch.volet_parents_petit:
+  hidden: true
 switch.volet_salon:
-  disabled: false
+  disabled: true
   sort_order: 4
+switch.volet_sdb:
+  hidden: true
 switch.wifi_switch:
   disabled: true
 update.nas_ds218_dsm_update:

@@ -140,22 +140,53 @@ cards:
     - color: '#00FF00'
       value: 0
     - color: '#FF9900'
-      value: 4000
+      value: 7
     - color: '#EA9999'
-      value: 6000
+      value: 8
     - color: '#CC0000'
-      value: 10000
+      value: 9
     color_thresholds_transition: hard
     entities:
-    - entity: input_number.ph_memoire
-      name: Mesure
+    - entity: sensor.ph_piscine_ph
+      name: pH
       show_line: true
     group: false
     hour24: true
     hours_to_show: 24
-    icon: mdi:flash
+    icon: mdi:ph
     line_width: 2
     name: Ph 24h
+    points_per_hour: 4
+    show:
+      average: true
+      extrema: true
+      fill: true
+      icon: true
+      labels: false
+      name: true
+      state: true
+    style: "ha-card {\n  border: solid 2px var(--primary-color);\n}\n"
+    type: custom:mini-graph-card
+  - color_thresholds:
+    - color: '#00FF00'
+      value: 30
+    - color: '#FF9900'
+      value: 40
+    - color: '#EA9999'
+      value: 60
+    - color: '#CC0000'
+      value: 100
+    color_thresholds_transition: hard
+    entities:
+    - entity: sensor.orp_piscine_orp
+      name: Orp
+      show_line: true
+    group: false
+    hour24: true
+    hours_to_show: 24
+    icon: mdi:chart-bell-curve
+    line_width: 2
+    name: ORP 24h
     points_per_hour: 4
     show:
       average: true
@@ -206,7 +237,7 @@ cards:
         name: Vol Bid
         unit: false
       entity: input_boolean.regul_ph
-      icon: mdi:chart-bell-curve
+      icon: mdi:ph
       name: Ph
       show_state: false
       type: custom:multiple-entity-row

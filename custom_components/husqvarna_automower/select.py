@@ -21,7 +21,10 @@ async def async_setup_entry(
     """Setup select platform."""
     session = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        AutomowerSelect(session, idx) for idx, ent in enumerate(session.data["data"])
+        AutomowerSelect(session, idx)
+        for idx, ent in enumerate(session.data["data"])
+        if not session.data["data"][idx]["attributes"]["system"]["model"]
+        in ["550", "Ceora"]
     )
 
 
@@ -32,15 +35,16 @@ class AutomowerSelect(SelectEntity, AutomowerEntity):
     _attr_icon = "mdi:car-light-high"
     _attr_entity_category = EntityCategory.CONFIG
 
-    @property
-    def name(self) -> str:
-        """Return the name of the entity."""
-        return f"{self.mower_name} Headlight mode"
+    def __init__(self, session, idx):
+        super().__init__(session, idx)
+        self._attr_name = f"{self.mower_name} Headlight mode"
+        self._attr_unique_id = f"{self.mower_id}_headlight_mode"
 
     @property
-    def unique_id(self) -> str:
-        """Return a unique identifier for this entity."""
-        return f"{self.mower_id}_headlight_mode"
+    def available(self) -> bool:
+        """Return True if the device is available."""
+        available = self.get_mower_attributes()["metadata"]["connected"]
+        return available
 
     @property
     def current_option(self) -> str:

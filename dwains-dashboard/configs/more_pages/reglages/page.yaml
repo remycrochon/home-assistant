@@ -304,6 +304,7 @@ cards:
     - entity: calendar.am435x_awd
     - entity: number.am435x_awd_cutting_height
     - entity: select.am435x_awd_headlight_mode
+    - entity: sensor.am435x_awd_battery_level
     - entity: input_number.seuil_pluie_stop_robot
     - entity: sensor.vp2_pluviometrie_moyenne
     show_header_toggle: false

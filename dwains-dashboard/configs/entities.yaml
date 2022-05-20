@@ -44,6 +44,10 @@ binary_sensor.nas_ds218_update_available:
   hidden: true
 binary_sensor.rfy_010205_1:
   disabled: true
+binary_sensor.tablette_etat_charge:
+  sort_order: 11
+binary_sensor.tablette_etat_usb:
+  sort_order: 10
 binary_sensor.tc_6bp_3:
   disabled: true
 binary_sensor.tc_volet_amis_grand:
@@ -214,6 +218,7 @@ cover.volet_ch_parents_zb:
 cover.volet_sam:
   custom_card: true
   grouped_sort_order: 3
+  sort_order: 12
 input_boolean.presence_amis_ch_sud:
   grouped_sort_order: 1
 light.rgb_strip_2:
@@ -497,6 +502,8 @@ sensor.speedtest_ping:
   disabled: true
 sensor.speedtest_upload:
   disabled: true
+sensor.tablette_niveau_charge:
+  sort_order: 4
 sensor.tc_6bp_3_rssi_numeric:
   disabled: true
 sensor.tc_volet_amis_grand_rssi_numeric:
@@ -564,6 +571,7 @@ switch.kobold_active:
   disabled: true
 switch.lumiere_salon:
   disabled: false
+  sort_order: 13
 switch.meteo81000_active:
   disabled: true
 switch.meteoweewx_active:

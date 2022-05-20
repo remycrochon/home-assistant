@@ -5,7 +5,7 @@ from homeassistant.const import Platform
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2022.5.2"
+INTEGRATION_VERSION = "2022.5.3"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
 HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/apps"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
@@ -19,6 +19,7 @@ PLATFORMS = [
     Platform.NUMBER,
     Platform.CALENDAR,
     Platform.SENSOR,
+    Platform.BINARY_SENSOR,
 ]
 
 # Configuration and options

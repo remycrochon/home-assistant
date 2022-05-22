@@ -557,8 +557,6 @@ cards:
         name: Mid
       - entity: binary_sensor.position_soleil_am
         name: AM
-      - entity: binary_sensor.position_soleil_soir
-        name: Soir
       - entity: sensor.sun_elevation
         name: Elev
       entity: sensor.sun_elevation

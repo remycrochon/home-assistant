@@ -399,8 +399,6 @@ cards:
       - entity: input_number.chlore_seuil_bas_bidon
       - entity: input_number.chlore_vol_injecte
       - entity: binary_sensor.chlore_niveau_bas_bidon
-      - entity: sensor.chlore_tps_inject_mn
-      - entity: sensor.chlore_tps_inject_s
       - entity: input_number.chlore_duree_inject_mn
       - entity: input_number.chlore_duree_inject_s
       - label: Commutateurs

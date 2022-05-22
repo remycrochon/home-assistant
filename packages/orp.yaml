@@ -113,7 +113,7 @@ input_boolean:
 sensor:
   - platform: history_stats
     name: chlore_derniere_heure
-    entity_id: switch.cde_ppe_chlore
+    entity_id: switch.ppe_chlore
     state: 'on'
     type: time
     end: '{{now().replace(minute=0).replace(second=0)}}'
@@ -121,7 +121,7 @@ sensor:
 
   - platform: history_stats
     name: chlore_derniere__48h
-    entity_id: switch.cde_ppe_chlore
+    entity_id: switch.ppe_chlore
     state: 'on'
     type: time
     end: '{{now()}}'

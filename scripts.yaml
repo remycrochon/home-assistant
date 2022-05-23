@@ -29,7 +29,9 @@ ouverture_volet:
       milliseconds: 0
   - service: cover.open_cover
     data: {}
-    entity_id: cover.volet_sam
+    target:
+      entity_id:
+      - cover.volet_sam_grand_p
   - service: script.volets_bureau
     data: {}
   - delay:
@@ -109,7 +111,9 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.volet_ch_parents_zb
+    target:
+      entity_id:
+      - cover.volet_parents_grand_p
   - delay:
       hours: 0
       minutes: 0
@@ -127,7 +131,9 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.volet_amis_sud_grand
+    target:
+      entity_id:
+      - cover.volet_amis_sud_grand_p
   mode: single
   icon: mdi:window-shutter
 ouverture_volet_absent:
@@ -154,7 +160,8 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.salon_petit
+      entity_id:
+      - cover.salon_petit
   - delay:
       hours: 0
       minutes: 0
@@ -181,7 +188,8 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.amis_nord
+      entity_id:
+      - cover.volet_amis_nord_p
   - delay:
       hours: 0
       minutes: 0
@@ -190,7 +198,8 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.parents_petit
+      entity_id:
+      - cover.volet_ch_parent_p
   - delay:
       hours: 0
       minutes: 0
@@ -199,7 +208,7 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.volet_ch_parents_zb
+      entity_id: cover.volet_parents_grand_p
   - delay:
       hours: 0
       minutes: 0
@@ -208,7 +217,8 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.volet_sam
+      entity_id:
+      - cover.volet_sam_grand_p
   - delay:
       hours: 0
       minutes: 0
@@ -217,7 +227,8 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.volet_amis_sud_grand
+      entity_id:
+      - cover.volet_amis_sud_grand_p
   - delay:
       hours: 0
       minutes: 0
@@ -226,7 +237,8 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.amis_sud_petit
+      entity_id:
+      - cover.volet_amis_sud_p
   mode: single
   icon: mdi:window-shutter-open
 fermeture_volet_absent:
@@ -292,7 +304,7 @@ fermeture_volet_absent:
     data: {}
     target:
       entity_id:
-      - cover.volet_ch_parents_zb
+      - cover.volet_parents_grand_p
   - delay:
       hours: 0
       minutes: 0
@@ -300,7 +312,8 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.volet_parents_grand
+    target:
+      entity_id: cover.parents_petit
   - delay:
       hours: 0
       minutes: 0
@@ -318,7 +331,8 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.volet_amis_sud_grand
+    target:
+      entity_id: cover.volet_amis_sud_grand_p
   - delay:
       hours: 0
       minutes: 0
@@ -450,7 +464,8 @@ ouverture_volet_chamb_sud:
     state: 'off'
   - service: cover.open_cover
     target:
-      entity_id: cover.volet_amis_sud_grand
+      entity_id:
+      - cover.volet_amis_sud_grand_p
     data: {}
   - delay:
       hours: 0
@@ -777,3 +792,178 @@ volet_piscine_stop:
       entity_id: switch.cde_ferm_volet_piscine
   mode: single
   icon: mdi:garage-open
+volet_parents_grand_up:
+  alias: volet parents grand up
+  sequence:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.tc_volet_parents_grands
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.volet_parents_grand
+  mode: single
+  icon: mdi:window-shutter-open
+volet_parents_grand_down:
+  alias: volet parents grand down
+  sequence:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.tc_volet_parents_grands
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.volet_parents_grand
+  mode: single
+  icon: mdi:window-shutter
+volet_parents_grand_stop:
+  alias: volet parents grand stop
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_text.volet_parents_grand'', ''open'')
+          }}'
+      sequence:
+      - service: script.volet_parents_grand_up
+        data: {}
+      - service: input_text.set_value
+        data:
+          value: stop_open
+        target:
+          entity_id: input_text.volet_parents_grand
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_text.volet_parents_grand'', ''close'')
+          }}'
+      sequence:
+      - service: script.volet_parents_grand_down
+        data: {}
+      - service: input_text.set_value
+        data:
+          value: stop_close
+        target:
+          entity_id: input_text.volet_parents_grand
+    default: []
+  mode: single
+  icon: mdi:window-shutter-alert
+volet_sam_grand_up:
+  alias: volet sam grand up
+  sequence:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.tc_volet_sam
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.volet_sam_grand
+  mode: single
+  icon: mdi:window-shutter-open
+volet_sam_grand_down:
+  alias: volet sam grand down
+  sequence:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.tc_volet_sam
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.volet_sam_grand
+  mode: single
+  icon: mdi:window-shutter
+volet_sam_grand_stop:
+  alias: volet sam grand stop
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_text.volet_sam_grand'', ''open'') }}'
+      sequence:
+      - service: script.volet_sam_grand_up
+        data: {}
+      - service: input_text.set_value
+        data:
+          value: stop_open
+        target:
+          entity_id: input_text.volet_sam_grand
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_text.volet_sam_grand'', ''close'') }}'
+      sequence:
+      - service: script.volet_sam_grand_down
+        data: {}
+      - service: input_text.set_value
+        data:
+          value: stop_close
+        target:
+          entity_id: input_text.volet_sam_grand
+    default: []
+  mode: single
+  icon: mdi:window-shutter-alert
+volet_amis_sud_grand_up:
+  alias: volet amis_sud grand up
+  sequence:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.tc_volet_amis_sud_grand
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.volet_amis_sud_grand
+  mode: single
+  icon: mdi:window-shutter-open
+volet_amis_sud_grand_down:
+  alias: volet amis sud grand down
+  sequence:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.tc_volet_amis_sud_grand
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.volet_amis_sud_grand
+  mode: single
+  icon: mdi:window-shutter
+volet_amis_sud_grand_stop:
+  alias: volet amis sud grand stop
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_text.volet_amis_sud_grand'', ''open'')
+          }}'
+      sequence:
+      - service: script.volet_amis_sud_grand_up
+        data: {}
+      - service: input_text.set_value
+        data:
+          value: stop_open
+        target:
+          entity_id: input_text.volet_amis_sud_grand
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''input_text.volet_amis_sud_grand'', ''close'')
+          }}'
+      sequence:
+      - service: script.volet_amis_sud_grand_down
+        data: {}
+      - service: input_text.set_value
+        data:
+          value: stop_close
+        target:
+          entity_id: input_text.volet_amis_sud_grand
+    default: []
+  mode: single
+  icon: mdi:window-shutter-alert

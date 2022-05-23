@@ -506,10 +506,15 @@
   description: 'Ete/Hiver/Absent '
   trigger:
   - platform: state
-    entity_id: input_boolean.nuit_jour
+    entity_id:
+    - input_boolean.nuit_jour
     from: 'on'
     to: 'off'
     id: jour->nuit
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
   - platform: time
     at: input_datetime.horaire_ete_volet_ouv
     id: ouv
@@ -517,10 +522,15 @@
     at: input_datetime.horaire_ete_volet_ferm
     id: ferm
   - platform: state
-    entity_id: input_boolean.nuit_jour
+    entity_id:
+    - input_boolean.nuit_jour
     id: nuit->jour
     from: 'off'
     to: 'on'
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
   condition: []
   action:
   - choose:

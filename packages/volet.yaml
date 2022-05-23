@@ -66,6 +66,14 @@ input_number:
       unit_of_measurement: "w/m2"
       icon: mdi:weather-sunny
 
+# memoire cde volet parents grand
+input_text:
+  volet_parents_grand:
+    initial: ""
+  volet_sam_grand:
+    initial: ""
+  volet_amis_sud_grand:
+    initial: ""
 
 binary_sensor:
 #inversion d'état pour l'alarme ALARMO
@@ -100,45 +108,8 @@ cover:
 # Convertion TC volet Amis sud grand en cover
   - platform: template
     covers:
-      volet_amis_sud_grand:
-        unique_id: "Volet Amis Sud grand"
-        friendly_name: "Volet amis sud grand"
-        open_cover:
-          service: switch.turn_on
-          data:
-            entity_id: switch.tc_volet_amis_grand
-        close_cover:
-          service: switch.turn_off
-          data:
-            entity_id: switch.tc_volet_amis_grand
 
-        icon_template: >-
-          {% if is_state('switch.tc_volet_amis_grand', 'on') %}
-            mdi:garage-open
-          {% else %}
-            mdi:garage
-          {% endif %} 
-
-  # Convertion TC volet SaM en cover
-      volet_sam:
-        friendly_name: "Volet SaM"
-        unique_id: "volet_sam"
-        open_cover:
-          service: switch.turn_on
-          data:
-            entity_id: switch.tc_volet_sam
-        close_cover:
-          service: switch.turn_off
-          data:
-            entity_id: switch.tc_volet_sam
-        icon_template: >-
-          {% if is_state('switch.tc_volet_sam', 'on') %}
-            mdi:garage-open
-          {% else %}
-            mdi:garage
-          {% endif %} 
-
-# porte de garage RDC
+      # porte de garage RDC
       garage_rdc:
         device_class: garage
         friendly_name: "Garage RdC"
@@ -254,7 +225,7 @@ cover:
         open_script_entity_id: script.volet_amis_nord_up
 
 
-# ch parent petit
+# ch parents petit
   - platform: cover_rf_time_based
     devices:
       volet_ch_parent_proport:
@@ -265,18 +236,49 @@ cover:
         stop_script_entity_id: script.volet_ch_parent_stop
         open_script_entity_id: script.volet_ch_parent_up
 
+# ch parents grand
+  - platform: cover_rf_time_based
+    devices:
+      volet_parents_grand_proport:
+        name: Volet Parents Grand P
+        travelling_time_up: 25
+        travelling_time_down: 20
+        close_script_entity_id: script.volet_parents_grand_down
+        stop_script_entity_id: script.volet_parents_grand_stop
+        open_script_entity_id: script.volet_parents_grand_up
+
+# SAM Grand
+  - platform: cover_rf_time_based
+    devices:
+      volet_sam_grand_proport:
+        name: Volet sam grand P
+        travelling_time_up: 21
+        travelling_time_down: 20
+        close_script_entity_id: script.volet_sam_grand_down
+        stop_script_entity_id: script.volet_sam_grand_stop
+        open_script_entity_id: script.volet_sam_grand_up
 
 # ch amis sud
   - platform: cover_rf_time_based
     devices:
       volet_amis_sud_proport:
         name: Volet amis sud P
-        travelling_time_up: 18
-        travelling_time_down: 17
+        travelling_time_up: 21
+        travelling_time_down: 19
         close_script_entity_id: script.volet_amis_sud_down
         stop_script_entity_id: script.volet_amis_sud_stop
         open_script_entity_id: script.volet_amis_sud_up
 
+# SAM Grand
+  - platform: cover_rf_time_based
+    devices:
+      volet_amis_sud_grand_proport:
+        name: Volet amis sud grand P
+        travelling_time_up: 29
+        travelling_time_down: 29
+        close_script_entity_id: script.volet_amis_sud_grand_down
+        stop_script_entity_id: script.volet_amis_sud_grand_stop
+        open_script_entity_id: script.volet_amis_sud_grand_up
 
 
 

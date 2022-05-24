@@ -15,7 +15,7 @@ volets_parents:
   name: volets_parents
   all: true
   entities:
-    - cover.volet_ch_parents_zb
+    - cover.volet_parents_grand_p
     - cover.volet_ch_parent_p
 
 volets_amis_sud:
@@ -23,7 +23,7 @@ volets_amis_sud:
   all: true
   entities:
     - cover.volet_amis_sud_p
-    - cover.volet_amis_sud_grand
+    - cover.volet_amis_sud_grand_p
 
 volets_salon_cuisine:
   name: volets_salon_cuisine
@@ -31,7 +31,7 @@ volets_salon_cuisine:
   entities:
     - cover.salon_petit
     - cover.cuisine
-    - cover.volet_sam
+    - cover.volet_sam_grand_p
 
 portes_garage_rdc:
   name: "portes garage rdc"

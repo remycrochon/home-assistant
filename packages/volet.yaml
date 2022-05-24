@@ -74,6 +74,10 @@ input_text:
     initial: ""
   volet_amis_sud_grand:
     initial: ""
+  mvt_porte_garage:
+    initial: ""
+  mvt_porte_sous_sol:
+    initial: ""
 
 binary_sensor:
 #inversion d'état pour l'alarme ALARMO
@@ -105,80 +109,35 @@ input_select:
       - Absent
       - Arret
 cover:
-# Convertion TC volet Amis sud grand en cover
-  - platform: template
-    covers:
-
-      # porte de garage RDC
-      garage_rdc:
-        device_class: garage
-        friendly_name: "Garage RdC"
-        unique_id: "garage_rdc"
-        value_template: >-
-          {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
-            closed
-          {% else %}
-            open
-          {% endif %}     
-        open_cover:
-          - condition: state
-            entity_id: binary_sensor.porte_garage_fermee
-            state: "on"
-          - service: script.cde_ouv_porte_garage
-        close_cover:
-          - condition: state
-            entity_id: binary_sensor.porte_garage_ouverte
-            state: "on"
-          - service: script.cde_ferm_porte_garage
-        stop_cover:
-          service: script.cde_ferm_porte_garage 
-        icon_template: >-
-          {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
-            mdi:garage
-          {% else %} 
-            {% if is_state('binary_sensor.porte_garage_ouverte', 'on') %}
-            mdi:garage-open
-            {% else %}
-            mdi:garage-alert
-            {% endif %}
-          {% endif %}
-
-# Porte de garage Sous Sol
-      garage_soussol:
-        device_class: garage
-        unique_id: "garage_sous_sol"
-        friendly_name: "Garage Sous-Sol"
-        #value_template: "{{ is_state('binary_sensor.porte_ssol_fermee', 'off')}}"
-        value_template: >-
-          {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
-            closed
-          {% else %}
-            open
-          {% endif %}        
-        open_cover:
-          - condition: state
-            entity_id: binary_sensor.porte_ssol_fermee
-            state: "on"          
-          - service: script.cde2_porte_sous_sol
-        close_cover:
-          - condition: state
-            entity_id: binary_sensor.porte_ssol_ouverte
-            state: "on"          
-          - service: script.ferm_porte_sous_sol      
-        stop_cover:
-          service: script.ferm_porte_sous_sol           
-        icon_template: >-
-          {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
-            mdi:garage
-          {% else %} 
-            {% if is_state('binary_sensor.porte_ssol_ouverte', 'on') %}
-            mdi:garage-open
-            {% else %}
-            mdi:garage-alert
-            {% endif %}
-          {% endif %}
 
 # Volets Proportionnels
+
+# Porte Sous Sol
+  - platform: cover_rf_time_based
+    devices:
+      porte_sous_sol:
+        name: Porte sous sol
+        travelling_time_up: 21
+        travelling_time_down: 21
+        close_script_entity_id: script.porte_sous_sol_down
+        stop_script_entity_id: script.porte_sous_sol_stop
+        open_script_entity_id: script.porte_sous_sol_up
+        device_class: garage
+        always_confident: True
+
+# Porte garage
+  - platform: cover_rf_time_based
+    devices:
+      porte_garage:
+        name: Porte garage
+        travelling_time_up: 21
+        travelling_time_down: 21
+        close_script_entity_id: script.porte_garage_down
+        stop_script_entity_id: script.porte_garage_stop
+        open_script_entity_id: script.porte_garage_up
+        device_class: garage
+        always_confident: True
+
 # Bureau Droit
   - platform: cover_rf_time_based
     devices:
@@ -201,6 +160,27 @@ cover:
         stop_script_entity_id: script.volet_bureau_gauche_stop
         open_script_entity_id: script.volet_bureau_gauche_up
 
+# Salon petit
+  - platform: cover_rf_time_based
+    devices:
+      volet_salon_proport:
+        name: Volet Salon P
+        travelling_time_up: 14
+        travelling_time_down: 13
+        close_script_entity_id: script.volet_salon_down
+        stop_script_entity_id: script.volet_salon_stop
+        open_script_entity_id: script.volet_salon_up
+
+# Salon cuisine
+  - platform: cover_rf_time_based
+    devices:
+      volet_cuisine_proport:
+        name: Volet Cuisine P
+        travelling_time_up: 18
+        travelling_time_down: 17
+        close_script_entity_id: script.volet_cuisine_down
+        stop_script_entity_id: script.volet_cuisine_stop
+        open_script_entity_id: script.volet_cuisine_up
 
 # Salle de bains
   - platform: cover_rf_time_based
@@ -258,7 +238,7 @@ cover:
         stop_script_entity_id: script.volet_sam_grand_stop
         open_script_entity_id: script.volet_sam_grand_up
 
-# ch amis sud
+# Ch amis sud
   - platform: cover_rf_time_based
     devices:
       volet_amis_sud_proport:

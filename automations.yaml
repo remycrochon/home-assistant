@@ -517,10 +517,10 @@
       seconds: 0
   - platform: time
     at: input_datetime.horaire_ete_volet_ouv
-    id: ouv
+    id: heure_ouv
   - platform: time
     at: input_datetime.horaire_ete_volet_ferm
-    id: ferm
+    id: heure_ferm
   - platform: state
     entity_id:
     - input_boolean.nuit_jour
@@ -528,7 +528,7 @@
     from: 'off'
     to: 'on'
     for:
-      hours: 1
+      hours: 0
       minutes: 0
       seconds: 0
   condition: []
@@ -557,7 +557,7 @@
         entity_id: input_select.volets
         state: Auto Ete
       - condition: trigger
-        id: ouv
+        id: heure_ouv
       sequence:
       - service: script.ouverture_volet
         data: {}
@@ -566,7 +566,7 @@
         entity_id: input_select.volets
         state: Auto Ete
       - condition: trigger
-        id: jour->nuit
+        id: heure_ferm
       sequence:
       - service: script.fermeture_volet
         data: {}
@@ -2017,4 +2017,76 @@
         %} {% set d=states('input_number.ph_duree_inject_mn')|float %} {{(b*((d*60)+c)/3600)|round(2)
         }} l {{-"\n"-}}{{states("sensor.date_time") }}
       title: Piscine Fin injection pH !!!
+  mode: single
+- id: '1653294353395'
+  alias: 4_3_3 sous sol position ouverte
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.porte_ssol_ouverte
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      confident: true
+      position: 100
+      position_type: target
+      entity_id: cover.porte_sous_sol
+  mode: single
+- id: '1653294805612'
+  alias: 4_3_2 garage position fermee
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.porte_garage_fermee
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      confident: true
+      position: 0
+      position_type: target
+      entity_id: cover.porte_garage
+  mode: single
+- id: '1653294983774'
+  alias: 4_3_4 sous sol position fermee
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.porte_ssol_fermee
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      confident: true
+      position: 0
+      position_type: target
+      entity_id: cover.porte_sous_sol
+  mode: single
+- id: '1653295223147'
+  alias: 4_3_1 garage position ouverte
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.porte_garage_ouverte
+    to: 'on'
+    from: 'off'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      confident: true
+      position: 100
+      position_type: target
+      entity_id: cover.porte_garage
   mode: single

@@ -55,7 +55,7 @@ cards:
         action: call-service
         service: cover.set_cover_position
         service_data:
-          position: 49
+          position: 50
         target:
           entity_id:
           - cover.volet_droit_p
@@ -103,9 +103,9 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.volet_sam
-          - cover.salon_petit
-          - cover.cuisine
+          - cover.volet_sam_grand_p
+          - cover.volet_salon_p
+          - cover.volet_cuisine_p
       type: button
     - icon: mdi:pause
       name: Stop
@@ -116,8 +116,9 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.salon_petit
-          - cover.cuisine
+          - cover.volet_salon_p
+          - cover.volet_cuisine_p
+          - cover.volet_sam_grand_p
       type: button
     - icon: mdi:arrow-down-bold
       name: Fermer
@@ -128,9 +129,9 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.salon_petit
-          - cover.volet_sam
-          - cover.cuisine
+          - cover.volet_salon_p
+          - cover.volet_sam_grand_p
+          - cover.volet_cuisine_p
       type: button
     - icon: mdi:weather-sunset-up
       name: Soleil
@@ -139,16 +140,16 @@ cards:
         action: call-service
         service: cover.set_cover_position
         service_data:
-          position: 20
+          position: 50
         target:
           entity_id:
-          - cover.salon_petit
-          - cover.volet_sam
-          - cover.cuisine
+          - cover.volet_salon_p
+          - cover.volet_sam_grand_p
+          - cover.volet_cuisine_p
       type: button
     - elements:
       - attribute: current_position
-        entity: cover.sdb
+        entity: cover.volet_sam_grand_p
         style:
           color: '#44739E'
           font-size: 16px
@@ -216,7 +217,7 @@ cards:
         action: call-service
         service: cover.set_cover_position
         service_data:
-          position: 20
+          position: 50
         target:
           entity_id: cover.volet_sdb_p
       type: button
@@ -245,7 +246,7 @@ cards:
       hold_action:
         action: none
       icon: mdi:bed
-      name: Am Nord
+      name: A Nord
       show_icon: true
       show_name: true
       show_state: false
@@ -292,7 +293,7 @@ cards:
         action: call-service
         service: cover.set_cover_position
         service_data:
-          position: 20
+          position: 50
         target:
           entity_id: cover.volet_amis_nord_p
       type: button
@@ -338,7 +339,7 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.volet_parents_grand
+          - cover.volet_parents_grand_p
           - cover.volet_ch_parent_p
       type: button
     - icon: mdi:pause
@@ -351,6 +352,7 @@ cards:
         target:
           entity_id:
           - cover.volet_ch_parent_p
+          - cover.volet_parents_grand_p
       type: button
     - icon: mdi:arrow-down-bold
       name: Fermer
@@ -361,7 +363,7 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.volet_parents_grand
+          - cover.volet_parents_grand_p
           - cover.volet_ch_parent_p
       type: button
     - icon: mdi:weather-sunset-up
@@ -371,13 +373,15 @@ cards:
         action: call-service
         service: cover.set_cover_position
         service_data:
-          position: 20
+          position: 50
         target:
-          entity_id: cover.volet_ch_parent_p
+          entity_id:
+          - cover.volet_ch_parent_p
+          - cover.volet_parents_grand_p
       type: button
     - elements:
       - attribute: current_position
-        entity: cover.volet_ch_parent_p
+        entity: cover.volet_parents_grand_p
         style:
           color: '#44739E'
           font-size: 16px
@@ -400,7 +404,7 @@ cards:
       hold_action:
         action: none
       icon: mdi:bed
-      name: Am Sud
+      name: A Sud
       show_icon: true
       show_name: true
       show_state: false
@@ -417,7 +421,7 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.volet_amis_sud_grand
+          - cover.volet_amis_sud_grand_p
           - cover.volet_amis_sud_p
       type: button
     - icon: mdi:pause
@@ -429,6 +433,7 @@ cards:
         service_data: {}
         target:
           entity_id:
+          - cover.volet_amis_sud_grand_p
           - cover.volet_amis_sud_p
       type: button
     - icon: mdi:arrow-down-bold
@@ -440,7 +445,7 @@ cards:
         service_data: {}
         target:
           entity_id:
-          - cover.volet_amis_sud_grand
+          - cover.volet_amis_sud_grand_p
           - cover.volet_amis_sud_p
       type: button
     - icon: mdi:weather-sunset-up
@@ -450,14 +455,171 @@ cards:
         action: call-service
         service: cover.set_cover_position
         service_data:
-          position: 20
+          position: 50
         target:
           entity_id:
           - cover.volet_amis_sud_p
+          - cover.volet_amis_sud_grand_p
       type: button
     - elements:
       - attribute: current_position
-        entity: cover.volet_amis_sud_p
+        entity: cover.volet_amis_sud_grand_p
+        style:
+          color: '#44739E'
+          font-size: 16px
+          font-weight: bold
+          left: 50%
+          top: 50%
+        suffix: '%'
+        tap_action:
+          action: more-info
+        type: state-label
+      image: /local/images/carre_orange.png
+      type: picture-elements
+      view_layout:
+        position: sidebar
+    columns: 6
+    square: true
+    type: grid
+  - cards:
+    - entity: cover.porte_garage
+      hold_action:
+        action: none
+      icon: mdi:garage
+      name: Garage
+      show_icon: true
+      show_name: true
+      show_state: false
+      tap_action:
+        action: more-info
+      type: button
+    - icon: mdi:arrow-up-bold
+      name: Ouvrir
+      show_icon: true
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.open_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - icon: mdi:pause
+      name: Stop
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.stop_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - icon: mdi:arrow-down-bold
+      name: Fermer
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.close_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - icon: mdi:weather-sunset-up
+      name: Soleil
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.set_cover_position
+        service_data:
+          position: 50
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - elements:
+      - attribute: current_position
+        entity: cover.porte_garage
+        style:
+          color: '#44739E'
+          font-size: 16px
+          font-weight: bold
+          left: 50%
+          top: 50%
+        suffix: '%'
+        tap_action:
+          action: more-info
+        type: state-label
+      image: /local/images/carre_orange.png
+      type: picture-elements
+      view_layout:
+        position: sidebar
+    columns: 6
+    square: true
+    type: grid
+  - cards:
+    - entity: cover.porte_sous_sol
+      hold_action:
+        action: none
+      icon: mdi:garage
+      name: Ss Sol
+      show_icon: true
+      show_name: true
+      show_state: false
+      tap_action:
+        action: more-info
+      type: button
+    - icon: mdi:arrow-up-bold
+      name: Ouvrir
+      show_icon: true
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.open_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - icon: mdi:pause
+      name: Stop
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.stop_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - icon: mdi:arrow-down-bold
+      name: Fermer
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.close_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - icon: mdi:weather-sunset-up
+      name: Soleil
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.set_cover_position
+        service_data:
+          position: 50
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - elements:
+      - attribute: current_position
+        entity: cover.porte_sous_sol
         style:
           color: '#44739E'
           font-size: 16px

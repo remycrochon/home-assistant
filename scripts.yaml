@@ -3,7 +3,7 @@ ouverture_volet:
   sequence:
   - service: cover.open_cover
     data: {}
-    entity_id: cover.salon_petit
+    entity_id: cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -11,7 +11,7 @@ ouverture_volet:
       milliseconds: 0
   - service: cover.open_cover
     data: {}
-    entity_id: cover.cuisine
+    entity_id: cover.volet_cuisine_p
   - delay:
       hours: 0
       minutes: 0
@@ -73,7 +73,7 @@ fermeture_volet:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.salon_petit
+    entity_id: cover.salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -142,7 +142,7 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.bureau_droit
+      entity_id: cover.bureau_droit_p
   - delay:
       hours: 0
       minutes: 0
@@ -150,7 +150,7 @@ ouverture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     target:
-      entity_id: cover.bureau_gauche
+      entity_id: cover.bureau_gauche_p
     data: {}
   - delay:
       hours: 0
@@ -161,7 +161,7 @@ ouverture_volet_absent:
     data: {}
     target:
       entity_id:
-      - cover.salon_petit
+      - cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -170,7 +170,7 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.cuisine
+      entity_id: cover.volet_cuisine_p
   - delay:
       hours: 0
       minutes: 0
@@ -179,7 +179,7 @@ ouverture_volet_absent:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.sdb
+      entity_id: cover.volet_sdb_p
   - delay:
       hours: 0
       minutes: 0
@@ -264,7 +264,7 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.salon_petit
+    entity_id: cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -274,7 +274,7 @@ fermeture_volet_absent:
     data: {}
     target:
       entity_id:
-      - cover.cuisine
+      - cover.volet_cuisine_p
   - delay:
       hours: 0
       minutes: 0
@@ -313,7 +313,7 @@ fermeture_volet_absent:
   - service: cover.close_cover
     data: {}
     target:
-      entity_id: cover.parents_petit
+      entity_id: cover.volet_ch_parent_p
   - delay:
       hours: 0
       minutes: 0
@@ -340,34 +340,32 @@ fermeture_volet_absent:
       milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.volet_sam
+    entity_id: cover.volet_sam_grand_p
   mode: single
   icon: mdi:window-shutter
-cde2_porte_sous_sol:
-  alias: cde_ouv_porte_sous_Sol
+porte_sous_sol_up:
+  alias: porte_sous_sol_up
   sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.porte_ssol_ouverte
-        state: 'off'
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.cde_porte_ssol
-        data: {}
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - service: switch.turn_off
-        target:
-          entity_id: switch.cde_porte_ssol
-        data: {}
-    default: []
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.mvt_porte_sous_sol
   mode: single
-  icon: mdi:garage-open
+  icon: mdi:garage-open-variant
 volet_piscine_ouverture:
   alias: volet_piscine_ouverture
   sequence:
@@ -551,81 +549,75 @@ volet_bureau_droit_stop:
     target:
       entity_id: cover.bureau_droit
   mode: single
-ferm_porte_sous_sol:
-  alias: cde_ferm_porte_sous_Sol
+porte_sous_sol_down:
+  alias: porte_sous_sol_down
   sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.porte_ssol_fermee
-        state: 'off'
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.cde_porte_ssol
-        data: {}
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - service: switch.turn_off
-        target:
-          entity_id: switch.cde_porte_ssol
-        data: {}
-    default: []
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.mvt_porte_sous_sol
   mode: single
-  icon: mdi:garage
-cde_ferm_porte_garage:
-  alias: cde_ferm_porte_garage
+  icon: mdi:garage-variant
+porte_garage_down:
+  alias: porte_garage_down
   sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.porte_garage_fermee
-        state: 'off'
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.cde_porte_garage
-        data: {}
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - service: switch.turn_off
-        target:
-          entity_id: switch.cde_porte_garage
-        data: {}
-    default: []
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.mvt_porte_garage
   mode: single
-  icon: mdi:garage
-cde_ouv_porte_garage:
-  alias: cde_ouv_porte_garage
+  icon: mdi:garage-variant
+porte_garage_up:
+  alias: porte_garage_up
   sequence:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.porte_garage_ouverte
-        state: 'off'
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.cde_porte_garage
-        data: {}
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 2
-          milliseconds: 0
-      - service: switch.turn_off
-        target:
-          entity_id: switch.cde_porte_garage
-        data: {}
-    default: []
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.mvt_porte_garage
   mode: single
-  icon: mdi:garage-open
+  icon: mdi:garage-open-variant
 create_all_automations_group:
   sequence:
   - service: group.set
@@ -676,6 +668,7 @@ volet_sdb_down:
     target:
       entity_id: cover.sdb
   mode: single
+  icon: mdi:window-shutter
 volet_sdb_stop:
   alias: volet sdb stop
   sequence:
@@ -684,6 +677,7 @@ volet_sdb_stop:
     target:
       entity_id: cover.sdb
   mode: single
+  icon: mdi:window-shutter-alert
 volet_sdb_up:
   alias: volet sdb up
   sequence:
@@ -692,6 +686,7 @@ volet_sdb_up:
     target:
       entity_id: cover.sdb
   mode: single
+  icon: mdi:window-shutter-open
 volet_amis_nord_down:
   alias: volet amis nord down
   sequence:
@@ -967,3 +962,108 @@ volet_amis_sud_grand_stop:
     default: []
   mode: single
   icon: mdi:window-shutter-alert
+volet_salon_down:
+  alias: volet salon down
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.salon_petit
+  mode: single
+  icon: mdi:window-shutter
+volet_salon_stop:
+  alias: volet salon stop
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id: cover.salon_petit
+  mode: single
+  icon: mdi:window-shutter-alert
+volet_salon_up:
+  alias: volet salon up
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.salon_petit
+  mode: single
+  icon: mdi:window-shutter-open
+volet_cuisine_down:
+  alias: volet cuisine down
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.cuisine
+  mode: single
+  icon: mdi:window-shutter
+volet_cuisine_stop:
+  alias: volet cuisine stop
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.cuisine
+  mode: single
+  icon: mdi:window-shutter-alert
+volet_cuisine_up:
+  alias: volet cuisine up
+  sequence:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.cuisine
+  mode: single
+  icon: mdi:window-shutter-open
+porte_garage_stop:
+  alias: porte_garage_stop
+  sequence:
+  - condition: state
+    entity_id: binary_sensor.porte_garage_fermee
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.porte_garage_ouverte
+    state: 'off'
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  mode: single
+  icon: mdi:garage-alert-variant
+porte_sous_sol_stop:
+  alias: porte_sous_sol_stop
+  sequence:
+  - condition: state
+    entity_id: binary_sensor.porte_ssol_fermee
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.porte_ssol_ouverte
+    state: 'off'
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  mode: single
+  icon: mdi:garage-alert-variant

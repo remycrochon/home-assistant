@@ -226,6 +226,7 @@ cover:
         close_script_entity_id: script.volet_parents_grand_down
         stop_script_entity_id: script.volet_parents_grand_stop
         open_script_entity_id: script.volet_parents_grand_up
+        always_confident: True
 
 # SAM Grand
   - platform: cover_rf_time_based
@@ -248,7 +249,8 @@ cover:
         close_script_entity_id: script.volet_amis_sud_down
         stop_script_entity_id: script.volet_amis_sud_stop
         open_script_entity_id: script.volet_amis_sud_up
-
+        always_confident: True
+        
 # SAM Grand
   - platform: cover_rf_time_based
     devices:
@@ -259,6 +261,6 @@ cover:
         close_script_entity_id: script.volet_amis_sud_grand_down
         stop_script_entity_id: script.volet_amis_sud_grand_stop
         open_script_entity_id: script.volet_amis_sud_grand_up
-
+        always_confident: True
 
 

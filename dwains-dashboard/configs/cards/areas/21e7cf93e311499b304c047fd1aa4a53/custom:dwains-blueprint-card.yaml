@@ -19,9 +19,9 @@ card:
     type: custom:simple-thermostat
   items_classes: col-xs-12
   type: custom:dwains-flexbox-card
-col_span: '1'
-col_span_lg: '1'
-col_span_xl: '1'
+col_span: '2'
+col_span_lg: '2'
+col_span_xl: '2'
 data:
   01_Thermostat_name: PAC
   02_thermostat_entity: climate.altherma

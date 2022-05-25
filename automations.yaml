@@ -2090,3 +2090,39 @@
       position_type: target
       entity_id: cover.porte_garage
   mode: single
+- id: '1653409072754'
+  alias: 4_3_5 volet parents grand position ouvert
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.fdc_volet_parents_grand_ouvert
+    to: 'off'
+    from: 'on'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      confident: true
+      position: 100
+      position_type: target
+      entity_id: cover.volet_parents_grand_p
+  mode: single
+- id: '1653410044804'
+  alias: 4_3_6 volet amis sud grand position ouvert
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.fdc_volet_amis_sud_grand
+    to: 'off'
+    from: 'on'
+  condition: []
+  action:
+  - service: cover_rf_time_based.set_known_position
+    data:
+      confident: true
+      position: 100
+      position_type: target
+      entity_id: cover.volet_amis_sud_grand_p
+  mode: single

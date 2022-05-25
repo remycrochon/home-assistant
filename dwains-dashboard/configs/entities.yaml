@@ -1,16 +1,92 @@
 alarm_control_panel.alarmo_2:
   disabled: true
+binary_sensor.am435x_awd_battery_charging:
+  disabled: true
+binary_sensor.am435x_awd_leaving_dock:
+  disabled: true
+binary_sensor.bp1_cellier:
+  hidden: true
 binary_sensor.bp_mod:
   disabled: true
 binary_sensor.bp_mod2:
   disabled: true
+binary_sensor.bp_raz:
+  disabled: true
+  hidden: true
+binary_sensor.bp_vmc_ssol:
+  hidden: true
+binary_sensor.bureau_droit:
+  hidden: true
+binary_sensor.bureau_gauche:
+  hidden: true
 binary_sensor.call_missed:
   disabled: true
   hidden: true
-binary_sensor.detecteur_porte_entree:
+binary_sensor.cellier_bp2:
+  hidden: true
+binary_sensor.detecteur_petite_porte_sous_sol:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
   disabled: false
+  excluded: false
+  friendly_name: Petite Porte
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+binary_sensor.detecteur_porte_entree:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "Detec porte Entr\xE9e"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 5
+binary_sensor.detecteur_presence1_ias_zone:
+  disabled: true
+binary_sensor.esp124_status:
+  hidden: true
+binary_sensor.esp124_status_2:
+  disabled: true
+  hidden: true
+binary_sensor.esp125_status:
+  hidden: true
+binary_sensor.esp126_status:
+  hidden: true
+binary_sensor.esp127_status:
+  disabled: true
+  hidden: true
+binary_sensor.esp128_status:
+  hidden: true
+binary_sensor.esp129_status:
+  hidden: true
+binary_sensor.esp130_status:
+  hidden: true
+binary_sensor.esp132_status:
+  hidden: true
+binary_sensor.esp133_status:
+  hidden: true
+binary_sensor.esp135_status:
+  disabled: true
+  hidden: true
+binary_sensor.esp136_status:
+  hidden: true
+binary_sensor.esp137_status:
+  hidden: true
 binary_sensor.esp138_status:
+  disabled: true
+binary_sensor.esp139_status:
+  hidden: true
+binary_sensor.esp141_status:
   disabled: true
 binary_sensor.esp142_status:
   disabled: true
@@ -21,8 +97,16 @@ binary_sensor.esp143_status:
 binary_sensor.espresense_bureau:
   disabled: true
   hidden: true
+binary_sensor.hatos_is_online:
+  disabled: true
+  hidden: true
+binary_sensor.hatos_valid_signal:
+  disabled: true
+  hidden: true
 binary_sensor.home_assistant_versions_update_available:
   disabled: true
+  hidden: true
+binary_sensor.lumiere_cellier:
   hidden: true
 binary_sensor.nas_ds218_disque_1_below_min_remaining_life:
   disabled: true
@@ -42,15 +126,71 @@ binary_sensor.nas_ds218_security_status:
 binary_sensor.nas_ds218_update_available:
   disabled: true
   hidden: true
+binary_sensor.omv_config_dirty:
+  disabled: true
+  hidden: true
+binary_sensor.omv_docker_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_fail2ban_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_nfs_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_proftpd_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_reboot_pending:
+  disabled: true
+  hidden: true
+binary_sensor.omv_rsyncd_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_samba_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_ssh_service:
+  disabled: true
+  hidden: true
+binary_sensor.omv_update_available:
+  disabled: true
+  hidden: true
+binary_sensor.porte_cellier:
+  custom_card: true
+binary_sensor.porte_frigo:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Porte frigo
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+binary_sensor.position_soleil_matin:
+  disabled: true
 binary_sensor.rfy_010205_1:
   disabled: true
 binary_sensor.tablette_etat_charge:
   sort_order: 11
 binary_sensor.tablette_etat_usb:
+  hidden: true
   sort_order: 10
+binary_sensor.tc_6_1:
+  hidden: true
+binary_sensor.tc_6bp_2:
+  hidden: true
 binary_sensor.tc_6bp_3:
   disabled: true
 binary_sensor.tc_volet_amis_grand:
+  hidden: true
+binary_sensor.tc_volet_amis_sud_grand:
+  hidden: true
+binary_sensor.tc_volet_sam:
   hidden: true
 binary_sensor.uptime_domo_rem81:
   disabled: true
@@ -73,8 +213,12 @@ binary_sensor.uptime_meteoweewx:
 binary_sensor.uptime_motioneye:
   disabled: true
   hidden: true
+binary_sensor.volet_amis_nord:
+  hidden: true
 binary_sensor.volet_amis_sud_petit:
   hidden: true
+binary_sensor.volet_parents_grand:
+  disabled: false
 binary_sensor.volet_parents_petit:
   hidden: true
 binary_sensor.volet_salon:
@@ -84,27 +228,59 @@ binary_sensor.volet_sdb:
 binary_sensor.wan_status:
   disabled: true
   hidden: true
+binary_sensor.zoe_is_online:
+  disabled: true
+  hidden: true
+binary_sensor.zoe_valid_signal:
+  disabled: true
+  hidden: true
 button.espresense_bureau_restart:
   disabled: true
   hidden: true
 button.espresense_salon_restart:
   disabled: true
   hidden: true
+button.ewelink_66666_b2a94822_identify:
+  hidden: true
+button.ewelink_ds01_8feffe22_identify:
+  disabled: true
+button.ewelink_ds01_996e5c24_identify:
+  hidden: true
 button.ewelink_ds01_a601fb22_identify:
   disabled: true
+button.ewelink_ds01_d528cd22_identify:
+  hidden: true
+button.ewelink_ds01_fe8ecd22_identify:
+  hidden: true
+button.ewelink_th01_e04a2023_identify:
+  hidden: true
+button.ewelink_th01_e5d51e23_identify:
+  hidden: true
 button.ewelink_wb01_4d594222_identify:
+  disabled: true
+button.hatos_activate_super_live:
+  disabled: true
+button.hatos_refresh_location:
+  disabled: true
+button.hatos_ring:
+  disabled: true
+button.hatos_vibrate:
   disabled: true
 button.livebox_restart:
   disabled: true
   hidden: true
 button.lumi_lumi_weather_1705a004_identify:
   disabled: true
+button.lumi_lumi_weather_64cc5a04_identify:
+  hidden: true
 button.lumi_lumi_weather_79615f07_identify:
   hidden: true
 button.lumi_lumi_weather_88655f07_identify:
   disabled: true
   hidden: true
 button.lumi_lumi_weather_d2088504_identify:
+  hidden: true
+button.lumi_lumi_weather_fe0b3c07_identify:
   hidden: true
 button.nas_ds218_reboot:
   disabled: true
@@ -116,16 +292,34 @@ button.nas_ds218_shutdown:
 button.ring_your_phone:
   disabled: true
   hidden: true
+button.sonoff_basiczbr3_750a6322_identify:
+  hidden: true
 button.tz3000_49qchf10_ts0502a_621ec8fe_identify:
   disabled: true
   hidden: true
+button.tz3000_oiymh3qu_ts011f_9283d2fe_identify:
+  disabled: true
 button.tz3000_wamqdr3f_ts011f_8dc890fe_identify:
   disabled: true
   hidden: true
+button.tz3000_wamqdr3f_ts011f_9db307fe_identify:
+  hidden: true
 button.tz3000_wamqdr3f_ts011f_f6bf65fe_identify:
+  disabled: true
+button.zoe_activate_super_live:
+  disabled: true
+button.zoe_refresh_location:
+  disabled: true
+button.zoe_ring:
+  disabled: true
+button.zoe_vibrate:
+  disabled: true
+calendar.am435x_awd:
   disabled: true
 climate.pid_controller:
   disabled: true
+cover.amis_nord:
+  hidden: true
 cover.amis_sud_petit:
   col_span: '1'
   col_span_lg: '1'
@@ -139,6 +333,8 @@ cover.amis_sud_petit:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+cover.bureau_droit:
+  hidden: true
 cover.bureau_gauche:
   col_span: '1'
   col_span_lg: '1'
@@ -148,7 +344,7 @@ cover.bureau_gauche:
   disabled: false
   excluded: false
   friendly_name: ''
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -156,7 +352,12 @@ cover.cuisine:
   custom_card: true
   disabled: false
   grouped_sort_order: 2
+  hidden: true
   sort_order: 1
+cover.garage_rdc:
+  hidden: true
+cover.garage_soussol:
+  hidden: true
 cover.parents_petit:
   col_span: '1'
   col_span_lg: '1'
@@ -166,10 +367,14 @@ cover.parents_petit:
   disabled: false
   excluded: false
   friendly_name: Petit Volet
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+cover.porte_garage:
+  custom_card: true
+cover.porte_sous_sol:
+  custom_card: true
 cover.salon_petit:
   col_span: '1'
   col_span_lg: '1'
@@ -180,13 +385,37 @@ cover.salon_petit:
   excluded: false
   friendly_name: Salon petit
   grouped_sort_order: 1
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
   sort_order: 6
 cover.sdb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: SdB P
+  hidden: true
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_amis_nord_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Amis Nord
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 cover.volet_amis_sud_grand:
   col_span: '1'
   col_span_lg: '1'
@@ -196,11 +425,37 @@ cover.volet_amis_sud_grand:
   disabled: false
   excluded: false
   friendly_name: Grand Volet
+  hidden: true
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_amis_sud_grand_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Amis Sud Grand
   hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
 cover.volet_amis_sud_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Amis Sud Petit
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_ch_parent_p:
   custom_card: true
 cover.volet_ch_parents_zb:
   col_span: '1'
@@ -215,15 +470,113 @@ cover.volet_ch_parents_zb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+cover.volet_cuisine_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Cuisine P
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_droit_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Volet Bur Droit
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_gauche_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Volet Bur Gauche
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_parents_grand_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Parents Grand
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_salon_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Salon P
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 cover.volet_sam:
   custom_card: true
   grouped_sort_order: 3
   sort_order: 12
+cover.volet_sam_grand_p:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: SaM Grand
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+cover.volet_sdb_p:
+  custom_card: true
+device_tracker.am435x_awd:
+  disabled: true
+device_tracker.hatos:
+  disabled: true
+device_tracker.zoe:
+  disabled: true
+input_boolean.presence_amis_ch_nord:
+  custom_card: true
 input_boolean.presence_amis_ch_sud:
+  custom_card: true
   grouped_sort_order: 1
+input_number.duree_filtration_ete:
+  disabled: true
+light.led1:
+  hidden: true
+light.rgb_strip:
+  excluded: true
+  hidden: true
 light.rgb_strip_2:
   disabled: true
 light.rgb_strip_3:
+  disabled: true
+light.rgb_strip_5:
   disabled: true
 light.tz3000_49qchf10_ts0502a_level_light_color_on_off:
   disabled: true
@@ -233,6 +586,8 @@ media_player.aftt_es_192_168_0_44:
   hidden: true
 media_player.cuisine:
   hidden: true
+number.am435x_awd_cutting_height:
+  disabled: true
 number.espresense_bureau_max_distance:
   disabled: true
   excluded: true
@@ -241,6 +596,12 @@ number.espresense_salon_absorption:
   disabled: true
   hidden: true
 number.espresense_salon_max_distance:
+  disabled: true
+select.am435x_awd_headlight_mode:
+  disabled: true
+select.hatos_update_rate:
+  disabled: true
+select.zoe_update_rate:
   disabled: true
 sensor.adguard_average_processing_speed:
   disabled: true
@@ -256,6 +617,30 @@ sensor.adguard_safe_browsing_blocked:
   disabled: true
 sensor.adguard_safe_searches_enforced:
   disabled: true
+sensor.am435x_awd_battery_level:
+  disabled: true
+sensor.am435x_awd_mode:
+  disabled: true
+sensor.am435x_awd_next_start:
+  disabled: true
+sensor.am435x_awd_problem_sensor:
+  disabled: true
+sensor.battery_sdb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Batterie
+  grouped_sort_order: 4
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.bh1750_illuminance:
+  disabled: false
 sensor.bp1_sonof_4d594222_power:
   disabled: true
 sensor.brother_mfc_j5330dw:
@@ -296,14 +681,237 @@ sensor.concentration_de_particules_1_0um:
   disabled: true
 sensor.concentration_de_particules_2_5um:
   disabled: false
+  grouped_sort_order: 9
   sort_order: 2
 sensor.concentration_de_particules_2_5um_median:
   disabled: true
+sensor.conso:
+  disabled: true
+sensor.detecteur_petite_porte_sous_sol_power:
+  custom_card: true
+  hidden: true
 sensor.detecteur_porte_entree_power:
   disabled: true
+sensor.detecteur_porte_frigo_power:
+  hidden: true
+sensor.detecteur_presence1_power:
+  hidden: true
+sensor.ecocompteur_vmc_niv0:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Pu VMC
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.energy_current_hour:
+  disabled: true
+sensor.energy_next_hour:
+  disabled: true
+sensor.energy_production_today:
+  disabled: true
+sensor.energy_production_tomorrow:
+  disabled: true
+sensor.energy_vmc_n0:
+  hidden: true
+sensor.envoy_122103023124_current_power_consumption:
+  hidden: true
+sensor.envoy_122103023124_current_power_production:
+  hidden: true
+sensor.envoy_122103023124_last_seven_days_energy_consumption:
+  hidden: true
+sensor.envoy_122103023124_last_seven_days_energy_production:
+  hidden: true
+sensor.envoy_122103023124_lifetime_energy_consumption:
+  hidden: true
+sensor.envoy_122103023124_lifetime_energy_production:
+  hidden: true
+sensor.envoy_122103023124_today_s_energy_consumption:
+  hidden: true
+sensor.envoy_122103023124_today_s_energy_production:
+  hidden: true
+sensor.esp124_uptime:
+  hidden: true
+sensor.esp124_uptime_2:
+  hidden: true
+sensor.esp124_uptime_3:
+  disabled: true
+sensor.esp124_uptime_4:
+  disabled: true
+sensor.esp124_wifi_signal_sensor:
+  hidden: true
+sensor.esp124_wifi_signal_sensor_2:
+  disabled: true
+sensor.esp126_connected_bssid:
+  hidden: true
+sensor.esp126_connected_ssid:
+  hidden: true
+sensor.esp126_ip_address:
+  hidden: true
+sensor.esp126_temp_ecs:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Temp ECS
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.esp126_uptime_sensor:
+  hidden: true
+sensor.esp126_wifi_signal_sensor:
+  hidden: true
+sensor.esp127_temperature:
+  disabled: true
+sensor.esp127_uptime_sensor:
+  disabled: true
+sensor.esp127_wifi_signal_sensor:
+  disabled: true
+sensor.esp128_connected_bssid:
+  hidden: true
+sensor.esp128_connected_ssid:
+  hidden: true
+sensor.esp128_esphome_version:
+  hidden: true
+sensor.esp128_ip_address:
+  hidden: true
+sensor.esp128_uptime_sensor:
+  hidden: true
+sensor.esp128_wifi_signal_sensor:
+  hidden: true
+sensor.esp129_connected_bssid:
+  hidden: true
+sensor.esp129_connected_ssid:
+  hidden: true
+sensor.esp129_esphome_version:
+  hidden: true
+sensor.esp129_ip_address:
+  hidden: true
+sensor.esp129_uptime_sensor:
+  hidden: true
+sensor.esp129_wifi_signal_sensor:
+  hidden: true
+sensor.esp130_connected_bssid:
+  hidden: true
+sensor.esp130_connected_ssid:
+  hidden: true
+sensor.esp130_esphome_version:
+  hidden: true
+sensor.esp130_ip_address:
+  hidden: true
+sensor.esp130_uptime_sensor:
+  hidden: true
+sensor.esp130_wifi_signal_sensor:
+  hidden: true
+sensor.esp132_uptime_sensor:
+  hidden: true
+sensor.esp132_wifi_signal_sensor:
+  hidden: true
+sensor.esp133_uptime_sensor:
+  hidden: true
+sensor.esp133_wifi_signal_sensor:
+  excluded: true
+  hidden: true
+sensor.esp134_uv:
+  disabled: true
+sensor.esp135_uptime_sensor:
+  disabled: true
+sensor.esp135_wifi_signal_sensor:
+  disabled: true
+sensor.esp136_rend:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Rend VMC
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.esp136_tdeg_air_neuf:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Air Neuf VMC"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.esp136_tdeg_air_vicie:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Air Vici\xE9 VMC"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.esp136_tdeg_aspiration:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Air Aspir\xE9 VMC"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.esp136_tdeg_insufflation:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Air Insuffl\xE9 VMC"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.esp136_tdegcombles:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Combles"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.esp138_uptime_sensor:
   disabled: true
 sensor.esp138_wifi_signal_sensor:
+  disabled: true
+sensor.esp141_uptime_sensor:
+  disabled: true
+sensor.esp141_wifi_signal_sensor:
   disabled: true
 sensor.esp142_connected_bssid:
   disabled: true
@@ -331,18 +939,93 @@ sensor.espresense_salon_uptime:
   disabled: true
 sensor.hacs:
   disabled: true
+sensor.hatos_battery:
+  disabled: true
+sensor.hatos_cell_tower_id:
+  disabled: true
+sensor.hatos_gps_satellites:
+  disabled: true
+sensor.hatos_gsm_strength:
+  disabled: true
+sensor.hatos_last_message_received:
+  disabled: true
+sensor.hatos_last_sensor_mode:
+  disabled: true
+sensor.hatos_last_update_rate:
+  disabled: true
+sensor.hatos_sensor_mode:
+  disabled: true
+sensor.hchp_j:
+  hidden: true
 sensor.home_assistant_versions:
   disabled: true
 sensor.humidite_salon_zb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
   disabled: false
+  excluded: false
+  friendly_name: "Humidit\xE9"
+  grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 7
+sensor.humidity_sdb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "Humidit\xE9"
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.humidity_status_garage:
+  hidden: true
+sensor.inj:
+  disabled: true
+sensor.linky_hc_wh:
+  hidden: true
+sensor.linky_hp_wh:
+  hidden: true
+sensor.linky_hphc_kwh:
+  hidden: true
+sensor.linky_i_inst:
+  hidden: true
+sensor.linky_n_tarif:
+  hidden: true
+sensor.linky_p_pcoup:
+  hidden: true
+sensor.linky_papp:
+  hidden: true
+sensor.linky_pcoup:
+  hidden: true
+sensor.linky_ptec:
+  hidden: true
+sensor.linky_statuts:
+  hidden: true
+sensor.linky_umoy:
+  hidden: true
+sensor.lumiere_cellier_rssi_numeric:
+  hidden: true
 sensor.measured_current:
   disabled: true
 sensor.mh_z19_co2_value:
   disabled: false
+  grouped_sort_order: 10
   sort_order: 3
 sensor.mh_z19_temperature:
   disabled: true
+sensor.myip:
+  grouped_sort_order: 7
 sensor.myups_battery_charge:
   disabled: true
 sensor.myups_battery_chemistry:
@@ -451,6 +1134,32 @@ sensor.nb_de_particules_2_5:
   disabled: true
 sensor.nb_de_particules_5_0:
   disabled: true
+sensor.omv:
+  disabled: true
+  hidden: true
+sensor.omv_boot_efi:
+  disabled: true
+  hidden: true
+sensor.omv_cpu_load:
+  disabled: true
+  hidden: true
+sensor.omv_memory:
+  disabled: true
+sensor.omv_sda:
+  disabled: true
+  hidden: true
+sensor.omv_sdb:
+  disabled: true
+  hidden: true
+sensor.omv_sdc:
+  disabled: true
+  hidden: true
+sensor.omv_srv_dev_disk_by_uuid_4b42f328_0410_4873_86f7_c709b89da520:
+  disabled: true
+  hidden: true
+sensor.omv_uptime:
+  disabled: true
+  hidden: true
 sensor.orange_livebox_download_speed:
   disabled: true
 sensor.orange_livebox_upload_speed:
@@ -461,8 +1170,26 @@ sensor.pid_pv_heat:
   disabled: true
 sensor.pid_pv_result:
   disabled: true
-sensor.power_salon_zb:
+sensor.power_highest_peak_time_today:
   disabled: true
+sensor.power_highest_peak_time_tomorrow:
+  disabled: true
+sensor.power_production_now:
+  disabled: true
+sensor.power_salon_zb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Batterie
+  grouped_sort_order: 4
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.pression:
   col_span: '1'
   col_span_lg: '1'
@@ -476,14 +1203,57 @@ sensor.pression:
   row_span: '2'
   row_span_lg: '1'
   row_span_xl: '1'
+sensor.pression_ext:
+  hidden: true
 sensor.pression_ext_2:
   custom_card: true
-  disabled: false
+  disabled: true
+  hidden: true
 sensor.pression_salon_zb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
   disabled: false
+  excluded: false
+  friendly_name: Pression
+  grouped_sort_order: 3
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 9
+sensor.pression_sdb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Pression
+  grouped_sort_order: 3
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.prod_inst:
   disabled: true
+sensor.prod_inst_2:
+  disabled: true
+sensor.pzem_totale_courant:
+  hidden: true
+sensor.pzem_totale_energy:
+  hidden: true
+sensor.pzem_totale_factpuiss:
+  hidden: true
+sensor.pzem_totale_frequence:
+  hidden: true
+sensor.pzem_totale_puissance:
+  hidden: true
+sensor.pzem_totale_tension:
+  hidden: true
 sensor.remote_printer_hp_laserjet_400_m401dne_postscript_recommended:
   disabled: true
 sensor.remycrochon_home_assistant_discussions:
@@ -496,6 +1266,12 @@ sensor.remycrochon_home_assistant_latest_release:
   disabled: true
 sensor.remycrochon_home_assistant_latest_tag:
   disabled: true
+sensor.rssi_cellier_bp2:
+  hidden: true
+sensor.rssi_garage:
+  hidden: true
+sensor.sout:
+  disabled: true
 sensor.speedtest_download:
   disabled: true
 sensor.speedtest_ping:
@@ -503,14 +1279,49 @@ sensor.speedtest_ping:
 sensor.speedtest_upload:
   disabled: true
 sensor.tablette_niveau_charge:
+  grouped_sort_order: 8
   sort_order: 4
+sensor.tc_6bp_2_rssi_numeric:
+  hidden: true
 sensor.tc_6bp_3_rssi_numeric:
   disabled: true
 sensor.tc_volet_amis_grand_rssi_numeric:
   hidden: true
+sensor.tc_volet_sam_rssi_numeric:
+  hidden: true
+sensor.tcl_6_bp_rssi_numeric:
+  hidden: true
 sensor.temperature_salon_zb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
   disabled: false
+  excluded: false
+  friendly_name: "T\xB0"
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 8
+sensor.temperature_sdb:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: false
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0"
+  grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.tz3000_rdtixbnu_ts0121_18c269fe_electrical_measurement_power_factor:
+  hidden: true
 sensor.uptime_domo_rem81:
   disabled: true
 sensor.uptime_ha:
@@ -523,6 +1334,28 @@ sensor.uptime_meteo81000:
   disabled: true
 sensor.uptime_meteoweewx:
   disabled: true
+sensor.volet_parents_ouvert_power:
+  disabled: false
+sensor.vp2_humidte_in:
+  grouped_sort_order: 6
+sensor.vp2_temp_in:
+  grouped_sort_order: 5
+sensor.zoe_battery:
+  disabled: true
+sensor.zoe_cell_tower_id:
+  disabled: true
+sensor.zoe_gps_satellites:
+  disabled: true
+sensor.zoe_gsm_strength:
+  disabled: true
+sensor.zoe_last_message_received:
+  disabled: true
+sensor.zoe_last_sensor_mode:
+  disabled: true
+sensor.zoe_last_update_rate:
+  disabled: true
+sensor.zoe_sensor_mode:
+  disabled: true
 switch.adguard_filtering:
   disabled: true
 switch.adguard_parental_control:
@@ -533,13 +1366,91 @@ switch.adguard_safe_browsing:
   disabled: true
 switch.adguard_safe_search:
   disabled: true
+switch.bp1_cellier:
+  hidden: true
+switch.bureau_droit:
+  hidden: true
+switch.bureau_gauche:
+  hidden: true
 switch.calibration_zero_mh_z19_co2:
   disabled: true
+switch.cellier_bp2:
+  hidden: true
 switch.domo_rem81_active:
   disabled: true
+switch.esp124_restart:
+  hidden: true
+switch.esp124_restart_2:
+  disabled: true
+switch.esp125_restart:
+  hidden: true
+switch.esp126_restart:
+  hidden: true
+switch.esp127_restart:
+  disabled: true
+switch.esp128_restart:
+  hidden: true
+switch.esp129_restart:
+  hidden: true
+switch.esp130_restart:
+  hidden: true
+switch.esp132_restart:
+  hidden: true
+switch.esp133_restart:
+  hidden: true
+switch.esp135_restart:
+  disabled: false
+  hidden: true
+switch.esp136_relais:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: V1 VMC
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+switch.esp136_restart:
+  hidden: true
+switch.esp136_vit_2:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: V2 VMC
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+switch.esp136_vit_3:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: V3 VMC
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+switch.esp137_restart:
+  hidden: true
 switch.esp138_restart:
   disabled: true
 switch.esp138_validation_mesure:
+  disabled: true
+switch.esp139_restart:
+  hidden: true
+switch.esp141_restart:
   disabled: true
 switch.esp142_restart:
   disabled: true
@@ -569,7 +1480,10 @@ switch.jeedom_active:
   disabled: true
 switch.kobold_active:
   disabled: true
+switch.lumiere_cellier:
+  custom_card: true
 switch.lumiere_salon:
+  custom_card: true
   disabled: false
   sort_order: 13
 switch.meteo81000_active:
@@ -577,13 +1491,16 @@ switch.meteo81000_active:
 switch.meteoweewx_active:
   disabled: true
 switch.pc1_lidl:
-  disabled: true
+  custom_card: true
+  disabled: false
 switch.pc2_tablette:
   disabled: true
 switch.pc_ht:
   disabled: true
 switch.pid_climate_autotune:
   disabled: true
+switch.relais_cde_vmc_niv0_on_off:
+  custom_card: true
 switch.rfy_010205_1:
   disabled: true
 switch.schedule_023fc8:
@@ -604,12 +1521,40 @@ switch.schedule_b2e421:
   disabled: true
 switch.schedule_c49e0d:
   disabled: true
+switch.sonoff_vmc_niv0_on_off:
+  hidden: true
+switch.spots_ext_sud:
+  custom_card: true
+  disabled: false
+switch.tc6_bp1:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: PC Ch Amis Sud
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 switch.tc_volet_amis_grand:
   disabled: true
+switch.tc_volet_amis_sud_grand:
+  hidden: true
+switch.tc_volet_sam:
+  hidden: true
 switch.test_com_out:
   disabled: true
 switch.test_ppe_piscine:
   disabled: true
+switch.vmc_ssol:
+  custom_card: true
+  hidden: false
+switch.volet_amis_nord:
+  custom_card: true
+  hidden: true
 switch.volet_amis_sud_petit:
   hidden: true
 switch.volet_parents_petit:
@@ -624,3 +1569,7 @@ switch.wifi_switch:
 update.nas_ds218_dsm_update:
   disabled: true
   hidden: true
+vacuum.am435x_awd:
+  disabled: true
+weather.maison:
+  disabled: true

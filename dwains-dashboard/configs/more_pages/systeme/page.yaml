@@ -795,44 +795,80 @@ cards:
       - font-weight: 100
       - letter-spacing: 10px
     type: custom:button-card
-  - entities:
-    - sensor.speedtest_download
-    hour24: true
+  - color_thresholds:
+    - color: '#e73c3c'
+      value: 70
+    - color: '#e7b13c'
+      value: 50
+    - color: '#3ce74d'
+      value: 0
+    entities:
+    - entity: sensor.speedtest_download
+    font_size: 80
+    height: 130
     hours_to_show: 168
-    line_color: var(--dwains-theme-accent)
-    name: Current Download Speed
-    points_per_hour: 0.25
+    line_width: 2
+    name: Debit Descendant
+    points_per_hour: 90
     show:
+      extrema: true
       graph: line
+      icon: true
       points: false
     smoothing: true
-    style: "ha-card {\n  background-color: var(--dwains-theme-primary);\n}\n"
+    style: "ha-card { \n    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';\n\
+      \    --ha-card-background: \"rgba(0, 0, 0, 0.0)\";\n    --ha-card-box-shadow:\
+      \ 'none';\n}\n"
     type: custom:mini-graph-card
-  - entities:
-    - sensor.speedtest_upload
-    hour24: true
+  - color_thresholds:
+    - color: '#e74c3c'
+      value: 8
+    - color: '#1db954'
+      value: 1
+    - color: '#3498db'
+      value: 0
+    entities:
+    - entity: sensor.speedtest_upload
+    font_size: 80
+    height: 130
     hours_to_show: 168
-    line_color: var(--dwains-theme-accent)
-    name: Current Upload
-    points_per_hour: 0.25
+    line_width: 2
+    name: Debit Montant
+    points_per_hour: 90
     show:
+      extrema: true
       graph: line
+      icon: true
       points: false
     smoothing: true
-    style: "ha-card {\n  background-color: var(--dwains-theme-primary);\n}\n"
+    style: "ha-card { \n    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';\n\
+      \    --ha-card-background: \"rgba(0, 0, 0, 0.0)\";\n    --ha-card-box-shadow:\
+      \ 'none';\n}\n"
     type: custom:mini-graph-card
-  - entities:
-    - sensor.speedtest_ping
-    hour24: true
+  - color_thresholds:
+    - color: '#e73c3c'
+      value: 500
+    - color: '#e7b13c'
+      value: 100
+    - color: '#3ce74d'
+      value: 30
+    entities:
+    - entity: sensor.speedtest_ping
+    font_size: 80
+    height: 130
     hours_to_show: 168
-    line_color: var(--dwains-theme-accent)
-    name: Current Ping
-    points_per_hour: 0.25
+    line_width: 2
+    name: Test Ping
+    points_per_hour: 90
     show:
+      extrema: true
       graph: line
+      icon: true
       points: false
     smoothing: true
-    style: "ha-card {\n  background-color: var(--dwains-theme-primary);\n}\n"
+    style: "ha-card { \n    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';\n\
+      \    --ha-card-background: \"rgba(0, 0, 0, 0.0)\";\n    --ha-card-box-shadow:\
+      \ 'none';\n}\n"
     type: custom:mini-graph-card
   type: vertical-stack
 - cards:

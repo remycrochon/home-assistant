@@ -1,0 +1,23 @@
+blueprint:
+  custom_cards:
+  - slider-button-card
+  description: replaces cover card with slider-button cover card by Gessink
+  name: Replace Slider Button Cover Card
+  type: replace-card
+  version: '1.0'
+card:
+  action_button:
+    icon: mdi:swap-vertical
+    mode: custom
+    tap_action:
+      action: toggle
+  entity: $replace_with_input_entity$
+  icon:
+    show: true
+    tap_action:
+      action: more-info
+  name: $replace_with_input_name$
+  slider:
+    background: striped
+    direction: top-bottom
+  type: custom:slider-button-card

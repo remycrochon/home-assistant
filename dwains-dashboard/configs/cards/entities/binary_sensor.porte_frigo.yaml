@@ -1,7 +1,12 @@
-blueprint: replace_mushroom_entity_card.yaml
-card:
-  entity: $replace_with_input_entity$
-  name: $replace_with_input_name$
-  type: custom:mushroom-entity-card
-input_entity: binary_sensor.porte_frigo
-type: custom:dwains-blueprint-card
+entity: binary_sensor.porte_frigo
+hold_action:
+  action: none
+icon: mdi:fridge
+name: Porte Frigo
+show_icon: true
+show_name: true
+show_state: false
+tap_action:
+  action: more-info
+theme: Mushroom
+type: button

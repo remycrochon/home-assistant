@@ -483,15 +483,34 @@ cards:
     type: grid
   - cards:
     - entity: cover.porte_garage
-      hold_action:
-        action: none
-      name: Garage
+      label: Garage
+      operator: default
       show_icon: true
-      show_name: true
-      show_state: false
+      show_label: true
+      show_name: false
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:garage
+        operator: template
+        value: '[[[ return states[''cover.porte_garage''].attributes.current_position
+          < 1 ]]]
+
+          '
+      - color: red
+        icon: mdi:garage-open
+        operator: template
+        value: '[[[ return states[''cover.porte_garage''].attributes.current_position
+          > 99 ]]]
+
+          '
+      - color: orange
+        icon: mdi:garage-alert
+        operator: default
       tap_action:
         action: more-info
-      type: button
+      theme: Mushroom
+      type: custom:button-card
     - icon: mdi:arrow-up-bold
       name: Ouvrir
       show_icon: true
@@ -560,15 +579,33 @@ cards:
     type: grid
   - cards:
     - entity: cover.porte_sous_sol
-      hold_action:
-        action: none
-      name: Ss Sol
+      label: Sous Sol
       show_icon: true
-      show_name: true
-      show_state: false
+      show_label: true
+      show_name: false
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:garage
+        operator: template
+        value: '[[[ return states[''cover.porte_sous_sol''].attributes.current_position
+          < 1 ]]]
+
+          '
+      - color: red
+        icon: mdi:garage-open
+        operator: template
+        value: '[[[ return states[''cover.porte_sous_sol''].attributes.current_position
+          > 99 ]]]
+
+          '
+      - color: orange
+        icon: mdi:garage-alert
+        operator: default
       tap_action:
         action: more-info
-      type: button
+      theme: Mushroom
+      type: custom:button-card
     - icon: mdi:arrow-up-bold
       name: Ouvrir
       show_icon: true

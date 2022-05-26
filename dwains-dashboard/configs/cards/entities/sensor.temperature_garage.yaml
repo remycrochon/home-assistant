@@ -1,0 +1,10 @@
+entity: sensor.temperature_garage
+max: 50
+min: -5
+name: "T\xB0 Garage"
+needle: true
+severity:
+  green: 18
+  red: 32
+  yellow: 1
+type: gauge

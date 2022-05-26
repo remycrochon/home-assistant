@@ -1176,22 +1176,22 @@
       alert_action:
       - service: notify.telegram
         data:
-          message: T° Haute Congelo = {{states("sensor.temp_congelo_garage_2") }}°C
+          message: T° Haute Congelo = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
       - service: dwains_dashboard.notification_create
         data:
-          message: T° Haute Congelo = {{states("sensor.temp_congelo_garage_2") }}°C
+          message: T° Haute Congelo = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
       - service: notify.telegram
         data:
-          message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
+          message: T° Congelo normale = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
       - service: dwains_dashboard.notification_create
         data:
-          message: T° Congelo normale = {{states("sensor.temp_congelo_garage_2") }}°C
+          message: T° Congelo normale = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
@@ -1909,7 +1909,7 @@
       sequence:
       - service: cover.set_cover_position
         data:
-          position: 25
+          position: 20
         target:
           entity_id:
           - cover.volet_sdb_p

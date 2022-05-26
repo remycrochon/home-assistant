@@ -625,6 +625,9 @@ sensor.am435x_awd_next_start:
   disabled: true
 sensor.am435x_awd_problem_sensor:
   disabled: true
+sensor.battery_garage:
+  custom_card: true
+  grouped_sort_order: 3
 sensor.battery_sdb:
   col_span: '1'
   col_span_lg: '1'
@@ -974,6 +977,20 @@ sensor.humidite_salon_zb:
   row_span_lg: '1'
   row_span_xl: '1'
   sort_order: 7
+sensor.humidity_garage:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Hum Garage
+  grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.humidity_sdb:
   col_span: '1'
   col_span_lg: '1'
@@ -1291,6 +1308,34 @@ sensor.tc_volet_sam_rssi_numeric:
   hidden: true
 sensor.tcl_6_bp_rssi_numeric:
   hidden: true
+sensor.temp_congelo_garage:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Congelo"
+  grouped_sort_order: 4
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.temperature_garage:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "T\xB0 Garage"
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.temperature_salon_zb:
   col_span: '1'
   col_span_lg: '1'
@@ -1374,8 +1419,12 @@ switch.bureau_gauche:
   hidden: true
 switch.calibration_zero_mh_z19_co2:
   disabled: true
+switch.cde_pc_mal:
+  custom_card: true
 switch.cellier_bp2:
   hidden: true
+switch.chacon_pc2:
+  custom_card: true
 switch.domo_rem81_active:
   disabled: true
 switch.esp124_restart:

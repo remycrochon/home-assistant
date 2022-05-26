@@ -1,0 +1,11 @@
+entity: sensor.humidity_garage
+max: 100
+min: 1
+name: Hum Garage
+needle: true
+severity:
+  green: 1
+  red: 80
+  yellow: 50
+type: gauge
+unit: '%'

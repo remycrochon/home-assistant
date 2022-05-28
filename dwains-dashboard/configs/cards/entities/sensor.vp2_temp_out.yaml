@@ -1,0 +1,12 @@
+entities:
+- entity: sensor.vp2_temp_out
+  name: "T\xB0 out"
+- entity: sensor.vp2_humidity_out
+  name: Hum
+- entity: sensor.vp2_barometer
+  name: Pression
+show_icon: true
+show_name: true
+show_state: true
+state_color: false
+type: glance

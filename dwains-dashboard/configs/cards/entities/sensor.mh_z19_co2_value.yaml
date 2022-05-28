@@ -1,0 +1,11 @@
+entity: sensor.mh_z19_co2_value
+max: 1200
+min: 400
+name: CO2
+needle: true
+severity:
+  green: 500
+  red: 1000
+  yellow: 800
+type: gauge
+unit: ppm

@@ -22,6 +22,7 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.outTemp_C | round(1) }}"
+    device_class: "temperature"
 
   - platform: mqtt
     name: "VP2_Humidity_Out"
@@ -29,6 +30,8 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '%'
     value_template: "{{ value_json.outHumidity | round(1) }}"
+    device_class: humidity
+        
 
   - platform: mqtt
     name: "VP2_Barometer"
@@ -36,6 +39,7 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: 'mbar'
     value_template: "{{ value_json.barometer_mbar | round(1) }}"
+    device_class: "pressure"
     
 #DAILY RAIN (PRECIPITATION QUOTIDIENNE).
 #Appuyez sur RAINDAY pour afficher la pluviométrie cumulée depuis minuit.
@@ -114,6 +118,7 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.inTemp_C | round(1) }}"
+    device_class: "temperature"
 
   - platform: mqtt
     name: "VP2_Humidté_In"
@@ -121,6 +126,7 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '%'
     value_template: "{{ value_json.inHumidity | round(1) }}"
+    device_class: "humidity"
 
   - platform: mqtt
     name: "VP2_Ressenti"
@@ -128,6 +134,7 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.windchill_C | round(1) }}"
+    device_class: "temperature"
 
   - platform: mqtt
     name: "VP2_HeatIndex"
@@ -135,6 +142,7 @@ sensor:
     state_topic: "home/Vp2/loop"
     unit_of_measurement: '°C'
     value_template: "{{ value_json.heatindex_C | round(1) }}"
+    device_class: "temperature"
 
   - platform: mqtt
     name: "VP2_Radiation"

@@ -644,6 +644,7 @@ sensor.battery_sdb:
   row_span_xl: '1'
 sensor.bh1750_illuminance:
   disabled: false
+  grouped_sort_order: 2
 sensor.bp1_sonof_4d594222_power:
   disabled: true
 sensor.brother_mfc_j5330dw:
@@ -774,7 +775,13 @@ sensor.esp126_uptime_sensor:
 sensor.esp126_wifi_signal_sensor:
   hidden: true
 sensor.esp127_temperature:
-  disabled: true
+  custom_card: true
+  disabled: false
+  grouped_sort_order: 3
+  hidden: true
+sensor.esp127_u_alim:
+  custom_card: true
+  grouped_sort_order: 3
 sensor.esp127_uptime_sensor:
   disabled: true
 sensor.esp127_wifi_signal_sensor:
@@ -1036,6 +1043,7 @@ sensor.lumiere_cellier_rssi_numeric:
 sensor.measured_current:
   disabled: true
 sensor.mh_z19_co2_value:
+  custom_card: true
   disabled: false
   grouped_sort_order: 10
   sort_order: 3
@@ -1197,7 +1205,7 @@ sensor.power_salon_zb:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
@@ -1381,10 +1389,70 @@ sensor.uptime_meteoweewx:
   disabled: true
 sensor.volet_parents_ouvert_power:
   disabled: false
+sensor.vp2_barometer:
+  grouped_sort_order: 8
+  hidden: true
+sensor.vp2_datetime:
+  grouped_sort_order: 8
+  hidden: true
+sensor.vp2_direction_du_vent:
+  grouped_sort_order: 18
+sensor.vp2_heatindex:
+  grouped_sort_order: 17
+sensor.vp2_humidity_out:
+  grouped_sort_order: 2
+  hidden: true
 sensor.vp2_humidte_in:
   grouped_sort_order: 6
+sensor.vp2_pluviometrie_max:
+  grouped_sort_order: 7
+sensor.vp2_pluviometrie_min:
+  grouped_sort_order: 6
+sensor.vp2_pluviometrie_moyenne:
+  grouped_sort_order: 4
+  hidden: true
+sensor.vp2_pluviometrie_standard_deviation:
+  grouped_sort_order: 8
+sensor.vp2_radiation:
+  grouped_sort_order: 5
+sensor.vp2_radiation_moyenne:
+  grouped_sort_order: 20
+sensor.vp2_rafale:
+  grouped_sort_order: 13
+sensor.vp2_rafales_max:
+  grouped_sort_order: 19
+sensor.vp2_rain:
+  grouped_sort_order: 9
+sensor.vp2_rain24:
+  grouped_sort_order: 10
+sensor.vp2_rain_rate:
+  grouped_sort_order: 11
+sensor.vp2_rain_storm:
+  grouped_sort_order: 12
+sensor.vp2_ressenti:
+  grouped_sort_order: 16
 sensor.vp2_temp_in:
   grouped_sort_order: 5
+sensor.vp2_temp_out:
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: ''
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.vp2_uv:
+  grouped_sort_order: 4
+sensor.vp2_win_dir:
+  grouped_sort_order: 15
+sensor.vp2_win_speed:
+  grouped_sort_order: 14
 sensor.zoe_battery:
   disabled: true
 sensor.zoe_cell_tower_id:

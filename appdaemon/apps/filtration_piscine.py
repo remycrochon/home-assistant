@@ -1,4 +1,4 @@
-# Version du 24/05/2022
+# Version du 30/05/2022
 import hassapi as hass
 import datetime
 from datetime import timedelta
@@ -214,7 +214,7 @@ class FiltrationPiscine(hass.Hass):
             # Affichage plage horaire
             affichage_texte =str(h_debut)[:5]+"/"+str(h_pivot)[:5]+"/"+str(h_fin)[:5]
             self.set_textvalue(periode_filtration,affichage_texte)
-            # Ajouté le 5 mai 2022
+            # Ajouté le 30 mai 2022
             self.set_value("input_number.duree_filtration_ete",round(temps_filtration,2))
             # fin ajout
             # Marche pompe si dans plage horaire sinon Arret

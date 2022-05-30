@@ -1,4 +1,4 @@
-# Version du 24/05/2022
+# Version du 30/05/2022
 Piscine:
   class: FiltrationPiscine
   module: filtration_piscine
@@ -24,8 +24,8 @@ Piscine:
 # Arret forcé filtration- Bloque la filtration si = on
   #arret_force: input_boolean.piscine_arret_force # à utiliser par défaut
   arret_force: input_boolean.mem_delestage
-# Ajouté le 9 mai 2022
-  # Durée de la filtration en hiver
+# Ajouté le 30 mai 2022
+  # Durée de la filtration en ete
   duree_filtration_ete: input_number.duree_filtration_ete
 
 # Actionneurs

@@ -108,10 +108,9 @@ input_select:
       - Auto Ete
       - Absent
       - Arret
+
 cover:
-
 # Volets Proportionnels
-
 # Porte Sous Sol
   - platform: cover_rf_time_based
     devices:

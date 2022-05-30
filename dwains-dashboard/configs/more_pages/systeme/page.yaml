@@ -806,15 +806,15 @@ cards:
     - entity: sensor.speedtest_download
     font_size: 80
     height: 130
-    hours_to_show: 168
+    hours_to_show: 48
     line_width: 2
     name: Debit Descendant
-    points_per_hour: 90
+    points_per_hour: 1
     show:
       extrema: true
       graph: line
       icon: true
-      points: false
+      points: true
     smoothing: true
     style: "ha-card { \n    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';\n\
       \    --ha-card-background: \"rgba(0, 0, 0, 0.0)\";\n    --ha-card-box-shadow:\
@@ -831,15 +831,15 @@ cards:
     - entity: sensor.speedtest_upload
     font_size: 80
     height: 130
-    hours_to_show: 168
+    hours_to_show: 48
     line_width: 2
     name: Debit Montant
-    points_per_hour: 90
+    points_per_hour: 1
     show:
       extrema: true
       graph: line
       icon: true
-      points: false
+      points: true
     smoothing: true
     style: "ha-card { \n    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';\n\
       \    --ha-card-background: \"rgba(0, 0, 0, 0.0)\";\n    --ha-card-box-shadow:\
@@ -856,15 +856,15 @@ cards:
     - entity: sensor.speedtest_ping
     font_size: 80
     height: 130
-    hours_to_show: 168
+    hours_to_show: 48
     line_width: 2
     name: Test Ping
-    points_per_hour: 90
+    points_per_hour: 1
     show:
       extrema: true
       graph: line
       icon: true
-      points: false
+      points: true
     smoothing: true
     style: "ha-card { \n    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';\n\
       \    --ha-card-background: \"rgba(0, 0, 0, 0.0)\";\n    --ha-card-box-shadow:\
@@ -891,7 +891,7 @@ cards:
     points_per_hour: 1
     show:
       graph: line
-      points: false
+      points: true
     smoothing: false
     style: "ha-card {\n  background-color: var(--dwains-theme-primary);\n}\n"
     type: custom:mini-graph-card

@@ -230,15 +230,18 @@ modbus:
       - name: tp_plein_lsh
         slave: 1
         address: 1
+        unique_id: niveau_haut_piscine
       #  scan_interval: 10 en sec 10 par défaut
       # niveau bas piscine
       - name: tp_plein_lsl
         slave: 1
         address: 2
+        unique_id: niveau_bas_piscine
       # information couverture flottante piscine fermée
       - name: volet piscine fermé
         slave: 1
         address: 3
+        unique_id: volet_piscine_ferme
 
     # lecture de la sonde pt100 de la mesure de temperature de l'eau
     sensors:

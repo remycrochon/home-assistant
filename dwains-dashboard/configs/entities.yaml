@@ -173,6 +173,8 @@ binary_sensor.porte_frigo:
   row_span_xl: '1'
 binary_sensor.position_soleil_matin:
   disabled: true
+binary_sensor.position_soleil_volet_piscine:
+  hidden: true
 binary_sensor.rfy_010205_1:
   disabled: true
 binary_sensor.tablette_etat_charge:
@@ -644,7 +646,8 @@ sensor.battery_sdb:
   row_span_xl: '1'
 sensor.bh1750_illuminance:
   disabled: false
-  grouped_sort_order: 2
+  grouped_sort_order: 3
+  hidden: true
 sensor.bp1_sonof_4d594222_power:
   disabled: true
 sensor.brother_mfc_j5330dw:
@@ -979,11 +982,24 @@ sensor.humidite_salon_zb:
   excluded: false
   friendly_name: "Humidit\xE9"
   grouped_sort_order: 2
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
   sort_order: 7
+sensor.humidite_terrasse2:
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: ''
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.humidity_garage:
   col_span: '1'
   col_span_lg: '1'
@@ -1215,6 +1231,8 @@ sensor.power_salon_zb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+sensor.power_terrasse2:
+  hidden: true
 sensor.pression:
   col_span: '1'
   col_span_lg: '1'
@@ -1244,7 +1262,7 @@ sensor.pression_salon_zb:
   excluded: false
   friendly_name: Pression
   grouped_sort_order: 3
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -1345,10 +1363,10 @@ sensor.temperature_garage:
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.temperature_salon_zb:
-  col_span: '1'
-  col_span_lg: '1'
-  col_span_xl: '1'
-  custom_card: false
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
@@ -1373,6 +1391,8 @@ sensor.temperature_sdb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+sensor.temperature_terrasse2:
+  hidden: true
 sensor.tz3000_rdtixbnu_ts0121_18c269fe_electrical_measurement_power_factor:
   hidden: true
 sensor.uptime_domo_rem81:
@@ -1396,41 +1416,42 @@ sensor.vp2_datetime:
   grouped_sort_order: 8
   hidden: true
 sensor.vp2_direction_du_vent:
-  grouped_sort_order: 18
+  grouped_sort_order: 16
 sensor.vp2_heatindex:
-  grouped_sort_order: 17
+  grouped_sort_order: 15
 sensor.vp2_humidity_out:
   grouped_sort_order: 2
   hidden: true
 sensor.vp2_humidte_in:
   grouped_sort_order: 6
 sensor.vp2_pluviometrie_max:
-  grouped_sort_order: 7
+  grouped_sort_order: 5
 sensor.vp2_pluviometrie_min:
-  grouped_sort_order: 6
+  grouped_sort_order: 4
 sensor.vp2_pluviometrie_moyenne:
   grouped_sort_order: 4
   hidden: true
 sensor.vp2_pluviometrie_standard_deviation:
-  grouped_sort_order: 8
+  grouped_sort_order: 6
 sensor.vp2_radiation:
   grouped_sort_order: 5
+  hidden: true
 sensor.vp2_radiation_moyenne:
-  grouped_sort_order: 20
+  grouped_sort_order: 18
 sensor.vp2_rafale:
-  grouped_sort_order: 13
-sensor.vp2_rafales_max:
-  grouped_sort_order: 19
-sensor.vp2_rain:
-  grouped_sort_order: 9
-sensor.vp2_rain24:
-  grouped_sort_order: 10
-sensor.vp2_rain_rate:
   grouped_sort_order: 11
+sensor.vp2_rafales_max:
+  grouped_sort_order: 17
+sensor.vp2_rain:
+  grouped_sort_order: 7
+sensor.vp2_rain24:
+  grouped_sort_order: 8
+sensor.vp2_rain_rate:
+  grouped_sort_order: 9
 sensor.vp2_rain_storm:
-  grouped_sort_order: 12
+  grouped_sort_order: 10
 sensor.vp2_ressenti:
-  grouped_sort_order: 16
+  grouped_sort_order: 14
 sensor.vp2_temp_in:
   grouped_sort_order: 5
 sensor.vp2_temp_out:
@@ -1448,11 +1469,23 @@ sensor.vp2_temp_out:
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.vp2_uv:
-  grouped_sort_order: 4
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: ''
+  grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.vp2_win_dir:
-  grouped_sort_order: 15
+  grouped_sort_order: 13
 sensor.vp2_win_speed:
-  grouped_sort_order: 14
+  grouped_sort_order: 12
 sensor.zoe_battery:
   disabled: true
 sensor.zoe_cell_tower_id:

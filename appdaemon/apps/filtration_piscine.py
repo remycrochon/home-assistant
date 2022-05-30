@@ -1,4 +1,4 @@
-# Version du 24/02/2022
+# Version du 24/05/2022
 import hassapi as hass
 import datetime
 from datetime import timedelta

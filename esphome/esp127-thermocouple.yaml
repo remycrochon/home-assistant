@@ -45,7 +45,7 @@ sensor:
   - platform: max31855
     name: "${friendly_name} Temperature"
     cs_pin: D2
-    update_interval: 60s
+    update_interval: 10s
     accuracy_decimals: 2
 #    filters:
 #      - sliding_window_moving_average:
@@ -56,6 +56,7 @@ sensor:
   - platform: adc
     pin: VCC
     name: "${friendly_name} U Alim"
+    update_interval: 10s
     
   - platform: wifi_signal
     id: wif

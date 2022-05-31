@@ -32,35 +32,35 @@ class AlerteMeteo(hass.Hass):
         # Affiche l'heure locale
         #h_locale=time.strftime('%H:%M:%S', time.localtime())[:5]
         #self.notification("Heure Locale:" + str(h_locale),2,"")
+        if new!="unavailable":
+            if new!="unknown":
+                # Ajoute le décalage UTC/Heure locale à l'heure transmise par Meteo France
+                h_pluie=datetime.strftime(datetime.strptime(new[11:19],'%H:%M:%S')+timedelta(hours=decalage_utc),"%H:%M:%S")
+                h_forcast[0] = dic_forcast['0 min']
+                h_forcast[1] = dic_forcast['5 min']
+                h_forcast[2] = dic_forcast['10 min']
+                h_forcast[3] = dic_forcast['15 min']
+                h_forcast[4] = dic_forcast['20 min']
+                h_forcast[5] = dic_forcast['25 min']
+                h_forcast[6] = dic_forcast['35 min']
+                h_forcast[7] = dic_forcast['45 min']
+                h_forcast[8] = dic_forcast['55 min']
+                for h in range(8):
+                    message_notification= "h"+str(h)+"_Forecast:"+h_forcast[h]
+                    self.notification(message_notification,2,"")
+                    
+                if FLAG==0: # Permet d'afficher le message une seule fois
+                    message_notification= " La pluie est attendue a "+ format(h_pluie)
+                    self.notification(message_notification,1,"teleg")
+                    FLAG = 1
 
-        if new!="unknown":
-            # Ajoute le décalage UTC/Heure locale à l'heure transmise par Meteo France
-            h_pluie=datetime.strftime(datetime.strptime(new[11:19],'%H:%M:%S')+timedelta(hours=decalage_utc),"%H:%M:%S")
-            h_forcast[0] = dic_forcast['0 min']
-            h_forcast[1] = dic_forcast['5 min']
-            h_forcast[2] = dic_forcast['10 min']
-            h_forcast[3] = dic_forcast['15 min']
-            h_forcast[4] = dic_forcast['20 min']
-            h_forcast[5] = dic_forcast['25 min']
-            h_forcast[6] = dic_forcast['35 min']
-            h_forcast[7] = dic_forcast['45 min']
-            h_forcast[8] = dic_forcast['55 min']
-            for h in range(8):
-                message_notification= "h"+str(h)+"_Forecast:"+h_forcast[h]
-                self.notification(message_notification,2,"")
-                
-            if FLAG==0: # Permet d'afficher le message une seule fois
-                message_notification= " La pluie est attendue a "+ format(h_pluie)
+            if new=="unknown" and h_forcast[0] == "Temps sec":
+                message_notification= " Plus de pluie attendue."
+                FLAG=0
                 self.notification(message_notification,1,"teleg")
-                FLAG = 1
-
-        if new=="unknown" and h_forcast[0] == "Temps sec":
-            message_notification= " Plus de pluie attendue."
-            FLAG=0
-            self.notification(message_notification,1,"teleg")
-        
-        message_notification= "Flag="+ str(FLAG)
-        self.notification(message_notification,2,"")
+            
+            message_notification= "Flag="+ str(FLAG)
+            self.notification(message_notification,2,"")
 
     def change_alerte(self, entity, attribute, old, new, kwargs):
         heure = str(self.time())[:8]

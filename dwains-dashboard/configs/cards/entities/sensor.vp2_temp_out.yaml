@@ -1,3 +1,4 @@
+columns: 2
 entities:
 - entity: sensor.vp2_temp_out
   name: "T\xB0 out"
@@ -5,8 +6,19 @@ entities:
   name: Hum
 - entity: sensor.vp2_barometer
   name: Pression
+- entity: sensor.vp2_heatindex
+- entity: sensor.vp2_ressenti
+- entity: sensor.vp2_rain
+- entity: sensor.vp2_rain24
+- entity: sensor.vp2_rain_rate
+- entity: sensor.vp2_rain_storm
+- entity: sensor.vp2_win_speed
+- entity: sensor.vp2_win_dir
+- entity: sensor.vp2_rafale
+- entity: sensor.vp2_rafales_max
 show_icon: true
 show_name: true
 show_state: true
 state_color: false
+title: VP2
 type: glance

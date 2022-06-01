@@ -1,3 +1,4 @@
+# Version du 1 juin 2022
 import hassapi as hass
 import datetime
 from datetime import datetime

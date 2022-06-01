@@ -1,0 +1,8 @@
+entities:
+- entity: sensor.tablette_niveau_charge
+- entity: binary_sensor.tablette_etat_charge
+show_icon: true
+show_name: true
+show_state: true
+title: Tablette
+type: glance

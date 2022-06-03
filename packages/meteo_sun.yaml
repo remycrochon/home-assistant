@@ -7,157 +7,141 @@ input_boolean:
     name: Comm VP2 OK=On
 
 
-sensor:
+mqtt:
+  sensor:
 # Vantage Pro2 -> WEEXWX
-  - platform: mqtt
-    name: "VP2_DateTime"
-    unique_id: VP2_DateTime" 
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'ms'
-    value_template: "{{ value_json.dateTime | round(1) }}"
+    - name: "VP2_DateTime"
+      unique_id: VP2_DateTime" 
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'ms'
+      value_template: "{{ value_json.dateTime | round(1) }}"
 
-  - platform: mqtt
-    name: "VP2_Temp_Out"
-    unique_id: "VP2_Temp_Out"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '°C'
-    value_template: "{{ value_json.outTemp_C | round(1) }}"
-    device_class: "temperature"
+    - name: "VP2_Temp_Out"
+      unique_id: "VP2_Temp_Out"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '°C'
+      value_template: "{{ value_json.outTemp_C | round(1) }}"
+      device_class: "temperature"
 
-  - platform: mqtt
-    name: "VP2_Humidity_Out"
-    unique_id: "VP2_Humidity_Out"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '%'
-    value_template: "{{ value_json.outHumidity | round(1) }}"
-    device_class: humidity
-        
+    - name: "VP2_Humidity_Out"
+      unique_id: "VP2_Humidity_Out"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '%'
+      value_template: "{{ value_json.outHumidity | round(1) }}"
+      device_class: humidity
+          
+    - name: "VP2_Barometer"
+      unique_id: "VP2_Barometer"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'mbar'
+      value_template: "{{ value_json.barometer_mbar | round(1) }}"
+      device_class: "pressure"
+      
+  #DAILY RAIN (PRECIPITATION QUOTIDIENNE).
+  #Appuyez sur RAINDAY pour afficher la pluviométrie cumulée depuis minuit.
+  #Toutes les précipitations cumulées depuis les 24 dernières heures sont affichées dans le bandeau déroulant au bas de l'écran.
+    - name: "VP2_Rain"
+      unique_id: "VP2_Rain"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'mm'
+      force_update: true
+      value_template: >-
+        {% set a=value_json.rain_cm|float(default=0)%}
+        {{ (a*10)|round(3) }}     
 
-  - platform: mqtt
-    name: "VP2_Barometer"
-    unique_id: "VP2_Barometer"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'mbar'
-    value_template: "{{ value_json.barometer_mbar | round(1) }}"
-    device_class: "pressure"
-    
-#DAILY RAIN (PRECIPITATION QUOTIDIENNE).
-#Appuyez sur RAINDAY pour afficher la pluviométrie cumulée depuis minuit.
-#Toutes les précipitations cumulées depuis les 24 dernières heures sont affichées dans le bandeau déroulant au bas de l'écran.
-  - platform: mqtt
-    name: "VP2_Rain"
-    unique_id: "VP2_Rain"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'mm'
-    force_update: true
-    value_template: >-
-      {% set a=value_json.rain_cm|float(default=0)%}
-      {{ (a*10)|round(3) }}     
+    - name: "VP2_Rain24"
+      unique_id: "VP2_Rain24"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'mm'
+      force_update: true
+      value_template: >-
+        {% set a=value_json.rain24_cm|float(default=0)%}
+        {{ (a*10)|round(3) }}
 
-  - platform: mqtt
-    name: "VP2_Rain24"
-    unique_id: "VP2_Rain24"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'mm'
-    force_update: true
-    value_template: >-
-      {% set a=value_json.rain24_cm|float(default=0)%}
-      {{ (a*10)|round(3) }}
+  # La Rain Rate (pluviométrie) sera nulle et l'icône parapluie ne sera pas affichée tant que
+  # deux basculements du pluviomètre ne sont pas survenus dans une période de 15 minutes.
+    - name: "VP2_Rain_Rate"
+      unique_id: "VP2_Rain_Rate"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'mm/h'
+      force_update: true
+      value_template: >-
+        {% set a=value_json.rainRate_cm_per_hour|float(default=0)%}
+        {{ (a*10)|round(3) }}
 
-# La Rain Rate (pluviométrie) sera nulle et l'icône parapluie ne sera pas affichée tant que
-# deux basculements du pluviomètre ne sont pas survenus dans une période de 15 minutes.
-  - platform: mqtt
-    name: "VP2_Rain_Rate"
-    unique_id: "VP2_Rain_Rate"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'mm/h'
-    force_update: true
-    value_template: >-
-      {% set a=value_json.rainRate_cm_per_hour|float(default=0)%}
-      {{ (a*10)|round(3) }}
+  #RAIN STORM (AVERSE D'ORAGE).
+  #Rain Storm (L'averse d'orage) affiche le cumul de pluie de la dernière averse.
+  #Il faut deux basculements du pluviomètre pour démarrer un événement d'orage et 24 heures sans pluie pour le stopper.
+  #Appuyez sur RAINDAY pour basculer entre les précipitations quotidiennes et le total d'Averse d'orage.
+  #Le cumul de pluie peut être affiché en pouces (in) ou millimètres (mm).    
+    - name: "VP2_Rain_Storm"
+      unique_id: "VP2_Rain_Storm"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'mm'
+      force_update: true
+      value_template: >-
+        {% set a=value_json.stormRain_cm|float(default=0)%}
+        {{ (a*10)|round(3) }}
 
-#RAIN STORM (AVERSE D'ORAGE).
-#Rain Storm (L'averse d'orage) affiche le cumul de pluie de la dernière averse.
-#Il faut deux basculements du pluviomètre pour démarrer un événement d'orage et 24 heures sans pluie pour le stopper.
-#Appuyez sur RAINDAY pour basculer entre les précipitations quotidiennes et le total d'Averse d'orage.
-#Le cumul de pluie peut être affiché en pouces (in) ou millimètres (mm).    
-  - platform: mqtt
-    name: "VP2_Rain_Storm"
-    unique_id: "VP2_Rain_Storm"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'mm'
-    force_update: true
-    value_template: >-
-      {% set a=value_json.stormRain_cm|float(default=0)%}
-      {{ (a*10)|round(3) }}
+    - name: "VP2_Rafale"
+      unique_id: "VP2_Rafale"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'km/h'
+      value_template: "{{ value_json.windGust_kph | round(2) }}"
 
-  - platform: mqtt
-    name: "VP2_Rafale"
-    unique_id: "VP2_Rafale"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'km/h'
-    value_template: "{{ value_json.windGust_kph | round(2) }}"
+    - name: "VP2_Win_Speed"
+      unique_id: "VP2_Win_Speed"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'km/h'
+      value_template: "{{ value_json.windSpeed_kph | round(2) }}"
 
-  - platform: mqtt
-    name: "VP2_Win_Speed"
-    unique_id: "VP2_Win_Speed"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'km/h'
-    value_template: "{{ value_json.windSpeed_kph | round(2) }}"
+    - name: "VP2_Win_Dir"
+      unique_id: "VP2_Win_Dir"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '°'
+      value_template: "{{ value_json.windDir | round(1) }}"
 
-  - platform: mqtt
-    name: "VP2_Win_Dir"
-    unique_id: "VP2_Win_Dir"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '°'
-    value_template: "{{ value_json.windDir | round(1) }}"
+    - name: "VP2_Temp_In"
+      unique_id: "VP2_Temp_In"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '°C'
+      value_template: "{{ value_json.inTemp_C | round(1) }}"
+      device_class: "temperature"
 
-  - platform: mqtt
-    name: "VP2_Temp_In"
-    unique_id: "VP2_Temp_In"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '°C'
-    value_template: "{{ value_json.inTemp_C | round(1) }}"
-    device_class: "temperature"
+    - name: "VP2_Humidté_In"
+      unique_id: "VP2_Humidté_In"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '%'
+      value_template: "{{ value_json.inHumidity | round(1) }}"
+      device_class: "humidity"
 
-  - platform: mqtt
-    name: "VP2_Humidté_In"
-    unique_id: "VP2_Humidté_In"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '%'
-    value_template: "{{ value_json.inHumidity | round(1) }}"
-    device_class: "humidity"
+    - name: "VP2_Ressenti"
+      unique_id: "VP2_Ressenti"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '°C'
+      value_template: "{{ value_json.windchill_C | round(1) }}"
+      device_class: "temperature"
 
-  - platform: mqtt
-    name: "VP2_Ressenti"
-    unique_id: "VP2_Ressenti"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '°C'
-    value_template: "{{ value_json.windchill_C | round(1) }}"
-    device_class: "temperature"
+    - name: "VP2_HeatIndex"
+      unique_id: "VP2_HeatIndex"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: '°C'
+      value_template: "{{ value_json.heatindex_C | round(1) }}"
+      device_class: "temperature"
 
-  - platform: mqtt
-    name: "VP2_HeatIndex"
-    unique_id: "VP2_HeatIndex"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: '°C'
-    value_template: "{{ value_json.heatindex_C | round(1) }}"
-    device_class: "temperature"
+    - name: "VP2_Radiation"
+      unique_id: "VP2_Radiation"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'W/m²'
+      value_template: "{{ value_json.radiation_Wpm2 | round(0) }}"
 
-  - platform: mqtt
-    name: "VP2_Radiation"
-    unique_id: "VP2_Radiation"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'W/m²'
-    value_template: "{{ value_json.radiation_Wpm2 | round(0) }}"
+    - name: "VP2_UV"
+      unique_id: "VP2_UV"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'UV'
+      value_template: "{{ value_json.UV | round(1) }}"
 
-  - platform: mqtt
-    name: "VP2_UV"
-    unique_id: "VP2_UV"
-    state_topic: "home/Vp2/loop"
-    unit_of_measurement: 'UV'
-    value_template: "{{ value_json.UV | round(1) }}"
-
+sensor:
 # lune https://www.home-assistant.io/integrations/moon/
   - platform: moon
 

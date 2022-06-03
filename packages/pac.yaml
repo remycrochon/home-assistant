@@ -213,10 +213,10 @@ sensor:
               {{ (a*t)+b | float(default=0) |round(2)}}
             {%endif%}
           {%endif%}
-
-  - platform: mqtt
-    name: "ESP_altherma status"
-    state_topic: "espaltherma/LWT"
+mqtt:
+  sensor:
+    - name: "ESP_altherma status"
+      state_topic: "espaltherma/LWT"
 
 # 
 input_boolean:

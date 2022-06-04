@@ -70,14 +70,14 @@ cards:
       needle: true
       type: gauge
     - entity: input_number.temps_cartouche_chlore
-      max: 70
+      max: 100
       min: 0
       name: Cart Chlore
       needle: true
       severity:
         green: 0
-        red: 60
-        yellow: 30
+        red: 80
+        yellow: 70
       type: gauge
     - entity: sensor.pzem_pisc_puissance
       max: 900

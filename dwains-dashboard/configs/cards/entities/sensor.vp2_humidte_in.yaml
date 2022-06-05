@@ -1,8 +1,7 @@
-entities:
-- entity: sensor.vp2_temp_in
-- entity: sensor.vp2_humidte_in
-show_icon: true
-show_name: true
-show_state: true
-title: VP2
-type: glance
+blueprint: replace_mushroom_entity_card.yaml
+card:
+  entity: $replace_with_input_entity$
+  name: $replace_with_input_name$
+  type: custom:mushroom-entity-card
+input_entity: sensor.vp2_humidte_in
+type: custom:dwains-blueprint-card

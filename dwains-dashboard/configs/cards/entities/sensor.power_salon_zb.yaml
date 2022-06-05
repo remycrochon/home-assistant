@@ -1,5 +1,7 @@
-entities:
-- entity: sensor.power_salon_zb
-  name: "Capteur T\xB0"
-title: Niveau Pile
-type: custom:battery-state-card
+blueprint: replace_mushroom_entity_card.yaml
+card:
+  entity: $replace_with_input_entity$
+  name: $replace_with_input_name$
+  type: custom:mushroom-entity-card
+input_entity: sensor.power_salon_zb
+type: custom:dwains-blueprint-card

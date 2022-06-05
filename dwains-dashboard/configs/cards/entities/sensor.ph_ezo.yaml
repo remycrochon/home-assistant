@@ -1,0 +1,10 @@
+entity: sensor.ph_ezo
+max: 10
+min: 6
+name: pH
+needle: true
+severity:
+  green: 6
+  red: 8
+  yellow: 7
+type: gauge

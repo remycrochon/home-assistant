@@ -1,8 +1,7 @@
-entities:
-- entity: sensor.tablette_niveau_charge
-- entity: binary_sensor.tablette_etat_charge
-show_icon: true
-show_name: true
-show_state: true
-title: Tablette
-type: glance
+blueprint: replace_mushroom_entity_card.yaml
+card:
+  entity: $replace_with_input_entity$
+  name: $replace_with_input_name$
+  type: custom:mushroom-entity-card
+input_entity: sensor.tablette_niveau_charge
+type: custom:dwains-blueprint-card

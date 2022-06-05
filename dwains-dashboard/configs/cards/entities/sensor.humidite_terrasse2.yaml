@@ -1,9 +1,7 @@
-entities:
-- entity: sensor.temperature_terrasse2
-- entity: sensor.humidite_terrasse2
-- entity: sensor.power_terrasse2
-show_icon: true
-show_name: true
-show_state: true
-title: Terrasse
-type: glance
+blueprint: replace_mushroom_entity_card.yaml
+card:
+  entity: $replace_with_input_entity$
+  name: $replace_with_input_name$
+  type: custom:mushroom-entity-card
+input_entity: sensor.humidite_terrasse2
+type: custom:dwains-blueprint-card

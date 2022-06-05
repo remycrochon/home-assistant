@@ -3,5 +3,5 @@ card:
   entity: $replace_with_input_entity$
   name: $replace_with_input_name$
   type: custom:mushroom-entity-card
-input_entity: sensor.vp2_temp_out
+input_entity: binary_sensor.tablette_etat_charge
 type: custom:dwains-blueprint-card

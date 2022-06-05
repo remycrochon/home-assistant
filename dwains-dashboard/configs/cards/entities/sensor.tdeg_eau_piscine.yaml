@@ -1,0 +1,10 @@
+entity: sensor.tdeg_eau_piscine
+max: 40
+min: 1
+name: "T\xB0"
+needle: true
+severity:
+  green: 26
+  red: 1
+  yellow: 22
+type: gauge

@@ -98,18 +98,18 @@ binary_sensor.espresense_bureau:
   disabled: true
   hidden: true
 binary_sensor.fdc_volet_amis_sud_grand:
-  hidden: false
-  excluded: false
-  disabled: false
-  friendly_name: Fdc Ouvert
   col_span: '1'
-  row_span: '1'
   col_span_lg: '1'
-  row_span_lg: '1'
   col_span_xl: '1'
-  row_span_xl: '1'
   custom_card: false
   custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Fdc Ouvert
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 binary_sensor.fdc_volet_parents_grand_ouvert:
   hidden: true
 binary_sensor.hatos_is_online:
@@ -193,7 +193,18 @@ binary_sensor.position_soleil_volet_piscine:
 binary_sensor.rfy_010205_1:
   disabled: true
 binary_sensor.tablette_etat_charge:
-  hidden: true
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Tab Batterie
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 11
 binary_sensor.tablette_etat_usb:
   hidden: true
@@ -212,6 +223,8 @@ binary_sensor.tc_volet_parents_grands:
   hidden: true
 binary_sensor.tc_volet_sam:
   hidden: true
+binary_sensor.tp_plein_lsl:
+  custom_card: true
 binary_sensor.uptime_domo_rem81:
   disabled: true
   hidden: true
@@ -426,9 +439,9 @@ cover.sdb:
   row_span_lg: '1'
   row_span_xl: '1'
 cover.volet_amis_nord_p:
-  col_span: '1'
-  col_span_lg: '1'
-  col_span_xl: '1'
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -504,9 +517,9 @@ cover.volet_ch_parents_zb:
   row_span_lg: '1'
   row_span_xl: '1'
 cover.volet_cuisine_p:
-  col_span: '1'
-  col_span_lg: '1'
-  col_span_xl: '1'
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -556,9 +569,9 @@ cover.volet_parents_grand_p:
   row_span_lg: '1'
   row_span_xl: '1'
 cover.volet_salon_p:
-  col_span: '1'
-  col_span_lg: '1'
-  col_span_xl: '1'
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -573,9 +586,9 @@ cover.volet_sam:
   grouped_sort_order: 3
   sort_order: 12
 cover.volet_sam_grand_p:
-  col_span: '1'
-  col_span_lg: '1'
-  col_span_xl: '1'
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -596,10 +609,32 @@ device_tracker.oszscclk_zoe:
 device_tracker.zoe:
   disabled: true
 input_boolean.presence_amis_ch_nord:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "Pr\xE9sence Amis"
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 input_boolean.presence_amis_ch_sud:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: "Pr\xE9sence Amis"
   grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 input_number.duree_filtration_ete:
   disabled: true
 light.led1:
@@ -678,9 +713,10 @@ sensor.battery_sdb:
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.bh1750_illuminance:
+  custom_card: true
   disabled: false
-  grouped_sort_order: 3
-  hidden: true
+  grouped_sort_order: 4
+  hidden: false
 sensor.bp1_sonof_4d594222_power:
   disabled: true
 sensor.brother_mfc_j5330dw:
@@ -725,6 +761,20 @@ sensor.bureau_temperature:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+sensor.chamb_nord_pression:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Pression
+  grouped_sort_order: 3
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.chamb_parents_humidite:
   hidden: true
 sensor.chamb_parents_power:
@@ -744,17 +794,112 @@ sensor.chamb_parents_temperature:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+sensor.chambre_nord_humidite:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Hum
+  grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.chambre_nord_power:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Batterie
+  grouped_sort_order: 4
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.chambre_nord_temperature:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Temp
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.chambre_sud_battery_numeric:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Batterie
+  grouped_sort_order: 3
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.chambre_sud_humidity:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Hum
+  grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.chambre_sud_humidity_status:
   hidden: true
 sensor.chambre_sud_rssi_numeric:
   hidden: true
+sensor.chambre_sud_temperature:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Temp
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.concentration_de_particules_10_0um:
   disabled: true
 sensor.concentration_de_particules_1_0um:
   disabled: true
 sensor.concentration_de_particules_2_5um:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
   disabled: false
+  excluded: false
+  friendly_name: PM2.5
   grouped_sort_order: 9
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 2
 sensor.concentration_de_particules_2_5um_median:
   disabled: true
@@ -820,6 +965,18 @@ sensor.esp124_wifi_signal_sensor:
   hidden: true
 sensor.esp124_wifi_signal_sensor_2:
   disabled: true
+sensor.esp125_connected_bssid:
+  hidden: true
+sensor.esp125_connected_ssid:
+  hidden: true
+sensor.esp125_esphome_version:
+  hidden: true
+sensor.esp125_ip_address:
+  grouped_sort_order: 5
+  hidden: true
+sensor.esp125_wifi_signal_sensor:
+  grouped_sort_order: 9
+  hidden: true
 sensor.esp126_connected_bssid:
   hidden: true
 sensor.esp126_connected_ssid:
@@ -846,11 +1003,22 @@ sensor.esp126_wifi_signal_sensor:
 sensor.esp127_temperature:
   custom_card: true
   disabled: false
-  grouped_sort_order: 3
-  hidden: true
+  grouped_sort_order: 6
+  hidden: false
 sensor.esp127_u_alim:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: U Thermo
   grouped_sort_order: 3
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
   sort_order: 3
 sensor.esp127_uptime_sensor:
   disabled: true
@@ -1017,6 +1185,9 @@ sensor.espresense_salon_free_memory:
   disabled: true
 sensor.espresense_salon_uptime:
   disabled: true
+sensor.fdc_volet_amis_sud_grand_power:
+  grouped_sort_order: 4
+  hidden: true
 sensor.hacs:
   disabled: true
 sensor.hatos_battery:
@@ -1043,26 +1214,27 @@ sensor.humidite_salon_zb:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
-  friendly_name: "Humidit\xE9"
+  friendly_name: Hum
   grouped_sort_order: 2
-  hidden: true
+  hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
   sort_order: 7
 sensor.humidite_terrasse2:
-  col_span: '2'
-  col_span_lg: '2'
-  col_span_xl: '2'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
-  friendly_name: ''
+  friendly_name: Hum
+  grouped_sort_order: 2
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1128,6 +1300,7 @@ sensor.measured_current:
 sensor.mh_z19_co2_value:
   custom_card: true
   disabled: false
+  favorite: false
   grouped_sort_order: 10
   sort_order: 3
 sensor.mh_z19_temperature:
@@ -1141,7 +1314,7 @@ sensor.myip:
   disabled: false
   excluded: false
   friendly_name: IP
-  grouped_sort_order: 4
+  grouped_sort_order: 8
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1284,6 +1457,12 @@ sensor.orange_livebox_download_speed:
   disabled: true
 sensor.orange_livebox_upload_speed:
   disabled: true
+sensor.orp_ezo:
+  custom_card: true
+  grouped_sort_order: 4
+sensor.ph_ezo:
+  custom_card: true
+  grouped_sort_order: 1
 sensor.pid_pv_cool:
   disabled: true
 sensor.pid_pv_heat:
@@ -1306,12 +1485,24 @@ sensor.power_salon_zb:
   excluded: false
   friendly_name: Batterie
   grouped_sort_order: 4
-  hidden: true
+  hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.power_terrasse2:
-  hidden: true
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Batterie
+  grouped_sort_order: 3
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.pression:
   col_span: '1'
   col_span_lg: '1'
@@ -1321,7 +1512,7 @@ sensor.pression:
   disabled: false
   excluded: false
   friendly_name: ''
-  hidden: false
+  hidden: true
   row_span: '2'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -1331,17 +1522,20 @@ sensor.pression_ext_2:
   custom_card: true
   disabled: true
   hidden: true
+sensor.pression_filtre:
+  custom_card: true
+  grouped_sort_order: 3
 sensor.pression_salon_zb:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: Pression
   grouped_sort_order: 3
-  hidden: true
+  hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -1364,6 +1558,24 @@ sensor.prod_inst:
   disabled: true
 sensor.prod_inst_2:
   disabled: true
+sensor.pzem_pisc_courant:
+  grouped_sort_order: 7
+  hidden: true
+sensor.pzem_pisc_energy:
+  grouped_sort_order: 4
+  hidden: true
+sensor.pzem_pisc_factpuiss:
+  grouped_sort_order: 6
+  hidden: true
+sensor.pzem_pisc_frequence:
+  grouped_sort_order: 3
+  hidden: true
+sensor.pzem_pisc_puissance:
+  custom_card: true
+  grouped_sort_order: 8
+sensor.pzem_pisc_tension:
+  grouped_sort_order: 6
+  hidden: true
 sensor.pzem_totale_courant:
   hidden: true
 sensor.pzem_totale_energy:
@@ -1401,15 +1613,15 @@ sensor.speedtest_ping:
 sensor.speedtest_upload:
   disabled: true
 sensor.tablette_niveau_charge:
-  col_span: '2'
-  col_span_lg: '2'
-  col_span_xl: '2'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
-  friendly_name: ''
-  grouped_sort_order: 3
+  friendly_name: Bat Tab
+  grouped_sort_order: 7
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1421,12 +1633,18 @@ sensor.tc_6bp_3_rssi_numeric:
   disabled: true
 sensor.tc_volet_amis_grand_rssi_numeric:
   hidden: true
+sensor.tc_volet_amis_sud_grand_rssi_numeric:
+  hidden: true
 sensor.tc_volet_parents_grands_rssi_numeric:
   hidden: true
 sensor.tc_volet_sam_rssi_numeric:
   hidden: true
 sensor.tcl_6_bp_rssi_numeric:
   hidden: true
+sensor.tdeg_eau_piscine:
+  custom_card: true
+  favorite: true
+  grouped_sort_order: 2
 sensor.temp_congelo_garage:
   col_span: '1'
   col_span_lg: '1'
@@ -1456,9 +1674,9 @@ sensor.temperature_garage:
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.temperature_salon_zb:
-  col_span: '2'
-  col_span_lg: '2'
-  col_span_xl: '2'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -1485,7 +1703,19 @@ sensor.temperature_sdb:
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.temperature_terrasse2:
-  hidden: true
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Temp
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.tz3000_rdtixbnu_ts0121_18c269fe_electrical_measurement_power_factor:
   hidden: true
 sensor.uptime_domo_rem81:
@@ -1504,8 +1734,19 @@ sensor.volet_parents_ouvert_power:
   disabled: false
   hidden: true
 sensor.vp2_barometer:
-  grouped_sort_order: 8
-  hidden: true
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Pression
+  grouped_sort_order: 5
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.vp2_datetime:
   grouped_sort_order: 8
   hidden: true
@@ -1514,22 +1755,34 @@ sensor.vp2_direction_du_vent:
   grouped_sort_order: 16
   sort_order: 17
 sensor.vp2_heatindex:
-  grouped_sort_order: 15
-  hidden: true
+  custom_card: true
+  grouped_sort_order: 10
+  hidden: false
   sort_order: 16
 sensor.vp2_humidity_out:
-  grouped_sort_order: 2
-  hidden: true
-sensor.vp2_humidte_in:
-  col_span: '2'
-  col_span_lg: '2'
-  col_span_xl: '2'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
-  friendly_name: Hum
+  friendly_name: Hum Out
   grouped_sort_order: 2
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.vp2_humidte_in:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: Hum VP2
+  grouped_sort_order: 5
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1550,15 +1803,17 @@ sensor.vp2_pluviometrie_standard_deviation:
   hidden: true
   sort_order: 7
 sensor.vp2_radiation:
-  grouped_sort_order: 5
-  hidden: true
+  custom_card: true
+  grouped_sort_order: 9
+  hidden: false
 sensor.vp2_radiation_moyenne:
   grouped_sort_order: 18
   hidden: true
   sort_order: 19
 sensor.vp2_rafale:
-  grouped_sort_order: 11
-  hidden: true
+  custom_card: true
+  grouped_sort_order: 14
+  hidden: false
   sort_order: 12
 sensor.vp2_rafales_max:
   grouped_sort_order: 17
@@ -1569,33 +1824,48 @@ sensor.vp2_rain:
   hidden: true
   sort_order: 8
 sensor.vp2_rain24:
+  custom_card: true
   grouped_sort_order: 8
-  hidden: true
+  hidden: false
   sort_order: 9
 sensor.vp2_rain_rate:
-  grouped_sort_order: 9
-  hidden: true
+  custom_card: true
+  grouped_sort_order: 12
+  hidden: false
   sort_order: 10
 sensor.vp2_rain_storm:
   grouped_sort_order: 10
   hidden: true
   sort_order: 11
 sensor.vp2_ressenti:
-  grouped_sort_order: 14
-  hidden: true
+  custom_card: true
+  grouped_sort_order: 11
+  hidden: false
   sort_order: 15
 sensor.vp2_temp_in:
-  grouped_sort_order: 5
-  hidden: true
-sensor.vp2_temp_out:
-  col_span: '2'
-  col_span_lg: '3'
-  col_span_xl: '3'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
-  friendly_name: ''
+  friendly_name: Temp VP2
+  grouped_sort_order: 6
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
+sensor.vp2_temp_out:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  favorite: true
+  friendly_name: Temp out
   grouped_sort_order: 1
   hidden: false
   row_span: '1'
@@ -1603,15 +1873,15 @@ sensor.vp2_temp_out:
   row_span_xl: '1'
   sort_order: 1
 sensor.vp2_uv:
-  col_span: '2'
-  col_span_lg: '2'
-  col_span_xl: '2'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: ''
-  grouped_sort_order: 2
+  grouped_sort_order: 7
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1629,11 +1899,13 @@ sensor.zoe_battery:
   disabled: true
 sensor.zoe_battery_level:
   custom_card: true
+  grouped_sort_order: 13
   sort_order: 4
 sensor.zoe_cell_tower_id:
   disabled: true
 sensor.zoe_daily_goal:
   custom_card: true
+  grouped_sort_order: 18
   sort_order: 22
 sensor.zoe_gps_satellites:
   disabled: true
@@ -1647,11 +1919,13 @@ sensor.zoe_last_update_rate:
   disabled: true
 sensor.zoe_minutes_active:
   custom_card: true
+  grouped_sort_order: 17
   sort_order: 21
 sensor.zoe_sensor_mode:
   disabled: true
 sensor.zoe_tracker_state:
   custom_card: true
+  grouped_sort_order: 15
   sort_order: 20
 switch.adguard_filtering:
   disabled: true

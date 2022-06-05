@@ -1,0 +1,9 @@
+entity: sensor.pression_filtre
+max: 1.5
+min: 0
+needle: true
+severity:
+  green: 0.1
+  red: 1
+  yellow: 0.8
+type: gauge

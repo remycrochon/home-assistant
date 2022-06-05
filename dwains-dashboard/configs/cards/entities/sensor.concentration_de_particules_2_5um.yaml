@@ -1,0 +1,8 @@
+entity: sensor.concentration_de_particules_2_5um
+name: PM 2.5
+needle: true
+severity:
+  green: 15
+  red: 40
+  yellow: 20
+type: gauge

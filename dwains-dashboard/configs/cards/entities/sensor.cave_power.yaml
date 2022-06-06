@@ -78,6 +78,6 @@ card:
     - align-self: center
   type: custom:button-card
 data:
-  battery_entity: sensor.zoe_battery
-  battery_name: ZOE
+  battery_entity: sensor.cave_power
+  battery_name: Cave
 type: custom:dwains-blueprint-card

@@ -1,4 +1,19 @@
-blueprint: battery_card_blueprint.yaml
+blueprint:
+  custom_cards:
+  - button-card
+  description: Battery card by mase
+  input:
+    battery_entity:
+      description: This is the battery
+      name: Select Battery
+      type: entity-picker
+    battery_name:
+      description: This is the battery name
+      name: Battery name
+      type: text-field
+  name: Battery card Blueprint
+  type: card
+  version: '1.0'
 card:
   color: var(--primary-color)
   entity: $battery_entity$
@@ -77,7 +92,3 @@ card:
     - font-size: 15px
     - align-self: center
   type: custom:button-card
-data:
-  battery_entity: sensor.zoe_battery
-  battery_name: ZOE
-type: custom:dwains-blueprint-card

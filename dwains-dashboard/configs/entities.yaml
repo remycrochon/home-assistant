@@ -29,7 +29,7 @@ binary_sensor.detecteur_petite_porte_sous_sol:
   col_span_lg: '1'
   col_span_xl: '1'
   custom_card: false
-  custom_popup: false
+  custom_popup: true
   disabled: false
   excluded: false
   friendly_name: Petite Porte
@@ -173,6 +173,7 @@ binary_sensor.omv_update_available:
   hidden: true
 binary_sensor.porte_cellier:
   custom_card: true
+  custom_popup: true
 binary_sensor.porte_frigo:
   col_span: '1'
   col_span_lg: '1'
@@ -409,7 +410,18 @@ cover.parents_petit:
 cover.porte_garage:
   custom_card: true
 cover.porte_sous_sol:
+  col_span: '2'
+  col_span_lg: '2'
+  col_span_xl: '2'
   custom_card: true
+  custom_popup: true
+  disabled: false
+  excluded: false
+  friendly_name: ''
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 cover.salon_petit:
   col_span: '1'
   col_span_lg: '1'
@@ -715,7 +727,7 @@ sensor.battery_sdb:
 sensor.bh1750_illuminance:
   custom_card: true
   disabled: false
-  grouped_sort_order: 4
+  grouped_sort_order: 6
   hidden: false
 sensor.bp1_sonof_4d594222_power:
   disabled: true
@@ -761,6 +773,15 @@ sensor.bureau_temperature:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+sensor.cave_humidity:
+  custom_card: true
+  grouped_sort_order: 2
+sensor.cave_power:
+  custom_card: true
+  grouped_sort_order: 3
+sensor.cave_temperature:
+  custom_card: true
+  grouped_sort_order: 1
 sensor.chamb_nord_pression:
   col_span: '1'
   col_span_lg: '1'
@@ -918,11 +939,12 @@ sensor.ecocompteur_vmc_niv0:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: Pu VMC
+  grouped_sort_order: 6
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1003,7 +1025,7 @@ sensor.esp126_wifi_signal_sensor:
 sensor.esp127_temperature:
   custom_card: true
   disabled: false
-  grouped_sort_order: 6
+  grouped_sort_order: 3
   hidden: false
 sensor.esp127_u_alim:
   col_span: '1'
@@ -1013,13 +1035,27 @@ sensor.esp127_u_alim:
   custom_popup: false
   disabled: false
   excluded: false
-  friendly_name: U Thermo
-  grouped_sort_order: 3
+  friendly_name: U Thermoc
+  grouped_sort_order: 5
   hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
   sort_order: 3
+sensor.esp127_u_panneau:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
+  custom_card: true
+  custom_popup: false
+  disabled: false
+  excluded: false
+  friendly_name: U Panno Thermoc
+  grouped_sort_order: 4
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.esp127_uptime_sensor:
   disabled: true
 sensor.esp127_wifi_signal_sensor:
@@ -1079,11 +1115,12 @@ sensor.esp136_rend:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: Rend VMC
+  grouped_sort_order: 5
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1092,11 +1129,12 @@ sensor.esp136_tdeg_air_neuf:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: "T\xB0 Air Neuf VMC"
+  grouped_sort_order: 1
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1105,11 +1143,12 @@ sensor.esp136_tdeg_air_vicie:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: "T\xB0 Air Vici\xE9 VMC"
+  grouped_sort_order: 2
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1118,11 +1157,12 @@ sensor.esp136_tdeg_aspiration:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: "T\xB0 Air Aspir\xE9 VMC"
+  grouped_sort_order: 3
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1131,11 +1171,12 @@ sensor.esp136_tdeg_insufflation:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: "T\xB0 Air Insuffl\xE9 VMC"
+  grouped_sort_order: 4
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1144,11 +1185,12 @@ sensor.esp136_tdegcombles:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: "T\xB0 Combles"
+  grouped_sort_order: 7
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1462,7 +1504,7 @@ sensor.orp_ezo:
   grouped_sort_order: 4
 sensor.ph_ezo:
   custom_card: true
-  grouped_sort_order: 1
+  grouped_sort_order: 2
 sensor.pid_pv_cool:
   disabled: true
 sensor.pid_pv_heat:
@@ -1572,7 +1614,7 @@ sensor.pzem_pisc_frequence:
   hidden: true
 sensor.pzem_pisc_puissance:
   custom_card: true
-  grouped_sort_order: 8
+  grouped_sort_order: 5
 sensor.pzem_pisc_tension:
   grouped_sort_order: 6
   hidden: true
@@ -1642,9 +1684,20 @@ sensor.tc_volet_sam_rssi_numeric:
 sensor.tcl_6_bp_rssi_numeric:
   hidden: true
 sensor.tdeg_eau_piscine:
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
-  favorite: true
-  grouped_sort_order: 2
+  custom_popup: false
+  disabled: false
+  excluded: false
+  favorite: false
+  friendly_name: "T\xB0 Piscine"
+  grouped_sort_order: 1
+  hidden: false
+  row_span: '1'
+  row_span_lg: '1'
+  row_span_xl: '1'
 sensor.temp_congelo_garage:
   col_span: '1'
   col_span_lg: '1'
@@ -1742,7 +1795,7 @@ sensor.vp2_barometer:
   disabled: false
   excluded: false
   friendly_name: Pression
-  grouped_sort_order: 5
+  grouped_sort_order: 9
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1752,11 +1805,11 @@ sensor.vp2_datetime:
   hidden: true
 sensor.vp2_direction_du_vent:
   custom_card: true
-  grouped_sort_order: 16
+  grouped_sort_order: 19
   sort_order: 17
 sensor.vp2_heatindex:
   custom_card: true
-  grouped_sort_order: 10
+  grouped_sort_order: 13
   hidden: false
   sort_order: 16
 sensor.vp2_humidity_out:
@@ -1804,7 +1857,7 @@ sensor.vp2_pluviometrie_standard_deviation:
   sort_order: 7
 sensor.vp2_radiation:
   custom_card: true
-  grouped_sort_order: 9
+  grouped_sort_order: 12
   hidden: false
 sensor.vp2_radiation_moyenne:
   grouped_sort_order: 18
@@ -1812,7 +1865,7 @@ sensor.vp2_radiation_moyenne:
   sort_order: 19
 sensor.vp2_rafale:
   custom_card: true
-  grouped_sort_order: 14
+  grouped_sort_order: 17
   hidden: false
   sort_order: 12
 sensor.vp2_rafales_max:
@@ -1825,12 +1878,12 @@ sensor.vp2_rain:
   sort_order: 8
 sensor.vp2_rain24:
   custom_card: true
-  grouped_sort_order: 8
+  grouped_sort_order: 11
   hidden: false
   sort_order: 9
 sensor.vp2_rain_rate:
   custom_card: true
-  grouped_sort_order: 12
+  grouped_sort_order: 15
   hidden: false
   sort_order: 10
 sensor.vp2_rain_storm:
@@ -1839,7 +1892,7 @@ sensor.vp2_rain_storm:
   sort_order: 11
 sensor.vp2_ressenti:
   custom_card: true
-  grouped_sort_order: 11
+  grouped_sort_order: 14
   hidden: false
   sort_order: 15
 sensor.vp2_temp_in:
@@ -1857,9 +1910,9 @@ sensor.vp2_temp_in:
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.vp2_temp_out:
-  col_span: '1'
-  col_span_lg: '1'
-  col_span_xl: '1'
+  col_span: '2'
+  col_span_lg: '3'
+  col_span_xl: '3'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -1881,7 +1934,7 @@ sensor.vp2_uv:
   disabled: false
   excluded: false
   friendly_name: ''
-  grouped_sort_order: 7
+  grouped_sort_order: 10
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1899,13 +1952,13 @@ sensor.zoe_battery:
   disabled: true
 sensor.zoe_battery_level:
   custom_card: true
-  grouped_sort_order: 13
+  grouped_sort_order: 16
   sort_order: 4
 sensor.zoe_cell_tower_id:
   disabled: true
 sensor.zoe_daily_goal:
   custom_card: true
-  grouped_sort_order: 18
+  grouped_sort_order: 8
   sort_order: 22
 sensor.zoe_gps_satellites:
   disabled: true
@@ -1919,13 +1972,13 @@ sensor.zoe_last_update_rate:
   disabled: true
 sensor.zoe_minutes_active:
   custom_card: true
-  grouped_sort_order: 17
+  grouped_sort_order: 7
   sort_order: 21
 sensor.zoe_sensor_mode:
   disabled: true
 sensor.zoe_tracker_state:
   custom_card: true
-  grouped_sort_order: 15
+  grouped_sort_order: 18
   sort_order: 20
 switch.adguard_filtering:
   disabled: true

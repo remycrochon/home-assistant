@@ -1,4 +1,47 @@
-blueprint: threegraphicsblueprint.yaml
+blueprint:
+  custom_cards:
+  - mini-graph-card
+  description: Three Graphics Blueprint by Michel Jourdain
+  input:
+    10_card_name:
+      description: Name of the card one
+      name: Name card one
+      type: text-field
+    11_card_entity:
+      description: Etity of the card one
+      name: Entity card one
+      type: entity-picker
+    12_card_icon:
+      description: Icone of the card one
+      name: Icon card one
+      type: icon-picker
+    20_card_name:
+      description: Name of the card two
+      name: Name card two
+      type: text-field
+    21_card_entity:
+      description: Etity of the card two
+      name: Entity card two
+      type: entity-picker
+    22_card_icon:
+      description: Icone of the card two
+      name: Icon card two
+      type: icon-picker
+    30_card_name:
+      description: Name of the card three
+      name: Name card three
+      type: text-field
+    31_card_entity:
+      description: Etity of the card three
+      name: Entity card three
+      type: entity-picker
+    32_card_icon:
+      description: Icone of the card three
+      name: Icon card three
+      type: icon-picker
+  name: ThreeGraphicsBlueprint
+  type: card
+  version: '1.0'
 card:
   cards:
   - cards:
@@ -83,14 +126,3 @@ card:
     type: horizontal-stack
   items_classes: col-xs-12
   type: custom:dwains-flexbox-card
-data:
-  10_card_name: Piscine
-  11_card_entity: sensor.temp_piscine
-  12_card_icon: mdi:pool-thermometer
-  20_card_name: Ext
-  21_card_entity: sensor.vp2_temp_out
-  22_card_icon: mdi:temperature-celsius
-  30_card_name: Hum
-  31_card_entity: sensor.vp2_humidity_out
-  32_card_icon: mdi:water-percent
-type: custom:dwains-blueprint-card

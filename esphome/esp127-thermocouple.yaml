@@ -30,6 +30,12 @@ wifi:
 deep_sleep:
   run_duration: 30s
   sleep_duration: 2min
+  
+i2c:
+  sda: GPIO4 #D2
+  scl: GPIO5 #D1
+  scan: true
+  id: bus_a
 
 logger:
 api:
@@ -39,12 +45,22 @@ web_server:
   
 spi:
   miso_pin: D5
-  clk_pin: D1
+  clk_pin: D8 #ex D1
 
+ads1115:
+  - address: 0x48
+  
 sensor:
+  - platform: ads1115
+    multiplexer: 'A0_GND'
+    gain: 6.144
+    name: "${friendly_name} U Panneau"
+    update_interval: 10s
+    
+
   - platform: max31855
     name: "${friendly_name} Temperature"
-    cs_pin: D2
+    cs_pin: D3
     update_interval: 10s
     accuracy_decimals: 2
 #    filters:

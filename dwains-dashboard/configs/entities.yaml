@@ -1873,8 +1873,9 @@ sensor.vp2_rafales_max:
   hidden: true
   sort_order: 18
 sensor.vp2_rain:
+  custom_card: true
   grouped_sort_order: 7
-  hidden: true
+  hidden: false
   sort_order: 8
 sensor.vp2_rain24:
   custom_card: true

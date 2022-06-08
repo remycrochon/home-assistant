@@ -1733,8 +1733,7 @@
           - select.energy_autres_usage_weekly
           - select.energy_autres_usage_yearly
           - select.energy_vmc_usage_daily
-          - select.linky_test_cmpt_15mn
-          - select.linky_cpt_test_1h
+          - select.linky_energie_jour
     - conditions:
       - condition: trigger
         id: tarif_hp
@@ -1773,8 +1772,7 @@
           - select.energy_autres_usage_weekly
           - select.energy_autres_usage_yearly
           - select.energy_vmc_usage_daily
-          - select.linky_cpt_test_1h
-          - select.linky_test_cmpt_15mn
+          - select.linky_energie_jour
     default: []
   mode: single
 - id: '1642958036645'

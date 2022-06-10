@@ -30,7 +30,7 @@ class AlerteFinCertificats(hass.Hass):
             self.notification("Friendly_name= "+nom_entité,2,"")
             self.notification("Etat= "+etat,2,"")
             # Vérifie si le certificat est valide
-            if etat !="unknown" or validité == True:
+            if etat !="unknown" and validité == True:
                 # Création entités dans HA
                 binarysensorname="binary_sensor.cert_"+certif[29:]+"_validite"  #binary_sensor.certificat_ha
                 #binarysensorname="binary_sensor.cert_"+nom_entité+"_validite"  #binary_sensor.certificat_ha

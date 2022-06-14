@@ -786,6 +786,33 @@ cards:
     style: "ha-card {\n  border: solid 2px var(--primary-color);\n}\n"
     type: entities
   type: vertical-stack
+- cards:
+  - entity: binary_sensor.detecteur_petite_porte_sous_sol
+    name: SSOl
+    show_icon: true
+    show_label: false
+    show_name: true
+    size: 70%
+    state:
+    - color: green
+      icon: mdi:door
+      value: 'off'
+    - color: red
+      icon: mdi:door-open
+      value: 'on'
+    - color: yellow
+      icon: mdi:door
+      operator: default
+      styles:
+        card:
+        - animation: blink 2s ease infinite
+    tap_action:
+      action: more-info
+    theme: Mushroom
+    type: custom:button-card
+  columns: 6
+  square: true
+  type: grid
 items_classes: col-xs-12 col-sm-6 col-md-6 col-lg-6
 padding: true
 type: custom:dwains-flexbox-card

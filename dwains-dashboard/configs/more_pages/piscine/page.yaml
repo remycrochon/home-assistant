@@ -76,8 +76,8 @@ cards:
       needle: true
       severity:
         green: 0
-        red: 80
-        yellow: 70
+        red: 70
+        yellow: 60
       type: gauge
     - entity: sensor.pzem_pisc_puissance
       max: 900

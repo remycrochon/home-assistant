@@ -244,7 +244,7 @@ cards:
       - entities:
         - entity: sensor.nas_ds218_cpu_load_average_15_min
           name: Charge 15 mn
-        - entity: binary_sensor.nas_ds218_update_available
+        - entity: update.nas_ds218_dsm_update
           name: Update
         - entity: binary_sensor.nas_ds218_security_status
           name: "S\xE9curit\xE9"
@@ -643,37 +643,6 @@ cards:
       none: '#C9C9C9'
       ok: '#45C669'
       title: gray
-    entity: binary_sensor.uptime_jeedom
-    hours_to_show: 72
-    icon: fas:safari
-    name: Jeedom
-    show:
-      average: true
-      footer: true
-      header: true
-      icon: true
-      status: true
-      timeline: true
-      title: true
-    status_adaptive_color: true
-    tooltip:
-      animation: true
-    type: custom:uptime-card
-  - alias:
-      ko: Offline
-      ok: Online
-    average_text: '% uptime'
-    blink:
-      effect: fade
-      speed: 1
-      target: card
-    color:
-      half: '#C66445'
-      icon: gray
-      ko: '#C6B145'
-      none: '#C9C9C9'
-      ok: '#45C669'
-      title: gray
     entity: binary_sensor.uptime_kobold
     hours_to_show: 72
     icon: fas:safari
@@ -768,6 +737,37 @@ cards:
       ok: '#45C669'
       title: gray
     entity: binary_sensor.uptime_motioneye
+    hours_to_show: 72
+    icon: fas:safari
+    name: Motioneye
+    show:
+      average: true
+      footer: true
+      header: true
+      icon: true
+      status: true
+      timeline: true
+      title: true
+    status_adaptive_color: true
+    tooltip:
+      animation: true
+    type: custom:uptime-card
+  - alias:
+      ko: Offline
+      ok: Online
+    average_text: '% uptime'
+    blink:
+      effect: fade
+      speed: 1
+      target: card
+    color:
+      half: '#C66445'
+      icon: gray
+      ko: '#C6B145'
+      none: '#C9C9C9'
+      ok: '#45C669'
+      title: gray
+    entity: binary_sensor.uptime_matamo
     hours_to_show: 72
     icon: fas:safari
     name: Motioneye

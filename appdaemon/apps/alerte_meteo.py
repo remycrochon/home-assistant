@@ -80,9 +80,9 @@ class AlerteMeteo(hass.Hass):
                     message_notification= ": Alerte Innondation :"+ Inondation
                     self.notification(message_notification,1,"teleg")
 
-                if Grand_Froid != 'Vert':
-                    message_notification= ": Alerte Grand-froid :"+Grand_Froid
-                    self.notification(message_notification,1,"teleg")
+#                if Grand_Froid != 'Vert':
+#                    message_notification= ": Alerte Grand-froid :"+Grand_Froid
+#                    self.notification(message_notification,1,"teleg")
 
                 if Neige_Verglas != 'Vert':
                     message_notification= ": Alerte Neige Verglas :"+Neige_Verglas

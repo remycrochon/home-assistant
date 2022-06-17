@@ -1881,7 +1881,7 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1649766635520'
-  alias: 4_1_3 Volet-Suivi Azimuth Soleil
+  alias: 4_1_3 Volet-Suivi Azimuth Soleil (old)
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
   trigger:
   - platform: time_pattern
@@ -1911,7 +1911,7 @@
       sequence:
       - service: cover.set_cover_position
         data:
-          position: 20
+          position: 10
         target:
           entity_id:
           - cover.volet_sdb_p
@@ -1942,7 +1942,7 @@
       sequence:
       - service: cover.set_cover_position
         data:
-          position: 20
+          position: 10
         target:
           entity_id:
           - cover.volet_amis_sud_p
@@ -2173,5 +2173,77 @@
           entity_id:
           - select.linky_energie_jour
           - select.energy_autres_usage_yearly
+    default: []
+  mode: single
+- id: '1655448600753'
+  alias: 4_1_3 Volet-Suivi Azimuth Soleil
+  description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
+  trigger:
+  - platform: template
+    value_template: '{% set a=states(''binary_sensor.position_soleil_matin'') %}
+
+      {% set b=states(''sensor.vp2_radiation_moyenne'') | float(default=0) %}
+
+      {% set c=states(''input_number.radiation_seuil_ferm_volet'') | float(default=0)
+      %}
+
+      {{ a == "on" and b>=c}}'
+    id: ferm_matin
+  - platform: state
+    entity_id:
+    - binary_sensor.position_soleil_midi
+    id: ouv_midi
+    to: 'on'
+  - platform: template
+    value_template: '{% set a=states(''binary_sensor.position_soleil_am'') %}
+
+      {% set b=states(''sensor.vp2_radiation_moyenne'') | float(default=0) %}
+
+      {% set c=states(''input_number.radiation_seuil_ferm_volet'') | float(default=0)
+      %}
+
+      {{ a == "on" and b>=c}}'
+    id: ferm_am
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ferm_matin
+      sequence:
+      - service: cover.set_cover_position
+        data:
+          position: 10
+        target:
+          entity_id:
+          - cover.volet_sdb_p
+          - cover.volet_amis_nord_p
+    - conditions:
+      - condition: trigger
+        id: ouv_midi
+      sequence:
+      - service: cover.open_cover
+        data: {}
+        target:
+          entity_id: cover.volet_sdb_p
+      - condition: state
+        entity_id: input_boolean.presence_amis_ch_nord
+        state: 'off'
+      - service: cover.open_cover
+        target:
+          entity_id:
+          - cover.volet_amis_nord_p
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: ferm_am
+      sequence:
+      - service: cover.set_cover_position
+        data:
+          position: 10
+        target:
+          entity_id:
+          - cover.volet_amis_sud_p
+          - cover.volet_ch_parent_p
     default: []
   mode: single

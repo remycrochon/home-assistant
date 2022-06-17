@@ -1,6 +1,197 @@
 cards:
 - cards:
   - cards:
+    - entity: cover.porte_garage
+      label: Garage
+      operator: default
+      show_icon: true
+      show_label: true
+      show_name: false
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:garage
+        operator: template
+        value: '[[[ return states[''cover.porte_garage''].attributes.current_position
+          < 1 ]]]
+
+          '
+      - color: red
+        icon: mdi:garage-open
+        operator: template
+        value: '[[[ return states[''cover.porte_garage''].attributes.current_position
+          > 99 ]]]
+
+          '
+      - color: orange
+        icon: mdi:garage-alert
+        operator: default
+      tap_action:
+        action: more-info
+      theme: Mushroom
+      type: custom:button-card
+    - icon: mdi:arrow-up-bold
+      name: Ouvrir
+      show_icon: true
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.open_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - icon: mdi:pause
+      name: Stop
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.stop_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - icon: mdi:arrow-down-bold
+      name: Fermer
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.close_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - icon: mdi:weather-sunset-up
+      name: Soleil
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.set_cover_position
+        service_data:
+          position: 50
+        target:
+          entity_id:
+          - cover.porte_garage
+      type: button
+    - elements:
+      - attribute: current_position
+        entity: cover.porte_garage
+        style:
+          color: '#44739E'
+          font-size: 16px
+          font-weight: bold
+          left: 50%
+          top: 50%
+        suffix: '%'
+        tap_action:
+          action: more-info
+        type: state-label
+      image: /local/images/carre_orange.png
+      type: picture-elements
+      view_layout:
+        position: sidebar
+    columns: 6
+    square: true
+    type: grid
+  - cards:
+    - entity: cover.porte_sous_sol
+      label: Sous Sol
+      show_icon: true
+      show_label: true
+      show_name: false
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:garage
+        operator: template
+        value: '[[[ return states[''cover.porte_sous_sol''].attributes.current_position
+          < 1 ]]]
+
+          '
+      - color: red
+        icon: mdi:garage-open
+        operator: template
+        value: '[[[ return states[''cover.porte_sous_sol''].attributes.current_position
+          > 99 ]]]
+
+          '
+      - color: orange
+        icon: mdi:garage-alert
+        operator: default
+      tap_action:
+        action: more-info
+      theme: Mushroom
+      type: custom:button-card
+    - icon: mdi:arrow-up-bold
+      name: Ouvrir
+      show_icon: true
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.open_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - icon: mdi:pause
+      name: Stop
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.stop_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - icon: mdi:arrow-down-bold
+      name: Fermer
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.close_cover
+        service_data: {}
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - icon: mdi:weather-sunset-up
+      name: Soleil
+      show_name: false
+      tap_action:
+        action: call-service
+        service: cover.set_cover_position
+        service_data:
+          position: 50
+        target:
+          entity_id:
+          - cover.porte_sous_sol
+      type: button
+    - elements:
+      - attribute: current_position
+        entity: cover.porte_sous_sol
+        style:
+          color: '#44739E'
+          font-size: 16px
+          font-weight: bold
+          left: 50%
+          top: 50%
+        suffix: '%'
+        tap_action:
+          action: more-info
+        type: state-label
+      image: /local/images/carre_orange.png
+      type: picture-elements
+      view_layout:
+        position: sidebar
+    columns: 6
+    square: true
+    type: grid
+  - cards:
     - entity: group.volets_bureau
       hold_action:
         action: none
@@ -481,199 +672,91 @@ cards:
     columns: 6
     square: true
     type: grid
-  - cards:
-    - entity: cover.porte_garage
-      label: Garage
-      operator: default
-      show_icon: true
-      show_label: true
-      show_name: false
-      size: 70%
-      state:
-      - color: green
-        icon: mdi:garage
-        operator: template
-        value: '[[[ return states[''cover.porte_garage''].attributes.current_position
-          < 1 ]]]
-
-          '
-      - color: red
-        icon: mdi:garage-open
-        operator: template
-        value: '[[[ return states[''cover.porte_garage''].attributes.current_position
-          > 99 ]]]
-
-          '
-      - color: orange
-        icon: mdi:garage-alert
-        operator: default
-      tap_action:
-        action: more-info
-      theme: Mushroom
-      type: custom:button-card
-    - icon: mdi:arrow-up-bold
-      name: Ouvrir
-      show_icon: true
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.open_cover
-        service_data: {}
-        target:
-          entity_id:
-          - cover.porte_garage
-      type: button
-    - icon: mdi:pause
-      name: Stop
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.stop_cover
-        service_data: {}
-        target:
-          entity_id:
-          - cover.porte_garage
-      type: button
-    - icon: mdi:arrow-down-bold
-      name: Fermer
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.close_cover
-        service_data: {}
-        target:
-          entity_id:
-          - cover.porte_garage
-      type: button
-    - icon: mdi:weather-sunset-up
-      name: Soleil
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.set_cover_position
-        service_data:
-          position: 50
-        target:
-          entity_id:
-          - cover.porte_garage
-      type: button
-    - elements:
-      - attribute: current_position
-        entity: cover.porte_garage
-        style:
-          color: '#44739E'
-          font-size: 16px
-          font-weight: bold
-          left: 50%
-          top: 50%
-        suffix: '%'
-        tap_action:
-          action: more-info
-        type: state-label
-      image: /local/images/carre_orange.png
-      type: picture-elements
-      view_layout:
-        position: sidebar
-    columns: 6
-    square: true
-    type: grid
-  - cards:
-    - entity: cover.porte_sous_sol
-      label: Sous Sol
-      show_icon: true
-      show_label: true
-      show_name: false
-      size: 70%
-      state:
-      - color: green
-        icon: mdi:garage
-        operator: template
-        value: '[[[ return states[''cover.porte_sous_sol''].attributes.current_position
-          < 1 ]]]
-
-          '
-      - color: red
-        icon: mdi:garage-open
-        operator: template
-        value: '[[[ return states[''cover.porte_sous_sol''].attributes.current_position
-          > 99 ]]]
-
-          '
-      - color: orange
-        icon: mdi:garage-alert
-        operator: default
-      tap_action:
-        action: more-info
-      theme: Mushroom
-      type: custom:button-card
-    - icon: mdi:arrow-up-bold
-      name: Ouvrir
-      show_icon: true
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.open_cover
-        service_data: {}
-        target:
-          entity_id:
-          - cover.porte_sous_sol
-      type: button
-    - icon: mdi:pause
-      name: Stop
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.stop_cover
-        service_data: {}
-        target:
-          entity_id:
-          - cover.porte_sous_sol
-      type: button
-    - icon: mdi:arrow-down-bold
-      name: Fermer
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.close_cover
-        service_data: {}
-        target:
-          entity_id:
-          - cover.porte_sous_sol
-      type: button
-    - icon: mdi:weather-sunset-up
-      name: Soleil
-      show_name: false
-      tap_action:
-        action: call-service
-        service: cover.set_cover_position
-        service_data:
-          position: 50
-        target:
-          entity_id:
-          - cover.porte_sous_sol
-      type: button
-    - elements:
-      - attribute: current_position
-        entity: cover.porte_sous_sol
-        style:
-          color: '#44739E'
-          font-size: 16px
-          font-weight: bold
-          left: 50%
-          top: 50%
-        suffix: '%'
-        tap_action:
-          action: more-info
-        type: state-label
-      image: /local/images/carre_orange.png
-      type: picture-elements
-      view_layout:
-        position: sidebar
-    columns: 6
-    square: true
-    type: grid
   type: vertical-stack
 - cards:
+  - name: PORTES
+    styles:
+      card:
+      - text-transform: uppercase
+      - color: var(--dwains-theme-accent)
+      - font-size: 125%
+      - border-radius: 0%
+      - font-weight: 100
+      - letter-spacing: 10px
+    type: custom:button-card
+  - cards:
+    - entity: binary_sensor.detecteur_petite_porte_sous_sol
+      name: Ssol
+      show_icon: true
+      show_label: false
+      show_name: true
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:door
+        value: 'off'
+      - color: red
+        icon: mdi:door-open
+        value: 'on'
+      - color: yellow
+        icon: mdi:door
+        operator: default
+        styles:
+          card:
+          - animation: blink 2s ease infinite
+      tap_action:
+        action: more-info
+      theme: Mushroom
+      type: custom:button-card
+    - entity: binary_sensor.porte_cellier
+      name: Cellier
+      show_icon: true
+      show_label: false
+      show_name: true
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:door
+        value: 'off'
+      - color: red
+        icon: mdi:door-open
+        value: 'on'
+      - color: yellow
+        icon: mdi:door
+        operator: default
+        styles:
+          card:
+          - animation: blink 2s ease infinite
+      tap_action:
+        action: more-info
+      theme: Mushroom
+      type: custom:button-card
+    - entity: binary_sensor.detecteur_porte_entree
+      name: "Entr\xE9e"
+      show_icon: true
+      show_label: false
+      show_name: true
+      size: 70%
+      state:
+      - color: green
+        icon: mdi:door
+        value: 'off'
+      - color: red
+        icon: mdi:door-open
+        value: 'on'
+      - color: yellow
+        icon: mdi:door
+        operator: default
+        styles:
+          card:
+          - animation: blink 2s ease infinite
+      tap_action:
+        action: more-info
+      theme: Mushroom
+      type: custom:button-card
+    columns: 6
+    square: true
+    type: grid
   - name: VOLETS
     styles:
       card:
@@ -786,79 +869,6 @@ cards:
     style: "ha-card {\n  border: solid 2px var(--primary-color);\n}\n"
     type: entities
   type: vertical-stack
-- cards:
-  - entity: binary_sensor.detecteur_petite_porte_sous_sol
-    name: Ssol
-    show_icon: true
-    show_label: false
-    show_name: true
-    size: 70%
-    state:
-    - color: green
-      icon: mdi:door
-      value: 'off'
-    - color: red
-      icon: mdi:door-open
-      value: 'on'
-    - color: yellow
-      icon: mdi:door
-      operator: default
-      styles:
-        card:
-        - animation: blink 2s ease infinite
-    tap_action:
-      action: more-info
-    theme: Mushroom
-    type: custom:button-card
-  - entity: binary_sensor.porte_cellier
-    name: Cellier
-    show_icon: true
-    show_label: false
-    show_name: true
-    size: 70%
-    state:
-    - color: green
-      icon: mdi:door
-      value: 'off'
-    - color: red
-      icon: mdi:door-open
-      value: 'on'
-    - color: yellow
-      icon: mdi:door
-      operator: default
-      styles:
-        card:
-        - animation: blink 2s ease infinite
-    tap_action:
-      action: more-info
-    theme: Mushroom
-    type: custom:button-card
-  - entity: binary_sensor.detecteur_porte_entree
-    name: "Entr\xE9e"
-    show_icon: true
-    show_label: false
-    show_name: true
-    size: 70%
-    state:
-    - color: green
-      icon: mdi:door
-      value: 'off'
-    - color: red
-      icon: mdi:door-open
-      value: 'on'
-    - color: yellow
-      icon: mdi:door
-      operator: default
-      styles:
-        card:
-        - animation: blink 2s ease infinite
-    tap_action:
-      action: more-info
-    theme: Mushroom
-    type: custom:button-card
-  columns: 6
-  square: true
-  type: grid
 items_classes: col-xs-12 col-sm-6 col-md-6 col-lg-6
 padding: true
 type: custom:dwains-flexbox-card

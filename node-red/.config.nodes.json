@@ -1192,7 +1192,7 @@
     },
     "node-red-contrib-telegrambot-home": {
         "name": "node-red-contrib-telegrambot-home",
-        "version": "0.5.2",
+        "version": "0.7.0",
         "local": true,
         "user": true,
         "nodes": {
@@ -1296,7 +1296,7 @@
     },
     "node-red-contrib-power-monitor": {
         "name": "node-red-contrib-power-monitor",
-        "version": "0.1.2",
+        "version": "1.0.0",
         "local": true,
         "user": true,
         "nodes": {
@@ -1467,6 +1467,36 @@
                 "user": false,
                 "module": "node-red-contrib-edge-trigger",
                 "file": "/config/node-red/node_modules/node-red-contrib-edge-trigger/edge-trigger/hysteresis.js"
+            }
+        }
+    },
+    "node-red-contrib-alexa-home": {
+        "name": "node-red-contrib-alexa-home",
+        "version": "1.4.0",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "alexa-home": {
+                "name": "alexa-home",
+                "types": [
+                    "alexa-home"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-home/alexa/alexa-home.js"
+            },
+            "alexa-home-controller": {
+                "name": "alexa-home-controller",
+                "types": [
+                    "alexa-home-controller"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-home/alexa/alexa-home-controller.js"
             }
         }
     }

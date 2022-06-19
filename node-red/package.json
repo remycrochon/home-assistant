@@ -4,13 +4,14 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
+        "node-red-contrib-alexa-home": "~1.4.0",
         "node-red-contrib-boolean-logic": "0.0.3",
         "node-red-contrib-credentials": "~0.2.1",
         "node-red-contrib-edge-trigger": "~1.0.0",
         "node-red-contrib-eztimer": "~1.2.5",
-        "node-red-contrib-power-monitor": "~0.1.2",
+        "node-red-contrib-power-monitor": "~1.0.0",
         "node-red-contrib-scheduler": "~1.0.5",
-        "node-red-contrib-telegrambot-home": "~0.5.2",
+        "node-red-contrib-telegrambot-home": "~0.7.0",
         "node-red-contrib-unit-converter": "0.0.2",
         "node-red-node-pushbullet": "0.0.17"
     }

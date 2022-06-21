@@ -5,7 +5,7 @@ from homeassistant.const import Platform
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2022.6.0"
+INTEGRATION_VERSION = "2022.6.2"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
 HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/apps"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
@@ -20,6 +20,7 @@ PLATFORMS = [
     Platform.CALENDAR,
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
+    Platform.CAMERA,
 ]
 
 # Configuration and options
@@ -30,6 +31,13 @@ CONF_TOKEN_TYPE = "token_type"
 CONF_REFRESH_TOKEN = "refresh_token"
 ACCESS_TOKEN_RAW = "access_token_raw"
 POSITIONS = "positions"
+
+# Camera configuration
+ENABLE_CAMERA = "enable_camera"
+GPS_TOP_LEFT = "gps_top_left"
+GPS_BOTTOM_RIGHT = "gps_bottom_right"
+MOWER_IMG_PATH = "mower_img_path"
+MAP_IMG_PATH = "map_img_path"
 
 
 # Defaults
@@ -169,7 +177,7 @@ ERRORCODES = {
     118: "Charging system problem",
     119: "Zone generator problem",
     120: "Internal voltage error",
-    121: "High internal temerature",
+    121: "High internal temperature",
     122: "CAN error",
     123: "Destination not reachable",
 }

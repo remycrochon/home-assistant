@@ -26,7 +26,7 @@ wifi:
 
   manual_ip:
     static_ip: ${adress_ip}
-    gateway: 192.168.0.1
+    gateway: 192.168.0.254
     subnet: 255.255.255.0
 
 captive_portal:

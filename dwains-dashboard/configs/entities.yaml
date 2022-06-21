@@ -71,6 +71,8 @@ binary_sensor.esp129_status:
   hidden: true
 binary_sensor.esp130_status:
   hidden: true
+binary_sensor.esp131_status:
+  sort_order: 2
 binary_sensor.esp132_status:
   hidden: true
 binary_sensor.esp133_status:
@@ -1096,6 +1098,23 @@ sensor.esp130_uptime_sensor:
   hidden: true
 sensor.esp130_wifi_signal_sensor:
   hidden: true
+sensor.esp131_connected_bssid:
+  grouped_sort_order: 5
+  hidden: true
+sensor.esp131_connected_ssid:
+  grouped_sort_order: 4
+  sort_order: 4
+sensor.esp131_esphome_version:
+  grouped_sort_order: 6
+  hidden: true
+sensor.esp131_ip_address:
+  excluded: true
+  grouped_sort_order: 3
+  hidden: true
+  sort_order: 4
+sensor.esp131_wifi_signal_sensor:
+  grouped_sort_order: 2
+  sort_order: 3
 sensor.esp132_uptime_sensor:
   hidden: true
 sensor.esp132_wifi_signal_sensor:
@@ -1469,6 +1488,14 @@ sensor.nb_de_particules_2_5:
   disabled: true
 sensor.nb_de_particules_5_0:
   disabled: true
+sensor.niveau_puit:
+  custom_card: true
+  custom_popup: true
+  grouped_sort_order: 1
+  sort_order: 1
+sensor.niveau_puit_brut:
+  grouped_sort_order: 7
+  hidden: true
 sensor.omv:
   disabled: true
   hidden: true
@@ -2022,6 +2049,8 @@ switch.esp128_restart:
 switch.esp129_restart:
   hidden: true
 switch.esp130_restart:
+  hidden: true
+switch.esp131_restart:
   hidden: true
 switch.esp132_restart:
   hidden: true

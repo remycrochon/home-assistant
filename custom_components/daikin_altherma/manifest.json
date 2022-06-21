@@ -1,0 +1,20 @@
+{
+  "domain": "daikin_altherma",
+  "name": "Daikin Altherma HVAC",
+  "config_flow": true,
+  "documentation": "https://github.com/tadasdanielius/daikin_altherma",
+  "issue_tracker": "https://github.com/tadasdanielius/daikin_altherma/issues",
+  "requirements": [
+    "pyaltherma==0.0.17"
+  ],
+  "ssdp": [],
+  "zeroconf": [
+    "_daikin._tcp.local."
+  ],
+  "homekit": {},
+  "codeowners": [
+    "@tadasdanielius"
+  ],
+  "iot_class": "local_polling",
+  "version": "1.2.2"
+}

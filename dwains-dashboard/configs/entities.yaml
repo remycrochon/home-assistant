@@ -208,7 +208,7 @@ binary_sensor.tablette_etat_charge:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
-  sort_order: 11
+  sort_order: 9
 binary_sensor.tablette_etat_usb:
   hidden: true
   sort_order: 10
@@ -543,6 +543,7 @@ cover.volet_cuisine_p:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 13
 cover.volet_droit_p:
   col_span: '1'
   col_span_lg: '1'
@@ -595,6 +596,7 @@ cover.volet_salon_p:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 12
 cover.volet_sam:
   custom_card: true
   grouped_sort_order: 3
@@ -612,10 +614,14 @@ cover.volet_sam_grand_p:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 11
 cover.volet_sdb_p:
   custom_card: true
 device_tracker.am435x_awd:
   disabled: true
+device_tracker.esp138_qualite_air:
+  hidden: true
+  sort_order: 13
 device_tracker.hatos:
   disabled: true
 device_tracker.oszscclk_zoe:
@@ -923,7 +929,7 @@ sensor.concentration_de_particules_2_5um:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
-  sort_order: 2
+  sort_order: 7
 sensor.concentration_de_particules_2_5um_median:
   disabled: true
 sensor.conso:
@@ -1285,7 +1291,7 @@ sensor.humidite_salon_zb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
-  sort_order: 7
+  sort_order: 2
 sensor.humidite_terrasse2:
   col_span: '1'
   col_span_lg: '1'
@@ -1363,7 +1369,7 @@ sensor.mh_z19_co2_value:
   disabled: false
   favorite: false
   grouped_sort_order: 10
-  sort_order: 3
+  sort_order: 6
 sensor.mh_z19_temperature:
   disabled: true
 sensor.myip:
@@ -1380,6 +1386,7 @@ sensor.myip:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 14
 sensor.myups_battery_charge:
   disabled: true
 sensor.myups_battery_chemistry:
@@ -1558,6 +1565,7 @@ sensor.power_salon_zb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 4
 sensor.power_terrasse2:
   col_span: '1'
   col_span_lg: '1'
@@ -1608,7 +1616,7 @@ sensor.pression_salon_zb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
-  sort_order: 9
+  sort_order: 3
 sensor.pression_sdb:
   col_span: '1'
   col_span_lg: '1'
@@ -1695,7 +1703,7 @@ sensor.tablette_niveau_charge:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
-  sort_order: 4
+  sort_order: 8
 sensor.tc_6bp_2_rssi_numeric:
   hidden: true
 sensor.tc_6bp_3_rssi_numeric:
@@ -1767,7 +1775,7 @@ sensor.temperature_salon_zb:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
-  sort_order: 8
+  sort_order: 1
 sensor.temperature_sdb:
   col_span: '2'
   col_span_lg: '3'
@@ -1863,10 +1871,11 @@ sensor.vp2_humidte_in:
   excluded: false
   friendly_name: Hum VP2
   grouped_sort_order: 5
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 16
 sensor.vp2_pluviometrie_max:
   grouped_sort_order: 5
   hidden: true
@@ -1933,10 +1942,11 @@ sensor.vp2_temp_in:
   excluded: false
   friendly_name: Temp VP2
   grouped_sort_order: 6
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 15
 sensor.vp2_temp_out:
   col_span: '2'
   col_span_lg: '3'
@@ -2143,7 +2153,7 @@ switch.lumiere_cellier:
 switch.lumiere_salon:
   custom_card: true
   disabled: false
-  sort_order: 13
+  sort_order: 10
 switch.meteo81000_active:
   disabled: true
 switch.meteoweewx_active:
@@ -2151,6 +2161,7 @@ switch.meteoweewx_active:
 switch.pc1_lidl:
   custom_card: true
   disabled: false
+  sort_order: 17
 switch.pc2_tablette:
   disabled: true
 switch.pc_ht:

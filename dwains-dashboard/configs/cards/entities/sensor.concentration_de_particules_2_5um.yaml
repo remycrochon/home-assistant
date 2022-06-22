@@ -1,8 +1,18 @@
 entity: sensor.concentration_de_particules_2_5um
-name: PM 2.5
-needle: true
-severity:
-  green: 15
-  red: 40
-  yellow: 20
-type: gauge
+name: PM2.5
+show_name: true
+show_state: true
+size: 15%
+state:
+- color: green
+  operator: <=
+  value: 15
+- color: green
+  operator: '>='
+  value: 25
+- color: green
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

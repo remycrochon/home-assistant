@@ -1,15 +1,15 @@
-entity: sensor.niveau_puit
-name: Niv Puit
+entity: sensor.chamb_parents_pressure
+name: Hum
 show_name: true
 show_state: true
 size: 15%
 state:
 - color: red
   operator: <=
-  value: 0.5
+  value: 990
 - color: green
   operator: '>='
-  value: 2
+  value: 1000
 - color: orange
   operator: default
   styles:

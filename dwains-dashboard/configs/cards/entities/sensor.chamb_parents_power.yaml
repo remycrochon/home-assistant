@@ -1,16 +1,19 @@
-entity: sensor.niveau_puit
-name: Niv Puit
+entity: sensor.chamb_parents_power
+name: Batterie
 show_name: true
 show_state: true
 size: 15%
 state:
 - color: red
+  icon: mdi:battery-40
   operator: <=
-  value: 0.5
-- color: green
-  operator: '>='
-  value: 2
+  value: 40
 - color: orange
+  icon: mdi:battery-80
+  operator: <=
+  value: 80
+- color: green
+  icon: mdi:battery
   operator: default
   styles:
     card:

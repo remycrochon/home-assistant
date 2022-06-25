@@ -1,96 +1,20 @@
-blueprint: threegraphicsblueprint.yaml
-card:
-  cards:
-  - cards:
-    - align_header: center
-      align_state: center
-      aligne_icon: right
-      animate: true
-      color: Red
-      decimals: 1
-      entities:
-      - entity: $11_card_entity$
-      font_size: 100
-      height: 300
-      hour24: true
-      hours_to_show: 24
-      icon: $12_card_icon$
-      line_width: 2
-      name: $10_card_name$
-      points_per_hour: 1
-      show:
-        average: false
-        extrema: false
-        graph: bar
-        labels: false
-        legend: false
-      show_fill: true
-      smoothing: true
-      theme: ios-dark-mode-blue-red
-      type: custom:mini-graph-card
-    - align_header: center
-      align_state: center
-      aligne_icon: right
-      animate: true
-      color: Red
-      decimals: 1
-      entities:
-      - entity: $21_card_entity$
-      font_size: 100
-      height: 300
-      hour24: true
-      hours_to_show: 24
-      icon: $22_card_icon$
-      line_width: 2
-      name: $20_card_name$
-      points_per_hour: 1
-      show:
-        average: false
-        extrema: false
-        graph: bar
-        labels: false
-        legend: false
-      show_fill: true
-      smoothing: true
-      theme: ios-dark-mode-blue-red
-      type: custom:mini-graph-card
-    - align_header: center
-      align_state: center
-      aligne_icon: right
-      animate: true
-      color: Red
-      decimals: 1
-      entities:
-      - entity: $31_card_entity$
-      font_size: 100
-      height: 300
-      hour24: true
-      hours_to_show: 24
-      icon: $32_card_icon$
-      line_width: 2
-      name: $30_card_name$
-      points_per_hour: 1
-      show:
-        average: false
-        extrema: false
-        graph: bar
-        labels: false
-        legend: false
-      show_fill: true
-      smoothing: true
-      theme: ios-dark-mode-blue-red
-      type: custom:mini-graph-card
-    type: horizontal-stack
-  items_classes: col-xs-12
-  type: custom:dwains-flexbox-card
-data:
-  10_card_name: Piscine
-  11_card_entity: sensor.temp_piscine
-  12_card_icon: mdi:pool-thermometer
-  20_card_name: Ext
-  21_card_entity: sensor.vp2_temp_out
-  22_card_icon: mdi:temperature-celsius
-  30_card_name: Hum
-  31_card_entity: sensor.vp2_humidity_out
-  32_card_icon: mdi:water-percent
-type: custom:dwains-blueprint-card
+entity: sensor.vp2_temp_out
+name: Temp
+show_name: true
+show_state: true
+state:
+- color: blue
+  icon: mdi:thermometer-minus
+  operator: <=
+  value: 15
+- color: red
+  icon: mdi:thermometer-plus
+  operator: '>='
+  value: 25
+- color: green
+  icon: mdi:thermometer
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

@@ -46,29 +46,18 @@ sensor:
   - platform: ultrasonic
     trigger_pin: D1
     echo_pin: D2
-    name: "niveau puit brut"
+    name: "niveau puit"
     accuracy_decimals: 2
     id: niveau_brut
     update_interval: 60s
+    filters:
+      - lambda: return 3.88 - x;
 
-############### TEMPLATE  ######################"
 # Calcul du niveau d'eau H total
 # longueur du tube=1.92 m
 # hauteur total puit=5.8 m
 # d'ou 5.80-1.92=3.88
-  - platform: template
-    name: "niveau puit"
-    id: niv_puit
-    icon: mdi:flash
-    unit_of_measurement: "m"
-    accuracy_decimals: 2
-    update_interval: 60s
-    lambda: |-
-      return ((3.88)-id(niveau_brut).state);    
-    filters:
-    - sliding_window_moving_average:
-        window_size: 15
-        send_every: 1
+
 
     
   - platform: wifi_signal

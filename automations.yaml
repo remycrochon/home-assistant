@@ -2247,3 +2247,38 @@
           - cover.volet_ch_parent_p
     default: []
   mode: single
+- id: '1656059504847'
+  alias: 2_1_10 Alarme Blueprints Notification Temps lames robot AM435 atteint
+  description: Surveillance du temps d'utilisation des lame du robot
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.am435x_temps_usage_lame_atteint
+      alert_state: 'on'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Lames robot à remplacer = {{states("sensor.am435x_awd_cutting_blade_usage_time")
+            }} {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Etat Robot tonte !!!
+      - service: dwains_dashboard.notification_create
+        data:
+          message: Lames robot à remplacer = {{states("sensor.am435x_awd_cutting_blade_usage_time")
+            }} {{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Etat robot tonte !!!
+      - service: dwains_dashboard.notification_create
+        data:
+          message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
+            }}
+      notify_message: Alerte {{ entity_name }}Déclenché
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 3600
+      resolved_message: Alerte {{ entity_name }} Résolu
+      initial_delay: 1
+      max_alerts: 10

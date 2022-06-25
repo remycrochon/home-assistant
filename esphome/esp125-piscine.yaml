@@ -78,8 +78,9 @@ sensor:
     unit_of_measurement: "mV"
     accuracy_decimals: 1
     update_interval: 60s
-# moyenne sur 15 mn-affichage toutes les 5mn
     filters:
+      - multiply: 10
+# moyenne sur 15 mn-affichage toutes les 5mn
       - sliding_window_moving_average:
           window_size: 15
           send_every: 5

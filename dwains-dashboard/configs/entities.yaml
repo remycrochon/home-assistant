@@ -4,6 +4,8 @@ binary_sensor.am435x_awd_battery_charging:
   disabled: true
 binary_sensor.am435x_awd_leaving_dock:
   disabled: true
+binary_sensor.am435x_temps_usage_lame_atteint:
+  hidden: true
 binary_sensor.bp1_cellier:
   hidden: true
 binary_sensor.bp_mod:
@@ -353,6 +355,8 @@ button.zoe_ring:
 button.zoe_vibrate:
   disabled: true
 calendar.am435x_awd:
+  disabled: true
+camera.am435x_awd:
   disabled: true
 climate.pid_controller:
   disabled: true
@@ -709,12 +713,39 @@ sensor.adguard_safe_searches_enforced:
   disabled: true
 sensor.am435x_awd_battery_level:
   disabled: true
+sensor.am435x_awd_cutting_blade_usage_time:
+  grouped_sort_order: 21
+  hidden: true
+sensor.am435x_awd_cutting_time_percent:
+  grouped_sort_order: 9
+  hidden: true
 sensor.am435x_awd_mode:
   disabled: true
 sensor.am435x_awd_next_start:
   disabled: true
+sensor.am435x_awd_number_of_charging_cycles:
+  grouped_sort_order: 19
+  hidden: true
+sensor.am435x_awd_number_of_collisions:
+  grouped_sort_order: 25
+  hidden: true
 sensor.am435x_awd_problem_sensor:
   disabled: true
+sensor.am435x_awd_searching_time_percent:
+  grouped_sort_order: 26
+  hidden: true
+sensor.am435x_awd_total_charging_time:
+  grouped_sort_order: 20
+  hidden: true
+sensor.am435x_awd_total_cutting_time:
+  grouped_sort_order: 21
+  hidden: true
+sensor.am435x_awd_total_running_time:
+  grouped_sort_order: 22
+  hidden: true
+sensor.am435x_awd_total_searching_time:
+  grouped_sort_order: 23
+  hidden: true
 sensor.battery_garage:
   custom_card: true
   grouped_sort_order: 3
@@ -735,7 +766,7 @@ sensor.battery_sdb:
 sensor.bh1750_illuminance:
   custom_card: true
   disabled: false
-  grouped_sort_order: 6
+  grouped_sort_order: 14
   hidden: false
 sensor.bp1_sonof_4d594222_power:
   disabled: true
@@ -1040,7 +1071,7 @@ sensor.esp126_wifi_signal_sensor:
 sensor.esp127_temperature:
   custom_card: true
   disabled: false
-  grouped_sort_order: 3
+  grouped_sort_order: 10
   hidden: false
 sensor.esp127_u_alim:
   col_span: '1'
@@ -1051,7 +1082,7 @@ sensor.esp127_u_alim:
   disabled: false
   excluded: false
   friendly_name: U Thermoc
-  grouped_sort_order: 5
+  grouped_sort_order: 12
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1066,7 +1097,7 @@ sensor.esp127_u_panneau:
   disabled: false
   excluded: false
   friendly_name: U Panno Thermoc
-  grouped_sort_order: 4
+  grouped_sort_order: 11
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1838,7 +1869,7 @@ sensor.vp2_barometer:
   disabled: false
   excluded: false
   friendly_name: Pression
-  grouped_sort_order: 9
+  grouped_sort_order: 3
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1848,7 +1879,7 @@ sensor.vp2_datetime:
   hidden: true
 sensor.vp2_direction_du_vent:
   custom_card: true
-  grouped_sort_order: 19
+  grouped_sort_order: 8
   sort_order: 17
 sensor.vp2_heatindex:
   custom_card: true
@@ -1901,7 +1932,7 @@ sensor.vp2_pluviometrie_standard_deviation:
   sort_order: 7
 sensor.vp2_radiation:
   custom_card: true
-  grouped_sort_order: 12
+  grouped_sort_order: 5
   hidden: false
 sensor.vp2_radiation_moyenne:
   grouped_sort_order: 18
@@ -1909,7 +1940,7 @@ sensor.vp2_radiation_moyenne:
   sort_order: 19
 sensor.vp2_rafale:
   custom_card: true
-  grouped_sort_order: 17
+  grouped_sort_order: 18
   hidden: false
   sort_order: 12
 sensor.vp2_rafales_max:
@@ -1923,12 +1954,12 @@ sensor.vp2_rain:
   sort_order: 8
 sensor.vp2_rain24:
   custom_card: true
-  grouped_sort_order: 11
+  grouped_sort_order: 4
   hidden: false
   sort_order: 9
 sensor.vp2_rain_rate:
   custom_card: true
-  grouped_sort_order: 15
+  grouped_sort_order: 16
   hidden: false
   sort_order: 10
 sensor.vp2_rain_storm:
@@ -1937,7 +1968,7 @@ sensor.vp2_rain_storm:
   sort_order: 11
 sensor.vp2_ressenti:
   custom_card: true
-  grouped_sort_order: 14
+  grouped_sort_order: 15
   hidden: false
   sort_order: 15
 sensor.vp2_temp_in:
@@ -1956,9 +1987,9 @@ sensor.vp2_temp_in:
   row_span_xl: '1'
   sort_order: 15
 sensor.vp2_temp_out:
-  col_span: '2'
-  col_span_lg: '3'
-  col_span_xl: '3'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
@@ -1980,7 +2011,7 @@ sensor.vp2_uv:
   disabled: false
   excluded: false
   friendly_name: ''
-  grouped_sort_order: 10
+  grouped_sort_order: 6
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1998,13 +2029,15 @@ sensor.zoe_battery:
   disabled: true
 sensor.zoe_battery_level:
   custom_card: true
-  grouped_sort_order: 16
+  grouped_sort_order: 17
+  hidden: true
   sort_order: 4
 sensor.zoe_cell_tower_id:
   disabled: true
 sensor.zoe_daily_goal:
   custom_card: true
-  grouped_sort_order: 8
+  grouped_sort_order: 12
+  hidden: true
   sort_order: 22
 sensor.zoe_gps_satellites:
   disabled: true
@@ -2018,13 +2051,15 @@ sensor.zoe_last_update_rate:
   disabled: true
 sensor.zoe_minutes_active:
   custom_card: true
-  grouped_sort_order: 7
+  grouped_sort_order: 5
+  hidden: true
   sort_order: 21
 sensor.zoe_sensor_mode:
   disabled: true
 sensor.zoe_tracker_state:
   custom_card: true
   grouped_sort_order: 18
+  hidden: true
   sort_order: 20
 switch.adguard_filtering:
   disabled: true
@@ -2246,10 +2281,13 @@ switch.volet_sdb:
 switch.wifi_switch:
   disabled: true
 switch.zoe_live_tracking:
+  hidden: true
   sort_order: 25
 switch.zoe_tracker_buzzer:
+  hidden: true
   sort_order: 23
 switch.zoe_tracker_led:
+  hidden: true
   sort_order: 24
 update.nas_ds218_dsm_update:
   disabled: true

@@ -1,6 +1,21 @@
-entities:
-- entity: sensor.temperature_sdb
-- entity: sensor.humidity_sdb
-- entity: sensor.pression_sdb
-- entity: sensor.battery_sdb
-type: glance
+entity: sensor.temperature_sdb
+name: Temp
+show_name: true
+show_state: true
+size: 25%
+state:
+- color: blue
+  icon: mdi:thermometer-minus
+  operator: <=
+  value: 15
+- color: red
+  icon: mdi:thermometer-plus
+  operator: '>='
+  value: 25
+- color: green
+  icon: mdi:thermometer
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

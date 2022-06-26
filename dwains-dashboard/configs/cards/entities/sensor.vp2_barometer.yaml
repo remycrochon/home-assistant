@@ -2,6 +2,7 @@ entity: sensor.vp2_barometer
 name: Hum
 show_name: true
 show_state: true
+size: 25%
 state:
 - color: red
   operator: <=

@@ -1,7 +1,21 @@
-blueprint: replace_mushroom_entity_card.yaml
-card:
-  entity: $replace_with_input_entity$
-  name: $replace_with_input_name$
-  type: custom:mushroom-entity-card
-input_entity: sensor.cave_humidity
-type: custom:dwains-blueprint-card
+entity: sensor.cave_humidity
+name: Hum
+show_name: true
+show_state: true
+size: 25%
+state:
+- color: blue
+  icon: mdi:water-percent-alert
+  operator: <=
+  value: 40
+- color: red
+  icon: mdi:water-percent-alert
+  operator: '>='
+  value: 85
+- color: green
+  icon: mdi:water-percent
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

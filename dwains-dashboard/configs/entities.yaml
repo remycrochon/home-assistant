@@ -206,7 +206,7 @@ binary_sensor.tablette_etat_charge:
   disabled: false
   excluded: false
   friendly_name: Tab Batterie
-  hidden: false
+  hidden: true
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -623,12 +623,17 @@ cover.volet_sdb_p:
   custom_card: true
 device_tracker.am435x_awd:
   disabled: true
+device_tracker.esp134_mesure_uv:
+  hidden: true
+device_tracker.esp135_luxmetre:
+  hidden: true
 device_tracker.esp138_qualite_air:
   hidden: true
   sort_order: 13
 device_tracker.hatos:
   disabled: true
 device_tracker.oszscclk_zoe:
+  hidden: true
   sort_order: 26
 device_tracker.zoe:
   disabled: true
@@ -753,13 +758,13 @@ sensor.battery_sdb:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: Batterie
   grouped_sort_order: 4
-  hidden: true
+  hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -791,23 +796,30 @@ sensor.brother_mfc_j5330dw_y:
   disabled: true
   hidden: true
 sensor.bureau_humidite:
+  custom_card: true
   disabled: false
-  hidden: true
+  grouped_sort_order: 2
+  hidden: false
 sensor.bureau_power:
+  custom_card: true
   disabled: false
-  hidden: true
+  grouped_sort_order: 4
+  hidden: false
 sensor.bureau_pression:
+  custom_card: true
   disabled: false
-  hidden: true
+  grouped_sort_order: 3
+  hidden: false
 sensor.bureau_temperature:
-  col_span: '2'
-  col_span_lg: '2'
-  col_span_xl: '2'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: ''
+  grouped_sort_order: 1
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -821,6 +833,14 @@ sensor.cave_power:
 sensor.cave_temperature:
   custom_card: true
   grouped_sort_order: 1
+sensor.cellier_humidity:
+  custom_card: true
+sensor.cellier_power:
+  custom_card: true
+sensor.cellier_pression:
+  custom_card: true
+sensor.cellier_temperature:
+  custom_card: true
 sensor.chamb_nord_pression:
   col_span: '1'
   col_span_lg: '1'
@@ -1055,11 +1075,12 @@ sensor.esp126_temp_ecs:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: Temp ECS
+  grouped_sort_order: 8
   hidden: false
   row_span: '1'
   row_span_lg: '1'
@@ -1106,6 +1127,12 @@ sensor.esp127_uptime_sensor:
   disabled: true
 sensor.esp127_wifi_signal_sensor:
   disabled: true
+sensor.esp128_climat_sous_sol1_humidite:
+  custom_card: true
+  grouped_sort_order: 6
+sensor.esp128_climat_sous_sol1_temperature:
+  custom_card: true
+  grouped_sort_order: 2
 sensor.esp128_connected_bssid:
   hidden: true
 sensor.esp128_connected_ssid:
@@ -1118,6 +1145,12 @@ sensor.esp128_uptime_sensor:
   hidden: true
 sensor.esp128_wifi_signal_sensor:
   hidden: true
+sensor.esp129_climat_sous_sol3_humidite:
+  custom_card: true
+  grouped_sort_order: 7
+sensor.esp129_climat_sous_sol3_temperature:
+  custom_card: true
+  grouped_sort_order: 3
 sensor.esp129_connected_bssid:
   hidden: true
 sensor.esp129_connected_ssid:
@@ -1130,6 +1163,12 @@ sensor.esp129_uptime_sensor:
   hidden: true
 sensor.esp129_wifi_signal_sensor:
   hidden: true
+sensor.esp130_climat_sous_sol_humidite:
+  custom_card: true
+  grouped_sort_order: 5
+sensor.esp130_climat_sous_sol_temperature:
+  custom_card: true
+  grouped_sort_order: 1
 sensor.esp130_connected_bssid:
   hidden: true
 sensor.esp130_connected_ssid:
@@ -1362,20 +1401,36 @@ sensor.humidity_sdb:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: "Humidit\xE9"
   grouped_sort_order: 1
-  hidden: true
+  hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
 sensor.humidity_status_garage:
   hidden: true
+sensor.imp_3d_humidity:
+  custom_card: true
+  grouped_sort_order: 9
+sensor.imp_3d_power:
+  custom_card: true
+  grouped_sort_order: 10
+sensor.imp_3d_temperature:
+  custom_card: true
+  grouped_sort_order: 4
+sensor.indoor_temperature:
+  disabled: true
+  excluded: true
+  grouped_sort_order: 12
 sensor.inj:
   disabled: true
+sensor.leaving_water_temperature:
+  custom_card: true
+  grouped_sort_order: 11
 sensor.linky_hc_wh:
   hidden: true
 sensor.linky_hp_wh:
@@ -1575,6 +1630,10 @@ sensor.orange_livebox_upload_speed:
 sensor.orp_ezo:
   custom_card: true
   grouped_sort_order: 4
+sensor.outdoor_temperature:
+  disabled: true
+  excluded: true
+  grouped_sort_order: 13
 sensor.ph_ezo:
   custom_card: true
   grouped_sort_order: 2
@@ -1660,13 +1719,13 @@ sensor.pression_sdb:
   col_span: '1'
   col_span_lg: '1'
   col_span_xl: '1'
-  custom_card: false
+  custom_card: true
   custom_popup: false
   disabled: false
   excluded: false
   friendly_name: Pression
   grouped_sort_order: 3
-  hidden: true
+  hidden: false
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
@@ -1816,9 +1875,9 @@ sensor.temperature_salon_zb:
   row_span_xl: '1'
   sort_order: 1
 sensor.temperature_sdb:
-  col_span: '2'
-  col_span_lg: '3'
-  col_span_xl: '3'
+  col_span: '1'
+  col_span_lg: '1'
+  col_span_xl: '1'
   custom_card: true
   custom_popup: false
   disabled: false

@@ -1,10 +1,21 @@
 entity: sensor.temperature_garage
-max: 50
-min: -5
-name: "T\xB0 Garage"
-needle: true
-severity:
-  green: 18
-  red: 32
-  yellow: 1
-type: gauge
+name: Temp
+show_name: true
+show_state: true
+size: 25%
+state:
+- color: blue
+  icon: mdi:thermometer-minus
+  operator: <=
+  value: 15
+- color: red
+  icon: mdi:thermometer-plus
+  operator: '>='
+  value: 25
+- color: green
+  icon: mdi:thermometer
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

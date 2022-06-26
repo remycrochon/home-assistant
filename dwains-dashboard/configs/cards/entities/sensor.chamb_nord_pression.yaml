@@ -1,7 +1,18 @@
-blueprint: replace_mushroom_entity_card.yaml
-card:
-  entity: $replace_with_input_entity$
-  name: $replace_with_input_name$
-  type: custom:mushroom-entity-card
-input_entity: sensor.chamb_nord_pression
-type: custom:dwains-blueprint-card
+entity: sensor.chamb_nord_pression
+name: Hum
+show_name: true
+show_state: true
+size: 25%
+state:
+- color: red
+  operator: <=
+  value: 990
+- color: green
+  operator: '>='
+  value: 1000
+- color: orange
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

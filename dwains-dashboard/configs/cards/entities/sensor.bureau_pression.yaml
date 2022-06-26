@@ -1,16 +1,16 @@
-entity: sensor.esp136_rend
-name: Rendement
+entity: sensor.bureau_pression
+name: Hum
 show_name: true
 show_state: true
 size: 25%
 state:
-- color: blue
+- color: red
   operator: <=
-  value: 15
+  value: 990
 - color: green
   operator: '>='
-  value: 70
-- color: red
+  value: 1000
+- color: orange
   operator: default
   styles:
     card:

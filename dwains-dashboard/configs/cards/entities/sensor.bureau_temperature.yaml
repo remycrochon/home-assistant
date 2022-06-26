@@ -1,6 +1,21 @@
-entities:
-- entity: sensor.bureau_temperature
-- entity: sensor.bureau_humidite
-- entity: sensor.bureau_pression
-- entity: sensor.bureau_power
-type: glance
+entity: sensor.bureau_temperature
+name: Temp
+show_name: true
+show_state: true
+size: 25%
+state:
+- color: blue
+  icon: mdi:thermometer-minus
+  operator: <=
+  value: 15
+- color: red
+  icon: mdi:thermometer-plus
+  operator: '>='
+  value: 25
+- color: green
+  icon: mdi:thermometer
+  operator: default
+  styles:
+    card:
+    - opacity: 0.8
+type: custom:button-card

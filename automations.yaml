@@ -586,7 +586,7 @@
       - condition: trigger
         id: nuit->jour
       sequence:
-      - service: script.fermeture_volet_absent
+      - service: script.ouverture_volet_absent
         data: {}
     default: []
   mode: single

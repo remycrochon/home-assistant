@@ -1,10 +1,7 @@
-entity: sensor.ph_ezo
-max: 10
-min: 6
-name: pH
-needle: true
-severity:
-  green: 6
-  red: 8
-  yellow: 7
-type: gauge
+blueprint: replace_mushroom_entity_card.yaml
+card:
+  entity: $replace_with_input_entity$
+  name: $replace_with_input_name$
+  type: custom:mushroom-entity-card
+input_entity: sensor.ph_ezo
+type: custom:dwains-blueprint-card

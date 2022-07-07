@@ -63,7 +63,12 @@ sensor:
     accuracy_decimals: 2
     update_interval: 60s
   #  moyenne sur 15 mn-affichage toutes les 5mn
+  # Etalonné le 6 juillet 2022
     filters:
+      - calibrate_linear:
+        - 4.44 -> 4.0
+        - 7.17 -> 6.86
+        - 9.41 -> 9.18
       - sliding_window_moving_average:
           window_size: 15
           send_every: 5
@@ -71,6 +76,7 @@ sensor:
 
 
 # Mesure de l'ORP
+# Etalonné le 6 juillet 2022
   - platform: ezo
     id: esp125_orp_ezo
     name: orp_ezo
@@ -80,6 +86,9 @@ sensor:
     update_interval: 60s
     filters:
       - multiply: 10
+      - calibrate_linear:
+          - 0 -> 0
+          - 216.9 -> 256
 # moyenne sur 15 mn-affichage toutes les 5mn
       - sliding_window_moving_average:
           window_size: 15

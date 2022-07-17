@@ -5,9 +5,9 @@ from homeassistant.const import Platform
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2022.6.2"
+INTEGRATION_VERSION = "2022.7.2"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
-HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/apps"
+HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/applications"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
 OAUTH2_TOKEN = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/token"
 
@@ -180,6 +180,24 @@ ERRORCODES = {
     121: "High internal temperature",
     122: "CAN error",
     123: "Destination not reachable",
+    701: "Connectivity problem",
+    702: "Connectivity settings restored",
+    703: "Connectivity problem",
+    704: "Connectivity problem",
+    705: "Connectivity problem",
+    706: "Poor signal quality",
+    707: "SIM card requires PIN",
+    708: "SIM card locked",
+    709: "SIM card not found",
+    710: "SIM card locked",
+    711: "SIM card locked",
+    712: "SIM card locked",
+    713: "Geofence problem",
+    714: "Geofence problem",
+    715: "Connectivity problem",
+    716: "Connectivity problem",
+    717: "SMS could not be sent",
+    724: "Communication circuit board SW must be updated",
 }
 
 # Headlight modes

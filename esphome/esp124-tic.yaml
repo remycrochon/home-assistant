@@ -138,6 +138,7 @@ sensor:
     teleinfo_id: myteleinfo
 
 #Puissance apparente instantanée ph1 
+
   - platform: teleinfo
     id: papp
     tag_name: "SINSTS"

@@ -30,25 +30,25 @@ utility_meter:
       - hc
 # Comptabilisation de l'énergie en surplus injectée dans l'ECS
   energy_ecs_surplus_usage_daily:
-    source: sensor.puissance_ecs_surplus_injectee
+    source: sensor.energy_ecs_surplus_injectee
     cycle: daily
     tariffs:
       - hp
       - hc
   energy_ecs_surplus_usage_weekly:
-    source: sensor.puissance_ecs_surplus_injectee
+    source: sensor.energy_ecs_surplus_injectee
     cycle: weekly
     tariffs:
       - hp
       - hc    
   energy_ecs_surplus_usage_monthly:
-    source: sensor.puissance_ecs_surplus_injectee
+    source: sensor.energy_ecs_surplus_injectee
     cycle: monthly
     tariffs:
       - hp
       - hc
   energy_ecs_surplus_usage_yearly:
-    source: sensor.puissance_ecs_surplus_injectee
+    source: sensor.energy_ecs_surplus_injectee
     cycle: yearly
     tariffs:
       - hp
@@ -97,7 +97,7 @@ sensor:
     method: left
     round: 2
 
-# Energie ECS surplus injection
+# Energie ECS surplus injection->utilisée dans tableau Energie
   - platform: integration
     source: sensor.puissance_ecs_surplus_injectee_w
     name: energy_ecs_surplus_injectee

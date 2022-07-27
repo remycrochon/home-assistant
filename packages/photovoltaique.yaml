@@ -27,22 +27,7 @@ input_number:
 template:
   - sensor:
 
-# Calcul energie injectée sur le réseau du jour
-    - name: "Envoy Energie Injectée Réseau Jour"
-      unique_id: "envoy_energie_injectee_reseau_jour"
-      device_class: "energy"
-      state_class: "total"
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set prod = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) %}
-        {% set conso = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
-        {% if prod>conso %}
-          {{ (prod - conso)/1000 | round(2) }}
-        {% else%}
-          0
-        {%endif%}
-
-# Envoy:  Energie soutirée depuis le reseau
+# Envoy:  Energie soutirée depuis le reseau -> Conso - Prod en kWh
     - name: "Envoy Energie Totale Soutirée Jour"
       unique_id: "envoy_energie_totale_soutiree_jour"
       state: >-
@@ -57,7 +42,7 @@ template:
       device_class: "energy"
       state_class: "total"
 
-# Envoy: Puissance injectée sur le réseau
+# Envoy: Puissance injectée sur le réseau - Integration dans "Entrées"
     - name: "Envoy Puissance Injectée Réseau"
       unique_id: "envoy_puissance_injectee_reseau"
       device_class: "power"

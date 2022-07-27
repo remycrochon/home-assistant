@@ -1,5 +1,5 @@
 substitutions:
-  device_name: esp140-chalet
+  device_name: esp140-chalet-eth
   adress_ip: "192.168.0.140"
   friendly_name: esp140
   time_timezone: "Europe/Paris"
@@ -44,12 +44,12 @@ sensor:
     id: niveau_brut
     update_interval: 60s
     filters:
-      - lambda: return 3.88 - x;
+      - lambda: return 3.5 - x;
 
 # Calcul du niveau d'eau H total
-# longueur du tube=1.92 m
+# longueur du tube=2.3 m
 # hauteur total puit=5.8 m
-# d'ou 5.80-1.92=3.88
+# d'ou 5.80-2.3=3.5
 
 
 

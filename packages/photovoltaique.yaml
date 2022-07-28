@@ -90,3 +90,18 @@ template:
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total"       
+
+# Envoy Energie injectée sur le reseau Jour
+    - name: "envoy_energie_injectee_reseau_jour"
+      unique_id: "envoy_energie_injectee_reseau_jour"
+      state: >-
+        {% set prod = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) /1000 %}
+        {% set conso = states('sensor.energie_totale_jour') | float(default=0) | round(2) %}
+        {% if prod>conso %}
+          {{ (prod - conso) | round(2) }}
+        {% else%}
+          0
+        {%endif%}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"    

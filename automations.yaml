@@ -348,7 +348,7 @@
       value: '{{ states("sensor.ph_ezo") | float |round(2) }}'
   mode: single
 - id: '1625215180801'
-  alias: 3_3_4 Piscine-ORP Mémorisation valeur avant arrêt
+  alias: 3_3_4 Piscine-ORP Mémorisation valeur avant arrêt ( A supprimer)
   description: ''
   trigger:
   - platform: time_pattern
@@ -361,6 +361,9 @@
       hours: 0
       minutes: 30
       seconds: 0
+  - condition: time
+    after: '12:00:00'
+    before: '16:00:00'
   action:
   - service: input_number.set_value
     target:
@@ -392,25 +395,23 @@
     target:
       entity_id: input_number.chlore_duree_inject_s
     data_template:
-      value: "{% set m=states('sensor.orp_piscine_orp') | float(default=0) %} {% set\
-        \ x=states('input_number.simul_orp') | float(default=0) %} {% set c=states('input_number.orp_cible')\
-        \ | float(default=0) %} {% set d=states('input_number.chlore_debit_ppe') |\
-        \ float(default=0) %} {% set e=states('input_number.chlore_concentration')\
-        \ | float(default=0) %} {% set r=(((c-m)/(e/100))/d)*3600|round(2)|int(default=0)\
-        \ %}  {% if r < 0 %}\n  {{ 0 }}\n{% else %}\n  {{ (r%60)|int(default=0) }}\n\
-        {% endif %}"
+      value: "{% set m=states('sensor.orp_piscine_orp') | float(default=0) %} {% set
+        x=states('input_number.simul_orp') | float(default=0) %} {% set c=states('input_number.orp_cible')
+        | float(default=0) %} {% set d=states('input_number.chlore_debit_ppe') | float(default=0)
+        %} {% set e=states('input_number.chlore_concentration') | float(default=0)
+        %} {% set r=(((c-m)/(e/100))/d)*3600|round(2)|int(default=0) %}  {% if r <
+        0 %}\n  {{ 0 }}\n{% else %}\n  {{ (r%60)|int(default=0) }}\n{% endif %}"
   - service: input_number.set_value
     target:
       entity_id: input_number.chlore_duree_inject_mn
     data_template:
-      value: "{% set m=states('sensor.orp_piscine_orp') | float(default=0) %} {% set\
-        \ y=state_attr(\"sensor.orp_stat\", \"mean\") | float(default=0) %} {% set\
-        \ x=states('input_number.simul_orp') | float(default=0) %} {% set c=states('input_number.orp_cible')\
-        \ | float(default=0) %} {% set d=states('input_number.chlore_debit_ppe') |\
-        \ float(default=0) %} {% set e=states('input_number.chlore_concentration')\
-        \ | float(default=0) %} {% set r=(((c-m)/(e/100))/d)*3600|round(2)|int(default=0)\
-        \ %}  {% if r < 0 %}\n  {{ 0 }}\n{% else %}\n  {{ (r//60)|int(default=0) }}\n\
-        {% endif %}"
+      value: "{% set m=states('sensor.orp_piscine_orp') | float(default=0) %} {% set
+        y=state_attr(\"sensor.orp_stat\", \"mean\") | float(default=0) %} {% set x=states('input_number.simul_orp')
+        | float(default=0) %} {% set c=states('input_number.orp_cible') | float(default=0)
+        %} {% set d=states('input_number.chlore_debit_ppe') | float(default=0) %}
+        {% set e=states('input_number.chlore_concentration') | float(default=0) %}
+        {% set r=(((c-m)/(e/100))/d)*3600|round(2)|int(default=0) %}  {% if r < 0
+        %}\n  {{ 0 }}\n{% else %}\n  {{ (r//60)|int(default=0) }}\n{% endif %}"
   - service: switch.turn_on
     target:
       entity_id:
@@ -1352,8 +1353,8 @@
   action:
   - service: frontend.set_theme
     data:
-      name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n\
-        {% else %}\n  Dwains Dark Theme\n{% endif %}\n"
+      name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n{%
+        else %}\n  Dwains Dark Theme\n{% endif %}\n"
   mode: single
 - id: '1637073026237'
   alias: 4_2_2 Volet Balise ouverture sous sol
@@ -1653,11 +1654,12 @@
           entity_id:
           - automation.piscine_injection_chlore
           - automation.piscine_orp_notifications
+        data: {}
       - service: notify.telegram
         data:
           message: pH sonde= {{states('sensor.orp_piscine_orp')}} {{-"\n"-}}{{states("sensor.date_time")
             }}
-          title: Piscine Activation Traitement pH !
+          title: Piscine Activation Traitement ORP !
     - conditions:
       - condition: trigger
         id: at_pump
@@ -1667,6 +1669,7 @@
           entity_id:
           - automation.piscine_injection_chlore
           - automation.piscine_orp_notifications
+        data: {}
     - conditions:
       - condition: trigger
         id: regule_chlore_off
@@ -1676,6 +1679,7 @@
           entity_id:
           - automation.piscine_injection_chlore
           - automation.piscine_orp_notifications
+        data: {}
     default: []
   mode: single
 - id: '1642614758763'
@@ -1983,13 +1987,13 @@
     target:
       entity_id: input_number.ph_duree_inject_mn
     data_template:
-      value: "{% set a=states('sensor.ph_piscine_ph') | float(default=0) %} {% set\
-        \ x=states('input_number.simul_ph') | float(default=0) %} {% set b=states('input_number.ph_cible')\
-        \ | float(default=0) %} {% set d=states('input_number.ph_debit_ppe') | float(default=0)\
-        \ %} {% set e=states('input_number.ph_concentration') | float(default=0) %}\
-        \ {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} \n  {% if r\
-        \ < 0 %}\n    {{ 0 }}\n  {% else %}\n    {{ (r//60)|int(default=0) }}\n  {%\
-        \ endif %}"
+      value: "{% set a=states('sensor.ph_piscine_ph') | float(default=0) %} {% set
+        x=states('input_number.simul_ph') | float(default=0) %} {% set b=states('input_number.ph_cible')
+        | float(default=0) %} {% set d=states('input_number.ph_debit_ppe') | float(default=0)
+        %} {% set e=states('input_number.ph_concentration') | float(default=0) %}
+        {% set r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} \n  {% if r <
+        0 %}\n    {{ 0 }}\n  {% else %}\n    {{ (r//60)|int(default=0) }}\n  {% endif
+        %}"
   - service: switch.turn_on
     target:
       entity_id:

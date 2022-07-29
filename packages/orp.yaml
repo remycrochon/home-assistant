@@ -130,21 +130,21 @@ sensor:
   # Statistiques orp
   - platform: statistics
     name: orp_stat_median
-    entity_id: sensor.orp_piscine_orp
+    entity_id: sensor.mesure_orp_validee
     state_characteristic: median
     sampling_size: 30
     #max_age:
       # minutes: 30
   - platform: statistics
     name: orp_stat_moyenne
-    entity_id: sensor.orp_piscine_orp
+    entity_id: sensor.mesure_orp_validee
     state_characteristic: average_step
     sampling_size: 30
     #max_age:
       # minutes: 30
   - platform: statistics
     name: orp_stat_standard_deviation
-    entity_id: sensor.orp_piscine_orp
+    entity_id: sensor.mesure_orp_validee
     state_characteristic: standard_deviation
     sampling_size: 30
     #max_age:
@@ -162,6 +162,23 @@ template:
           {{ (a-b) <= c }} 
 ####################################
   - sensor:
+# Recopie de la mesure ORP si la pompe est en marche et 
+# si dans la plage horaire définie dans une "entrée"
+# sinon on recopie la derniere valeur médiane
+    - name: "Mesure ORP validée"
+      unique_id: "mesure_orp_validee"
+      unit_of_measurement: "mV"
+      state: >
+        {% set orp = states('sensor.orp_ezo') | float(default=0) | round(2) %}
+        {% set orp_median = states('sensor.orp_stat_median') | float(default=0) | round(2) %}
+        {% set ppe = states('binary_sensor.ppe_piscine_en_marche') %}
+        {% set plage_H = states('binary_sensor.plage_horaire_mesure_orp') %}
+        {% if ppe == 'on' and plage_H == 'on'%}
+          {{ orp | round(2) }}
+        {% else %}
+          {{ orp_median }}
+        {%endif%}
+
   # Recopie mémoire orp dans le sensor pour calcul qt à injecter
     - name: "orp_piscine_orp"
       unique_id: "orp_piscine_orp"

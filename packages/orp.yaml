@@ -8,15 +8,6 @@ input_number:
     unit_of_measurement: mV
     mode: box
 
-# Mémorisation orp
-  orp_memoire:
-    name: orp Mémoire avant arret
-    min: -1019.9
-    max: 1019.9
-    step: 0.1
-    unit_of_measurement: mV
-    mode: box
-
 # orp Valeur cible
   orp_cible:
     name: orp Cible 
@@ -130,21 +121,24 @@ sensor:
   # Statistiques orp
   - platform: statistics
     name: orp_stat_median
-    entity_id: sensor.mesure_orp_validee
+    entity_id: sensor.orp_piscine_orp
+    unique_id: orp_stat_median
     state_characteristic: median
     sampling_size: 30
     #max_age:
       # minutes: 30
   - platform: statistics
     name: orp_stat_moyenne
-    entity_id: sensor.mesure_orp_validee
+    unique_id: orp_stat_moyenne
+    entity_id: sensor.orp_piscine_orp
     state_characteristic: average_step
     sampling_size: 30
     #max_age:
       # minutes: 30
   - platform: statistics
     name: orp_stat_standard_deviation
-    entity_id: sensor.mesure_orp_validee
+    entity_id: sensor.orp_piscine_orp
+    unique_id: orp_stat_standard_deviation
     state_characteristic: standard_deviation
     sampling_size: 30
     #max_age:
@@ -165,9 +159,9 @@ template:
 # Recopie de la mesure ORP si la pompe est en marche et 
 # si dans la plage horaire définie dans une "entrée"
 # sinon on recopie la derniere valeur médiane
-    - name: "Mesure ORP validée"
-      unique_id: "mesure_orp_validee"
-      unit_of_measurement: "mV"
+
+    - name: "orp_piscine_orp"
+      unique_id: "orp_piscine_orp"
       state: >
         {% set orp = states('sensor.orp_ezo') | float(default=0) | round(2) %}
         {% set orp_median = states('sensor.orp_stat_median') | float(default=0) | round(2) %}
@@ -178,12 +172,6 @@ template:
         {% else %}
           {{ orp_median }}
         {%endif%}
-
-  # Recopie mémoire orp dans le sensor pour calcul qt à injecter
-    - name: "orp_piscine_orp"
-      unique_id: "orp_piscine_orp"
-      state: >-
-        {{ states("input_number.orp_memoire")|float(default=0) }}
       unit_of_measurement: "mV"
     
     - name: "chlore_volume_restant_bidon"

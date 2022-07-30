@@ -99,6 +99,7 @@ mqtt:
       device_class: "battery_charging"
 
     - name: "Tablette etat connection"
+      unique_id: "tablette_etat_connection"
       state_topic: wallpanel/mywallpanel/connection
       payload_on: online
       payload_off: offline

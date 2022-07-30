@@ -14,15 +14,6 @@ input_number:
     unit_of_measurement: pH
     mode: box
 
-# Mémorisation pH
-  ph_memoire:
-    name: pH Mémoire avant arret
-    min: 6
-    max: 9
-    step: 0.1
-    unit_of_measurement: pH
-    mode: box
-
 # pH Valeur cible
   ph_cible:
     name: Ph Cible 
@@ -156,7 +147,7 @@ sensor:
   - platform: statistics
     name: ph_stat_median
     entity_id: sensor.ph_piscine_ph
-    unique_id: ph_median
+    unique_id: "ph_median"
     state_characteristic: median
     sampling_size: 30
     #max_age:
@@ -193,11 +184,23 @@ template:
 
 ####################################
   - sensor:
-# Recopie mémoire pH dans le sensor
+
+# Recopie de la mesure pH si la pompe est en marche et 
+# si dans la plage horaire définie dans une "entrée"
+# sinon on recopie la derniere valeur médiane
+
     - name: "pH_piscine_ph"
       unique_id: "ph_piscine_ph"
       state: >-
-        {{ states("input_number.ph_memoire")|float(default=0) }}
+        {% set ph = states('sensor.ph_ezo') | float(default=0) | round(2) %}
+        {% set ph_median = states('sensor.ph_stat_median') | float(default=0) | round(2) %}
+        {% set ppe = states('binary_sensor.ppe_piscine_en_marche') %}
+        {% set plage_H = states('binary_sensor.plage_horaire_mesure_orp') %}
+        {% if ppe == 'on'%}
+          {{ ph | round(2) }}
+        {% else %}
+          {{ ph_median }}
+        {%endif%}
       unit_of_measurement: "pH"
 
     - name: "ph_volume_restant_bidon"

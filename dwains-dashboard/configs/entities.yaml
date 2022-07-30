@@ -1595,7 +1595,7 @@ sensor.nb_de_particules_5_0:
 sensor.niveau_puit:
   custom_card: true
   custom_popup: true
-  favorite: true
+  favorite: false
   grouped_sort_order: 1
   sort_order: 1
 sensor.niveau_puit_brut:
@@ -1828,7 +1828,7 @@ sensor.tdeg_eau_piscine:
   custom_popup: false
   disabled: false
   excluded: false
-  favorite: true
+  favorite: false
   friendly_name: "T\xB0 Piscine"
   grouped_sort_order: 1
   hidden: false

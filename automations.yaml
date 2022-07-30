@@ -329,48 +329,6 @@
         h {{-"\n"-}}{{states("sensor.date_time") }}'
       title: Piscine Alerte Cartouche Chlore à changer!!!
   mode: single
-- id: '1625215180800'
-  alias: 3_2_4 Piscine-pH Mémorisation valeur arret
-  description: ''
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  condition:
-  - condition: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
-    state: 'on'
-    for: 00:30:00
-  action:
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.ph_memoire
-    data_template:
-      value: '{{ states("sensor.ph_ezo") | float |round(2) }}'
-  mode: single
-- id: '1625215180801'
-  alias: 3_3_4 Piscine-ORP Mémorisation valeur avant arrêt ( A supprimer)
-  description: ''
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  condition:
-  - condition: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
-    state: 'on'
-    for:
-      hours: 0
-      minutes: 30
-      seconds: 0
-  - condition: time
-    after: '12:00:00'
-    before: '16:00:00'
-  action:
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.orp_memoire
-    data_template:
-      value: '{{ states("sensor.orp_ezo") | float |round(2) }}'
-  mode: single
 - id: '1624811066594'
   alias: 3_3_2 Piscine-Chlore Injection
   description: ''
@@ -1227,8 +1185,8 @@
           message: VP2 On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
-      initial_delay: 1
-      max_alerts: 100
+      initial_delay: 60
+      max_alerts: 50
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634708878890'
@@ -1858,17 +1816,17 @@
     default: []
   mode: single
 - id: '1647538159020'
-  alias: 2_1_12 Alarme Blueprints Notification Def Alim Tablette
+  alias: 2_1_12 Alarme Blueprints Notification Def connection Tablette
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: input_boolean.alim_tablette_ok
+      sensor_entity: binary_sensor.tablette_etat_connection
       alert_state: 'off'
       alert_action:
       - service: dwains_dashboard.notification_create
         data:
-          message: Alim Tablette en defaut {{-"\n"-}}{{states("sensor.date_time")
+          message: Connection Tablette NOK  {{-"\n"-}}{{states("sensor.date_time")
             }}
       - service: switch.turn_on
         data: {}
@@ -1877,7 +1835,7 @@
       resolved_action:
       - service: dwains_dashboard.notification_create
         data:
-          message: Alim Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
+          message: Connection Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 1

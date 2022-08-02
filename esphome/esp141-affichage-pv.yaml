@@ -133,14 +133,26 @@ sensor:
     unit_of_measurement: "W"
     entity_id: sensor.envoy_122103023124_current_power_production
     id: prod
+    
+############### TEMPLATE  ######################"
+# Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
+  - platform: template
+    name: "P Disponible"
+    id: pdispo
+    icon: mdi:flash
+    unit_of_measurement: "w"
+    accuracy_decimals: 0
+    lambda: |-
+      return (id(prod).state-id(conso).state);
+
     on_value:
-# de 0 à 85 / 8 leds    
+# de 0 à 4200 / 8 leds    
 # Led 1
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                below: 225
+                id: pdispo
+                below: 500
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -162,9 +174,9 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 225
-                below: 450
+                id: pdispo
+                above: 500
+                below: 1000
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -186,9 +198,9 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 450
-                below: 675
+                id: pdispo
+                above: 1000
+                below: 1500
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -210,9 +222,9 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 675
-                below: 900
+                id: pdispo
+                above: 1500
+                below: 2000
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -234,9 +246,9 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 900
-                below: 1125
+                id: pdispo
+                above: 2000
+                below: 2500
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -258,9 +270,9 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 1125
-                below: 1350
+                id: pdispo
+                above: 2500
+                below: 3000
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -282,9 +294,9 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 1350
-                below: 1575
+                id: pdispo
+                above: 3000
+                below: 3500
             then: 
               - light.addressable_set:
                   id: rgb_led
@@ -306,8 +318,8 @@ sensor:
         - if:
             condition:
               sensor.in_range:
-                id: prod
-                above: 1575
+                id: pdispo
+                above: 3500
             then: 
               - light.addressable_set:
                   id: rgb_led

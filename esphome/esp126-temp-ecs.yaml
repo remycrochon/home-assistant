@@ -41,13 +41,6 @@ ota:
 web_server:
   port: 80
 
-sun:
-  latitude: 43.9193
-  longitude: 2.198449722222222
-
-time:
-  - platform: homeassistant
-    timezone:  ${time_timezone} #UTC+0  #Africa/Abidjan #Africa/Algiers #Europe/Paris  #Africa/Algiers
 
 #uart:
 #  rx_pin: GPIO3 # RX=pin 21
@@ -73,6 +66,8 @@ sensor:
   - platform: dallas
     address: 0xCA00AA2D00000328
     name: "${friendly_name} temp_ecs"
+    filters:
+      - offset: 8.0
     
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"

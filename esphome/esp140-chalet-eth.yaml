@@ -41,7 +41,7 @@ sensor:
     echo_pin: GPIO4
     name: "niveau puit"
     accuracy_decimals: 2
-    id: niveau_brut
+    id: niveau_eau
     update_interval: 60s
     filters:
       - lambda: return 3.5 - x;
@@ -50,6 +50,17 @@ sensor:
 # longueur du tube=2.3 m
 # hauteur total puit=5.8 m
 # d'ou 5.80-2.3=3.5
+
+############### TEMPLATE  ######################"
+# Calcul volume eau
+  - platform: template
+    name: "volume_puit"
+    id: volume
+    icon: mdi:flash
+    unit_of_measurement: "m3"
+    accuracy_decimals: 2
+    lambda: |-
+      return (id(niveau_eau).state*0.6*0.6*3.14159);
 
 
 

@@ -61,13 +61,4 @@ modbus:
         precision: 1
         data_type: int16
 
-template:
-# Calcul vulume eau dans le puit
-  - sensor:
-    - name: "Volume Puit"
-      unique_id: "volume_puit"
-      state: >-
-        {% set niv = states('sensor.niveau_puit') | float(default=0) | round(2) %}
-        {{ (niv *0.6*0.6*3.14159) | round(2) }}
-      unit_of_measurement: "m3"
-      state_class: "measurement"
+

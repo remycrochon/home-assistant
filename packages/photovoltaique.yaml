@@ -43,33 +43,96 @@ template:
       state_class: "total"
 
 # Envoy: Puissance injectée sur le réseau - Integration dans "Entrées"
+# binary_sensor.linky_sens_energie_active=off 
     - name: "Envoy Puissance Injectée Réseau"
       unique_id: "envoy_puissance_injectee_reseau"
       device_class: "power"
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
+        {% set p_active = states('binary_sensor.linky_sens_energie_active') %}
         {% set conso = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
-        {% if prod>conso %}
-          {{ (prod - conso) | round(2) }}
-        {% else%}
+        {% if p_active == 'off'%}
+          {{ conso }}
+        {% else %}
           0
         {%endif%}
 # Envoy: Puissance soutirée sur le réseau
+# binary_sensor.linky_sens_energie_active = on
     - name: "Envoy Puissance soutirée Réseau"
       unique_id: "envoy_puissance_soutiree_reseau"
       device_class: "power"
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
+        {% set p_active = states('binary_sensor.linky_sens_energie_active') %}
         {% set conso = states('sensor.envoy_122103023124_current_power_consumption') | float(default=0) | round(2) %}
-        {% if conso>prod %}
-          {{ (conso - prod) | round(2) }}
-        {% else%}
+        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}       
+        {% if p_active == 'on'%}
+          {{ conso-prod }}
+        {% else %}
           0
-        {%endif%}    
+        {%endif%} 
+
+# Permet d'animer la Grille Tesla
+    - name: "grid_entity"
+      unique_id: "grid_entity"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set souti = states('sensor.envoy_puissance_soutiree_reseau') | float(default=0) | round(2) %}
+        {% set inject = states('sensor.envoy_puissance_injectee_reseau') | float(default=0) | round(2) %}
+        {% if souti > 0 %}
+          {{ souti }}        
+        {% else %}
+          {{ inject }}      
+        {%endif%} 
+
+    - name: "house_entity"
+      unique_id: "house_entity"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set p_active = states('binary_sensor.linky_sens_energie_active') %}
+        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}       
+        {% set souti = states('sensor.envoy_puissance_soutiree_reseau') | float(default=0) | round(2) %}
+        {% set inject = states('sensor.envoy_puissance_injectee_reseau') | float(default=0) | round(2) %}
+        {% if p_active == 'on'%}
+          {{ prod+souti }}
+        {% else %}
+          {{ prod-inject}}
+        {%endif%} 
+
+    - name: "grid_to_house_entity"
+      unique_id: "grid_to_house_entity"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set souti = states('sensor.envoy_puissance_soutiree_reseau') | float(default=0) | round(2) %}
+        {{ souti | round(2) }}
+
+    - name: "generation_to_house_entity"
+      unique_id: "generation_to_house_entity"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set prod = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
+        {% set inj = states('sensor.envoy_puissance_injectee_reseau') | float(default=0) | round(2) %}
+        {{ (prod-inj) | round(2) }}
+
+    - name: "generation_to_grid_entity"
+      unique_id: "generation_to_grid_entity"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set inj = states('sensor.envoy_puissance_injectee_reseau') | float(default=0) | round(2) %}
+        {{ inj | round(2) }}
+
 
 # Envoy: Convertion en kWh de la consommation energie jour
     - name: "Envoy Energie Totale Consommée Jour"
@@ -97,8 +160,9 @@ template:
       state: >-
         {% set prod = states('sensor.envoy_122103023124_today_s_energy_production') | float(default=0) | round(2) /1000 %}
         {% set conso = states('sensor.energie_totale_jour') | float(default=0) | round(2) %}
-        {% if prod>conso %}
-          {{ (prod - conso) | round(2) }}
+        {% set conso2 = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}
+        {% if prod>conso2 %}
+          {{ (prod - conso2) | round(2) }}
         {% else%}
           0
         {%endif%}

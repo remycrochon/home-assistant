@@ -126,6 +126,11 @@ sensor:
     name: "Inj"
     entity_id: sensor.envoy_puissance_injectee_reseau
     id: inj
+    
+  - platform: homeassistant
+    name: "Inj"
+    entity_id: sensor.puissance_ecs_surplus_injectee_w
+    id: p_surplus
 
 # Lecture dans HA de la conso du jour
   - platform: homeassistant
@@ -135,7 +140,7 @@ sensor:
     id: prod
     
 ############### TEMPLATE  ######################"
-# Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
+# Calcul P Dispo
   - platform: template
     name: "P Disponible"
     id: pdispo
@@ -143,7 +148,7 @@ sensor:
     unit_of_measurement: "w"
     accuracy_decimals: 0
     lambda: |-
-      return (id(prod).state-id(conso).state);
+      return (id(prod).state-id(conso).state+id(p_surplus).state);
 
     on_value:
 # de 0 à 4200 / 8 leds    
@@ -350,8 +355,9 @@ display:
     lambda: |-
       it.printf(0, 0, id(arial10),"P:%.0f W",id(prod).state);
       it.printf(0, 10, id(arial10),"C:%.0f W",id(conso).state);
-      it.printf(0, 20, id(arial10),"S:%.0f W",id(sout).state);
-      it.printf(0, 30, id(arial10),"I:%.0f W",id(inj).state);      
+      it.printf(0, 20, id(arial10),"S:%.0f ",id(sout).state);
+      it.printf(32, 20, id(arial10),"I:%.0f W",id(inj).state);
+      it.printf(0, 30, id(arial10),"Disp:%.0f W",id(pdispo).state);   
 
 #      it.printf(0,0,"PM1.0=%.2f",id(pm1_0).state);
 #          it.printf(0, 0, id(arial), "%.1f C", id(temp).state);

@@ -128,7 +128,7 @@ sensor:
     id: inj
     
   - platform: homeassistant
-    name: "Inj"
+    name: "Ecs_surplus"
     entity_id: sensor.puissance_ecs_surplus_injectee_w
     id: p_surplus
 
@@ -148,7 +148,7 @@ sensor:
     unit_of_measurement: "w"
     accuracy_decimals: 0
     lambda: |-
-      return (id(prod).state-id(conso).state+id(p_surplus).state);
+      return (id(inj).state-id(p_surplus).state);
 
     on_value:
 # de 0 à 4200 / 8 leds    

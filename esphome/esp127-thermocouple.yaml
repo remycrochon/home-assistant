@@ -63,12 +63,7 @@ sensor:
     cs_pin: D3
     update_interval: 10s
     accuracy_decimals: 2
-    filters:
-      - sliding_window_moving_average:
-          window_size: 6
-          send_every: 3
-          send_first_at: 1
-          
+
   - platform: adc
     pin: VCC
     name: "${friendly_name} U Alim"

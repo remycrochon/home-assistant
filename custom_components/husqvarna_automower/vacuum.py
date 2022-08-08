@@ -51,15 +51,6 @@ async def async_setup_entry(
     platform = entity_platform.current_platform.get()
 
     platform.async_register_entity_service(
-        "park_and_start",
-        {
-            vol.Required("command"): cv.string,
-            vol.Required("duration"): vol.Coerce(int),
-        },
-        "async_park_and_start",
-    )
-
-    platform.async_register_entity_service(
         "calendar",
         {
             vol.Required("start"): cv.time,
@@ -99,14 +90,14 @@ class HusqvarnaAutomowerStateMixin(object):
             "WAIT_POWER_UP",
         ]:
             return STATE_IDLE
-        if (mower_attributes["mower"]["state"] == "RESTRICTED") or (
-            mower_attributes["mower"]["activity"] in ["PARKED_IN_CS", "CHARGING"]
-        ):
-            return STATE_DOCKED
         if mower_attributes["mower"]["activity"] in ["MOWING", "LEAVING"]:
             return STATE_CLEANING
         if mower_attributes["mower"]["activity"] == "GOING_HOME":
             return STATE_RETURNING
+        if (mower_attributes["mower"]["state"] == "RESTRICTED") or (
+            mower_attributes["mower"]["activity"] in ["PARKED_IN_CS", "CHARGING"]
+        ):
+            return STATE_DOCKED
         if (
             mower_attributes["mower"]["state"]
             in [
@@ -146,7 +137,6 @@ class HusqvarnaAutomowerEntity(
     def __init__(self, session, idx):
         """Set up HusqvarnaAutomowerEntity."""
         super().__init__(session, idx)
-        self._attr_name = self.mower_name
         self._attr_unique_id = self.session.data["data"][self.idx]["id"]
 
     @property
@@ -264,24 +254,6 @@ class HusqvarnaAutomowerEntity(
         """Parks the mower until further notice."""
         command_type = "actions"
         payload = '{"data": {"type": "ParkUntilFurtherNotice"}}'
-        try:
-            await self.session.action(self.mower_id, payload, command_type)
-        except ClientResponseError as exception:
-            _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
-
-    async def async_park_and_start(self, command, duration, **kwargs) -> None:
-        """Send a custom command to the mower."""
-        _LOGGER.warning(
-            "The service `park_and_start` is depracated. Please use the number entites `number.park_for` or `number.mow_for` instead"
-        )
-        command_type = "actions"
-        string = {
-            "data": {
-                "type": command,
-                "attributes": {"duration": duration},
-            }
-        }
-        payload = json.dumps(string)
         try:
             await self.session.action(self.mower_id, payload, command_type)
         except ClientResponseError as exception:

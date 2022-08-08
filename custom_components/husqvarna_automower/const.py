@@ -5,7 +5,7 @@ from homeassistant.const import Platform
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2022.7.3"
+INTEGRATION_VERSION = "2022.8.0"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
 HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/applications"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
@@ -212,4 +212,29 @@ WEEKDAYS = (
     "friday",
     "saturday",
     "sunday",
+)
+
+# Models that support electronic cutting height
+ELECTRONIC_CUTTING_HEIGHT_SUPPORT = [
+    "405",
+    "415",
+    "420",
+    "430",
+    "435",
+    "440",
+    "450",
+    "520",
+    "535",
+    "544",
+    "546",
+    "550",
+    "550 EPOS",
+]
+
+# Models that support electronic cutting height, but are not changeable with this APII
+NO_SUPPORT_FOR_CHANGING_CUTTING_HEIGHT = ["405", "415", "435", "544", "546", "550 EPOS"]
+
+# Models that are able to change the cutting height with this API
+CHANGING_CUTTING_HEIGHT_SUPPORT = list(
+    set(ELECTRONIC_CUTTING_HEIGHT_SUPPORT) - set(NO_SUPPORT_FOR_CHANGING_CUTTING_HEIGHT)
 )

@@ -45,6 +45,10 @@ sensor:
     update_interval: 60s
     filters:
       - lambda: return 3.5 - x;
+      - sliding_window_moving_average:
+          window_size: 5 # moyenne sur x lectures
+          send_every: 5 # envoi toutes les x lectures
+          send_first_at: 1 # envoi à la premiere lecture
 
 # Calcul du niveau d'eau H total
 # longueur du tube=2.3 m

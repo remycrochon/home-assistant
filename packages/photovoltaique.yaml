@@ -27,11 +27,8 @@ input_number:
 template:
   - sensor:
 
-# Envoy:  Energie soutirée et injectée depuis le reseau -> Conso - Prod en kWh
-# calculee dans "entrées"
-
 # Envoy: Puissance injectée sur le réseau - Integration dans "Entrées"
-# binary_sensor.linky_sens_energie_active=off 
+# L'intégration en kWh et le cumul journalier sont effectués dans "parametres/entrée"
     - name: "Envoy Puissance Injectée Réseau"
       unique_id: "envoy_puissance_injectee_reseau"
       device_class: "power"
@@ -41,7 +38,7 @@ template:
         {{ [0, (states('sensor.envoy_122103023124_current_power_production') | int - states('sensor.envoy_122103023124_current_power_consumption') | int)] | max }}
 
 # Envoy: Puissance soutirée sur le réseau
-# binary_sensor.linky_sens_energie_active = on
+# L'intégration en kWh et le cumul journalier sont effectués dans "parametres/entrée"
     - name: "Envoy Puissance soutirée Réseau"
       unique_id: "envoy_puissance_soutiree_reseau"
       device_class: "power"
@@ -50,6 +47,7 @@ template:
       state: >-
         {{ [0, (states('sensor.envoy_122103023124_current_power_consumption') | int - states('sensor.envoy_122103023124_current_power_production') | int)] | max }}
 
+# Envoy Ecart asolu entre la production et la consommation
     - name: "Envoy pv conso net"
       unique_id: "envoy_pv_conso_net"
       device_class: "power"
@@ -64,12 +62,14 @@ template:
           {{ house }}
         {%endif%} 
 
+# Calcul de la puissance importée ou exportée
     - name: "Envoy energie import export"
       unique_id: "envoy_energie_import_export"
       state: >-
         {% if (states('sensor.envoy_122103023124_current_power_production') | int - states('sensor.envoy_122103023124_current_power_consumption') | int) > 0 %}Export{% else %}Import{% endif %}
       icon: "{% if (states('sensor.envoy_122103023124_current_power_production') | int - states('sensor.envoy_122103023124_current_power_consumption') | int) > 0 %}mdi:arrow-up-box{% else %}mdi:arrow-down-box{% endif %}"
 
+# Calcul de la consommation maison = production PV + la puissance importée - la puissance exportée
     - name: "Envoy total conso maison"
       unique_id: "envoy_total_conso_maison"
       unit_of_measurement: "kWh"
@@ -101,12 +101,20 @@ template:
       device_class: "energy"
       state_class: "total" 
       
-
-    - name: "Energie injectee Jour 2"
-      unique_id: "energie_injectee_jour_2"
+# Envoy Rendement panneaux
+# Doit tendre idéalement vers le 100%
+    - name: "Envoy Rendement PV"
+      unique_id: "envoy_rendement_pv"
+      unit_of_measurement: "%"
       state: >-
-        {% set p = states('sensor.energie_injectee_reseau_jour') | float(default=0) | round(2) %}
-        {{ ( p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"
+        {% set p = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
+        {{ ((p / 4490)*100) | round(0) }}
+
+# Dépendenace energetique
+    - name: "Envoy Dépendance Energetique"
+      unique_id: "envoy_dependance_energetique"
+      unit_of_measurement: "%"
+      state: >-
+        {% set import = states('sensor.envoy_energie_soutiree_reseau_jour') | float(default=0) | round(2) %}
+        {% set conso = states('sensor.envoy_energie_totale_consommee_jour') | float(default=0) | round(2) %}
+        {{ ((1-(import/conso))*100) | round(0) }}

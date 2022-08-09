@@ -105,11 +105,6 @@ mqtt:
       payload_off: offline
       device_class: connectivity
 
-template:
-    - sensor:
-      - name: 'espresence_distance_oneplus5t'
-        unit_of_measurement: "ml"
-        state: >-
-          {{state_attr('sensor.espresense_presence_oneplus','distance') }}
+
 
 

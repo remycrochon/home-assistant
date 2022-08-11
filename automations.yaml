@@ -731,18 +731,35 @@
     below: '6.8'
     above: '0'
     id: ph_bas
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   - platform: numeric_state
     entity_id: sensor.ph_stat_median
     id: ph_haut
     above: '7.8'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   - platform: numeric_state
     entity_id: sensor.ph_stat_standard_deviation
     id: ph_mauvais
     above: '0.1'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   - platform: state
-    entity_id: binary_sensor.ph_niveau_bas_bidon
+    entity_id:
+    - binary_sensor.ph_niveau_bas_bidon
     id: niv_bas_bidon
     to: 'on'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   condition: []
   action:
   - choose:

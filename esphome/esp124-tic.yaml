@@ -107,8 +107,10 @@ sensor:
     device_class: "energy"
     state_class: "total_increasing"  
     filters:
-      lambda: |-
-        return x/1000;
+      - filter_out: 0.0
+      - lambda: |-
+          return x/1000;
+
 
 # Energie Active soutirée Index01
   - platform: teleinfo
@@ -118,6 +120,8 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0
     
 # Energie Active soutirée Index02    
   - platform: teleinfo
@@ -127,6 +131,8 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0    
 
 #Puissance apparente de coupure
   - platform: teleinfo

@@ -1713,6 +1713,10 @@
           - select.energy_autres_usage_yearly
           - select.energy_vmc_usage_daily
           - select.linky_energie_jour
+          - select.energy_cuisine_usage_daily
+          - select.energy_cuisine_usage_monthly
+          - select.energy_cuisine_usage_weekly
+          - select.energy_cuisine_usage_yearly
     - conditions:
       - condition: trigger
         id: tarif_hp
@@ -1752,6 +1756,10 @@
           - select.energy_autres_usage_yearly
           - select.energy_vmc_usage_daily
           - select.linky_energie_jour
+          - select.energy_cuisine_usage_daily
+          - select.energy_cuisine_usage_monthly
+          - select.energy_cuisine_usage_weekly
+          - select.energy_cuisine_usage_yearly
     default: []
   mode: single
 - id: '1642958036645'

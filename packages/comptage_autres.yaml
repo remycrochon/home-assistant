@@ -79,8 +79,9 @@ template:
         {% set e = states('sensor.ecocompteur_ecs') | float(default=0) | round(2) %}          
         {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
         {% set g = states('sensor.ecocompteur_wc') | float(default=0) | round(2) %}
-        {% if (a-b-c-d-e-f-g) >= 0 %}
-          {{ (a-b-c-d-e-f-g) | round(2) }}
+        {% set h = states('sensor.pzem_cuisine_puissance') | float(default=0) | round(2) %}
+        {% if (a-b-c-d-e-f-g-h) >= 0 %}
+          {{ (a-b-c-d-e-f-g-h) | round(2) }}
         {% else%}
           0
         {%endif%}

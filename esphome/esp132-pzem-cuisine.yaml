@@ -1,5 +1,5 @@
 esphome:
-  name: esp132-pzem-total
+  name: esp132-pzem-cuisine
   platform: ESP8266
   board: d1_mini
 
@@ -49,24 +49,24 @@ binary_sensor:
 sensor:
   - platform: pzemac
     current:
-      name: "pzem_totale_courant"
+      name: "pzem_cuisine_courant"
       unit_of_measurement: "A"
     voltage:
-      name: "pzem_totale_tension"
+      name: "pzem_cuisine_tension"
       unit_of_measurement: "V"
     energy:
-      name: "pzem_totale_energy"
+      name: "pzem_cuisine_energy"
       unit_of_measurement: "kWh"
       filters:
         - multiply: 0.001
     power:
-      name: "pzem_totale_puissance"
+      name: "pzem_cuisine_puissance"
       unit_of_measurement: "W"
     frequency:
-      name: "pzem_totale_frequence"
+      name: "pzem_cuisine_frequence"
       unit_of_measurement: "hz"
     power_factor:
-      name: "pzem_totale_factpuiss"
+      name: "pzem_cuisine_factpuiss"
       unit_of_measurement: "fp"
     update_interval: 10s
     

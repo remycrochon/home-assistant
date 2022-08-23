@@ -69,6 +69,7 @@ class FiltrationPiscine(hass.Hass):
         self.notification("Duree tempo:"+str(DUREE_TEMPO),2)
         nom_entité=self.args["cde_pompe"]
         self.tempo=self.run_in(self.fin_temporisation_mesure_temp, DUREE_TEMPO,entité=nom_entité)
+        FIN_TEMPO = 0
         # Arret de la pompe sur initalisation
         self.turn_off(self.args["cde_pompe"])
 

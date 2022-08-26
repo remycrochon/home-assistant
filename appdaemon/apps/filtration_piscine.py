@@ -6,7 +6,7 @@ import time
 
 # Variables globales
 # Saisir ici les memes modes que dans HA 
-TAB_MODE = ["Ete", "Hiver", "At F", "Ma F"]
+TAB_MODE = ["Ete", "Hiver", "At F", "Ma F", "PV"]
 # Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
 JOURNAL=2 
 # RAZ du flag fin_tempo
@@ -62,6 +62,7 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
         self.listen_state(self.change_etat_pompe,self.args["cde_pompe"])
         self.listen_state(self.change_arret_force,self.args["arret_force"])
+        self.listen_state(self.change_pu_pv,self.args["pu_pv"])
         self.run_every(self.touteslesxminutes, "now", 5 * 60)
         
         # initialisation de la temporisation avant recopie temperature
@@ -97,6 +98,12 @@ class FiltrationPiscine(hass.Hass):
     def change_mode_calcul(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement changement mode de calcul.',2)
+        self.traitement(kwargs)
+
+# Appelé sur changement de puissance photovoltaique
+    def change_pu_pv(self, entity, attribute, old, new, kwargs):
+        global JOURNAL
+        self.notification('Appel traitement changement puissance PV.',2)
         self.traitement(kwargs)
 
 # Appelé sur changement arret forcé
@@ -265,7 +272,23 @@ class FiltrationPiscine(hass.Hass):
             ma_ppe=1
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            
+
+        # Mode Marche PV
+        elif mode_de_fonctionnement == TAB_MODE[4]:
+            puissance_pv = float(self.get_state(self.args["pu_pv"]))
+            if puissance_pv > 800.0:
+                ma_ppe=1
+                text_affichage = "PV= "+str(puissance_pv)+ ">800"
+                self.set_textvalue(periode_filtration,text_affichage)
+                message_notification="Ma Ppe car PU_PV= "+str(puissance_pv)+ " > 800"
+                self.notification(message_notification,2)
+            if puissance_pv < 300.0:
+                ma_ppe=0
+                text_affichage = "PV= "+str(puissance_pv)+ "<300"
+                self.set_textvalue(periode_filtration,text_affichage)
+                message_notification="AT Ppe car PU_PV= "+str(puissance_pv)+ " < 300"
+                self.notification(message_notification,2)
+
         # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
         else:
             message_notification="Mode de fonctionnement Piscine Inconnu: "+mode_de_fonctionnement

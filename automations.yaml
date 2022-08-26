@@ -804,7 +804,7 @@
   mode: single
 - id: '1634222619535'
   alias: 3_1_3 Piscine-Notifications filtration
-  description: Debut, Fin
+  description: Notification Debut, Fin filtration et mise à jour du fichier log "conso_piscine.csv"
   trigger:
   - platform: state
     entity_id: binary_sensor.ppe_piscine_en_marche
@@ -844,14 +844,14 @@
       sequence:
       - service: notify.telegram
         data:
-          message: 'Temps de filtration:  {{states.sensor.ma_ppe_piscine_jour.attributes.value}}{{-"\n"-}}Conso:
+          message: 'Temps de filtration:  {{states(''sensor.ma_ppe_piscine_jour'')}}{{-"\n"-}}Conso:
             {{states(''sensor.energie_piscine_jour'')}} kWh.{{-"\n"-}} Tps Utilisation
             cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}} h {{-"\n"-}}{{states("sensor.date_time")
             }}'
           title: Piscine Rapport Fin de journée
       - service: notify.log_piscine
         data:
-          message: '{{states.sensor.ma_ppe_piscine_jour.attributes.value }},{{states(''sensor.energie_piscine_jour'')}}'
+          message: ',{{states(''sensor.energie_piscine_jour'')}},{{states(''sensor.ma_ppe_piscine_jour'')}}'
           title: Rapport jour piscine
     default: []
   mode: single
@@ -2342,4 +2342,48 @@
         %} {% set d=states('input_number.ph_duree_inject_mn')|float %} {{(b*((d*60)+c)/3600)|round(2)
         }} l {{-"\n"-}}{{states("sensor.date_time") }}
       title: Piscine Fin injection pH !!!
+  mode: single
+- id: '1661426812138'
+  alias: 3_1_0 Piscine Calcul Filtration PV
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.envoy_122103023124_current_power_production
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    above: '790'
+    id: ma_ppe
+  - platform: numeric_state
+    entity_id: sensor.envoy_122103023124_current_power_production
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    below: '750'
+    id: at_ppe
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine
+        state: Ete
+      - condition: trigger
+        id: ma_ppe
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.ppe_filtration
+    - conditions:
+      - condition: trigger
+        id: at_ppe
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.ppe_filtration
+    default: []
   mode: single

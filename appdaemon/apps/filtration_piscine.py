@@ -1,5 +1,5 @@
 # Version du 26/08/2022
-# Ajout
+# Ajout du mode PV -> Fonctionnement PPE filtration en fonction de la production Photovoltaique
 import hassapi as hass
 import datetime
 from datetime import timedelta
@@ -12,9 +12,9 @@ TAB_MODE = ["Ete", "Hiver", "At F", "Ma F", "PV"]
 JOURNAL=2 
 # RAZ du flag fin_tempo
 FIN_TEMPO = 0
-# Seuil PV marche pompe
+# Seuil PV marche pompe en W
 PV_SEUIL_MA_PPE = 800.0
-# Seuil PV Arret pompe
+# Seuil PV Arret pompe en W
 PV_SEUIL_AT_PPE = 300.0
 # Cde PPE
 MA_PPE=0
@@ -112,7 +112,6 @@ class FiltrationPiscine(hass.Hass):
         self.traitement(kwargs)
 
 # Appelé sur changement de puissance photovoltaique
-
     def pu_pv_sup(self, entity, attribute, old, new, kwargs):
         global SEUIL_PU
         self.notification('Appel traitement changement puissance SUP PV.',2)
@@ -124,7 +123,7 @@ class FiltrationPiscine(hass.Hass):
         self.notification('Appel traitement changement puissance INF PV.',2)
         self.traitement(kwargs)
 
-# Filtre seuil haut/seuil bas PU_PV 
+    # Filtre seuil haut/seuil bas PU_PV 
     def filtre_pu_pv(self,value):
         global PV_SEUIL_MA_PPE,PV_SEUIL_AT_PPE
         valeur = float(self.get_state(self.args["pu_pv"]))
@@ -185,7 +184,7 @@ class FiltrationPiscine(hass.Hass):
         self.notification('Appel traitement toutes les x mn.',2)
         self.traitement(kwargs)
 
-# Routine de traitiment principale
+# Routine de traitement principale
     def traitement(self, kwargs):
         global JOURNAL, FIN_TEMPO,PV_SEUIL_MA_PPE,PV_SEUIL_AT_PPE,MA_PPE
         h_locale=time.strftime('%H:%M:%S', time.localtime())
@@ -310,6 +309,7 @@ class FiltrationPiscine(hass.Hass):
         # Mode Marche PV
         elif mode_de_fonctionnement == TAB_MODE[4]:
             global SEUIL_PU
+            puissance_pv = float(self.get_state(self.args["pu_pv"]))
             if SEUIL_PU == "sup":
                 MA_PPE=1
                 text_affichage = "PV= "+str(puissance_pv)+ ">"+str(PV_SEUIL_MA_PPE)

@@ -2344,7 +2344,7 @@
       title: Piscine Fin injection pH !!!
   mode: single
 - id: '1661426812138'
-  alias: 3_1_0 Piscine Calcul Filtration PV
+  alias: 3_1_0 Piscine Delestage sur Photovoltaique V0
   description: ''
   trigger:
   - platform: numeric_state
@@ -2354,36 +2354,33 @@
       minutes: 5
       seconds: 0
     above: '790'
-    id: ma_ppe
+    id: pv_niveau_haut
   - platform: numeric_state
     entity_id: sensor.envoy_122103023124_current_power_production
     for:
       hours: 0
       minutes: 5
       seconds: 0
-    below: '750'
-    id: at_ppe
+    below: '300'
+    id: pv_niveau_bas
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine
-        state: Ete
       - condition: trigger
-        id: ma_ppe
+        id: pv_niveau_haut
       sequence:
-      - service: switch.turn_on
+      - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: switch.ppe_filtration
+          entity_id: input_boolean.valid_delestage
     - conditions:
       - condition: trigger
-        id: at_ppe
+        id: pv_niveau_bas
       sequence:
-      - service: switch.turn_off
+      - service: input_boolean.turn_on
         data: {}
         target:
-          entity_id: switch.ppe_filtration
+          entity_id: input_boolean.mem_delestage
     default: []
   mode: single

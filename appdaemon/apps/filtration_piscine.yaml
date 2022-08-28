@@ -1,4 +1,4 @@
-# Version du 30/05/2022
+# Version du 27/08/2022
 Piscine:
   class: FiltrationPiscine
   module: filtration_piscine
@@ -27,9 +27,6 @@ Piscine:
 # Ajouté le 30 mai 2022
   # Durée de la filtration en ete
   duree_filtration_ete: input_number.duree_filtration_ete
-# Ajouté le 30 mai 2022
-  # Puissance production Photovoltaique
-  pu_pv: sensor.envoy_122103023124_current_power_production
 
 # Actionneurs
   # Switch de commande de la pompe

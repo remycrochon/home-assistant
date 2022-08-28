@@ -1,5 +1,4 @@
-# Version du 26/08/2022
-# Ajout du mode PV -> Fonctionnement PPE filtration en fonction de la production Photovoltaique
+# Version du 27/08/2022
 import hassapi as hass
 import datetime
 from datetime import timedelta
@@ -7,18 +6,11 @@ import time
 
 # Variables globales
 # Saisir ici les memes modes que dans HA 
-TAB_MODE = ["Ete", "Hiver", "At F", "Ma F", "PV"]
+TAB_MODE = ["Ete", "Hiver", "At F", "Ma F"]
 # Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
 JOURNAL=2 
 # RAZ du flag fin_tempo
 FIN_TEMPO = 0
-# Seuil PV marche pompe en W
-PV_SEUIL_MA_PPE = 800.0
-# Seuil PV Arret pompe en W
-PV_SEUIL_AT_PPE = 300.0
-# Cde PPE
-MA_PPE=0
-
 
 # Fonction de calcul du temps de filtration selon Abaque Abacus 
 def duree_abaque(Temperature_eau):
@@ -58,7 +50,7 @@ def en_heure(t):
 ########## Programme principal ###################
 class FiltrationPiscine(hass.Hass): 
     def initialize(self):
-        global JOURNAL, DUREE_TEMPO, FIN_TEMPO, MA_PPE
+        global JOURNAL, DUREE_TEMPO, FIN_TEMPO
         message_notification= "Initialisation AppDaemon Filtration Piscine."
         self.notification(message_notification,0)
         self.log(message_notification, log="error_log")
@@ -68,22 +60,16 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
-        self.listen_state(self.change_etat_pompe,self.args["cde_pompe"])
+        self.listen_state(self.raz_temporisation_mesure_temp,self.args["cde_pompe"],new_state="off")
+        self.listen_state(self.fin_temporisation_mesure_temp,self.args["cde_pompe"],new_state="on", duration=float(self.get_state(self.args["tempo_eau"])))        
         self.listen_state(self.change_arret_force,self.args["arret_force"])
-        self.register_constraint("filtre_pu_pv")
-        self.listen_state(self.pu_pv_sup,self.args["pu_pv"], duration=60, filtre_pu_pv="sh")
-        self.listen_state(self.pu_pv_inf,self.args["pu_pv"], duration=60, filtre_pu_pv="sb")
         self.run_every(self.touteslesxminutes, "now", 5 * 60)
-        
+        self.listen_state(self.change_tempo_circulation_eau,self.args["tempo_eau"])
+        #         
         # initialisation de la temporisation avant recopie temperature
-        DUREE_TEMPO=float(self.get_state(self.args["tempo_eau"]))
-        self.notification("Duree tempo:"+str(DUREE_TEMPO),2)
-        nom_entité=self.args["cde_pompe"]
-        self.tempo=self.run_in(self.fin_temporisation_mesure_temp, DUREE_TEMPO,entité=nom_entité)
         FIN_TEMPO = 0
         # Arret de la pompe sur initalisation
         self.turn_off(self.args["cde_pompe"])
-        MA_PPE=0
 
 # Appelé sur changement de temperature
     def change_temp(self, entity, attribute, old, new, kwargs):
@@ -111,60 +97,26 @@ class FiltrationPiscine(hass.Hass):
         self.notification('Appel traitement changement mode de calcul.',2)
         self.traitement(kwargs)
 
-# Appelé sur changement de puissance photovoltaique
-    def pu_pv_sup(self, entity, attribute, old, new, kwargs):
-        global SEUIL_PU
-        self.notification('Appel traitement changement puissance SUP PV.',2)
-        SEUIL_PU = "sup"
-        self.traitement(kwargs)
-    def pu_pv_inf(self, entity, attribute, old, new, kwargs):
-        global SEUIL_PU
-        SEUIL_PU = "inf"
-        self.notification('Appel traitement changement puissance INF PV.',2)
-        self.traitement(kwargs)
-
-    # Filtre seuil haut/seuil bas PU_PV 
-    def filtre_pu_pv(self,value):
-        global PV_SEUIL_MA_PPE,PV_SEUIL_AT_PPE
-        valeur = float(self.get_state(self.args["pu_pv"]))
-        if value == "sh":
-            if valeur > PV_SEUIL_MA_PPE: 
-                #self.notification("val_sup= "+str(valeur),2,"")
-                return True
-        elif value == "sb":
-            if valeur < PV_SEUIL_AT_PPE: 
-                #self.notification("val_inf= "+str(valeur),2,"")    
-                return True
-        else:
-            return False
-
 # Appelé sur changement arret forcé
     def change_arret_force(self, entity, attribute, old, new, kwargs):
         global JOURNAL
         self.notification('Appel traitement sur arret force.',2)
         self.traitement(kwargs)
 
-# Appelé sur changement d'état de la pompe de filtrage
-    def change_etat_pompe(self, entity, attribute, old, new, kwargs):
-        global JOURNAL, FIN_TEMPO ,DUREE_TEMPO
-        nom_entité=self.args["cde_pompe"]
+# Appelé sur changement d'état de la pompe de filtrage de ON à OFF
+    def raz_temporisation_mesure_temp(self, entity, attribute, old, new, kwargs):
+        global JOURNAL, FIN_TEMPO
         FIN_TEMPO = 0
-        if new=="on":
-            self.tempo=self.run_in(self.fin_temporisation_mesure_temp, DUREE_TEMPO,entité=nom_entité)
-        else:
-            cle_tempo = self.tempo
-            if cle_tempo != None:
-                cle_tempo = self.tempo
-                self.tempo = self.cancel_timer(cle_tempo)
-
-        self.notification('Appel traitement changement etat pompe.',2)
+        self.notification('Remise a zero temporisation circulation temp.',2)
+        self.notification("Flag fin tempo= "+str(FIN_TEMPO),2)
         #self.traitement(kwargs)
-        
-# Appelé sur fin temporisation suit à demarrage de la pompe
-    def fin_temporisation_mesure_temp(self,kwargs):
+
+# Appelé sur fin temporisation suite à demarrage de la pompe
+    def fin_temporisation_mesure_temp(self, entity, attribute, old, new, kwargs):
         global JOURNAL, FIN_TEMPO 
         FIN_TEMPO = 1
         self.notification('Fin temporisation circulation eau.',2)
+        self.notification("Flag fin tempo= "+str(FIN_TEMPO),2)
         #self.traitement(kwargs)
 
 # Ecretage Heure pivot entre h_pivot_min et h_pivot_max
@@ -184,9 +136,17 @@ class FiltrationPiscine(hass.Hass):
         self.notification('Appel traitement toutes les x mn.',2)
         self.traitement(kwargs)
 
-# Routine de traitement principale
+# Appelé sur changement temporisation circulation eau
+    def change_tempo_circulation_eau(self, entity, attribute, old, new, kwargs):
+        global JOURNAL, FIN_TEMPO
+        FIN_TEMPO = 0
+        self.notification('Appel changement tempo circulation eau.',2)
+        self.notification("Flag fin tempo= "+str(FIN_TEMPO),2)
+        self.initialize()
+
+# Routine du traitement principal
     def traitement(self, kwargs):
-        global JOURNAL, FIN_TEMPO,PV_SEUIL_MA_PPE,PV_SEUIL_AT_PPE,MA_PPE
+        global JOURNAL, FIN_TEMPO
         h_locale=time.strftime('%H:%M:%S', time.localtime())
         Mesure_temperature_eau = float(self.get_state(self.args["temperature_eau"]))
         Mem_temperature_eau = float(self.get_state(self.args["mem_temp"]))
@@ -201,6 +161,7 @@ class FiltrationPiscine(hass.Hass):
         # Flag FIN_TEMPO
         self.notification("Flag fin tempo= "+str(FIN_TEMPO),2)
         # Temporisation avant prise en compte de la mesure de la temperature
+        self.notification("Duree tempo recirculation= "+str(float(self.get_state(self.args["tempo_eau"]))),2)
         # sinon on travaille avec la memoire de la 
         # temperature avant arret de la pompe
         # mémorise la température eau de la veille.
@@ -260,9 +221,9 @@ class FiltrationPiscine(hass.Hass):
             # fin ajout
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
-                MA_PPE=1
+                ma_ppe=1
             else:
-                MA_PPE=0
+                ma_ppe=0
 
 # Notifications de debug
             message_notification="Mode de fonctionnement: "+mode_de_fonctionnement
@@ -290,40 +251,22 @@ class FiltrationPiscine(hass.Hass):
             self.notification(message_notification,2)
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut_h),str(h_fin_f)):
-                MA_PPE=1
+                ma_ppe=1
             else:
-                MA_PPE=0
+                ma_ppe=0
 
         # Mode Arret Forcé
         elif mode_de_fonctionnement == TAB_MODE[2]:
-            MA_PPE=0
+            ma_ppe=0
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
 
         # Mode Marche Forcée
         elif mode_de_fonctionnement == TAB_MODE[3]:
-            MA_PPE=1
+            ma_ppe=1
             text_affichage = "Ma manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-
-        # Mode Marche PV
-        elif mode_de_fonctionnement == TAB_MODE[4]:
-            global SEUIL_PU
-            puissance_pv = float(self.get_state(self.args["pu_pv"]))
-            if SEUIL_PU == "sup":
-                MA_PPE=1
-                text_affichage = "PV= "+str(puissance_pv)+ ">"+str(PV_SEUIL_MA_PPE)
-                self.set_textvalue(periode_filtration,text_affichage)
-                message_notification="Ma Ppe car PU_PV= "+str(puissance_pv)+ ">"+str(PV_SEUIL_MA_PPE)
-                self.notification(message_notification,2)
-            if SEUIL_PU == "inf":
-                self.notification("Seuil PV inferieur",0)
-                MA_PPE=0
-                text_affichage = "PV= "+str(puissance_pv)+ "<"+str(PV_SEUIL_AT_PPE)
-                self.set_textvalue(periode_filtration,text_affichage)
-                message_notification="AT Ppe car PU_PV= "+str(puissance_pv)+ " <"+str(PV_SEUIL_AT_PPE)
-                self.notification(message_notification,2)
-
+            
         # Mode Inconnu: revoir le contenu de Input_select.mode_de_fonctionnement
         else:
             message_notification="Mode de fonctionnement Piscine Inconnu: "+mode_de_fonctionnement
@@ -337,7 +280,7 @@ class FiltrationPiscine(hass.Hass):
             text_affichage = "At delestage"
             self.set_textvalue(periode_filtration,text_affichage)
         else:
-            if MA_PPE==1:
+            if ma_ppe==1:
                 self.turn_on(pompe)
                 self.notification("Ma Pompe",1)
             else:

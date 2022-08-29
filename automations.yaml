@@ -2354,7 +2354,7 @@
       minutes: 5
       seconds: 0
     above: '790'
-    id: pv_niveau_haut
+    id: pv_ma_ppe
   - platform: numeric_state
     entity_id: sensor.envoy_122103023124_current_power_production
     for:
@@ -2362,13 +2362,13 @@
       minutes: 5
       seconds: 0
     below: '300'
-    id: pv_niveau_bas
+    id: pv_at_ppe
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
-        id: pv_niveau_haut
+        id: pv_ma_ppe
       sequence:
       - service: input_boolean.turn_off
         data: {}
@@ -2376,7 +2376,7 @@
           entity_id: input_boolean.valid_delestage
     - conditions:
       - condition: trigger
-        id: pv_niveau_bas
+        id: pv_at_ppe
       sequence:
       - service: input_boolean.turn_on
         data: {}

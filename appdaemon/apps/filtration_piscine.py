@@ -8,7 +8,7 @@ import time
 # Saisir ici les memes modes que dans HA 
 TAB_MODE = ["Ete", "Hiver", "At F", "Ma F"]
 # Niveau de JOURNALISATION (log): 0=rien ou 1 =info ou 2=debug 
-JOURNAL=2 
+JOURNAL=1
 # RAZ du flag fin_tempo
 FIN_TEMPO = 0
 
@@ -16,7 +16,7 @@ FIN_TEMPO = 0
 def duree_abaque(Temperature_eau):
     #Advanced calculation method using an abacus.
     #D = a*T^3 + b*T^2 + c*T +d
-    #T est forçèe a 10°C minimum
+    #T est forçé a 10°C minimum
     #Formule découverte dans: https://github.com/scadinot/pool
     #Filtration en heures
     temperature_min: float = max(float(Temperature_eau), 10)

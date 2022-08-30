@@ -2373,7 +2373,8 @@
       - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: input_boolean.valid_delestage
+          entity_id:
+          - input_boolean.mem_delestage
     - conditions:
       - condition: trigger
         id: pv_at_ppe
@@ -2381,6 +2382,8 @@
       - service: input_boolean.turn_on
         data: {}
         target:
-          entity_id: input_boolean.mem_delestage
+          entity_id:
+          - input_boolean.mem_delestage
+          - input_boolean.mem_delestage
     default: []
   mode: single

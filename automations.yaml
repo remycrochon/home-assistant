@@ -1446,12 +1446,14 @@
           - service: switch.turn_on
             target:
               entity_id:
-              - switch.sonoff_vmc_niv0_on_off
+              - switch.relais_cde_vmc_niv0_on_off
+            data: {}
         default:
         - service: switch.turn_off
           target:
             entity_id:
-            - switch.sonoff_vmc_niv0_on_off
+            - switch.relais_cde_vmc_niv0_on_off
+          data: {}
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
@@ -1465,10 +1467,13 @@
       sequence:
       - service: switch.turn_on
         target:
-          entity_id: switch.sonoff_vmc_niv0_on_off
+          entity_id:
+          - switch.relais_cde_vmc_niv0_on_off
+        data: {}
       - service: switch.turn_on
         target:
           entity_id: switch.esp136_vit_2
+        data: {}
       - delay:
           hours: 0
           minutes: 30
@@ -1487,10 +1492,13 @@
       sequence:
       - service: switch.turn_on
         target:
-          entity_id: switch.sonoff_vmc_niv0_on_off
+          entity_id:
+          - switch.relais_cde_vmc_niv0_on_off
+        data: {}
       - service: switch.turn_on
         target:
           entity_id: switch.esp136_vit_3
+        data: {}
       - delay:
           hours: 0
           minutes: 15
@@ -1499,6 +1507,7 @@
       - service: switch.turn_on
         target:
           entity_id: switch.esp136_vit_2
+        data: {}
       - delay:
           hours: 0
           minutes: 30
@@ -1512,7 +1521,8 @@
       - service: switch.turn_off
         target:
           entity_id:
-          - switch.sonoff_vmc_niv0_on_off
+          - switch.relais_cde_vmc_niv0_on_off
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
@@ -1521,7 +1531,8 @@
       - service: switch.turn_on
         target:
           entity_id:
-          - switch.sonoff_vmc_niv0_on_off
+          - switch.relais_cde_vmc_niv0_on_off
+        data: {}
     default: []
   mode: single
 - id: '1634204887777'

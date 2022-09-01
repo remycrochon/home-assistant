@@ -1966,6 +1966,9 @@
   - condition: state
     entity_id: input_boolean.regul_ph
     state: 'on'
+  - condition: state
+    entity_id: binary_sensor.ppe_piscine_en_marche
+    state: 'on'
   action:
   - service: input_number.set_value
     target:
@@ -2362,9 +2365,9 @@
     entity_id: sensor.envoy_122103023124_current_power_production
     for:
       hours: 0
-      minutes: 5
+      minutes: 2
       seconds: 0
-    above: '790'
+    above: input_number.seuil_haut_delestage_piscine
     id: pv_ma_ppe
   - platform: numeric_state
     entity_id: sensor.envoy_122103023124_current_power_production
@@ -2372,7 +2375,7 @@
       hours: 0
       minutes: 5
       seconds: 0
-    below: '300'
+    below: input_number.seuil_bas_delestage_piscine
     id: pv_at_ppe
   condition: []
   action:

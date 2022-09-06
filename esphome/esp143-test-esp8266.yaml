@@ -45,7 +45,31 @@ web_server:
 
 
 sensor:
-      
+  - platform: ntc
+    sensor: resistance_sensor
+    calibration:
+#      - 20.01kOhm -> 25°C
+#      - 68.057kOhm -> 0.56°C
+#      - 32.336kOhm -> 15°C
+      - 298.057kOhm -> 0.56°C
+      - 262.336kOhm -> 15°C
+      - 250.01kOhm -> 25°C
+
+    name: esp143-ntc20k
+    
+  - platform: resistance
+    id: resistance_sensor
+    sensor: source_sensor
+    configuration: UPSTREAM
+    resistor: 100.0kOhm
+    name: Resistance Sensor
+    
+  - platform: adc
+    id: source_sensor
+    pin: A0      
+    # Added:
+    update_interval: 10s
+    
   - platform: wifi_signal
     id: wif
     name: "${friendly_name} WiFi Signal Sensor"
@@ -59,7 +83,6 @@ binary_sensor:
 
 switch:   
 
-    
   - platform: restart
     name: "${friendly_name} Restart"
     

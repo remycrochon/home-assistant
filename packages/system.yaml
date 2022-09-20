@@ -105,6 +105,12 @@ mqtt:
       payload_off: offline
       device_class: connectivity
 
-
+switch:
+  - platform: wake_on_lan
+    name: RebootWeeks
+    host: 192.168.0.62
+    mac: B8:27:EB:27:F8:6F
+    turn_off:
+      service: shell_command.turn_off_remote_pc
 
 

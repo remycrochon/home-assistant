@@ -1,0 +1,1 @@
+turn_off_remote_pc: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' homeassistant@192.168.0.62 sudo shutdown -h now"

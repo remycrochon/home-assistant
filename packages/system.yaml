@@ -63,14 +63,34 @@ sensor:
     away_timeout: 120
 
 mqtt:
-# Tablette
   sensor: 
+    # Tablette
     - name: "Tablette niveau charge"
       unique_id: "tablette_niveau_charge"
       state_topic: "wallpanel/mywallpanel/sensor/battery"
       unit_of_measurement: "%"
       device_class: "battery"
       value_template: "{{ value_json.value | round(2) }}"
+
+    # Speed Test - Contenair dans NAS OMV
+    # https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436/11
+    - name: "speedtest.download"
+      state_topic: "speedtest/download"
+      unit_of_measurement: Mbit/s
+      icon: mdi:speedometer      
+      state_class: measurement  
+
+    - name: "speedtest.upload"
+      state_topic: "speedtest/upload"
+      unit_of_measurement: Mbit/s
+      icon: mdi:speedometer      
+      state_class: measurement 
+
+    - name: "speedtest.ping"
+      state_topic: "speedtest/ping"
+      unit_of_measurement: ms      
+      icon: mdi:speedometer      
+      state_class: measurement  
 
   binary_sensor:
 # One entry per sensor node
@@ -105,7 +125,9 @@ mqtt:
       payload_off: offline
       device_class: connectivity
 
+
 switch:
+# Commande de reboot du RPI Weex
   - platform: wake_on_lan
     name: RebootWeeks
     host: 192.168.0.62

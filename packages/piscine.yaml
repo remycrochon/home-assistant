@@ -295,8 +295,10 @@ template:
     # {{ is_state('switch.ppe_filtration', 'on') }}
     - name: "ppe_piscine_en_marche"
       state: >-
-        {{states.sensor.pzem_pisc_puissance.state | float(default=0) > 500}} 
-
+        {% set pu_ok = states.sensor.pzem_pisc_puissance.state | float(default=0) > 500 %}
+        {% set esp_ok = states('binary_sensor.esp137_status') %}
+        {% set cde_ppe = states('switch.ppe_filtration') %}
+        {{ (esp_ok=='on' and pu_ok == True) or (esp_ok == 'off' and cde_ppe == 'on') }}
 
 # Commande du volet roulant via un Cover
 cover:

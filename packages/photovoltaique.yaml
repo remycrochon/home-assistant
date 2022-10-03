@@ -26,7 +26,6 @@ input_number:
 
 template:
   - sensor:
-
 # Envoy: Puissance injectée sur le réseau - Integration dans "Entrées"
 # L'intégration en kWh et le cumul journalier sont effectués dans "parametres/entrée"
     - name: "Envoy Puissance Injectée Réseau"
@@ -110,7 +109,7 @@ template:
         {% set p = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
         {{ ((p / 4490)*100) | round(0) }}
 
-# Dépendenace energetique
+# Dépendence energetique
     - name: "Envoy Dépendance Energetique"
       unique_id: "envoy_dependance_energetique"
       unit_of_measurement: "%"

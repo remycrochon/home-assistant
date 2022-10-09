@@ -1,6 +1,15 @@
 ouverture_volet:
   alias: ouverture_volet
   sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.volet_salon_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
   - service: cover.open_cover
     data: {}
     entity_id: cover.volet_salon_p
@@ -71,9 +80,18 @@ fermeture_volet:
       minutes: 0
       seconds: 2
       milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.volet_salon_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
   - service: cover.close_cover
     data: {}
-    entity_id: cover.salon_p
+    entity_id: cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -482,9 +500,9 @@ ouverture_volet_chamb_sud:
   sequence:
   - service: notify.telegram
     data:
-      message: "Intruder Alert!  {% for open_sensor in state_attr(\"alarm_control_panel.alarmo_2\"\
-        , \"open_sensors\").key() | list %}\n  at {{ state_attr(open_sensor, 'friendly_name')\
-        \ }}\n{% endfor %}\n"
+      message: "Intruder Alert!  {% for open_sensor in state_attr(\"alarm_control_panel.alarmo_2\",
+        \"open_sensors\").key() | list %}\n  at {{ state_attr(open_sensor, 'friendly_name')
+        }}\n{% endfor %}\n"
       title: Alarme intrusions
   mode: single
 ecs_on:

@@ -561,6 +561,14 @@
   - platform: time
     id: fin
     at: input_datetime.horaire_ecs_fin
+  - platform: numeric_state
+    entity_id: sensor.envoy_122103023124_current_power_production
+    above: 10
+    id: p>10
+  - platform: numeric_state
+    entity_id: sensor.envoy_122103023124_current_power_production
+    below: 5
+    id: p<5
   condition: []
   action:
   - choose:
@@ -572,6 +580,7 @@
         id: debut
       sequence:
       - service: script.ecs_on
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
@@ -580,6 +589,7 @@
         id: fin
       sequence:
       - service: script.ecs_off
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
@@ -590,6 +600,7 @@
           entity_id:
           - switch.cde_relais_ecs
           - switch.cde_relais_ecs_router_pv
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
@@ -598,9 +609,11 @@
       - service: switch.turn_on
         target:
           entity_id: switch.cde_relais_ecs
+        data: {}
       - service: switch.turn_off
         target:
           entity_id: switch.cde_relais_ecs_router_pv
+        data: {}
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
@@ -609,7 +622,28 @@
       - service: switch.turn_off
         target:
           entity_id: switch.cde_relais_ecs
+        data: {}
       - service: switch.turn_on
+        target:
+          entity_id: switch.cde_relais_ecs_router_pv
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: p>10
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Marche PV
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.cde_relais_ecs_router_pv
+    - conditions:
+      - condition: trigger
+        id: p<5
+      sequence:
+      - service: switch.turn_off
+        data: {}
         target:
           entity_id: switch.cde_relais_ecs_router_pv
     default: []

@@ -143,9 +143,9 @@ mqtt:
 
 sensor:
 # lune https://www.home-assistant.io/integrations/moon/
-  - platform: moon
+#  - platform: moon
 
-  - platform: season  
+#  - platform: season  
 
   - platform: template
     sensors:

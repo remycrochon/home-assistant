@@ -72,6 +72,44 @@ mqtt:
       device_class: "battery"
       value_template: "{{ value_json.value | round(2) }}"
 
+# Routeur PV
+# https://ota.apper-solaire.org/index.php
+
+    - name: "Routeur PV Dimmer"
+      unique_id: routeur_pv_dimmer" 
+      state_topic: "pvrouter/in/110"
+      unit_of_measurement: '%'
+      device_class: power
+      state_class: measurement
+      icon: mdi:power
+
+    - name: "Routeur PV injection"
+      unique_id: routeur_pv_injection" 
+      state_topic: "pvrouter/in/100/injection"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement
+      icon: mdi:flash
+
+    - name: "Routeur PV soutirage"
+      unique_id: routeur_pv_soutirage" 
+      state_topic: "pvrouter/in/100/grid"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement
+      icon: mdi:flash
+
+    - name: "Routeur PV reseau"
+      unique_id: routeur_pv_reseau" 
+      state_topic: "pvrouter/in/100"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement
+      icon: mdi:flash
+
+
+
+
   binary_sensor:
 # One entry per sensor node
     - name: Salon Mqtt Room

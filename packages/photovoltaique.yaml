@@ -46,7 +46,7 @@ template:
       state: >-
         {{ [0, (states('sensor.envoy_122103023124_current_power_consumption') | int - states('sensor.envoy_122103023124_current_power_production') | int)] | max }}
 
-# Envoy Ecart asolu entre la production et la consommation
+# Envoy Ecart absolu entre la production et la consommation
     - name: "Envoy pv conso net"
       unique_id: "envoy_pv_conso_net"
       device_class: "power"
@@ -61,6 +61,17 @@ template:
           {{ house }}
         {%endif%} 
 
+# Envoy Ecart relatif entre la production et la consommation
+    - name: "Envoy pv conso-prod"
+      unique_id: "envoy_pv_conso_prod"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set solar = states('sensor.envoy_122103023124_current_power_consumption') | int %}
+        {% set house = states('sensor.envoy_122103023124_current_power_production') | int %}
+        {{ solar-house }}
+        
 # Calcul de la puissance importée ou exportée
     - name: "Envoy energie import export"
       unique_id: "envoy_energie_import_export"

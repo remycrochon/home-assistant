@@ -627,25 +627,23 @@
         target:
           entity_id: switch.cde_relais_ecs_router_pv
         data: {}
-    - conditions:
-      - condition: trigger
-        id: p>10
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Marche PV
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.cde_relais_ecs_router_pv
-    - conditions:
-      - condition: trigger
-        id: p<5
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.cde_relais_ecs_router_pv
+      - choose:
+        - conditions:
+          - condition: trigger
+            id: p<5
+          sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.cde_relais_ecs_router_pv
+        - conditions:
+          - condition: trigger
+            id: p>10
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.cde_relais_ecs_router_pv
     default: []
   mode: single
 - id: '1633075302563'

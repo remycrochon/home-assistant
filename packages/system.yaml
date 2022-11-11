@@ -75,7 +75,7 @@ mqtt:
 # Routeur PV
 # https://ota.apper-solaire.org/index.php
 
-      - name: "Routeur PV Dimmer"
+    - name: "Routeur PV Dimmer"
       unique_id: routeur_pv_dimmer" 
       state_topic: "pvrouter/in/110"
       unit_of_measurement: '%'

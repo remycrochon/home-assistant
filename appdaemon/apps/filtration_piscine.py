@@ -33,7 +33,6 @@ def duree_classique(Temperature_eau):
     #Methode classique temperature / 2
     temperature_min: float = max(float(Temperature_eau), 10)
     duree = temperature_min / 2
-    duree_m = min(float(duree), 23)
     return duree
 
 # Fonction de Convertion Int en heure "HH:MM:SS"

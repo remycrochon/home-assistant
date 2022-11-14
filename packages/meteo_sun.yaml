@@ -490,6 +490,7 @@ sensor:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_moyenne
     state_characteristic: median
+    sampling_size: 20
 
   - platform: statistics
     entity_id: sensor.vp2_rain24

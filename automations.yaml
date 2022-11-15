@@ -1430,7 +1430,7 @@
   - platform: time
     at: input_datetime.heure_vmc_niv0_at
   - platform: numeric_state
-    entity_id: sensor.concentration_de_particules_2_5um
+    entity_id: sensor.esp145_conc_particules_2_5um
     id: pm2.5sh
     above: input_number.seuil_haut_pm2_5
     for:
@@ -1438,7 +1438,7 @@
       minutes: 10
       seconds: 0
   - platform: numeric_state
-    entity_id: sensor.mh_z19_co2_value
+    entity_id: sensor.esp145_mh_z19_co2_value
     id: co2sh
     above: input_number.seuil_haut_co2
     for:
@@ -1446,7 +1446,7 @@
       minutes: 10
       seconds: 0
   - platform: numeric_state
-    entity_id: sensor.concentration_de_particules_2_5um
+    entity_id: sensor.esp145_conc_particules_2_5um
     id: pm2.5sth
     above: input_number.seuil_tres_haut_pm2_5
     for:
@@ -1454,7 +1454,7 @@
       minutes: 5
       seconds: 0
   - platform: numeric_state
-    entity_id: sensor.mh_z19_co2_value
+    entity_id: sensor.esp145_mh_z19_co2_value
     id: co2sth
     above: input_number.seuil_tres_haut_co2
     for:

@@ -1,4 +1,4 @@
-# Version du 27/08/2022
+# Version du 14/09/2022 -> Affichage heure début/fin au format hh:mm
 import hassapi as hass
 import datetime
 from datetime import timedelta
@@ -213,7 +213,7 @@ class FiltrationPiscine(hass.Hass):
             message_notification="h_debut: "+str(h_debut)+"/h_pivot: "+str(h_pivot)+"/h_fin: "+str(h_fin) 
             self.notification(message_notification,1)
             # Affichage plage horaire
-            affichage_texte =str(h_debut)[:5]+"/"+str(h_pivot)[:5]+"/"+str(h_fin)[:5]
+            affichage_texte =f"{str(h_debut).zfill(8)[:5]}/{str(h_pivot).zfill(8)[:5]}/{str(h_fin).zfill(8)[:5]}"
             self.set_textvalue(periode_filtration,affichage_texte)
             # Ajouté le 30 mai 2022
             self.set_value("input_number.duree_filtration_ete",round(temps_filtration,2))
@@ -243,7 +243,7 @@ class FiltrationPiscine(hass.Hass):
             duree_t = timedelta(hours=int(duree_h[:2]), minutes=int(duree_h[3:5]))
             h_fin_f = h_debut_t + duree_t
             # Affichage plage horaire
-            affichage_texte =str(h_debut_h)[:5]+"/"+str(h_fin_f)[:5]
+            affichage_texte =f"{str(h_debut_h).zfill(8)[:5]}/{str(h_fin_f).zfill(8)[:5]}"
             self.set_textvalue(periode_filtration,affichage_texte)
 
             message_notification="h_debut_h"+str(h_debut_h)+"-Duree H:"+str(duree_h)+"-H fin:"+str(h_fin_f)

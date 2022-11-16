@@ -474,6 +474,7 @@ sensor:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_min
     state_characteristic: value_min
+    sampling_size: 20
 
   - platform: statistics
     entity_id: sensor.vp2_rain24
@@ -482,6 +483,7 @@ sensor:
       minutes: 320 # sur 6h
     name: vp2_pluviometrie_max
     state_characteristic: value_max
+    sampling_size: 20
 
   - platform: statistics
     entity_id: sensor.vp2_rain24

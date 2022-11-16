@@ -1907,7 +1907,7 @@
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 1
-      max_alerts: 20
+      max_alerts: 10
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1649766635520'
@@ -2432,3 +2432,12 @@
           - input_boolean.mem_delestage
     default: []
   mode: single
+- id: '1668506550340'
+  alias: 0.0.2-Alim tablette BP
+  description: ''
+  use_blueprint:
+    path: seamus65/wallpanel-battery-management.yaml
+    input:
+      battery: sensor.tablette_niveau_charge
+      charger: switch.pc2_tablette
+      low_percent: 20

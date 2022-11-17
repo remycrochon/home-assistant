@@ -21,10 +21,14 @@ async def async_setup_entry(hass, entry, async_add_entities):
             'SpaceHeating'))
 
     if api.HWT_device_info is not None:
+        hwt = api.device.hot_water_tank
+        unit_function = hwt.unit_function
+        unit_ref = unit_function.split('/')[1]
         entities.append(AlthermaUnitProblemSensor(
             coordinator, api, 'Hot Water Tank State',
             api.HWT_device_info,
-            'DomesticHotWaterTank'
+            #'DomesticHotWaterTank'
+            unit_ref
         ))
     async_add_entities(entities, update_before_add=False)
 

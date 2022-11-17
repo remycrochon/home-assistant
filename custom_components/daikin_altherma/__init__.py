@@ -35,12 +35,12 @@ async def setup_api_instance(hass, host):
     unit_profiles = device.profiles
 
     # Uncomment this if you want to store profile info in json files.
-    # try:
+    #try:
     #    for profile in unit_profiles:
     #        filepath: str = os.path.join(hass.config.config_dir, f'daikin_altherma_{profile["idx"]}.json')
     #        with open(filepath, 'w') as f:
     #            f.write(json.dumps(profile['profile']))
-    # except Exception as e:
+    #except Exception as e:
     #    _LOGGER.warning(f'Failed to save profile state to file {filepath}. It does not affect the operation of the integration.', exc_info=True)
 
     api = AlthermaAPI(device)
@@ -132,7 +132,10 @@ class AlthermaAPI:
 
     @property
     def water_tank_status(self):
-        return self._status["function/DomesticHotWaterTank"]
+        if "function/DomesticHotWaterTank" in self._status:
+            return self._status["function/DomesticHotWaterTank"]
+        if "function/DomesticHotWater" in self._status:
+            return self._status["function/DomesticHotWater"]
 
     @property
     def space_heating_status(self):
@@ -145,7 +148,11 @@ class AlthermaAPI:
     async def api_init(self):
         self._status = await self.device.get_current_state()
         self._info = await self.device.device_info()
-        self._climate_control_powered = await self._device.climate_control.is_turned_on
+        if self._device.climate_control is not None:
+            self._climate_control_powered = await self._device.climate_control.is_turned_on
+        else:
+            self._climate_control_powered = False
+
         await self.get_HWT_device_info()
         await self.get_space_heating_device_info()
         await self._device.ws_connection.close()
@@ -155,6 +162,10 @@ class AlthermaAPI:
             state = False
             if 'function/DomesticHotWaterTank' in self.status:
                 dhw_states = self.status['function/DomesticHotWaterTank']['states']
+                if 'InstallerState' in dhw_states:
+                    state = state | dhw_states['InstallerState']
+            elif 'function/DomesticHotWater' in self.status:
+                dhw_states = self.status['function/DomesticHotWater']['states']
                 if 'InstallerState' in dhw_states:
                     state = state | dhw_states['InstallerState']
             else:
@@ -288,13 +299,24 @@ class AlthermaAPI:
         is_on = ops["Power"] == "on"
         # First check if it is on and if yes then check whatever it is in powerful mode
         if is_on:
-            state = ops["powerful"]
+            if 'powerful' in ops:
+                state = ops["powerful"]
+            else:
+                state = 0
+
             if state == 0:
                 return STATE_ON
             else:
                 return STATE_PERFORMANCE
         else:
             return STATE_OFF
+
+    def hwt_powerful_support(self):
+        device = self.device
+        if device.hot_water_tank is None:
+            return False
+        powerful_support = 'powerful' in [x.lower() for x in device.hot_water_tank.operations]
+        return powerful_support
 
     async def async_set_water_tank_state(self, state):
         """
@@ -303,14 +325,18 @@ class AlthermaAPI:
         @return: Nothing
         """
         if state == STATE_OFF:
-            await self.device.hot_water_tank.set_powerful(False)
+            if self.hwt_powerful_support():
+                await self.device.hot_water_tank.set_powerful(False)
             await self.device.hot_water_tank.turn_off()
         elif state == STATE_ON:
             await self.device.hot_water_tank.turn_on()
-            await self.device.hot_water_tank.set_powerful(False)
+            if self.hwt_powerful_support():
+                await self.device.hot_water_tank.set_powerful(False)
         else:
             await self.device.hot_water_tank.turn_on()
-            await self.device.hot_water_tank.set_powerful(True)
+
+            if self.hwt_powerful_support():
+                await self.device.hot_water_tank.set_powerful(True)
         await self.device.ws_connection.close()
 
     @property

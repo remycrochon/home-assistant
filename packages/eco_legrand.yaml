@@ -1,5 +1,6 @@
 
 #EcoLegrand
+# Les puissances sont converties en kwh dans "entrée"
 sensor:
   - platform: command_line
     name: "EcoCompteur ECS"  

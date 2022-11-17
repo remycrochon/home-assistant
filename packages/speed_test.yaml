@@ -1,0 +1,83 @@
+####################################################
+#                                                  #
+#                     SPEED TEST                   #
+#                                                  #
+####################################################
+
+mqtt:
+  sensor: 
+
+    # Speed Test - Contenair dans NAS OMV
+    # https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436/11
+    - name: "speedtest.download"
+      state_topic: "speedtest/download"
+      unit_of_measurement: Mbit/s
+      icon: mdi:speedometer      
+      state_class: measurement  
+
+    - name: "speedtest.upload"
+      state_topic: "speedtest/upload"
+      unit_of_measurement: Mbit/s
+      icon: mdi:speedometer      
+      state_class: measurement 
+
+    - name: "speedtest.ping"
+      state_topic: "speedtest/ping"
+      unit_of_measurement: ms      
+      icon: mdi:speedometer      
+      state_class: measurement  
+
+
+# https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436
+sensor:
+  - platform: command_line
+    name: "SpeedTest CLI Data"
+    unique_id: speedtest_cli_data
+    command: "/config/3rdparty/speedtest/speedtest --format=json --accept-license --accept-gdpr"
+    #Toutes les 4 heures, 60 * 60 * 4 = 14400  3600 = 1 heure
+    scan_interval: 3600
+    command_timeout: 60
+    value_template: >-
+      {{ 
+        { 
+          "ping": value_json.ping.latency, 
+          "download": value_json.download.bandwidth, 
+          "upload": value_json.upload.bandwidth 
+        }
+        | to_json 
+      }}
+
+
+
+  # Portainer
+  # https://forum.hacf.fr/t/scan-interval-dun-sensor-command-line/5182
+  - platform: command_line
+    name: "Portainer Online"
+    command: response=$(curl -LIk -m 3 http://192.168.0.153:9000 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"
+    scan_interval: 90
+    value_template: "{{ value }}"
+
+template:
+  - sensor:
+      - name: 'SpeedTest CLI Ping'
+        unique_id: speedtest_cli_ping
+        icon: mdi:speedometer
+        unit_of_measurement: ms
+        state_class: measurement
+        state: "{{ (states('sensor.speedtest_cli_data') | from_json).ping | round(2) }}"
+      - name: 'SpeedTest CLI Download'
+        unique_id: speedtest_cli_download
+        icon: mdi:speedometer
+        unit_of_measurement: Mbit/s
+        state_class: measurement
+        state: "{{ ((states('sensor.speedtest_cli_data') | from_json).download * 8 / 1000 / 1000) | round(2) }}"
+      - name: 'SpeedTest CLI Upload'
+        unique_id: speedtest_cli_upload
+        icon: mdi:speedometer
+        unit_of_measurement: Mbit/s
+        state_class: measurement
+        state: "{{ ((states('sensor.speedtest_cli_data') | from_json).upload * 8 / 1000 / 1000) | round(2) }}"
+
+
+
+

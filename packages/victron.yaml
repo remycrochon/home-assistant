@@ -29,6 +29,7 @@ modbus:
         address: 826
         scale: 1
 
+
       - name: "MP2 Charge"
         data_type: int16
         unit_of_measurement: "W"
@@ -72,6 +73,8 @@ modbus:
         address: 840
         scale: 0.1
         device_class: voltage
+        state_class: measurement
+
       - name: "MP2 Intensité Batteries"
         data_type: int16
         unit_of_measurement: "A"
@@ -79,6 +82,8 @@ modbus:
         address: 841
         scale: 0.1
         device_class: current
+        state_class: measurement
+
       - name: "MP2 Puissance Batteries"
         data_type: int16
         unit_of_measurement: "W"
@@ -86,6 +91,8 @@ modbus:
         address: 842
         scale: 1
         device_class: power
+        state_class: measurement
+
       - name: "MP2 Puissance PV"
         data_type: uint16
         unit_of_measurement: "W"
@@ -93,6 +100,7 @@ modbus:
         address: 850
         scale: 1
         device_class: power
+        state_class: measurement
 
         # Smart Shunt
       - name: "MP2 Charge Batteries"
@@ -103,12 +111,14 @@ modbus:
         scale: 0.1
         device_class: battery
         state_class: measurement
+
       - name: "MP2 Temps restant batteries"
         data_type: uint16
         unit_of_measurement: "seconds"
         slave: 223
         address: 303
         scale: 100
+
       - name: "MP2 Temps depuis derniere pleine batteries"
         data_type: uint16
         unit_of_measurement: "seconds"

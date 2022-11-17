@@ -33,26 +33,29 @@ utility_meter:
       - hp
       - hc
 
+# Configuration du thermostat générique HA
+# https://www.home-assistant.io/integrations/generic_thermostat/
+
 climate:
   - platform: generic_thermostat
     name: Altherma
-    heater: switch.altherma
-    target_sensor: sensor.temperature_salon_zb
+    heater: switch.altherma # organe de co Polommande
+    target_sensor: sensor.temperature_salon_zb # Capteur de température
 #    target_sensor: sensor.espaltherma_temp_ambiante_int_r1t
-    min_temp: 15
-    max_temp: 25
-    cold_tolerance: 0.3
-    hot_tolerance: 0
+    min_temp: 15 # Définit le point de consigne minimum disponible.
+    max_temp: 25 # Définit le point de consigne maximum disponible.
+    cold_tolerance: 0.3 # Marche Chauffe si: T°<Consigne-cette valeur
+    hot_tolerance: 0 # Arret Chauffe si: T°>Consigne+cette valeur
 #    min_cycle_duration:
 #      minutes: 30
-    away_temp: 15
-    precision: 0.1
-    initial_hvac_mode: "heat"
+    # away_temp: 15 # Réglez la température utilisée par preset_mode: away.
+    precision: 0.1 # Précision souhaitée pour cet appareil. 0.1/0.5/1.0
+    initial_hvac_mode: "off" # Ou heat
     ac_mode: false
-    keep_alive:
+    keep_alive:  # Mise à jour de l'ordre de commande toutes les 5mn
       minutes: 5
 
-
+# 
 template:
 # Consommation journalière HP + HC - addition des utility meter
   - sensor:
@@ -93,81 +96,113 @@ template:
       device_class: "energy"
       state_class: "total"  
 
-# Cumul de PAC et RPAC -> devenu inutile suite regroupement des TC en 1 seul sur l'ecocomppteur
-    - name: "Puissance PAC+RPAC"
-      unique_id: "puissance_pac_rpac"
-      device_class: "power"
-      state_class: "measurement"
-      unit_of_measurement: "W"
-      state: >-
-        {% set pac = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
-        {{ (pac) | round(2) }}
-
+# Conversion de la trame JSON MQTT en template
 sensor:
   - platform: template
     sensors:
       espaltherma_mode_fonctionnement:
+        unique_id: "pac_mode_fonctionnement"
         friendly_name: "Mode de Fonctionnement"
         value_template: "{{ state_attr('sensor.althermasensors','Mode de fonctionnement') }}" # L27
 
       espaltherma_thermostat:
+        unique_id: "pac_etat_thermostat"
         friendly_name: "Thermostat"
         value_template: "{{ state_attr('sensor.althermasensors','Thermostat ON/OFF') }}" # L28
 
       espaltherma_temp_cible:
+        unique_id: "pac_temp_cible"
         friendly_name: "T° cible"
         value_template: "{{ state_attr('sensor.althermasensors','Temp. cond. cible')|round(2,default=0) }}" # L39
         unit_of_measurement: '°C'
+        device_class: "temperature"
+
 
       espaltherma_temp_ambiante_int_r1t:
-        friendly_name: "T° Int"
+        unique_id: "pac_temp_int"
+        friendly_name: "T°Int"
         value_template: "{{ state_attr('sensor.althermasensors','Temp. ambiante intérieure (R1T)') }}" # L154
         unit_of_measurement: '°C'
+        device_class: "temperature"
+
 
       espaltherma_temp_eau_retour_rt4:
-        friendly_name: "T°Retour"
+        unique_id: "pac_temp_retour_rt4"
+        friendly_name: "T°Retour-R4T"
         value_template: "{{ state_attr('sensor.althermasensors','Temp. d eau d entrée (R4T)') }}" # L152
         unit_of_measurement: '°C'
+        device_class: "temperature"
+
 
       espaltherma_temp_eau_depart_echangeur_plaque:
-        friendly_name: "T° Départ Echang"
+        unique_id: "pac_temp_sortie_echangeur_r1t"
+        friendly_name: "T°Sortie-Echang-R1T"
         value_template: "{{ state_attr('sensor.althermasensors','Laisser temp. eau avant BUH (R1T)') }}" # L149
         unit_of_measurement: '°C'
 
+
+
       espaltherma_temp_eau_depart:
-        friendly_name: "T° Départ"
+        unique_id: "pac_temp_depart_r2t"
+        friendly_name: "T°Départ-R2T"
         value_template: "{{ state_attr('sensor.althermasensors','Laisser temp. eau après BUH (R2T)') }}" # L150
         unit_of_measurement: '°C'
+        device_class: "temperature"
 
-      espaltherma_temp_air_ext:
-        friendly_name: "T° Ext"
+
+      espaltherma_temp_air_ext_r1t:
+        unique_id: "pac_temp_ext"
+        friendly_name: "T°Ext"
         value_template: "{{ state_attr('sensor.althermasensors','Temp. d air extérieur(R1T)') }}"  # L59
         unit_of_measurement: '°C'
+        device_class: "temperature"
+
+
+      espaltherma_temp_air_ext_r6t:
+        unique_id: "pac_temp_ext_r6t"
+        friendly_name: "T°Ext_r6t"
+        value_template: "{{ state_attr('sensor.althermasensors','Capteur ext. de temp. ambiante intérieure (R6T)') }}"  # L60
+        unit_of_measurement: '°C'
+        device_class: "temperature"
+
 
       espaltherma_temp_liquid_r3t:
-        friendly_name: "Temp refrig liquide R3T"
+        unique_id: "pac_temp_ent_refrigerant_r3t"
+        friendly_name: "T°Ent_Refrigerant_R3T"
         value_template: "{{ state_attr('sensor.althermasensors','Temp. réfrig. côté liquide (R3T)') }}" # L151
         unit_of_measurement: '°C'
+        device_class: "temperature"
+
 
       espaltherma_capteur_debit:
+        unique_id: "pac_débitmetre"
         friendly_name: "Débit"
         value_template: "{{ state_attr('sensor.althermasensors','Capteur de débit (l/min)') }}" # L184
         unit_of_measurement: 'l/min'
+        device_class: "pressure"
+
 
       espaltherma_courant_primaire:
+        unique_id: "pac_intensite_primaire"
         friendly_name: "Courant primaire INV"
         value_template: "{{ state_attr('sensor.althermasensors','Courant primaire INV (A)') }}"  # L68
         unit_of_measurement: 'A'
+        device_class: "current"
+
 
       espaltherma_signal_ppe_eau:
+        unique_id: "pac_signal_ppe_eau"
         friendly_name: "Signal Ppe Eau"
         value_template: "{{ 100-state_attr('sensor.althermasensors','Signal de pompe à eau (0:max-100:arrêt)')|int(default=0) }}" # L186
         unit_of_measurement: '%'
 
       espaltherma_pression:
+        unique_id: "pac_mesure_pression"
         friendly_name: "Pression"
         value_template: "{{ state_attr('sensor.althermasensors','Capteur de pression') }}" # L66
         unit_of_measurement: 'bars'
+        device_class: "pressure"
+
 
 # Calcul du COP
       espaltherma_cop :
@@ -178,7 +213,7 @@ sensor:
           {% set b = states('sensor.espaltherma_temp_eau_depart_echangeur_plaque') | float(default=0) %}
           {% set c = states('sensor.espaltherma_temp_eau_retour_rt4') | float(default=0) %}
           {% set d = states('sensor.espaltherma_courant_primaire') | float(default=0) %}
-          {% set e = states('sensor.pzem_totale_tension') | float(default=0) %}
+          {% set e = states('sensor.linky_umoy') | float(default=0) %}
           {% if is_state("sensor.espaltherma_mode_fonctionnement", "Heating")
             and (states('sensor.espaltherma_courant_primaire')|float(default=0) > 0) %}
             {% set cop=((a*0.06*1.16)*(b-c)/(d*e/1000))| float(default=0) | round(2) %}
@@ -203,7 +238,7 @@ sensor:
           {% set p101=20 %}
           {% set a=(p102-p103)/(p100-p101) | float(default=0) %}
           {% set b=p103-a*p101 | float %}
-          {% set t = states('sensor.espaltherma_temp_air_ext') | float(default=0) %}
+          {% set t = states('sensor.espaltherma_temp_air_ext_r1t') | float(default=0) %}
           {% if t<= p100 %}
             {{ p100 }}
           {%else%}

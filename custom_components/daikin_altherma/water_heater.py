@@ -18,6 +18,8 @@ _LOGGER = logging.getLogger(__name__)
 
 OPERATION_LIST = [STATE_OFF, STATE_ON, STATE_PERFORMANCE]
 
+OPERATION_LIST_NO_PERF = [STATE_OFF, STATE_ON]
+
 SUPPORT_FLAGS_HEATER = SUPPORT_TARGET_TEMPERATURE | SUPPORT_OPERATION_MODE
 
 
@@ -39,6 +41,11 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
     def __init__(self, coordinator, api: AlthermaAPI):
         super().__init__(coordinator)
         self._attr_name = "Domestic Hot Water Tank"
+        self._attr_operation_list = OPERATION_LIST
+        device = api.device
+        self.powerful_support = 'powerful' in [x.lower() for x in device.hot_water_tank.operations]
+        if not self.powerful_support:
+            self._attr_operation_list = OPERATION_LIST_NO_PERF
         self._attr_device_info = api.HWT_device_info
         self._api = api
         self._attr_unique_id = f"{self._api.info['serial_number']}-heater"
@@ -65,11 +72,22 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
         conf = device._unit.operation_config['DomesticHotWaterTemperatureHeating']
         if 'settable' in conf:
             return conf['settable']
-        return False
+        return True
+
+    def _get_status(self):
+        if "function/DomesticHotWaterTank" in self._api.status:
+            status = self._api.status[f"function/DomesticHotWaterTank"]
+
+        elif "function/DomesticHotWater" in self._api.status:
+            status = self._api.status[f"function/DomesticHotWater"]
+        else:
+            status = None
+        return status
 
     @property
     def supported_features(self):
-        states = self._api.status[f"function/DomesticHotWaterTank"]['states']
+        status = self._get_status()
+        states = status['states']
         if 'WeatherDependentState' in states:
             if states['WeatherDependentState']:
                 return SUPPORT_OPERATION_MODE
@@ -77,7 +95,8 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
 
     @property
     def target_temperature(self) -> float:
-        target_temperature = self._api.status["function/DomesticHotWaterTank"][
+        status = self._get_status()
+        target_temperature = status[
             "operations"
         ]["TargetTemperature"]
 
@@ -85,10 +104,23 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
 
     @property
     def current_temperature(self) -> float:
-        current_temperature = self._api.status["function/DomesticHotWaterTank"][
-            "sensors"
-        ]["TankTemperature"]
-        return current_temperature
+        status = self._get_status()
+        #_LOGGER.warning(f"Hot Water status: {status}")
+        if "sensors" in status:
+            sensors = status["sensors"]
+            if "TankTemperature" in sensors:
+                return sensors['TankTemperature']
+            if len(sensors) > 0:
+                return list(sensors.values())[0]
+        if "operations" in status:
+            operations = status["operations"]
+            if "SensorTemperature" in operations:
+                return operations["SensorTemperature"]
+        return 0
+        #current_temperature = status[
+        #    "sensors"
+        #]["TankTemperature"]
+        #return current_temperature
 
     @property
     def current_operation(self):
@@ -108,3 +140,16 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
     @property
     def available(self):
         return self._api.available
+
+    async def async_turn_on(self, **kwargs) -> None:
+        await self.async_set_operation_mode(STATE_ON)
+
+    async def async_turn_off(self, **kwargs) -> None:
+        await self.async_set_operation_mode(STATE_OFF)
+
+    async def async_toggle(self, **kwargs) -> None:
+        current_operation = self.current_operation()
+        if current_operation == STATE_OFF:
+            await self.async_turn_on()
+        else:
+            await self.async_turn_off()

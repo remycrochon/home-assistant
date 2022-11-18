@@ -143,6 +143,7 @@ sensor:
 # Statistiques puissance 
   - platform: statistics
     name: puissance_vmc_niv0_median
+    unique_id: "puissance_vmc_niv0_median" 
     entity_id: sensor.ecocompteur_vmc_niv0_brut
     state_characteristic: median
     sampling_size: 10

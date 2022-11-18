@@ -4,39 +4,46 @@
 sensor:
   - platform: command_line
     name: "EcoCompteur ECS"  
+    unique_id: "ecocompteur_ecs"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
     name: "EcoCompteur WC"
+    unique_id: "ecocompteur_wc"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data2'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
     name: "EcoCompteur PAC"
+    unique_id: "ecocompteur_pac"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data3'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
     name: "EcoCompteur Clim"
+    unique_id: "ecocompteur_clim"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data4'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
     name: "EcoCompteur VMC Niv0 brut"
+    unique_id: "ecocompteur_vmc_niv0_brut"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
     name: "EcoCompteur Date_Time"
+    unique_id: "ecocompteur_date_time"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.Date_Time'
     scan_interval: 120
     unit_of_measurement: s
+
 
 
 

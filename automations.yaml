@@ -2161,53 +2161,6 @@
       position_type: target
       entity_id: cover.volet_amis_sud_grand_p
   mode: single
-- id: '1654764257755'
-  alias: 6_1_0 Energie Changement HP<->HC (Dupliquer)
-  description: ''
-  trigger:
-  - platform: time
-    id: tarif_hc
-    at: 01:00:00
-  - platform: time
-    id: tarif_hp
-    at: 02:00:00
-  - platform: time
-    at: 05:00:00
-    id: tarif_hc2
-  - platform: time
-    at: 06:00:00
-    id: tarif_hp2
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: tarif_hc
-      - condition: trigger
-        id: tarif_hc2
-      - condition: trigger
-        id: tarif_hp2
-      sequence:
-      - service: select.select_option
-        data:
-          option: hc
-        target:
-          entity_id:
-          - select.linky_energie_jour
-          - select.energy_total_usage_monthly
-    - conditions:
-      - condition: trigger
-        id: tarif_hp
-      sequence:
-      - service: select.select_option
-        data:
-          option: hp
-        target:
-          entity_id:
-          - select.linky_energie_jour
-          - select.energy_autres_usage_yearly
-    default: []
-  mode: single
 - id: '1655448600753'
   alias: 4_1_3 Volet-Suivi Azimuth Soleil
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil

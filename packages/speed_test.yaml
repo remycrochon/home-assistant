@@ -7,7 +7,7 @@
 mqtt:
   sensor: 
 
-    # Speed Test - Contenair dans NAS OMV
+# Speed Test - Contenair dans NAS OMV
     # https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436/11
     - name: "speedtest.download"
       state_topic: "speedtest/download"
@@ -31,11 +31,13 @@ mqtt:
 # https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436
 sensor:
   - platform: command_line
-    name: "SpeedTest CLI Data"
+    name: "SpeedTest CLI"
     unique_id: speedtest_cli_data
-    command: "/config/3rdparty/speedtest/speedtest --format=json --accept-license --accept-gdpr"
+    command: "/config/3rparty/speedtest/speedtest --format=json --accept-license --accept-gdpr"
     #Toutes les 4 heures, 60 * 60 * 4 = 14400  3600 = 1 heure
-    scan_interval: 3600
+    #scan_interval: 3600
+    #Toutes les 4 heures, 60 * 60 * 4 = 14400  3600 = 1 heure
+    scan_interval: 60    
     command_timeout: 60
     value_template: >-
       {{ 

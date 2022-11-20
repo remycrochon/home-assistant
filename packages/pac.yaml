@@ -222,6 +222,15 @@ template:
       state_class: "measurement"
       device_class: "pressure"
 
+# Extraction des atributs climate.althermat
+    # Consigne Chauffage
+    - name: "pac_consigne_int"
+      unique_id: "pac_consigne_interieure"
+      state: >-
+        {{ state_attr('climate.altherma','temperature') }}
+      unit_of_measurement: '°C'
+      state_class: "measurement"
+      device_class: "temperature"
 
 
 # Calcul du COP

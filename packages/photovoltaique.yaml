@@ -78,6 +78,8 @@ template:
       state: >-
         {% if (states('sensor.envoy_122103023124_current_power_production') | int - states('sensor.envoy_122103023124_current_power_consumption') | int) > 0 %}Export{% else %}Import{% endif %}
       icon: "{% if (states('sensor.envoy_122103023124_current_power_production') | int - states('sensor.envoy_122103023124_current_power_consumption') | int) > 0 %}mdi:arrow-up-box{% else %}mdi:arrow-down-box{% endif %}"
+      device_class: "power"
+      state_class: "measurement"
 
 # Calcul de la consommation maison = production PV + la puissance importée - la puissance exportée
     - name: "Envoy total conso maison"
@@ -119,6 +121,7 @@ template:
       state: >-
         {% set p = states('sensor.envoy_122103023124_current_power_production') | float(default=0) | round(2) %}
         {{ ((p / 4490)*100) | round(0) }}
+      state_class: "measurement"
 
 # Dépendence energetique
     - name: "Envoy Dépendance Energetique"
@@ -128,3 +131,4 @@ template:
         {% set import = states('sensor.envoy_energie_soutiree_reseau_jour') | float(default=0) | round(2) %}
         {% set conso = states('sensor.envoy_energie_totale_consommee_jour') | float(default=0) | round(2) %}
         {{ ((1-(import/conso))*100) | round(0) }}
+      state_class: "measurement"

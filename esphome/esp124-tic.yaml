@@ -309,7 +309,7 @@ display:
     address: 0x3C
     brightness: 100%
     lambda: |-
-      it.printf(0,0,id(arial),"P=%.0f W",id(papp).state);
+      it.printf(0,0,id(arial),"P=%.0f VA",id(papp).state);
       it.printf(75,0,id(arial),"-%.0f %%",id(p100).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
       it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);

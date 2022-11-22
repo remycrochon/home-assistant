@@ -1111,23 +1111,23 @@
       alert_action:
       - service: notify.telegram
         data:
-          message: Discordance PAC=> PU= {{states("sensor.puissance_pac")}} et Pilotage=
+          message: Discordance PAC=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat PAC !!!
       - service: dwains_dashboard.notification_create
         data:
-          message: Discordance PAC=> PU= {{states("sensor.puissance_pac")}} et Pilotage=
+          message: Discordance PAC=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
       - service: notify.telegram
         data:
-          message: PAC OK=> PU= {{states("sensor.puissance_pac")}} et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
-            }}
+          message: PAC OK=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
+            {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat PAC !!!
       - service: dwains_dashboard.notification_create
         data:
-          message: PAC OK=> PU= {{states("sensor.puissance_pac")}} et Pilotage= {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time")
-            }}
+          message: PAC OK=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
+            {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 1200
       max_alerts: 100
@@ -2396,42 +2396,30 @@
   alias: 1_2_3 ECS Forcage Temp basse
   description: Si temp trop basse et HC
   trigger:
-  - platform: numeric_state
-    entity_id: sensor.esp126_temp_ecs
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    below: 30
-    id: t_bass
-  - platform: numeric_state
-    entity_id: sensor.esp126_temp_ecs
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 0
-    above: 35
-    id: t_haute
-  - platform: numeric_state
-    entity_id: sensor.linky_n_tarif
-    below: 2
-    id: hc
-  - platform: numeric_state
-    entity_id: sensor.linky_n_tarif
-    above: 1
-    id: hp
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    from: HC..
+    to: HP..
+    id: HC-HP
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    from: HP..
+    to: HC..
+    id: HP-HC
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
-        id: hc
+        id: HP-HC
       - condition: numeric_state
         entity_id: sensor.esp126_temp_ecs
-        below: 30
-      - condition: time
-        after: 00:00:00
-        before: 06:00:00
+        below: 39
+      - condition: sun
+        before: sunrise
+        after: sunset
       sequence:
       - service: script.ecs_on
         data: {}
@@ -2439,10 +2427,10 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: t_haute
+          id: HP-HC
         - condition: numeric_state
-          entity_id: sensor.linky_n_tarif
-          above: 1
+          entity_id: sensor.esp126_temp_ecs
+          above: 39.9
       sequence:
       - service: script.ecs_off
         data: {}

@@ -88,9 +88,9 @@ template:
       device_class: "energy"
       state_class: "total" 
       state: >-
-        {% set import = states('sensor.envoy_energie_soutiree_reseau_jour') | int %}
-        {% set export = states('sensor.envoy_energie_injectee_reseau_jour') | int %}
-        {% set prod = states('sensor.envoy_energie_totale_produite_jour') | int %}
+        {% set import = states('sensor.envoy_energie_soutiree_reseau_jour') | int(default=0) %}
+        {% set export = states('sensor.envoy_energie_injectee_reseau_jour') | int(default=0) %}
+        {% set prod = states('sensor.envoy_energie_totale_produite_jour') | int(default=0) %}
         {{ prod + import - export }}
 
 # Envoy: Convertion en kWh de la consommation energie jour

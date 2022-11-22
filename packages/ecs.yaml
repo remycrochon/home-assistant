@@ -3,56 +3,23 @@
 #              EAU CHAUDE SANITAIRE                #
 #                                                  #
 ####################################################
-utility_meter:
-  energy_ecs1_usage_daily:
-    source: sensor.energy_ecs_p_kw
-    cycle: daily
-    tariffs:
-      - hp
-      - hc
-  energy_ecs1_usage_weekly:
-    source: sensor.energy_ecs_p_kw
-    cycle: weekly
-    tariffs:
-      - hp
-      - hc
-  energy_ecs1_usage_monthly:
-    source: sensor.energy_ecs_p_kw
-    cycle: monthly
-    tariffs:
-      - hp
-      - hc
-  energy_ecs1_usage_yearly:
-    source: sensor.energy_ecs_p_kw
-    cycle: yearly
-    tariffs:
-      - hp
-      - hc
-# Comptabilisation de l'énergie en surplus injectée dans l'ECS
-  energy_ecs_surplus_usage_daily:
-    source: sensor.energy_ecs_surplus_injectee
-    cycle: daily
-    tariffs:
-      - hp
-      - hc
-  energy_ecs_surplus_usage_weekly:
-    source: sensor.energy_ecs_surplus_injectee
-    cycle: weekly
-    tariffs:
-      - hp
-      - hc    
-  energy_ecs_surplus_usage_monthly:
-    source: sensor.energy_ecs_surplus_injectee
-    cycle: monthly
-    tariffs:
-      - hp
-      - hc
-  energy_ecs_surplus_usage_yearly:
-    source: sensor.energy_ecs_surplus_injectee
-    cycle: yearly
-    tariffs:
-      - hp
-      - hc
+# sensor.ecocompteur_ecs:
+# Si switch.cde_relais_ecs->
+#   template: sensor.puissance_ecs_reseau_w->
+#     template: sensor.puissance_ecs_reseau_kw
+#     Integration en kW: sensor.energie_ecs_reseau->
+#       utility_meter: energy_ecs_reseau_usage_daily->
+#          sensor.energy_ecs_reseau_usage_daily_hp
+#          sensor.energy_ecs_reseau_usage_daily_hc 
+
+# Si switch.cde_relais_ecs_router_pv->
+#   template: sensor.puissance_ecs_pv_w->
+#     template: sensor.puissance_ecs_pv_kw
+#     Integration en kW: sensor.energie_ecs_pv->
+#       utility_meter: energy_ecs_pv_usage_daily->
+#          sensor.energy_ecs_pv_usage_daily_hp
+#          sensor.energy_ecs_pv_usage_daily_hc 
+
 
 input_datetime:
   # Horaire Chauffe ECS
@@ -89,14 +56,6 @@ sensor:
     start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
     end: '{{ now() }}'
 
-# Energie ECS mesurée avec integration 
-  - platform: integration
-    source: sensor.ecocompteur_ecs
-    name: energy_ecs_p_kw
-    unit_prefix: k
-    method: left
-    round: 2
-
 # Energie ECS surplus injection->utilisée dans tableau Energie
   - platform: integration
     source: sensor.puissance_ecs_surplus_injectee_w
@@ -118,72 +77,142 @@ template:
 
 # Consommation hP + HC - addition des utility meter
   - sensor:
-    - name: "Energie ECS Jour"
-      unique_id: "energy_ecs1_daily"
-      state: >-
-        {% set p = states('sensor.energy_ecs1_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
 
-    - name: "energy_ecs1_weekly"
-      state: >-
-        {% set p = states('sensor.energy_ecs1_usage_weekly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_weekly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total" 
-
-    - name: "energy_ecs1_monthly"
-      state: >-
-        {% set p = states('sensor.energy_ecs1_usage_monthly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_monthly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
-    - name: "energy_ecs1_yearly"
-      state: >-
-        {% set p = states('sensor.energy_ecs1_usage_yearly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_ecs1_usage_yearly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
-# Puissance produite en surplus et injectée dans l'ECS EN kW
-    - name: puissance_ecs_surplus_injectee
-      unique_id: "puissance_ecs_surplus_injectee"
+############################################ 21/12/2022
+# Calcul puissance ECS si mode réseau
+# L'integrale de riemman et les utily_meter sont déclarés dans "/config/helpers"
+    - name: puissance_ecs_reseau_w
+      unique_id: "puissance_ecs_reseau_w"
       device_class: "power"
       state_class: "measurement"    
-      unit_of_measurement: "kW"
+      unit_of_measurement: "W"
       state: >-
-        {% set a=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set b=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
-        {% if (a>0) and (b>10) %}          
-          {{ a/1000 }}
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set rel_ecs=states('switch.cde_relais_ecs')%}
+        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
+          {{ pu_ecs }}
         {%else%}
           0
         {%endif%}
 
-# Puissance produite en surplus et injectée dans l'ECS en W
+    - name: puissance_ecs_reseau_kw
+      unique_id: "puissance_ecs_reseau_kw"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "kW"
+      state: >-
+        {% set p=states('sensor.puissance_ecs_reseau_w')|float(default=0) %}
+        {{ p/1000 }}
+
+    - name: "energie ecs reseau jour"
+      unique_id: "energie_ecs_reseau_jour"
+      state: >-
+        {% set p = states('sensor.energy_ecs_reseau_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs_reseau_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+
+# Calcul puissance ECS si mode PV
+    - name: puissance_ecs_pv_w
+      unique_id: "puissance_ecs_pv_w"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "W"
+      state: >-
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
+        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
+          {{ pu_ecs }}
+        {%else%}
+          0
+        {%endif%}
+        
+    - name: puissance_ecs_pv_kw
+      unique_id: "puissance_ecs_pv_kw"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "kW"
+      state: >-
+        {% set p=states('sensor.puissance_ecs_pv_w')|float(default=0) %}
+        {{ p/1000 }}
+
+
+    - name: "Energie ecs pv jour"
+      unique_id: "energie_ecs_pv_jour"
+      state: >-
+        {% set p = states('sensor.energy_ecs_pv_usage_daily_hp') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energy_ecs_pv_usage_daily_hc') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+
+# Cumul de Energie ECS Reseau et PV
+    - name: "Energie ECS Jour"
+      unique_id: "energy_ecs1_daily"
+      state: >-
+        {% set p = states('sensor.energie_ecs_reseau_jour') | float(default=0) | round(2) %}
+        {% set o = states('sensor.energie_ecs_pv_jour') | float(default=0) | round(2) %}
+        {{ (o + p) | round(2) }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"  
+
+
+###########################################################
+
+
+# Puissance produite en surplus et injectée dans l'ECS en W en mode PV
     - name: puissance_ecs_surplus_injectee_w
       unique_id: "puissance_ecs_surplus_injectee_w"
       device_class: "power"
       state_class: "measurement"    
       unit_of_measurement: "W"
       state: >-
-        {% set a=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set b=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
-        {% if (a>0) and (b>10) %}          
-          {{ a }}
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set prod=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
+        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
+        {% if (pu_ecs>0) and (prod>10) and (rel_ecs=="on")%}          
+          {{ pu_ecs }}
         {%else%}
           0
         {%endif%}
-        
+
+
+# Puissance produite en surplus et injectée dans l'ECS EN kW en mode PV
+
+    - name: puissance_ecs_surplus_injectee
+      unique_id: "puissance_ecs_surplus_injectee"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "kW"
+      state: >-
+        {% set a=states('sensor.puissance_ecs_surplus_injectee_w')|float(default=0) %}
+        {% if (a>0) %}          
+          {{ a/1000 }}
+        {%else%}
+          0
+        {%endif%}
+
+# Puissance disponible sans routeur ecs
+# Utilisé dans esp141-affichage_pv
+    - name: puissance_dispo_sans ecs
+      unique_id: "puissance_dispo_sans_ecs"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "W"
+      state: >-
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set prod=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
+        {% set conso = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}        
+        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
+        {% if (prod>conso) and (pu_ecs>0) and (rel_ecs=="on")%}          
+          {{ prod-conso+pu_ecs }}
+        {%else%}
+          0
+        {%endif%}
+
 
 

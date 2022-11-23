@@ -3,22 +3,6 @@
 #              EAU CHAUDE SANITAIRE                #
 #                                                  #
 ####################################################
-# sensor.ecocompteur_ecs:
-# Si switch.cde_relais_ecs->
-#   template: sensor.puissance_ecs_reseau_w->
-#     template: sensor.puissance_ecs_reseau_kw
-#     Integration en kW: sensor.energie_ecs_reseau->
-#       utility_meter: energy_ecs_reseau_usage_daily->
-#          sensor.energy_ecs_reseau_usage_daily_hp
-#          sensor.energy_ecs_reseau_usage_daily_hc 
-
-# Si switch.cde_relais_ecs_router_pv->
-#   template: sensor.puissance_ecs_pv_w->
-#     template: sensor.puissance_ecs_pv_kw
-#     Integration en kW: sensor.energie_ecs_pv->
-#       utility_meter: energy_ecs_pv_usage_daily->
-#          sensor.energy_ecs_pv_usage_daily_hp
-#          sensor.energy_ecs_pv_usage_daily_hc 
 
 
 input_datetime:
@@ -75,12 +59,29 @@ template:
           {% set a=states('sensor.ecocompteur_ecs')|float(default=0) %}
           {{ a > 500 }}
 
-# Consommation hP + HC - addition des utility meter
+# 
   - sensor:
 
 ############################################ 21/12/2022
+# sensor.ecocompteur_ecs:
+# Si switch.cde_relais_ecs->
+#   template: sensor.puissance_ecs_reseau_w->
+#     template: sensor.puissance_ecs_reseau_kw
+#     Integration en kW: sensor.energie_ecs_reseau->
+#       utility_meter: energy_ecs_reseau_usage_daily->
+#          sensor.energy_ecs_reseau_usage_daily_hp
+#          sensor.energy_ecs_reseau_usage_daily_hc 
+
+# Si switch.cde_relais_ecs_router_pv->
+#   template: sensor.puissance_ecs_pv_w->
+#     template: sensor.puissance_ecs_pv_kw
+#     Integration en kW: sensor.energie_ecs_pv->
+#       utility_meter: energy_ecs_pv_usage_daily->
+#          sensor.energy_ecs_pv_usage_daily_hp
+#          sensor.energy_ecs_pv_usage_daily_hc 
+
 # Calcul puissance ECS si mode réseau
-# L'integrale de riemman et les utily_meter sont déclarés dans "/config/helpers"
+# L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
     - name: puissance_ecs_reseau_w
       unique_id: "puissance_ecs_reseau_w"
       device_class: "power"
@@ -138,7 +139,6 @@ template:
         {% set p=states('sensor.puissance_ecs_pv_w')|float(default=0) %}
         {{ p/1000 }}
 
-
     - name: "Energie ecs pv jour"
       unique_id: "energie_ecs_pv_jour"
       state: >-
@@ -151,7 +151,7 @@ template:
 
 # Cumul de Energie ECS Reseau et PV
     - name: "Energie ECS Jour"
-      unique_id: "energy_ecs1_daily"
+      unique_id: "energie_ecs_jour"
       state: >-
         {% set p = states('sensor.energie_ecs_reseau_jour') | float(default=0) | round(2) %}
         {% set o = states('sensor.energie_ecs_pv_jour') | float(default=0) | round(2) %}
@@ -164,7 +164,7 @@ template:
 ###########################################################
 
 
-# Puissance produite en surplus et injectée dans l'ECS en W en mode PV
+# Puissance produite en surplus et injectée dans l'ECS en mode PV en W 
     - name: puissance_ecs_surplus_injectee_w
       unique_id: "puissance_ecs_surplus_injectee_w"
       device_class: "power"
@@ -181,7 +181,7 @@ template:
         {%endif%}
 
 
-# Puissance produite en surplus et injectée dans l'ECS EN kW en mode PV
+# Puissance produite en surplus et injectée dans l'ECS en mode PV en kW 
 
     - name: puissance_ecs_surplus_injectee
       unique_id: "puissance_ecs_surplus_injectee"

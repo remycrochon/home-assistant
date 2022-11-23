@@ -2430,7 +2430,7 @@
           id: HP-HC
         - condition: numeric_state
           entity_id: sensor.esp126_temp_ecs
-          above: 39.9
+          above: 45
       sequence:
       - service: script.ecs_off
         data: {}

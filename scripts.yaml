@@ -514,15 +514,15 @@ ecs_on:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 1
       milliseconds: 0
   - service: switch.turn_on
     target:
       entity_id: switch.cde_relais_ecs
     data: {}
   mode: single
-  alias: Ecs_On
-  icon: mdi:water-boiler
+  alias: Ecs_Reseau
+  icon: mdi:water-boiler-auto
 ecs_off:
   sequence:
   - service: switch.turn_off
@@ -532,20 +532,15 @@ ecs_off:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 1
       milliseconds: 0
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: input_boolean.ecs_av_pv
-      state: 'on'
   - service: switch.turn_on
     target:
       entity_id: switch.cde_relais_ecs_router_pv
     data: {}
   mode: single
-  alias: Ecs_Off
-  icon: mdi:water-boiler-off
+  alias: Ecs_Pv
+  icon: mdi:water-boiler-auto
 volet_bureau_droit_up:
   alias: volet bureau droit up
   sequence:
@@ -1085,3 +1080,21 @@ porte_sous_sol_stop:
     data: {}
   mode: single
   icon: mdi:garage-alert-variant
+ecs_off_off:
+  alias: Ecs_Off
+  sequence:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs_router_pv
+    data: {}
+  mode: single
+  icon: mdi:water-boiler-auto

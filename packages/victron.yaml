@@ -57,7 +57,7 @@ modbus:
         device_class: power
         state_class: measurement
 
-      - name: "MP2 Shore Power"
+      - name: "MP2 Réseau"
         data_type: int16
         unit_of_measurement: "W"
         slave: 100
@@ -84,6 +84,7 @@ modbus:
         device_class: current
         state_class: measurement
 
+      # postive en charge-negatif en décharge
       - name: "MP2 Puissance Batteries"
         data_type: int16
         unit_of_measurement: "W"
@@ -125,3 +126,32 @@ modbus:
         slave: 223
         address: 289
         scale: 0
+
+template:
+  - sensor:
+# Envoy: Puissance soutirée sur le réseau
+# L'intégration en kWh et le cumul journalier sont effectués dans "parametres/entrée"
+    - name: "MP2 Pu charge batterie"
+      unique_id: "mp2_pu_charge_batterie"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set p=states('sensor.mp2_puissance_batteries')|float(default=0) %}
+        {% if (p>0) %}          
+          {{ p }}
+        {%else%}
+          0
+        {%endif%}
+    - name: "MP2 Pu decharge batterie"
+      unique_id: "mp2_pu_decharge_batterie"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set p=states('sensor.mp2_puissance_batteries')|float(default=0) %}
+        {% if (p<0) %}          
+          {{ p*-1 }}
+        {%else%}
+          0
+        {%endif%}

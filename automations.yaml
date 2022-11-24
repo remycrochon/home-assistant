@@ -554,21 +554,36 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: input_select.ecs_ssol
-  - platform: time
-    id: debut
-    at: input_datetime.horaire_ecs_debut
-  - platform: time
-    id: fin
-    at: input_datetime.horaire_ecs_fin
+    entity_id:
+    - input_select.ecs_ssol
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: levee_soleil
+  - platform: sun
+    event: sunset
+    offset: 0
+    id: couche_soleil
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    from: HC..
+    to: HP..
+    id: HC-HP
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    from: HP..
+    to: HC..
+    id: HP-HC
   - platform: numeric_state
-    entity_id: sensor.envoy_122103023124_current_power_production
-    above: 10
-    id: p>10
+    entity_id: sensor.esp126_temp_ecs
+    id: t_bas
+    below: 40
   - platform: numeric_state
-    entity_id: sensor.envoy_122103023124_current_power_production
-    below: 5
-    id: p<5
+    entity_id: sensor.esp126_temp_ecs
+    above: 45
+    id: t_haut
   condition: []
   action:
   - choose:
@@ -576,8 +591,15 @@
       - condition: state
         entity_id: input_select.ecs_ssol
         state: Auto
-      - condition: trigger
-        id: debut
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.esp126_temp_ecs
+        below: 40
+      - condition: state
+        entity_id: sensor.linky_ptec
+        state: HC..
       sequence:
       - service: script.ecs_on
         data: {}
@@ -585,65 +607,43 @@
       - condition: state
         entity_id: input_select.ecs_ssol
         state: Auto
-      - condition: trigger
-        id: fin
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: HC-HP
+        - condition: numeric_state
+          entity_id: sensor.esp126_temp_ecs
+          above: 45
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - service: script.ecs_on
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: sun
+        before: sunset
+        after: sunrise
       sequence:
       - service: script.ecs_off
         data: {}
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
-        state: Arret
+        state: At Forcé
       sequence:
-      - service: switch.turn_off
-        target:
-          entity_id:
-          - switch.cde_relais_ecs
-          - switch.cde_relais_ecs_router_pv
+      - service: script.ecs_off_off
         data: {}
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
-        state: Marche ECS
+        state: Ma Forcée
       sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.cde_relais_ecs
+      - service: script.ecs_on
         data: {}
-      - service: switch.turn_off
-        target:
-          entity_id: switch.cde_relais_ecs_router_pv
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Marche PV
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.cde_relais_ecs
-        data: {}
-      - service: switch.turn_on
-        target:
-          entity_id: switch.cde_relais_ecs_router_pv
-        data: {}
-      - choose:
-        - conditions:
-          - condition: trigger
-            id: p<5
-          sequence:
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.cde_relais_ecs_router_pv
-        - conditions:
-          - condition: trigger
-            id: p>10
-          sequence:
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id: switch.cde_relais_ecs_router_pv
     default: []
   mode: single
 - id: '1633075302563'
@@ -2392,46 +2392,3 @@
       battery: sensor.tablette_niveau_charge
       charger: switch.pc2_tablette
       low_percent: 20
-- id: '1668874608197'
-  alias: 1_2_3 ECS Forcage Temp basse
-  description: Si temp trop basse et HC
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.linky_ptec
-    from: HC..
-    to: HP..
-    id: HC-HP
-  - platform: state
-    entity_id:
-    - sensor.linky_ptec
-    from: HP..
-    to: HC..
-    id: HP-HC
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: HP-HC
-      - condition: numeric_state
-        entity_id: sensor.esp126_temp_ecs
-        below: 39
-      - condition: sun
-        before: sunrise
-        after: sunset
-      sequence:
-      - service: script.ecs_on
-        data: {}
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: HP-HC
-        - condition: numeric_state
-          entity_id: sensor.esp126_temp_ecs
-          above: 45
-      sequence:
-      - service: script.ecs_off
-        data: {}
-  mode: single

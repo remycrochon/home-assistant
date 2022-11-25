@@ -17,19 +17,24 @@ modbus:
           state_off: 4
     sensors:
       # SYSTEM
+      # Switch Position
+      # 1=Charger Only;2=Inverter Only;3=On;4=Off
       - name: "MP2 Etat"
         slave: 227
         address: 33
         data_type: uint16
         scale: 1
 
+      # Active input source
+      # 0=Unknown;1=Grid;2=Generator;3=Shore power;240=Not connected
       - name: "MP2 Source Puissance"
         data_type: int16
         slave: 100
         address: 826
         scale: 1
 
-
+      # Power supplied by Genset tot system.
+      # Alimentation fournie par le système Genset tot.
       - name: "MP2 Charge"
         data_type: int16
         unit_of_measurement: "W"
@@ -39,7 +44,8 @@ modbus:
         device_class: power
         state_class: measurement
 
-      - name: "MP2 Conso Onduleur"
+        # AC Consumption L1
+      - name: "MP2 Conso Entrée Onduleur"
         data_type: uint16
         unit_of_measurement: "W"
         slave: 100
@@ -48,6 +54,7 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # DC System Power
       - name: "MP2 Conso DC "
         data_type: int16
         unit_of_measurement: "W"
@@ -57,6 +64,7 @@ modbus:
         device_class: power
         state_class: measurement
 
+      #Grid L1
       - name: "MP2 Réseau"
         data_type: int16
         unit_of_measurement: "W"
@@ -66,6 +74,7 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # Battery Voltage (System)
       - name: "MP2 Tension Batteries"
         data_type: uint16
         unit_of_measurement: "V"
@@ -75,6 +84,7 @@ modbus:
         device_class: voltage
         state_class: measurement
 
+      # Battery Current (System)
       - name: "MP2 Intensité Batteries"
         data_type: int16
         unit_of_measurement: "A"
@@ -84,7 +94,8 @@ modbus:
         device_class: current
         state_class: measurement
 
-      # postive en charge-negatif en décharge
+      # Battery Power (System)
+      # positive en charge-negatif en décharge
       - name: "MP2 Puissance Batteries"
         data_type: int16
         unit_of_measurement: "W"
@@ -94,6 +105,15 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # Battery state (System)
+      # 0=idle;1=charging;2=discharging
+      - name: "MP2 Etat Batteries"
+        data_type: int16
+        slave: 100
+        address: 844
+        scale: 1
+
+      # PV - DC-coupled power
       - name: "MP2 Puissance PV"
         data_type: uint16
         unit_of_measurement: "W"
@@ -103,6 +123,7 @@ modbus:
         device_class: power
         state_class: measurement
 
+        # State of charge - SOC
         # Smart Shunt
       - name: "MP2 Charge Batteries"
         data_type: uint16
@@ -113,6 +134,7 @@ modbus:
         device_class: battery
         state_class: measurement
 
+      # Time to go
       - name: "MP2 Temps restant batteries"
         data_type: uint16
         unit_of_measurement: "seconds"
@@ -126,6 +148,58 @@ modbus:
         slave: 223
         address: 289
         scale: 0
+
+# Energie
+      # Energy from AC-In 1 to AC-out
+      - name: "MP2 Energy from AC-In 1 to AC-out"
+        data_type: uint16
+        slave: 227
+        address: 74
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy from AC-In 1 to battery
+      - name: "MP2 Energy from AC-In 1 to battery"
+        data_type: uint16
+        slave: 227
+        address: 76
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy from AC-out to AC-in 1 (reverse fed PV)
+      - name: "MP2 Energy from AC-out to AC-in 1"
+        data_type: uint16
+        slave: 227
+        address: 82
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy from battery to AC-in 1
+      - name: "MP2 Energy from battery to AC-in 1"
+        data_type: uint16
+        slave: 227
+        address: 86
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy from AC-out to battery (typically from PV-inverter)
+      - name: "MP2 Energy from AC-out to battery"
+        data_type: uint16
+        slave: 227
+        address: 92
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
 
 template:
   - sensor:

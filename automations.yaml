@@ -618,7 +618,7 @@
         before: sunrise
         after: sunset
       sequence:
-      - service: script.ecs_on
+      - service: script.ecs_off_off
         data: {}
     - conditions:
       - condition: state

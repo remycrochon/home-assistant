@@ -584,6 +584,19 @@
     entity_id: sensor.esp126_temp_ecs
     above: 45
     id: t_haut
+  - platform: state
+    entity_id:
+    - input_boolean.ecs_av_pv
+    from: 'on'
+    to: 'off'
+    id: arret_pv_routeur
+  - platform: state
+    entity_id:
+    - sensor.mp2_energy_charge_batteries_jour
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   condition: []
   action:
   - choose:
@@ -627,8 +640,33 @@
       - condition: sun
         before: sunset
         after: sunrise
+      - condition: state
+        entity_id: input_boolean.ecs_av_pv
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.mp2_energy_charge_batteries_jour
+        above: 98
       sequence:
       - service: script.ecs_off
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: numeric_state
+        entity_id: sensor.mp2_energy_charge_batteries_jour
+        below: 95
+      sequence:
+      - service: script.ecs_off_off
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: arret_pv_routeur
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      sequence:
+      - service: script.ecs_off_off
         data: {}
     - conditions:
       - condition: state

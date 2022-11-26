@@ -149,22 +149,34 @@ modbus:
         address: 289
         scale: 0
 
+# Energie Smart Shunt
+      # Energy Décharge
+      - name: "MP2 Energy décharge batteries"
+        data_type: uint16
+        slave: 223
+        address: 301
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy Charge
+      - name: "MP2 Energy charge batteries"
+        data_type: uint16
+        slave: 223
+        address: 302
+        scale: 1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+
 # Energie
       # Energy from AC-In 1 to AC-out
       - name: "MP2 Energy from AC-In 1 to AC-out"
         data_type: uint16
         slave: 227
         address: 74
-        scale: 1
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
-
-      # Energy from AC-In 1 to battery
-      - name: "MP2 Energy from AC-In 1 to battery"
-        data_type: uint16
-        slave: 227
-        address: 76
         scale: 1
         unit_of_measurement: "kWh"
         device_class: "energy"
@@ -190,15 +202,6 @@ modbus:
         device_class: "energy"
         state_class: "total"
 
-      # Energy from AC-out to battery (typically from PV-inverter)
-      - name: "MP2 Energy from AC-out to battery"
-        data_type: uint16
-        slave: 227
-        address: 92
-        scale: 1
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
 
 
 template:
@@ -211,21 +214,12 @@ template:
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {% set p=states('sensor.mp2_puissance_batteries')|float(default=0) %}
-        {% if (p>0) %}          
-          {{ p }}
-        {%else%}
-          0
-        {%endif%}
+        {{ max(0, states('sensor.mp2_puissance_batteries') | float) }}
+
     - name: "MP2 Pu decharge batterie"
       unique_id: "mp2_pu_decharge_batterie"
       device_class: "power"
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {% set p=states('sensor.mp2_puissance_batteries')|float(default=0) %}
-        {% if (p<0) %}          
-          {{ p*-1 }}
-        {%else%}
-          0
-        {%endif%}
+        {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float) }}

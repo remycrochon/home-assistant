@@ -592,11 +592,10 @@
     id: arret_pv_routeur
   - platform: state
     entity_id:
-    - sensor.mp2_energy_charge_batteries_jour
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 0
+    - input_boolean.ecs_av_pv
+    from: 'off'
+    to: 'on'
+    id: avect_pv_routeur
   condition: []
   action:
   - choose:
@@ -643,21 +642,8 @@
       - condition: state
         entity_id: input_boolean.ecs_av_pv
         state: 'on'
-      - condition: numeric_state
-        entity_id: sensor.mp2_energy_charge_batteries_jour
-        above: 98
       sequence:
       - service: script.ecs_off
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Auto
-      - condition: numeric_state
-        entity_id: sensor.mp2_energy_charge_batteries_jour
-        below: 95
-      sequence:
-      - service: script.ecs_off_off
         data: {}
     - conditions:
       - condition: trigger

@@ -1,0 +1,123 @@
+substitutions:
+  device_name: esp146-ttgo-1
+  adress_ip: "192.168.0.146"
+  friendly_name: esp146
+  time_timezone: "Europe/Paris"
+  
+esphome:
+    name: ${device_name}
+    
+esp32:
+  board: esp32dev
+  framework:
+      type: arduino
+
+wifi:
+  networks:
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
+      priority: 2    
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 0
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 1
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+web_server:
+  port: 80
+
+font:
+  - file: "fonts/arial.ttf"
+    id: arial10
+    size: 10
+  - file: "fonts/arial.ttf"
+    id: arial15
+    size: 15
+  - file: "fonts/arial.ttf"
+    id: arial30
+    size: 30
+
+
+# Example minimal configuration entry
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO19
+
+
+sensor:
+
+# Lecture dans HA
+  - platform: homeassistant
+    name: "Prod"
+    entity_id: sensor.envoy_122103023124_current_power_production
+    id: prod
+    
+  - platform: homeassistant
+    name: "Conso"
+    entity_id: sensor.mp2_grid_l1
+    id: conso
+
+  - platform: uptime
+    name: "${friendly_name} Uptime Sensor"
+    id: esp142_uptime
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+
+switch:
+  - platform: restart
+    name: "${friendly_name}_Restart"
+    
+text_sensor:
+  # IP address #
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP address"
+      icon: "mdi:network-outline"
+    ssid:
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+  - platform: version
+    id: text_sensor_version
+    name: "${friendly_name} ESPHome Version"
+    
+
+display:
+  - platform: st7789v
+    backlight_pin: GPIO4
+    cs_pin: GPIO5
+    dc_pin: GPIO16
+    reset_pin: GPIO23
+    rotation: 270
+    lambda: |-
+      it.printf(0, 0, id(arial30),"Prod:%.0f W",id(prod).state);
+      it.printf(0, 40, id(arial30),"Conso:%.0f W",id(conso).state);
+#      it.printf(0, 20, id(arial10),"S:%.0f ",id(sout).state);
+#      it.printf(32, 20, id(arial10),"I:%.0f W",id(inj).state);
+#      it.printf(0, 30, id(arial10),"Disp:%.0f W",id(pdispo).state);   
+ 

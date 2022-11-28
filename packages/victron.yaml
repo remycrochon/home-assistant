@@ -19,33 +19,25 @@ modbus:
       # SYSTEM
       # Switch Position
       # 1=Charger Only;2=Inverter Only;3=On;4=Off
-      - name: "MP2 Etat"
+      - name: "MP2 position Inter"
         slave: 227
         address: 33
         data_type: uint16
         scale: 1
 
-      # Active input source
-      # 0=Unknown;1=Grid;2=Generator;3=Shore power;240=Not connected
-      - name: "MP2 Source Puissance"
-        data_type: int16
-        slave: 100
-        address: 826
-        scale: 1
+      # Switch Position
+      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
+      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
 
-      # Power supplied by Genset tot system.
-      # Alimentation fournie par le système Genset tot.
-      - name: "MP2 Charge"
-        data_type: int16
-        unit_of_measurement: "W"
-        slave: 100
-        address: 823
+      - name: "MP2 Etat bus"
+        slave: 227
+        address: 31
+        data_type: uint16
         scale: 1
-        device_class: power
-        state_class: measurement
 
         # AC Consumption L1
-      - name: "MP2 Conso Entrée Onduleur"
+      - name: "MP2 Conso AC L1"
+        unique_id: "mp2_conso_ac_l1"
         data_type: uint16
         unit_of_measurement: "W"
         slave: 100
@@ -54,18 +46,9 @@ modbus:
         device_class: power
         state_class: measurement
 
-      # DC System Power
-      - name: "MP2 Conso DC "
-        data_type: int16
-        unit_of_measurement: "W"
-        slave: 100
-        address: 860
-        scale: 1
-        device_class: power
-        state_class: measurement
-
       #Grid L1
-      - name: "MP2 Réseau"
+      - name: "MP2 Grid L1"
+        unique_id: "mp2_grid_l1"
         data_type: int16
         unit_of_measurement: "W"
         slave: 100
@@ -74,8 +57,18 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # Active input source
+      # 0=Unknown;1=Grid;2=Generator;3=Shore power;240=Not connected
+      - name: "MP2 Source Puissance"
+        unique_id: "mp2_source_puissance"
+        data_type: int16
+        slave: 100
+        address: 826
+        scale: 1
+
       # Battery Voltage (System)
       - name: "MP2 Tension Batteries"
+        unique_id: "mp2_tension_batteries"
         data_type: uint16
         unit_of_measurement: "V"
         slave: 100
@@ -86,6 +79,7 @@ modbus:
 
       # Battery Current (System)
       - name: "MP2 Intensité Batteries"
+        unique_id: "mp2_intensite_batteries"
         data_type: int16
         unit_of_measurement: "A"
         slave: 100
@@ -97,6 +91,7 @@ modbus:
       # Battery Power (System)
       # positive en charge-negatif en décharge
       - name: "MP2 Puissance Batteries"
+        unique_id: "mp2_puissance_batteries"
         data_type: int16
         unit_of_measurement: "W"
         slave: 100
@@ -107,7 +102,8 @@ modbus:
 
       # Battery state (System)
       # 0=idle;1=charging;2=discharging
-      - name: "MP2 Etat Batteries"
+      - name: "MP2 Status Batteries"
+        unique_id: "mp2_status_batteries"
         data_type: int16
         slave: 100
         address: 844
@@ -115,6 +111,7 @@ modbus:
 
       # PV - DC-coupled power
       - name: "MP2 Puissance PV"
+        unique_id: "mp2_puissance_pv"
         data_type: uint16
         unit_of_measurement: "W"
         slave: 100
@@ -123,9 +120,21 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # DC System Power
+      - name: "MP2 Puissance reseau DC "
+        unique_id: "mp2_puissance_reseau_dc"
+        data_type: int16
+        unit_of_measurement: "W"
+        slave: 100
+        address: 860
+        scale: 1
+        device_class: power
+        state_class: measurement
+
         # State of charge - SOC
         # Smart Shunt
-      - name: "MP2 Charge Batteries"
+      - name: "MP2 Niveau Charge Batteries"
+        unique_id: "mp2_niveau_charge_batteries"
         data_type: uint16
         unit_of_measurement: "%"
         slave: 223
@@ -149,9 +158,11 @@ modbus:
         address: 289
         scale: 0
 
+# Modbus Smart Shunt
 # Energie Smart Shunt
       # Energy Décharge
       - name: "MP2 Energy décharge batteries"
+        unique_id: "mp2_energy_decharge_batteries"
         data_type: uint16
         slave: 223
         address: 301
@@ -162,6 +173,7 @@ modbus:
 
       # Energy Charge
       - name: "MP2 Energy charge batteries"
+        unique_id: "mp2_energy_charge_batteries"
         data_type: uint16
         slave: 223
         address: 302
@@ -170,6 +182,17 @@ modbus:
         device_class: "energy"
         state_class: "total"
 
+# Modbus MP2
+      # DC System Power
+      - name: "MP2 Puissance Sortie 1"
+        unique_id: "mp2_puissance_sortie_1"
+        data_type: int16
+        unit_of_measurement: "W"
+        slave: 227
+        address: 23
+        scale: 1
+        device_class: power
+        state_class: measurement
 
 # Energie
       # Energy from AC-In 1 to AC-out

@@ -25,11 +25,12 @@ modbus:
         data_type: uint16
         scale: 1
 
-      # Switch Position
+      # Status bus VE
       # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
       # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
 
-      - name: "MP2 Etat bus"
+      - name: "MP2 Status bus VE"
+        unique_id: "mp2_status_bus_ve"
         slave: 227
         address: 31
         data_type: uint16
@@ -131,8 +132,49 @@ modbus:
         device_class: power
         state_class: measurement
 
+# Modbus Smart Shunt
         # State of charge - SOC
         # Smart Shunt
+      - name: "MP2 SS Tension Batteries"
+        unique_id: "mp2_ss_tension_batteries"
+        data_type: uint16
+        unit_of_measurement: "V"
+        slave: 223
+        address: 259
+        scale: 0.1
+        device_class: voltage
+        state_class: measurement
+
+      - name: "MP2 SS Tension Start Batteries"
+        unique_id: "mp2_ss_tension_start_batteries"
+        data_type: uint16
+        unit_of_measurement: "V"
+        slave: 223
+        address: 260
+        scale: 0.1
+        device_class: voltage
+        state_class: measurement
+
+      - name: "MP2 SS Intensité Batteries"
+        unique_id: "mp2_ss_intensite_batteries"
+        data_type: int16
+        unit_of_measurement: "A"
+        slave: 223
+        address: 261
+        scale: 0.1
+        device_class: current
+        state_class: measurement
+
+      - name: "MP2 SS Conso Ah Batteries"
+        unique_id: "mp2_ss_conso_ah_batteries"
+        data_type: int16
+        unit_of_measurement: "Ah"
+        slave: 223
+        address: 265
+        scale: 0.1
+        device_class: current
+        state_class: measurement
+
       - name: "MP2 Niveau Charge Batteries"
         unique_id: "mp2_niveau_charge_batteries"
         data_type: uint16
@@ -158,11 +200,9 @@ modbus:
         address: 289
         scale: 0
 
-# Modbus Smart Shunt
-# Energie Smart Shunt
       # Energy Décharge
-      - name: "MP2 Energy décharge batteries"
-        unique_id: "mp2_energy_decharge_batteries"
+      - name: "MP2 Energy décharge batteries brut"
+        unique_id: "mp2_energy_decharge_batteries_brut"
         data_type: uint16
         slave: 223
         address: 301
@@ -172,8 +212,8 @@ modbus:
         state_class: "total"
 
       # Energy Charge
-      - name: "MP2 Energy charge batteries"
-        unique_id: "mp2_energy_charge_batteries"
+      - name: "MP2 Energy charge batteries brut"
+        unique_id: "mp2_energy_charge_batteries_brut"
         data_type: uint16
         slave: 223
         address: 302
@@ -229,15 +269,48 @@ modbus:
 
 template:
   - sensor:
-# Envoy: Puissance soutirée sur le réseau
-# L'intégration en kWh et le cumul journalier sont effectués dans "parametres/entrée"
+    # Affichage Status bus VE
+      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
+      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
+
+    - name: "Mp2 Affichage Status Bus VE"
+      unique_id: "mp2_affichage_status_bus_ve"
+      state: >-
+        {% set st = states('sensor.mp2_status_bus_ve') | int(default=0) %}
+        {% for num, text in [(0, 'Off'), (1, 'Low power'),(2, 'Defaut')
+        ,(3, 'Bulk'),(4, 'Absorption'),(5, 'Float'),(6, 'Stockage')
+        ,(7, 'Equalize'),(8, 'Traverse'),(9, 'Inverser'),
+        (10, 'Power Assist') ,(11, 'Power Supply'),(252, 'PControl externe')
+        ] %}
+            {% if st == num %}
+              {{ text }}
+            {%endif%}
+        {% endfor %} 
+
+    # Energie batteries- Mise à l'échelle (/10)
+    - name: "MP2 Energy charge batterie"
+      unique_id: "mp2_energy_charge_batterie"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+      state: >-
+        {{ states('sensor.mp2_energy_charge_batteries_brut') | float(default=0) | round(1) /10}}
+    - name: "MP2 Energy decharge batterie"
+      unique_id: "mp2_energy_decharge_batterie"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total"
+      state: >-
+        {{ states('sensor.mp2_energy_decharge_batteries_brut') | float(default=0) | round(1) /10}}
+
+    # Puissance batteries
     - name: "MP2 Pu charge batterie"
       unique_id: "mp2_pu_charge_batterie"
       device_class: "power"
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {{ max(0, states('sensor.mp2_puissance_batteries') | float) }}
+        {{ max(0, states('sensor.mp2_puissance_batteries') | float(default=0)) }}
 
     - name: "MP2 Pu decharge batterie"
       unique_id: "mp2_pu_decharge_batterie"
@@ -245,4 +318,13 @@ template:
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float) }}
+        {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float(default=0)) }}
+
+    # Calcul Affichage Import ou Eport dans la carte Tesla
+    - name: "Mp2 Affichage import export grid"
+      unique_id: "mp2_affichage_import_export_grid"
+      state: >-
+        {% if (states('sensor.mp2_grid_l1') | int) < 0 %}Export{% else %}Import{% endif %}
+      icon: "{% if (states('sensor.mp2_grid_l1') | int) < 0 %}mdi:arrow-left-bold{% else %}mdi:arrow-right-bold{% endif %}"
+      device_class: "power"
+      state_class: "measurement"

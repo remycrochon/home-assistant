@@ -33,23 +33,37 @@ logger:
 
 # Enable Home Assistant API
 api:
-
+  services:
+    - service: set_dac_value
+      variables:
+        dac_value: int
+      then:
+        - output.set_level:
+            id: dac_output
+            level: !lambda 'return dac_value / 100.0;'
 ota:
 web_server:
   port: 80
 
-
-
 output:
+  - platform: esp32_dac
+    pin: GPIO25
+    id: dac_output
+
   - platform: ac_dimmer
     id: variateur1
-    gate_pin: GPIO01
+    gate_pin: GPIO17
     zero_cross_pin:
-      number: GPIO03
+      number: GPIO16
       mode:
         input: true
       inverted: yes
-      
+
+    
+light:
+  - platform: monochromatic
+    output: variateur1
+    name: Dimmer Light      
 
 climate:
   - platform: pid
@@ -57,14 +71,13 @@ climate:
     id: pid_pv
     sensor: potar
     default_target_temperature: 5
-    heat_output: variateur1
+    heat_output: dac_output
     control_parameters:
       kp: 0.5
       ki: 0.0
       kd: 0.0
 
 sensor:
-
   - platform: pid
     name: "PID PV Result"
     type: RESULT
@@ -153,6 +166,8 @@ switch:
       
   - platform: restart
     name: "${friendly_name}_Restart"
+
+
     
 text_sensor:
   # IP address #

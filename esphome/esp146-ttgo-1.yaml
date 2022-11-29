@@ -8,7 +8,7 @@ esphome:
     name: ${device_name}
     
 esp32:
-  board: esp32dev
+  board: ttgo-t1
   framework:
       type: arduino
 
@@ -49,9 +49,14 @@ font:
     id: arial15
     size: 15
   - file: "fonts/arial.ttf"
+    id: arial20
+    size: 20
+  - file: "fonts/arial.ttf"
     id: arial30
     size: 30
-
+  - file: "fonts/arial.ttf"
+    id: arial25
+    size: 25
 
 # Example minimal configuration entry
 spi:
@@ -70,7 +75,17 @@ sensor:
   - platform: homeassistant
     name: "Conso"
     entity_id: sensor.mp2_grid_l1
-    id: conso
+    id: grid
+
+  - platform: homeassistant
+    name: "Conso"
+    entity_id: sensor.mp2_conso_ac_l1
+    id: house
+
+  - platform: homeassistant
+    name: "Conso"
+    entity_id: sensor.mp2_puissance_batteries
+    id: batt
 
   - platform: uptime
     name: "${friendly_name} Uptime Sensor"
@@ -87,8 +102,23 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
+  - platform: gpio
+    pin:
+      number: GPIO0
+      inverted: true
+    name: ${device_name}top push
+    id: tdisplay_button_input_0
+
+  - platform: gpio
+    pin:
+      number: GPIO35
+      inverted: true
+    id: tdisplay_button_input_1
+    name: ${device_name}bottom push
+    
 
 switch:
+
   - platform: restart
     name: "${friendly_name}_Restart"
     
@@ -115,8 +145,10 @@ display:
     reset_pin: GPIO23
     rotation: 270
     lambda: |-
-      it.printf(0, 0, id(arial30),"Prod:%.0f W",id(prod).state);
-      it.printf(0, 40, id(arial30),"Conso:%.0f W",id(conso).state);
+      it.printf(0, 0, id(arial25),"Link:%.0f W",id(grid).state);
+      it.printf(0, 30, id(arial25),"Mais:%.0f W",id(house).state);
+      it.printf(0, 60, id(arial25),"Prod:%.0f W",id(prod).state);
+      it.printf(0, 90, id(arial25),"Batt:%.0f W",id(batt).state);
 #      it.printf(0, 20, id(arial10),"S:%.0f ",id(sout).state);
 #      it.printf(32, 20, id(arial10),"I:%.0f W",id(inj).state);
 #      it.printf(0, 30, id(arial10),"Disp:%.0f W",id(pdispo).state);   

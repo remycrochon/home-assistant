@@ -2416,3 +2416,16 @@
       battery: sensor.tablette_niveau_charge
       charger: switch.pc2_tablette
       low_percent: 20
+- id: '1669652772079'
+  alias: 0--0-0Nouvelle automatisation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_number.nombre_test
+  condition: []
+  action:
+  - service: esphome.esp142_test_esp32_set_dac_value
+    data:
+      dac_value: '{{ trigger.to_state.state | int }}'
+  mode: single

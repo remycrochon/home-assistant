@@ -1,18 +1,8 @@
 ouverture_volet:
-  alias: ouverture_volet
+  alias: 0_0_1 Ouverture Volets
   sequence:
-  - service: cover.close_cover
+  - service: script.1_2_1_ouverture_volet_salon_petit
     data: {}
-    target:
-      entity_id: cover.volet_salon_p
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
-    data: {}
-    entity_id: cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -60,7 +50,7 @@ ouverture_volet:
   mode: single
   icon: mdi:window-shutter-open
 fermeture_volet:
-  alias: fermeture_volet
+  alias: 0_0_0 Fermeture Volets
   sequence:
   - service: cover.close_cover
     data: {}
@@ -71,27 +61,15 @@ fermeture_volet:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
+  - service: script.0_0_fermeture_volet_bureau_droit
     data: {}
-    target:
-      entity_id: cover.volet_droit_p
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
+  - service: script.1_2_0_fermeture_volet_salon_petit
     data: {}
-    target:
-      entity_id: cover.volet_salon_p
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    data: {}
-    entity_id: cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -107,11 +85,8 @@ fermeture_volet:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
+  - service: script.0_0_0_fermeture_volet_ami_nord
     data: {}
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
   - delay:
       hours: 0
       minutes: 0
@@ -155,31 +130,27 @@ fermeture_volet:
   mode: single
   icon: mdi:window-shutter
 ouverture_volet_absent:
-  alias: ouverture_volet_absent
+  alias: 0_1_1 Ouverture Volets Mode absent
   sequence:
   - service: cover.open_cover
     data: {}
     target:
-      entity_id: cover.bureau_droit_p
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    target:
-      entity_id: cover.bureau_gauche_p
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
-    data: {}
-    target:
       entity_id:
-      - cover.volet_salon_p
+      - cover.volet_gauche_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.ouverture_volet_bureau_droit
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1_2_1_ouverture_volet_salon_petit
+    data: {}
   - delay:
       hours: 0
       minutes: 0
@@ -203,11 +174,8 @@ ouverture_volet_absent:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
+  - service: script.0_0_1_ouverture_volet_ami_nord
     data: {}
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
   - delay:
       hours: 0
       minutes: 0
@@ -260,7 +228,7 @@ ouverture_volet_absent:
   mode: single
   icon: mdi:window-shutter-open
 fermeture_volet_absent:
-  alias: fermeture_volet_absent
+  alias: 0_1_0 Fermeture Volets Mode absent
   sequence:
   - service: cover.close_cover
     data: {}
@@ -271,18 +239,15 @@ fermeture_volet_absent:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
+  - service: script.0_0_fermeture_volet_bureau_droit
     data: {}
-    target:
-      entity_id: cover.volet_droit_p
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
+  - service: script.1_2_0_fermeture_volet_salon_petit
     data: {}
-    entity_id: cover.volet_salon_p
   - delay:
       hours: 0
       minutes: 0
@@ -308,11 +273,8 @@ fermeture_volet_absent:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
+  - service: script.0_0_0_fermeture_volet_ami_nord
     data: {}
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
   - delay:
       hours: 0
       minutes: 0
@@ -439,7 +401,7 @@ volet_piscine_fermeture:
   mode: single
   icon: mdi:garage
 volets_bureau:
-  alias: Ouverture Volets Bureau
+  alias: 1_0_2 Ouverture Volets Bureau
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_bureau
@@ -453,27 +415,22 @@ volets_bureau:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
+  - service: script.ouverture_volet_bureau_droit
     data: {}
-    target:
-      entity_id: cover.volet_droit_p
   mode: single
   icon: mdi:window-shutter-open
 ouverture_volets_chamb_nord:
-  alias: Ouverture Volets Chamb Nord
+  alias: 1_1_2 Ouverture Volets Chamb Nord
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_nord
     state: 'off'
-  - service: cover.open_cover
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
+  - service: script.0_0_1_ouverture_volet_ami_nord
     data: {}
   mode: single
   icon: mdi:window-shutter-open
 ouverture_volet_chamb_sud:
-  alias: Ouverture Volet Chamb Sud
+  alias: 1_3_2 Ouverture Volet Chamb Sud
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_sud
@@ -1098,3 +1055,171 @@ ecs_off_off:
     data: {}
   mode: single
   icon: mdi:water-boiler-auto
+ouverture_volet_bureau_droit:
+  alias: 1_0_1 Ouverture Volet Bureau droit
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id: cover.volet_droit_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.bureau_droit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.volet_droit_p
+  mode: single
+0_0_fermeture_volet_bureau_droit:
+  alias: 1_0_0 Fermeture Volet Bureau droit
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id: cover.volet_droit_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.bureau_droit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id: cover.volet_droit_p
+  mode: single
+0_0_0_fermeture_volet_ami_nord:
+  alias: 1_1_0 Fermeture Volet ami nord
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  mode: single
+0_0_1_ouverture_volet_ami_nord:
+  alias: 1_1_1 Ouverture Volet ami nord
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  mode: single
+1_2_0_fermeture_volet_salon_petit:
+  alias: 1_2_0 Fermeture Volet salon petit
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_p
+  mode: single
+1_2_1_ouverture_volet_salon_petit:
+  alias: 1_2_1 Ouverture Volet salon petit
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_p
+  mode: single

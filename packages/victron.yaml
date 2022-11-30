@@ -141,7 +141,7 @@ modbus:
         unit_of_measurement: "V"
         slave: 223
         address: 259
-        scale: 0.1
+        scale: 0.01
         device_class: voltage
         state_class: measurement
 
@@ -151,7 +151,7 @@ modbus:
         unit_of_measurement: "V"
         slave: 223
         address: 260
-        scale: 0.1
+        scale: 0.01
         device_class: voltage
         state_class: measurement
 
@@ -185,6 +185,36 @@ modbus:
         device_class: battery
         state_class: measurement
 
+      - name: "MP2 Temps depuis derniere pleine batteries"
+        data_type: uint16
+        unit_of_measurement: "seconds"
+        slave: 223
+        address: 289
+        scale: 100
+
+
+      # Energy Décharge
+      - name: "MP2 Energy décharge batteries"
+        unique_id: "mp2_energy_decharge_batteries"
+        data_type: uint16
+        slave: 223
+        address: 301
+        scale: 0.1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy Charge
+      - name: "MP2 Energy charge batteries"
+        unique_id: "mp2_energy_charge_batteries"
+        data_type: uint16
+        slave: 223
+        address: 302
+        scale: 0.1
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
       # Time to go
       - name: "MP2 Temps restant batteries"
         data_type: uint16
@@ -192,35 +222,6 @@ modbus:
         slave: 223
         address: 303
         scale: 100
-
-      - name: "MP2 Temps depuis derniere pleine batteries"
-        data_type: uint16
-        unit_of_measurement: "seconds"
-        slave: 223
-        address: 289
-        scale: 0
-
-      # Energy Décharge
-      - name: "MP2 Energy décharge batteries brut"
-        unique_id: "mp2_energy_decharge_batteries_brut"
-        data_type: uint16
-        slave: 223
-        address: 301
-        scale: 1
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
-
-      # Energy Charge
-      - name: "MP2 Energy charge batteries brut"
-        unique_id: "mp2_energy_charge_batteries_brut"
-        data_type: uint16
-        slave: 223
-        address: 302
-        scale: 1
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
 
 # Modbus MP2
       # DC System Power
@@ -230,7 +231,7 @@ modbus:
         unit_of_measurement: "W"
         slave: 227
         address: 23
-        scale: 1
+        scale: 10
         device_class: power
         state_class: measurement
 
@@ -240,7 +241,7 @@ modbus:
         data_type: uint16
         slave: 227
         address: 74
-        scale: 1
+        scale: 0.01
         unit_of_measurement: "kWh"
         device_class: "energy"
         state_class: "total"
@@ -250,7 +251,7 @@ modbus:
         data_type: uint16
         slave: 227
         address: 82
-        scale: 1
+        scale: 0.01
         unit_of_measurement: "kWh"
         device_class: "energy"
         state_class: "total"
@@ -260,7 +261,7 @@ modbus:
         data_type: uint16
         slave: 227
         address: 86
-        scale: 1
+        scale: 0.01
         unit_of_measurement: "kWh"
         device_class: "energy"
         state_class: "total"
@@ -287,22 +288,6 @@ template:
             {%endif%}
         {% endfor %} 
 
-    # Energie batteries- Mise à l'échelle (/10)
-    - name: "MP2 Energy charge batterie"
-      unique_id: "mp2_energy_charge_batterie"
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"
-      state: >-
-        {{ states('sensor.mp2_energy_charge_batteries_brut') | float(default=0) | round(1) /10}}
-    - name: "MP2 Energy decharge batterie"
-      unique_id: "mp2_energy_decharge_batterie"
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"
-      state: >-
-        {{ states('sensor.mp2_energy_decharge_batteries_brut') | float(default=0) | round(1) /10}}
-
     # Puissance batteries
     - name: "MP2 Pu charge batterie"
       unique_id: "mp2_pu_charge_batterie"
@@ -320,11 +305,110 @@ template:
       state: >-
         {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float(default=0)) }}
 
-    # Calcul Affichage Import ou Eport dans la carte Tesla
-    - name: "Mp2 Affichage import export grid"
-      unique_id: "mp2_affichage_import_export_grid"
+
+    # Calcul Affichage Prod dans la carte Tesla
+
+    - name: MP2 Grid to House
+      unique_id: mp2_grid_to_house
+      state_class: measurement
+      device_class: power
+      unit_of_measurement: 'W'
+      state:  >
+        {%set grid=states('sensor.mp2_grid_l1')|int%}
+        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
+        {%set house=states('sensor.mp2_conso_ac_l1') | int %}
+        {% if grid >0 %}
+          {% if ( prod> house ) %}
+            0
+          {% else %}
+            {{ ( house-prod) }}
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+
+    - name: MP2 Grid to Battery
+      unique_id: mp2_grid_to_battery
+      state_class: measurement
+      device_class: power
+      unit_of_measurement: 'W'
+      state:  >
+        {%set grid=states('sensor.mp2_grid_l1')|int%}
+        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
+        {%set house=states('sensor.mp2_conso_ac_l1') | int %}
+        {% if grid >0 %}
+          {% if ( prod< house ) %}
+            {{house-grid}}
+          {% else %}
+            {{ grid-(prod-house) }}
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+
+    - name: MP2 Generation to house
+      unique_id: mp2_generation_to_house
+      state_class: measurement
+      device_class: power
+      unit_of_measurement: 'W'
+      state:  >
+        {%set grid=states('sensor.mp2_grid_l1')|int%}
+        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
+        {%set house=states('sensor.mp2_conso_ac_l1') | int %}
+        {%set pu_batterie=states('sensor.mp2_puissance_batteries') | int %}
+        {%set g_to_b=states('sensor.mp2_grid_to_battery') | int %}
+        {% if prod > house | float(0) %}
+          {{ prod - pu_batterie + g_to_b }}
+        {% else %}
+          {{ prod }}
+        {% endif %}
+
+    - name: MP2 Generation to Battery
+      unique_id: mp2_generation_to_battery
+      state_class: measurement
+      device_class: power
+      unit_of_measurement: 'W'
       state: >-
-        {% if (states('sensor.mp2_grid_l1') | int) < 0 %}Export{% else %}Import{% endif %}
-      icon: "{% if (states('sensor.mp2_grid_l1') | int) < 0 %}mdi:arrow-left-bold{% else %}mdi:arrow-right-bold{% endif %}"
-      device_class: "power"
-      state_class: "measurement"
+        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
+        {%set g_to_h=states('sensor.mp2_generation_to_house') | int %}
+        {{ prod-g_to_h }}
+
+    - name:  MP2 Battery to House
+      unique_id: mp2_battery_to_house
+      state_class: measurement
+      device_class: power
+      unit_of_measurement: 'W'
+      state:  >
+        {%set pu_batterie=states('sensor.mp2_puissance_batteries') | int %}
+        {% if pu_batterie < 0 %}
+          {{ pu_batterie*-1 }}
+        {% else %}
+          0
+        {% endif %}
+
+    - name:  MP2 Generation to grid
+      unique_id: mp2_generation_to_grid
+      state_class: measurement
+      device_class: power
+      unit_of_measurement: 'W'
+      state:  >
+        {%set grid=states('sensor.mp2_grid_l1')|int%}
+        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
+        {%set g_to_b=states('sensor.mp2_generation_to_battery') | int %}
+        {%set g_to_h=states('sensor.mp2_generation_to_house') | int %}
+        {% if grid <0 %}
+          {{prod-g_to_b-g_to_h}}
+        {% else %}
+          0
+        {% endif %}
+        
+    - name:  MP2 affichage import export
+      unique_id: mp2_affichage_import_export
+      state:  >
+        {%set grid=states('sensor.mp2_grid_l1')|int%}
+        {% if grid> 0 %}
+          Import
+        {% else %}
+          Export
+        {% endif %}
+        

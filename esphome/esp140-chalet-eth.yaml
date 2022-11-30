@@ -65,8 +65,24 @@ sensor:
     accuracy_decimals: 2
     lambda: |-
       return (id(niveau_eau).state*0.6*0.6*3.14159);
+      
+  - platform: template
+    name: "niveau_remplissage_puit"
+    id: niveau
+    icon: mdi:flash
+    unit_of_measurement: "%"
+    accuracy_decimals: 2
+    lambda: |-
+      return (id(niveau_eau).state/5.8*100);
 
-
+  - platform: template
+    name: "niveau_reserve_puit"
+    id: niveau_reserve
+    icon: mdi:flash
+    unit_of_measurement: "m"
+    accuracy_decimals: 2
+    lambda: |-
+      return (3.5-id(niveau_eau).state);
 
 #Etat de la connection
 binary_sensor:

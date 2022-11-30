@@ -308,99 +308,6 @@ template:
 
     # Calcul Affichage Prod dans la carte Tesla
 
-    - name: MP2 Grid to House
-      unique_id: mp2_grid_to_house
-      state_class: measurement
-      device_class: power
-      unit_of_measurement: 'W'
-      state:  >
-        {%set grid=states('sensor.mp2_grid_l1')|int%}
-        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
-        {%set house=states('sensor.mp2_conso_ac_l1') | int %}
-        {% if grid >0 %}
-          {% if ( prod> house ) %}
-            0
-          {% else %}
-            {{ ( house-prod) }}
-          {% endif %}
-        {% else %}
-          0
-        {% endif %}
-
-    - name: MP2 Grid to Battery
-      unique_id: mp2_grid_to_battery
-      state_class: measurement
-      device_class: power
-      unit_of_measurement: 'W'
-      state:  >
-        {%set grid=states('sensor.mp2_grid_l1')|int%}
-        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
-        {%set house=states('sensor.mp2_conso_ac_l1') | int %}
-        {% if grid >0 %}
-          {% if ( prod< house ) %}
-            {{house-grid}}
-          {% else %}
-            {{ grid-(prod-house) }}
-          {% endif %}
-        {% else %}
-          0
-        {% endif %}
-
-    - name: MP2 Generation to house
-      unique_id: mp2_generation_to_house
-      state_class: measurement
-      device_class: power
-      unit_of_measurement: 'W'
-      state:  >
-        {%set grid=states('sensor.mp2_grid_l1')|int%}
-        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
-        {%set house=states('sensor.mp2_conso_ac_l1') | int %}
-        {%set pu_batterie=states('sensor.mp2_puissance_batteries') | int %}
-        {%set g_to_b=states('sensor.mp2_grid_to_battery') | int %}
-        {% if prod > house | float(0) %}
-          {{ prod - pu_batterie + g_to_b }}
-        {% else %}
-          {{ prod }}
-        {% endif %}
-
-    - name: MP2 Generation to Battery
-      unique_id: mp2_generation_to_battery
-      state_class: measurement
-      device_class: power
-      unit_of_measurement: 'W'
-      state: >-
-        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
-        {%set g_to_h=states('sensor.mp2_generation_to_house') | int %}
-        {{ prod-g_to_h }}
-
-    - name:  MP2 Battery to House
-      unique_id: mp2_battery_to_house
-      state_class: measurement
-      device_class: power
-      unit_of_measurement: 'W'
-      state:  >
-        {%set pu_batterie=states('sensor.mp2_puissance_batteries') | int %}
-        {% if pu_batterie < 0 %}
-          {{ pu_batterie*-1 }}
-        {% else %}
-          0
-        {% endif %}
-
-    - name:  MP2 Generation to grid
-      unique_id: mp2_generation_to_grid
-      state_class: measurement
-      device_class: power
-      unit_of_measurement: 'W'
-      state:  >
-        {%set grid=states('sensor.mp2_grid_l1')|int%}
-        {%set prod=states('sensor.envoy_122103023124_current_power_production') | int %}
-        {%set g_to_b=states('sensor.mp2_generation_to_battery') | int %}
-        {%set g_to_h=states('sensor.mp2_generation_to_house') | int %}
-        {% if grid <0 %}
-          {{prod-g_to_b-g_to_h}}
-        {% else %}
-          0
-        {% endif %}
         
     - name:  MP2 affichage import export
       unique_id: mp2_affichage_import_export
@@ -412,3 +319,187 @@ template:
           Export
         {% endif %}
         
+
+#
+# Modèles pour les diagrammes de transfert de Powerflow réel (APF - PowerFlow réel)
+#
+# Pour que les calculs additionnent, une nouvelle charge réelle de la maison doit être calculée et utilisée, ce qui inclut
+# la consommation de l'onduleur et exclut les erreurs d'arrondi et corrige les lectures de puissance inexactes.
+#
+# Il n'a jamais été logique que la puissance entrante ne soit parfois pas égale à la puissance sortante. Cela corrige le problème !
+#
+# Développé par AviadorLP modifié pour powerwall par purcell-lab
+# Définit correctement les flux battery2grid et grid2battery
+
+# le capteur de grille doit être négatif lors de l'importation et positif lors de l'exportation
+    - name: APF Grid Entity
+      unique_id: apf_grid_entity
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: "{{ (0 - states('sensor.mp2_grid_l1')|float(0)*1)|int(0) }}"
+
+# le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
+    - name: APF House Entity
+      unique_id: apf_house_entity
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: "{{ (states('sensor.mp2_conso_ac_l1')|float(0)*1)|int(0) }}"
+
+# le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
+    - name: APF Generation Entity
+      unique_id: apf_generation_entity
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: "{{ (states('sensor.envoy_122103023124_current_power_production')|float(0)*1)|int(0) }}"
+
+# le capteur de batterie doit être positif lors de la charge et négatif lors de la décharge
+    - name: APF Battery Entity
+      unique_id: apf_battery_entity
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: "{{ (0 - states('sensor.mp2_puissance_batteries')|float(0)*1)|int(0) }}"
+
+# Nécessaire pour réduire le code plus tard
+    - name: APF Grid Import
+      unique_id: apf_grid_import
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_grid_entity')|int(default=0) < 0 %}
+          {{ states('sensor.apf_grid_entity')|int(default=0)|abs }}
+        {% else %}
+          0
+        {% endif %}
+
+# Consommation de l'onduleur et pertes de puissance dues aux transferts de l'onduleur et aux conversions de puissance (AC/DC)
+# exclut les erreurs d'arrondi rendues pires par le fait que certains onduleurs arrondissent toutes les lectures de capteurs à INT
+# Parfois, cela peut être négatif, probablement en raison d'erreurs cumulatives dans des lectures de puissance pas si précises.
+    - name: APF Inverter Power Consumption
+      unique_id: apf_inverter_power_consumption
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: "{{ states('sensor.apf_generation_entity')|int(default=0) - states('sensor.apf_battery_entity')|int(default=0) - states('sensor.apf_house_entity')|int(default=0) - states('sensor.apf_grid_entity')|int(default=0) }}"
+
+# La charge réelle de la maison comprend la consommation de l'onduleur et les conversions et pertes de transfert et les erreurs d'arrondi.
+# Il n'a jamais été logique que la puissance entrante ne soit parfois pas égale à la puissance sortante. Cela corrige le problème !
+    - name: APF Real House Load
+      unique_id: apf_real_house_load
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: "{{ states('sensor.apf_house_entity')|int(default=0) + states('sensor.apf_inverter_power_consumption')|int(default=0) }}"
+      icon: mdi:home-lightning-bolt
+
+    - name: APF Grid2House
+      unique_id: apf_grid2house
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state:  >
+        {% if states('sensor.apf_grid_import')|int(default=0) > states('sensor.apf_real_house_load')|int(default=0) %}
+          {{ states('sensor.apf_real_house_load')|int(default=0) }}
+        {% else %}
+          {{ states('sensor.apf_grid_import')|int(default=0) }}
+        {% endif %}
+
+    - name: APF Grid2Batt
+      unique_id: apf_grid2batt
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_grid_import')|int(default=0) > states('sensor.apf_real_house_load')|int(default=0) %}
+          {{ states('sensor.apf_grid_import')|int(default=0) - states('sensor.apf_real_house_load')|int(default=0) }}
+        {% else %}
+          0
+        {% endif %}
+
+    - name: APF Batt2House
+      unique_id: apf_batt2house
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_battery_entity')|int(default=0) < 0 %}
+          {% if states('sensor.apf_battery_entity')|int(default=0)|abs > states('sensor.apf_real_house_load')|int(default=0) %}
+            {{ states('sensor.apf_real_house_load')|int(default=0) }}
+          {% else %}
+            {{ states('sensor.apf_battery_entity')|int(default=0)|abs }}
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+
+# Cela peut s'appeler house to grid et peut se produire dans de rares circonstances,
+# comme quand l'onduleur n'est pas capable de faire un réglage précis de puissance assez vite
+# ou quand on veut forcer une décharge de la batterie ou autre...
+# Mais cela ne se produit qu'avec des utilisateurs de batterie ou d'autres groupes électrogènes.
+    - name: APF Batt2Grid
+      unique_id: apf_batt2grid
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_battery_entity')|int(default=0) < 0 %}
+          {% if states('sensor.apf_battery_entity')|int(default=0)|abs > states('sensor.apf_real_house_load')|int(default=0) %}
+            {{ states('sensor.apf_battery_entity')|int(default=0)|abs - states('sensor.apf_real_house_load')|int(default=0) }}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+
+    - name: APF Solar2Grid
+      unique_id: apf_solar2grid
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_grid_entity')|int(default=0) > states('sensor.apf_batt2grid')|int(default=0) %}
+          {{ states('sensor.apf_grid_entity')|int(default=0) - states('sensor.apf_batt2grid')|int(default=0) }}
+        {% else %}
+          0
+        {% endif %}
+
+    - name: APF Solar2House
+      unique_id: apf_solar2house
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_generation_entity')|int(default=0) > 0 and states('sensor.apf_real_house_load')|int(default=0) > states('sensor.apf_batt2house')|int(default=0) + states('sensor.apf_grid_import')|int(default=0) %}
+          {% if states('sensor.apf_generation_entity')|int(default=0) > states('sensor.apf_real_house_load')|int(default=0) - states('sensor.apf_batt2house')|int(default=0) - states('sensor.apf_grid2house')|int(default=0) %}
+            {{ states('sensor.apf_real_house_load')|int(default=0) - states('sensor.apf_batt2house')|int(default=0) - states('sensor.apf_grid2house')|int(default=0) }}
+          {% else %}
+            {{ states('sensor.apf_generation_entity')|int(default=0) }}
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+
+    - name: APF Solar2Batt
+      unique_id: apf_solar2batt
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+      state: >
+        {% if states('sensor.apf_generation_entity')|int(default=0) > 0 and states('sensor.apf_battery_entity')|int(default=0) > 0 %}
+          {% if states('sensor.apf_battery_entity')|int(default=0) > states('sensor.apf_grid2batt')|int(default=0) %}
+            {% if states('sensor.apf_generation_entity')|int(default=0) - states('sensor.apf_solar2house')|int(default=0) > states('sensor.apf_battery_entity')|int(default=0) - states('sensor.apf_grid2batt')|int(default=0) %}
+              {{ states('sensor.apf_battery_entity')|int(default=0) - states('sensor.apf_grid2batt')|int(default=0) }}
+            {% else %}
+              {{ states('sensor.apf_generation_entity')|int(default=0) - states('sensor.apf_solar2house')|int(default=0) - states('sensor.apf_solar2grid')|int(default=0) }}
+            {% endif %}
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}

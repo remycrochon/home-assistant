@@ -175,58 +175,8 @@ template:
       state_class: "total"  
 
 
-###########################################################
 
 
-# Puissance produite en surplus et injectée dans l'ECS en mode PV en W 
-    - name: puissance_ecs_surplus_injectee_w
-      unique_id: "puissance_ecs_surplus_injectee_w"
-      device_class: "power"
-      state_class: "measurement"    
-      unit_of_measurement: "W"
-      state: >-
-        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set prod=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
-        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
-        {% if (pu_ecs>0) and (prod>10) and (rel_ecs=="on")%}          
-          {{ pu_ecs }}
-        {%else%}
-          0
-        {%endif%}
-
-
-# Puissance produite en surplus et injectée dans l'ECS en mode PV en kW 
-
-    - name: puissance_ecs_surplus_injectee
-      unique_id: "puissance_ecs_surplus_injectee"
-      device_class: "power"
-      state_class: "measurement"    
-      unit_of_measurement: "kW"
-      state: >-
-        {% set a=states('sensor.puissance_ecs_surplus_injectee_w')|float(default=0) %}
-        {% if (a>0) %}          
-          {{ a/1000 }}
-        {%else%}
-          0
-        {%endif%}
-
-# Puissance disponible sans routeur ecs
-# Utilisé dans esp141-affichage_pv
-    - name: puissance_dispo_sans ecs
-      unique_id: "puissance_dispo_sans_ecs"
-      device_class: "power"
-      state_class: "measurement"    
-      unit_of_measurement: "W"
-      state: >-
-        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set prod=states('sensor.envoy_122103023124_current_power_production')|float(default=0) %}
-        {% set conso = states('sensor.envoy_122103023124_today_s_energy_consumption') | float(default=0) | round(2) %}        
-        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
-        {% if (prod>conso) and (pu_ecs>0) and (rel_ecs=="on")%}          
-          {{ prod-conso+pu_ecs }}
-        {%else%}
-          0
-        {%endif%}
 
 
 

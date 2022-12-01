@@ -145,7 +145,7 @@ display:
     reset_pin: GPIO23
     rotation: 270
     lambda: |-
-      it.printf(0, 0, id(arial25),"Link:%.0f W",id(grid).state);
+      it.printf(0, 0, id(arial25),"Gtrid:%.0f W",id(grid).state);
       it.printf(0, 30, id(arial25),"Mais:%.0f W",id(house).state);
       it.printf(0, 60, id(arial25),"Prod:%.0f W",id(prod).state);
       it.printf(0, 90, id(arial25),"Batt:%.0f W",id(batt).state);

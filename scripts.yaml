@@ -420,13 +420,36 @@ volets_bureau:
   mode: single
   icon: mdi:window-shutter-open
 ouverture_volets_chamb_nord:
-  alias: 1_1_2 Ouverture Volets Chamb Nord
+  alias: 1_1_1 Ouverture Volets Chamb Nord
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_nord
     state: 'off'
-  - service: script.0_0_1_ouverture_volet_ami_nord
+  - service: cover.stop_cover
     data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_amis_nord_p
   mode: single
   icon: mdi:window-shutter-open
 ouverture_volet_chamb_sud:
@@ -1065,7 +1088,7 @@ ouverture_volet_bureau_droit:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 10
       milliseconds: 0
   - service: cover.close_cover
     data: {}
@@ -1074,7 +1097,7 @@ ouverture_volet_bureau_droit:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 10
       milliseconds: 0
   - service: cover.open_cover
     data: {}
@@ -1118,7 +1141,7 @@ ouverture_volet_bureau_droit:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 10
       milliseconds: 0
   - service: cover.open_cover
     data: {}
@@ -1128,38 +1151,9 @@ ouverture_volet_bureau_droit:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 10
       milliseconds: 0
   - service: cover.close_cover
-    data: {}
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
-  mode: single
-0_0_1_ouverture_volet_ami_nord:
-  alias: 1_1_1 Ouverture Volet ami nord
-  sequence:
-  - service: cover.stop_cover
-    data: {}
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    data: {}
-    target:
-      entity_id:
-      - cover.volet_amis_nord_p
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
     data: {}
     target:
       entity_id:
@@ -1205,7 +1199,7 @@ ouverture_volet_bureau_droit:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 9
       milliseconds: 0
   - service: cover.close_cover
     data: {}
@@ -1215,7 +1209,7 @@ ouverture_volet_bureau_droit:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 10
       milliseconds: 0
   - service: cover.open_cover
     data: {}

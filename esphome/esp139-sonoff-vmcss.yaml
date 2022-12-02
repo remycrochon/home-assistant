@@ -1,8 +1,8 @@
 esphome:
   name: esp139-sonoff-vmcss
   platform: ESP8266
-  board: esp01_1m
-
+  board: d1_mini
+  
 wifi:
   networks:
     - ssid: !secret wifi_mi4
@@ -51,7 +51,7 @@ binary_sensor:
 switch:
   - platform: gpio
     name: "vmc_ssol"
-    pin: GPIO12
+    pin: D1
     id: relay
     
   - platform: restart

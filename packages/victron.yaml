@@ -28,7 +28,6 @@ modbus:
       # Status bus VE
       # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
       # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
-
       - name: "MP2 Status bus VE"
         unique_id: "mp2_status_bus_ve"
         slave: 227
@@ -288,6 +287,19 @@ template:
             {%endif%}
         {% endfor %} 
 
+    # Affichage Status charge batteries
+    # 0=idle;1=charging;2=discharging
+    - name: "Mp2 Affichage Status Charge Batteries"
+      unique_id: "mp2_affichage_status_charge_batteries"
+      state: >-
+        {% set st = states('sensor.mp2_status_batteries') | int(default=0) %}
+        {% for num, text in [(0, 'Off'), (1, 'Charge'),(2, 'DeCharge')
+                ] %}
+            {% if st == num %}
+              {{ text }}
+            {%endif%}
+        {% endfor %} 
+
     # Puissance batteries
     - name: "MP2 Pu charge batterie"
       unique_id: "mp2_pu_charge_batterie"
@@ -306,20 +318,6 @@ template:
         {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float(default=0)) }}
 
 
-    # Calcul Affichage Prod dans la carte Tesla
-
-        
-    - name:  MP2 affichage import export
-      unique_id: mp2_affichage_import_export
-      state:  >
-        {%set grid=states('sensor.mp2_grid_l1')|int%}
-        {% if grid> 0 %}
-          Import
-        {% else %}
-          Export
-        {% endif %}
-        
-
 #
 # Modèles pour les diagrammes de transfert de Powerflow réel (APF - PowerFlow réel)
 #
@@ -337,7 +335,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (0 - states('sensor.mp2_grid_l1')|float(0)*1)|int(0) }}"
+      state: "{{ (states('sensor.mp2_grid_l1')|float(0)*-1)|int(0) }}"
 
 # le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
     - name: APF House Entity
@@ -361,7 +359,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (0 - states('sensor.mp2_puissance_batteries')|float(0)*1)|int(0) }}"
+      state: "{{ (states('sensor.mp2_puissance_batteries')|float(0)*1)|int(0) }}"
 
 # Nécessaire pour réduire le code plus tard
     - name: APF Grid Import
@@ -503,3 +501,15 @@ template:
         {% else %}
           0
         {% endif %}
+
+    # Affichage "Import/Export" carte Tesla
+    - name:  MP2 affichage import export
+      unique_id: mp2_affichage_import_export
+      state:  >
+        {%set grid=states('sensor.mp2_grid_l1')|int%}
+        {% if grid> 0 %}
+          Import
+        {% else %}
+          Export
+        {% endif %}
+        

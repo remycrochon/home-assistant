@@ -35,6 +35,17 @@ modbus:
         data_type: uint16
         scale: 1
 
+        # PV - AC-coupled on input L1
+      - name: "MP2 PC AC Couplet on L1"
+        unique_id: "mp2_pv_ac_coupled_on_l1"
+        data_type: uint16
+        unit_of_measurement: "W"
+        slave: 100
+        address: 811
+        scale: 1
+        device_class: power
+        state_class: measurement
+
         # AC Consumption L1
       - name: "MP2 Conso AC L1"
         unique_id: "mp2_conso_ac_l1"
@@ -131,6 +142,28 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # Point de consigne ESS
+      - name: 'MP2 ESS Minimum SoC Consigne'
+        unique_id: 'mp2_ess_minimum_soc_consigne'
+        unit_of_measurement: "%"
+        data_type: uint16
+        slave: 100
+        address: 2901
+        scale: 0.1
+
+        # P max Alim System 
+      - name: 'MP2 P Max alim System'
+        unique_id: 'mp2_p_max_alim_system'
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        slave: 100
+        address: 2700
+        data_type: int16
+        # command_on: 4000
+        # command_off: 40
+        # verify_state: false
+
 # Modbus Smart Shunt
         # State of charge - SOC
         # Smart Shunt
@@ -191,7 +224,6 @@ modbus:
         address: 289
         scale: 100
 
-
       # Energy Décharge
       - name: "MP2 Energy décharge batteries"
         unique_id: "mp2_energy_decharge_batteries"
@@ -234,6 +266,13 @@ modbus:
         device_class: power
         state_class: measurement
 
+      # Alarme Réseau Perdu
+      - name : 'Alarme perte réseau' 
+        unique_id: 'mp2_alarme_perte_reseau'
+        unit_of_measurement : "marche/arrêt" 
+        slave : 227 
+        address : 64   
+
 # Energie
       # Energy from AC-In 1 to AC-out
       - name: "MP2 Energy from AC-In 1 to AC-out"
@@ -266,9 +305,20 @@ modbus:
         state_class: "total"
 
 
-
 template:
   - sensor:
+
+    # Affichage Ac Load
+    - name: MP2_ac_loads
+      unique_id: "mp2_ac_loads"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set l1=states('sensor.mp2_conso_ac_l1')|int(default=0)%}
+        {% set out1=states('sensor.mp2_puissance_sortie_1')|int(default=0)%}
+        {{ l1-out1 }}
+  
     # Affichage Status bus VE
       # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
       # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
@@ -317,7 +367,6 @@ template:
       state: >-
         {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float(default=0)) }}
 
-
 #
 # Modèles pour les diagrammes de transfert de Powerflow réel (APF - PowerFlow réel)
 #
@@ -335,7 +384,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_grid_l1')|float(0)*-1)|int(0) }}"
+      state: "{{ (states('sensor.mp2_grid_l1')|float(default=0)*-1)|int(default=0) }}"
 
 # le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
     - name: APF House Entity
@@ -343,7 +392,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_conso_ac_l1')|float(0)*1)|int(0) }}"
+      state: "{{ (states('sensor.mp2_conso_ac_l1')|float(default=0)*1)|int(default=0) }}"
 
 # le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
     - name: APF Generation Entity
@@ -351,7 +400,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.envoy_122103023124_current_power_production')|float(0)*1)|int(0) }}"
+      state: "{{ (states('sensor.envoy_122103023124_current_power_production')|float(default=0)*1)|int(default=0) }}"
 
 # le capteur de batterie doit être positif lors de la charge et négatif lors de la décharge
     - name: APF Battery Entity
@@ -359,7 +408,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_puissance_batteries')|float(0)*1)|int(0) }}"
+      state: "{{ (states('sensor.mp2_puissance_batteries')|float(default=0)*1)|int(default=0) }}"
 
 # Nécessaire pour réduire le code plus tard
     - name: APF Grid Import

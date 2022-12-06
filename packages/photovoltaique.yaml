@@ -90,8 +90,9 @@ template:
       state: >-
         {% set import = states('sensor.envoy_energie_soutiree_reseau_jour') | int(default=0) %}
         {% set export = states('sensor.envoy_energie_injectee_reseau_jour') | int(default=0) %}
+        {% set dech_bat = states('sensor.mp2_energy_decharge_batteries_jour') | int(default=0) %}
         {% set prod = states('sensor.envoy_energie_totale_produite_jour') | int(default=0) %}
-        {{ prod + import - export }}
+        {{ prod + import + dech_bat - export }}
 
 # Envoy: Convertion en kWh de la consommation energie jour
     - name: "Envoy Energie Totale Consommée Jour"

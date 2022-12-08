@@ -576,13 +576,15 @@
     from: HP..
     to: HC..
     id: HP-HC
-  - platform: numeric_state
-    entity_id: sensor.esp126_temp_ecs
+  - platform: template
+    value_template: "      {% set temp=states('sensor.esp126_temp_ecs') | float %}\n
+      \     {% set sbas=states('input_number.ecs_seuil_bas_temp') | float %}\n      {{
+      temp < sbas }}"
     id: t_bas
-    below: 40
-  - platform: numeric_state
-    entity_id: sensor.esp126_temp_ecs
-    above: 45
+  - platform: template
+    value_template: "      {% set temp=states('sensor.esp126_temp_ecs') | float %}\n
+      \     {% set shaut=states('input_number.ecs_seuil_bas_haut') | float %}\n      {{
+      temp > shaut }}"
     id: t_haut
   - platform: state
     entity_id:
@@ -608,7 +610,7 @@
         after: sunset
       - condition: numeric_state
         entity_id: sensor.esp126_temp_ecs
-        below: 40
+        below: input_number.ecs_seuil_bas_temp
       - condition: state
         entity_id: sensor.linky_ptec
         state: HC..
@@ -625,7 +627,7 @@
           id: HC-HP
         - condition: numeric_state
           entity_id: sensor.esp126_temp_ecs
-          above: 45
+          above: input_number.ecs_seuil_haut_temp
       - condition: sun
         before: sunrise
         after: sunset

@@ -577,14 +577,21 @@
     to: HC..
     id: HP-HC
   - platform: template
-    value_template: "      {% set temp=states('sensor.esp126_temp_ecs') | float %}\n
-      \     {% set sbas=states('input_number.ecs_seuil_bas_temp') | float %}\n      {{
-      temp < sbas }}"
+    value_template: '{% set temp=states(''sensor.esp126_temp_ecs'') | float(default=0)
+      %}
+
+      {% set sbas=states(''input_number.ecs_seuil_bas_temp'') | float(default=0) %}
+
+      {{ temp < sbas }}'
     id: t_bas
   - platform: template
-    value_template: "      {% set temp=states('sensor.esp126_temp_ecs') | float %}\n
-      \     {% set shaut=states('input_number.ecs_seuil_bas_haut') | float %}\n      {{
-      temp > shaut }}"
+    value_template: '{% set temp=states(''sensor.esp126_temp_ecs'') | float (default=0)
+      %}
+
+      {% set shaut=states(''input_number.ecs_seuil_haut_temp'') | float(default=0)
+      %}
+
+      {{ temp > shaut }}'
     id: t_haut
   - platform: state
     entity_id:

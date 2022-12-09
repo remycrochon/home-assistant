@@ -15,27 +15,52 @@ modbus:
           address: 33
           state_on: 3
           state_off: 4
+
     sensors:
-      # SYSTEM
-      # Switch Position
-      # 1=Charger Only;2=Inverter Only;3=On;4=Off
-      - name: "MP2 position Inter"
-        slave: 227
-        address: 33
+# Compteur PV ET112
+      # Battery Voltage (System)
+      - name: "MP2 Tension PV"
+        unique_id: "mp2_tension_pv"
         data_type: uint16
-        scale: 1
+        unit_of_measurement: "V"
+        slave: 32
+        address: 1027
+        scale: 0.1
+        device_class: voltage
+        state_class: measurement
 
-      # Status bus VE
-      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
-      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
-      - name: "MP2 Status bus VE"
-        unique_id: "mp2_status_bus_ve"
-        slave: 227
-        address: 31
+      - name: "MP2 Intensité PV"
+        unique_id: "mp2_intensite_pv"
+        data_type: int16
+        unit_of_measurement: "A"
+        slave: 32
+        address: 1028
+        scale: 0.1
+        device_class: current
+        state_class: measurement
+
+      - name: "MP2 Prod PV"
+        unique_id: "mp2_prod_pv"
         data_type: uint16
+        unit_of_measurement: "W"
+        slave: 32
+        address: 1029
         scale: 1
+        device_class: power
+        state_class: measurement
 
-        # PV - AC-coupled on input L1
+      - name: "MP2 Energy PV"
+        unique_id: "mp2_energy_pv"
+        data_type: uint16
+        slave: 32
+        address: 1030
+        scale: 0.01
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+# Multiplus 2
+      # PV - AC-coupled on input L1
       - name: "MP2 PC AC Couplet on L1"
         unique_id: "mp2_pv_ac_coupled_on_l1"
         data_type: uint16
@@ -46,7 +71,7 @@ modbus:
         device_class: power
         state_class: measurement
 
-        # AC Consumption L1
+      # AC Consumption L1
       - name: "MP2 Conso AC L1"
         unique_id: "mp2_conso_ac_l1"
         data_type: uint16
@@ -255,6 +280,7 @@ modbus:
         scale: 100
 
 # Modbus MP2
+
       # DC System Power
       - name: "MP2 Puissance Sortie 1"
         unique_id: "mp2_puissance_sortie_1"
@@ -271,8 +297,26 @@ modbus:
         unique_id: 'mp2_alarme_perte_reseau'
         unit_of_measurement : "marche/arrêt" 
         slave : 227 
-        address : 64   
+        address : 64
 
+      # SYSTEM
+      # Switch Position
+      # 1=Charger Only;2=Inverter Only;3=On;4=Off
+      - name: "MP2 position Inter"
+        slave: 227
+        address: 33
+        data_type: uint16
+        scale: 1
+
+      # Status bus VE
+      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
+      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
+      - name: "MP2 Status bus VE"
+        unique_id: "mp2_status_bus_ve"
+        slave: 227
+        address: 31
+        data_type: uint16
+        scale: 1
 # Energie
       # Energy from AC-In 1 to AC-out
       - name: "MP2 Energy from AC-In 1 to AC-out"
@@ -303,7 +347,6 @@ modbus:
         unit_of_measurement: "kWh"
         device_class: "energy"
         state_class: "total"
-
 
 template:
   - sensor:

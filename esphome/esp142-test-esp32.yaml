@@ -9,6 +9,8 @@ esphome:
   platform: ESP32
   board: lolin_d32
 
+
+
 wifi:
   networks:
     - ssid: !secret wifi_mi4
@@ -30,7 +32,8 @@ wifi:
 
 # Enable logging
 logger:
-
+    level: VERBOSE
+    baud_rate: 0
 # Enable Home Assistant API
 api:
   services:
@@ -44,6 +47,25 @@ api:
 ota:
 web_server:
   port: 80
+
+uart:
+  id: mod_bus
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+  baud_rate: 9600
+  stop_bits: 1
+
+modbus:
+  flow_control_pin: 5
+  id: modbus1
+
+modbus_controller:
+  - id: epever
+    ## the Modbus device addr
+    address: 0x1
+    modbus_id: modbus1
+    setup_priority: -10
+
 
 output:
   - platform: esp32_dac
@@ -78,6 +100,15 @@ climate:
       kd: 0.0
 
 sensor:
+  - platform: modbus_controller
+    modbus_controller_id: epever
+    name: "tension"
+    id: battery_capacity
+    register_type: holding
+    address: 0x0009
+    unit_of_measurement: "V"
+    value_type: U_WORD
+    
   - platform: pid
     name: "PID PV Result"
     type: RESULT
@@ -182,3 +213,4 @@ text_sensor:
   - platform: version
     id: text_sensor_version
     name: "${friendly_name} ESPHome Version"
+    

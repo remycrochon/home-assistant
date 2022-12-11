@@ -17,8 +17,8 @@ modbus:
           state_off: 4
 
     sensors:
-# Compteur PV ET112
-      # Battery Voltage (System)
+# Compteur PhotoVoltaique ET112-2
+      # 
       - name: "MP2 Tension PV"
         unique_id: "mp2_tension_pv"
         data_type: uint16
@@ -280,6 +280,35 @@ modbus:
         scale: 100
 
 # Modbus MP2
+      - name: "MP2 Tension Entrée L1"
+        unique_id: "mp2_tension_entree_l1"
+        data_type: uint16
+        unit_of_measurement: "V"
+        slave: 227
+        address: 3
+        scale: 0.1
+        device_class: voltage
+        state_class: measurement
+
+      - name: "MP2 Intensité Entrée L1"
+        unique_id: "mp2_intensite_entree_l1"
+        data_type: int16
+        unit_of_measurement: "A"
+        slave: 227
+        address: 6
+        scale: 0.1
+        device_class: current
+        state_class: measurement
+
+      - name: "MP2 Fréquence Entrée L1"
+        unique_id: "mp2_frequence_entree_l1"
+        data_type: int16
+        unit_of_measurement: "Hz"
+        slave: 227
+        address: 9
+        scale: 0.01
+        device_class: frequency
+        state_class: measurement
 
       # DC System Power
       - name: "MP2 Puissance Sortie 1"
@@ -290,6 +319,36 @@ modbus:
         address: 23
         scale: 10
         device_class: power
+        state_class: measurement
+
+      - name: "MP2 Tension Sortie L1"
+        unique_id: "mp2_tension_sortie_l1"
+        data_type: uint16
+        unit_of_measurement: "V"
+        slave: 227
+        address: 15
+        scale: 0.1
+        device_class: voltage
+        state_class: measurement
+
+      - name: "MP2 Intensité Sortie L1"
+        unique_id: "mp2_intensite_sortie_l1"
+        data_type: int16
+        unit_of_measurement: "A"
+        slave: 227
+        address: 18
+        scale: 0.1
+        device_class: current
+        state_class: measurement
+
+      - name: "MP2 Fréquence Sortie"
+        unique_id: "mp2_frequence_sortie"
+        data_type: int16
+        unit_of_measurement: "Hz"
+        slave: 227
+        address: 21
+        scale: 0.01
+        device_class: frequency
         state_class: measurement
 
       # Alarme Réseau Perdu

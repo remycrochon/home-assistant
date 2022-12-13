@@ -7,7 +7,7 @@ homeassistant:
   packages: !include_dir_named packages
   external_url: !secret external-url
   internal_url: !secret internal-url
-  #country: FR
+  country: FR
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
@@ -173,9 +173,6 @@ influxdb:
       - persistent_notification
       - person
 
-
-
-
 # Notification dans Telegram 
 telegram_bot:
   - platform: polling
@@ -188,9 +185,6 @@ notify:
     platform: telegram
     chat_id: !secret id_telegram_remy
 
-  - platform: pushbullet
-    api_key: !secret pushbullet_api_key
-    name: pushbullet
 
 # Notification dans les fichiers
   - name: log_energy
@@ -203,10 +197,6 @@ notify:
     filename: conso_piscine.csv
     timestamp: True
 
-livebox:
-  host: 192.168.0.1
-  username: !secret user_livebox
-  password: !secret mdp_livebox
   
 #owntracks:
 #  max_gps_accuracy: 200

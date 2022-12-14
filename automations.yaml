@@ -2490,3 +2490,105 @@
         }}'
       title: Conso Electrique du jour en kWh
   mode: single
+- id: '1670917693978'
+  alias: 9_1_1 Thermostat  Chambre Nord
+  description: PID Chauffage
+  use_blueprint:
+    path: argonaute199/thermostat_tpi.yaml
+    input:
+      coeff_c: 0.6
+      coeff_t: 0.01
+      entity_temp_ext: sensor.vp2_temp_out
+      entity_temp_int: sensor.chambre_nord_temperature
+      entity_puissance: input_number.affichage_puissance_chauffe_chambre_nord
+      entity_fenetre: binary_sensor.detecteur_porte_entree
+      entity_consigne: input_number.consigne_temperature_chambre_nord
+      entity_chauffage: switch.esp147_relais
+- id: '1670919556060'
+  alias: 9_1_0 Pilotage Chauffage Chambre Nord
+  description: Affectation consigne
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.mode_chauffage_chambre_nord
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_chauffage_chambre_nord
+        state: Present
+      sequence:
+      - service: input_number.set_value
+        data:
+          value: 19
+        target:
+          entity_id: input_number.consigne_temperature_chambre_nord
+      - service: automation.turn_on
+        data: {}
+        target:
+          entity_id: automation.thermostat_chambre_nord
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_chauffage_chambre_nord
+        state: Eco
+      sequence:
+      - service: input_number.set_value
+        data:
+          value: 17
+        target:
+          entity_id: input_number.consigne_temperature_chambre_nord
+      - service: automation.turn_on
+        data: {}
+        target:
+          entity_id: automation.thermostat_chambre_nord
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_chauffage_chambre_nord
+        state: Arret
+      sequence:
+      - service: automation.turn_off
+        data: {}
+        target:
+          entity_id: automation.thermostat_chambre_nord
+  mode: single
+- id: '1670934948268'
+  alias: 6_1_4 MP2 Affection puissance reduite decharge batterie
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    from: HC..
+    to: HP..
+    id: HC-HP
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    from: HP..
+    to: HC..
+    id: HP-HC
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: HC-HP
+      sequence:
+      - service: modbus.write_register
+        data:
+          address: 2704
+          slave: 100
+          hub: cerbo
+          value: 250
+    - conditions:
+      - condition: trigger
+        id: HP-HC
+      sequence:
+      - service: modbus.write_register
+        data:
+          address: 2704
+          slave: 100
+          hub: cerbo
+          value: 5
+  mode: single

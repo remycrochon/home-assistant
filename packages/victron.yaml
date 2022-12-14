@@ -167,16 +167,7 @@ modbus:
         device_class: power
         state_class: measurement
 
-      # Point de consigne ESS
-      - name: 'MP2 ESS Minimum SoC Consigne'
-        unique_id: 'mp2_ess_minimum_soc_consigne'
-        unit_of_measurement: "%"
-        data_type: uint16
-        slave: 100
-        address: 2901
-        scale: 0.1
-
-        # P max Alim System 
+      # P max Alim System 
       - name: 'MP2 P Max alim System'
         unique_id: 'mp2_p_max_alim_system'
         unit_of_measurement: "W"
@@ -185,9 +176,26 @@ modbus:
         slave: 100
         address: 2700
         data_type: int16
-        # command_on: 4000
-        # command_off: 40
-        # verify_state: false
+
+      # ESS Puissance decharge maximum
+      - name: 'MP2 ESS Puissance Decharge Max'
+        unique_id: 'mp2_ess_puissance_decharge_maximum'
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        data_type: uint16
+        slave: 100
+        address: 2704
+        scale: 10
+
+      # Point de consigne ESS
+      - name: 'MP2 ESS Minimum SoC Consigne'
+        unique_id: 'mp2_ess_minimum_soc_consigne'
+        unit_of_measurement: "%"
+        data_type: uint16
+        slave: 100
+        address: 2901
+        scale: 0.1
 
 # Modbus Smart Shunt
         # State of charge - SOC

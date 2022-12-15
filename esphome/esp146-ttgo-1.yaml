@@ -68,22 +68,22 @@ sensor:
 
 # Lecture dans HA
   - platform: homeassistant
-    name: "Prod"
+    name: "${friendly_name}_Prod"
     entity_id: sensor.envoy_122103023124_current_power_production
     id: prod
     
   - platform: homeassistant
-    name: "Conso"
+    name: "${friendly_name}_Conso_grid"
     entity_id: sensor.mp2_grid_l1
     id: grid
 
   - platform: homeassistant
-    name: "Conso"
+    name: "${friendly_name}_Conso_ac"
     entity_id: sensor.mp2_conso_ac_l1
     id: house
 
   - platform: homeassistant
-    name: "Conso"
+    name: "${friendly_name}_Pu_Batteries"
     entity_id: sensor.mp2_puissance_batteries
     id: batt
 

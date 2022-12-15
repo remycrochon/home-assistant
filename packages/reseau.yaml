@@ -66,6 +66,10 @@ binary_sensor:
     host: 192.168.0.101
     name: "ping_Module Wago Piscine"
 
+  - platform: ping
+    host: 192.168.0.102
+    name: "ping_Module Wago Chalet"
+
 #  - platform: ping
 #    host: 192.168.0.121
 #    name: "ping_Arduino Piscine"
@@ -107,6 +111,7 @@ binary_sensor:
       - binary_sensor.esp140_status
       - binary_sensor.esp142_status
       - binary_sensor.esp145_status
+      - binary_sensor.esp147_status
       - binary_sensor.test_reseau
 
   - platform: group

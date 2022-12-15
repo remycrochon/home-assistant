@@ -3,36 +3,36 @@
 # Les puissances sont converties en kwh dans "entrée"
 sensor:
   - platform: command_line
-    name: "EcoCompteur ECS"  
-    unique_id: "ecocompteur_ecs"
+    name: "EcoCompteur ECS_0"  
+    unique_id: "ecocompteur_ecs_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur WC"
-    unique_id: "ecocompteur_wc"
+    name: "EcoCompteur WC_0"
+    unique_id: "ecocompteur_wc_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data2'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur PAC"
-    unique_id: "ecocompteur_pac"
+    name: "EcoCompteur PAC_0"
+    unique_id: "ecocompteur_pac_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data3'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur Clim"
-    unique_id: "ecocompteur_clim"
+    name: "EcoCompteur Clim_0"
+    unique_id: "ecocompteur_clim_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data4'
     scan_interval: 60
     unit_of_measurement: W
 
   - platform: command_line
-    name: "EcoCompteur VMC Niv0 brut"
-    unique_id: "ecocompteur_vmc_niv0_brut"
+    name: "EcoCompteur VMC Niv0 brut_0"
+    unique_id: "ecocompteur_vmc_niv0_brut_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
     scan_interval: 60
     unit_of_measurement: W
@@ -44,6 +44,46 @@ sensor:
     scan_interval: 120
     unit_of_measurement: s
 
+# Conversion Puissance Eco Compteur en W/Device_classe/State_class
+template:
+  - sensor:
+    - name: "EcoCompteur ECS"
+      unique_id: "ecocompteur_ecs"
+      state: >-
+        {{ states('sensor.ecocompteur_ecs_0') | float(default=0) | round(2) }}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"
 
+    - name: "EcoCompteur WC"
+      unique_id: "ecocompteur_wc"
+      state: >-
+        {{ states('sensor.ecocompteur_wc_0') | float(default=0) | round(2) }}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"        
 
+    - name: "EcoCompteur PAC"
+      unique_id: "ecocompteur_pac"
+      state: >-
+        {{ states('sensor.ecocompteur_pac_0') | float(default=0) | round(2) }}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"
+
+    - name: "EcoCompteur Clim"
+      unique_id: "ecocompteur_clim"
+      state: >-
+        {{ states('sensor.ecocompteur_clim_0') | float(default=0) | round(2) }}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"  
+
+    - name: "EcoCompteur VMC Niv0 brut"
+      unique_id: "ecocompteur_vmc_niv0_brut"
+      state: >-
+        {{ states('sensor.ecocompteur_vmc_niv0_brut_0') | float(default=0) | round(2) }}
+      unit_of_measurement: "W"
+      device_class: "power"
+      state_class: "measurement"  
 

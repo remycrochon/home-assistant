@@ -17,7 +17,31 @@ modbus:
           state_off: 4
 
     sensors:
-# Compteur PhotoVoltaique ET112-2
+# Compteur PhotoVoltaique ET112-1 - GRID METER
+# Energie
+      # Energy 
+      - name: "MP2 Energy Total Energy from net"
+        unique_id: "mp2_total_energy_from_net"
+        data_type: uint32
+        slave: 31
+        address: 2634
+        scale: 0.01
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+      # Energy 
+      - name: "MP2 Energy Total Energy to net"
+        unique_id: "mp2_total_energy_to_net"
+        data_type: uint32
+        slave: 31
+        address: 2636
+        scale: 0.01
+        unit_of_measurement: "kWh"
+        device_class: "energy"
+        state_class: "total"
+
+# Compteur PhotoVoltaique ET112-2 - PVMETER
       # 
       - name: "MP2 Tension PV"
         unique_id: "mp2_tension_pv"
@@ -39,8 +63,8 @@ modbus:
         device_class: current
         state_class: measurement
 
-      - name: "MP2 Prod PV"
-        unique_id: "mp2_prod_pv"
+      - name: "MP2 Puissance Production PV"
+        unique_id: "mp2_puissance_production_pv"
         data_type: uint16
         unit_of_measurement: "W"
         slave: 32
@@ -49,11 +73,11 @@ modbus:
         device_class: power
         state_class: measurement
 
-      - name: "MP2 Energy PV"
-        unique_id: "mp2_energy_pv"
-        data_type: uint16
+      - name: "MP2 Energy Produite PV"
+        unique_id: "mp2_energy_produite_pv"
+        data_type: uint32
         slave: 32
-        address: 1030
+        address: 1046
         scale: 0.01
         unit_of_measurement: "kWh"
         device_class: "energy"
@@ -318,17 +342,6 @@ modbus:
         device_class: frequency
         state_class: measurement
 
-      # DC System Power
-      - name: "MP2 Puissance Sortie 1"
-        unique_id: "mp2_puissance_sortie_1"
-        data_type: int16
-        unit_of_measurement: "W"
-        slave: 227
-        address: 23
-        scale: 10
-        device_class: power
-        state_class: measurement
-
       - name: "MP2 Tension Sortie L1"
         unique_id: "mp2_tension_sortie_l1"
         data_type: uint16
@@ -359,21 +372,16 @@ modbus:
         device_class: frequency
         state_class: measurement
 
-      # Alarme Réseau Perdu
-      - name : 'Alarme perte réseau' 
-        unique_id: 'mp2_alarme_perte_reseau'
-        unit_of_measurement : "marche/arrêt" 
-        slave : 227 
-        address : 64
-
-      # SYSTEM
-      # Switch Position
-      # 1=Charger Only;2=Inverter Only;3=On;4=Off
-      - name: "MP2 position Inter"
+      # DC System Power
+      - name: "MP2 Puissance Sortie 1"
+        unique_id: "mp2_puissance_sortie_1"
+        data_type: int16
+        unit_of_measurement: "W"
         slave: 227
-        address: 33
-        data_type: uint16
-        scale: 1
+        address: 23
+        scale: 10
+        device_class: power
+        state_class: measurement
 
       # Status bus VE
       # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
@@ -384,36 +392,22 @@ modbus:
         address: 31
         data_type: uint16
         scale: 1
-# Energie
-      # Energy from AC-In 1 to AC-out
-      - name: "MP2 Energy from AC-In 1 to AC-out"
-        data_type: uint16
-        slave: 227
-        address: 74
-        scale: 0.01
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
 
-      # Energy from AC-out to AC-in 1 (reverse fed PV)
-      - name: "MP2 Energy from AC-out to AC-in 1"
-        data_type: uint16
+      # SYSTEM
+      # Switch Position
+      # 1=Charger Only;2=Inverter Only;3=On;4=Off
+      - name: "MP2 position Inter"
         slave: 227
-        address: 82
-        scale: 0.01
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
+        address: 33
+        data_type: uint16
+        scale: 1
 
-      # Energy from battery to AC-in 1
-      - name: "MP2 Energy from battery to AC-in 1"
-        data_type: uint16
-        slave: 227
-        address: 86
-        scale: 0.01
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
+      # Alarme Réseau Perdu
+      - name : 'Alarme perte réseau' 
+        unique_id: 'mp2_alarme_perte_reseau'
+        unit_of_measurement : "marche/arrêt" 
+        slave : 227 
+        address : 64
 
 template:
   - sensor:

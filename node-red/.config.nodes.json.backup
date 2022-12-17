@@ -475,7 +475,7 @@
     },
     "node-red-contrib-home-assistant-websocket": {
         "name": "node-red-contrib-home-assistant-websocket",
-        "version": "0.47.0",
+        "version": "0.47.1",
         "local": false,
         "user": false,
         "nodes": {
@@ -561,7 +561,7 @@
     },
     "node-red-contrib-modbus": {
         "name": "node-red-contrib-modbus",
-        "version": "5.23.3",
+        "version": "5.25.0",
         "local": false,
         "user": false,
         "nodes": {
@@ -791,7 +791,7 @@
     },
     "node-red-dashboard": {
         "name": "node-red-dashboard",
-        "version": "3.2.0",
+        "version": "3.2.3",
         "local": false,
         "user": false,
         "nodes": {
@@ -1513,6 +1513,36 @@
                 "user": false,
                 "module": "node-red-contrib-alexa-home",
                 "file": "/config/node-red/node_modules/node-red-contrib-alexa-home/alexa/alexa-home-controller.js"
+            }
+        }
+    },
+    "node-red-contrib-virtual-smart-home": {
+        "name": "node-red-contrib-virtual-smart-home",
+        "version": "3.0.6",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "vsh-connection": {
+                "name": "vsh-connection",
+                "types": [
+                    "vsh-connection"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-virtual-smart-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/connection.js"
+            },
+            "vsh-virtual-device": {
+                "name": "vsh-virtual-device",
+                "types": [
+                    "vsh-virtual-device"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-virtual-smart-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/virtual-device.js"
             }
         }
     }

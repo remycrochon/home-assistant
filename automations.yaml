@@ -2368,7 +2368,8 @@
     input:
       battery: sensor.tablette_niveau_charge
       charger: switch.pc2_tablette
-      low_percent: 20
+      low_percent: 30
+      charged_percent: 90
 - id: '1669802402697'
   alias: 1_2_4 ECS Validation Routeur sur SOC
   description: 'SOC < 97 : Routeur Inactif _ SOC>99: Routeur Actif'

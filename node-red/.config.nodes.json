@@ -1515,5 +1515,65 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-alexa-home/alexa/alexa-home-controller.js"
             }
         }
+    },
+    "node-red-contrib-virtual-smart-home": {
+        "name": "node-red-contrib-virtual-smart-home",
+        "version": "3.0.6",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "vsh-connection": {
+                "name": "vsh-connection",
+                "types": [
+                    "vsh-connection"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-virtual-smart-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/connection.js"
+            },
+            "vsh-virtual-device": {
+                "name": "vsh-virtual-device",
+                "types": [
+                    "vsh-virtual-device"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-virtual-smart-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/virtual-device.js"
+            }
+        }
+    },
+    "node-red-contrib-alexa-virtual-smarthome": {
+        "name": "node-red-contrib-alexa-virtual-smarthome",
+        "version": "0.0.31",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "alexa-adapter": {
+                "name": "alexa-adapter",
+                "types": [
+                    "alexa-adapter"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-virtual-smarthome",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-adapter.js"
+            },
+            "alexa-device": {
+                "name": "alexa-device",
+                "types": [
+                    "alexa-device"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-virtual-smarthome",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-device.js"
+            }
+        }
     }
 }

@@ -1,0 +1,17 @@
+{
+  "name": "smart-home",
+  "version": "1.0.0",
+  "description": "Smart Home Custom",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Claudio Chimera",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "ask-sdk-core": "^2.12.1",
+    "ask-sdk-model": "^1.38.3",
+    "axios": "^0.27.2",
+    "i18next": "^21.8.16"
+  }
+}

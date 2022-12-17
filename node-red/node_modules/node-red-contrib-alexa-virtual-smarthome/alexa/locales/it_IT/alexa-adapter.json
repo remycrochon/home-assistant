@@ -1,0 +1,53 @@
+{
+    "alexa-adapter": {
+        "name": "Alexa",
+        "label": {
+            "name": "Nome",
+            "username": "Nome Utente",
+            "password": "Password",
+            "skill_client_id": "ID Cliente della skill Alexa",
+            "skill_secret": "Segreto della skill Alexa",
+            "your_client_id": "Il tuo ID cliente",
+            "your_secret": "Il tuo sgreto",
+            "oa2_client_id": "ID Cliente",
+            "oa2_secret": "Segreto",
+            "port": "Porta del server HTTP",
+            "http_path": "Percorso del server HTTP",
+            "login_with_amazon": "Accedi con le credenziali di Amazon",
+            "secirity_profile_web_settings": "Impostazioni del profilo di sicurezza WEB",
+            "local_credentials": "Credenziali locali",
+            "http_server": "Server HTTP(s) ",
+            "skill_info": "Informazioni Skill Alexa",
+            "emails": "Email consentite",
+            "event_endpoint": "URL dell'Event endpoint",
+            "scope": "Scopo",
+            "msg_check": "Verifica i messaggi di Alexa",
+            "verbose": "Log dettagliato",
+            "privacy_policy": "Politica sulla riservatezza",
+            "privacy_policy_content": "Usando questa Skill accetti di condividere informazioni relative alla tua casa intelligente con Amazon."
+        },
+        "placeholder": {
+            "name": "None",
+            "username": "Nome Utente",
+            "password": "Password",
+            "skill_client_id": "ID Cliente della skill Alexa",
+            "skill_secret": "Segreto della skill Alexa",
+            "your_client_id": "Il tuo ID cliente",
+            "your_secret": "Il tuo sgreto",
+            "oa2_client_id": "ID Cliente",
+            "oa2_secret": "Segreto",
+            "port": "Porta del server HTTP, zero o vuoto per usare la porta di Node-RED",
+            "http_path": "Percorso del server HTTP",
+            "event_endpoint": "URL dell'Event endpoint",
+            "scope": "Scopo, e.g.: smart_home"
+        },
+        "error": {
+            "missing-config": "Configurazione SmartHome mancante.",
+            "missing-bridge": "Manca SmartHome.",
+            "login-error": "Nome Utente o password errate.",
+            "invalid-directive": "Direttiva invalida.",
+            "accept-grant-directive": "Errore nella gestione della direttiva AcceptGrant.",
+            "no-account-link": "Devi collegare la tua utenza di Alexa con questa skill."
+        }
+    }
+}

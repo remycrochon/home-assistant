@@ -1,0 +1,49 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "casa chimera",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "RiavviaDomoticaIntent",
+                    "slots": [],
+                    "samples": [
+                        "Riavvia domotica"
+                    ]
+                },
+                {
+                    "name": "TemperaturaIntent",
+                    "slots": [
+                        {
+                            "name": "Stanza",
+                            "type": "AMAZON.Room"
+                        }
+                    ],
+                    "samples": [
+                        "Temperatura {Stanza}"
+                    ]
+                }
+            ],
+            "types": []
+        }
+    }
+}

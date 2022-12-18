@@ -2593,3 +2593,100 @@
           hub: cerbo
           value: 5
   mode: single
+- id: '1671263456762'
+  alias: Essai filtration piscine
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  - platform: state
+    entity_id:
+    - input_select.mode_fonctionnement_piscine_test
+    id: at_force
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine_test
+        state: Auto
+      - condition: numeric_state
+        entity_id: input_number.temp_piscine
+        below: 1
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.chalet_s1
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine_test
+        state: Auto
+      - condition: numeric_state
+        entity_id: input_number.temp_piscine
+        above: 1
+        below: 10.1
+      - condition: or
+        conditions:
+        - condition: time
+          after: 06:00:00
+          before: 08:00:00
+        - condition: time
+          after: '11:00:00'
+          before: '12:00:00'
+        - condition: time
+          after: '16:00:00'
+          before: '17:00:00'
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.chalet_s1
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine_test
+        state: Auto
+      - condition: numeric_state
+        entity_id: input_number.temp_piscine
+        above: 10
+        below: 12.1
+      - condition: or
+        conditions:
+        - condition: time
+          after: 06:00:00
+          before: 07:33:00
+        - condition: time
+          after: 09:00:00
+          before: '12:33:00'
+        - condition: time
+          after: '16:00:00'
+          before: '17:33:00'
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.chalet_s1
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine_test
+        state: Ma F
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.chalet_s1
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_piscine_test
+        state: At F
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.chalet_s1
+    default:
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.chalet_s1
+  mode: single

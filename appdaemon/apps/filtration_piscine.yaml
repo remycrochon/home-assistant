@@ -23,7 +23,7 @@ Piscine:
   mem_temp: input_number.mem_temp_piscine
 # Arret forcé filtration- Bloque la filtration si = on
   #arret_force: input_boolean.piscine_arret_force # à utiliser par défaut
-  arret_force: input_boolean.piscine_arret_force
+  arret_force: input_boolean.mem_delestage
 # Ajouté le 30 mai 2022
   # Durée de la filtration en ete
   duree_filtration_ete: input_number.duree_filtration_ete

@@ -1,0 +1,81 @@
+substitutions:
+  device_name: esp148-pc-sonoff
+  adress_ip: "192.168.0.148"
+  friendly_name: esp148
+  time_timezone: "Europe/Paris"
+esphome:
+  name: ${device_name} 
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  networks:
+    - ssid: !secret wifi_mi4
+      password: !secret mdpwifi_mi4
+      priority: 2    
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+  
+  manual_ip:
+    # Set this to the IP of the ESP
+    static_ip: ${adress_ip}
+    # Set this to the IP address of the router. Often ends with .1
+    gateway: 192.168.0.254
+    # The subnet of the network. 255.255.255.0 works for most home networks.
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name} Status"
+    
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "${friendly_name} bp"
+    on_press:
+      - switch.toggle: relay
+
+switch:
+  - platform: gpio
+    name: "${friendly_name} Relais"
+    pin: GPIO12
+    id: relay
+    
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: yes
+    
+text_sensor:
+  # IP address #
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP address"
+      icon: "mdi:network-outline"
+    ssid:
+      name: "${friendly_name} Connected SSID"
+    bssid:
+      name: "${friendly_name} Connected BSSID"
+    

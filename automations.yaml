@@ -2361,8 +2361,8 @@
     default: []
   mode: single
 - id: '1668506550340'
-  alias: 0_0_2-Alim tablette BP
-  description: ''
+  alias: 0_0_2 0_0_2 Alim tablette BP
+  description: ' '
   use_blueprint:
     path: seamus65/wallpanel-battery-management.yaml
     input:
@@ -2689,4 +2689,35 @@
       data: {}
       target:
         entity_id: switch.chalet_s1
+  mode: single
+- id: '1671811895133'
+  alias: 1_1_5 Spot Terrasse
+  description: ''
+  trigger:
+  - device_id: 191305ef12c4538ae3dc593438f5e19d
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: switch.spots_ext_sud
+        state: 'off'
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.spots_ext_sud
+    - conditions:
+      - condition: state
+        entity_id: switch.spots_ext_sud
+        state: 'on'
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.spots_ext_sud
   mode: single

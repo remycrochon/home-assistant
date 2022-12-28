@@ -1,0 +1,80 @@
+substitutions:
+  device_name: esp171-esp8266-4-relais
+  friendly_name: esp171
+  adress_ip: "192.168.0.171"
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  
+esp8266:
+  board: esp12e
+  framework:
+    version: recommended
+
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO5
+    inverted: True  
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
+
+sensor:
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "${friendly_name} Uptime Sensor"
+    update_interval: 60s
+    
+switch:
+  - platform: gpio
+    name: "${friendly_name} Relais1"
+    pin: GPIO16
+    id: relay1
+  - platform: gpio
+    name: "${friendly_name} Relais2"
+    pin: GPIO14
+    id: relay2
+  - platform: gpio
+    name: "${friendly_name} Relais3"
+    pin: GPIO12
+    id: relay3
+  - platform: gpio
+    name: "${friendly_name} Relais4"
+    pin: GPIO13
+    id: relay4
+    
+  - platform: restart
+    name: "${friendly_name} Restart"

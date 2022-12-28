@@ -88,8 +88,7 @@ sensor:
       name: "${friendly_name} MH-Z19 Temperature"
     update_interval: 120s
     automatic_baseline_calibration: false              
-  
-            
+ 
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s

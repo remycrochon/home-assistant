@@ -1,0 +1,222 @@
+substitutions:
+  device_name: esp138-qualite-air
+  adress_ip: "192.168.0.138"
+  friendly_name: esp138
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP32
+  board: mhetesp32minikit
+  #board: wemos_d1_mini32
+  
+
+wifi:
+  networks:
+
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+      
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+i2c:
+  sda: GPIO21 #
+  scl: GPIO22 #
+  scan: True
+  id: bus_a
+  
+uart:
+  - id: uart_a
+    rx_pin: GPIO25 #
+    baud_rate: 9600
+
+  - id: uart_b
+    rx_pin: GPIO16 # GPIO16
+    tx_pin: GPIO17 # GPIO17
+    baud_rate: 9600
+#    debug:
+#      direction: BOTH
+    
+globals:
+  - id: bp_mode
+    type: int
+    initial_value: '1'
+    
+sensor:
+  - platform: pmsx003
+    uart_id: uart_a
+    type: PMSX003
+    pm_1_0:
+      name: "Concentration de particules <1.0µm"
+      id: pm1_0
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 15
+            send_every: 10
+            send_first_at: 1
+
+    pm_2_5:
+      name: "Concentration de particules <2.5µm"
+      id: pm2_5
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 15
+            send_every: 10
+            send_first_at: 1
+
+   
+
+    pm_10_0:
+      name: "Concentration de particules <10.0µm"
+      id: pm10_0
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 15
+            send_every: 10
+            send_first_at: 1
+            
+    pm_0_3um:
+      name: "Nb de particules >0.3"
+      id: pm_03_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+
+    pm_0_5um:
+      name: "Nb de particules >0.5"
+      id: pm_05_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+
+    pm_1_0um:
+      name: "Nb de particules >1.0"
+      id: pm_10_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+
+    pm_2_5um:
+      name: "Nb de particules >2.5"
+      id: pm_25_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+
+    pm_5_0um:
+      name: "Nb de particules >5.0"
+      id: pm_50_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+
+    pm_10_0um:
+      name: "Nb de particules >10.0"
+      id: pm_100_um
+      unit_of_measurement: "ppd"
+      accuracy_decimals: 0
+
+      
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "${friendly_name} Uptime Sensor"
+    update_interval: 60s
+    
+  - platform: mhz19
+    uart_id: uart_b
+    id: mh_z19
+    co2:
+      name: "MH-Z19 CO2 Value"
+      id: co2
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 12 # moyenne sur 12 lecture
+            send_every: 6 # envoi toutes les 6 lectures
+            send_first_at: 1 # envoi à la premiere lecture
+            
+    temperature:
+      name: "MH-Z19 Temperature"
+      id: temp
+      filters:
+        - sliding_window_moving_average:
+            window_size: 24
+            send_every: 12
+            send_first_at: 1
+            
+    update_interval: 10s
+    automatic_baseline_calibration: false    
+
+
+# Il s'agit d'un modèle de capteur qui effectue une moyenne mobile de 30 minutes de PM2,5
+# il supprime les valeurs aberrantes et de rendre le contrôle plus fluide
+
+  - platform: template
+    name: "Concentration de particules <2.5µm median"
+    id: pm2_5_median
+    icon: mdi:chemical-weapon
+    unit_of_measurement: µg/m³
+    lambda: |-
+      return id(pm2_5).state;
+    update_interval: 60s
+    filters:
+      - median:
+          window_size: 30
+          send_every: 30
+          send_first_at: 15
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name} Status"
+
+interval:
+  - interval: 60s
+    then:
+      - switch.turn_on: val_mes
+      - delay: 10s
+#     - switch.turn_on: val_mes
+      - switch.turn_off: val_mes
+      - delay: 30s
+
+switch:   
+  - platform: gpio
+    pin: 
+      number: GPIO27 #
+    id: val_mes
+    name: "${friendly_name} Validation mesure"
+    
+  - platform: template
+    name: "${friendly_name} Calibration zero Mh-Z19 CO2"
+    turn_on_action:
+      - mhz19.calibrate_zero: mh_z19
+      - switch.turn_off: co2_cal
+    id: co2_cal
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+# gestion afficheur
+

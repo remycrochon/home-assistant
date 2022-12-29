@@ -62,7 +62,13 @@ binary_sensor:
     name: "${friendly_name} Status"
 
 switch:    
-
+  - platform: template
+    name: "Calibration zero Mh-Z19 CO2"
+    turn_on_action:
+      - mhz19.calibrate_zero: mh_z19
+      - switch.turn_off: co2_cal
+    id: co2_cal
+    
   - platform: restart
     name: "${friendly_name} Restart"
     
@@ -82,12 +88,29 @@ sensor:
             
   - platform: mhz19
     uart_id: uart_b
+    id: mh_z19
     co2:
       name: "${friendly_name} MH-Z19 CO2 Value"
+      id: co2
+      accuracy_decimals: 0
+      filters:
+        - sliding_window_moving_average:
+            window_size: 12 # moyenne sur 12 lecture
+            send_every: 6 # envoi toutes les 6 lectures
+            send_first_at: 1 # envoi à la premiere lecture
+            
     temperature:
       name: "${friendly_name} MH-Z19 Temperature"
-    update_interval: 120s
-    automatic_baseline_calibration: false              
+      id: temp
+      filters:
+        - sliding_window_moving_average:
+            window_size: 24
+            send_every: 12
+            send_first_at: 1
+            
+    update_interval: 10s
+    automatic_baseline_calibration: false    
+     
  
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"

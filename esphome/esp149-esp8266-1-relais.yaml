@@ -35,6 +35,11 @@ ota:
 
 web_server:
   port: 80
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO16
+    inverted: true
 
 binary_sensor:
 #Etat de la connection

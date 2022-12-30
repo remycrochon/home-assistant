@@ -31,7 +31,7 @@
     default: []
   mode: single
 - id: '1610371647929'
-  alias: 1_1_2 Purge base de données
+  alias: 01-1-2 Purge base de données
   description: ''
   trigger:
   - platform: time
@@ -44,7 +44,7 @@
       repack: true
   mode: single
 - id: '1611218307411'
-  alias: 1_1_1 Mode Present/Absent
+  alias: 01-1-1 Mode Present/Absent
   description: Passage du mode Presence de Absent ou Vacances à Present
   trigger:
   - platform: state
@@ -1330,7 +1330,7 @@
       entity_id: cover.garage_rdc
   mode: single
 - id: '1634916685737'
-  alias: 1_1_3 Pusch gitub
+  alias: 01-1-3 Pusch gitub
   description: pousse vers githtub
   trigger:
   - platform: time
@@ -1338,6 +1338,7 @@
   condition: []
   action:
   - service: shell_command.push_to_github
+    data: {}
   mode: single
 - id: '1635590858245'
   alias: 1_4_1 BP Sonof
@@ -1352,7 +1353,8 @@
       message: bp sonof
   mode: single
 - id: '1635590853335'
-  alias: 1_1_4 Choix du theme jour ou nuit
+  alias: 01-1-4 Choix du theme jour ou nuit
+  description: ''
   trigger:
   - platform: homeassistant
     event: start
@@ -1846,7 +1848,7 @@
       max_alerts: 100
       initial_delay: 300
 - id: '1644765337710'
-  alias: 0-0-0 Démarrage System
+  alias: 00-0-0 Démarrage System
   description: ''
   trigger:
   - platform: homeassistant
@@ -2492,7 +2494,7 @@
       title: Conso Electrique du jour en kWh
   mode: single
 - id: '1670917693978'
-  alias: 9_1_1 Thermostat  Chambre Nord
+  alias: 09-1-1 Thermostat  Chambre Nord
   description: PID Chauffage
   use_blueprint:
     path: argonaute199/thermostat_tpi.yaml
@@ -2506,7 +2508,7 @@
       entity_consigne: input_number.consigne_temperature_chambre_nord
       entity_chauffage: switch.esp147_relais
 - id: '1670919556060'
-  alias: 9_1_0 Pilotage Chauffage Chambre Nord
+  alias: 09-1-0 Pilotage Chauffage Chambre Nord
   description: Affectation consigne
   trigger:
   - platform: state
@@ -2691,7 +2693,7 @@
         entity_id: switch.chalet_s1
   mode: single
 - id: '1671811895133'
-  alias: 1_1_5 Spot Terrasse
+  alias: 10_0_0 Spot Terrasse
   description: ''
   trigger:
   - device_id: 191305ef12c4538ae3dc593438f5e19d
@@ -2701,23 +2703,40 @@
     subtype: button
   condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: switch.spots_ext_sud
-        state: 'off'
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.spots_ext_sud
-    - conditions:
-      - condition: state
-        entity_id: switch.spots_ext_sud
-        state: 'on'
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.spots_ext_sud
+  - type: toggle
+    device_id: 216e88150c3bb7fa0e5a68ac407485f9
+    entity_id: switch.spots_ext_sud
+    domain: switch
+  mode: single
+- id: '1672317557269'
+  alias: 10_0_1 Eclairage 1
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: 4426c2e7eae7885c0d4b21db4405ae40
+    entity_id: binary_sensor.esp149_bp1
+    domain: binary_sensor
+  condition: []
+  action:
+  - type: toggle
+    device_id: e62c133861b9ca712b5539e51c07d05b
+    entity_id: switch.esp170_relais1
+    domain: switch
+  mode: single
+- id: '1672318040631'
+  alias: 10_0_2 Eclairage 2
+  description: ''
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: 4426c2e7eae7885c0d4b21db4405ae40
+    entity_id: binary_sensor.esp149_bp2
+    domain: binary_sensor
+  condition: []
+  action:
+  - type: toggle
+    device_id: e62c133861b9ca712b5539e51c07d05b
+    entity_id: switch.esp170_relais2
+    domain: switch
   mode: single

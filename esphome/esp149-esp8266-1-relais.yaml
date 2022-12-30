@@ -42,6 +42,31 @@ status_led:
     inverted: true
 
 binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO10
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp1"
+  - platform: gpio
+    pin:
+      number: GPIO13
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp2"
+  - platform: gpio
+    pin:
+      number: GPIO14
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp3"
+
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"

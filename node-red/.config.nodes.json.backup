@@ -1545,5 +1545,35 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/virtual-device.js"
             }
         }
+    },
+    "node-red-contrib-alexa-virtual-smarthome": {
+        "name": "node-red-contrib-alexa-virtual-smarthome",
+        "version": "0.0.31",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "alexa-adapter": {
+                "name": "alexa-adapter",
+                "types": [
+                    "alexa-adapter"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-virtual-smarthome",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-adapter.js"
+            },
+            "alexa-device": {
+                "name": "alexa-device",
+                "types": [
+                    "alexa-device"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-virtual-smarthome",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-device.js"
+            }
+        }
     }
 }

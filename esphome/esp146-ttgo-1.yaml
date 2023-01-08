@@ -24,6 +24,7 @@ wifi:
       password: !secret mdpwifi
       priority: 1
   reboot_timeout: 5min
+  
 
   manual_ip:
     static_ip: ${adress_ip}

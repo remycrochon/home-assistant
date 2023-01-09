@@ -395,7 +395,7 @@
         mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
         mm {{-"\n"-}}{{states("sensor.date_time") }}
       title: Alerte Meteo Pluie !!!
-  - service: dwains_dashboard.notification_create
+  - service: notify.telegram
     data:
       message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
         mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
@@ -429,7 +429,7 @@
       message: 'Nouvelle IP: {{ states("sensor.myip")}} {{-"\n"-}}{{states("sensor.date_time")
         }}'
       title: Réseau:!!!
-  - service: dwains_dashboard.notification_create
+  - service: notify.telegram
     data:
       message: Nouvelle IP {{ states("sensor.myip")}}
       title: Reseau
@@ -982,7 +982,7 @@
         data:
           message: PAC Off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: PAC Off Line {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
@@ -990,7 +990,7 @@
         data:
           message: PAC On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alerte {{ entity_name }}Déclenché
@@ -1015,7 +1015,7 @@
           message: Porte Cellier ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Cellier ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1024,7 +1024,7 @@
         data:
           message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Cellier OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alerte {{ entity_name }}Déclenché
@@ -1050,7 +1050,7 @@
           data:
             inline_keyboard:
             - Ferme porte:/ferme_soussol, Cancel:/cancel
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Sous Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1059,7 +1059,7 @@
         data:
           message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Porte Sous _Sol Ouverte
@@ -1087,7 +1087,7 @@
           data:
             inline_keyboard:
             - Ferme Porte:/ferme_garage, Cancel:/cancel
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Garage ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1096,7 +1096,7 @@
         data:
           message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Garage OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Alerte {{ entity_name }}Déclenché
@@ -1121,7 +1121,7 @@
           message: Discordance PAC=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat PAC !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Discordance PAC=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
@@ -1131,7 +1131,7 @@
           message: PAC OK=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat PAC !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: PAC OK=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
             {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
@@ -1157,7 +1157,7 @@
           message: Porte Frigo Garage Ouverte {{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Frigo Garage Ouverte {{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1167,7 +1167,7 @@
           message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Porte Frigo Garage Fermée {{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1192,7 +1192,7 @@
           message: T° Haute Congelo = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: T° Haute Congelo = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
@@ -1202,7 +1202,7 @@
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
@@ -1226,17 +1226,11 @@
         data:
           message: VP2 Off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: dwains_dashboard.notification_create
-        data:
-          message: VP2 Off Line {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
       - service: notify.telegram
         data:
           message: VP2 On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
-      - service: dwains_dashboard.notification_create
-        data:
-          message: VP2 On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 60
@@ -1408,17 +1402,11 @@
         data:
           message: Com Linky off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: dwains_dashboard.notification_create
-        data:
-          message: Com Linky Off Line {{-"\n"-}}{{states("sensor.date_time") }}
       resolved_action:
       - service: notify.telegram
         data:
           message: Com Linky On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
-      - service: dwains_dashboard.notification_create
-        data:
-          message: Com Linky On Line{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 1
@@ -1827,7 +1815,7 @@
           message: Petite Porte Sous-Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Petite Porte Sous-Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1837,7 +1825,7 @@
           message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes!!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Petite Porte Sous-Sol OK{{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1869,7 +1857,7 @@
       sensor_entity: binary_sensor.tablette_etat_connection
       alert_state: 'off'
       alert_action:
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Connection Tablette NOK  {{-"\n"-}}{{states("sensor.date_time")
             }}
@@ -1878,7 +1866,7 @@
         target:
           entity_id: switch.pc2_tablette
       resolved_action:
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Connection Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_device: 62cdce054a9d3448484b4df8e44cc499
@@ -2225,7 +2213,7 @@
           message: Lames robot à remplacer = {{states("sensor.am435x_awd_cutting_blade_usage_time")
             }} {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Robot tonte !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Lames robot à remplacer = {{states("sensor.am435x_awd_cutting_blade_usage_time")
             }} {{-"\n"-}}{{states("sensor.date_time") }}
@@ -2235,7 +2223,7 @@
           message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat robot tonte !!!
-      - service: dwains_dashboard.notification_create
+      - service: notify.telegram
         data:
           message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
             }}

@@ -84,7 +84,7 @@ switch:
   - platform: gpio
     name: "${friendly_name} Relais"
     pin: GPIO5
-    id: relay
+    id: relais
     
   - platform: restart
     name: "${friendly_name} Restart"

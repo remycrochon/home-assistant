@@ -62,19 +62,19 @@ switch:
   - platform: gpio
     name: "${friendly_name} Relais1"
     pin: GPIO16
-    id: relay1
+    id: relais1
   - platform: gpio
     name: "${friendly_name} Relais2"
     pin: GPIO14
-    id: relay2
+    id: relais2
   - platform: gpio
     name: "${friendly_name} Relais3"
     pin: GPIO12
-    id: relay3
+    id: relais3
   - platform: gpio
     name: "${friendly_name} Relais4"
     pin: GPIO13
-    id: relay4
+    id: relais4
     
   - platform: restart
     name: "${friendly_name} Restart"

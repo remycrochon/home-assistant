@@ -1,19 +1,14 @@
 substitutions:
-  device_name: esp170-esp8266-2-relais
-  friendly_name: esp170
-  adress_ip: "192.168.0.170"
+  device_name: esp172-esp8266-1-relais-1
+  friendly_name: esp172
+  adress_ip: "192.168.0.172"
   time_timezone: "Europe/Paris"
   
 esphome:
   name: ${device_name}
-#  platform: ESP8266
-#  board: d1_mini
-
-esp8266:
+  platform: ESP8266
   board: d1_mini
-  framework:
-    version: recommended
-    
+  
 wifi:
   networks:
     - ssid: !secret wifi_esp
@@ -29,6 +24,7 @@ wifi:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
+
 # Enable logging
 logger:
 
@@ -40,18 +36,55 @@ ota:
 web_server:
   port: 80
 
+# Configuration Dallas
+dallas:
+  - pin: GPIO2 
+    update_interval: 10s
+
 # Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
     number: GPIO16
     inverted: true
-    
+
 binary_sensor:
+  # 3 Entrées logiques permettant de lire des contacts ou des BP
+  - platform: gpio
+    pin:
+      number: GPIO10
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp1"
+  - platform: gpio
+    pin:
+      number: GPIO13
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp2"
+  - platform: gpio
+    pin:
+      number: GPIO14
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp3"
+
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
 sensor:
+    # DS18B20 15/12/2021
+  - platform: dallas
+    address: 0xab0321117f919d28
+    name: "${friendly_name} Temperature"
+    id: temp
+    
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s
@@ -61,16 +94,11 @@ sensor:
     update_interval: 60s
     
 switch:
+  # Pilotage du relais
   - platform: gpio
-    name: "${friendly_name} Relais1"
-    pin: GPIO4
-    id: relais1
-  - platform: gpio
-    name: "${friendly_name} Relais2"
+    name: "${friendly_name} Relais"
     pin: GPIO5
-    id: relais2
+    id: relais
     
   - platform: restart
     name: "${friendly_name} Restart"
-
- 

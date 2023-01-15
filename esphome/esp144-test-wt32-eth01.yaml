@@ -7,17 +7,16 @@ substitutions:
 esphome:
   name: ${device_name}
   platform: ESP32
-  board: esp-wrover-kit
+  board: wt32-eth01 #esp-wrover-kit
 
 # Enable logging
 logger:
 
 # Enable Home Assistant API
 api:
-
+ota:
 web_server:
   port: 80
-
 
 ethernet:
   type: LAN8720
@@ -26,44 +25,43 @@ ethernet:
   clk_mode: GPIO0_IN
   phy_addr: 1
   power_pin: GPIO16
-  
+
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
 sensor:
-  - platform: ultrasonic
-    trigger_pin: GPIO2
-    echo_pin: GPIO4
-    name: "niveau puit"
-    accuracy_decimals: 2
-    id: niveau_eau
-    update_interval: 60s
-    filters:
-      - lambda: return 3.5 - x;
-      - sliding_window_moving_average:
-          window_size: 5 # moyenne sur x lectures
-          send_every: 5 # envoi toutes les x lectures
-          send_first_at: 1 # envoi à la premiere lecture
-
+# Mesure du niveau
+  - platform: adc
+    pin: GPIO39 #A0
+    id: niveau
+    name: "${friendly_name}_niveau_puit"
+    unit_of_measurement: "ml"
+    update_interval: 5s
+    attenuation: 11db
+#    filters:
+#      - calibrate_linear:
+#         - 0.0 -> 0.0
+#         - 3.3 -> 6.0
+# moyenne sur 30 mn + affichage toutes les mn
+#      - sliding_window_moving_average:
+#          window_size: 30
+#          send_every: 1
+############### TEMPLATE  ######################"
 # Calcul du niveau d'eau H total
 # longueur du tube=2.3 m
 # hauteur total puit=5.8 m
 # d'ou 5.80-2.3=3.5
-
-############### TEMPLATE  ######################"
 # Calcul volume eau
   - platform: template
-    name: "volume_puit"
+    name: "${friendly_name}_volume_puit"
     id: volume
     icon: mdi:flash
     unit_of_measurement: "m3"
     accuracy_decimals: 2
     lambda: |-
-      return (id(niveau_eau).state*0.6*0.6*3.14159);
-
-
+      return (id(niveau).state*0.6*0.6*3.14159);
 
 #Etat de la connection
 binary_sensor:

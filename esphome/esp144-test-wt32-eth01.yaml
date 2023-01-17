@@ -38,12 +38,12 @@ sensor:
     id: niveau
     name: "${friendly_name}_niveau_puit"
     unit_of_measurement: "ml"
-    update_interval: 5s
+    update_interval: 1s
     attenuation: 11db
-#    filters:
-#      - calibrate_linear:
-#         - 0.0 -> 0.0
-#         - 3.3 -> 6.0
+    filters:
+      - calibrate_linear:
+         - 0.4 -> 0.0  # 4 ma
+         - 1.88 -> 3.23  # 12.61
 # moyenne sur 30 mn + affichage toutes les mn
 #      - sliding_window_moving_average:
 #          window_size: 30

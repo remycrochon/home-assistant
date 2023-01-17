@@ -208,7 +208,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage basic options."""
         if self.config_entry.unique_id == REMOTE_ID:
-            return
+            return self.async_abort(reason="not_supported")
         
         if user_input is not None:
             self.options = user_input.copy()
@@ -238,7 +238,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self._default(CONF_LOAD_COMPONENTS),
                     ): cv.multi_select(sorted(domains)),
                     vol.Required(
-                        CONF_SERVICE_PREFIX, default=slugify(self.config_entry.title)
+                        CONF_SERVICE_PREFIX, default=self.config_entry.options.get(CONF_SERVICE_PREFIX) or slugify(self.config_entry.title)
                     ): str,
                     vol.Optional(
                         CONF_SERVICES,

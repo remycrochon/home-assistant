@@ -1,0 +1,103 @@
+blueprint: threegraphicsblueprint.yaml
+card:
+  cards:
+  - cards:
+    - align_header: center
+      align_state: center
+      aligne_icon: right
+      animate: true
+      color: Red
+      decimals: 1
+      entities:
+      - entity: $11_card_entity$
+      font_size: 100
+      height: 300
+      hour24: true
+      hours_to_show: 24
+      icon: $12_card_icon$
+      line_width: 2
+      name: $10_card_name$
+      points_per_hour: 1
+      show:
+        average: false
+        extrema: false
+        graph: bar
+        labels: false
+        legend: false
+      show_fill: true
+      smoothing: true
+      theme: ios-dark-mode-blue-red
+      type: custom:mini-graph-card
+    - align_header: center
+      align_state: center
+      aligne_icon: right
+      animate: true
+      color: Red
+      decimals: 1
+      entities:
+      - entity: $21_card_entity$
+      font_size: 100
+      height: 300
+      hour24: true
+      hours_to_show: 24
+      icon: $22_card_icon$
+      line_width: 2
+      name: $20_card_name$
+      points_per_hour: 1
+      show:
+        average: false
+        extrema: false
+        graph: bar
+        labels: false
+        legend: false
+      show_fill: true
+      smoothing: true
+      theme: ios-dark-mode-blue-red
+      type: custom:mini-graph-card
+    - align_header: center
+      align_state: center
+      aligne_icon: right
+      animate: true
+      color: Red
+      decimals: 1
+      entities:
+      - entity: $31_card_entity$
+      font_size: 100
+      height: 300
+      hour24: true
+      hours_to_show: 24
+      icon: $32_card_icon$
+      line_width: 2
+      name: $30_card_name$
+      points_per_hour: 1
+      show:
+        average: false
+        extrema: false
+        graph: bar
+        labels: false
+        legend: false
+      show_fill: true
+      smoothing: true
+      theme: ios-dark-mode-blue-red
+      type: custom:mini-graph-card
+    type: horizontal-stack
+  items_classes: col-xs-12
+  type: custom:dwains-flexbox-card
+col_span: '1'
+col_span_lg: '1'
+col_span_xl: '2'
+data:
+  10_card_name: Speedtest Download
+  11_card_entity: sensor.speedtest_download
+  12_card_icon: 12_card_icon
+  20_card_name: Speedtest Upload
+  21_card_entity: sensor.speedtest_upload
+  22_card_icon: 22_card_icon
+  30_card_name: Speedtest ping
+  31_card_entity: sensor.speedtest_ping
+  32_card_icon: 32_card_icon
+position: top
+row_span: '1'
+row_span_lg: '1'
+row_span_xl: '1'
+type: custom:dwains-blueprint-card

@@ -220,3 +220,6 @@ sensor:
     password: !secret my_zwift_password
 #    players:
 #      - !secret my_friends_zwift_player_id
+
+remote_homeassistant:
+  instances:

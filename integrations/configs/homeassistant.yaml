@@ -1,0 +1,11 @@
+---
+# Home Assistant component
+# # https://www.home-assistant.io/docs/configuration/basic/
+homeassistant:
+  name: Crochon
+  latitude: !secret latitude
+  longitude: !secret longitude
+  unit_system: metric
+  external_url: !secret external-url
+  internal_url: !secret internal-url
+  country: FR

@@ -1,0 +1,23 @@
+# Notification dans Telegram 
+telegram_bot:
+  - platform: polling
+    api_key: !secret telegram_token
+    allowed_chat_ids:
+      - !secret id_telegram_remy ## remy
+      
+notify:
+  - name: Telegram
+    platform: telegram
+    chat_id: !secret id_telegram_remy
+
+
+# Notification dans les fichiers
+  - name: log_energy
+    platform: file
+    filename: conso_energy.csv
+    timestamp: True
+
+  - name: log_piscine
+    platform: file
+    filename: conso_piscine.csv
+    timestamp: True

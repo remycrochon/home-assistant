@@ -1,0 +1,8 @@
+# HTTP
+# https://home-assistant.io/components/http/
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.0.105
+    - 192.168.0.153

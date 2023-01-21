@@ -1,18 +1,30 @@
-entity: sensor.chamb_nord_pression
-name: Hum
-show_name: true
-show_state: true
-size: 25%
-state:
-- color: red
-  operator: <=
-  value: 990
-- color: green
-  operator: '>='
-  value: 1000
-- color: orange
-  operator: default
-  styles:
+custom_fields:
+  gauge:
     card:
-    - opacity: 0.8
+      entity: sensor.chamb_nord_pression
+      gauge:
+        max_value: 1100
+        severity:
+        - color: darkgrey
+        - color: var(--label-badge-blue)
+          from: 0
+          to: 300
+        - color: yellow
+          from: 500
+          to: 600
+        - color: orange
+          from: 600
+          to: 700
+        - color: red
+          from: 700
+          to: 1100
+entity: sensor.chamb_nord_pression
+name: Pression
+show_last_changed: true
+styles:
+  label:
+  - font-size: 10px
+template:
+- carte_jauge
+- state_unavailable
 type: custom:button-card

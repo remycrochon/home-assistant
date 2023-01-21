@@ -114,6 +114,7 @@ binary_sensor.fdc_volet_amis_sud_grand:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 4
 binary_sensor.fdc_volet_parents_grand_ouvert:
   hidden: true
 binary_sensor.hatos_is_online:
@@ -469,6 +470,7 @@ cover.volet_amis_nord_p:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 5
 cover.volet_amis_sud_grand:
   col_span: '1'
   col_span_lg: '1'
@@ -495,6 +497,7 @@ cover.volet_amis_sud_grand_p:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 6
 cover.volet_amis_sud_p:
   col_span: '2'
   col_span_lg: '2'
@@ -508,6 +511,7 @@ cover.volet_amis_sud_p:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 5
 cover.volet_ch_parent_p:
   col_span: '2'
   col_span_lg: '2'
@@ -654,6 +658,7 @@ input_boolean.presence_amis_ch_nord:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 4
 input_boolean.presence_amis_ch_sud:
   col_span: '1'
   col_span_lg: '1'
@@ -668,6 +673,7 @@ input_boolean.presence_amis_ch_sud:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 7
 input_number.duree_filtration_ete:
   disabled: true
 light.led1:
@@ -859,6 +865,7 @@ sensor.chamb_nord_pression:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 3
 sensor.chamb_parents_humidite:
   custom_card: true
   grouped_sort_order: 2
@@ -899,6 +906,7 @@ sensor.chambre_nord_humidite:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 1
 sensor.chambre_nord_power:
   col_span: '1'
   col_span_lg: '1'
@@ -913,6 +921,7 @@ sensor.chambre_nord_power:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 7
 sensor.chambre_nord_temperature:
   col_span: '1'
   col_span_lg: '1'
@@ -927,6 +936,7 @@ sensor.chambre_nord_temperature:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 2
 sensor.chambre_sud_battery_numeric:
   col_span: '1'
   col_span_lg: '1'
@@ -941,6 +951,7 @@ sensor.chambre_sud_battery_numeric:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 3
 sensor.chambre_sud_humidity:
   col_span: '1'
   col_span_lg: '1'
@@ -955,6 +966,7 @@ sensor.chambre_sud_humidity:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 2
 sensor.chambre_sud_humidity_status:
   hidden: true
 sensor.chambre_sud_rssi_numeric:
@@ -973,6 +985,7 @@ sensor.chambre_sud_temperature:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 1
 sensor.concentration_de_particules_10_0um:
   disabled: true
 sensor.concentration_de_particules_1_0um:
@@ -2314,6 +2327,7 @@ switch.tc6_bp1:
   row_span: '1'
   row_span_lg: '1'
   row_span_xl: '1'
+  sort_order: 8
 switch.tc_volet_amis_grand:
   disabled: true
 switch.tc_volet_amis_sud_grand:
@@ -2365,3 +2379,18 @@ switch.esp140_restart:
   disabled: true
 camera.am435x_awd_map:
   disabled: true
+sensor.p_dispo:
+  excluded: true
+  sort_order: 11
+binary_sensor.esp147_status:
+  sort_order: 8
+device_tracker.esp141_affichage_pv:
+  sort_order: 6
+input_number.consigne_temperature_chambre_nord:
+  sort_order: 9
+sensor.ecs_surplus:
+  sort_order: 10
+switch.esp147_relais:
+  sort_order: 12
+switch.esp147_restart:
+  sort_order: 13

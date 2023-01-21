@@ -291,9 +291,28 @@ sensor:
           {{ state_attr('weather.albi','pressure') }}
         unit_of_measurement: hPa
 
+#      mf_current_conditions:
+#        value_template: >-
+#          {{ states.weather.albi.state }}
+
       mf_current_conditions:
         value_template: >-
-          {{ states.weather.albi.state }}
+          {% set weather_state = states('weather.albi') 
+            | replace('rainy', 'Pluvieux')
+            | replace('partlycloudy', 'Partiellement nuageux')
+            | replace('cloudy', 'Nuageux')
+            | replace('clear-night', 'Nuit claire')
+            | replace('fog', 'Brouillard')
+            | replace('hail', 'Grêle')
+            | replace('lightning-rainy', 'Pluie orageuse')
+            | replace('lightning', 'Orages') 
+            | replace('pouring', 'Fortes pluies')
+            | replace('snowy-rainy', 'Neigeux')
+            | replace('snowy', 'Neigeux')
+            | replace('sunny', 'Ensoleillé')
+            | replace('windy-variant', 'Venteux')
+            | replace('windy', 'Venteux')
+            | replace('exceptional', 'Exceptionel') %}
 
   #        feels_like
       mf_visibility:
@@ -431,7 +450,35 @@ sensor:
           {% set end = (start + timedelta(days=2)) %}
           {{ state_attr('weather.albi', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='templow') | list | max }} 
         unit_of_measurement: '°C'      
+          
+      weather_icon:
+        value_template: >-
+          {% set weather_icon = states('weather.albi') 
+            | replace('rainy', '☔️')
+            | replace('partlycloudy', '⛅️')
+            | replace('cloudy', '☁️')
+            | replace('clear-night', '✨')
+            | replace('fog', '🌀')
+            | replace('hail', '🌧')
+            | replace('lightning-rainy', '⛈')
+            | replace('lightning', '⚡️') 
+            | replace('pourring', '️☔️')
+            | replace('snowy-rainy', '❄️️')
+            | replace('snowy', '❄️')
+            | replace('sunny', '☀️')
+            | replace('windy-variant', '💨')
+            | replace('windy', '💨')
+            | replace('exceptional', '⚠️') %}     
 
+          {% if not state_attr('weather.maison', 'temperature') == 'Indisponible' -%}
+            {% if states('weather.albi') == 'lightning-rainy' -%}
+              ⛈
+            {% else -%}
+            {{ weather_icon }}
+            {% endif -%}
+          {% else -%}
+          {% endif -%}
+          
       today_icon:
           value_template: >-
             {% if state_attr("weather.albi","forecast")[0].condition =='clear-night' %}

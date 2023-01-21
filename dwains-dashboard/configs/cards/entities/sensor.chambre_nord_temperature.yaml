@@ -1,21 +1,14 @@
-entity: sensor.chambre_nord_temperature
-name: Temp
-show_name: true
-show_state: true
-size: 25%
-state:
-- color: blue
-  icon: mdi:thermometer-minus
-  operator: <=
-  value: 15
-- color: red
-  icon: mdi:thermometer-plus
-  operator: '>='
-  value: 25
-- color: green
-  icon: mdi:thermometer
-  operator: default
-  styles:
+custom_fields:
+  gauge:
     card:
-    - opacity: 0.8
+      entity: sensor.chambre_nord_temperature
+entity: sensor.chambre_nord_temperature
+name: temp
+styles:
+  name:
+  - font-size: 40px
+  state:
+  - font-size: 50px
+template:
+- carte_thermo
 type: custom:button-card

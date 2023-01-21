@@ -1,0 +1,3316 @@
+button_card_templates:
+  police:
+    styles:
+      card:
+        - font-family: Avenir
+  style:
+    styles:
+      card:
+        - border-color: rgba(12, 12, 14, 0.2)
+        - border-style: outset
+        - border-width: 1px
+        - box-shadow: 1px 1px 2px 0px rgba(12, 12, 14,0.3)
+  sidebar:
+    entity: weather.tu_mets_ta_ville
+    show_entity_picture: true
+    show_icon: true
+    show_name: false
+    show_state: false
+    show_label: false
+    template:
+      - police
+      - style
+    entity_picture: |
+      [[[
+        if ((entity.state == 'sunny') && (states['sun.sun'].state == 'above_horizon'))
+          return "/local/weather/icones animes/clear-day.svg"
+        if ((entity.state == 'sunny') || (entity.state == 'clear-night') && (states['sun.sun'].state == 'below_horizon'))
+          return "/local/weather/icones animes/clear-night.svg"  
+
+        if ((entity.state == 'lightning-rainy') && (states['sun.sun'].state == 'above_horizon'))
+          return "/local/weather/icones animes/thunderstorms-day-rain.svg"
+        if ((entity.state == 'lightning-rainy') || (entity.state == 'clear-night') && (states['sun.sun'].state == 'below_horizon'))
+          return "/local/weather/icones animes/thunderstorms-night-rain.svg"
+
+        if ((entity.state == 'fog') && (states['sun.sun'].state == 'above_horizon'))
+          return "/local/weather/icones animes/fog-day.svg"             
+        if ((entity.state == 'fog') && (states['sun.sun'].state == 'below_horizon'))
+          return "/local/weather/icones animes/fog-night.svg"
+
+        if ((entity.state == 'partlycloudy') && (states['sun.sun'].state == 'above_horizon'))
+          return "/local/weather/icones animes/partly-cloudy-day.svg"                    
+        if ((entity.state == 'partlycloudy') && (states['sun.sun'].state == 'below_horizon'))
+          return "/local/weather/icones animes/partly-cloudy-night.svg"  
+
+        if ((entity.state == 'rainy') && (states['sun.sun'].state == 'above_horizon'))
+          return "/local/weather/icones animes/partly-cloudy-day-rain.svg"                      
+        if ((entity.state == 'rainy') && (states['sun.sun'].state == 'below_horizon'))
+          return "/local/weather/icones animes/partly-cloudy-night-rain.svg" 
+
+        if ((entity.state == 'lightning') && (states['sun.sun'].state == 'above_horizon'))
+          return "/local/weather/icones animes/thunderstorms-day.svg"                      
+        if ((entity.state == 'lightning') && (states['sun.sun'].state == 'below_horizon'))
+          return "/local/weather/icones animes/thunderstorms-night.svg" 
+
+        if (entity.state == 'clear-night')
+          return "/local/weather/icones animes/clear-night.svg";
+
+        if (entity.state == 'sleet')
+          return "/local/weather/icones animes/sleet.svg";  
+
+        if (entity.state == 'pouring')
+          return "/local/weather/icones animes/umbrella.svg"; 
+
+        if (entity.state == 'snowy-rainy')
+          return "/local/weather/icones animes/sleet.svg";  
+
+        if (entity.state == 'snow')
+          return "/local/weather/icones animes/snow.svg"; 
+
+        if (entity.state == 'snowy')
+          return "/local/weather/icones animes/snow.svg"; 
+
+        if (entity.state == 'cloudy')
+          return "/local/weather/icones animes/cloudy.svg"; 
+
+        if (entity.state == 'wind')
+          return "/local/weather/icones animes/wind.svg"; 
+
+        if (entity.state == 'hail')
+          return "/local/weather/icones animes/hail.svg"; 
+      ]]]
+    styles:
+      img_cell:
+        - border-radius: 50%
+        - width: 60px
+        - height: 60px
+        - position: absolute
+        - top: 0%
+        - left: 5%
+        - background-color: transparent
+        - color: transparent
+        - border-color: transparent
+        - box-shadow: transparent
+      entity_picture:
+        - width: 90%
+      grid:
+        - grid-template-areas: |
+            "date"
+            "meteo"
+            "alerte"
+            "titre_programme"
+            "anniv"
+            "calendrier"
+            "poubelle"
+            "titre_activite"
+            "reveil"
+            "rappel"
+            "mouvement"
+            "porte"
+            "lumiere"
+            "appareil"
+            "modes"
+            "air"
+            "app_connectes"
+            "enedis"
+            "gaz"
+            "titre_info"
+            "info"
+            "titre_avertissement"
+            "device_hs"
+            "jauge"
+            "boutons"
+            "titre_maj"
+            "maj"
+        - grid-template-columns: 1fr
+        - grid-template-rows: >-
+            min-content min-content min-content min-content  min-content 
+            min-content  min-content  min-content  min-content  min-content 
+            min-content  min-content   min-content  min-content  min-content
+            min-content  min-content  min-content  min-content  min-content 
+            min-content 1fr
+        - gap: 0%
+        - overflow: hidden
+      card:
+        - '-webkit-tap-highlight-color': rgba(0,0,0,0)
+        - padding: 3% 4% 2% 4%
+        - line-height: 125%
+        - font-size: 13px
+      custom_fields:
+        date:
+          - padding: 0px 0px 0px 0px
+          - font-weight: bold
+          - font-size: 13px
+          - color: var(--text_on_sidebar)
+          - align-self: middle
+          - white-space: normal
+        meteo:
+          - padding: 2px 0px 0px 0px
+          - font-weight: null
+          - font-size: 13px
+          - color: var(--text_on_sidebar)
+          - align-self: middle
+          - white-space: normal
+        alerte:
+          - padding: 0px 0px 0px 0px
+          - padding-left: 8px
+          - font-size: 11px
+          - color: |
+              [[[
+                if (states['sensor.weather_alerte_couleur_v2'].state == 'Vigilance Jaune')
+                  return 'yellow'
+                if (states['sensor.weather_alerte_couleur_v2'].state == 'Vigilance Orange')
+                  return 'orange'
+                if (states['sensor.weather_alerte_couleur_v2'].state == 'Vigilance Rouge')
+                  return 'red'
+                return ''
+              ]]]
+          - align-self: middle
+          - white-space: normal
+        titre_programme:
+          - padding: 20px 0px 03px 0px
+          - font-weight: bold
+          - font-style: italic
+          - font-size: 12px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_sidebar)
+          - white-space: normal
+        anniv:
+          - border-left: |
+              [[[
+                if (states['sensor.anniversaire'].state == 'Aucun')
+                  return '';
+                return '2px rgb(180, 70, 70) solid';
+              ]]]
+          - padding: 0px 0px 0px 0px
+          - padding-left: 8px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_info_sidebar)
+          - white-space: normal
+        calendrier:
+          - border-left: 2px rgb(180, 70, 70) solid
+          - padding: 0px 0px 0px 0px
+          - padding-left: 8px
+          - color: |
+              [[[
+                if (states['sensor.calendar_famille'].state == 'Aucun évènement')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+          - justifiy-self: start
+          - text-align: left
+          - white-space: normal
+        poubelle:
+          - border-left: 2px rgb(180, 70, 70) solid
+          - padding: 0px 0px 0px 0px
+          - padding-left: 8px
+          - color: |
+              [[[
+                if (states['sensor.calendar_poubelles'].state == 'Aucun rappel')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+          - justifiy-self: start
+          - text-align: left
+          - white-space: normal
+        titre_avertissement:
+          - font-style: italic
+          - font-size: 12px
+          - padding: |
+              [[[
+                if (states['sensor.systeme_avertissement'].state == '' )
+                  return "0px 0px 0px 0px" ;
+                return "15px 0px 03px 0px" ;
+              ]]]
+          - font-weight: bold
+          - justifiy-self: start
+          - text-align: left
+          - color: red
+          - white-space: normal
+        device_hs:
+          - border-left: 2px rgb(180, 70, 70) solid
+          - padding: |
+              [[[
+                if (states['sensor.systeme_avertissement'].state == '')
+                  return "0px 0px 0px 0px" ;
+                return "0px 0px 0px 08px" ;
+              ]]]
+          - justifiy-self: start
+          - color: red
+          - white-space: normal
+          - text-align: left
+        titre_activite:
+          - font-style: italic
+          - font-size: 12px
+          - padding: 15px 0px 03px 0px
+          - font-weight: bold
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_sidebar)
+          - white-space: normal
+        appareil:
+          - border-left: 2px grey solid
+          - white-space: normal
+          - text-align: left
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - color: |
+              [[[
+                if (states['sensor.compteur_autre'].state == '0')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+        reveil:
+          - border-left: 2px grey solid
+          - white-space: normal
+          - text-align: left
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - color: |
+              [[[
+                if (states['input_boolean.nilemato'].state == "on" && states['sensor.tom_reveil'].state == "unknown")
+                  return 'red';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+        air:
+          - border-left: 2px grey solid
+          - white-space: normal
+          - text-align: left
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - color: var(--text_on_info_sidebar)
+        lumiere:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - color: |
+              [[[
+                if (states['light.tout'].state == 'off')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+          - white-space: normal
+          - text-align: left
+        mouvement:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: |
+              [[[
+                if (states['binary_sensor.mouvements'].state == 'off')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+          - white-space: normal
+        porte:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: |
+              [[[
+                if (states['binary_sensor.portes'].state == 'off')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+          - white-space: normal
+        rappel:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - white-space: normal
+          - color: |
+              [[[
+                if (states['sensor.rappel'].state == 'Aucun')
+                  return 'var(--text_off_sidebar)';
+                return 'var(--text_on_info_sidebar)';
+              ]]]
+        app_connectes:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_info_sidebar)
+          - white-space: normal
+        enedis:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_info_sidebar)
+          - white-space: normal
+        gaz:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_info_sidebar)
+          - white-space: normal
+        modes:
+          - border-left: 2px grey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_info_sidebar)
+          - white-space: normal
+        titre_info:
+          - padding: |
+              [[[
+                if (states['input_boolean.sidecar_show_info'].state == 'off')
+                  return "0px" ;
+                return "15px 0px 01px 0px" 
+              ]]]
+          - font-weight: bold
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_sidebar)
+          - white-space: normal
+        info:
+          - border-left: 2px darkslategrey solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_info_sidebar)
+          - white-space: normal
+        jauge:
+          - padding: 15px 0px 0px 23px
+          - align-self: middle
+          - white-space: normal
+          - width: calc(85% + 0px)
+          - '--ha-card-border-width': 0px
+        boutons:
+          - padding: 15px 0px 0px 0px
+          - align-self: middle
+          - white-space: normal
+          - width: calc(100% + 1px)
+          - '--ha-card-border-width': 0px
+        titre_maj:
+          - font-size: 12px
+          - padding: |
+              [[[
+                if (states['input_boolean.sidecar_show_maj'].state == 'off')
+                  return "0px" ;
+                return "15px 0px 03px 0px" 
+              ]]]
+          - font-weight: bold
+          - font-style: italic
+          - justifiy-self: start
+          - text-align: left
+          - color: var(--text_on_sidebar)
+          - white-space: normal
+        maj:
+          - border-left: 2px dodgerblue solid
+          - padding: 0px 0px 0px 08px
+          - justifiy-self: start
+          - text-align: left
+          - color: |
+              [[[
+                if (states['sensor.maj'].state == 'Aucune')
+                  return "var(--text_off)" ;
+                return "var(--text_on_info_sidebar)" 
+              ]]]
+          - white-space: normal
+    custom_fields:
+      date: |
+        [[[ return states['sensor.date_simple'].state ]]]
+      meteo: >
+        [[[ return states['sensor.weather_conditions'].state+",
+        "+states['sensor.weather_temperature_v2'].state +"° " ]]]
+      alerte: |
+        [[[
+          if (states['sensor.weather_alerte_couleur_v2'].state == "Aucune vigilance en cours" ) 
+            return ""
+          return "Vigilance "+states['sensor.weather_alerte'].state
+        ]]]
+      titre_programme: |
+        [[[ return "Aujourd'hui " ]]]
+      anniv: |
+        [[[
+          if (states['sensor.anniversaire'].state == 'Aucun')
+            return "" 
+          return "🎉 " + states['sensor.anniversaire'].state
+        ]]]
+      calendrier: |
+        [[[ return  states['sensor.calendar_famille'].state
+        ]]]
+      poubelle: |
+        [[[ return  states['sensor.calendar_poubelles'].state
+        ]]]
+      titre_avertissement: |
+        [[[
+          if (states['sensor.systeme_avertissement'].state == '')
+            return "" 
+          return "Avertissement" 
+        ]]]
+      device_hs: |
+        [[[
+          if (states['sensor.systeme_avertissement'].state == '')
+            return "" 
+          return states['sensor.systeme_avertissement'].state ;
+        ]]]
+      titre_activite: |
+        [[[ return "Maison" 
+        ]]]
+      appareil: |
+        [[[
+          if (states['sensor.compteur_autre'].state == 0 || states['input_boolean.sidecar_show_autre'].state == 'off')
+            return ""
+          return `<ha-icon
+            icon="mdi:power"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.autres_appareils'].state}</span>`
+        ]]]
+      air: |
+        [[[
+          if (states['input_boolean.sidecar_show_air'].state == 'off' )
+            return ""
+          if (states['sensor.moniteur_qualite_air'].state < 65 )
+            return ""
+          if (states['sensor.moniteur_qualite_air'].state >= 65 && states['sensor.moniteur_qualite_air'].state < 220 )
+            return `<ha-icon
+              icon="mdi:blur"
+              style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+              </ha-icon><span>Air correct : aération recommandée</span>`
+          if (states['sensor.moniteur_qualite_air'].state >= 220 && states['sensor.moniteur_qualite_air'].state < 660 )
+            return `<ha-icon
+              icon="mdi:blur"
+              style="width: 16px; color: yellow; height: 16px; margin-right: 2px;">
+              </ha-icon><span>Air moyen : aération intense recommandée</span>`
+          if (states['sensor.moniteur_qualite_air'].state >= 660 && states['sensor.moniteur_qualite_air'].state < 2200 )
+            return `<ha-icon
+              icon="mdi:blur"
+              style="width: 16px; color: orange; height: 16px; margin-right: 2px;">
+              </ha-icon><span>Air mauvais : aération intense nécessaire </span>`
+          if (states['sensor.moniteur_qualite_air'].state >= 2200 )
+            return `<ha-icon
+              icon="mdi:blur"
+              style="width: 16px; color: red; height: 16px; margin-right: 2px;">
+              </ha-icon><span>Air Danger : aération intense nécessaire </span>`
+        ]]]
+      lumiere: |
+        [[[
+          if (states['sensor.lumiere_etat'].state == 'Aucune' || states['input_boolean.sidecar_show_lumiere'].state == 'off')
+            return ""
+          return `<ha-icon
+            icon="phu:bulb-group-filament-candle"
+            style="width: 16px; color: gold; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.lumiere_etat'].state}</span>`
+        ]]]
+      mouvement: |
+        [[[
+          if (states['sensor.mouv_on'].state == 'Aucun' || states['input_boolean.sidecar_show_mouvement'].state == 'off')
+            return ""
+          return `<ha-icon
+            icon="mdi:run"
+            style="width: 16px; color: red; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.mouv_on'].state}</span>`
+        ]]]
+      porte: |
+        [[[
+          if (states['sensor.porte_on'].state == 'Aucune'|| states['input_boolean.sidecar_show_porte'].state == 'off')
+            return ""
+          return `<ha-icon
+            icon="mdi:door-open"
+            style="width: 16px; color: red; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.porte_on'].state}</span>`
+        ]]]
+      rappel: |
+        [[[
+          if (states['sensor.rappel'].state == "Aucun")
+            return ""
+          return `<ha-icon
+            icon="mdi:reminder"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.rappel'].state}</span>`
+        ]]]
+      reveil: |
+        [[[
+          if (states['input_boolean.nilemato'].state == "on" && states['sensor.tom_reveil'].state == "unavailable")
+            return `<ha-icon
+              icon="mdi:alarm"
+              style="width: 16px; color: red; height: 16px; margin-right: 2px;">
+              </ha-icon><span>Indisponible</span>`
+          if (states['input_boolean.nilemato'].state == "off")
+            return ""
+          if (states['input_boolean.nilemato'].state == "on" && states['sensor.reveil'].state == "" )
+          return `<ha-icon
+            icon="mdi:alarm"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span> Aucun réveil</span>`
+          if (states['input_boolean.nilemato'].state == "on" && states['sensor.reveil'].state != "" )
+          return `<ha-icon
+            icon="mdi:alarm"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.reveil'].state}</span>`
+
+        ]]]
+      app_connectes: |
+        [[[
+          if (states['sensor.app_connectes'].state == 'Aucun' || states['input_boolean.sidecar_show_connecte'].state == 'off')
+            return ""
+          return `<ha-icon
+            icon="mdi:access-point-network"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.app_connectes2'].state}</span>`
+        ]]]
+      enedis: |
+        [[[
+          if (states['input_boolean.sidecar_show_electricite'].state == 'off')
+            return ""
+          if (states['sensor.myenedis_cost_yesterday_09397539765420'].state == '-1.0')
+          return `<ha-icon
+            icon="mdi:flash-alert"
+            style="width: 16px; color: var(--text_on_sidebar); height: 16px; margin-right: 2px;">
+            </ha-icon><span>Enedis: en attente</span>`
+          if (states['sensor.myenedis_cost_yesterday_09397539765420'].state == 'unavailable')
+          return `<ha-icon
+            icon="mdi:flash-off"
+            style="width: 16px; color: var(--text_on_sidebar); height: 16px; margin-right: 2px;">
+            </ha-icon><span>Enedis : en attente</span>`
+          if (states['sensor.myenedis_cost_yesterday_09397539765420'].state != '-1.0')
+          return `<ha-icon
+            icon="mdi:flash"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span>Électricité : ${states['sensor.electricite_conso_kwh_arrondie'].state}kWh / ${states['sensor.electricite_cout_jour_avec_abo'].state}€</span>`
+        ]]]
+      gaz: |
+        [[[
+          if (states['input_boolean.sidecar_show_gaz'].state == 'off')
+            return ""
+          if (states['sensor.grdf_consommation_gaz'].state == 'unavailable')
+          return `<ha-icon
+            icon="mdi:gas-burner"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span>Gaz : en attente</span>`
+          if (states['sensor.grdf_consommation_gaz'].state != '-1.0')
+          return `<ha-icon
+            icon="mdi:gas-burner"
+            style="width: 16px; color: '#6aa17f'; height: 16px; margin-right: 2px;">
+            </ha-icon><span>Gaz : ${states['sensor.grdf_consommation_gaz'].state}kWh / ${states['sensor.gaz_cout_jour_avec_abo'].state}€</span>`
+        ]]]
+      modes: |
+        [[[
+          if (states['sensor.modes'].state == 'Aucun'|| states['input_boolean.sidecar_show_mode'].state == 'off')
+            return ""
+          return `<ha-icon
+            icon="mdi:cogs"
+            style="width: 16px; color: darkgrey; height: 16px; margin-right: 2px;">
+            </ha-icon><span> ${states['sensor.modes'].state}</span>`
+        ]]]
+      titre_info: |
+        [[[  if (states['input_boolean.sidecar_show_info'].state == 'on')
+               return "Savoir Inutile" 
+             return ""
+        ]]]
+      info: |
+        [[[ if (states['input_boolean.sidecar_show_info'].state == 'on')
+              return states['sensor.web_scrape'].state 
+             return ""
+        ]]]
+      titre_maj: |
+        [[[ 
+          if (states['input_boolean.sidecar_show_maj'].state == 'off')
+            return "" 
+          return "Système"
+        ]]]
+      maj: |
+        [[[ 
+          if (states['input_boolean.sidecar_show_maj'].state == 'off')
+            return "" 
+          return "Démarrage il y a "+states['sensor.uptime_ha'].state+"<br>"+states['sensor.maj'].state  
+         ]]] 
+      jauge:
+        card:
+          square: false
+          columns: 5
+          type: grid
+          cards:
+            - type: custom:button-card
+              entity: sensor.temp_sejour
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace/Temp
+              name: rdc
+              show_name: true
+              show_state: false
+              show_label: true
+              show_units: false
+              units: °
+              label: |
+                [[[
+                  if (states['sensor.temp_moyenne_rdc'].state != "unavailable"  )
+                    return states['sensor.temp_moyenne_rdc'].state
+                  if (states['sensor.temp_sejour'].state != "unavailable" )
+                    return states['sensor.temp_sejour'].state
+                  if (states['sensor.moniteur_qualite_air_temperature'].state != "unavailable" )
+                    return states['sensor.moniteur_qualite_air_temperature'].state
+                  return '-'
+                      ]]]
+              template:
+                - carte_jauge
+              styles:
+                card:
+                  - line-height: 70%
+                  - background-color: |
+                      [[[
+                        if (states['sensor.thermo_alerte_froid_rdc'].state > 0  )
+                          return 'var(--custom-card-color-blue)'
+                        if (states['sensor.thermo_alerte_chaud_rdc'].state > 0  )
+                          return 'var(--custom-card-color-red)'
+                        return ''
+                      ]]]
+                name:
+                  - font-size: 11px
+                  - font-weight: null
+                  - color: darkgrey
+                state:
+                  - font-size: 11px
+                label:
+                  - font-size: 11px
+                  - font-weight: bold
+                custom_fields:
+                  gauge:
+                    - width: calc(140% + 0px)
+              custom_fields:
+                gauge:
+                  card:
+                    entity: sensor.temp_sejour
+                    gauge:
+                      max_value: 50
+                      min_value: 0
+                      severity:
+                        - color: darkgrey
+                        - color: var(--custom-icon-color-blue)
+                          from: 0
+                          to: 18.4
+                        - color: rgb(180, 70, 70)
+                          from: 26.9
+                          to: 50
+                    tap_action:
+                      action: navigate
+                      navigation_path: /lovelace/Temp
+            - type: custom:button-card
+              color_type: blank-card
+            - type: custom:button-card
+              entity: sensor.temp_moyenne_etage
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace/Temp
+              name: étage
+              show_name: true
+              show_state: false
+              show_label: true
+              show_units: false
+              units: °
+              label: |
+                [[[
+                  if (states['sensor.temp_moyenne_etage'].state != "unavailable"  )
+                    return states['sensor.temp_moyenne_etage'].state
+                  if (states['sensor.temp_tom'].state != "unavailable" )
+                    return states['sensor.temp_tom'].state
+                  if (states['sensor.temp_manon'].state != "unavailable" )
+                    return states['sensor.temp_manon'].state
+                  if (states['sensor.temp_nina'].state != "unavailable" )
+                    return states['sensor.temp_nina'].state
+                  return '-'
+                      ]]]
+              template:
+                - carte_jauge
+              styles:
+                card:
+                  - line-height: 70%
+                  - background-color: |
+                      [[[
+                        if (states['sensor.thermo_alerte_froid_etage'].state > 0 )
+                          return 'var(--custom-card-color-blue)'
+                        if (states['sensor.thermo_alerte_chaud_etage'].state > 0 )
+                          return 'var(--custom-card-color-red)'
+                        return ''
+                      ]]]
+                name:
+                  - font-size: 9px
+                  - font-weight: null
+                  - color: darkgrey
+                state:
+                  - font-size: 11px
+                label:
+                  - font-size: 11px
+                  - font-weight: bold
+                custom_fields:
+                  gauge:
+                    - width: calc(140% + 0px)
+              custom_fields:
+                gauge:
+                  card:
+                    entity: sensor.temp_tom
+                    gauge:
+                      max_value: 50
+                      min_value: 0
+                      severity:
+                        - color: darkgrey
+                        - color: var(--custom-icon-color-blue)
+                          from: 0
+                          to: 18.4
+                        - color: rgb(180, 70, 70)
+                          from: 26.9
+                          to: 50
+                    tap_action:
+                      action: navigate
+                      navigation_path: /lovelace/Temp
+            - type: custom:button-card
+              color_type: blank-card
+            - type: custom:button-card
+              entity: sensor.qualite_air_pourcentage
+              tap_action:
+                action: navigate
+                navigation_path: /lovelace/air
+              name: Air
+              show_name: true
+              show_label: false
+              show_units: false
+              template:
+                - carte_jauge
+                - state_unavailable
+              styles:
+                card:
+                  - line-height: 70%
+                  - background-color: |
+                      [[[
+                        if (states['sensor.qualite_air_pourcentage'].state >= 96.1 && states['sensor.qualite_air_pourcentage'].state <= 98.8)
+                          return "var(--custom-card-color-blue)" 
+                        if (states['sensor.qualite_air_pourcentage'].state >= 88.1 && states['sensor.qualite_air_pourcentage'].state <= 96)
+                          return "var(--custom-card-color-yellow)" 
+                        if (states['sensor.qualite_air_pourcentage'].state >= 60.1 && states['sensor.qualite_air_pourcentage'].state <= 88)
+                          return "var(--custom-card-color-orange)" 
+                        if (states['sensor.qualite_air_pourcentage'].state >= 0 && states['sensor.qualite_air_pourcentage'].state <= 60)
+                          return "var(--custom-card-color-red)" 
+                        return "" 
+                      ]]]
+                name:
+                  - font-size: 11px
+                  - font-weight: null
+                  - color: darkgrey
+                state:
+                  - font-size: 11px
+                  - color: |
+                      [[[
+                        if (states['sensor.qualite_air_pourcentage'].state >= 96.1 && states['sensor.qualite_air_pourcentage'].state <= 98.8)
+                          return "var(--custom-icon-color-blue)" 
+                        if (states['sensor.qualite_air_pourcentage'].state >= 88.1 && states['sensor.qualite_air_pourcentage'].state <= 96)
+                          return "var(--custom-icon-color-yellow)" 
+                        if (states['sensor.qualite_air_pourcentage'].state >= 60.1 && states['sensor.qualite_air_pourcentage'].state <= 88)
+                          return "var(--custom-icon-color-orange)" 
+                        if (states['sensor.qualite_air_pourcentage'].state >= 0 && states['sensor.qualite_air_pourcentage'].state <= 60)
+                          return "var(--custom-icon-color-red)" 
+                        return "" 
+                      ]]]
+                custom_fields:
+                  gauge:
+                    - top: 50.5%
+                    - left: 50%
+                    - opacity: 50%
+                    - width: calc(140% + 0px)
+              custom_fields:
+                gauge:
+                  card:
+                    entity: sensor.qualite_air_pourcentage
+                    gauge:
+                      max_value: 100
+                      severity:
+                        - color: darkgrey
+                        - color: var(--custom-icon-color-blue)
+                          from: 96.1
+                          to: 98.8
+                        - color: yellow
+                          from: 88.1
+                          to: 96
+                        - color: orange
+                          from: 60.1
+                          to: 88
+                        - color: red
+                          from: 0
+                          to: 60
+                    tap_action:
+                      action: navigate
+                      navigation_path: /lovelace/air
+      boutons:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: switch.adguard_protection
+              name: AdGuard
+              template:
+                - carte_bouton
+              styles:
+                icon:
+                  - color: |
+                      [[[
+                        if (states['switch.adguard_protection'].state == 'off')
+                        return 'red'
+                      return 'lightgrey'
+                      ]]]
+                card:
+                  - background-color: |
+                      [[[
+                        if (states['switch.adguard_protection'].state == 'off')
+                          return 'var(--custom-img-cell-color-red)'
+                        return 'var(--custom-img-cell-color-blue)'
+                      ]]]
+            - type: custom:button-card
+              entity: binary_sensor.home_assistant_versions_update_available
+              icon: mdi:update
+              show_name: true
+              show_state: false
+              show_label: true
+              show_icon: false
+              name: Core
+              label: |
+                [[[
+                  if (states['binary_sensor.home_assistant_versions_update_available'].state == "on")
+                    return states['sensor.home_assistant_versions'].state
+                  return states['sensor.home_assistant_versions'].state
+                ]]]
+              template:
+                - carte_bouton
+                - carte_bouton_state
+              styles:
+                card:
+                  - background-color: |
+                      [[[
+                        if (states['binary_sensor.home_assistant_versions_update_available'].state == "on")
+                          return 'var(--custom-img-cell-color-blue)'
+                        return 'rgba(43,53,66,0.6)'
+                      ]]]
+              double_tap_action:
+                action: more-info
+              tap_action:
+                action: call-service
+                service: input_boolean.toggle
+                service_data:
+                  entity_id: input_boolean.sidecar_show_maj
+            - type: custom:button-card
+              entity: update.home_assistant_supervisor_update
+              icon: mdi:update
+              show_name: true
+              show_state: false
+              show_label: true
+              show_icon: false
+              name: Supervisor
+              label: |
+                [[[
+                  if (states['update.home_assistant_supervisor_update'].state == "on")
+                    return states['update.home_assistant_supervisor_update'].attributes.latest_version
+                  return states['update.home_assistant_supervisor_update'].attributes.installed_version
+                ]]]
+              styles:
+                card:
+                  - background-color: |
+                      [[[
+                        if (states['update.home_assistant_supervisor_update'].state == "on")
+                          return 'var(--custom-img-cell-color-blue)'
+                        return 'rgba(43,53,66,0.6)'
+                      ]]]
+              template:
+                - carte_bouton
+                - carte_bouton_state
+              double_tap_action:
+                action: more-info
+              tap_action:
+                action: call-service
+                service: input_boolean.toggle
+                service_data:
+                  entity_id: input_boolean.sidecar_show_maj
+            - type: custom:button-card
+              entity: update.home_assistant_operating_system_update
+              icon: mdi:update
+              show_name: true
+              show_state: false
+              show_label: true
+              show_icon: false
+              name: HassOS
+              label: |
+                [[[
+                  if (states['update.home_assistant_operating_system_update'].state == "on")
+                    return states['sensor.home_assistant_operating_system_newest_version'].state
+                  return states['sensor.home_assistant_operating_system_version'].state
+                ]]]
+              styles:
+                card:
+                  - background-color: |
+                      [[[
+                        if (states['update.home_assistant_operating_system_update'].state == "on")
+                          return 'var(--custom-img-cell-color-blue)'
+                        return 'rgba(43,53,66,0.6)'
+                      ]]]
+              template:
+                - carte_bouton
+                - carte_bouton_state
+              double_tap_action:
+                action: more-info
+              tap_action:
+                action: call-service
+                service: input_boolean.toggle
+                service_data:
+                  entity_id: input_boolean.sidecar_show_maj
+            - type: custom:button-card
+              entity: sensor.hacs
+              show_name: true
+              show_state: false
+              show_label: true
+              show_icon: false
+              name: hacs
+              label: |
+                [[[
+                  if (states['sensor.hacs'].state > 1)
+                    return states['sensor.hacs'].state
+                  return '0'
+                ]]]
+              template:
+                - carte_bouton
+              styles:
+                label:
+                  - font-weight: |
+                      [[[
+                        if (states['sensor.hacs'].state > 1)
+                          return 'bold'
+                        return ''
+                      ]]]
+                card:
+                  - background-color: |
+                      [[[
+                        if (states['sensor.hacs'].state > 1)
+                          return 'var(--custom-img-cell-color-blue)'
+                        return 'rgba(43,53,66,0.7)'
+                      ]]]
+              double_tap_action:
+                action: more-info
+              tap_action:
+                action: call-service
+                service: input_boolean.toggle
+                service_data:
+                  entity_id: input_boolean.sidecar_show_maj
+  base:
+    show_icon: true
+    show_name: true
+    show_state: false
+    show_label: true
+    template:
+      - police
+      - style
+    styles:
+      grid:
+        - grid-template-areas: '"i n" "i s" "i l" '
+        - grid-template-columns: min-content auto
+        - grid-template-rows: min-content min-content min-content
+      img_cell:
+        - background-color: var(--pastille_off)
+        - border-radius: 50%
+        - place-self: start
+        - text-align: start
+        - width: 35px
+        - height: 35px
+      icon:
+        - width: 55%
+        - color: var(--icon_off)
+      name:
+        - color: rgba(232,233,242,1)
+        - align-self: end
+        - justify-self: start
+        - text-align: left
+        - font-weight: bold
+        - font-size: 12px
+        - margin-left: 9px
+      state:
+        - white-space: normal
+        - color: lightgrey
+        - justify-self: start
+        - align-self: end
+        - font-weight: null
+        - text-align: left
+        - font-size: 12px
+        - filter: opacity(90%)
+        - margin-left: 9px
+        - line-height: 110%
+        - margin-top: 0px
+      label:
+        - white-space: normal
+        - color: lightgrey
+        - justify-self: start
+        - align-self: start
+        - text-align: left
+        - font-weight: null
+        - font-size: 12px
+        - filter: opacity(90%)
+        - margin-left: 9px
+        - margin-bottom: 2px
+        - line-height: 110%
+      card:
+        - padding: 8px 5px 8px 5px
+        - font-size: 100%
+        - white-space: normal
+      custom_fields:
+        bouton:
+          - position: absolute
+          - top: 70%
+          - left: 50%
+          - width: calc(90% + 1px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - '--ha-card-border-width': 0px
+        jauge-cercle:
+          - top: '-03%'
+          - left: 75%
+          - width: 25%
+          - position: absolute
+          - z-index: 2
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+        jauge-horizontal:
+          - opacity: 90%
+          - position: absolute
+          - top: 65%
+          - left: 0%
+          - width: calc(100% + 0px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 1
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+        graph_temp:
+          - position: absolute
+          - top: 80%
+          - left: 50%
+          - width: calc(100% + 15px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+        temp:
+          - position: absolute
+          - left: 8%
+          - top: 60px
+          - font-size: 20px
+          - font-weight: bold
+        hum:
+          - position: absolute
+          - left: 60%
+          - top: 60px
+          - font-size: 20px
+          - font-weight: bold
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: toggle
+  graph_temp:
+    custom_fields:
+      graph_temp:
+        card:
+          type: custom:mini-graph-card
+          height: 250
+          line_width: 4
+          lower_bound: 10
+          points_per_hour: 1
+          hours_to_show: 24
+          show:
+            fill: fade
+            icon: false
+            name: false
+            state: false
+            legend: false
+            points: false
+            labels: false
+  jauge_horizontal:
+    custom_fields:
+      jauge-horizontal:
+        card:
+          type: custom:bar-card
+          name: null
+          entity_row: true
+          direction: null
+          unit_of_measurement: null
+          positions:
+            value: 'off'
+            name: 'off'
+            indicator: 'off'
+          height: 20px
+          width: 100%
+          icon: 'off'
+  carte_bouton:
+    show_name: false
+    show_state: false
+    show_label: false
+    show_icon: true
+    styles:
+      card:
+        - border-radius: 8px
+        - height: 27px
+        - padding: 02px
+        - line-height: 77%
+        - background: rgba(43,53,66,0.6)
+      icon:
+        - color: grey
+        - width: 16px
+        - padding-bottom: 0px
+      name:
+        - font-size: 9px
+      label:
+        - font-size: 11px
+      state:
+        - font-size: 11px
+    double_tap_action:
+      action: more-info
+    tap_action:
+      action: toggle
+  carte_bouton_state:
+    state:
+      - value: 'on'
+        styles:
+          state:
+            - font-weight: bold
+          label:
+            - font-weight: bold
+          icon:
+            - color: lightgrey
+      - value: home
+        styles:
+          icon:
+            - color: lightgrey
+      - value: heat
+        styles:
+          icon:
+            - color: lightgrey
+      - value: Run
+        styles:
+          icon:
+            - color: lightgrey
+      - value: armed_away
+        styles:
+          icon:
+            - color: lightgrey
+      - value: playing
+        styles:
+          icon:
+            - color: lightgrey
+      - value: veille
+        styles:
+          icon:
+            - color: lightgrey
+      - value: 'off'
+        styles:
+          icon:
+            - color: grey
+      - value: not_home
+        styles:
+          icon:
+            - color: grey
+      - value: disarmed
+        styles:
+          icon:
+            - color: grey
+      - value: standby
+        styles:
+          icon:
+            - color: grey
+      - value: idle
+        styles:
+          icon:
+            - color: grey
+      - value: paused
+        styles:
+          icon:
+            - color: grey
+      - value: unavailable
+        styles:
+          icon:
+            - color: red
+            - animation: blink 0.8s ease infinite
+    tap_action:
+      action: more-info
+  carte_bouton_state_tv_salon:
+    styles:
+      icon:
+        - color: |
+            [[[
+              if (states['media_player.tv_salon'].state == "on")
+                return 'lightgrey';
+              return "grey"
+            ]]]
+  carte_bouton_state_tv_parents:
+    styles:
+      icon:
+        - color: |
+            [[[
+              if (states['switch.tele_des_parents'].state == "on")
+                return 'lightgrey';
+              return "grey"
+            ]]]
+  base_petite:
+    styles:
+      card:
+        - height: 50px
+  base_moyenne:
+    styles:
+      card:
+        - height: 80px
+  base_large:
+    styles:
+      card:
+        - height: 95px
+  base_tres_large:
+    styles:
+      card:
+        - height: 147px
+  base_extra_large:
+    styles:
+      card:
+        - height: 235px
+  carte_piece:
+    styles:
+      custom_fields:
+        notification:
+          - border-radius: 50%
+          - position: absolute
+          - left: 18%
+          - top: 6%
+          - height: 15px
+          - width: 15px
+          - font-size: 85%
+          - line-height: 17px
+          - font-weight: null
+          - background-color: |
+              [[[
+                if (entity.state == "off")
+                  return 'rgba(0,191,205,0)';
+               return 'rgba(0,0,0,0.4)';
+              ]]]
+          - color: |
+              [[[
+                if (entity.state == "off")
+                  return 'rgba(0,191,205,0)';
+               return 'lightgrey';
+              ]]]
+        lum:
+          - position: absolute
+          - top: 46%
+          - left: 50%
+          - width: calc(90% + 0px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 8
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+  piece_jauge_lumiere:
+    custom_fields:
+      lum:
+        card:
+          type: conditional
+          card:
+            type: custom:my-slider
+            radius: 10px
+            height: 8px
+            width: 100%
+            mainSliderColor: var(--button-card-light-color-no-temperature)
+            secondarySliderColor: darkslategrey
+            thumbHorizontalPadding: 0px
+            thumbVerticalPadding: 0px
+            minSet: 1
+            thumbWidth: 1px
+            thumbColor: lightgrey
+  jauge_lumiere:
+    custom_fields:
+      lum:
+        card:
+          type: custom:my-slider
+          radius: 6px
+          height: 20px
+          mainSliderColor: var(--button-card-light-color-no-temperature)
+          thumbHorizontalPadding: 0px
+          thumbVerticalPadding: 0px
+          thumbWidth: 2px
+          minSet: 1
+    styles:
+      custom_fields:
+        lum:
+          - position: absolute
+          - top: 72%
+          - left: 51%
+          - width: calc(90% + 1px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 1
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+  carte_lumiere:
+    template:
+      - carte_badge
+      - state_lumiere
+      - state_unavailable
+    styles:
+      card:
+        - height: 90px
+      name:
+        - padding-bottom: 30px
+  carte_badge:
+    show_icon: true
+    show_name: true
+    show_state: false
+    show_label: false
+    template:
+      - police
+      - style
+    styles:
+      img_cell:
+        - border-radius: 50%
+        - width: 30px
+        - height: 30px
+        - background-color: var(--pastille_off)
+        - color: var(--text_systeme_info)
+        - margin-top: 2px
+      icon:
+        - width: 60%
+        - color: var(--icon_off)
+      label:
+        - font-weight: null
+        - font-size: 11px
+        - color: var(--text_on)
+      state:
+        - font-weight: null
+        - font-size: 11px
+        - color: var(--text_on)
+      name:
+        - font-weight: bold
+        - font-size: 11px
+        - padding-top: 5%
+        - color: rgba(232,233,242,1)
+      card:
+        - border-radius: 15px
+        - height: auto
+        - padding-left: 3px
+        - padding-right: 3px
+    state:
+      - value: 'off'
+        styles:
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+          label:
+            - color: var(--text_off)
+          state:
+            - color: var(--text_off)
+    double_tap_action:
+      action: toggle
+    tap_action:
+      action: more-info
+  carte_ronde:
+    show_icon: true
+    show_name: false
+    show_state: false
+    show_label: false
+    aspect_ratio: 1/1
+    template:
+      - police
+      - style
+    styles:
+      img_cell:
+        - border-radius: 100%
+        - width: 27px
+        - height: 27px
+        - background-color: var(--pastille_off)
+        - color: var(--text_systeme_info)
+      icon:
+        - width: 62%
+        - color: var(--icon_off)
+      card:
+        - border-radius: 50%
+        - padding: 0px
+    double_tap_action:
+      action: more-info
+  carte_thermo:
+    template:
+      - carte_ronde
+      - state_unavailable
+    show_icon: false
+    show_state: true
+    show_name: true
+    show_label: true
+    state:
+      - value: 18.5
+        operator: <
+        styles:
+          card:
+            - background-color: var(--custom-card-color-blue)
+          state:
+            - color: var(--custom-icon-color-blue)
+      - value: 26.9
+        operator: '>'
+        styles:
+          card:
+            - background-color: var(--custom-card-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+    styles:
+      name:
+        - font-size: 90%
+      state:
+        - font-size: 130%
+        - font-weight: bold
+      label:
+        - font-size: 90%
+      custom_fields:
+        gauge:
+          - z-index: 1
+          - position: absolute
+          - top: 50.5%
+          - left: 50%
+          - opacity: 90%
+          - width: calc(115% + 0px)
+          - transform: translate(-50%, calc(-50% + 0px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+    custom_fields:
+      gauge:
+        card:
+          type: custom:hatc-gauge-card
+          title:
+            name: false
+            icon: false
+          gauge:
+            icon: false
+            icon-size: 20px
+            state: false
+            text-color: lightgrey
+            font-size: 20px
+            max_value: 50
+            friendly_name: true
+            severity:
+              - color: rgb(0,191,255)
+              - color: rgb(176, 196, 222)
+                from: 0
+                to: 18.4
+              - color: rgb(180, 70, 70)
+                from: 26.9
+                to: 50
+  carte_humidite:
+    template:
+      - carte_ronde
+      - state_unavailable
+    show_icon: false
+    show_state: true
+    show_name: true
+    show_label: true
+    state:
+      - value: 40
+        operator: <
+        styles:
+          card:
+            - background-color: var(--custom-card-color-blue)
+          state:
+            - color: var(--custom-icon-color-blue)
+      - value: 70
+        operator: '>'
+        styles:
+          card:
+            - background-color: var(--custom-card-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+    styles:
+      name:
+        - font-size: 90%
+      state:
+        - font-size: 130%
+        - font-weight: bold
+      label:
+        - font-size: 90%
+      custom_fields:
+        gauge:
+          - z-index: 1
+          - position: absolute
+          - top: 50.5%
+          - left: 50%
+          - opacity: 90%
+          - width: calc(115% + 0px)
+          - transform: translate(-50%, calc(-50% + 0px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+    custom_fields:
+      gauge:
+        card:
+          type: custom:hatc-gauge-card
+          title:
+            name: false
+            icon: false
+          gauge:
+            icon: false
+            icon-size: 20px
+            state: false
+            text-color: lightgrey
+            font-size: 20px
+            max_value: 100
+            friendly_name: true
+            severity:
+              - color: rgb(0,191,255)
+              - color: rgb(176, 196, 222)
+                from: 0
+                to: 39.9
+              - color: rgb(180, 70, 70)
+                from: 69.9
+                to: 50
+  carte_lum:
+    template:
+      - carte_ronde
+      - state_unavailable
+    show_icon: false
+    show_state: true
+    show_name: true
+    show_label: true
+    state:
+      - value: 100
+        operator: <
+        styles:
+          card:
+            - background-color: var(--custom-card-color-blue)
+          state:
+            - color: var(--custom-icon-color-blue)
+      - value: 500
+        operator: '>'
+        styles:
+          card:
+            - background-color: var(--custom-card-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+    styles:
+      name:
+        - font-size: 90%
+      state:
+        - font-size: 130%
+        - font-weight: bold
+      label:
+        - font-size: 90%
+      custom_fields:
+        gauge:
+          - position: absolute
+          - top: 50.5%
+          - left: 50%
+          - opacity: 90%
+          - width: calc(115% + 0px)
+          - transform: translate(-50%, calc(-50% + 0px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+    custom_fields:
+      gauge:
+        card:
+          type: custom:hatc-gauge-card
+          title:
+            name: false
+            icon: false
+          gauge:
+            icon: false
+            icon-size: 20px
+            state: false
+            text-color: lightgrey
+            font-size: 20px
+            max_value: 1000
+            friendly_name: true
+            severity:
+              - color: rgb(222, 222, 176)
+              - color: rgb(176, 196, 222)
+                from: 0
+                to: 99.9
+              - color: rgb(180, 70, 70)
+                from: 500
+                to: 10000
+  carte_jauge:
+    template:
+      - carte_ronde
+      - state_unavailable
+    show_icon: false
+    show_state: true
+    show_name: true
+    show_label: true
+    styles:
+      name:
+        - font-size: 90%
+      state:
+        - font-size: 130%
+        - font-weight: bold
+      label:
+        - font-size: 90%
+      custom_fields:
+        gauge:
+          - position: absolute
+          - top: 50.5%
+          - left: 50%
+          - opacity: 90%
+          - width: calc(115% + 0px)
+          - transform: translate(-50%, calc(-50% + 0px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+    custom_fields:
+      gauge:
+        card:
+          type: custom:hatc-gauge-card
+          title:
+            name: false
+            icon: false
+          gauge:
+            unit_of_measurement: false
+            icon: false
+            icon-size: 20px
+            state: false
+            text-color: lightgrey
+            font-size: 20px
+            friendly_name: true
+  state_lumiere:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: |-
+                [[[ 
+                  var color = '255,215,0'; // Default Color
+
+                  if( states[entity.entity_id].attributes.rgb_color != undefined)
+                    color = states[entity.entity_id].attributes.rgb_color; 
+                  
+                  return 'rgb(' + color + ',0.5)';
+                ]]]
+          img_cell:
+            - background-color: |-
+                [[[ 
+                  var color = '255,215,0'; // Default Color
+
+                  if( states[entity.entity_id].attributes.rgb_color != undefined)
+                    color = states[entity.entity_id].attributes.rgb_color; 
+                  
+                  return 'rgb(' + color + ',0.3)';
+                ]]]
+          icon:
+            - color: |-
+                [[[ 
+                  var color = '255,215,0'; // Default Color
+
+                  if( states[entity.entity_id].attributes.rgb_color != undefined)
+                    color = states[entity.entity_id].attributes.rgb_color; 
+                  
+                  return 'rgb(' + color + ',1)';
+                ]]]
+            - transition: 1s ease
+      - value: 'off'
+        color: grey
+        styles:
+          card:
+            - animation: ball-scale2 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_porte:
+    state:
+      - value: 'on'
+        icon: mdi:door-open
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: 'off'
+        icon: mdi:door
+        color: grey
+        styles:
+          card:
+            - animation: ball-scale2 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_mouv:
+    state:
+      - value: 'on'
+        icon: mdi:human-greeting
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: 'off'
+        icon: mdi:human-male
+        color: grey
+        styles:
+          card:
+            - animation: ball-scale2 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_person:
+    state:
+      - value: Atoll
+        styles:
+          label:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: Travail
+        styles:
+          label:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: Collège
+        styles:
+          label:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: Lycée
+        styles:
+          label:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: home
+        operator: '!='
+        styles:
+          label:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: 'off'
+        styles:
+          label:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+  state_alarme:
+    state:
+      - value: disarmed
+        color: grey
+        styles:
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+      - value: 'off'
+        color: grey
+        styles:
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+      - value: armed_away
+        color: red
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: armed_night
+        color: red
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: 'on'
+        color: red
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: arming
+        color: gold
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: pending
+        color: red
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - animation: blink 1s ease infinite
+            - transition: 1s ease
+      - value: triggered
+        color: red
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - animation: blink 1s ease infinite
+            - transition: 1s ease
+  state_temp:
+    state:
+      - value: 25.9
+        operator: '>'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: 18.5
+        operator: <
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: 25.9
+        operator: <
+        styles: null
+  state_temp_exterieur:
+    state:
+      - value: 25
+        operator: '>'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+          state:
+            - font-weight: bold
+      - value: 10
+        operator: <
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: rgba(30,144,255,0.5)
+          img_cell:
+            - background-color: rgba(30,144,255,0.08)
+          icon:
+            - color: rgba(30,144,255,1)
+            - transition: 1s ease
+          state:
+            - font-weight: bold
+  state_humidite:
+    state:
+      - value: 70
+        operator: '>'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+      - value: 40
+        operator: <
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+  state_luminosite:
+    state:
+      - value: 500
+        operator: '>'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - transition: 1s ease
+      - value: 150
+        operator: <
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+  state_imprimante:
+    state:
+      - value: idle
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: printing
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: stopped
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: unavailable
+        color: var(--text_off)
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+      - value: 'off'
+        color: var(--text_off)
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_appareil:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: 'off'
+        color: var(--text_off)
+        styles:
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_musique:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: playing
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: 'off'
+        color: var(--text_off)
+        styles:
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_machine:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: 'off'
+        color: var(--text_off)
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_lave_linge:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: veille
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: 'off'
+        color: var(--text_off)
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_aspi:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+            - animation: rotating 4s ease infinite
+      - value: cleaning
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+            - animation: rotating 4s ease infinite
+      - value: returning
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+            - animation: rotating 4s ease infinite
+      - value: idle
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: paused
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: docked
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+      - value: 'off'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+      - value: error
+        styles:
+          icon:
+            - animation: blink 1s ease infinite
+            - color: firebrick
+            - transition: 1s ease
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          name:
+            - color: firebrick
+          label:
+            - color: firebrick
+            - font-weight: bold
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace/Aspis
+  state_tv:
+    state:
+      - value: 'on'
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: home
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+            - background-color: var(--custom-card-color-blue)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-blue)
+          icon:
+            - color: var(--custom-icon-color-blue)
+            - transition: 1s ease
+      - value: 'off'
+        color: var(--text_off)
+        styles:
+          card:
+            - animation: ball-scale 0.2s
+          img_cell:
+            - background-color: var(--pastille_off)
+          icon:
+            - color: var(--icon_off)
+            - transition: 1s ease
+  state_batterie:
+    show_state: true
+    show_last_changed: true
+    styles:
+      name:
+        - font-size: 12px
+      state:
+        - font-size: 12px
+        - font-weight: bold
+      label:
+        - font-size: 9px
+    units: '%'
+    state:
+      - value: 40
+        operator: '>'
+      - value: 20
+        operator: '>'
+        styles:
+          card:
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: 0
+        operator: '>'
+        styles:
+          card:
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - animation: blink 1s ease infinite
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: 0
+        styles:
+          card:
+            - background-color: var(--custom-card-color-red)
+          img_cell:
+            - background-color: var(--custom-img-cell-color-red)
+          icon:
+            - color: var(--custom-icon-color-red)
+            - animation: blink 1s ease infinite
+          state:
+            - color: var(--custom-icon-color-red)
+      - value: unavailable
+        styles:
+          card:
+            - border-color: rgba(255, 0, 0, 0.5)
+            - opacity: 100%
+          img_cell:
+            - background-color: black
+          icon:
+            - color: red
+            - transition: 1s ease
+          name:
+            - color: red
+          label:
+            - color: red
+            - font-size: 65%
+          state:
+            - color: red
+            - font-weight: bold
+  state_unavailable:
+    state:
+      - value: unavailable
+        styles:
+          card:
+            - border-color: rgba(255, 0, 0, 0.8)
+            - opacity: 100%
+          img_cell:
+            - background-color: black
+          icon:
+            - color: var(--custom-icon-color-red)
+            - animation: blink 0.8s ease infinite
+            - transition: 1s ease
+          name:
+            - color: red
+          label:
+            - color: red
+          state:
+            - color: red
+  carte_personne:
+    show_entity_picture: true
+    show_state: false
+    template:
+      - base
+      - base_large
+      - state_person
+    styles:
+      entity_picture:
+        - width: 100%
+      custom_fields:
+        jauge-cercle:
+          - width: 27%
+        notification:
+          - border-radius: 100%
+          - position: absolute
+          - left: 28px
+          - top: 5%
+          - width: 17.5px
+          - height: 17.5px
+          - line-height: 16px
+          - background-color: |
+              [[[
+                if (entity.state == 'home') 
+                  return "rgb(103,173,91)"
+                if (entity.state == 'not_home') 
+                  return "var(--custom-badge-color-red)"
+                return "var(--custom-badge-color-blue)"
+              ]]]
+    custom_fields:
+      notification: |
+        [[[
+              var f_n_zone = states[entity.entity_id].state;
+
+              // supprime les accents
+              var b="áàâäãåçéèêëíïîìñóòôöõúùûüýÁÀÂÄÃÅÇÉÈÊËÍÏÎÌÑÓÒÔÖÕÚÙÛÜÝ",
+              c="aaaaaaceeeeiiiinooooouuuuyAAAAAACEEEEIIIINOOOOOUUUUY",
+              d="";
+              for(var i = 0, j = f_n_zone.length; i < j; i++) {
+                var e = f_n_zone.substr(i, 1);
+                d += (b.indexOf(e) !== -1) ? c.substr(b.indexOf(e), 1) : e;
+              }
+              // remplace " - " par "_"
+              var id_zone = d.replaceAll(' - ', '_');
+              // remplace les espaces restants par "_"
+              id_zone = id_zone.replaceAll(' ', '_');
+              // transforme le texte en minuscule 
+              id_zone = id_zone.toLowerCase();
+
+              if(states["zone." + id_zone] == undefined){
+                return `<ha-icon icon="mdi:home-export-outline" style="width: 13px; height: 13px; color: white;"></ha-icon>`;
+              }else{
+                return `<ha-icon icon="${states["zone." + id_zone].attributes.icon}" style="width: 13px; height: 13px; color: white;"></ha-icon>`;
+              }
+            ]]]
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace/Personnes
+    double_tap_action:
+      action: more-info
+  carte_personne_aurel:
+    entity: person.herve
+    template:
+      - carte_personne
+    label: |
+      [[[return states["sensor.aurel_gps"].state ]]]
+    styles:
+      label:
+        - white-space: normal
+    custom_fields:
+      jauge-cercle:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: conditional
+              conditions:
+                - entity: sensor.iphone_aurel_battery_state
+                  state: Not Charging
+              card:
+                type: custom:hatc-gauge-card
+                entity: sensor.iphone_aurel_battery_level
+                title:
+                  name: false
+                  icon: false
+                gauge:
+                  icon: false
+                  font-size: 11px
+                  text-color: severity
+                  max_value: 100
+                  friendly_name: false
+                  unit_of_measurement: false
+                  severity:
+                    - color: darkgrey
+                    - color: rgb(70, 130, 180)
+                      from: 100
+                      to: 100
+                    - color: rgb(255,215,0)
+                      from: 31
+                      to: 50
+                    - color: rgb(180, 70, 70)
+                      from: 0
+                      to: 30
+            - type: conditional
+              conditions:
+                - entity: sensor.iphone_aurel_battery_state
+                  state_not: Not Charging
+              card:
+                type: custom:hatc-gauge-card
+                entity: sensor.iphone_aurel_battery_level
+                title:
+                  name: false
+                  icon: false
+                gauge:
+                  state: false
+                  font-size: 11px
+                  icon-size: 13px
+                  icon-color: severity
+                  max_value: 100
+                  friendly_name: false
+                  unit_of_measurement: false
+                  severity:
+                    - color: darkgrey
+                    - color: rgb(70, 130, 180)
+                      from: 100
+                      to: 100
+                    - color: rgb(255,215,0)
+                      from: 31
+                      to: 50
+                    - color: rgb(180, 70, 70)
+                      from: 0
+                      to: 30
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.aurel_duree
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 10px
+                  - white-space: normal
+                card:
+                  - padding-top: 5px
+                  - line-height: 60%
+                  - width: 35px
+            - type: custom:button-card
+              entity: sensor.iphone_activity
+              template:
+                - carte_bouton
+              icon: |
+                [[[
+                  if (states['sensor.iphone_activity'].state == 'Unknown')
+                    return "mdi:human-handsdown"
+                  if (states['sensor.iphone_activity'].state == 'Stationary')
+                    return "mdi:human-male"
+                  if (states['sensor.iphone_activity'].state == 'Automotive')
+                    return "mdi:car"
+                  if (states['sensor.iphone_activity'].state == 'Walking')
+                    return "mdi:walk"
+                  if (states['sensor.iphone_activity'].state == 'Running')
+                    return "mdi:run-fast"
+                  if (states['sensor.iphone_activity'].state == 'Cycling')
+                    return "mdi:bike"
+                  return ""
+                ]]]
+              styles:
+                icon:
+                  - color: |
+                      [[[
+                        if (states['sensor.iphone_activity'].state == 'Stationary')
+                          return "grey"
+                        if (states['sensor.iphone_activity'].state == 'Automotive')
+                          return "red"
+                        return 'lightgrey'
+                      ]]]
+            - type: custom:button-card
+              entity: device_tracker.aurel_mac_ping
+              icon: mdi:laptop
+              template:
+                - carte_bouton
+              styles:
+                card:
+                  - background-color: |
+                      [[[
+                         if (states['sensor.macbook_aurel_internal_battery_state'].state == "Charging" && states['sensor.macbook_aurel_internal_battery_level'].state != 100 )
+                           return "var(--custom-img-cell-color-yellow)"
+                         if (states['sensor.macbook_aurel_internal_battery_state'].state == "Charging" && states['sensor.macbook_aurel_internal_battery_level'].state == 100)
+                           return "var(--custom-img-cell-color-blue)"
+                         if (states['sensor.macbook_aurel_internal_battery_state'].state == "Full" )
+                           return "var(--custom-img-cell-color-blue)"
+                         return "rgba(43,53,66,0.6)"
+                      ]]]
+                icon:
+                  - color: |
+                      [[[
+                        if (states['sensor.macbook_aurel_internal_battery_level'].state < 50)
+                          return "tomato"
+                        if (states['sensor.macbook_aurel_internal_battery_level'].state < 30)
+                          return "rgb(180, 70, 70)"
+                        if (states['device_tracker.aurel_mac_ping'].state == "home")
+                          return 'lightgrey'
+                        if (states['device_tracker.aurel_mac_ping'].state == "not_home")
+                          return 'grey'
+                      ]]]
+            - type: custom:button-card
+              entity: device_tracker.aurel_ipad_ping
+              icon: mdi:tablet
+              template:
+                - carte_bouton
+              styles:
+                card:
+                  - background-color: |
+                      [[[
+                         if (states['sensor.ipad_aurel_battery_state'].state == "Charging" )
+                           return "var(--custom-img-cell-color-gold)"
+                         if (states['sensor.ipad_aurel_battery_state'].state == "Full" )
+                           return "var(--custom-img-cell-color-blue)"
+                         return "rgba(43,53,66,0.6)"
+                      ]]]
+                icon:
+                  - color: |
+                      [[[
+                        if (states['sensor.ipad_aurel_battery_level'].state < 50)
+                          return "tomato"
+                        if (states['sensor.ipad_aurel_battery_level'].state < 30)
+                          return "rgb(180, 70, 70)"
+                        if (states['device_tracker.aurel_ipad_ping'].state == "home")
+                          return 'lightgrey'
+                        if (states['device_tracker.aurel_ipad_ping'].state == "not_home")
+                          return 'grey'
+                      ]]]
+  carte_personne_alex:
+    entity: person.alex
+    label: |
+      [[[return states["sensor.alex_gps"].state]]]
+    template:
+      - carte_personne
+    styles:
+      label:
+        - white-space: normal
+    custom_fields:
+      jauge-cercle:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: conditional
+              conditions:
+                - entity: sensor.alex_iphone_battery_state_ha
+                  state: Not Charging
+              card:
+                type: custom:hatc-gauge-card
+                entity: sensor.alex_iphone_battery_level_ha
+                title:
+                  name: false
+                  icon: false
+                gauge:
+                  icon: false
+                  font-size: 11px
+                  text-color: severity
+                  max_value: 100
+                  friendly_name: false
+                  unit_of_measurement: false
+                  severity:
+                    - color: darkgrey
+                    - color: rgb(70, 130, 180)
+                      from: 100
+                      to: 100
+                    - color: rgb(255,215,0)
+                      from: 31
+                      to: 50
+                    - color: rgb(180, 70, 70)
+                      from: 0
+                      to: 30
+            - type: conditional
+              conditions:
+                - entity: sensor.alex_iphone_battery_state_ha
+                  state_not: Not Charging
+              card:
+                type: custom:hatc-gauge-card
+                entity: sensor.alex_iphone_battery_level_ha
+                title:
+                  name: false
+                  icon: false
+                gauge:
+                  state: false
+                  font-size: 11px
+                  icon-size: 13px
+                  icon-color: severity
+                  max_value: 100
+                  friendly_name: false
+                  unit_of_measurement: false
+                  severity:
+                    - color: darkgrey
+                    - color: rgb(70, 130, 180)
+                      from: 100
+                      to: 100
+                    - color: rgb(255,215,0)
+                      from: 31
+                      to: 50
+                    - color: rgb(180, 70, 70)
+                      from: 0
+                      to: 30
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.alex_duree
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 10px
+                  - white-space: normal
+                card:
+                  - padding-top: 5px
+                  - line-height: 60%
+                  - width: 35px
+            - type: custom:button-card
+              entity: sensor.alex_iphone_activity_2
+              template:
+                - carte_bouton
+              icon: |
+                [[[
+                  if (states['sensor.alex_iphone_activity_2'].state == 'Unknown')
+                    return "mdi:human-handsdown"
+                  if (states['sensor.alex_iphone_activity_2'].state == 'Stationary')
+                    return "mdi:human-male"
+                  if (states['sensor.alex_iphone_activity_2'].state == 'Automotive')
+                    return "mdi:car"
+                  if (states['sensor.alex_iphone_activity_2'].state == 'Walking')
+                    return "mdi:walk"
+                  if (states['sensor.alex_iphone_activity_2'].state == 'Running')
+                    return "mdi:run-fast"
+                  if (states['sensor.alex_iphone_activity_2'].state == 'Cycling')
+                    return "mdi:bike"
+                  return ""
+                ]]]
+              styles:
+                icon:
+                  - color: |
+                      [[[
+                        if (states['sensor.alex_iphone_activity_2'].state == 'Stationary')
+                          return "grey"
+                        if (states['sensor.alex_iphone_activity_2'].state == 'Automotive')
+                          return "red"
+                        return 'lightgrey'
+                      ]]]
+            - type: custom:button-card
+              entity: device_tracker.macbook_alex
+              icon: mdi:laptop
+              template:
+                - carte_bouton
+              styles:
+                card:
+                  - background-color: |
+                      [[[
+                         if (states['sensor.macbook_alex_internal_battery_state'].state == "Charging" && states['sensor.macbook_alex_internal_battery_level'].state != 100)
+                           return "var(--custom-img-cell-color-gold)"
+                         if (states['sensor.macbook_alex_internal_battery_state'].state == "Charging" && states['sensor.macbook_alex_internal_battery_level'].state == 100)
+                           return "var(--custom-img-cell-color-blue)"
+                         if (states['sensor.macbook_alex_internal_battery_state'].state == "Full" )
+                           return "var(--custom-img-cell-color-blue)"
+                         return "rgba(43,53,66,0.6)"
+                      ]]]
+                icon:
+                  - color: |
+                      [[[
+                        if (states['sensor.macbook_alex_internal_battery_level'].state < 50)
+                          return "tomato"
+                        if (states['sensor.macbook_alex_internal_battery_level'].state < 30)
+                          return "rgb(180, 70, 70)"
+                        if (states['device_tracker.alex_mac_ping'].state == "home")
+                          return 'lightgrey'
+                        if (states['device_tracker.alex_mac_ping'].state == "not_home")
+                          return 'grey'
+                      ]]]
+            - type: custom:button-card
+              entity: device_tracker.liseuse_alex
+              icon: |
+                [[[
+                  if (states['device_tracker.liseuse_alex'].state == "home")
+                    return 'mdi:book-open'
+                  if (states['device_tracker.liseuse_alex'].state == "not_home")
+                    return 'mdi:book-open'
+                ]]]
+              template:
+                - carte_bouton
+                - carte_bouton_state
+  carte_personne_tom:
+    entity: person.tom
+    label: |
+      [[[return states["sensor.tom_gps"].state]]]
+    template:
+      - carte_personne
+    custom_fields:
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.tom_duree
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 10px
+            - type: custom:button-card
+              entity: device_tracker.tom_mac_ping
+              icon: mdi:laptop
+              template:
+                - carte_bouton
+                - carte_bouton_state
+  carte_personne_manon:
+    entity: person.manon
+    label: |
+      [[[
+        if (states['device_tracker.manon_tab_ping'].state == 'home')
+          return "Présent"
+        return "Absent"
+      ]]]
+    template:
+      - carte_personne
+    custom_fields:
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.manon_duree
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 10px
+  carte_personne_leane:
+    entity: person.leane
+    label: |
+      [[[
+        if (states['device_tracker.leane_tab_ping'].state == 'home')
+          return "Présent"
+        return "Absent"
+      ]]]
+    template:
+      - carte_personne
+    custom_fields:
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.leane_duree
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 10px
+  carte_personne_nina:
+    entity: person.nina
+    label: |
+      [[[
+        if (states['device_tracker.nina_tab_ping'].state == 'home')
+          return "Présent"
+        return "Absent"
+      ]]]
+    template:
+      - carte_personne
+    custom_fields:
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.nina_duree
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 10px
+  carte_appareil:
+    styles:
+      custom_fields:
+        barre_imprimante_noire:
+          - opacity: 90%
+          - position: absolute
+          - top: 50%
+          - left: 0%
+          - width: calc(100% + 0px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 1
+          - '--ha-card-border-width': 0px
+        barre_imprimante_couleur:
+          - opacity: 90%
+          - position: absolute
+          - top: 75%
+          - left: 0%
+          - width: calc(100% + 0px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 1
+          - '--ha-card-border-width': 0px
+  carte_appareil_vaisselle:
+    entity: switch.lave_vaisselle_power
+    name: Vaisselle
+    icon: phu:rooms-dining
+    template:
+      - base
+      - base_large
+      - carte_appareil
+      - state_machine
+      - state_unavailable
+    label: |
+      [[[
+        if (states['switch.lave_vaisselle_power'].state == "on" &&states['switch.lave_vaisselle_program_machinecare'].state == "on")
+          return "Entretien"+"<br>"+states['sensor.lave_vaisselle'].state
+        if (states['switch.lave_vaisselle_power'].state == "on" &&states['switch.lave_vaisselle_program_machinecare'].state == "off")
+          return states['sensor.lave_vaisselle'].state
+        if (states['switch.lave_vaisselle_power'].state == "off")
+          return "Éteint "
+        return "" 
+      ]]]
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: toggle
+    custom_fields:
+      jauge-cercle:
+        card:
+          type: conditional
+          conditions:
+            - entity: switch.lave_vaisselle_power
+              state: 'on'
+          card:
+            type: custom:hatc-gauge-card
+            entity: sensor.lave_vaisselle_program_progress
+            title:
+              name: false
+              icon: false
+              text-align: center
+              text-color: red
+              font-size: 28px
+            gauge:
+              icon: false
+              font-size: 11px
+              text-color: severity
+              max_value: 100
+              friendly_name: false
+              unit_of_measurement: false
+              severity:
+                - color: darkgrey
+                - color: rgb(70, 130, 180)
+                  from: 95
+                  to: 100
+                - color: rgb(180, 70, 70)
+                  from: 0
+                  to: 1
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: switch.lave_vaisselle_power
+              icon: mdi:power
+              template:
+                - carte_bouton
+                - carte_bouton_state
+              tap_action:
+                confirmation:
+                  text: >-
+                    [[[ return `${entity.attributes.friendly_name} : confirmer
+                    la bascule ON / OFF ?` ]]]
+            - type: custom:button-card
+              entity: switch.lave_vaisselle_program_auto2
+              icon: mdi:flag-checkered
+              template:
+                - carte_bouton
+                - carte_bouton_state
+              tap_action:
+                confirmation:
+                  text: >-
+                    [[[ return `${entity.attributes.friendly_name} : confirmer
+                    la bascule du programme ?` ]]]
+            - type: custom:button-card
+              entity: binary_sensor.lave_vaisselle_door
+              template:
+                - carte_bouton
+                - carte_bouton_state
+              tap_action:
+                action: more-info
+  carte_appareil_linge:
+    entity: input_select.lave_linge
+    name: Linge
+    icon: mdi:tshirt-crew
+    template:
+      - base
+      - base_large
+      - carte_appareil
+      - state_lave_linge
+      - state_unavailable
+    label: |
+      [[[
+        if (states['input_select.lave_linge'].state == "off")
+          return "Éteint"
+        if (states['input_select.lave_linge'].state == "veille")
+          return "Veille : "+ states['sensor.lave_linge_duree'].state
+        if (states['input_select.lave_linge'].state == "on")
+          return "Dépuis : "+ states['sensor.lave_linge_duree'].state
+      ]]]
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: toggle
+    custom_fields:
+      bouton:
+        card:
+          type: horizontal-stack
+          cards:
+            - type: custom:button-card
+              entity: sensor.lave_linge_conso
+              units: W
+              show_state: true
+              show_icon: false
+              template:
+                - carte_bouton
+                - state_unavailable
+              styles:
+                state:
+                  - font-size: 11px
+                  - color: |
+                      [[[
+                        if (states['sensor.lave_linge_conso'].state > 0.4)
+                          return 'rlightgrey';
+                        return "grey"
+                      ]]]
+            - type: custom:button-card
+              entity: switch.lave_linge
+              icon: mdi:power-plug
+              template:
+                - carte_bouton
+                - state_unavailable
+  carte_appareil_imprimante:
+    type: custom:button-card
+    entity: sensor.canon_mg4100_series
+    name: Imprimante
+    icon: mdi:printer
+    label: |
+      [[[
+        if (states['sensor.canon_mg4100_series'].state == "unavailable")
+          return "Éteint"
+        if (states['sensor.canon_mg4100_series'].state == "printing")
+          return "Impression"
+        if (states['sensor.canon_mg4100_series'].state == "stopped")
+          return "Arrêt"
+        if (states['sensor.canon_mg4100_series'].state == "idle")
+          return "Veille"
+        return states['sensor.canon_mg4100_series'].state
+      ]]]
+    template:
+      - base
+      - base_large
+      - carte_appareil
+      - state_imprimante
+    custom_fields:
+      barre_imprimante_noire:
+        card:
+          type: conditional
+          conditions:
+            - entity: sensor.canon_mg4100_series
+              state_not: unavailable
+          card:
+            type: custom:bar-card
+            name: Batterie
+            entities:
+              - entity: sensor.canon_mg4100_series_black
+                color: rgb(30,30,30)
+            entity_row: true
+            direction: null
+            unit_of_measurement: '%'
+            max: 100
+            positions:
+              value: inside
+              name: 'off'
+              indicator: 'off'
+            height: 17px
+            width: 100%
+            icon: 'off'
+            style: |-
+              bar-card-value {
+                font-size: 11px;
+                font-weight: bold;
+                color: var(--text_on);
+              }
+      barre_imprimante_couleur:
+        card:
+          type: conditional
+          conditions:
+            - entity: sensor.canon_mg4100_series
+              state_not: unavailable
+          card:
+            type: custom:bar-card
+            name: Batterie
+            entities:
+              - entity: sensor.canon_mg4100_series_color
+                color: rgb(70, 130, 180)
+            entity_row: true
+            direction: null
+            unit_of_measurement: '%'
+            max: 100
+            positions:
+              value: inside
+              name: 'off'
+              indicator: 'off'
+            height: 17px
+            width: 100%
+            icon: 'off'
+            style: |-
+              bar-card-value {
+
+                font-size: 11px;
+                font-weight: bold;
+                color: var(--text_on);
+              }
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: toggle
+  carte_tv:
+    styles:
+      card:
+        - height: 132px
+      custom_fields:
+        bouton2:
+          - position: absolute
+          - top: 54%
+          - left: 50%
+          - width: calc(90% + 0px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - '--ha-card-border-width': 0px
+        bouton:
+          - top: 79%
+        barre_volume:
+          - position: absolute
+          - opacity: 100%
+          - top: 40%
+          - left: '-06%'
+          - width: calc(100% + 020px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 1
+          - '--ha-card-border-width': 0px
+  carte_securite:
+    label: |-
+      [[[ 
+         if( states[entity.entity_id].state == "disarmed" )
+          return "Désarmée"
+         if( states[entity.entity_id].state == "armed_away" )
+          return "Absent"
+         if( states[entity.entity_id].state == "armed_night" )
+          return "Nuit"
+         if( states[entity.entity_id].state == "arming" )
+          return "Armement"
+         if( states[entity.entity_id].state == "triggered" )
+          return "Déclenchée"]]]
+  carte_multimedia:
+    aspect_ratio: 1/1
+    show_entity_picture: true
+    icon: |-
+      [[[
+        if (entity.state == 'playing' )
+          return ""
+        if (entity.state != 'playing' )
+          return "mdi:speaker"
+      ]]]
+    styles:
+      entity_picture:
+        - width: 100%
+      custom_fields:
+        notification:
+          - border-radius: 50%
+          - position: absolute
+          - left: 21%
+          - top: 03%
+          - height: 10%
+          - width: 10%
+          - font-size: 85%
+          - line-height: 137%
+          - font-weight: null
+        cartes:
+          - position: absolute
+          - border-radius: 50%
+          - top: 44.5%
+          - left: 50%
+          - width: calc(100% + 03px)
+          - transform: translate(-50%, calc(-50% + 10px))
+  titre_section:
+    show_icon: false
+    show_name: true
+    show_state: false
+    show_label: true
+    template:
+      - police
+    styles:
+      name:
+        - font-size: 14px
+        - font-weight: bold
+        - color: var(--text_on)
+        - justify-self: start
+      label:
+        - font-size: 14px
+        - font-weight: bold
+        - color: var(--text_on)
+        - justify-self: start
+      card:
+        - height: 35px
+        - padding: 01%
+        - border-radius: 0px
+        - line-height: 100%
+        - '--ha-card-border-width': 0px
+    tap_action:
+      action: toggle
+    double-tap_action:
+      action: more-info
+    style:
+      .: |
+        ha-card {
+            --ha-card-background: none !important;
+            box-shadow: none !important;
+            font-family: Avenir
+            border-width: 0px
+  badge:
+    template:
+      - police
+      - style
+    show_name: false
+    show_label: true
+    show_icon: true
+    styles:
+      grid:
+        - grid-template-areas: '"i n l" '
+      card:
+        - height: 32px
+        - width: auto
+        - padding-right: 07px
+        - padding-left: 03px
+        - border-radius: 15px
+      img_cell:
+        - background-color: transparent
+        - border-radius: 50%
+        - width: 25px
+        - height: 25px
+      icon:
+        - width: 18px
+      entity_picture:
+        - width: 90%
+      label:
+        - font-size: 11px
+        - font-weight: bold
+        - margin-left: 1px
+        - padding-top: 03px
+      name:
+        - font-size: 11px
+        - font-weight: bold
+        - margin-left: 1px
+    double_tap_action:
+      action: more-info
+  carte_systeme:
+    styles:
+      custom_fields:
+        reload:
+          - position: absolute
+          - top: 2%
+          - left: 113%
+          - width: calc(55% + 1px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - z-index: 1
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - opacity: 100%
+          - '--ha-card-border-width': 0px
+        graph:
+          - position: absolute
+          - top: 60%
+          - left: 50%
+          - width: calc(100% + 15px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+        graph_bar:
+          - position: absolute
+          - top: 69%
+          - left: 51%
+          - width: calc(100% + 35px)
+          - transform: translate(-50%, calc(-50% + 10px))
+          - '--paper-card-background-color': rgba(0, 0, 0, 0.0)
+          - '--ha-card-background': rgba(0, 0, 0, 0.0)"
+          - '--ha-card-box-shadow': none
+          - '--ha-card-border-width': 0px
+        info1:
+          - color: var(--text_systeme_info)
+          - position: absolute
+          - top: 50px
+          - left: 10px
+          - font-size: 90%
+          - font-weight: null
+          - text-align: left
+          - white-space: normal
+        info2:
+          - color: var(--text_systeme_info)
+          - position: absolute
+          - top: 70px
+          - left: 10px
+          - font-size: 90%
+          - font-weight: null
+          - text-align: left
+        info3:
+          - color: var(--text_systeme_info)
+          - position: absolute
+          - top: 90px
+          - left: 10px
+          - font-size: 90%
+          - font-weight: null
+          - text-align: left
+        info4:
+          - color: var(--text_systeme_info)
+          - position: absolute
+          - top: 110px
+          - left: 10px
+          - font-size: 90%
+          - font-weight: null
+          - text-align: left

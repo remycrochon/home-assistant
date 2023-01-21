@@ -1,4 +1,3 @@
-# Start of the dwains dashboard ui-lovelace.yaml
 
 #Load all settings for Dwains Dashboard
 dwains_dashboard:
@@ -6,8 +5,9 @@ dwains_dashboard:
 
 #For people who want to use button card templates
 button_card_templates: 
-  !include_dir_merge_named ../../../dwains-dashboard/button_card_templates
-
+#  !include_dir_merge_named ../../../dwains-dashboard/button_card_templates
+  !include_dir_merge_named /config/custom_components/dwains_dashboard/lovelace/button_card_templates
+  
 #For people who want to use apexcharts card templates
 apexcharts_card_templates:
   !include_dir_merge_named ../../../dwains-dashboard/apexcharts_card_templates

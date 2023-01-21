@@ -1,12 +1,15 @@
+col_span: '1'
+col_span_lg: '1'
+col_span_xl: '1'
 custom_fields:
   gauge:
     card:
-      entity: sensor.chambre_nord_humidite
+      entity: sensor.glances_ha_acpitz_1_temperature
       gauge:
         max_value: 100
         severity:
         - color: darkgrey
-        - color: var(--label-badge-blue)
+        - color: var(--custom-icon-color-blue)
           from: 0
           to: 30
         - color: yellow
@@ -18,8 +21,12 @@ custom_fields:
         - color: red
           from: 70.1
           to: 100
-entity: sensor.chambre_nord_humidite
-name: "Humidit\xE9"
+entity: sensor.glances_ha_acpitz_1_temperature
+name: CPU
+position: top
+row_span: '1'
+row_span_lg: '1'
+row_span_xl: '1'
 show_last_changed: true
 styles:
   label:

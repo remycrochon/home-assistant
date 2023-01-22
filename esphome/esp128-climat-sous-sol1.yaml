@@ -1,5 +1,5 @@
 substitutions:
-  device_name: esp128-climat-sous-sol1
+  device_name: esp128-climat-cellier
   adress_ip: "192.168.0.128"
   friendly_name: esp128
   time_timezone: "Europe/Paris"
@@ -22,7 +22,6 @@ wifi:
       priority: 0
   reboot_timeout: 5min
  
-
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -33,15 +32,6 @@ api:
 ota:
 web_server:
   port: 80
-
-time:
-  - platform: homeassistant
-    timezone:  ${time_timezone} 
-
-#uart:
-#  rx_pin: GPIO3 # RX=pin 21
-#  tx_pin: GPIO1 # TX=pin 22
-#  baud_rate: 9600
 
 i2c:
   sda: GPIO00 #
@@ -54,11 +44,6 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
-switch:    
-
-  - platform: restart
-    name: "${friendly_name} Restart"
-
 sensor:
   - platform: htu21d
     temperature:
@@ -66,25 +51,4 @@ sensor:
     humidity:
       name: "${device_name} Humidité"
     update_interval: 60s
-    
-  - platform: wifi_signal
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
 
-  - platform: uptime
-    name: "${friendly_name} Uptime Sensor"
-    update_interval: 60s
-
-text_sensor:
-  # IP address #
-  - platform: wifi_info
-    ip_address:
-      name: "${friendly_name} IP address"
-      icon: "mdi:network-outline"
-    ssid:
-      name: "${friendly_name} Connected SSID"
-    bssid:
-      name: "${friendly_name} Connected BSSID"
-  - platform: version
-    id: text_sensor_version
-    name: "${friendly_name} ESPHome Version"

@@ -415,7 +415,7 @@ sensor:
           {{ state_attr('weather.albi','forecast')[4].precipitation }}
 
 # Meteo france
-
+    # Utilisés dans boutton-card de la page /remy-2/home 
       meteo_france_orage:
         friendly_name: Orages
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Orages'') }}'
@@ -423,10 +423,10 @@ sensor:
         friendly_name: Inondation
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Inondation'') }}'
       meteo_france_pluie_inondation:
-        friendly_name: Inondation
+        friendly_name: Pluie-Inondation
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Pluie-inondation'') }}'       
-      meteo_france_vague:
-        friendly_name: Vagues-submersion
+      meteo_france_grand_froid:
+        friendly_name: Grand-froid
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Grand-froid'') }}'         
       meteo_france_vent:
         friendly_name: Vent violent
@@ -512,7 +512,7 @@ sensor:
             {% endif %}
           friendly_name: Today weather forecast  
 
-# Statistiques
+  # Statistiques
   # Pluviometrie - sert à gestion robot tonte
   - platform: statistics
     entity_id: sensor.vp2_rain24

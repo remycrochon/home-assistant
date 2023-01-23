@@ -1,6 +1,6 @@
 homeassistant:
   # Load packages
-  packages: !include_dir_named integrations
+  packages: !include_dir_named packages
 
 # Inclusion groupes/automatismes/script/scene
 group: !include groups.yaml

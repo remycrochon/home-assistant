@@ -88,8 +88,10 @@ template:
         {% set h = states('sensor.pzem_cuisine_puissance') | float(default=0) | round(2) %}
         {% set i = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(2) %}
         {% set j = states('sensor.ecocompteur_clim') | float(default=0) | round(2) %}
-        {% if (a-b-c-d-e-f-g-h-i-j) >= 0 %}
-          {{ (a-b-c-d-e-f-g-h-i-j) | round(2) }}
+        {% set k = states('sensor.pc_onduleur_eaton_puissance') | float(default=0) | round(2) %}
+        
+        {% if (a-b-c-d-e-f-g-h-i-j-k) >= 0 %}
+          {{ (a-b-c-d-e-f-g-h-i-j-k) | round(2) }}
         {% else%}
           0
         {%endif%}

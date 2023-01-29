@@ -4,35 +4,7 @@
 #                                                  #
 ####################################################
 
-utility_meter:
-# usage jour  
-  energy_pisc_usage_daily:
-    source: sensor.pzem_pisc_energy
-    cycle: daily
-    tariffs:
-      - hp
-      - hc
-# usage semaine
-  energy_pisc_usage_weekly:
-    source: sensor.pzem_pisc_energy
-    cycle: weekly
-    tariffs:
-      - hp
-      - hc
-# usage mois
-  energy_pisc_usage_monthly:
-    source: sensor.pzem_pisc_energy
-    cycle: monthly
-    tariffs:
-      - hp
-      - hc
-#usage an
-  energy_pisc_usage_yearly:
-    source: sensor.pzem_pisc_energy
-    cycle: yearly
-    tariffs:
-      - hp
-      - hc
+
 input_number:
   # utilisé pour simuler la température de l'eau pendant les tests
   temp_piscine:
@@ -245,46 +217,7 @@ template:
         {{ as_timestamp(state_attr("sun.sun", "next_noon")) | timestamp_custom('%H %M')}}
       icon: mdi:weather-sunset
 
-# Calcul des energies consommées par le piscine
-    - name: "Energie Piscine Jour"
-      unique_id: "energy_pisc_daily" 
-      state: >-
-        {% set p = states('sensor.energy_pisc_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
 
-    - name: "energy_pisc_weekly"
-      unique_id: "energy_pisc_weekly" 
-      state: >-
-        {% set p = states('sensor.energy_pisc_usage_weekly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_weekly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
-    - name: "energy_pisc_monthly"
-      unique_id: "energy_pisc_monthy" 
-      state: >-
-        {% set p = states('sensor.energy_pisc_usage_monthly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_monthly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
-    - name: "energy_pisc_yearly"
-      unique_id: "energy_pisc_yearly" 
-      state: >-
-        {% set p = states('sensor.energy_pisc_usage_yearly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_pisc_usage_yearly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
 
   - binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement

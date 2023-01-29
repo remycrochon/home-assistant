@@ -1722,39 +1722,18 @@
         target:
           entity_id:
           - select.energy_total_usage_daily
-          - select.energy_total_usage_weekly
-          - select.energy_total_usage_monthly
-          - select.energy_total_usage_yearly
-          - select.energy_pisc_usage_daily
-          - select.energy_pisc_usage_weekly
-          - select.energy_pisc_usage_monthly
-          - select.energy_pisc_usage_yearly
-          - select.energy_sdb_usage_daily
-          - select.energy_sdb_usage_weekly
-          - select.energy_sdb_usage_monthly
-          - select.energy_sdb_usage_yearly
-          - select.energy_ecs1_usage_daily
-          - select.energy_ecs1_usage_weekly
-          - select.energy_ecs1_usage_monthly
-          - select.energy_ecs1_usage_yearly
-          - select.energy_pac1_usage_daily
-          - select.energy_pac1_usage_weekly
-          - select.energy_pac1_usage_monthly
-          - select.energy_pac1_usage_yearly
-          - select.energy_mal_usage_daily
-          - select.energy_mal_usage_monthly
-          - select.energy_mal_usage_weekly
-          - select.energy_mal_usage_yearly
-          - select.energy_autres_usage_daily
-          - select.energy_autres_usage_monthly
-          - select.energy_autres_usage_weekly
-          - select.energy_autres_usage_yearly
-          - select.energy_vmc_usage_daily
           - select.linky_energie_jour
-          - select.energy_cuisine_usage_daily
-          - select.energy_cuisine_usage_monthly
-          - select.energy_cuisine_usage_weekly
-          - select.energy_cuisine_usage_yearly
+          - select.compteur_energie_pac
+          - select.compteur_energie_piscine_jour
+          - select.compteur_energie_autres_jour
+          - select.compteur_energie_onduleur_jour
+          - select.compteur_energie_vmc_jour
+          - select.compteur_energie_sdb_jour
+          - select.compteur_energie_wc_jour
+          - select.compteur_energie_ecs_pv_jour
+          - select.compteur_energie_ecs_reseau_jour
+          - select.compteur_energie_cuisine_jour
+          - select.compteur_energie_mal_jour
     - conditions:
       - condition: trigger
         id: tarif_hp
@@ -1765,39 +1744,18 @@
         target:
           entity_id:
           - select.energy_total_usage_daily
-          - select.energy_total_usage_weekly
-          - select.energy_total_usage_monthly
-          - select.energy_total_usage_yearly
-          - select.energy_pisc_usage_daily
-          - select.energy_pisc_usage_weekly
-          - select.energy_pisc_usage_monthly
-          - select.energy_pisc_usage_yearly
-          - select.energy_sdb_usage_daily
-          - select.energy_sdb_usage_weekly
-          - select.energy_sdb_usage_monthly
-          - select.energy_sdb_usage_yearly
-          - select.energy_ecs1_usage_daily
-          - select.energy_ecs1_usage_weekly
-          - select.energy_ecs1_usage_monthly
-          - select.energy_ecs1_usage_yearly
-          - select.energy_pac1_usage_daily
-          - select.energy_pac1_usage_weekly
-          - select.energy_pac1_usage_monthly
-          - select.energy_pac1_usage_yearly
-          - select.energy_mal_usage_daily
-          - select.energy_mal_usage_monthly
-          - select.energy_mal_usage_weekly
-          - select.energy_mal_usage_yearly
-          - select.energy_autres_usage_daily
-          - select.energy_autres_usage_monthly
-          - select.energy_autres_usage_weekly
-          - select.energy_autres_usage_yearly
-          - select.energy_vmc_usage_daily
           - select.linky_energie_jour
-          - select.energy_cuisine_usage_daily
-          - select.energy_cuisine_usage_monthly
-          - select.energy_cuisine_usage_weekly
-          - select.energy_cuisine_usage_yearly
+          - select.compteur_energie_pac
+          - select.compteur_energie_piscine_jour
+          - select.compteur_energie_autres_jour
+          - select.compteur_energie_onduleur_jour
+          - select.compteur_energie_vmc_jour
+          - select.compteur_energie_sdb_jour
+          - select.compteur_energie_wc_jour
+          - select.compteur_energie_ecs_pv_jour
+          - select.compteur_energie_ecs_reseau_jour
+          - select.compteur_energie_cuisine_jour
+          - select.compteur_energie_mal_jour
     default: []
   mode: single
 - id: '1642958036645'

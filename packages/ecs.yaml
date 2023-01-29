@@ -153,26 +153,7 @@ template:
         {% set p=states('sensor.puissance_ecs_pv_w')|float(default=0) %}
         {{ p/1000 }}
 
-    - name: "Energie ecs pv jour"
-      unique_id: "energie_ecs_pv_jour"
-      state: >-
-        {% set p = states('sensor.energy_ecs_pv_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_ecs_pv_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"
 
-# Cumul de Energie ECS Reseau et PV
-    - name: "Energie ECS Jour"
-      unique_id: "energie_ecs_jour"
-      state: >-
-        {% set p = states('sensor.energie_ecs_reseau_jour') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energie_ecs_pv_jour') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
 
 
 

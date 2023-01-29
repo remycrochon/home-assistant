@@ -4,14 +4,6 @@
 #                                                  #
 ####################################################
 
-utility_meter:
-# usage jour  
-  energy_vmc_usage_daily:
-    source: sensor.energy_vmc_n0
-    cycle: daily
-    tariffs:
-      - hp
-      - hc
 
 input_datetime:
 
@@ -47,16 +39,6 @@ input_select:
     
 template:
   - sensor:
-    - name: "Energie VMC Jour"
-      unique_id: "energy_vmc_daily"
-      state: >-
-        {% set p = states('sensor.energy_vmc_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_vmc_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
 # Limite les valeurs aberantes de la puissance de la VMC
     - name: "EcoCompteur VMC Niv0"
       unique_id: "ecocompteur_vmc_niv0"

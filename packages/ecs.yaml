@@ -153,10 +153,36 @@ template:
         {% set p=states('sensor.puissance_ecs_pv_w')|float(default=0) %}
         {{ p/1000 }}
 
+# Totalisation des energies HC+HP
+    - name: Compteur Energie ECS PV Jour HP_HC
+      unique_id: "compteur_energie_ecs_pv_jour_hp_hc"
+      device_class: "energy"
+      state_class: "total_increasing"    
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set hp=states('sensor.compteur_energie_ecs_pv_jour_hp')|float(default=0) %}
+        {% set hc=states('sensor.compteur_energie_ecs_pv_jour_hc')|float(default=0) %}
+        {{ hp+hc }}
 
+    - name: Compteur Energie ECS Reseau Jour HP-HC
+      unique_id: "compteur_energie_ecs_reseau_jour_hp_hc"
+      device_class: "energy"
+      state_class: "total_increasing"    
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set hp=states('sensor.compteur_energie_ecs_reseau_jour_hp')|float(default=0) %}
+        {% set hc=states('sensor.compteur_energie_ecs_reseau_jour_hc')|float(default=0) %}
+        {{ hp+hc }}
 
-
-
+    - name: Compteur Energie ECS PV Reseau Jour HP-HC
+      unique_id: "compteur_energie_ecs_pv_reseau_jour_hp_hc"
+      device_class: "energy"
+      state_class: "total_increasing"    
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set p=states('sensor.compteur_energie_ecs_reseau_jour_hp_hc')|float(default=0) %}
+        {% set r=states('sensor.compteur_energie_ecs_pv_jour_hp_hc')|float(default=0) %}
+        {{ p+r }}
 
 
 

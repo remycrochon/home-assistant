@@ -216,8 +216,16 @@ template:
       state: >
         {{ as_timestamp(state_attr("sun.sun", "next_noon")) | timestamp_custom('%H %M')}}
       icon: mdi:weather-sunset
-
-
+# Totalisation des energies HC+HP
+    - name: Compteur Energie Piscine Jour HP_HC
+      unique_id: "compteur_energie_piscine_jour_hp_hc"
+      device_class: "energy"
+      state_class: "total_increasing"    
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set hp=states('sensor.compteur_energie_piscine_jour_hp')|float(default=0) %}
+        {% set hc=states('sensor.compteur_energie_piscine_jour_hc')|float(default=0) %}
+        {{ hp+hc }}
 
   - binary_sensor:
     # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement

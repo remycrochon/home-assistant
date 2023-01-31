@@ -4,7 +4,6 @@
 #                                                  #
 ####################################################
 
-
 utility_meter:
 # usage jour  
   energy_total_usage_daily:
@@ -13,27 +12,7 @@ utility_meter:
     tariffs:
       - hp
       - hc
-# usage semaine
-  energy_total_usage_weekly:
-    source: sensor.linky_hphc_kwh
-    cycle: weekly
-    tariffs:
-      - hp
-      - hc
-# usage mois
-  energy_total_usage_monthly:
-    source: sensor.linky_hphc_kwh
-    cycle: monthly
-    tariffs:
-      - hp
-      - hc
-#usage an
-  energy_total_usage_yearly:
-    source: sensor.linky_hphc_kwh
-    cycle: yearly
-    tariffs:
-      - hp
-      - hc
+
 ## 
 input_boolean:
   com_linky:
@@ -83,37 +62,8 @@ template:
         {{ (o + p) | round(2) }}
       unit_of_measurement: "kWh"
       device_class: "energy"
-      state_class: "total"
+      state_class: "total_increasing"
 
-# Consommation semaine HP + HC
-    - name: "energy_total_weekly"
-      state: >-
-        {% set p = states('sensor.energy_total_usage_weekly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_usage_weekly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
-# Consommation mensuelle HP + HC
-    - name: "energy_total_monthly"
-      state: >-
-        {% set p = states('sensor.energy_total_usage_monthly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_usage_monthly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
-
-# Consommation annuelle HP + HC
-    - name: "energy_total_yearly"
-      state: >-
-        {% set p = states('sensor.energy_total_usage_yearly_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_usage_yearly_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"  
 
 # Cout de l'Energie
 # les couts du kWh HP et HC sont calculés dans excel en fonction des factures recues

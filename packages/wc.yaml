@@ -1,0 +1,12 @@
+template:
+  - sensor:
+# Totalisation des energies HC+HP
+    - name: Compteur Energie WC Jour HP_HC
+      unique_id: "compteur_energie_wc_jour_hp_hc"
+      device_class: "energy"
+      state_class: "total_increasing"    
+      unit_of_measurement: "kWh"
+      state: >-
+        {% set hp=states('sensor.compteur_energie_wc_jour_hp')|float(default=0) %}
+        {% set hc=states('sensor.compteur_energie_wc_jour_hc')|float(default=0) %}
+        {{ hp+hc }}

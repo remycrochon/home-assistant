@@ -75,7 +75,6 @@ template:
 
 # 
   - sensor:
-
 ############################################ 21/12/2022
 # sensor.ecocompteur_ecs:
 # Si switch.cde_relais_ecs->
@@ -83,16 +82,16 @@ template:
 #     template: sensor.puissance_ecs_reseau_kw
 #     Integration en kW: sensor.energie_ecs_reseau->
 #       utility_meter: energy_ecs_reseau_usage_daily->
-#          sensor.energy_ecs_reseau_usage_daily_hp
-#          sensor.energy_ecs_reseau_usage_daily_hc 
+#         sensor.compteur_energie_ecs_reseau_jour_hp
+#         sensor.compteur_energie_ecs_reseau_jour_hc
 
 # Si switch.cde_relais_ecs_router_pv->
 #   template: sensor.puissance_ecs_pv_w->
 #     template: sensor.puissance_ecs_pv_kw
 #     Integration en kW: sensor.energie_ecs_pv->
 #       utility_meter: energy_ecs_pv_usage_daily->
-#          sensor.energy_ecs_pv_usage_daily_hp
-#          sensor.energy_ecs_pv_usage_daily_hc 
+#         sensor.compteur_energie_ecs_pv_jour_hp
+#         sensor.compteur_energie_ecs_pv_jour_hc
 
 # Calcul puissance ECS si mode réseau
 # L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
@@ -119,16 +118,6 @@ template:
         {% set p=states('sensor.puissance_ecs_reseau_w')|float(default=0) %}
         {{ p/1000 }}
 
-    - name: "energie ecs reseau jour"
-      unique_id: "energie_ecs_reseau_jour"
-      state: >-
-        {% set p = states('sensor.energy_ecs_reseau_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_ecs_reseau_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
-      unit_of_measurement: "kWh"
-      device_class: "energy"
-      state_class: "total"
-
 # Calcul puissance ECS si mode PV
     - name: puissance_ecs_pv_w
       unique_id: "puissance_ecs_pv_w"
@@ -153,6 +142,7 @@ template:
         {% set p=states('sensor.puissance_ecs_pv_w')|float(default=0) %}
         {{ p/1000 }}
 
+# L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
 # Totalisation des energies HC+HP
     - name: Compteur Energie ECS PV Jour HP_HC
       unique_id: "compteur_energie_ecs_pv_jour_hp_hc"

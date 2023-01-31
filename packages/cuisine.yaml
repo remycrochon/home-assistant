@@ -6,15 +6,3 @@
 
 
 # Les utility_meter sont créés dans http://192.168.0.37:8123/config/helpers "
-template:
-  - sensor:
-# Totalisation des energies HC+HP
-    - name: Compteur Energie Cuisine Jour HP_HC
-      unique_id: "compteur_energie_cuisine_jour_hp_hc"
-      device_class: "energy"
-      state_class: "total_increasing"    
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set hp=states('sensor.compteur_energie_ecs_pv_jour_hp')|float(default=0) %}
-        {% set hc=states('sensor.compteur_energie_ecs_pv_jour_hc')|float(default=0) %}
-        {{ hp+hc }}

@@ -24,7 +24,7 @@ input_number:
     name: Cout du Kwh HP
     min: 0
     max: 10
-    unit_of_measurement: €
+    unit_of_measurement: EUR/kWh
     icon: mdi:currency-eur
     step: 0.00001
     mode: box
@@ -33,7 +33,7 @@ input_number:
     name: Cout du Kwh HC
     min: 0
     max: 10
-    unit_of_measurement: €
+    unit_of_measurement: EUR/kWh
     icon: mdi:currency-eur
     step: 0.00001
     mode: box

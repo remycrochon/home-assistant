@@ -5,8 +5,9 @@
 recorder:
   db_url: !secret db_mysql
   auto_purge: true
+  auto_repack: true
   commit_interval: 15
-  purge_keep_days: 7
+  purge_keep_days: 14
   include:
     domains:
       - binary_sensor

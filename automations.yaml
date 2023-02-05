@@ -2814,3 +2814,15 @@
           entity_id:
           - automation.09_3_1_thermostat_chambre_sud
   mode: single
+- id: '1675530085157'
+  alias: Dimmer
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.consigne_puissance_dimmer
+  condition: []
+  action:
+  - service: rest_command.cde_dimmer
+    data: {}
+  mode: single

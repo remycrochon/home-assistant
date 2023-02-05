@@ -48,7 +48,7 @@ sensor:
          - 0.4 -> 0.0  # 4 ma
          - 1.88 -> 3.23  # 12.61
       - sliding_window_moving_average:
-          window_size: 5 # moyenne sur x lectures
+          window_size: 10 # moyenne sur x lectures
           send_every: 5 # envoi toutes les x lectures
           send_first_at: 1 # envoi à la premiere lecture
 
@@ -86,9 +86,7 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
-switch:   
-  - platform: restart
-    name: "${friendly_name} Restart"
+
     
 
     

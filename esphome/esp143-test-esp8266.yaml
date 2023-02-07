@@ -100,4 +100,8 @@ text_sensor:
     id: text_sensor_version
     name: "${friendly_name} ESPHome Version"
 
-    
+output:
+  - platform: esp8266_pwm
+    pin: D1
+    frequency: 1000 Hz
+    id: pwm_output

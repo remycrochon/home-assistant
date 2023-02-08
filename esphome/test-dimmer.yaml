@@ -68,4 +68,4 @@ number:
       then:
         - output.set_level:
             id: custom_float
-            level: 10%
+            level: !lambda "return x/1000;"

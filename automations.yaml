@@ -2826,3 +2826,47 @@
   - service: rest_command.cde_dimmer
     data: {}
   mode: single
+- id: '1675765119907'
+  alias: 1_2_4 ECS Validation Routeur sur Float
+  description: float alors routeur ECS Actif
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.mp2_affichage_status_bus_ve
+    to: Float
+    id: Float
+  - platform: state
+    entity_id:
+    - sensor.mp2_affichage_status_bus_ve
+    from: Float
+    id: non_float
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Float
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: notify.telegram
+        data:
+          message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % > {{states('input_number.mp2_seuil_validation_routeur')}}
+            %{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Validation Routeur ECS
+    - conditions:
+      - condition: trigger
+        id: non_float
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: notify.telegram
+        data:
+          message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
+            %{{-"\n"-}}{{states("sensor.date_time") }}
+          title: De Validation Routeur ECS
+  mode: single

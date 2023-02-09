@@ -4,13 +4,28 @@ rest_command:
 
 template:
   - sensor:
+#    - name: Consigne Puissance Dimmer
+#      unique_id: "consigne_puissance_dimmer"
+#      unit_of_measurement: "%"
+#      state: >-
+#        {% set p = states('sensor.mp2_grid_l1') | float(default=0) %}
+#        {% if (p<0) %}
+#          {{ p*-1/20}}
+#        {%else%}
+#          0
+#        {%endif%}  
+
+        
     - name: Consigne Puissance Dimmer
       unique_id: "consigne_puissance_dimmer"
       unit_of_measurement: "%"
       state: >-
-        {% set p = states('sensor.mp2_grid_l1') | float(default=0) %}
+        {% set p = states('input_number.valeur_dimer') | float(default=0) %}
         {% if (p<0) %}
-          {{ p*-1/20}}
+          {{ 0 }}
         {%else%}
-          0
-        {%endif%}  
+          {% if (p>100) %}
+            {{ 100 }}
+          {%endif%}
+          {{ p }}
+        {%endif%}

@@ -13,36 +13,42 @@ modbus:
     switches:
       # Sortie D0
       - name: cde_relais_ecs
+        unique_id: 'Cde Relais ECS Reseau'
         slave: 1
         address: 16
         write_type: coil
 
       # Sortie D1
       - name: cde_relais_ecs_router_pv
+        unique_id: 'Cde Relais ECS Routeur'
         slave: 1
         address: 17
         write_type: coil
 
       # Sortie D2
       - name: cde_porte_ssol
+        unique_id: 'Cde Relais Porte Sous-Sol'
         slave: 1
         address: 18
         write_type: coil
 
       # Sortie D3     
       - name: cde_porte_garage
+        unique_id: 'Cde Relais Porte Garage'
         slave: 1
         address: 19
         write_type: coil
 
       # Sortie D4  
       - name: adam_sortie_d4
+        unique_id: 'Cde Sortie 4 Adam'
         slave: 1
         address: 20
         write_type: coil
 
-      # Sortie D5      
-      - name: sort5_adam_ssol
+      # Sortie D5
+      - name: adam_sortie_d5
+        unique_id: 'Cde Sortie 5 Adam'
         slave: 1
         address: 21
         write_type: coil
@@ -50,24 +56,30 @@ modbus:
     binary_sensors:
       # Entrées module Adam sous sol
       - name: porte_ssol_fermee
+        unique_id: "FdC Porte SSol Fermée"
         slave: 1
         address: 0
         scan_interval: 5
       - name: porte_ssol_ouverte
+        unique_id: "FdC Porte SSol Ouverte"
         slave: 1
         address: 1
         scan_interval: 5
       - name: porte_garage_fermee
+        unique_id: "FdC Porte Garage Fermée"
         slave: 1
         address: 2
         scan_interval: 5
       - name: porte_garage_ouverte
+        unique_id: "FdC Porte Garage Ouverte"
         slave: 1
         address: 3
         scan_interval: 5
       - name: Etor5_adam_ssol
+        unique_id: "Entrée 5 Adam"
         slave: 1
         address: 4
       - name: Etor6_adam_ssol
+        unique_id: "Entrée 6 Adam"
         slave: 1
         address: 5

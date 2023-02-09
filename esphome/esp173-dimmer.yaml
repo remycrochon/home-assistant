@@ -45,6 +45,11 @@ web_server:
   port: 80
 
 captive_portal:
+  
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
 
 output:
 - platform: custom

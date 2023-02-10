@@ -1,7 +1,7 @@
 substitutions:
-  device_name: esp144-test-wt32-eth01
-  adress_ip: "192.168.0.144"
-  friendly_name: esp144
+  device_name: esp174-esp32-eth0-dimmer-ecs
+  adress_ip: "192.168.0.174"
+  friendly_name: esp174
   time_timezone: "Europe/Paris"
   
 esphome:
@@ -34,20 +34,32 @@ ethernet:
 output:
   - platform: ledc
     pin: GPIO2
-    frequency: 90 Hz
     id: pwm_output
+    #frequency: 50 Hz
 
+#fan:
+#  - platform: speed
+#    output: pwm_output
+#    name: "Living Room Fan"
+
+light:
+  - platform: monochromatic
+    output: pwm_output
+    name: "Kitchen Light"
 sensor:
-# Lecture dans HA
+# Lecture de la consigne de puissance dans HA
   - platform: homeassistant
     name: "${friendly_name} Consigne Puissance Dimmer"
-    entity_id: input_number.valeur_dimer
+    entity_id: input_number.consigne_dimmer_ecs
     id: p_dimmer
     on_value:
       then:
-        - output.set_level:
-            id: pwm_output
-            level: !lambda "return x/1000;"
+      - output.ledc.set_frequency:
+          id: pwm_output
+          frequency: !lambda "return x*100;"
+#        - output.set_level:
+#            id: pwm_output
+#            level: !lambda "return x/1000;"
 
 #Etat de la connection
 binary_sensor:

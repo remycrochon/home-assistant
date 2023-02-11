@@ -1,16 +1,16 @@
 """The Husqvarna Automower integration."""
 import logging
 
-import voluptuous as vol
-
 import aioautomower
+from asyncio.exceptions import TimeoutError
 from homeassistant.components.application_credentials import DATA_STORAGE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_TOKEN, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers.config_entry_oauth2_flow import (
+    async_get_config_entry_implementation,
+)
 
 from .const import DOMAIN, PLATFORMS, STARTUP_MESSAGE
 
@@ -32,19 +32,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session.register_token_callback(
         lambda token: hass.config_entries.async_update_entry(
             entry,
-            data={CONF_TOKEN: token},
+            data={"auth_implementation": DOMAIN, CONF_TOKEN: token},
         )
     )
 
     try:
         await session.connect()
-    except Exception:
+    except TimeoutError as error:
+        _LOGGER.debug("Asyncio timeout: %s", error)
+        raise ConfigEntryNotReady from error
+    except Exception as error:
+        _LOGGER.debug("Exception in async_setup_entry: %s", error)
         # If we haven't used the refresh_token (ie. been offline) for 10 days,
         # we need to login using username and password in the config flow again.
         raise ConfigEntryAuthFailed from Exception
 
     hass.data[DOMAIN][entry.entry_id] = session
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(update_listener))
     return True
 
@@ -70,5 +74,5 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
         entry, [Platform.CAMERA]
     )
     if unload_ok:
-        hass.config_entries.async_setup_platforms(entry, [Platform.CAMERA])
+        await hass.config_entries.async_forward_entry_setups(entry, [Platform.CAMERA])
         entry.async_on_unload(entry.add_update_listener(update_listener))

@@ -10,7 +10,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, TIME_SECONDS
+from homeassistant.const import PERCENTAGE, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -62,6 +62,27 @@ def get_problem(mower_attributes) -> dict:
     return None
 
 
+def problem_list() -> list:
+    """Get a list with possible problems for the current mower."""
+    error_list = list(ERRORCODES.values())
+    other_reasons = [
+        "OFF",
+        "UNKNOWN",
+        "STOPPED",
+        "STOPPED_IN_GARDEN",
+        "NOT_APPLICABLE",
+        "NONE",
+        "WEEK_SCHEDULE",
+        "PARK_OVERRIDE",
+        "SENSOR",
+        "DAILY_LIMIT",
+        "FOTA",
+        "FROST",
+    ]
+    problem_list = error_list + other_reasons
+    return problem_list
+
+
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     AutomowerSensorEntityDescription(
         key="cuttingBladeUsageTime",
@@ -71,7 +92,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.TOTAL,
         device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement=TIME_SECONDS,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
         value_fn=lambda data: data["statistics"]["cuttingBladeUsageTime"],
     ),
     AutomowerSensorEntityDescription(
@@ -82,7 +103,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement=TIME_SECONDS,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
         value_fn=lambda data: data["statistics"]["totalChargingTime"],
     ),
     AutomowerSensorEntityDescription(
@@ -93,7 +114,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement=TIME_SECONDS,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
         value_fn=lambda data: data["statistics"]["totalCuttingTime"],
     ),
     AutomowerSensorEntityDescription(
@@ -104,7 +125,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement=TIME_SECONDS,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
         value_fn=lambda data: data["statistics"]["totalRunningTime"],
     ),
     AutomowerSensorEntityDescription(
@@ -115,7 +136,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement=TIME_SECONDS,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
         value_fn=lambda data: data["statistics"]["totalSearchingTime"],
     ),
     AutomowerSensorEntityDescription(
@@ -191,6 +212,9 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="Mode",
         entity_registry_enabled_default=False,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.ENUM,
+        options=["MAIN_AREA", "SECONDARY_AREA", "HOME", "DEMO", "UNKNOWN"],
+        translation_key="mode list",
         value_fn=lambda data: data["mower"]["mode"],
     ),
     AutomowerSensorEntityDescription(
@@ -198,6 +222,9 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="Problem Sensor",
         entity_registry_enabled_default=False,
         entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.ENUM,
+        options=problem_list(),
+        translation_key="problem list",
         value_fn=lambda data: get_problem(data),
     ),
     AutomowerSensorEntityDescription(

@@ -4,7 +4,9 @@
   "documentation": "https://github.com/Thomas55555/husqvarna_automower",
   "issue_tracker": "https://github.com/Thomas55555/husqvarna_automower/issues",
   "dependencies": [
-    "application_credentials"
+    "application_credentials",
+    "my",
+    "schedule"
   ],
   "config_flow": true,
   "codeowners": [
@@ -17,5 +19,9 @@
     "Pillow>=9.1.1"
   ],
   "iot_class": "cloud_push",
-  "version": "2022.9.0"
+  "version": "2023.2.0",
+  "loggers": [
+    "aioautomower, geopy, numpy, Pillow"
+  ],
+  "integration_type": "hub"
 }

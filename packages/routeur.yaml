@@ -20,7 +20,7 @@ template:
       unique_id: "consigne_puissance_dimmer"
       unit_of_measurement: "%"
       state: >-
-        {% set p = states('input_number.valeur_dimer') | float(default=0) %}
+        {% set p = states('input_number.consigne_dimmer_ecs') | float(default=0) %}
         {% if (p<0) %}
           {{ 0 }}
         {%else%}

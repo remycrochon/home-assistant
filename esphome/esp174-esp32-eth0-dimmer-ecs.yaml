@@ -31,40 +31,32 @@ ethernet:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
-output:
-  - platform: ledc
-    pin: GPIO2
-    id: pwm_output
-    #frequency: 50 Hz
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
 
-#fan:
-#  - platform: speed
-#    output: pwm_output
-#    name: "Living Room Fan"
+output:
+  - platform: ac_dimmer
+    id: dimmer1
+    gate_pin: GPIO2
+    zero_cross_pin:
+      number: GPIO4
+      mode:
+        input: true
+      inverted: yes
+
 
 light:
   - platform: monochromatic
-    output: pwm_output
-    name: "Kitchen Light"
-sensor:
-# Lecture de la consigne de puissance dans HA
-  - platform: homeassistant
-    name: "${friendly_name} Consigne Puissance Dimmer"
-    entity_id: input_number.consigne_dimmer_ecs
-    id: p_dimmer
-    on_value:
-      then:
-      - output.ledc.set_frequency:
-          id: pwm_output
-          frequency: !lambda "return x*100;"
-#        - output.set_level:
-#            id: pwm_output
-#            level: !lambda "return x/1000;"
+    output: dimmer1
+    name: "${friendly_name} Puissance Dimmer ECS"
 
-#Etat de la connection
-binary_sensor:
-  - platform: status
-    name: "${friendly_name} Status"
+# Restart de l'ESP
+switch:   
+  - platform: restart
+    name: "${friendly_name} Restart"
+ 
 
 
     

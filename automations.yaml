@@ -2870,3 +2870,19 @@
             %{{-"\n"-}}{{states("sensor.date_time") }}
           title: De Validation Routeur ECS
   mode: single
+- id: '1676284606975'
+  alias: Dimmer V2
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.consigne_puissance_dimmer
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      transition: 3
+      brightness_pct: '{{ states("sensor.consigne_puissance_dimmer")|int }}'
+    target:
+      entity_id: light.esp174_puissance_dimmer_ecs
+  mode: single

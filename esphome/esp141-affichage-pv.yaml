@@ -22,10 +22,6 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2   
-
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 1
@@ -106,10 +102,6 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
-switch:    
-
-  - platform: restart
-    name: "${friendly_name} Restart"
 
 sensor:
 # Lecture dans HA

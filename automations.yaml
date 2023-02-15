@@ -2360,7 +2360,7 @@
         data:
           message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
             %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: De Validation Routeur ECS
+          title: De-Validation Routeur ECS
   mode: single
 - id: '1669803250640'
   alias: 1_2_5 ECS Arret Forcé sur Puissance Réseau Haute
@@ -2827,25 +2827,28 @@
     data: {}
   mode: single
 - id: '1675765119907'
-  alias: 1_2_4 ECS Validation Routeur sur Float
+  alias: 1_2_4 ECS Validation Routeur sur Absorption
   description: float alors routeur ECS Actif
   trigger:
   - platform: state
     entity_id:
-    - sensor.mp2_affichage_status_bus_ve
-    to: Float
-    id: Float
-  - platform: state
-    entity_id:
-    - sensor.mp2_affichage_status_bus_ve
-    from: Float
-    id: non_float
+    - sensor.mp2_status_bus_ve
+    to: '4'
+    id: Absorption
+  - platform: template
+    value_template: "      {% set soc=states('sensor.mp2_niveau_charge_batteries')
+      | float %}\n      {% set deval=states('input_number.mp2_seuil_devalidation_routeur')
+      | float %}\n      {{ soc < deval }}"
+    id: devalid_routeur
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
-        id: Float
+        id: Absorption
+      - condition: sun
+        before: sunset
+        after: sunrise
       sequence:
       - service: input_boolean.turn_on
         data: {}
@@ -2853,12 +2856,12 @@
           entity_id: input_boolean.ecs_av_pv
       - service: notify.telegram
         data:
-          message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % > {{states('input_number.mp2_seuil_validation_routeur')}}
-            %{{-"\n"-}}{{states("sensor.date_time") }}
+          message: Bus VE passe en mode:{{states('sensor.mp2_affichage_status_bus_ve')}}{{-"\n"-}}
+            Marche routeur ECS %{{-"\n"-}}{{states("sensor.date_time") }}
           title: Validation Routeur ECS
     - conditions:
       - condition: trigger
-        id: non_float
+        id: devalid_routeur
       sequence:
       - service: input_boolean.turn_off
         data: {}
@@ -2868,7 +2871,7 @@
         data:
           message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
             %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: De Validation Routeur ECS
+          title: De-Validation Routeur ECS
   mode: single
 - id: '1676284606975'
   alias: Dimmer V2

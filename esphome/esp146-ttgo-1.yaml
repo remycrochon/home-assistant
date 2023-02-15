@@ -14,9 +14,6 @@ esp32:
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2    
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 0
@@ -88,16 +85,6 @@ sensor:
     entity_id: sensor.mp2_puissance_batteries
     id: batt
 
-  - platform: uptime
-    name: "${friendly_name} Uptime Sensor"
-    id: esp142_uptime
-    update_interval: 60s
-
-  - platform: wifi_signal
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-
-
 #Etat de la connection
 binary_sensor:
   - platform: status
@@ -117,27 +104,6 @@ binary_sensor:
     id: tdisplay_button_input_1
     name: ${device_name}bottom push
     
-
-switch:
-
-  - platform: restart
-    name: "${friendly_name}_Restart"
-    
-text_sensor:
-  # IP address #
-  - platform: wifi_info
-    ip_address:
-      name: "${friendly_name} IP address"
-      icon: "mdi:network-outline"
-    ssid:
-      name: "${friendly_name} Connected SSID"
-    bssid:
-      name: "${friendly_name} Connected BSSID"
-  - platform: version
-    id: text_sensor_version
-    name: "${friendly_name} ESPHome Version"
-    
-
 display:
   - platform: st7789v
     model: TTGO TDisplay 135x240
@@ -147,7 +113,7 @@ display:
     reset_pin: GPIO23
     rotation: 270
     lambda: |-
-      it.printf(0, 0, id(arial25),"Gtrid:%.0f W",id(grid).state);
+      it.printf(0, 0, id(arial25),"Grid:%.0f W",id(grid).state);
       it.printf(0, 30, id(arial25),"Mais:%.0f W",id(house).state);
       it.printf(0, 60, id(arial25),"Prod:%.0f W",id(prod).state);
       it.printf(0, 90, id(arial25),"Batt:%.0f W",id(batt).state);

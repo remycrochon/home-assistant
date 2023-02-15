@@ -19,7 +19,6 @@ wifi:
       priority: 0
   reboot_timeout: 5min
     
-
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -38,7 +37,6 @@ ota:
 web_server:
   port: 80
 
-
 #uart:
 #  rx_pin: GPIO3 # RX=pin 21
 #  tx_pin: GPIO1 # TX=pin 22
@@ -51,10 +49,8 @@ dallas:
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
-  
         
 sensor:
-
   - platform: dallas
     address: 0xCA00AA2D00000328
     name: "${friendly_name} temp_ecs"

@@ -5,12 +5,11 @@ substitutions:
   time_timezone: "Europe/Paris"
   
 esphome:
-    name: ${device_name}
-    
-esp32:
-  board: ttgo-t1
-  framework:
-      type: arduino
+  name: ${device_name}
+  platform: ESP32
+  board: ttgo-t1 
+  includes:
+    - power_mon.h
 
 wifi:
   networks:
@@ -64,26 +63,81 @@ spi:
 
 sensor:
 
+  - platform: custom
+    lambda: |-
+      auto powerMonSensor = new CustomPowerMon();
+      App.register_component(powerMonSensor);
+      return {powerMonSensor};
+    sensors:
+     name: "Power Meter"
+     unit_of_measurement: W
+     accuracy_decimals: 0
+     filters:
+       - sliding_window_moving_average:
+           window_size: 10
+           send_every: 10
+           send_first_at: 10
+
 # Lecture dans HA
-  - platform: homeassistant
-    name: "${friendly_name}_Prod"
-    entity_id: sensor.envoy_122103023124_current_power_production
-    id: prod
+#  - platform: homeassistant
+#    name: "${friendly_name}_Prod"
+#    entity_id: sensor.envoy_122103023124_current_power_production
+#    id: prod
     
-  - platform: homeassistant
-    name: "${friendly_name}_Conso_grid"
-    entity_id: sensor.mp2_grid_l1
-    id: grid
+#  - platform: homeassistant
+#    name: "${friendly_name}_Conso_grid"
+#    entity_id: sensor.mp2_grid_l1
+#    id: grid
 
-  - platform: homeassistant
-    name: "${friendly_name}_Conso_ac"
-    entity_id: sensor.mp2_conso_ac_l1
-    id: house
+#  - platform: homeassistant
+#    name: "${friendly_name}_Conso_ac"
+#    entity_id: sensor.mp2_conso_ac_l1
+#    id: house
 
-  - platform: homeassistant
-    name: "${friendly_name}_Pu_Batteries"
-    entity_id: sensor.mp2_puissance_batteries
-    id: batt
+#  - platform: homeassistant
+#    name: "${friendly_name}_Pu_Batteries"
+#    entity_id: sensor.mp2_puissance_batteries
+#    id: batt
+    
+# Mesure de Courant
+  - platform: ct_clamp
+    sensor: mesure_i
+    name: "${friendly_name} Mesure Courant"
+    update_interval: 5s
+    id: i_clamp
+    filters:
+      - calibrate_linear:
+          # Measured value of 0 maps to 0A
+          - 0.134 -> 0.0
+          # Known load: 4.0A
+          # Value shown in logs: 0.1333A
+          #- 0.1333 -> 4.0
+          - 0.422 -> 0.71
+
+  # Entrée Courant
+  - platform: adc
+    pin: GPIO32
+    id: mesure_i
+    update_interval: 5s
+
+# Entrée Tension
+  - platform: adc
+    pin: GPIO33
+    id: mesure_u
+    update_interval: 5s
+
+############### TEMPLATE  ######################"
+# Calcul Puissance
+  - platform: template
+    name: "${friendly_name} Mesure Puissance"
+    id: puissance
+    icon: mdi:flash
+    unit_of_measurement: "W"
+    accuracy_decimals: 2
+    update_interval: 5s
+    lambda: |-
+      return (id(i_clamp).state*230);
+      
 
 #Etat de la connection
 binary_sensor:
@@ -113,11 +167,26 @@ display:
     reset_pin: GPIO23
     rotation: 270
     lambda: |-
-      it.printf(0, 0, id(arial25),"Grid:%.0f W",id(grid).state);
-      it.printf(0, 30, id(arial25),"Mais:%.0f W",id(house).state);
-      it.printf(0, 60, id(arial25),"Prod:%.0f W",id(prod).state);
-      it.printf(0, 90, id(arial25),"Batt:%.0f W",id(batt).state);
+      it.printf(0, 0, id(arial25),"I Ana: %.2f A",id(mesure_i).state);
+      it.printf(0, 30, id(arial25),"I Clamp: %.2f A",id(i_clamp).state);      
+#      it.printf(0, 30, id(arial25),"Mais:%.0f W",id(house).state);
+#      it.printf(0, 60, id(arial25),"Prod:%.0f W",id(prod).state);
+#      it.printf(0, 90, id(arial25),"Batt:%.0f W",id(batt).state);
 #      it.printf(0, 20, id(arial10),"S:%.0f ",id(sout).state);
 #      it.printf(32, 20, id(arial10),"I:%.0f W",id(inj).state);
 #      it.printf(0, 30, id(arial10),"Disp:%.0f W",id(pdispo).state);   
- 
+#      it.printf(0, 0, id(arial25),"Grid:%.0f W",id(grid).state);
+output:
+  - platform: ac_dimmer
+    id: dimmer1
+    gate_pin: GPIO26
+    zero_cross_pin:
+      number: GPIO27
+      mode:
+        input: true
+      inverted: yes
+
+light:
+  - platform: monochromatic
+    output: dimmer1
+    name: "${friendly_name} Puissance Dimmer ECS"

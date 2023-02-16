@@ -52,10 +52,7 @@ light:
     output: dimmer1
     name: "${friendly_name} Puissance Dimmer ECS"
 
-# Restart de l'ESP
-switch:   
-  - platform: restart
-    name: "${friendly_name} Restart"
+
  
 
 

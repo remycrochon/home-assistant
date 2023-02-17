@@ -11,9 +11,6 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2    
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 2
@@ -69,23 +66,8 @@ sensor:
     name: "${friendly_name} U Alim"
     update_interval: 10s
     
-  - platform: wifi_signal
-    id: wif
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-
-  - platform: uptime
-    id: up
-    name: "${friendly_name} Uptime Sensor"
-    update_interval: 60s
-    
 #Etat de la connection
 binary_sensor:
-
   - platform: status
     name: "${friendly_name} Status"
 
-switch:    
-
-  - platform: restart
-    name: "${friendly_name} Restart"

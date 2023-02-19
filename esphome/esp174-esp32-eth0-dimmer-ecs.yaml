@@ -46,16 +46,48 @@ output:
         input: true
       inverted: yes
 
-
 light:
   - platform: monochromatic
     output: dimmer1
+    id: p_dimmer
     name: "${friendly_name} Puissance Dimmer ECS"
 
+sensor:
+  - platform: homeassistant
+    name: "${friendly_name}_Conso_grid"
+    entity_id: sensor.mp2_grid_l1
+    id: p_grid
+    
+############### TEMPLATE  ######################"
+# Calcul consigne puissance
+# 100 = 100%
+# 3000 = 3000W à 100%
+  - platform: template
+    name: "${friendly_name} Consigne Puissance"
+    id: consigne_p
+    icon: mdi:flash
+    unit_of_measurement: "%"
+    accuracy_decimals: 2
+    update_interval: 5s
+    lambda: |-
+      if (id(p_grid).state>0)
+        {return id(p_grid).state*1;}
+      else
+        {return 0.0;}
+    on_value:
+      then:
+        - light.turn_on:
+            id: p_dimmer
+            transition_length: '0.5s'
+            brightness: !lambda |-
+              return x/100;
 
- 
-
-
+#    lambda: |-
+#      if (id(p_grid).state<-10)
+#        {return id(p_grid).state*-100/3000;}
+#      else
+#        {return 0.0;}
     
 
-    
+
+  

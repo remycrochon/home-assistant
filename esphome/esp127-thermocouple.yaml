@@ -54,7 +54,6 @@ sensor:
     name: "${friendly_name} U Panneau"
     update_interval: 10s
     
-
   - platform: max31855
     name: "${friendly_name} Temperature"
     cs_pin: D3

@@ -11,14 +11,9 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2   
-
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 1
-      
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 0
@@ -57,53 +52,7 @@ sensor:
           window_size: 5
           send_every: 5  
 
-# Puissance du signal WIFI
-  - platform: wifi_signal
-    id: wif
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-    
-# Temps de fonctionnement de l'ESP    
-  - platform: uptime
-    id: uptime_seconds
-    name: "${friendly_name} Uptime"
-    update_interval: 60s
-    unit_of_measurement: s
-    accuracy_decimals: 0
-    force_update: false
-    icon: mdi:timer
-
-
 #Etat de la connection
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
-    
-# Restart de l'ESP
-switch:   
-  - platform: restart
-    name: "${friendly_name} Restart"
-    
-text_sensor:
-# Affichage du temps de fonctionnement
-  - platform: template
-    name: "${friendly_name} Uptime"
-    update_interval: 60s
-    icon: mdi:clock-start
-    lambda: |-
-      int seconds = (id(uptime_seconds).state);
-      int days = seconds / (24 * 3600);
-      seconds = seconds % (24 * 3600);
-      int hours = seconds / 3600;
-      seconds = seconds % 3600;
-      int minutes = seconds /  60;
-      seconds = seconds % 60;
-      if ( days ) {
-        return { (String(days) +"d " + String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
-      } else if ( hours ) {
-        return { (String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
-      } else if ( minutes ) {
-        return { (String(minutes) +"m "+ String(seconds) +"s").c_str() };
-      } else {
-        return { (String(seconds) +"s").c_str() };
-      }

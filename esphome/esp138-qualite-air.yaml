@@ -13,11 +13,9 @@ esphome:
 
 wifi:
   networks:
-
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 1
-      
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 0
@@ -32,7 +30,6 @@ wifi:
 logger:
   baud_rate: 0
 
-# Enable Home Assistant API
 api:
 
 ota:
@@ -87,8 +84,6 @@ sensor:
             send_every: 10
             send_first_at: 1
 
-   
-
     pm_10_0:
       name: "Concentration de particules <10.0µm"
       id: pm10_0
@@ -135,15 +130,6 @@ sensor:
       unit_of_measurement: "ppd"
       accuracy_decimals: 0
 
-      
-  - platform: wifi_signal
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-
-  - platform: uptime
-    name: "${friendly_name} Uptime Sensor"
-    update_interval: 60s
-    
   - platform: mhz19
     uart_id: uart_b
     id: mh_z19
@@ -165,10 +151,9 @@ sensor:
             window_size: 24
             send_every: 12
             send_first_at: 1
-            
+          
     update_interval: 10s
     automatic_baseline_calibration: false    
-
 
 # Il s'agit d'un modèle de capteur qui effectue une moyenne mobile de 30 minutes de PM2,5
 # il supprime les valeurs aberrantes et de rendre le contrôle plus fluide
@@ -215,8 +200,4 @@ switch:
       - switch.turn_off: co2_cal
     id: co2_cal
 
-  - platform: restart
-    name: "${friendly_name} Restart"
-
-# gestion afficheur
 

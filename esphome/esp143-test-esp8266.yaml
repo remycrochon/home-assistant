@@ -1,25 +1,18 @@
 substitutions:
   device_name: esp143-test-esp8266
   adress_ip: "192.168.0.143"
-  friendly_name: esp143
-  time_timezone: "Europe/Paris"
-  
+
 esphome:
   name: ${device_name}
   platform: ESP8266
   board: d1_mini
-
+  friendly_name: esp143
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2   
-
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
       priority: 1
-      
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 0
@@ -33,7 +26,6 @@ wifi:
 # Enable logging
 logger:
 
-
 # Enable Home Assistant API
 api:
 
@@ -41,8 +33,6 @@ ota:
    
 web_server:
   port: 80
-
-
 
 sensor:
   - platform: ntc
@@ -69,36 +59,11 @@ sensor:
     pin: A0      
     # Added:
     update_interval: 10s
-    
-  - platform: wifi_signal
-    id: wif
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-    
-    
+   
 #Etat de la connection
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"
-
-switch:   
-
-  - platform: restart
-    name: "${friendly_name} Restart"
-    
-text_sensor:
-  # IP address #
-  - platform: wifi_info
-    ip_address:
-      name: "${friendly_name} IP address"
-      icon: "mdi:network-outline"
-    ssid:
-      name: "${friendly_name} Connected SSID"
-    bssid:
-      name: "${friendly_name} Connected BSSID"
-  - platform: version
-    id: text_sensor_version
-    name: "${friendly_name} ESPHome Version"
+    name: "Status"
 
 output:
   - platform: esp8266_pwm

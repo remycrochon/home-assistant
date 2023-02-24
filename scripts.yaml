@@ -174,7 +174,7 @@ ouverture_volet_absent:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: script.0_0_1_ouverture_volet_ami_nord
+  - service: script.ouverture_volets_chamb_nord
     data: {}
   - delay:
       hours: 0

@@ -6,17 +6,10 @@
 
 binary_sensor:
 
-  - platform: ping
-    host: 192.168.0.14
-    name: "ping_pc_motion"
 
 #  - platform: ping
 #    host: 192.168.0.21
 #    name: "ping_cam_terrasse"
-
-  - platform: ping
-    host: 192.168.0.25
-    name: "ping_RPI ADguard"
 
   - platform: ping
     host: 192.168.0.26
@@ -79,7 +72,6 @@ binary_sensor:
     all: true
     device_class: "connectivity"
     entities:
-      - binary_sensor.ping_rpi_adguard
       - binary_sensor.ping_module_adam
       - binary_sensor.ping_module_wago_piscine
       - binary_sensor.ping_routeur_dlink
@@ -119,14 +111,13 @@ binary_sensor:
     all: true
     device_class: "connectivity"
     entities:
-      - binary_sensor.uptime_domo_rem81
-      - binary_sensor.uptime_jeedom
-      - binary_sensor.uptime_meteo81000
-      - binary_sensor.uptime_meteoweewx
-      - binary_sensor.uptime_ha
-      - binary_sensor.uptime_motioneye
-      - binary_sensor.uptime_vtt
-      - binary_sensor.uptime_kobold
+      - binary_sensor.uptimekuma_domo
+      - binary_sensor.uptimekuma_ha
+      - binary_sensor.uptimekuma_kobold
+      - binary_sensor.uptimekuma_matamo
+      - binary_sensor.uptimekuma_meteo_weewx
+      - binary_sensor.uptimekuma_motion
+      - binary_sensor.uptimekuma_vtt
 
 
 

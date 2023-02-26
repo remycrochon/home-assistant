@@ -58,6 +58,15 @@ mqtt:
         {% set a=value_json.rain24_cm|float(default=0)%}
         {{ (a*10)|round(3) }}
 
+    - name: "VP2_RainJour"
+      unique_id: "VP2_RainJour"
+      state_topic: "home/Vp2/loop"
+      unit_of_measurement: 'mm'
+      force_update: true
+      value_template: >-
+        {% set a=value_json.dayRain_cm|float(default=0)%}
+        {{ (a*10)|round(3) }}
+
   # La Rain Rate (pluviométrie) sera nulle et l'icône parapluie ne sera pas affichée tant que
   # deux basculements du pluviomètre ne sont pas survenus dans une période de 15 minutes.
     - name: "VP2_Rain_Rate"

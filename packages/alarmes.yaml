@@ -10,7 +10,6 @@ input_boolean:
   test_alert:
     name: Test Alert
 
-
 # Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple
   inhib_alarme_pac:
     name: Inhib Alarm PAC
@@ -18,24 +17,15 @@ input_boolean:
   inhib_alarme_linky:
     name: Inhib Alarm Linky
 
-
-      
 template:
+  - binary_sensor:
 # Surveillance de la temperature du congelateur     
 # normalement sur off
-  - binary_sensor:
-    - name: "alarme_temp_congelo_haute"
-      state: >-
-        {{ states('sensor.temp_congelo_garage')|float(default=0)>-10 }}
-      device_class: "problem"
+# Déclaré dans http://192.168.0.37:8123/config/helpers
 
 # Surveillance de la temperature du chalet     
 # normalement sur off
-  - binary_sensor:
-    - name: "alarme_temp_chalet_basse"
-      state: >-
-        {{ states('sensor.pt100_0_chalet')|float(default=0)<1 }}
-      device_class: "problem"
+# Déclaré dans http://192.168.0.37:8123/config/helpers
 
 # Surveillance discordance PAC entre l'état du thermostat et l'état du switch de commande   
 # normalement sur on  

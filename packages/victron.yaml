@@ -403,7 +403,7 @@ modbus:
         scale: 1
 
       # Alarme Réseau Perdu
-      - name : 'Alarme perte réseau' 
+      - name : 'Mp2 Alarme perte réseau' 
         unique_id: 'mp2_alarme_perte_reseau'
         unit_of_measurement : "marche/arrêt" 
         slave : 227 

@@ -2,7 +2,6 @@ substitutions:
   device_name: esp127-thermocouple
   adress_ip: "192.168.0.127"
   friendly_name: esp127
-  time_timezone: "Europe/Paris"
   
 esphome:
   name: ${device_name}
@@ -25,7 +24,7 @@ wifi:
     subnet: 255.255.255.0
     
 deep_sleep:
-  run_duration: 30s
+  run_duration: 60s
   sleep_duration: 2min
   
 i2c:
@@ -53,12 +52,17 @@ sensor:
     gain: 6.144
     name: "${friendly_name} U Panneau"
     update_interval: 10s
-    
+        
   - platform: max31855
     name: "${friendly_name} Temperature"
     cs_pin: D3
     update_interval: 10s
     accuracy_decimals: 2
+    filters:
+    - median:
+        window_size: 8
+        send_every: 4
+        send_first_at: 1
 
   - platform: adc
     pin: VCC

@@ -481,7 +481,7 @@
         entity_id: input_select.volets
         state: Auto Hiv
       - condition: trigger
-        id: nuit->jour
+        id: heure_ouv
       sequence:
       - service: script.ouverture_volet
         data: {}
@@ -2840,6 +2840,10 @@
       | float %}\n      {% set deval=states('input_number.mp2_seuil_devalidation_routeur')
       | float %}\n      {{ soc < deval }}"
     id: devalid_routeur
+  - platform: numeric_state
+    entity_id: sensor.mp2_niveau_charge_batteries
+    id: devalid_seuil2
+    below: 95
   condition: []
   action:
   - choose:
@@ -2862,6 +2866,8 @@
     - conditions:
       - condition: trigger
         id: devalid_routeur
+      - condition: trigger
+        id: devalid_seuil2
       sequence:
       - service: input_boolean.turn_off
         data: {}

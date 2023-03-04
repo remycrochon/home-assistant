@@ -883,14 +883,14 @@
       sequence:
       - service: notify.telegram
         data:
-          message: 'Temps de filtration:  {{states(''sensor.ma_ppe_piscine_jour'')}}{{-"\n"-}}Conso:
-            {{states(''sensor.energie_piscine_jour'')}} kWh.{{-"\n"-}} Tps Utilisation
-            cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}} h {{-"\n"-}}{{states("sensor.date_time")
-            }}'
+          message: 'du {{states("sensor.date_time") }} {{-"\n"-}} Temps de filtration:  {{states(''sensor.ma_ppe_piscine_jour'')}}{{-"\n"-}}Conso:
+            {{states(''sensor.compteur_energie_piscine_jour_hp_hc'')}} kWh {{-"\n"-}}
+            Tps Utilisation cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}}
+            h'
           title: Piscine Rapport Fin de journée
       - service: notify.log_piscine
         data:
-          message: ',{{states(''sensor.energie_piscine_jour'')}},{{states(''sensor.ma_ppe_piscine_jour'')}}'
+          message: ',{{states(''sensor.compteur_energie_piscine_jour_hp_hc'')}},{{states(''sensor.ma_ppe_piscine_jour'')}}'
           title: Rapport jour piscine
     default: []
   mode: single
@@ -2864,10 +2864,12 @@
             Marche routeur ECS %{{-"\n"-}}{{states("sensor.date_time") }}
           title: Validation Routeur ECS
     - conditions:
-      - condition: trigger
-        id: devalid_routeur
-      - condition: trigger
-        id: devalid_seuil2
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: devalid_routeur
+        - condition: trigger
+          id: devalid_seuil2
       sequence:
       - service: input_boolean.turn_off
         data: {}

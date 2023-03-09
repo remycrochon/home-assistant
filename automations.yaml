@@ -2853,6 +2853,7 @@
       - condition: sun
         before: sunset
         after: sunrise
+        after_offset: 02:00:00
       sequence:
       - service: input_boolean.turn_on
         data: {}

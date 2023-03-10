@@ -57,8 +57,10 @@ sensor:
         - multiply: 0.001
     power:
       name: "PZEM-SdB Puissance"
+      unit_of_measurement: "W"
     frequency:
       name: "PZEM-SdB Frequence"
+      unit_of_measurement: "hz"
     power_factor:
       name: "PZEM-SdB FactPuiss"
     update_interval: 30s

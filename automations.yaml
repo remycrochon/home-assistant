@@ -2898,3 +2898,20 @@
     target:
       entity_id: light.esp174_puissance_dimmer_ecs
   mode: single
+- id: '1678531257946'
+  alias: 6_1_2 Surveillance Puissance Onduleur la nuit
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.pc_onduleur_eaton_puissance
+    above: 150
+  condition:
+  - condition: time
+    after: '23:00:00'
+    before: 07:00:00
+  action:
+  - service: notify.telegram
+    data:
+      message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
+        }}
+  mode: single

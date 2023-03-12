@@ -420,7 +420,7 @@ volets_bureau:
   mode: single
   icon: mdi:window-shutter-open
 ouverture_volets_chamb_nord:
-  alias: 1_1_1 Ouverture Volets Chamb Nord
+  alias: 1_1_1 Ouverture Volet Chambre Nord
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_nord
@@ -739,6 +739,7 @@ volet_amis_sud_down:
       entity_id:
       - cover.amis_sud_petit
   mode: single
+  icon: mdi:window-shutter-open
 volet_amis_sud_stop:
   alias: volet amis sud stop
   sequence:
@@ -1104,6 +1105,7 @@ ouverture_volet_bureau_droit:
     target:
       entity_id: cover.volet_droit_p
   mode: single
+  icon: mdi:window-shutter-open
 0_0_fermeture_volet_bureau_droit:
   alias: 1_0_0 Fermeture Volet Bureau droit
   sequence:
@@ -1130,8 +1132,9 @@ ouverture_volet_bureau_droit:
     target:
       entity_id: cover.volet_droit_p
   mode: single
+  icon: mdi:window-shutter
 0_0_0_fermeture_volet_ami_nord:
-  alias: 1_1_0 Fermeture Volet ami nord
+  alias: 1_1_0 Fermeture Volet Chambre nord
   sequence:
   - service: cover.stop_cover
     data: {}
@@ -1159,6 +1162,7 @@ ouverture_volet_bureau_droit:
       entity_id:
       - cover.volet_amis_nord_p
   mode: single
+  icon: mdi:window-shutter
 1_2_0_fermeture_volet_salon_petit:
   alias: 1_2_0 Fermeture Volet salon petit
   sequence:
@@ -1188,6 +1192,7 @@ ouverture_volet_bureau_droit:
       entity_id:
       - cover.volet_salon_p
   mode: single
+  icon: mdi:window-shutter
 1_2_1_ouverture_volet_salon_petit:
   alias: 1_2_1 Ouverture Volet salon petit
   sequence:
@@ -1217,3 +1222,4 @@ ouverture_volet_bureau_droit:
       entity_id:
       - cover.volet_salon_p
   mode: single
+  icon: mdi:window-shutter-open

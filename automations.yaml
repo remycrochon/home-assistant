@@ -2834,22 +2834,32 @@
     entity_id:
     - sensor.mp2_status_bus_ve
     to: '4'
-    id: Absorption
+    id: bulk to Absorption
+    from: '3'
   - platform: template
     value_template: "      {% set soc=states('sensor.mp2_niveau_charge_batteries')
       | float %}\n      {% set deval=states('input_number.mp2_seuil_devalidation_routeur')
-      | float %}\n      {{ soc < deval }}"
-    id: devalid_routeur
+      | float -5 %}\n      {{ soc < deval }}"
+    id: devalid_routeur_seuil2
   - platform: numeric_state
     entity_id: sensor.mp2_niveau_charge_batteries
-    id: devalid_seuil2
-    below: 95
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    below: input_number.mp2_seuil_devalidation_routeur
+    id: devalid_routeur_seuil1
+  - platform: state
+    entity_id:
+    - sensor.mp2_affichage_status_bus_ve
+    to: '3'
+    id: Float to bulk
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
-        id: Absorption
+        id: bulk to Absorption
       - condition: sun
         before: sunset
         after: sunrise
@@ -2863,14 +2873,17 @@
         data:
           message: Bus VE passe en mode:{{states('sensor.mp2_affichage_status_bus_ve')}}{{-"\n"-}}
             Marche routeur ECS %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Validation Routeur ECS
+          title: Validation Routeur ECS_ Bulk to Absorption
     - conditions:
       - condition: or
         conditions:
         - condition: trigger
-          id: devalid_routeur
+          id: devalid_routeur_seuil1
         - condition: trigger
-          id: devalid_seuil2
+          id: devalid_routeur_seuil2
+        enabled: false
+      - condition: trigger
+        id: Float to bulk
       sequence:
       - service: input_boolean.turn_off
         data: {}
@@ -2880,7 +2893,7 @@
         data:
           message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
             %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: De-Validation Routeur ECS
+          title: De-Validation Routeur ECS - Float to Bulk
   mode: single
 - id: '1676284606975'
   alias: Dimmer V2

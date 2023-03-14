@@ -35,67 +35,13 @@ binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
-
-output:
-  - platform: ac_dimmer
-    id: dimmer1
-    gate_pin: GPIO2
-    zero_cross_pin:
-      number: GPIO4
-      mode:
-        input: true
-      inverted: yes
-
-light:
-  - platform: monochromatic
-    output: dimmer1
-    id: p_dimmer
-    name: "${friendly_name} Puissance Dimmer ECS"
-
-# Variables Globales
-# Puissance max du CE avec Dimmer à 100%
-globals:
-   - id: p_max
-     type: int
-     restore_value: no
-     initial_value: '300'
-
 sensor:
-# Lecture puissance réseau, si <0 alors injection ds le réseau
-  - platform: homeassistant
-    name: "${friendly_name}_Conso_grid"
-    entity_id: sensor.mp2_grid_l1
-    id: p_grid
-    
-############### TEMPLATE  ######################"
-# Calcul consigne puissance
-
-  - platform: template
-    name: "${friendly_name} Consigne Puissance"
-    id: consigne_p
-    icon: mdi:flash
-    unit_of_measurement: "%"
-    accuracy_decimals: 2
+  - platform: dht
+    pin: GPIO2
+    model: DHT22
+    temperature:
+      name: "${friendly_name} Temperature"
+    humidity:
+      name: "${friendly_name} Humidity"
     update_interval: 5s
-    lambda: |-
-      if (id(p_grid).state<0)
-        {return id(p_grid).state*-1*100/id(p_max);}
-      else
-        {return 0.0;}
-    on_value:
-      then:
-        - light.turn_on:
-            id: p_dimmer
-            transition_length: '0.5s'
-            brightness: !lambda |-
-              return x/100;
-
-#    lambda: |-
-#      if (id(p_grid).state<-10)
-#        {return id(p_grid).state*-100/3000;}
-#      else
-#        {return 0.0;}
-    
-
-
   

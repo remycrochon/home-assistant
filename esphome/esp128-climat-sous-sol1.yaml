@@ -45,7 +45,13 @@ sensor:
   - platform: htu21d
     temperature:
       name: "${device_name} Temperature"
+      id: temperature
     humidity:
       name: "${device_name} Humidité"
+      id: humidite
     update_interval: 60s
 
+  - platform: absolute_humidity
+    name: "${device_name} Humidité Absolue"
+    temperature: temperature
+    humidity: humidite

@@ -446,7 +446,7 @@
     id: jour->nuit
     for:
       hours: 0
-      minutes: 0
+      minutes: 30
       seconds: 0
   - platform: time
     at: input_datetime.horaire_ete_volet_ouv

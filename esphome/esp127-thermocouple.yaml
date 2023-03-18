@@ -7,6 +7,9 @@ esphome:
   name: ${device_name}
   platform: ESP8266
   board: d1_mini
+  on_boot:
+    then:
+      - script.execute: exec_deep_sleep
 
 wifi:
   networks:
@@ -24,8 +27,8 @@ wifi:
     subnet: 255.255.255.0
     
 deep_sleep:
-  run_duration: 60s
   sleep_duration: 2min
+  id: control_deep_sleep
   
 i2c:
   sda: GPIO4 #D2
@@ -68,9 +71,32 @@ sensor:
     pin: VCC
     name: "${friendly_name} U Alim"
     update_interval: 10s
-    
-#Etat de la connection
+
 binary_sensor:
+  - platform: homeassistant
+    entity_id: input_boolean.reveil_esp127_thermocouple
+    id: prevent_deep_sleep
+
+  #Etat de la connection
   - platform: status
     name: "${friendly_name} Status"
+
+script:
+  - id: exec_deep_sleep
+    mode: queued
+    then:
+      - delay: 60s
+      - logger.log: 'execute script'
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Eviter la mise en sommeil par prevent_deep_sleep'
+            -  deep_sleep.prevent: control_deep_sleep
+          else:
+            - logger.log: 'Autorise la mise en sommeil par deep_sleep_enter'
+            - deep_sleep.enter: 
+                id: control_deep_sleep
+                sleep_duration: 2min
+      - script.execute: exec_deep_sleep
 

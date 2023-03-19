@@ -1334,18 +1334,6 @@
   - service: shell_command.push_to_github
     data: {}
   mode: single
-- id: '1635590858245'
-  alias: 1_4_1 BP Sonof
-  description: ''
-  trigger:
-  - platform: event
-    event_type: zha_event
-  condition: []
-  action:
-  - service: notify.persistent_notification
-    data:
-      message: bp sonof
-  mode: single
 - id: '1635590853335'
   alias: 01-1-4 Choix du theme jour ou nuit
   description: ''
@@ -2309,12 +2297,12 @@
     default: []
   mode: single
 - id: '1668506550340'
-  alias: 0_0_2 0_0_2 Alim tablette BP
+  alias: 0_0_2 Alim tablette BP
   description: ' '
   use_blueprint:
     path: seamus65/wallpanel-battery-management.yaml
     input:
-      battery: sensor.tablette_niveau_charge
+      battery: sensor.tablette_battery_level
       charger: switch.pc2_tablette
       low_percent: 30
       charged_percent: 90

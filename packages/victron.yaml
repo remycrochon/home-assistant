@@ -396,7 +396,8 @@ modbus:
       # SYSTEM
       # Switch Position
       # 1=Charger Only;2=Inverter Only;3=On;4=Off
-      - name: "MP2 position Inter"
+      - name: "MP2 Mode ESS"
+        unique_id: mp2_mode_ess
         slave: 227
         address: 33
         data_type: uint16
@@ -678,4 +679,11 @@ template:
       state:  >
         {{ states('sensor.mp2_temps_depuis_derniere_pleine_batteries')|int(default=0)|timestamp_custom('%H:%M:%S', false) }}
 
-        
+    - name: MP2 Cible SOC pour charge nocturne
+      unique_id: mp2_cible_soc
+      unit_of_measurement: "%"
+      state: >-
+        {% set state = 2.5 * states('sensor.energy_production_today') | float(0) %}
+        {% set state = 150 - state | float(0) %}
+        {% set y = (((state/5) | int) +1) * 5 %}
+        {{ ([35, y, 95] | sort)[1] }}

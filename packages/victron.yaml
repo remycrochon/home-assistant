@@ -684,6 +684,6 @@ template:
       unit_of_measurement: "%"
       state: >-
         {% set state = 2.5 * states('sensor.energy_production_today') | float(0) %}
-        {% set state = 150 - state | float(0) %}
+        {% set state = 100 - state | float(0) %}
         {% set y = (((state/5) | int) +1) * 5 %}
         {{ ([35, y, 95] | sort)[1] }}

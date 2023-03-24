@@ -27,7 +27,7 @@ wifi:
     subnet: 255.255.255.0
     
 deep_sleep:
-  sleep_duration: 2min
+  sleep_duration: 5min
   id: control_deep_sleep
   
 i2c:
@@ -97,6 +97,6 @@ script:
             - logger.log: 'Autorise la mise en sommeil par deep_sleep_enter'
             - deep_sleep.enter: 
                 id: control_deep_sleep
-                sleep_duration: 2min
+                sleep_duration: 5min
       - script.execute: exec_deep_sleep
 

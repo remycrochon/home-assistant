@@ -123,7 +123,7 @@
       title: Piscine Alarme Niveau Bas !!!
   mode: single
 - id: '1617968589301'
-  alias: '8_1_1 Alarmo  Activation Nuit '
+  alias: '08-01-01 Alarmo  Activation Nuit '
   description: ''
   trigger:
   - platform: time
@@ -133,9 +133,10 @@
   - service: alarm_control_panel.alarm_arm_night
     target:
       entity_id: alarm_control_panel.alarmo
+    data: {}
   mode: single
 - id: '1617968698367'
-  alias: 8_1_2 Alarmo Desactivation
+  alias: 08-01-02 Alarmo Desactivation
   description: ''
   trigger:
   - platform: time
@@ -145,6 +146,7 @@
   - service: alarm_control_panel.alarm_disarm
     target:
       entity_id: alarm_control_panel.alarmo
+    data: {}
   mode: single
 - id: '1622182531449'
   alias: 3_5_1 Piscine-Volet Ouv/Ferm Horaires
@@ -376,7 +378,7 @@
       title: Piscine Fin injection Chlore !!!
   mode: single
 - id: '1629296468909'
-  alias: 7_1_4 Robot_Stop Pluie
+  alias: 07-01-01 Robot_Stop Pluie
   description: ''
   trigger:
   - platform: numeric_state
@@ -417,7 +419,7 @@
       position: 0
   mode: single
 - id: '1632232387237'
-  alias: 5_1_1 Reseau Notification Nouvelle IP
+  alias: 05-01-01 Reseau Notification Nouvelle IP
   description: ''
   trigger:
   - platform: state
@@ -969,7 +971,7 @@
     default: []
   mode: single
 - id: '1634569261594'
-  alias: 2_1_04 Alarme Blueprints Notification Status PAC
+  alias: 02-01-04 Alarme Blueprints Notification Status PAC
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1001,7 +1003,7 @@
       max_alerts: 100
       condition_entity: input_boolean.inhib_alarme_pac
 - id: '1634569580188'
-  alias: 2_1_05 Alarme Blueprints Notification Porte Cellier Ouverte
+  alias: 02-01-06 Alarme Blueprints Notification Porte Cellier Ouverte
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1034,7 +1036,7 @@
       max_alerts: 100
       initial_delay: 300
 - id: '1634569751638'
-  alias: 2_1_06 Alarme Blueprints Notification Porte Sous Sol Ouverte
+  alias: 02-01-08 Alarme Blueprints Notification Porte Sous Sol Ouverte
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1070,7 +1072,7 @@
       max_alerts: 100
       repeat_delay: 600
 - id: '1634569897913'
-  alias: 2_1_07 Alarme Blueprints Notification Porte Garage Ouverte
+  alias: 02-01-07 Alarme Blueprints Notification Porte Garage Ouverte
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1106,7 +1108,7 @@
       initial_delay: 300
       max_alerts: 100
 - id: '1634570304569'
-  alias: 2_1_08 Alarme Blueprints Notification Discordance PAC
+  alias: 02-01-09 Alarme Blueprints Notification Discordance PAC
   description: ' Surveillance discordance PAC entre l''état du thermostat et l''état
     du switch de commande '
   use_blueprint:
@@ -1143,7 +1145,7 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634571065075'
-  alias: 2_1_09 Alarme Blueprints Notification Porte frigo garage ouverte
+  alias: 02-01-10 Alarme Blueprints Notification Porte frigo garage ouverte
   description: '# Alarme porte frigo garage ouverte   '
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1178,7 +1180,7 @@
       initial_delay: 60
       max_alerts: 100
 - id: '1634571983587'
-  alias: 2_1_10 Alarme Blueprints Notification Temperature congelateur haute
+  alias: 02-01-11 Alarme Blueprints Notification Temperature congelateur haute
   description: '# Surveillance de la temperature du congelateur  '
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1213,7 +1215,7 @@
       initial_delay: 300
       max_alerts: 100
 - id: '1634621594490'
-  alias: 2_1_12 Alarme Blueprints Notification Def Com VP2
+  alias: 02-01-14 Alarme Blueprints Notification Def Com VP2
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1296,7 +1298,7 @@
     default: []
   mode: single
 - id: '1634766452141'
-  alias: 2_2_4 Alarme Acquittement Porte Sous Sol
+  alias: 02-02-02 Alarme Acquittement Porte Sous Sol
   description: Ferme la porte du sous sol
   trigger:
   - platform: event
@@ -1308,9 +1310,10 @@
   - service: cover.close_cover
     target:
       entity_id: cover.garage_soussol
+    data: {}
   mode: single
 - id: '1634766777070'
-  alias: 2_2_3 Alarme Acquittement Porte Garage
+  alias: 02-02-01 Alarme Acquittement Porte Garage
   description: Ferme la porte du sous sol
   trigger:
   - platform: event
@@ -1322,6 +1325,7 @@
   - service: cover.close_cover
     target:
       entity_id: cover.garage_rdc
+    data: {}
   mode: single
 - id: '1634916685737'
   alias: 01-1-3 Pusch gitub
@@ -1377,7 +1381,7 @@
       entity_id: cover.garage_rdc
   mode: single
 - id: '1638119466260'
-  alias: 2_1_11 Alarme Blueprints Notification Def Com Linky
+  alias: 02-01-13 Alarme Blueprints Notification Def Com Linky
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1747,7 +1751,7 @@
     default: []
   mode: single
 - id: '1642958036645'
-  alias: 2_1_05 Alarme Blueprints Notification Petite Porte Sous Sol
+  alias: 02-01-05 Alarme Blueprints Notification Petite Porte Sous Sol
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1795,7 +1799,8 @@
     data: {}
   mode: single
 - id: '1647538159020'
-  alias: 2_1_12 Alarme Blueprints Notification Def connection Tablette
+  alias: 02-01-15 Alarme Blueprints Notification Def connection Tablette
+  description: ''
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
     input:
@@ -2145,7 +2150,7 @@
     default: []
   mode: single
 - id: '1656059504847'
-  alias: 2_1_10 Alarme Blueprints Notification Temps lames robot AM435 atteint
+  alias: 02-01-12 Alarme Blueprints Notification Temps lames robot AM435 atteint
   description: Surveillance du temps d'utilisation des lame du robot
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -2373,7 +2378,7 @@
       title: Alarme Delestage ECS
   mode: single
 - id: '1669919504303'
-  alias: 2_1_13 Alarme Temp basse Chalet
+  alias: 02-01-16 Alarme BP Temp basse Chalet
   description: '# Surveillance de la temperature du chalet'
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -2843,6 +2848,10 @@
     to: '3'
     id: Float to bulk
     from: '5'
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: levee_sun
   condition: []
   action:
   - choose:
@@ -2883,6 +2892,23 @@
           message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
             %{{-"\n"-}}{{states("sensor.date_time") }}
           title: De-Validation Routeur ECS - Float to Bulk
+    - conditions:
+      - condition: trigger
+        id: levee_sun
+      - condition: numeric_state
+        entity_id: sensor.mp2_status_bus_ve
+        above: 2
+        below: 6
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: notify.telegram
+        data:
+          message: Bus VE passe en mode:{{states('sensor.mp2_affichage_status_bus_ve')}}{{-"\n"-}}
+            Marche routeur ECS %{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Validation Routeur ECS_ Bulk to Absorption
   mode: single
 - id: '1676284606975'
   alias: Dimmer V2
@@ -2922,25 +2948,90 @@
   description: En lien avec NodRED
   trigger:
   - platform: time_pattern
-    minutes: /15
-  condition:
-  - condition: time
-    after: 03:48:00
-    before: 06:50:00
-    enabled: true
+    minutes: /5
+  - platform: time
+    at: 03:48:00
+    id: debut
+  - platform: time
+    at: 06:50:00
+    id: fin
+  condition: []
   action:
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.mp2_niveau_soc_cp1
-    data_template:
-      value: '{{ states(''sensor.mp2_cible_soc_pour_charge_nocturne'') }}'
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 1
-      milliseconds: 0
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.mp2_valid_ess_charge_prog_1
+  - choose:
+    - conditions:
+      - condition: time
+        after: 03:48:00
+        before: 06:50:00
+        enabled: true
+      sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.mp2_niveau_soc_cp1
+        data_template:
+          value: '{{ states(''sensor.mp2_cible_soc_pour_charge_nocturne'') }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 1
+          milliseconds: 0
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.mp2_valid_ess_charge_prog_1
+    default:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.mp2_valid_ess_charge_prog_1
+  mode: single
+- id: '1679654722410'
+  alias: 01-2-4 ECS Validation Routeur sur Absorption V2
+  description: float alors routeur ECS Actif
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.mp2_status_bus_ve
+        above: 3
+        below: 6
+      - condition: state
+        entity_id: input_boolean.ecs_av_pv
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.mp2_pc_ac_couplet_on_l1
+        above: 50
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: notify.telegram
+        data:
+          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC:{{states('sensor.mp2_niveau_charge_batteries')}}
+            {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Validation Routeur ECS
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.mp2_status_bus_ve
+          above: 3
+          below: 6
+      - condition: state
+        entity_id: input_boolean.ecs_av_pv
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: notify.telegram
+        data:
+          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC:{{states('sensor.mp2_niveau_charge_batteries')}}%
+            {{-"\n"-}}{{states("sensor.date_time") }}
+          title: De-Validation Routeur ECS
   mode: single

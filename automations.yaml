@@ -3011,7 +3011,7 @@
           entity_id: input_boolean.ecs_av_pv
       - service: notify.telegram
         data:
-          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC:{{states('sensor.mp2_niveau_charge_batteries')}}
+          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Validation Routeur ECS
     - conditions:
@@ -3031,7 +3031,9 @@
           entity_id: input_boolean.ecs_av_pv
       - service: notify.telegram
         data:
-          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC:{{states('sensor.mp2_niveau_charge_batteries')}}%
+          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: De-Validation Routeur ECS
   mode: single
+  trace:
+    stored_traces: 10

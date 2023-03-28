@@ -378,32 +378,60 @@
       title: Piscine Fin injection Chlore !!!
   mode: single
 - id: '1629296468909'
-  alias: 07-01-01 Robot_Stop Pluie
+  alias: 07-01-01 Robot Tondeuse
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id: sensor.vp2_pluviometrie_moyenne
-    above: input_number.seuil_pluie_stop_robot
+  - platform: state
+    entity_id:
+    - sensor.vp2_pluviometrie_moyenne
   condition: []
   action:
-  - service: vacuum.return_to_base
-    target:
-      entity_id:
-      - vacuum.am435x_awd
-    data: {}
-  - service: notify.telegram
-    data:
-      message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
-        mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
-        mm {{-"\n"-}}{{states("sensor.date_time") }}
-      title: Alerte Meteo Pluie !!!
-  - service: notify.telegram
-    data:
-      message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
-        mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
-        mm {{-"\n"-}}{{states("sensor.date_time") }}
-      title: Alerte Meteo Pluie !!!
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.vp2_pluviometrie_moyenne
+        above: input_number.seuil_pluie_stop_robot
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: vacuum.am435x_awd
+          state: docked
+      sequence:
+      - service: vacuum.return_to_base
+        target:
+          entity_id:
+          - vacuum.am435x_awd
+        data: {}
+      - service: notify.telegram
+        data:
+          message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
+            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
+            mm {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Robot-Début Alerte Meteo Pluie !!!
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.vp2_pluviometrie_moyenne
+        below: input_number.seuil_pluie_stop_robot
+      - condition: state
+        entity_id: input_boolean.am435x_awd_autorisation_tonte
+        state: 'on'
+      - condition: state
+        entity_id: vacuum.am435x_awd
+        state: docked
+      sequence:
+      - service: vacuum.start
+        data: {}
+        target:
+          entity_id: vacuum.am435x_awd
+      - service: notify.telegram
+        data:
+          message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
+            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
+            mm {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Robot- Fin Alerte Meteo Pluie !!!
   mode: single
+  trace:
+    stored_traces: 10
 - id: '1629792204535'
   alias: 4_1_4 Volet  Proport_Bureau_droit
   description: Mise à jour Position fermé (=0)
@@ -2632,7 +2660,7 @@
         entity_id: switch.chalet_s1
   mode: single
 - id: '1671811895133'
-  alias: 10_0_0 Spot Terrasse
+  alias: 10-00-00 Spot Terrasse
   description: ''
   trigger:
   - device_id: 191305ef12c4538ae3dc593438f5e19d
@@ -2648,7 +2676,7 @@
     domain: switch
   mode: single
 - id: '1672317557269'
-  alias: 10_0_1 Eclairage 1
+  alias: 10-01-01 Eclairage 1
   description: ''
   trigger:
   - type: turned_on
@@ -2664,7 +2692,7 @@
     domain: switch
   mode: single
 - id: '1672318040631'
-  alias: 10_0_2 Eclairage 2
+  alias: 10-00-02 Eclairage 2
   description: ''
   trigger:
   - type: turned_on
@@ -2927,7 +2955,7 @@
       entity_id: light.esp174_puissance_dimmer_ecs
   mode: single
 - id: '1678531257946'
-  alias: 06-1-2 Surveillance Puissance Onduleur la nuit
+  alias: 06-1-2 Surveillance Puissance Onduleur Bureau la nuit
   description: ''
   trigger:
   - platform: numeric_state

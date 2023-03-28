@@ -381,21 +381,20 @@
   alias: 07-01-01 Robot Tondeuse
   description: ''
   trigger:
-  - platform: state
-    entity_id:
-    - sensor.vp2_pluviometrie_moyenne
+  - platform: numeric_state
+    entity_id: sensor.vp2_pluviometrie_moyenne
+    above: input_number.seuil_pluie_stop_robot
+    id: seuil_haut
+  - platform: numeric_state
+    entity_id: sensor.vp2_pluviometrie_moyenne
+    id: seuil_bas
+    below: input_number.seuil_pluie_stop_robot
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: numeric_state
-        entity_id: sensor.vp2_pluviometrie_moyenne
-        above: input_number.seuil_pluie_stop_robot
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: vacuum.am435x_awd
-          state: docked
+      - condition: trigger
+        id: seuil_haut
       sequence:
       - service: vacuum.return_to_base
         target:
@@ -409,15 +408,11 @@
             mm {{-"\n"-}}{{states("sensor.date_time") }}
           title: Robot-Début Alerte Meteo Pluie !!!
     - conditions:
-      - condition: numeric_state
-        entity_id: sensor.vp2_pluviometrie_moyenne
-        below: input_number.seuil_pluie_stop_robot
+      - condition: trigger
+        id: seuil_bas
       - condition: state
         entity_id: input_boolean.am435x_awd_autorisation_tonte
         state: 'on'
-      - condition: state
-        entity_id: vacuum.am435x_awd
-        state: docked
       sequence:
       - service: vacuum.start
         data: {}
@@ -1582,6 +1577,8 @@
         data: {}
     default: []
   mode: single
+  trace:
+    stored_traces: 10
 - id: '1634204887777'
   alias: 3_3_3 Piscine ORP Notifications
   description: Notifie ORP bas, haut, anormal, bidon bas

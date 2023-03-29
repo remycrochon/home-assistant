@@ -620,6 +620,9 @@
       - condition: state
         entity_id: sensor.linky_ptec
         state: HC..
+      - condition: numeric_state
+        entity_id: sensor.energy_production_today
+        below: 8
       sequence:
       - service: script.ecs_on
         data: {}

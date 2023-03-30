@@ -85,6 +85,7 @@ modbus:
 
 # Multiplus 2
       # PV - AC-coupled on input L1
+      # Production PV couplée sur L1
       - name: "MP2 PC AC Couplet on L1"
         unique_id: "mp2_pv_ac_coupled_on_l1"
         data_type: uint16
@@ -96,6 +97,7 @@ modbus:
         state_class: measurement
 
       # AC Consumption L1
+      # Puissance soutirée sur ligne L1 du MP2
       - name: "MP2 Conso AC L1"
         unique_id: "mp2_conso_ac_l1"
         data_type: uint16
@@ -107,6 +109,7 @@ modbus:
         state_class: measurement
 
       #Grid L1
+      # Puissance soutirée sur le réseau public      
       - name: "MP2 Grid L1"
         unique_id: "mp2_grid_l1"
         data_type: int16
@@ -149,6 +152,7 @@ modbus:
         state_class: measurement
 
       # Battery Power (System)
+      # Puissance soutirée(>0) ou injectée(<0) dans les batteries
       # positive en charge-negatif en décharge
       - name: "MP2 Puissance Batteries"
         unique_id: "mp2_puissance_batteries"

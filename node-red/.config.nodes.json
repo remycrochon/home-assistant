@@ -1575,5 +1575,27 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-device.js"
             }
         }
+    },
+    "node-red-contrib-alexa-smart-home": {
+        "name": "node-red-contrib-alexa-smart-home",
+        "version": "0.4.68",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "alexa": {
+                "name": "alexa",
+                "types": [
+                    "alexa-smart-home-v3-conf",
+                    "alexa-smart-home-v3",
+                    "alexa-smart-home-v3-state",
+                    "alexa-smart-home-v3-resp"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-smart-home",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-smart-home/alexa.js"
+            }
+        }
     }
 }

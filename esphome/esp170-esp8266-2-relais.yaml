@@ -51,14 +51,6 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
-sensor:
-  - platform: wifi_signal
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-
-  - platform: uptime
-    name: "${friendly_name} Uptime Sensor"
-    update_interval: 60s
     
 switch:
   - platform: gpio
@@ -72,5 +64,3 @@ switch:
     
   - platform: restart
     name: "${friendly_name} Restart"
-
- 

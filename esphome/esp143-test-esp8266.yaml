@@ -33,40 +33,57 @@ ota:
    
 web_server:
   port: 80
+font:
+  - file: "fonts/arial.ttf"
+    id: arial15
+    size: 15
+  - file: "fonts/arial.ttf"
+    id: arial30
+    size: 30
+  - file: "fonts/arial.ttf"
+    id: arial10
+    size: 10
+  - file: "fonts/arial.ttf"
+    id: arial20
+    size: 20
+#uart:
+#  rx_pin: GPIO3 # RX=pin 21
+#  tx_pin: GPIO1 # TX=pin 22
+#  baud_rate: 9600
+i2c:
+  sda: GPIO4 #D2=pin 19
+  scl: GPIO5 #D1=pin 20
+  scan: True
+  id: bus_a
 
-sensor:
-  - platform: ntc
-    sensor: resistance_sensor
-    calibration:
-#      - 20.01kOhm -> 25°C
-#      - 68.057kOhm -> 0.56°C
-#      - 32.336kOhm -> 15°C
-      - 298.057kOhm -> 0.56°C
-      - 262.336kOhm -> 15°C
-      - 250.01kOhm -> 25°C
-
-    name: esp143-ntc20k
-    
-  - platform: resistance
-    id: resistance_sensor
-    sensor: source_sensor
-    configuration: UPSTREAM
-    resistor: 100.0kOhm
-    name: Resistance Sensor
-    
-  - platform: adc
-    id: source_sensor
-    pin: A0      
-    # Added:
-    update_interval: 10s
-   
+  
 #Etat de la connection
 binary_sensor:
   - platform: status
     name: "Status"
 
-output:
-  - platform: esp8266_pwm
-    pin: D1
-    frequency: 1000 Hz
-    id: pwm_output
+  - platform: homeassistant
+    name: "Bouton Hatos"
+    entity_id: input_boolean.allume_ecran_hatos
+    id: allume
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 64x48"
+    reset_pin: D0
+    address: 0x3C
+    brightness: 100%
+    rotation: 0
+    lambda: |-
+      if (id(allume).state) {
+        it.print(0, 20, id(arial20), "Hatos");
+      } else {
+        it.print(0, 20, id(arial20), "");
+      }
+#      it.printf(0, 0, id(arial30),"Hatos");  
+#      it.printf(0, 0, id(arial10),"P:%.0f W",id(prod).state);
+#      it.printf(0, 10, id(arial10),"C:%.0f W",id(conso).state);
+#      it.printf(0, 20, id(arial10),"S:%.0f ",id(sout).state);
+#      it.printf(32, 20, id(arial10),"I:%.0f W",id(inj).state);
+#      it.printf(0, 30, id(arial10),"Disp:%.0f W",id(pdispo).state);   
+ 

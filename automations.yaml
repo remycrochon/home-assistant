@@ -2335,7 +2335,7 @@
   use_blueprint:
     path: seamus65/wallpanel-battery-management.yaml
     input:
-      battery: sensor.tablette_battery_level
+      battery: sensor.s6_pro_battery
       charger: switch.pc2_tablette
       low_percent: 30
       charged_percent: 90
@@ -3065,3 +3065,37 @@
   mode: single
   trace:
     stored_traces: 10
+- id: '1680272979934'
+  alias: Allumage Ecran sur Hatos
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: 2d249d1ffc712f4ec1c489cc0fa81f03
+    entity_id: binary_sensor.detecteur_presence1_ias_zone
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.allume_ecran_hatos
+  - service: notify.telegram
+    data:
+      message: Pépère est dans l'escalier {{-"\n"-}}{{states("sensor.date_time") }}
+      title: Hatos
+  - service: notify.persistent_notification
+    data:
+      message: Pépère est ds l'Escalier
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.allume_ecran_hatos
+  mode: restart
+  trace:
+    stored_traces: 20

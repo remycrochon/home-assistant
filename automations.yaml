@@ -3084,9 +3084,6 @@
     data:
       message: Pépère est dans l'escalier {{-"\n"-}}{{states("sensor.date_time") }}
       title: Hatos
-  - service: notify.persistent_notification
-    data:
-      message: Pépère est ds l'Escalier
   - delay:
       hours: 0
       minutes: 1

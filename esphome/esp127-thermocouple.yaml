@@ -2,6 +2,8 @@ substitutions:
   device_name: esp127-thermocouple
   adress_ip: "192.168.0.127"
   friendly_name: esp127
+  duree_sommeil: "5min"
+  duree_reveil: "60s"
   
 esphome:
   name: ${device_name}
@@ -27,7 +29,7 @@ wifi:
     subnet: 255.255.255.0
     
 deep_sleep:
-  sleep_duration: 5min
+  sleep_duration: ${duree_sommeil}
   id: control_deep_sleep
   
 i2c:
@@ -85,7 +87,7 @@ script:
   - id: exec_deep_sleep
     mode: queued
     then:
-      - delay: 60s
+      - delay: ${duree_reveil}
       - logger.log: 'execute script'
       - if:
           condition:
@@ -97,6 +99,6 @@ script:
             - logger.log: 'Autorise la mise en sommeil par deep_sleep_enter'
             - deep_sleep.enter: 
                 id: control_deep_sleep
-                sleep_duration: 5min
+                sleep_duration: ${duree_sommeil}
       - script.execute: exec_deep_sleep
 

@@ -27,7 +27,7 @@ climate:
     activity_temp: 20
     home_temp: 20.5 # Jour
     precision: 0.1 # Précision souhaitée pour cet appareil. 0.1/0.5/1.0
-    initial_hvac_mode: "heat" # Ou heat
+    initial_hvac_mode: "off" # Demarre sur Arret
     ac_mode: false
     keep_alive:  # Mise à jour de l'ordre de commande toutes les 5mn
       minutes: 5

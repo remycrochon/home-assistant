@@ -471,7 +471,7 @@
     id: jour->nuit
     for:
       hours: 0
-      minutes: 30
+      minutes: 0
       seconds: 0
   - platform: time
     at: input_datetime.horaire_ete_volet_ouv
@@ -3065,34 +3065,3 @@
   mode: single
   trace:
     stored_traces: 10
-- id: '1680272979934'
-  alias: Allumage Ecran sur Hatos
-  description: ''
-  trigger:
-  - type: motion
-    platform: device
-    device_id: 2d249d1ffc712f4ec1c489cc0fa81f03
-    entity_id: binary_sensor.detecteur_presence1_ias_zone
-    domain: binary_sensor
-  condition: []
-  action:
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.allume_ecran_hatos
-  - service: notify.telegram
-    data:
-      message: Pépère est dans l'escalier {{-"\n"-}}{{states("sensor.date_time") }}
-      title: Hatos
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.allume_ecran_hatos
-  mode: restart
-  trace:
-    stored_traces: 20

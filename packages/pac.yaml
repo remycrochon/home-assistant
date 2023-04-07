@@ -160,7 +160,7 @@ template:
       state_class: "measurement"
       device_class: "pressure"
 
-# Extraction des atributs climate.althermat
+# Extraction des attributs climate.althermat
     # Consigne Chauffage
     - name: "pac_consigne_int"
       unique_id: "pac_consigne_interieure"

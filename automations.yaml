@@ -3065,3 +3065,45 @@
   mode: single
   trace:
     stored_traces: 10
+- id: '1680974992963'
+  alias: 06-1-5 MP2 Calcul SOC Charge Nocturne V2
+  description: En lien avec NodRED
+  trigger:
+  - platform: time
+    at: 03:48:00
+    id: debut
+  condition: []
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.mp2_niveau_soc_cp1
+    data_template:
+      value: '{{ states(''sensor.mp2_cible_soc_pour_charge_nocturne'') }}'
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.mp2_valid_ess_charge_prog_1
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: sensor.mp2_niveau_charge_batteries
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 0
+      above: input_number.mp2_niveau_soc_cp1
+    timeout:
+      hours: 3
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: false
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.mp2_valid_ess_charge_prog_1
+  mode: single

@@ -2339,50 +2339,6 @@
       charger: switch.pc2_tablette
       low_percent: 30
       charged_percent: 90
-- id: '1669802402697'
-  alias: 1_2_4 ECS Validation Routeur sur SOC
-  description: 'SOC < 97 : Routeur Inactif _ SOC>99: Routeur Actif'
-  trigger:
-  - platform: template
-    value_template: "      {% set soc=states('sensor.mp2_niveau_charge_batteries')
-      | float %}\n      {% set val=states('input_number.mp2_seuil_validation_routeur')
-      | float %}\n      {{ soc > val }}"
-    id: valid_routeur
-  - platform: template
-    value_template: "      {% set soc=states('sensor.mp2_niveau_charge_batteries')
-      | float %}\n      {% set deval=states('input_number.mp2_seuil_devalidation_routeur')
-      | float %}\n      {{ soc < deval }}"
-    id: devalid_routeur
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: valid_routeur
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
-      - service: notify.telegram
-        data:
-          message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % > {{states('input_number.mp2_seuil_validation_routeur')}}
-            %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Validation Routeur ECS
-    - conditions:
-      - condition: trigger
-        id: devalid_routeur
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
-      - service: notify.telegram
-        data:
-          message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
-            %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: De-Validation Routeur ECS
-  mode: single
 - id: '1669803250640'
   alias: 1_2_5 ECS Arret Forcé sur Puissance Réseau Haute
   description: Si PU Réseau > Seuil alors on force l'ECS à l'Arret
@@ -3031,7 +2987,7 @@
         state: 'off'
       - condition: numeric_state
         entity_id: sensor.mp2_pc_ac_couplet_on_l1
-        above: 50
+        above: 1000
       sequence:
       - service: input_boolean.turn_on
         data: {}
@@ -3072,7 +3028,14 @@
   - platform: time
     at: 03:48:00
     id: debut
-  condition: []
+  condition:
+  - condition: template
+    value_template: '{% set soc=states(''sensor.mp2_niveau_charge_batteries'') | float
+      %}
+
+      {% set cons=states(''sensor.mp2_cible_soc_pour_charge_nocturne'') | float %}
+
+      {{ soc < cons }}'
   action:
   - service: input_number.set_value
     target:
@@ -3088,22 +3051,45 @@
     data: {}
     target:
       entity_id: input_boolean.mp2_valid_ess_charge_prog_1
-  - wait_for_trigger:
-    - platform: numeric_state
-      entity_id: sensor.mp2_niveau_charge_batteries
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 0
-      above: input_number.mp2_niveau_soc_cp1
-    timeout:
-      hours: 3
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
+  - wait_template: '{% set soc=states(''sensor.mp2_niveau_charge_batteries'') | float
+      %}
+
+      {% set cons=states(''input_number.mp2_niveau_soc_cp1'') | float %}
+
+      {{ soc >= cons }}'
     continue_on_timeout: false
+    timeout: 03:00:00
   - service: input_boolean.turn_off
     data: {}
     target:
       entity_id: input_boolean.mp2_valid_ess_charge_prog_1
+  mode: single
+- id: '1681195839898'
+  alias: Nouvelle automatisation
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: /10
+  condition:
+  - condition: template
+    value_template: '{% set m=states(''input_number.temp_piscine'') | float %}
+
+      {% set c=states(''input_number.ph_cible'') | float %}
+
+      {{ m <= 10 }}'
+  action:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.chalet_s1
+  - wait_template: '{% set m=states(''input_number.temp_piscine'') | float %}
+
+      {% set c=states(''input_number.ph_cible'') | float %}
+
+      {{ m > 10 }}'
+    continue_on_timeout: true
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.chalet_s1
   mode: single

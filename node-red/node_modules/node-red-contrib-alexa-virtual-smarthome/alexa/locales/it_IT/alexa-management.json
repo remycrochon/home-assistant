@@ -1,0 +1,22 @@
+{
+    "alexa-management": {
+        "name": "Gestione Alexa",
+        "label": {
+            "alexa": "Alexa",
+            "name": "Nome",
+            "set_state_type": "Typo di set_state",
+            "no_nodes": "Nessun nodo",
+            "all_by_id": "Tutti i nodi, la chiave è l'ID",
+            "all_by_name": "Tutti i nodi, la chiave è il nome",
+            "filtered_by_id": "Soltanto i nodi marcati persistenti, la chiave è l'ID",
+            "filtered_by_name": "Soltanto i nodi marcati persistenti, la chiave è il nome"
+        },
+        "placeholder": {
+            "name": "None"
+        },
+        "error": {
+            "missing-config": "Configurazione SmartHome mancante.",
+            "missing-bridge": "Manca SmartHome."
+        }
+    }
+}

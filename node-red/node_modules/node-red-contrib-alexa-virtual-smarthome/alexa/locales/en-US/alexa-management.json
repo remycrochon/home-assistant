@@ -1,0 +1,22 @@
+{
+    "alexa-management": {
+        "name": "Alexa management",
+        "label": {
+            "alexa": "Alexa",
+            "name": "Name",
+            "set_state_type": "set_state type",
+            "no_nodes": "No nodes",
+            "all_by_id": "All nodes, key is ID",
+            "all_by_name": "All nodes, key is name",
+            "filtered_by_id": "Only nodes marked with 'persistent state', key is ID",
+            "filtered_by_name": "Only nodes marked with 'persistent state', key is name"
+        },
+        "placeholder": {
+            "name": "Name"
+        },
+        "error": {
+            "missing-config": "Missing SmartHome configuration.",
+            "missing-bridge": "Missing SmartHome."
+        }
+    }
+}

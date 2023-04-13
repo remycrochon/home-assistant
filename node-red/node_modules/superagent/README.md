@@ -1,13 +1,13 @@
 # superagent
 
-[![build status](https://img.shields.io/travis/visionmedia/superagent.svg)](https://travis-ci.org/visionmedia/superagent)
-[![code coverage](https://img.shields.io/codecov/c/github/visionmedia/superagent.svg)](https://codecov.io/gh/visionmedia/superagent)
+[![build status](https://img.shields.io/travis/ladjs/superagent.svg)](https://travis-ci.org/ladjs/superagent)
+[![code coverage](https://img.shields.io/codecov/c/github/ladjs/superagent.svg)](https://codecov.io/gh/ladjs/superagent)
 [![code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![made with lass](https://img.shields.io/badge/made_with-lass-95CC28.svg)](https://lass.js.org)
-[![license](https://img.shields.io/github/license/visionmedia/superagent.svg)](LICENSE)
+[![license](https://img.shields.io/github/license/ladjs/superagent.svg)](LICENSE)
 
-> Small progressive client-side HTTP request library, and Node.js module with the same API, supporting many high-level HTTP client features
+> Small progressive client-side HTTP request library, and Node.js module with the same API, supporting many high-level HTTP client features.  Maintained for [Forward Email](https://github.com/forwardemail) and [Lad](https://github.com/ladjs).
 
 
 ## Table of Contents
@@ -72,7 +72,7 @@ superagent.post('/api/pet').then(console.log).catch(console.error);
 
 ### Browser
 
-**The browser-ready, minified version of `superagent` is only 6 KB (minified and gzipped)!**
+**The browser-ready, minified version of `superagent` is only 50 KB (minified and gzipped).**
 
 Browser-ready versions of this module are available via [jsdelivr][], [unpkg][], and also in the `node_modules/superagent/dist` folder in downloads of the `superagent` package.
 
@@ -83,7 +83,7 @@ Browser-ready versions of this module are available via [jsdelivr][], [unpkg][],
 This is the solution for you if you're just using `<script>` tags everywhere!
 
 ```html
-<script src="https://polyfill.io/v3/polyfill.min.js?features=Array.from,Promise,Symbol,Object.setPrototypeOf,Object.getOwnPropertySymbols,Set,Math.trunc,BigInt,Map,Reflect,WeakMap,WeakRef,WeakSet,BigInt,Map,Reflect,WeakMap,WeakRef,WeakSet"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=WeakRef,BigInt"></script>
 <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
 <!-- if you wish to use unpkg.com instead: -->
 <!-- <script src="https://unpkg.com/superagent"></script> -->
@@ -120,38 +120,37 @@ If you are using [browserify][], [webpack][], [rollup][], or another bundler, th
   ```
 
   ```sh
-  and_chr 71
-  and_ff 64
-  and_qq 1.2
-  and_uc 11.8
-  android 67
-  android 4.4.3-4.4.4
-  baidu 7.12
-  bb 10
-  bb 7
-  chrome 73
-  chrome 72
-  chrome 71
-  edge 18
-  edge 17
-  firefox 66
-  firefox 65
-  ie 11
-  ie 10
-  ie 9
-  ie_mob 11
-  ie_mob 10
-  ios_saf 12.0-12.1
-  ios_saf 11.3-11.4
+  and_chr 102
+  and_ff 101
+  and_qq 10.4
+  and_uc 12.12
+  android 101
+  chrome 103
+  chrome 102
+  chrome 101
+  chrome 100
+  edge 103
+  edge 102
+  edge 101
+  firefox 101
+  firefox 100
+  firefox 91
+  ios_saf 15.5
+  ios_saf 15.4
+  ios_saf 15.2-15.3
+  ios_saf 15.0-15.1
+  ios_saf 14.5-14.8
+  ios_saf 14.0-14.4
+  ios_saf 12.2-12.5
+  kaios 2.5
   op_mini all
-  op_mob 46
-  op_mob 12.1
-  opera 58
-  opera 57
-  safari 12
-  safari 11.1
-  samsung 8.2
-  samsung 7.2-7.4
+  op_mob 64
+  opera 86
+  opera 85
+  safari 15.5
+  safari 15.4
+  samsung 17.0
+  samsung 16.0
   ```
 
 ### Required Browser Features
@@ -159,11 +158,11 @@ If you are using [browserify][], [webpack][], [rollup][], or another bundler, th
 We recommend using <https://polyfill.io> (specifically with the bundle mentioned in [VanillaJS](#vanillajs) above):
 
 ```html
-<script src="https://polyfill.io/v3/polyfill.min.js?features=Array.from,Promise,Symbol,Object.setPrototypeOf,Object.getOwnPropertySymbols,Set,Math.trunc,BigInt,Map,Reflect,WeakMap,WeakRef,WeakSet"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=WeakRef,BigInt"></script>
 ```
 
-* IE 9-10 requires a polyfill for `Promise`, `Array.from`, `Symbol`, `Object.getOwnPropertySymbols`, and `Object.setPrototypeOf`
-* IE 9 requires a polyfill for `window.FormData` (we recommend [formdata-polyfill][]), `Set`, `Math.trunc`, `BigInt`, `Map`, `Reflect`, `WeakMap`, `WeakRef`, and `WeakSet`
+* WeakRef is not supported in Opera 85, iOS Safari 12.2-12.5
+* BigInt is not supported in iOS Safari 12.2-12.5
 
 
 ## Plugins
@@ -205,34 +204,34 @@ Existing plugins:
 
 Please prefix your plugin with `superagent-*` so that it can easily be found by others.
 
-For SuperAgent extensions such as couchdb and oauth visit the [wiki](https://github.com/visionmedia/superagent/wiki).
+For SuperAgent extensions such as couchdb and oauth visit the [wiki](https://github.com/ladjs/superagent/wiki).
 
 
 ## Upgrading from previous versions
 
-Please see [GitHub releases page](https://github.com/visionmedia/superagent/releases) for the current changelog.
+Please see [GitHub releases page](https://github.com/ladjs/superagent/releases) for the current changelog.
 
 Our breaking changes are mostly in rarely used functionality and from stricter error handling.
 
-* [6.0 to 6.1](https://github.com/visionmedia/superagent/releases/tag/v6.1.0)
+* [6.0 to 6.1](https://github.com/ladjs/superagent/releases/tag/v6.1.0)
   * Browser behaviour changed to match Node when serializing `application/x-www-form-urlencoded`, using `arrayFormat: 'indices'` semantics of `qs` library. (See: <https://www.npmjs.com/package/qs#stringifying>)
-* [5.x to 6.x](https://github.com/visionmedia/superagent/releases/tag/v6.0.0):
+* [5.x to 6.x](https://github.com/ladjs/superagent/releases/tag/v6.0.0):
   * Retry behavior is still opt-in, however we now have a more fine-grained list of status codes and error codes that we retry against (see updated docs)
   * A specific issue with Content-Type matching not being case-insensitive is fixed
   * Set is now required for IE 9, see [Required Browser Features](#required-browser-features) for more insight
-* [4.x to 5.x](https://github.com/visionmedia/superagent/releases/tag/v5.0.0):
+* [4.x to 5.x](https://github.com/ladjs/superagent/releases/tag/v5.0.0):
   * We've implemented the build setup of [Lass](https://lass.js.org) to simplify our stack and linting
   * Unminified browserified build size has been reduced from 48KB to 20KB (via `tinyify` and the latest version of Babel using `@babel/preset-env` and `.browserslistrc`)
   * Linting support has been added using `caniuse-lite` and `eslint-plugin-compat`
   * We can now target what versions of Node we wish to support more easily using `.babelrc`
-* [3.x to 4.x](https://github.com/visionmedia/superagent/releases/tag/v4.0.0-alpha.1):
+* [3.x to 4.x](https://github.com/ladjs/superagent/releases/tag/v4.0.0-alpha.1):
   * Ensure you're running Node 6 or later. We've dropped support for Node 4.
   * We've started using ES6 and for compatibility with Internet Explorer you may need to use Babel.
   * We suggest migrating from `.end()` callbacks to `.then()` or `await`.
-* [2.x to 3.x](https://github.com/visionmedia/superagent/releases/tag/v3.0.0):
+* [2.x to 3.x](https://github.com/ladjs/superagent/releases/tag/v3.0.0):
   * Ensure you're running Node 4 or later. We've dropped support for Node 0.x.
   * Test code that calls `.send()` multiple times. Invalid calls to `.send()` will now throw instead of sending garbage.
-* [1.x to 2.x](https://github.com/visionmedia/superagent/releases/tag/v2.0.0):
+* [1.x to 2.x](https://github.com/ladjs/superagent/releases/tag/v2.0.0):
   * If you use `.parse()` in the *browser* version, rename it to `.serialize()`.
   * If you rely on `undefined` in query-string values being sent literally as the text "undefined", switch to checking for missing value instead. `?key=undefined` is now `?key` (without a value).
   * If you use `.then()` in Internet Explorer, ensure that you have a polyfill that adds a global `Promise` object.
@@ -260,8 +259,6 @@ Our breaking changes are mostly in rarely used functionality and from stricter e
 [npm]: https://www.npmjs.com/
 
 [yarn]: https://yarnpkg.com/
-
-[formdata-polyfill]: https://www.npmjs.com/package/formdata-polyfill
 
 [jsdelivr]: https://www.jsdelivr.com/
 

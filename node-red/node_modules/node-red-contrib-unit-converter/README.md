@@ -49,3 +49,8 @@ The field name in the output message, that will contain the converted value.  By
 
 ### Round result to ... decimals
 When selected, the output number(s) will be rounded to the specified number of decimals.
+
+### Status
+Specify which data needs to be displayed in the node status.  The different options are being visualized in the next screenshot:
+
+![image](https://user-images.githubusercontent.com/14224149/188721042-a8680ed4-5c66-4e10-b770-5ca90c78fa10.png)

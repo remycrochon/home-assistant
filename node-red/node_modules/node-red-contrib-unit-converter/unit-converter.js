@@ -27,9 +27,12 @@
         this.outputFieldType     = config.outputFieldType || "msg";
         this.outputFieldDecimals = config.outputFieldDecimals;
         this.roundOutputField    = config.roundOutputField;
+        this.statusType          = config.statusType || "none";
         this.name                = config.name;
 
         var node = this;
+        
+        node.status({});
 
         node.on("input", function(msg) {
             try {
@@ -72,6 +75,27 @@
                 node.error("Error setting value in msg." + node.outputField + " : " + err.message);
                 return;
             }
+            
+            switch(node.statusType) {
+                case "units":
+                    node.status({fill:"blue", shape:"dot", text:node.inputUnit + "=>" + node.outputUnit});
+                    break;
+                case "input":
+                    node.status({fill:"blue", shape:"dot", text:convertedInput + node.inputUnit});
+                    break;
+                case "output":
+                    node.status({fill:"blue", shape:"dot", text:outputValue + node.outputUnit});
+                    break;
+                case "inout":
+                    node.status({fill:"blue", shape:"dot", text:convertedInput + node.inputUnit + "=>" + outputValue + node.outputUnit});
+                    break;
+                default:
+                    // No need to update the node status (in case of "none")
+            }
+        });
+        
+        node.on("close",function() { 
+            node.status({});
         });
     }
 

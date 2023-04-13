@@ -119,6 +119,7 @@ modbus:
         scale: 1
         device_class: power
         state_class: measurement
+        
 
       # Active input source
       # 0=Unknown;1=Grid;2=Generator;3=Shore power;240=Not connected

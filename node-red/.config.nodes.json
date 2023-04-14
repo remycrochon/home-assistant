@@ -1249,7 +1249,7 @@
     },
     "node-red-contrib-power-monitor": {
         "name": "node-red-contrib-power-monitor",
-        "version": "1.0.0",
+        "version": "1.2.1",
         "local": true,
         "user": true,
         "nodes": {
@@ -1264,12 +1264,11 @@
                 "module": "node-red-contrib-power-monitor",
                 "file": "/config/node-red/node_modules/node-red-contrib-power-monitor/power-monitor/power-monitor.js"
             }
-        },
-        "pending_version": "1.2.1"
+        }
     },
     "node-red-contrib-unit-converter": {
         "name": "node-red-contrib-unit-converter",
-        "version": "0.0.2",
+        "version": "0.0.3",
         "local": true,
         "user": true,
         "nodes": {
@@ -1284,8 +1283,7 @@
                 "module": "node-red-contrib-unit-converter",
                 "file": "/config/node-red/node_modules/node-red-contrib-unit-converter/unit-converter.js"
             }
-        },
-        "pending_version": "0.0.3"
+        }
     },
     "node-red-contrib-scheduler": {
         "name": "node-red-contrib-scheduler",
@@ -1357,7 +1355,7 @@
     },
     "node-red-contrib-virtual-smart-home": {
         "name": "node-red-contrib-virtual-smart-home",
-        "version": "3.0.6",
+        "version": "3.0.9",
         "local": true,
         "user": true,
         "nodes": {
@@ -1383,12 +1381,11 @@
                 "module": "node-red-contrib-virtual-smart-home",
                 "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/virtual-device.js"
             }
-        },
-        "pending_version": "3.0.9"
+        }
     },
     "node-red-contrib-alexa-virtual-smarthome": {
         "name": "node-red-contrib-alexa-virtual-smarthome",
-        "version": "0.0.31",
+        "version": "0.0.33",
         "local": true,
         "user": true,
         "nodes": {
@@ -1413,9 +1410,19 @@
                 "user": false,
                 "module": "node-red-contrib-alexa-virtual-smarthome",
                 "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-device.js"
+            },
+            "alexa-management": {
+                "name": "alexa-management",
+                "types": [
+                    "alexa-management"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-alexa-virtual-smarthome",
+                "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-management.js"
             }
-        },
-        "pending_version": "0.0.33"
+        }
     },
     "node-red-contrib-alexa-smart-home": {
         "name": "node-red-contrib-alexa-smart-home",

@@ -1254,6 +1254,10 @@
         data:
           message: VP2 Off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.rebootweeks
       resolved_action:
       - service: notify.telegram
         data:
@@ -1261,7 +1265,7 @@
           title: Etat RESEAU!!!
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
-      initial_delay: 60
+      initial_delay: 120
       max_alerts: 50
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
@@ -2993,6 +2997,10 @@
         data: {}
         target:
           entity_id: input_boolean.ecs_av_pv
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.dimmer_on_off_4630
       - service: notify.telegram
         data:
           message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
@@ -3013,6 +3021,10 @@
         data: {}
         target:
           entity_id: input_boolean.ecs_av_pv
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.dimmer_on_off_4630
       - service: notify.telegram
         data:
           message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%

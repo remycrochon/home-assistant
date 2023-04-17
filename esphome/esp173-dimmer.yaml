@@ -74,3 +74,160 @@ number:
         - output.set_level:
             id: custom_float
             level: !lambda "return x/1000;"
+
+
+***cedric
+# PIERRON Cédric www.pionpion.fr
+# -----------------------------------------------------------------------------------------
+# version 1.0 25/09/2022 création.
+# version 1.1 22/01/2023 correction puissance à vide à 0W
+# version 1.2 31/01/2023 modif refresh http de 2s à 0.5s, PZEM de 2s à 0.5s, correction veille à 0.25s
+# version 2.0 02/02/2023 passage triac à 4 decimales, modif refresh http de 0.5s à 0.25s, PZEM de 0.5s à 0.25s,
+# version 2.1 03/02/2023 ajout correction anti flash triac <0 et >100 avant ajout consigne dans ESP tableau
+# version 3.0 04/02/2023 
+
+
+esphome:
+  name: gradateur-chauffe-eau
+
+
+esp8266:
+  board: d1_mini 
+
+# disable logging UART--------------------------------------------------------------------
+logger:
+  baud_rate: 0  
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "##"
+
+ota:
+  password: "##"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  reboot_timeout: 10min
+
+  manual_ip:
+    static_ip: 192.168.0.48
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+    dns1: 192.168.0.26
+    dns2: 1.1.1.1
+
+  ap:
+    ssid: "ESP_gradateur_chauffe_eau"
+    ap_timeout: 2min
+
+    
+web_server:
+  port: 80    
+
+
+  
+  
+# Configuration UART-série PZEM------------------------------------------------------------------------
+uart:
+  rx_pin: GPIO3 #RX
+  tx_pin: GPIO1 #TX
+  baud_rate: 9600
+  
+#Etat de la connection HA--------------------------------------------------------------------------
+binary_sensor:
+  - platform: status
+    name: "esp48_Status"
+
+
+sensor:
+
+
+#PZEM-------------------------------------------------------------------------------------
+  - platform: pzemac
+#    current:                                    entité non rappatriée dans home assistant
+#      name: "pzem_tableau_courant"
+#      unit_of_measurement: "A"
+#      accuracy_decimals: 2
+#    voltage:                                    entité non rappatriée dans home assistant
+#      name: "pezm_tableau_tension"
+#      unit_of_measurement: "V"
+    energy:
+      name: "Consommation chauffe eau"
+      unit_of_measurement: "kWh"
+      filters:
+        - multiply: 0.001
+      accuracy_decimals: 3
+    power:
+      name: "puissance chauffe eau"             
+      id: power_chauffe_eau
+      unit_of_measurement: "W"
+      accuracy_decimals: 0
+      filters:
+        - offset: -1.3
+#    power_factor:                               entité non rappatriée dans home assistant
+#      name: "pzem_tableau_factpuiss"
+#      unit_of_measurement: "fp"
+    update_interval: 0.25s
+
+
+
+
+#rappatriement valeur commande triac-----------------------------------------------------------          
+  - platform: template
+    name: "triac HTTP"
+    id: triac
+    unit_of_measurement: "%"
+    accuracy_decimals: 4 
+    state_class: "measurement"
+
+#-------------------------------------------------------------------------------------------
+
+#AC dimmer level 0 à 1-----------------------------------------------------------------------
+
+output:
+  - platform: ac_dimmer
+    id: chauffe_eau
+    gate_pin: GPIO12 #D6
+    method: leading
+    zero_cross_pin:
+      number: GPIO14 #D5
+      mode:
+        input: true
+      inverted: yes
+    min_power: 0% 
+
+
+light:
+  - platform: monochromatic
+    output: chauffe_eau
+    id: gradateur
+    default_transition_length: 0s
+
+
+#HTTP request------------------------------------------------------------------------------------
+http_request:
+  useragent: esphome/device
+  timeout: 10s
+  id: http_request_data
+
+interval:
+  - interval: 0.25s
+    then:    
+
+      - http_request.get: 
+          url: http://192.168.0.49/sensor/triac/
+          on_response:
+            then:
+             - lambda: |-
+                json::parse_json(id(http_request_data).get_string(), [](JsonObject root) {
+                id(triac).publish_state(root["value"]);
+                });
+                id(chauffe_eau).set_level(id(triac).state / 100);
+      
+
+#switch reboot dans Home Assistant et Web-----------------------------------------------------------
+switch:    
+  - platform: restart
+    name: "esp48_Restart"

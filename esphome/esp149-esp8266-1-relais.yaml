@@ -79,6 +79,14 @@ sensor:
   - platform: uptime
     name: "${friendly_name} Uptime Sensor"
     update_interval: 60s
+
+#rappatriement valeur commande triac-----------------------------------------------------------          
+  - platform: template
+    name: "triac HTTP"
+    id: triac
+    unit_of_measurement: "%"
+    accuracy_decimals: 4 
+    state_class: "measurement"
     
 switch:
   - platform: gpio
@@ -89,4 +97,47 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
- 
+ # Configuration du serveur HTTP
+
+#AC dimmer level 0 à 1-----------------------------------------------------------------------
+
+output:
+  - platform: ac_dimmer
+    id: chauffe_eau
+    gate_pin: GPIO12 #D6
+    method: leading
+    zero_cross_pin:
+      number: GPIO14 #D5
+      mode:
+        input: true
+      inverted: yes
+    min_power: 0% 
+
+
+light:
+  - platform: monochromatic
+    output: chauffe_eau
+    id: gradateur
+    default_transition_length: 0s
+
+#HTTP request------------------------------------------------------------------------------------
+http_request:
+  useragent: esphome/device
+  timeout: 10s
+  id: http_request_data
+
+
+interval:
+  - interval: 0.25s
+    then:    
+
+      - http_request.get: 
+          url: http://192.168.0.37:1880/endpoint/triac?valeur
+          on_response:
+            then:
+             - lambda: |-
+                json::parse_json(id(http_request_data).get_string(), [](JsonObject root) {
+                id(triac).publish_state(root["value"]);
+                });
+                id(chauffe_eau).set_level(id(triac).state / 100);
+      

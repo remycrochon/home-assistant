@@ -623,6 +623,7 @@
       - condition: numeric_state
         entity_id: sensor.energy_production_today
         below: 8
+        enabled: false
       sequence:
       - service: script.ecs_on
         data: {}

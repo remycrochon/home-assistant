@@ -1464,35 +1464,5 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-pid/pid.js"
             }
         }
-    },
-    "node-red-contrib-pid-autotune": {
-        "name": "node-red-contrib-pid-autotune",
-        "version": "1.3.0",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "pid-autotune": {
-                "name": "pid-autotune",
-                "types": [
-                    "pid-autotune"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-pid-autotune",
-                "file": "/config/node-red/node_modules/node-red-contrib-pid-autotune/pid-autotune.js"
-            },
-            "kettle-sim": {
-                "name": "kettle-sim",
-                "types": [
-                    "kettle-sim"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-pid-autotune",
-                "file": "/config/node-red/node_modules/node-red-contrib-pid-autotune/kettle-sim.js"
-            }
-        }
     }
 }

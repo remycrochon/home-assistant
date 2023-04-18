@@ -1464,5 +1464,24 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-pid/pid.js"
             }
         }
+    },
+    "node-red-contrib-tag-memory": {
+        "name": "node-red-contrib-tag-memory",
+        "version": "1.0.2",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "tag-memory": {
+                "name": "tag-memory",
+                "types": [
+                    "tag-memory"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-tag-memory",
+                "file": "/config/node-red/node_modules/node-red-contrib-tag-memory/tag-memory.js"
+            }
+        }
     }
 }

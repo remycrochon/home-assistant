@@ -1,7 +1,8 @@
+
 substitutions:
-  device_name: esp149-esp8266-1-relais
-  friendly_name: esp149
-  adress_ip: "192.168.0.149"
+  device_name: esp175-triac-router
+  friendly_name: triac_pv
+  adress_ip: "192.168.0.175"
   time_timezone: "Europe/Paris"
   
 esphome:
@@ -24,7 +25,6 @@ wifi:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
-
 # Enable logging
 logger:
 
@@ -43,18 +43,9 @@ status_led:
 #sonde Dallas
 dallas:
   - pin: GPIO2 #D4
-
-update_interval: 10s
+    update_interval: 10s
+    
 binary_sensor:
-  - platform: gpio
-    pin:
-      number: GPIO10
-      inverted: True
-      mode:
-        input: true
-        pullup: true
-    name: "${friendly_name}_bp1"
-
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
@@ -78,7 +69,24 @@ number:
     max_value: 25
     step: 1
 
+  - platform: template
+    name: "${friendly_name} T Max"
+    id: tmax
+    optimistic: true
+    restore_value: true
+    min_value: 10
+    max_value: 70
+    step: 1
+
 sensor:
+# Sonde Temperature radiateur
+  - platform: dallas
+    address: 0x82012111efe81d28
+    name: "${friendly_name} Temp triac"
+    id: temp_triac
+    filters:
+      - filter_out: NAN
+      
 ############### TEMPLATE  ######################"
 # 
   - platform: template
@@ -96,14 +104,6 @@ sensor:
     unit_of_measurement: "%"
     accuracy_decimals: 4 
     state_class: "measurement"
-
-  - platform: template
-    name: "${friendly_name} Triac HTTP2"
-    id: triac2
-    unit_of_measurement: "%"
-    accuracy_decimals: 4 
-    state_class: "measurement"
-    update_interval: 1s
     lambda: |-
       if ((id(triac).state/10)>id(pmax).state) {
         return id(pmax).state;
@@ -116,13 +116,19 @@ sensor:
         {
         return id(triac).state/10;}
         }
+        id(_ecs).publish_state(id(triac).state);
     on_value:
       then:
         - output.set_level:
             id: ecs
-            level: !lambda "return x;"
+            level: !lambda "return x/1000;"
 
 switch:
+  - platform: template
+    name: "Dimmer"
+    id: dimmer
+    optimistic: true
+
   - platform: gpio
     name: "${friendly_name} Relais"
     pin: GPIO5
@@ -130,10 +136,6 @@ switch:
     
   - platform: restart
     name: "${friendly_name} Restart"
-
-
-
- # Configuration du serveur HTTP
 
 #AC dimmer level 0 à 1-----------------------------------------------------------------------
 
@@ -148,7 +150,6 @@ output:
         input: true
       inverted: yes
     min_power: 0%
-    
 
 light:
   - platform: monochromatic
@@ -156,6 +157,7 @@ light:
     id: gradateur
     default_transition_length: 0s
 
+ # Configuration du serveur HTTP
 #HTTP request------------------------------------------------------------------------------------
 http_request:
   useragent: esphome/device
@@ -174,4 +176,73 @@ interval:
                 id(triac).publish_state(root["value"]);
                 });
                 
-      
+  - interval: 0.5s
+    then:
+      - script.execute: sortie_pu
+      - script.execute: correction_triac
+
+#Scripts-----------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
+
+script:
+
+#Validation sortie triac
+  - id: sortie_pu
+    mode: single
+    then:
+     - if: 
+        condition:
+          or:
+            - lambda: 'return id(temp_triac).state > id(tmax).state;' # temp > tmax
+            - lambda: 'return id(dimmer).state == false;'
+        then:
+          - light.turn_off: gradateur
+          - switch.turn_off: relais
+
+     - if: 
+        condition:
+          and:
+            - lambda: 'return id(temp_triac).state < id(tmax).state- 2;' # temp < tmax
+            - lambda: 'return id(dimmer).state == true;'
+        then:
+          - light.turn_on: gradateur
+          - switch.turn_on: relais    
+   
+#correction consigne triac si <0.0001 et >99.999 pour eviter les flashs ------------------------
+
+  - id: correction_triac
+    mode: single
+    then:
+
+     - if: 
+        condition:
+          sensor.in_range:
+            id: triac
+            below: 100
+            above: 0
+        then:
+          - lambda: |-
+              id(triac).publish_state(id(triac).state);  
+          #- logger.log: "triac entre 0 et 100" 
+     - if:
+        condition:
+           sensor.in_range:
+              id: triac
+              above: 100
+        then:
+           - lambda: |-
+              id(triac).publish_state( 99.999 );
+          # id(triac_inc).publish_state( 99.999 );      
+           #- logger.log: "triac >100"
+ 
+     - if: 
+        condition:
+          sensor.in_range:
+            id: triac
+            below: 0
+        then:
+          - lambda: |-
+              id(triac).publish_state( 0.0001 );
+          #    id(triac_inc).publish_state( 0.0001 );              
+          #- logger.log: "correction triac <0"
+  

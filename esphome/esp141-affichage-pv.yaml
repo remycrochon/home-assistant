@@ -356,16 +356,7 @@ sensor:
                   green: 100%
                   blue: 0%
                   color_brightness: 100%
-    
-  - platform: wifi_signal
-    id: wif
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
 
-  - platform: uptime
-    id: up
-    name: "${friendly_name} Uptime Sensor"
-    update_interval: 60s
 
 display:
   - platform: ssd1306_i2c

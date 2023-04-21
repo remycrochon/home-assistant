@@ -5,11 +5,12 @@ from homeassistant.const import Platform
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2023.2.0"
+INTEGRATION_VERSION = "2023.4.3"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
 HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/login"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
 OAUTH2_TOKEN = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/token"
+DISABLE_LE = "disable_le"
 
 # Platforms
 PLATFORMS = [
@@ -214,8 +215,22 @@ WEEKDAYS = (
     "sunday",
 )
 
+
+WEEKDAYS_TO_RFC5545 = {
+    "monday": "MO",
+    "tuesday": "TU",
+    "wednesday": "WE",
+    "thursday": "TH",
+    "friday": "FR",
+    "saturday": "SA",
+    "sunday": "SU",
+}
+
+
 # Models that support electronic cutting height
 ELECTRONIC_CUTTING_HEIGHT_SUPPORT = [
+    "320",
+    "330",
     "405",
     "415",
     "420",

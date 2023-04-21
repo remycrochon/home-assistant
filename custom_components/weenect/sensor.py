@@ -26,19 +26,16 @@ SENSOR_ENTITY_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         name="Last Update Rate",
         key="last_freq_mode",
-        state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         name="Sensor Mode",
         key="sensor_mode",
-        state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         name="Last Sensor Mode",
         key="last_sensor_mode",
-        state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
@@ -55,7 +52,6 @@ LOCATION_SENSOR_ENTITY_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         name="Cell Tower Id",
         key="cellid",
-        state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
@@ -69,7 +65,6 @@ LOCATION_SENSOR_ENTITY_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         name="Last Message Received",
         key="last_message",
-        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -117,7 +112,7 @@ async def async_setup_entry(
         f"{entry.entry_id}_{TRACKER_ADDED}",
         async_add_sensors,
     )
-    coordinator.unsub_dispatchers.append(unsub_dispatcher)
+    entry.async_on_unload(unsub_dispatcher)
     if len(coordinator.data) > 0:
         async_add_sensors(coordinator.data.keys())
 

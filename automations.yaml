@@ -2921,7 +2921,7 @@
   trigger:
   - platform: numeric_state
     entity_id: sensor.pc_onduleur_eaton_puissance
-    above: 150
+    above: 200
   condition:
   - condition: time
     after: '23:00:00'

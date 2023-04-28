@@ -197,7 +197,7 @@ script:
             - lambda: 'return id(dimmer).state == false;'
         then:
           - light.turn_off: gradateur
-          - switch.turn_off: relais
+          
 
      - if: 
         condition:
@@ -206,7 +206,7 @@ script:
             - lambda: 'return id(dimmer).state == true;'
         then:
           - light.turn_on: gradateur
-          - switch.turn_on: relais    
+            
    
 #correction consigne triac si <0.0001 et >99.999 pour eviter les flashs ------------------------
 

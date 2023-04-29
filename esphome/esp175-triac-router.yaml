@@ -98,30 +98,15 @@ sensor:
 
 #rapatriement valeur commande triac-----------------------------------------------------------          
 
-  - platform: template
-    name: "${friendly_name} Triac HTTP"
-    id: triac
-    unit_of_measurement: "%"
-    accuracy_decimals: 4 
-    state_class: "measurement"
-    lambda: |-
-      if ((id(triac).state/10)>id(pmax).state) {
-        return id(pmax).state;
-        }
-        else
-        {
-         if ((id(triac).state/10)<id(pmin).state) {
-        return id(pmin).state;}
-        else
-        {
-        return id(triac).state/10;}
-        }
-        id(_ecs).publish_state(id(triac).state);
-    on_value:
-      then:
-        - output.set_level:
-            id: ecs
-            level: !lambda "return x/1000;"
+#  - platform: template
+#    name: "${friendly_name} Affichage STriac"
+#    id: triac
+#    unit_of_measurement: "%"
+#    accuracy_decimals: 4 
+#    state_class: "measurement"
+#    lambda: |-
+#      return (id(gradateur).brightness);
+
 
 switch:
   - platform: template
@@ -153,96 +138,9 @@ output:
 
 light:
   - platform: monochromatic
+    #name: "${friendly_name}+STriac"
     output: ecs
     id: gradateur
     default_transition_length: 0s
 
- # Configuration du serveur HTTP
-#HTTP request------------------------------------------------------------------------------------
-http_request:
-  useragent: esphome/device
-  timeout: 10s
-  id: http_request_data
 
-interval:
-  - interval: 1s
-    then:    
-      - http_request.get: 
-          url: http://192.168.0.37:1880/endpoint/triac?valeur
-          on_response:
-            then:
-             - lambda: |-
-                json::parse_json(id(http_request_data).get_string(), [](JsonObject root) {
-                id(triac).publish_state(root["value"]);
-                });
-                
-  - interval: 0.5s
-    then:
-      - script.execute: sortie_pu
-      - script.execute: correction_triac
-
-#Scripts-----------------------------------------------------------------------
-#-----------------------------------------------------------------------------------
-
-script:
-
-#Validation sortie triac
-  - id: sortie_pu
-    mode: single
-    then:
-     - if: 
-        condition:
-          or:
-            - lambda: 'return id(temp_triac).state > id(tmax).state;' # temp > tmax
-            - lambda: 'return id(dimmer).state == false;'
-        then:
-          - light.turn_off: gradateur
-          
-
-     - if: 
-        condition:
-          and:
-            - lambda: 'return id(temp_triac).state < id(tmax).state- 2;' # temp < tmax
-            - lambda: 'return id(dimmer).state == true;'
-        then:
-          - light.turn_on: gradateur
-            
-   
-#correction consigne triac si <0.0001 et >99.999 pour eviter les flashs ------------------------
-
-  - id: correction_triac
-    mode: single
-    then:
-
-     - if: 
-        condition:
-          sensor.in_range:
-            id: triac
-            below: 100
-            above: 0
-        then:
-          - lambda: |-
-              id(triac).publish_state(id(triac).state);  
-          #- logger.log: "triac entre 0 et 100" 
-     - if:
-        condition:
-           sensor.in_range:
-              id: triac
-              above: 100
-        then:
-           - lambda: |-
-              id(triac).publish_state( 99.999 );
-          # id(triac_inc).publish_state( 99.999 );      
-           #- logger.log: "triac >100"
- 
-     - if: 
-        condition:
-          sensor.in_range:
-            id: triac
-            below: 0
-        then:
-          - lambda: |-
-              id(triac).publish_state( 0.0001 );
-          #    id(triac_inc).publish_state( 0.0001 );              
-          #- logger.log: "correction triac <0"
-  

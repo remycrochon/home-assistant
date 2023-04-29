@@ -47,6 +47,7 @@ ouverture_volet:
       milliseconds: 0
   - service: script.ouverture_volet_chamb_sud
     data: {}
+    enabled: false
   mode: single
   icon: mdi:window-shutter-open
 fermeture_volet:
@@ -117,16 +118,19 @@ fermeture_volet:
     target:
       entity_id:
       - cover.volet_amis_sud_p
+    enabled: false
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
+    enabled: false
   - service: cover.close_cover
     data: {}
     target:
       entity_id:
       - cover.volet_amis_sud_grand_p
+    enabled: false
   mode: single
   icon: mdi:window-shutter
 ouverture_volet_absent:

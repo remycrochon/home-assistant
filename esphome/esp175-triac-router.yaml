@@ -1,7 +1,7 @@
 
 substitutions:
   device_name: esp175-triac-router
-  friendly_name: triac_pv
+  friendly_name: esp175
   adress_ip: "192.168.0.175"
   time_timezone: "Europe/Paris"
   
@@ -78,6 +78,21 @@ number:
     max_value: 70
     step: 1
 
+  - platform: template
+    name: "${friendly_name} Sortie_Triac"
+    id: striac
+    optimistic: true
+    restore_value: true
+    min_value: 0
+    max_value: 100
+    step: 1
+    on_value:
+      then:
+        - light.turn_on:
+            id: gradateur
+            brightness: !lambda |-
+              return x/100;
+    
 sensor:
 # Sonde Temperature radiateur
   - platform: dallas
@@ -95,18 +110,6 @@ sensor:
     icon: mdi:flash
     unit_of_measurement: "%"
     accuracy_decimals: 4
-
-#rapatriement valeur commande triac-----------------------------------------------------------          
-
-#  - platform: template
-#    name: "${friendly_name} Affichage STriac"
-#    id: triac
-#    unit_of_measurement: "%"
-#    accuracy_decimals: 4 
-#    state_class: "measurement"
-#    lambda: |-
-#      return (id(gradateur).brightness);
-
 
 switch:
   - platform: template
@@ -138,7 +141,7 @@ output:
 
 light:
   - platform: monochromatic
-    #name: "${friendly_name}+STriac"
+    name: "${friendly_name}+STriac"
     output: ecs
     id: gradateur
     default_transition_length: 0s

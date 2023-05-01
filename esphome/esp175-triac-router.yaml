@@ -92,7 +92,8 @@ number:
             id: gradateur
             brightness: !lambda |-
               return x/100;
-    
+
+
 sensor:
 # Sonde Temperature radiateur
   - platform: dallas
@@ -111,6 +112,34 @@ sensor:
     unit_of_measurement: "%"
     accuracy_decimals: 4
 
+
+  - platform: template
+    name: "${friendly_name} Pu Reseau"
+    id: preseau
+    on_value:
+        - if:
+            condition:
+              sensor.in_range:
+                id: preseau
+                below: 1
+            then: 
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return x/100; 
+        - if:
+            condition:
+              sensor.in_range:
+                id: preseau
+                above: 1
+                below: 500
+            then: 
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return x/100; 
+
+                    
 switch:
   - platform: template
     name: "Dimmer"

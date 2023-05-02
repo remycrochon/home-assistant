@@ -11,6 +11,7 @@ esphome:
 
 # Enable logging
 logger:
+  level: DEBUG
 
 # Enable Home Assistant API
 api:
@@ -31,17 +32,295 @@ ethernet:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
+i2c:
+  sda: GPIO14
+  scl: GPIO15
+  scan: True
+  id: bus_a
+
+globals:
+   - id: increment
+     type: float
+     restore_value: no
+     initial_value: '0'
+   - id: striac
+     type: float
+     restore_value: no
+     initial_value: '0'
+   - id: palier0
+     type: int
+     restore_value: no
+     initial_value: '0'
+   - id: palier1
+     type: int
+     restore_value: no
+     initial_value: '15'
+   - id: palier2
+     type: int
+     restore_value: no
+     initial_value: '50'
+   - id: palier3
+     type: int
+     restore_value: no
+     initial_value: '100'
+   - id: palier4
+     type: int
+     restore_value: no
+     initial_value: '200'
+   - id: palier5
+     type: int
+     restore_value: no
+     initial_value: '300'
+   - id: palier6
+     type: int
+     restore_value: no
+     initial_value: '600'
+   - id: palier7
+     type: int
+     restore_value: no
+     initial_value: '900'
+
+
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
+
+number:
+
+  - platform: template
+    name: "${friendly_name} Pu_Reseau"
+    id: pureseau
+    optimistic: true
+    restore_value: true
+    min_value: -3000
+    max_value: +3000
+    step: 1
+    mode: box
+
+
 sensor:
-  - platform: dht
-    pin: GPIO2
-    model: DHT22
-    temperature:
-      name: "${friendly_name} Temperature"
-    humidity:
-      name: "${friendly_name} Humidity"
-    update_interval: 5s
-  
+      
+############### TEMPLATE  ######################"
+# 
+   
+  - platform: template
+    name: "${friendly_name} Pu Reseau"
+    id: pureseau1
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    update_interval: 0.5s
+    lambda: |-
+     return (id(pureseau).state);
+
+  - platform: template
+    name: "${friendly_name} Increment"
+    id: afincrement
+    unit_of_measurement: ""
+    accuracy_decimals: 2
+    state_class: "measurement"
+    update_interval: 0.5s
+    lambda: |-
+     return id(increment);  
+
+  - platform: template
+    name: "${friendly_name} Sortie Triac"
+    id: afstriac
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    update_interval: 0.5s
+    lambda: |-
+      return id(striac);
+        
+
+switch:
+#  - platform: gpio
+#    name: "${friendly_name} Relais"
+#    pin: GPIO4
+#    id: relais
+    
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+#AC dimmer level 0 à 1-----------------------------------------------------------------------
+
+output:
+  #LEDS -----------------------------------------------------------------------------------------
+  - id: led_conso
+    platform: gpio
+    pin: GPIO4
+    
+  - id: led_injec
+    platform: gpio
+    pin: GPIO12
+
+  - platform: ac_dimmer
+    id: ecs
+    gate_pin: GPIO2
+    method: leading
+    zero_cross_pin:
+      number: GPIO39 
+      mode:
+        input: true
+      inverted: yes
+    min_power: 0%
+
+light:
+  - platform: monochromatic
+    name: "${friendly_name}+STriac"
+    output: ecs
+    id: gradateur
+    default_transition_length: 0s
+
+# Affichage
+display:
+  - platform: lcd_pcf8574
+    dimensions: 20x4
+    address: 0x27
+    lambda: |-
+      it.printf(0,0,"Pu=%.0f W",id(pureseau1).state);
+      it.printf(0,1,"Inc=%.2f ",id(increment));
+      it.printf(0,2,"Triac=%.2f %%",id(striac));
+
+interval:
+
+  - interval: 0.5s
+    then:
+
+    #calcul niveau d'injection et injection dans triac
+      - script.execute: calcul_injection 
+
+    #script affichage
+      - script.execute: etat_production 
+
+#sous Scripts-----------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
+
+script:
+
+#calcul puissance injection-------------------------------------------------------- 
+  - id: calcul_injection
+    mode: single
+    then:
+      - lambda: |-
+         id(increment) = 0.0;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier0) && abs(id(pureseau1).state) < id(palier1);
+          then:
+            - lambda: |-
+                id(increment) = 0.0;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier1) && abs(id(pureseau1).state) < id(palier2);
+          then:
+            - lambda: |-
+               id(increment) = 0.5;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier2) && abs(id(pureseau1).state) < id(palier3);
+          then:
+            - lambda: |-
+               id(increment) = 1.0;               
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier3) && abs(id(pureseau1).state) < id(palier4);
+          then:
+            - lambda: |-
+               id(increment) = 1.5;               
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier4) && abs(id(pureseau1).state) < id(palier5);
+          then:
+            - lambda: |-
+               id(increment) = 2.0;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier5) && abs(id(pureseau1).state) < id(palier6);
+          then:
+            - lambda: |-
+               id(increment) = 2.5;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier6) && abs(id(pureseau1).state) < id(palier7);
+          then:
+            - lambda: |-
+               id(increment) = 3.0;                                       
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier7);
+          then:
+            - lambda: |-
+               id(increment) = 4.0;
+
+      - if: 
+          condition:
+            lambda: |-
+              return id(pureseau1).state < 0;
+          then:
+            - lambda: |-
+                id(striac) = id(striac)-id(increment);
+          else:
+            - lambda: |-
+                id(striac) = id(striac)+id(increment);            
+
+      - lambda: |-
+          if (id(striac) <= 0.0) {
+            id(striac) = 0.0;
+          } else if(id(striac)>=100.0){
+            id(striac) = 100.0;
+          }
+
+      - light.turn_on:
+          id: gradateur
+          brightness: !lambda |-
+            return id(striac)/100 ;  
+
+      - logger.log:
+          format: "Increment= %f"
+          args: [ 'id(increment)']
+
+          
+# Pilotage led
+  - id: etat_production
+    mode: single
+    then:
+     - if: 
+         condition:
+           sensor.in_range:
+              id: pureseau1
+              below: 50
+              above: -50
+         then:
+           - output.turn_on: led_conso
+           - output.turn_on: led_injec
+                
+     - if: 
+         condition:
+           sensor.in_range:
+             id: pureseau1
+             above: 50
+         then:
+           - output.turn_off: led_injec
+           - output.turn_on: led_conso
+
+     - if: 
+         condition:
+           sensor.in_range:
+             id: pureseau1
+             below: -50
+         then:
+          - output.turn_off: led_conso
+          - output.turn_on: led_injec
+
+       
+

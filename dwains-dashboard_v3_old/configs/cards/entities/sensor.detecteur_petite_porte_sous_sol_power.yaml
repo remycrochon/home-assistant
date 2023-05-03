@@ -1,7 +1,0 @@
-blueprint: replace_mushroom_lock_card.yaml
-card:
-  entity: $replace_with_input_entity$
-  name: $replace_with_input_name$
-  type: custom:mushroom-lock-card
-input_entity: sensor.detecteur_petite_porte_sous_sol_power
-type: custom:dwains-blueprint-card

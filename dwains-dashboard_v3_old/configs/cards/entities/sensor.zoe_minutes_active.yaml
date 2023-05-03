@@ -1,7 +1,0 @@
-blueprint: replace_mushroom_entity_card.yaml
-card:
-  entity: $replace_with_input_entity$
-  name: $replace_with_input_name$
-  type: custom:mushroom-entity-card
-input_entity: sensor.zoe_minutes_active
-type: custom:dwains-blueprint-card

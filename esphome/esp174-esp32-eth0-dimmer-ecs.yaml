@@ -86,8 +86,8 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
+# Reception de la puissance avant transfert vers le template
 number:
-
   - platform: template
     name: "${friendly_name} Pu_Reseau"
     id: pureseau
@@ -97,13 +97,33 @@ number:
     max_value: +3000
     step: 1
     mode: box
+    on_value:
+      then:
+        - script.execute: calcul_injection 
+        - script.execute: etat_production 
 
+  - platform: template
+    name: "${friendly_name} P Max"
+    id: pmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 50
+    max_value: 100
+    step: 1
 
-sensor:
-      
+  - platform: template
+    name: "${friendly_name} P Min"
+    id: pmin
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 25
+    step: 1
+sensor:  
 ############### TEMPLATE  ######################"
 # 
-   
   - platform: template
     name: "${friendly_name} Pu Reseau"
     id: pureseau1
@@ -139,7 +159,11 @@ switch:
 #    name: "${friendly_name} Relais"
 #    pin: GPIO4
 #    id: relais
-    
+  - platform: template
+    name: "${friendly_name} Validation Router"    
+    id: val_router
+    optimistic: true
+
   - platform: restart
     name: "${friendly_name} Restart"
 
@@ -179,27 +203,25 @@ display:
     dimensions: 20x4
     address: 0x27
     lambda: |-
-      it.printf(0,0,"Pu=%.0f W",id(pureseau1).state);
-      it.printf(0,1,"Inc=%.2f ",id(increment));
-      it.printf(0,2,"Triac=%.2f %%",id(striac));
-
+      it.printf(0,0,"Pu=%8.0f W",id(pureseau1).state);
+      it.printf(0,1,"Inc=%7.1f ",id(increment));
+      it.printf(0,2,"Triac=%5.1f %%",id(striac));
+      it.printf(0,3,"Valid: %s", id(val_router).state ? "ON" : "OFF");
+      
 interval:
 
   - interval: 0.5s
     then:
 
     #calcul niveau d'injection et injection dans triac
-      - script.execute: calcul_injection 
+    #  - script.execute: calcul_injection 
 
     #script affichage
-      - script.execute: etat_production 
+    #  - script.execute: etat_production 
 
-#sous Scripts-----------------------------------------------------------------------
-#-----------------------------------------------------------------------------------
-
+#Scripts
 script:
-
-#calcul puissance injection-------------------------------------------------------- 
+#calcul puissance injection
   - id: calcul_injection
     mode: single
     then:
@@ -274,20 +296,31 @@ script:
                 id(striac) = id(striac)+id(increment);            
 
       - lambda: |-
-          if (id(striac) <= 0.0) {
-            id(striac) = 0.0;
-          } else if(id(striac)>=100.0){
-            id(striac) = 100.0;
+          if (id(striac) <= id(pmin).state) {
+            id(striac) = 0;
+          } else if(id(striac)>=id(pmax).state){
+            id(striac) = id(pmax).state;
           }
+      - if: 
+          condition:
+             switch.is_on: val_router
+          then:
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(striac)/100 ;  
+          else:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(0) ;  
 
-      - light.turn_on:
-          id: gradateur
-          brightness: !lambda |-
-            return id(striac)/100 ;  
-
-      - logger.log:
-          format: "Increment= %f"
-          args: [ 'id(increment)']
+#     - logger.log:
+#          format: "Increment= %f"
+#          args: [ 'id(increment)']
 
           
 # Pilotage led

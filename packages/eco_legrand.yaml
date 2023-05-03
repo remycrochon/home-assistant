@@ -6,7 +6,7 @@ sensor:
     name: "EcoCompteur ECS_0"  
     unique_id: "ecocompteur_ecs_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
-    scan_interval: 60
+    scan_interval: 10
     unit_of_measurement: W
 
   - platform: command_line
@@ -20,7 +20,7 @@ sensor:
     name: "EcoCompteur PAC_0"
     unique_id: "ecocompteur_pac_0"
     command: curl -s 'http://192.168.0.26/inst.json' | jq '.data3'
-    scan_interval: 60
+    scan_interval: 10
     unit_of_measurement: W
 
   - platform: command_line
@@ -54,7 +54,7 @@ template:
       unit_of_measurement: "W"
       device_class: "power"
       state_class: "measurement"
-
+     
     - name: "EcoCompteur WC"
       unique_id: "ecocompteur_wc"
       state: >-

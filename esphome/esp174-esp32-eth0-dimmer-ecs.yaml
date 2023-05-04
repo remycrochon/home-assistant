@@ -45,8 +45,8 @@ globals:
      initial_value: '0'
    - id: striac
      type: float
-     restore_value: no
-     initial_value: '0'
+     restore_value: yes
+
    - id: palier0
      type: int
      restore_value: no
@@ -163,6 +163,7 @@ switch:
     name: "${friendly_name} Validation Router"    
     id: val_router
     optimistic: true
+    restore_state: true
 
   - platform: restart
     name: "${friendly_name} Restart"
@@ -173,11 +174,11 @@ output:
   #LEDS -----------------------------------------------------------------------------------------
   - id: led_conso
     platform: gpio
-    pin: GPIO4
+    pin: GPIO12
     
   - id: led_injec
     platform: gpio
-    pin: GPIO12
+    pin: GPIO4
 
   - platform: ac_dimmer
     id: ecs
@@ -208,10 +209,10 @@ display:
       it.printf(0,2,"Triac=%5.1f %%",id(striac));
       it.printf(0,3,"Valid: %s", id(val_router).state ? "ON" : "OFF");
       
-interval:
+#interval:
 
-  - interval: 0.5s
-    then:
+#  - interval: 0.5s
+#    then:
 
     #calcul niveau d'injection et injection dans triac
     #  - script.execute: calcul_injection 
@@ -287,13 +288,17 @@ script:
       - if: 
           condition:
             lambda: |-
-              return id(pureseau1).state < 0;
+              return id(pureseau).state < 0;
           then:
             - lambda: |-
-                id(striac) = id(striac)-id(increment);
+                id(striac) = id(striac)+id(increment);
           else:
             - lambda: |-
-                id(striac) = id(striac)+id(increment);            
+                id(striac) = id(striac)-id(increment);            
+
+      - logger.log:
+          format: "Log S Triac= %f"
+          args: [ 'id(striac)']
 
       - lambda: |-
           if (id(striac) <= id(pmin).state) {
@@ -301,6 +306,7 @@ script:
           } else if(id(striac)>=id(pmax).state){
             id(striac) = id(pmax).state;
           }
+
       - if: 
           condition:
              switch.is_on: val_router
@@ -318,9 +324,7 @@ script:
                 brightness: !lambda |-
                   return id(0) ;  
 
-#     - logger.log:
-#          format: "Increment= %f"
-#          args: [ 'id(increment)']
+
 
           
 # Pilotage led

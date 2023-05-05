@@ -3,6 +3,7 @@
 import json
 import logging
 from os import path
+from typing import Any
 from pickle import dump as pickle_dump
 from pickle import load as pickle_load
 from threading import Lock
@@ -176,7 +177,7 @@ class OpenMediaVaultAPI(object):
             error = True
             self.error_to_strings("%s" % api_error)
             self._connection = None
-        except:
+        except Exception:
             error = True
         else:
             if self.connection_error_reported:
@@ -197,7 +198,7 @@ class OpenMediaVaultAPI(object):
         if error:
             try:
                 errorcode = response.status_code
-            except:
+            except Exception:
                 errorcode = "no_respose"
 
             if errorcode == 200:
@@ -237,16 +238,16 @@ class OpenMediaVaultAPI(object):
     # ---------------------------
     #   query
     # ---------------------------
-    def query(self, service, method, params=None, options=None) -> Optional(list):
+    def query(
+        self,
+        service: str,
+        method: str,
+        params: dict[str, Any] | None = {},
+        options: dict[str, Any] | None = {"updatelastaccess": True},
+    ) -> Optional(list):
         """Retrieve data from OMV."""
         if not self.connection_check():
             return None
-
-        if not params:
-            params = {}
-
-        if not options:
-            options = {"updatelastaccess": False}
 
         self.lock.acquire()
         error = False
@@ -286,7 +287,7 @@ class OpenMediaVaultAPI(object):
             self.disconnect("query", api_error)
             self.lock.release()
             return None
-        except:
+        except Exception:
             self.disconnect("query")
             self.lock.release()
             return None
@@ -295,7 +296,7 @@ class OpenMediaVaultAPI(object):
         if error:
             try:
                 errorcode = response.status_code
-            except:
+            except Exception:
                 errorcode = "no_respose"
 
             _LOGGER.warning(

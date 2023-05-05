@@ -10,10 +10,10 @@ from homeassistant.components.binary_sensor import (
 from .const import DOMAIN
 
 
-DEVICE_ATTRIBUTES_SERVICE = {
+DEVICE_ATTRIBUTES_SERVICE = [
     "name",
     "enabled",
-}
+]
 
 
 @dataclass
@@ -31,6 +31,7 @@ class OMVBinarySensorEntityDescription(BinarySensorEntityDescription):
     data_uid: str = ""
     data_reference: str = ""
     data_attributes_list: List = field(default_factory=lambda: [])
+    func: str = "OMVBinarySensor"
 
 
 SENSOR_TYPES = {
@@ -88,9 +89,11 @@ SENSOR_TYPES = {
         ha_connection_value="Services",
         data_path="service",
         data_is_on="running",
-        data_name="name",
+        data_name="title",
         data_uid="name",
         data_reference="name",
         data_attributes_list=DEVICE_ATTRIBUTES_SERVICE,
     ),
 }
+
+SENSOR_SERVICES = []

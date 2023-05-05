@@ -16,7 +16,13 @@ from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_time_interval
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_SCAN_INTERVAL,
+    CONF_SMART_DISABLE,
+    DEFAULT_SMART_DISABLE,
+)
 from .apiparser import parse_api
 from .omv_api import OpenMediaVaultAPI
 
@@ -26,16 +32,6 @@ DEFAULT_TIME_ZONE = None
 def utc_from_timestamp(timestamp: float) -> datetime:
     """Return a UTC time from a timestamp."""
     return pytz.utc.localize(datetime.utcfromtimestamp(timestamp))
-
-
-def as_local(dattim: datetime) -> datetime:
-    """Convert a UTC datetime object to local time zone."""
-    if dattim.tzinfo == DEFAULT_TIME_ZONE:
-        return dattim
-    if dattim.tzinfo is None:
-        dattim = pytz.utc.localize(dattim)
-
-    return dattim.astimezone(DEFAULT_TIME_ZONE)
 
 
 # ---------------------------
@@ -57,6 +53,9 @@ class OMVControllerData(object):
             "disk": {},
             "fs": {},
             "service": {},
+            "network": {},
+            "kvm": {},
+            "compose": {},
         }
 
         self.listeners = []
@@ -77,13 +76,32 @@ class OMVControllerData(object):
     # ---------------------------
     #   async_init
     # ---------------------------
-    async def async_init(self):
+    async def async_init(self) -> None:
         self._force_update_callback = async_track_time_interval(
-            self.hass, self.force_update, timedelta(seconds=60)
+            self.hass, self.force_update, self.option_scan_interval
         )
         self._force_hwinfo_update_callback = async_track_time_interval(
             self.hass, self.force_hwinfo_update, timedelta(seconds=3600)
         )
+
+    # ---------------------------
+    #   option_scan_interval
+    # ---------------------------
+    @property
+    def option_scan_interval(self):
+        """Config entry option scan interval."""
+        scan_interval = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+        return timedelta(seconds=scan_interval)
+
+    # ---------------------------
+    #   option_smart_disable
+    # ---------------------------
+    @property
+    def option_smart_disable(self):
+        """Config entry option smart disable."""
+        return self.config_entry.options.get(CONF_SMART_DISABLE, DEFAULT_SMART_DISABLE)
 
     # ---------------------------
     #   signal_update
@@ -96,7 +114,7 @@ class OMVControllerData(object):
     # ---------------------------
     #   async_reset
     # ---------------------------
-    async def async_reset(self):
+    async def async_reset(self) -> bool:
         """Reset dispatchers."""
         for unsub_dispatcher in self.listeners:
             unsub_dispatcher()
@@ -126,7 +144,7 @@ class OMVControllerData(object):
         """Update OpenMediaVault hardware info."""
         try:
             await asyncio.wait_for(self.lock.acquire(), timeout=30)
-        except:
+        except Exception:
             return
 
         await self.hass.async_add_executor_job(self.get_hwinfo)
@@ -155,16 +173,34 @@ class OMVControllerData(object):
 
         try:
             await asyncio.wait_for(self.lock.acquire(), timeout=10)
-        except:
+        except Exception:
             return
 
         await self.hass.async_add_executor_job(self.get_hwinfo)
         if self.api.connected():
             await self.hass.async_add_executor_job(self.get_fs)
-        if self.api.connected():
+
+        if not self.option_smart_disable and self.api.connected():
             await self.hass.async_add_executor_job(self.get_smart)
+
+        if self.api.connected():
+            await self.hass.async_add_executor_job(self.get_network)
+
         if self.api.connected():
             await self.hass.async_add_executor_job(self.get_service)
+
+        if (
+            self.api.connected()
+            and "openmediavault-kvm" in self.data["plugin"]
+            and self.data["plugin"]["openmediavault-kvm"]["installed"]
+        ):
+            await self.hass.async_add_executor_job(self.get_kvm)
+        if (
+            self.api.connected()
+            and "openmediavault-compose" in self.data["plugin"]
+            and self.data["plugin"]["openmediavault-compose"]["installed"]
+        ):
+            await self.hass.async_add_executor_job(self.get_compose)
 
         async_dispatcher_send(self.hass, self.signal_update)
         self.lock.release()
@@ -180,15 +216,25 @@ class OMVControllerData(object):
             vals=[
                 {"name": "hostname", "default": "unknown"},
                 {"name": "version", "default": "unknown"},
-                {"name": "cpuUsage", "default": 0},
+                {"name": "cpuUsage", "default": 0.0},
                 {"name": "memTotal", "default": 0},
                 {"name": "memUsed", "default": 0},
+                {"name": "loadAverage_1", "source": "loadAverage/1min", "default": 0.0},
+                {"name": "loadAverage_5", "source": "loadAverage/5min", "default": 0.0},
+                {
+                    "name": "loadAverage_15",
+                    "source": "loadAverage/15min",
+                    "default": 0.0,
+                },
                 {"name": "uptime", "default": "0 days 0 hours 0 minutes 0 seconds"},
                 {"name": "configDirty", "type": "bool", "default": False},
                 {"name": "rebootRequired", "type": "bool", "default": False},
+                {"name": "availablePkgUpdates", "default": 0},
+            ],
+            ensure_vals=[
+                {"name": "memUsage", "default": 0.0},
                 {"name": "pkgUpdatesAvailable", "type": "bool", "default": False},
             ],
-            ensure_vals=[{"name": "memUsage", "default": 0}],
         )
 
         if not self.api.connected():
@@ -196,7 +242,7 @@ class OMVControllerData(object):
 
         tmp_uptime = 0
         if int(self.data["hwinfo"]["version"].split(".")[0]) > 5:
-            tmp = self.data["hwinfo"]["uptime"]
+            tmp = float(self.data["hwinfo"]["uptime"])
             pos = abs(int(tmp))
             day = pos / (3600 * 24)
             rem = pos % (3600 * 24)
@@ -222,9 +268,7 @@ class OMVControllerData(object):
         tmp_uptime += int(tmp[6])  # seconds
         now = datetime.now().replace(microsecond=0)
         uptime_tm = datetime.timestamp(now - timedelta(seconds=tmp_uptime))
-        self.data["hwinfo"]["uptimeEpoch"] = str(
-            as_local(utc_from_timestamp(uptime_tm)).isoformat()
-        )
+        self.data["hwinfo"]["uptimeEpoch"] = utc_from_timestamp(uptime_tm)
 
         self.data["hwinfo"]["cpuUsage"] = round(self.data["hwinfo"]["cpuUsage"], 1)
         mem = (
@@ -234,6 +278,10 @@ class OMVControllerData(object):
             else 0
         )
         self.data["hwinfo"]["memUsage"] = round(mem, 1)
+
+        self.data["hwinfo"]["pkgUpdatesAvailable"] = (
+            self.data["hwinfo"]["availablePkgUpdates"] > 0
+        )
 
     # ---------------------------
     #   get_disk
@@ -248,24 +296,22 @@ class OMVControllerData(object):
                 {"name": "devicename"},
                 {"name": "canonicaldevicefile"},
                 {"name": "size", "default": "unknown"},
+                {"name": "vendor", "default": "unknown"},
+                {"name": "model", "default": "unknown"},
+                {"name": "description", "default": "unknown"},
+                {"name": "serialnumber", "default": "unknown"},
                 {"name": "israid", "type": "bool", "default": False},
                 {"name": "isroot", "type": "bool", "default": False},
+                {"name": "isreadonly", "type": "bool", "default": False},
             ],
             ensure_vals=[
-                {"name": "devicemodel", "default": "unknown"},
-                {"name": "serialnumber", "default": "unknown"},
-                {"name": "firmwareversion", "default": "unknown"},
-                {"name": "sectorsize", "default": "unknown"},
-                {"name": "rotationrate", "default": "unknown"},
-                {"name": "writecacheis", "default": "unknown"},
-                {"name": "smartsupportis", "default": "unknown"},
+                {"name": "temperature", "default": 0},
                 {"name": "Raw_Read_Error_Rate", "default": "unknown"},
                 {"name": "Spin_Up_Time", "default": "unknown"},
                 {"name": "Start_Stop_Count", "default": "unknown"},
                 {"name": "Reallocated_Sector_Ct", "default": "unknown"},
                 {"name": "Seek_Error_Rate", "default": "unknown"},
                 {"name": "Load_Cycle_Count", "default": "unknown"},
-                {"name": "Temperature_Celsius", "default": "unknown"},
                 {"name": "UDMA_CRC_Error_Count", "default": "unknown"},
                 {"name": "Multi_Zone_Error_Rate", "default": "unknown"},
             ],
@@ -275,6 +321,22 @@ class OMVControllerData(object):
     #   get_smart
     # ---------------------------
     def get_smart(self):
+        """Get S.M.A.R.T. information from OMV."""
+        tmp_smart_get_list = self.api.query(
+            "Smart", "getList", {"start": 0, "limit": -1}
+        )
+        if "data" in tmp_smart_get_list:
+            tmp_smart_get_list = tmp_smart_get_list["data"]
+
+        self.data["disk"] = parse_api(
+            data=self.data["disk"],
+            source=tmp_smart_get_list,
+            key="devicename",
+            vals=[
+                {"name": "temperature", "default": 0},
+            ],
+        )
+
         for uid in self.data["disk"]:
             if self.data["disk"][uid]["devicename"].startswith("mmcblk"):
                 continue
@@ -282,34 +344,8 @@ class OMVControllerData(object):
             if self.data["disk"][uid]["devicename"].startswith("sr"):
                 continue
 
-            tmp_data = parse_api(
-                data={},
-                source=self.api.query(
-                    "Smart",
-                    "getInformation",
-                    {"devicefile": self.data["disk"][uid]["canonicaldevicefile"]},
-                ),
-                vals=[
-                    {"name": "devicemodel", "default": "unknown"},
-                    {"name": "serialnumber", "default": "unknown"},
-                    {"name": "firmwareversion", "default": "unknown"},
-                    {"name": "sectorsize", "default": "unknown"},
-                    {"name": "rotationrate", "default": "unknown"},
-                    {"name": "writecacheis", "type": "bool", "default": False},
-                    {"name": "smartsupportis", "type": "bool", "default": False},
-                ],
-            )
-
-            if not tmp_data:
+            if self.data["disk"][uid]["devicename"].startswith("bcache"):
                 continue
-
-            self.data["disk"][uid]["devicemodel"] = tmp_data["devicemodel"]
-            self.data["disk"][uid]["serialnumber"] = tmp_data["serialnumber"]
-            self.data["disk"][uid]["firmwareversion"] = tmp_data["firmwareversion"]
-            self.data["disk"][uid]["sectorsize"] = tmp_data["sectorsize"]
-            self.data["disk"][uid]["rotationrate"] = tmp_data["rotationrate"]
-            self.data["disk"][uid]["writecacheis"] = tmp_data["writecacheis"]
-            self.data["disk"][uid]["smartsupportis"] = tmp_data["smartsupportis"]
 
             tmp_data = parse_api(
                 data={},
@@ -335,7 +371,6 @@ class OMVControllerData(object):
                 "Reallocated_Sector_Ct",
                 "Seek_Error_Rate",
                 "Load_Cycle_Count",
-                "Temperature_Celsius",
                 "UDMA_CRC_Error_Count",
                 "Multi_Zone_Error_Rate",
             ]
@@ -366,12 +401,14 @@ class OMVControllerData(object):
                 {"name": "parentdevicefile", "default": "unknown"},
                 {"name": "label", "default": "unknown"},
                 {"name": "type", "default": "unknown"},
-                {"name": "mountpoint", "default": "unknown"},
-                {"name": "available", "default": "unknown"},
-                {"name": "size", "default": "unknown"},
-                {"name": "percentage", "default": "unknown"},
+                {"name": "mounted", "type": "bool", "default": False},
+                {"name": "devicename", "default": "unknown"},
+                {"name": "available", "default": 0},
+                {"name": "size", "default": 0},
+                {"name": "percentage", "default": 0},
                 {"name": "_readonly", "type": "bool", "default": False},
                 {"name": "_used", "type": "bool", "default": False},
+                {"name": "propreadonly", "type": "bool", "default": False},
             ],
             skip=[
                 {"name": "type", "value": "swap"},
@@ -380,6 +417,11 @@ class OMVControllerData(object):
         )
 
         for uid in self.data["fs"]:
+            tmp = self.data["fs"][uid]["devicename"]
+            self.data["fs"][uid]["devicename"] = tmp[
+                tmp.startswith("mapper/") and len("mapper/") :
+            ]
+
             self.data["fs"][uid]["size"] = round(
                 int(self.data["fs"][uid]["size"]) / 1073741824, 1
             )
@@ -420,5 +462,113 @@ class OMVControllerData(object):
             vals=[
                 {"name": "name"},
                 {"name": "installed", "type": "bool", "default": False},
+            ],
+        )
+
+    # ---------------------------
+    #   get_network
+    # ---------------------------
+    def get_network(self):
+        """Get OMV plugin status"""
+        self.data["network"] = parse_api(
+            data=self.data["network"],
+            source=self.api.query("Network", "enumerateDevices"),
+            key="uuid",
+            vals=[
+                {"name": "uuid"},
+                {"name": "devicename", "default": "unknown"},
+                {"name": "type", "default": "unknown"},
+                {"name": "method", "default": "unknown"},
+                {"name": "address", "default": "unknown"},
+                {"name": "netmask", "default": "unknown"},
+                {"name": "gateway", "default": "unknown"},
+                {"name": "mtu", "default": 0},
+                {"name": "link", "type": "bool", "default": False},
+                {"name": "wol", "type": "bool", "default": False},
+                {"name": "rx-current", "source": "stats/rx_packets", "default": 0.0},
+                {"name": "tx-current", "source": "stats/tx_packets", "default": 0.0},
+            ],
+            ensure_vals=[
+                {"name": "rx-previous", "default": 0.0},
+                {"name": "tx-previous", "default": 0.0},
+                {"name": "rx", "default": 0.0},
+                {"name": "tx", "default": 0.0},
+            ],
+            skip=[
+                {"name": "type", "value": "loopback"},
+            ],
+        )
+
+        for uid, vals in self.data["network"].items():
+            current_tx = vals["tx-current"]
+            previous_tx = vals["tx-previous"]
+            if not previous_tx:
+                previous_tx = current_tx
+
+            delta_tx = max(0, current_tx - previous_tx) * 8
+            self.data["network"][uid]["tx"] = round(
+                delta_tx / self.option_scan_interval.seconds, 2
+            )
+            self.data["network"][uid]["tx-previous"] = current_tx
+
+            current_rx = vals["rx-current"]
+            previous_rx = vals["rx-previous"]
+            if not previous_rx:
+                previous_rx = current_rx
+
+            delta_rx = max(0, current_rx - previous_rx) * 8
+            self.data["network"][uid]["rx"] = round(
+                delta_rx / self.option_scan_interval.seconds, 2
+            )
+            self.data["network"][uid]["rx-previous"] = current_rx
+
+    # ---------------------------
+    #   get_kvm
+    # ---------------------------
+    def get_kvm(self):
+        """Get OMV KVM"""
+        tmp = self.api.query("Kvm", "getVmList", {"start": 0, "limit": 999})
+        if "data" not in tmp:
+            return
+
+        self.data["kvm"] = parse_api(
+            data={},
+            source=tmp["data"],
+            key="vmname",
+            vals=[
+                {"name": "vmname"},
+                {"name": "type", "source": "virttype", "default": "unknown"},
+                {"name": "memory", "source": "mem", "default": "unknown"},
+                {"name": "cpu", "default": "unknown"},
+                {"name": "state", "default": "unknown"},
+                {"name": "architecture", "source": "arch", "default": "unknown"},
+                {"name": "autostart", "default": "unknown"},
+                {"name": "vncexists", "type": "bool", "default": False},
+                {"name": "spiceexists", "type": "bool", "default": False},
+                {"name": "vncport", "default": "unknown"},
+                {"name": "snapshots", "source": "snaps", "default": "unknown"},
+            ],
+        )
+
+    # ---------------------------
+    #   get_compose
+    # ---------------------------
+    def get_compose(self):
+        """Get OMV compose"""
+        tmp = self.api.query("compose", "getContainerList", {"start": 0, "limit": 999})
+        if "data" not in tmp:
+            return
+
+        self.data["compose"] = parse_api(
+            data={},
+            source=tmp["data"],
+            key="name",
+            vals=[
+                {"name": "name"},
+                {"name": "image", "default": "unknown"},
+                {"name": "project", "default": "unknown"},
+                {"name": "service", "default": "unknown"},
+                {"name": "created", "default": "unknown"},
+                {"name": "state", "default": "unknown"},
             ],
         )

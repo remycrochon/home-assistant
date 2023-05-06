@@ -119,6 +119,11 @@ sensor:
     id: temp_piscine
     entity_id: sensor.temp_piscine
 
+#  - platform: homeassistant
+#    #name: "mode de fonctionnemment"
+#    id: mode_f
+#    entity_id: input_select.mode_fonctionnement_piscine
+
 # gestion afficheur
 display:
   - platform: lcd_pcf8574
@@ -130,4 +135,4 @@ display:
       it.printf(0,1,"Or=%.2f",id(esp125_orp_ezo).state);
       it.printf(8,0,"P=%.3f",id(esp125_pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(temp_piscine).state);
-
+#it.printf(15,1,"T=%.1s",id(mode_f).state);

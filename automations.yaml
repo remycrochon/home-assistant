@@ -265,7 +265,7 @@
   action:
   - service: notify.telegram
     data:
-      message: Pression Haute = {{states("sensor.pression_piscine_p") }}{{-"\n"-}}{{states("sensor.date_time")
+      message: Pression Haute = {{states("sensor.pression_filtre") }}{{-"\n"-}}{{states("sensor.date_time")
         }}
       title: Piscine Alerte Pression Filtre !!!
   mode: single

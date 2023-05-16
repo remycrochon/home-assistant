@@ -7,18 +7,11 @@ substitutions:
 esphome:
   name: ${device_name}
   platform: ESP32
-  board: lolin_d32
-
+  board: esp32dev
 
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2    
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 0
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 1
@@ -32,185 +25,393 @@ wifi:
 
 # Enable logging
 logger:
-    level: VERBOSE
-    baud_rate: 0
+#  baud_rate: 0
 # Enable Home Assistant API
 api:
-  services:
-    - service: set_dac_value
-      variables:
-        dac_value: int
-      then:
-        - output.set_level:
-            id: dac_output
-            level: !lambda 'return dac_value / 100.0;'
+
 ota:
+
 web_server:
   port: 80
 
-uart:
-  id: mod_bus
-  tx_pin: GPIO1
-  rx_pin: GPIO3
-  baud_rate: 9600
-  stop_bits: 1
 
-modbus:
-  flow_control_pin: 5
-  id: modbus1
+i2c:
+  sda: GPIO21 #D2=pin 19
+  scl: GPIO22 #D1=pin 20
+  scan: True
+  id: bus_a
 
-modbus_controller:
-  - id: epever
-    ## the Modbus device addr
-    address: 0x1
-    modbus_id: modbus1
-    setup_priority: -10
+globals:
+   - id: increment
+     type: float
+     restore_value: no
+     initial_value: '0'
+   - id: striac
+     type: float
+     restore_value: yes
 
+   - id: palier0
+     type: int
+     restore_value: no
+     initial_value: '0'
+   - id: palier1
+     type: int
+     restore_value: no
+     initial_value: '15'
+   - id: palier2
+     type: int
+     restore_value: no
+     initial_value: '50'
+   - id: palier3
+     type: int
+     restore_value: no
+     initial_value: '100'
+   - id: palier4
+     type: int
+     restore_value: no
+     initial_value: '200'
+   - id: palier5
+     type: int
+     restore_value: no
+     initial_value: '300'
+   - id: palier6
+     type: int
+     restore_value: no
+     initial_value: '600'
+   - id: palier7
+     type: int
+     restore_value: no
+     initial_value: '900'
+
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO26
+    inverted: true
+
+#sonde Dallas
+dallas:
+  - pin: GPIO27 #
+    update_interval: 10s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name}_ESP IP Address
+    ssid:
+      name: ${friendly_name}_ESP Connected SSID
+    bssid:
+      name: ${friendly_name}_ESP Connected BSSID
+    mac_address:
+      name: ${friendly_name}_ESP Mac Wifi Address
+#    scan_results:
+#      name: ${friendly_name}_ESP Latest Scan Results
+
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
+
+
+# Reception de la puissance avant transfert vers le template
+number:
+  - platform: template
+    name: "${friendly_name} Pu_Reseau"
+    id: pureseau
+    optimistic: true
+    restore_value: true
+    min_value: -3000
+    max_value: +3000
+    step: 1
+    mode: box
+    on_value:
+      then:
+        - script.execute: calcul_injection 
+        - script.execute: etat_production 
+        - lambda: id(pureseau1).publish_state( id(pureseau).state );
+        - lambda: id(afincrement).publish_state( id(increment) );
+        - lambda: id(afstriac).publish_state( id(striac) );
+
+  - platform: template
+    name: "${friendly_name} P Max"
+    id: pmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 50
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+
+  - platform: template
+    name: "${friendly_name} P Min"
+    id: pmin
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 25
+    unit_of_measurement: "%"
+    step: 1
+
+sensor:  
+
+# Informations WI_FI
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "${friendly_name} WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "${friendly_name} WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+
+############### TEMPLATE  ######################"
+# 
+  - platform: template
+    name: "${friendly_name} Pu Reseau"
+    id: pureseau1
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    update_interval: 60s
+    lambda: |-
+     return (id(pureseau).state);
+
+  - platform: template
+    name: "${friendly_name} Increment"
+    id: afincrement
+    unit_of_measurement: ""
+    accuracy_decimals: 2
+    state_class: "measurement"
+    update_interval: 60s
+    lambda: |-
+     return id(increment);  
+
+  - platform: template
+    name: "${friendly_name} Sortie Triac"
+    id: afstriac
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    update_interval: 60s
+    lambda: |-
+      return id(striac);
+
+
+# Sonde Temperature radiateur
+  - platform: dallas
+    address: 0x82012111efe81d28
+    name: "${friendly_name} Temp triac"
+    id: temp_triac
+    filters:
+      - filter_out: NAN
+                    
+switch:
+  - platform: gpio
+    name: "${friendly_name} Relais"
+    pin: GPIO5
+    id: relais
+
+  - platform: template
+    name: "${friendly_name} Validation Router"    
+    id: val_router
+    optimistic: true
+    restore_state: true   
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+#AC dimmer level 0 à 1-----------------------------------------------------------------------
 
 output:
-  - platform: esp32_dac
+  #LEDS -----------------------------------------------------------------------------------------
+  - id: led_conso
+    platform: gpio
+    pin: GPIO32
+    
+  - id: led_injec
+    platform: gpio
     pin: GPIO25
-    id: dac_output
 
   - platform: ac_dimmer
-    id: variateur1
-    gate_pin: GPIO17
+    id: ecs
+    gate_pin: GPIO33
+    method: leading
     zero_cross_pin:
-      number: GPIO16
+      number: GPIO34 
       mode:
         input: true
       inverted: yes
+    min_power: 25%
 
-    
 light:
   - platform: monochromatic
-    output: variateur1
-    name: Dimmer Light      
+    name: "${friendly_name}+STriac"
+    output: ecs
+    id: gradateur
+    default_transition_length: 50ms
 
-climate:
-  - platform: pid
-    name: "PID Controller"
-    id: pid_pv
-    sensor: potar
-    default_target_temperature: 5
-    heat_output: dac_output
-    control_parameters:
-      kp: 0.5
-      ki: 0.0
-      kd: 0.0
-
-sensor:
-  - platform: modbus_controller
-    modbus_controller_id: epever
-    name: "tension"
-    id: battery_capacity
-    register_type: holding
-    address: 0x0009
-    unit_of_measurement: "V"
-    value_type: U_WORD
-    
-  - platform: pid
-    name: "PID PV Result"
-    type: RESULT
-    
-  - platform: pid
-    name: "PID PV Heat"
-    type: HEAT
-    
-  - platform: pid
-    name: "PID PV Cool"
-    type: COOL
-
-  - platform: ct_clamp
-    sensor: adc_sensor
-    id: mesure_courant
-    name: "Measured Current"
-    update_interval: 1s
-    filters:
-      - sliding_window_moving_average:
-          window_size: 10
-          send_every: 5  
-      - calibrate_linear:
-          # Measured value of 0 maps to 0A
-          - 0.01 -> 0
-          - 0.074 -> 4.77
-          - 0.122 -> 7.82
-
-  # Example source sensor
-  - platform: adc
-    pin: GPIO36
-    id: adc_sensor
-    attenuation: 11db
-
- # Potentiometre
-  - platform: adc
-    pin: GPIO39
-    id: potar
-    name: "${friendly_name} potar"
-    unit_of_measurement: "bar"
-    update_interval: 1s
-    accuracy_decimals: 3
-    attenuation: 11db
- #   filters:
-#      - calibrate_linear:
-#        - 0.5 -> 0.0
-#        - 1.83 -> 1.03421
-#        - 3.3 -> 2.03843
-        
-  - platform: uptime
-    name: "${friendly_name} Uptime Sensor"
-    id: esp142_uptime
-    update_interval: 60s
-
-  - platform: wifi_signal
-    name: "${friendly_name} WiFi Signal Sensor"
-    update_interval: 60s
-
-  - platform: homeassistant
-    name: "Pression Ext"
-    id: p_ext
-    entity_id: sensor.vp2_barometer
-
-
-############### TEMPLATE  ######################"
-# Calcul de la pression relative
-  - platform: template
-    name: "Pression"
-    id: pression
-    icon: mdi:flash
-    unit_of_measurement: "bar"
-    accuracy_decimals: 3
-    update_interval: 1s
+# Affichage
+display:
+  - platform: lcd_pcf8574
+    dimensions: 20x4
+    address: 0x27
     lambda: |-
-      return ((id(potar).state)-((id(p_ext).state)/1000));
-
-#Etat de la connection
-binary_sensor:
-  - platform: status
-    name: "${friendly_name} Status"
-
-switch:
-  - platform: template
-    name: "PID Climate Autotune"
-    turn_on_action:
-      - climate.pid.autotune: pid_pv
+      it.printf(0,0,"Pu=%8.0f W",id(pureseau1).state);
+      it.printf(0,1,"Inc=%7.1f ",id(increment));
+      it.printf(0,2,"Triac=%5.1f %%",id(striac));
+      it.printf(0,3,"Valid: %s", id(val_router).state ? "ON" : "OFF");
       
-  - platform: restart
-    name: "${friendly_name}_Restart"
+#interval:
 
+#  - interval: 0.5s
+#    then:
 
-    
-text_sensor:
-  # IP address #
-  - platform: wifi_info
-    ip_address:
-      name: "${friendly_name} IP address"
-      icon: "mdi:network-outline"
-    ssid:
-      name: "${friendly_name} Connected SSID"
-    bssid:
-      name: "${friendly_name} Connected BSSID"
-  - platform: version
-    id: text_sensor_version
-    name: "${friendly_name} ESPHome Version"
-    
+    #calcul niveau d'injection et injection dans triac
+    #  - script.execute: calcul_injection 
+
+    #script affichage
+    #  - script.execute: etat_production 
+
+#Scripts
+script:
+#calcul puissance injection
+  - id: calcul_injection
+    mode: single
+    then:
+      - lambda: |-
+         id(increment) = 0.0;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier0) && abs(id(pureseau1).state) < id(palier1);
+          then:
+            - lambda: |-
+                id(increment) = 0.0;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier1) && abs(id(pureseau1).state) < id(palier2);
+          then:
+            - lambda: |-
+               id(increment) = 0.5;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier2) && abs(id(pureseau1).state) < id(palier3);
+          then:
+            - lambda: |-
+               id(increment) = 1.0;               
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier3) && abs(id(pureseau1).state) < id(palier4);
+          then:
+            - lambda: |-
+               id(increment) = 1.5;               
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier4) && abs(id(pureseau1).state) < id(palier5);
+          then:
+            - lambda: |-
+               id(increment) = 2.0;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier5) && abs(id(pureseau1).state) < id(palier6);
+          then:
+            - lambda: |-
+               id(increment) = 2.5;
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier6) && abs(id(pureseau1).state) < id(palier7);
+          then:
+            - lambda: |-
+               id(increment) = 3.0;                                       
+      - if: 
+          condition:
+            lambda: |-
+              return abs(id(pureseau1).state) >= id(palier7);
+          then:
+            - lambda: |-
+               id(increment) = 4.0;
+
+      - if: 
+          condition:
+            lambda: |-
+              return id(pureseau).state < 0;
+          then:
+            - lambda: |-
+                id(striac) = id(striac)+id(increment);
+          else:
+            - lambda: |-
+                id(striac) = id(striac)-id(increment);            
+
+      - logger.log:
+          format: "Log S Triac= %f"
+          args: [ 'id(striac)']
+
+      - lambda: |-
+          if (id(striac) <= id(pmin).state) {
+            id(striac) = 0;
+          } else if(id(striac)>=id(pmax).state){
+            id(striac) = id(pmax).state;
+          }
+
+      - if: 
+          condition:
+             switch.is_on: val_router
+          then:
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(striac)/100 ;  
+          else:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(0) ;  
+
+          
+# Pilotage led
+  - id: etat_production
+    mode: single
+    then:
+     - if: 
+         condition:
+           sensor.in_range:
+              id: pureseau1
+              below: 50
+              above: -50
+         then:
+           - output.turn_on: led_conso
+           - output.turn_on: led_injec
+                
+     - if: 
+         condition:
+           sensor.in_range:
+             id: pureseau1
+             above: 50
+         then:
+           - output.turn_off: led_injec
+           - output.turn_on: led_conso
+
+     - if: 
+         condition:
+           sensor.in_range:
+             id: pureseau1
+             below: -50
+         then:
+          - output.turn_off: led_conso
+          - output.turn_on: led_injec

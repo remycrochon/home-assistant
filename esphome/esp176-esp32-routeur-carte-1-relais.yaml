@@ -7,7 +7,7 @@ substitutions:
 esphome:
   name: ${device_name}
   platform: ESP32
-  board: mhetesp32minikit
+  board: esp32dev
   project:
     name: "rem81.esp176-esp32-routeur"
     version: "1.0.0"
@@ -29,7 +29,7 @@ wifi:
 
 # Enable logging
 logger:
-#  baud_rate: 0
+  baud_rate: 0
 # Enable Home Assistant API
 api:
 
@@ -40,10 +40,37 @@ web_server:
 
 
 i2c:
-  sda: GPIO21 #D2=pin 19
-  scl: GPIO22 #D1=pin 20
+  sda: GPIO21 
+  scl: GPIO22
   scan: True
   id: bus_a
+
+uart:
+  id: mod_bus
+  tx_pin: 17
+  rx_pin: 16
+  baud_rate: 4800
+  stop_bits: 1
+#  debug:
+#    direction: BOTH
+#    dummy_receiver: false
+#    after:
+#      delimiter: "\n"
+#    sequence:
+#      - lambda: UARTDebug::log_string(direction, bytes);
+
+modbus:
+#flow_control_pin: 5
+#send_wait_time: 200ms
+  id: modbus1
+
+modbus_controller:
+  - id: jsymk
+    ## the Modbus device addr
+    address: 0x1
+    modbus_id: modbus1
+    update_interval: 1s
+    # setup_priority: -10
 
 globals:
    - id: increment
@@ -120,22 +147,6 @@ binary_sensor:
 
 # Reception de la puissance avant transfert vers le template
 number:
-  - platform: template
-    name: "${friendly_name} Pu_Reseau"
-    id: pureseau
-    optimistic: true
-    restore_value: true
-    min_value: -3000
-    max_value: +3000
-    step: 1
-    mode: box
-    on_value:
-      then:
-        - script.execute: calcul_injection 
-        - script.execute: etat_production 
-        - lambda: id(pureseau1).publish_state( id(pureseau).state );
-        - lambda: id(afincrement).publish_state( id(increment) );
-        - lambda: id(afstriac).publish_state( id(striac) );
 
   - platform: template
     name: "${friendly_name} P Max"
@@ -161,6 +172,157 @@ number:
 
 sensor:  
 
+#Voltage = ByteData[1] * 0.0001;     // Tension         48
+#Intensite1 = ByteData[2] * 0.0001;     // Intensité 1  49
+#Power1 = ByteData[3] * 0.0001;     // Puissance 1      4A
+#Energy1 = ByteData[4] * 0.0001;     // Energie 1       4B   
+#Sens1 = ByteData[7];     // Sens 1                          
+#Sens2 = ByteData[9];     // Sens 2
+#Frequency = ByteData[8] * 0.01;     // Fréquence
+#Intensite2 = ByteData[10] * 0.0001;     // Intensité 2
+#Power2 = ByteData[11] * 0.0001;     // Puissance 2
+#Energy2 = ByteData[12] * 0.0001;     // Energie 2
+
+# tension de l'alimentation
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: Tension
+    name: "${friendly_name} Tension JSKPV"
+    address: 0x0048
+    unit_of_measurement: "V"
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.0001
+
+# Intensité traversant le tore
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: Itore
+    name: "${friendly_name} I_Tore JSKPV"
+    address: 0x0049
+    unit_of_measurement: "A"
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.0001
+
+# Puissance traversant le tore
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: putore
+    name: "${friendly_name} P_Tore JSKPV"
+    address: 0x004A
+    unit_of_measurement: "W"
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.0001
+
+# Energie lue dans le tore
+#  - platform: modbus_controller
+#    modbus_controller_id: jsymk
+#    id: energie1
+#    name: "${friendly_name} Energie1 JSKPV"
+#    address: 0x004B
+#    unit_of_measurement: "kWh"
+#    register_type: holding
+#    value_type: U_DWORD
+#    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.0001
+
+# Sens du courant dans le tore
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: senstore
+    name: "${friendly_name} Sens_Tore JSKPV"
+    address: 0x004E
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+
+# Fréquence de l'alimentation  
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: frequence
+    name: "${friendly_name} Frequence JSKPV"
+    address: 0x0050
+    unit_of_measurement: "hz"    
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+
+# Sens du courant dans la pince
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: sensreseau
+    name: "${friendly_name} Sens_Reseau JSKPV"
+    address: 0x004F
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 1
+
+# Intensité lue dans la pince
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: Ireseau
+    name: "${friendly_name} I_Reseau JSKPV"
+    address: 0x0051
+    unit_of_measurement: "A"
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.0001
+
+# puissance lue dans la pince
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: pureseau
+    name: "${friendly_name} P_Reseau JSKPV"
+    address: 0x0052
+    unit_of_measurement: "W"
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.0001
+    on_value:
+      then:
+        - lambda: |-
+            if ( id(sensreseau).state == 0 ) {
+              id(pureseau1).publish_state( id(pureseau).state *-1);
+            } else {
+              id(pureseau1).publish_state( id(pureseau).state );
+            }
+        - lambda: id(afincrement).publish_state( id(increment) );
+        - lambda: id(afstriac).publish_state( id(striac) );
+        - script.execute: calcul_injection 
+        - script.execute: etat_production 
+
+# Energie lue dans la pince
+  - platform: modbus_controller
+    modbus_controller_id: jsymk
+    id: energietore
+    name: "${friendly_name} Energie_tore JSKPV"
+    address: 0x0053
+    unit_of_measurement: "kWh"
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.0001
+
 # Informations WI_FI
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "${friendly_name} WiFi Signal dB"
@@ -183,10 +345,7 @@ sensor:
     id: pureseau1
     unit_of_measurement: "W"
     state_class: "measurement"  
-    update_interval: 60s
-    lambda: |-
-     return (id(pureseau).state);
-
+ 
   - platform: template
     name: "${friendly_name} Increment"
     id: afincrement
@@ -206,7 +365,6 @@ sensor:
     update_interval: 60s
     lambda: |-
       return id(striac);
-
 
 # Sonde Temperature radiateur
   - platform: dallas
@@ -351,7 +509,7 @@ script:
       - if: 
           condition:
             lambda: |-
-              return id(pureseau).state < 0;
+              return id(pureseau1).state < 0;
           then:
             - lambda: |-
                 id(striac) = id(striac)+id(increment);

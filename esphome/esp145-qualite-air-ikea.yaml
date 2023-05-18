@@ -15,14 +15,6 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi_mi4
-      password: !secret mdpwifi_mi4
-      priority: 2   
-
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 1
-      
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 0

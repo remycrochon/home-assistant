@@ -248,7 +248,7 @@ output:
       mode:
         input: true
       inverted: yes
-    min_power: 25%
+    min_power: 5%
 
 light:
   - platform: monochromatic
@@ -415,3 +415,6 @@ script:
          then:
           - output.turn_off: led_conso
           - output.turn_on: led_injec
+
+
+

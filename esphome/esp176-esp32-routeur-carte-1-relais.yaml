@@ -69,7 +69,7 @@ modbus_controller:
     ## the Modbus device addr
     address: 0x1
     modbus_id: modbus1
-    update_interval: 0.5s
+    update_interval: 1s
     # setup_priority: -10
 
 globals:
@@ -114,27 +114,22 @@ globals:
      restore_value: no
      initial_value: '900'
 
-# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
-status_led:
-  pin:
-    number: GPIO26
-    inverted: true
 
 #sonde Dallas
 dallas:
   - pin: GPIO27 #
     update_interval: 10s
 
-text_sensor:
-  - platform: wifi_info
-    ip_address:
-      name: ${friendly_name}_ESP IP Address
-    ssid:
-      name: ${friendly_name}_ESP Connected SSID
-    bssid:
-      name: ${friendly_name}_ESP Connected BSSID
-    mac_address:
-      name: ${friendly_name}_ESP Mac Wifi Address
+#text_sensor:
+#  - platform: wifi_info
+#    ip_address:
+#      name: ${friendly_name}_ESP IP Address
+#    ssid:
+#      name: ${friendly_name}_ESP Connected SSID
+#    bssid:
+#      name: ${friendly_name}_ESP Connected BSSID
+#    mac_address:
+#      name: ${friendly_name}_ESP Mac Wifi Address
 #    scan_results:
 #      name: ${friendly_name}_ESP Latest Scan Results
 
@@ -144,8 +139,7 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
-
-# Reception de la puissance avant transfert vers le template
+# Bornes Min/Max de la sortie triac
 number:
 
   - platform: template
@@ -170,13 +164,24 @@ number:
     unit_of_measurement: "%"
     step: 1
 
+  - platform: template
+    name: "${friendly_name} T Max"
+    id: tmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 75
+    unit_of_measurement: "C°"
+    step: 1
+
 sensor:  
 
 # Sens du courant dans la pince
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: senspince
-    name: "${friendly_name} Sens_Pince JSKPV"
+# name: "${friendly_name} Sens_Pince JSKPV" Inutile de l'afficher dans HA
     address: 0x004E
     register_type: holding
     value_type: U_DWORD
@@ -185,7 +190,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: pureseau
-    name: "${friendly_name} P_Reseau JSKPV"
+#    name: "${friendly_name} P_Reseau JSKPV" Inutile de l'afficher dans HA
     address: 0x0052
     unit_of_measurement: "W"
     register_type: holding
@@ -199,14 +204,14 @@ sensor:
             if ( id(senspince).state == 65536 ) {
               id(pureseau1).publish_state( id(pureseau).state *-1);
             } else {
-              id(pureseau1).publish_state( id(pureseau).state );
+              id(pureseau1).publish_state( id(pureseau).state *-1 );
             }
         - lambda: id(afincrement).publish_state( id(increment) );
         - script.execute: calcul_injection 
         - script.execute: etat_production 
-        - http_request.get:
-             url: !lambda |-
-              return ((std::string) "http://192.168.0.77/?POWER=" + std::to_string(id(striac))).c_str();
+#        - http_request.get:
+#             url: !lambda |-
+#              return ((std::string) "http://192.168.0.77/?POWER=" + std::to_string(id(striac))).c_str();
         - lambda: id(afstriac).publish_state( id(striac) );
 
 
@@ -239,9 +244,6 @@ sensor:
     unit_of_measurement: ""
     accuracy_decimals: 2
     state_class: "measurement"
-    update_interval: 60s
-    lambda: |-
-     return id(increment);  
 
   - platform: template
     name: "${friendly_name} Sortie Triac"
@@ -249,13 +251,10 @@ sensor:
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
-    update_interval: 60s
-    lambda: |-
-      return id(striac);
 
 # Sonde Temperature radiateur
   - platform: dallas
-    address: 0x82012111efe81d28
+    address: 0xeb012112e461b128
     name: "${friendly_name} Temp triac"
     id: temp_triac
     filters:
@@ -275,8 +274,6 @@ switch:
 
   - platform: restart
     name: "${friendly_name} Restart"
-
-#AC dimmer level 0 à 1-----------------------------------------------------------------------
 
 output:
   #LEDS -----------------------------------------------------------------------------------------
@@ -316,6 +313,7 @@ display:
       it.printf(0,1,"Inc=%7.1f ",id(increment));
       it.printf(0,2,"Triac=%5.1f %%",id(striac));
       it.printf(0,3,"Valid: %s", id(val_router).state ? "ON" : "OFF");
+      it.printf(11,3,"T=%0.1f", id(temp_triac).state);
       
 #interval:
 

@@ -11,10 +11,14 @@ esphome:
   project:
     name: "rem81.esp176-esp32-routeur"
     version: "1.0.0"
-#  on_boot:
-#    priority: 800
-#    then: 
-#     - lambda: id(ecs).publish_state( 0.0001 );
+  on_boot:
+    priority: 800
+    # Force mode auto et tempok au demmarrage
+    then: 
+      - switch.turn_on: modeauto
+      - binary_sensor.template.publish:
+          id: tempok
+          state: ON
 
 wifi:
   networks:
@@ -139,9 +143,13 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
-# Bornes Min/Max de la sortie triac
-number:
+  - platform: template
+    name: "${friendly_name} Temp Ok"
+    id: tempok
 
+# Input Number
+number:
+  # Seuil Min/Max de la sortie triac
   - platform: template
     name: "${friendly_name} P Max"
     id: pmax
@@ -164,6 +172,7 @@ number:
     unit_of_measurement: "%"
     step: 1
 
+# Seuil MAX temperature
   - platform: template
     name: "${friendly_name} T Max"
     id: tmax
@@ -204,7 +213,7 @@ sensor:
             if ( id(senspince).state == 65536 ) {
               id(pureseau1).publish_state( id(pureseau).state *-1);
             } else {
-              id(pureseau1).publish_state( id(pureseau).state *-1 );
+              id(pureseau1).publish_state( id(pureseau).state );
             }
         - lambda: id(afincrement).publish_state( id(increment) );
         - script.execute: calcul_injection 
@@ -216,13 +225,13 @@ sensor:
 
 
 # Informations WI_FI
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+  - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
     name: "${friendly_name} WiFi Signal dB"
     id: wifi_signal_db
     update_interval: 60s
     entity_category: "diagnostic"
 
-  - platform: copy # Reports the WiFi signal strength in %
+  - platform: copy # Affiche le signal WiFi strength en %
     source_id: wifi_signal_db
     name: "${friendly_name} WiFi Signal Percent"
     filters:
@@ -259,7 +268,23 @@ sensor:
     id: temp_triac
     filters:
       - filter_out: NAN
-                    
+    on_value:
+      then:
+        if:
+          condition:
+            lambda: 'return id(temp_triac).state < id(tmax).state;'
+        # Si Temp Triac inferieur au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: tempok
+                state: ON
+        # Sinon attendre 60s avant retour à la normal
+          else:
+            - binary_sensor.template.publish:
+                id: tempok
+                state: OFF
+            - delay: 60s
+ 
 switch:
   - platform: gpio
     name: "${friendly_name} Relais"
@@ -271,6 +296,12 @@ switch:
     id: val_router
     optimistic: true
     restore_state: true   
+
+  - platform: template
+    name: "${friendly_name} Mode Auto"    
+    id: modeauto
+    optimistic: true
+    restore_state: false  
 
   - platform: restart
     name: "${friendly_name} Restart"
@@ -309,12 +340,13 @@ display:
     dimensions: 20x4
     address: 0x27
     lambda: |-
-      it.printf(0,0,"Pu=%8.0f W",id(pureseau1).state);
-      it.printf(0,1,"Inc=%7.1f ",id(increment));
-      it.printf(0,2,"Triac=%5.1f %%",id(striac));
-      it.printf(0,3,"Valid: %s", id(val_router).state ? "ON" : "OFF");
-      it.printf(11,3,"T=%0.1f", id(temp_triac).state);
-      
+      it.printf(0,0,"Pu=%0.0fW",id(pureseau1).state);
+      it.printf(12,0,"Inc=%0.1f ",id(increment));
+      it.printf(0,1,"Triac=%0.1f%%",id(striac));
+      it.printf(12,1,"Val:%s", id(val_router).state ? "OK" : "NOK");
+      it.printf(0,2,"T=%0.1f", id(temp_triac).state);
+      it.printf(12,2,"Etat=%s", id(tempok).state ? "OK" : "NOK");
+      it.printf(0,3,"Mode=%s", id(modeauto).state ? "Auto" : "Manu");     
 #interval:
 
 #  - interval: 0.5s
@@ -413,15 +445,25 @@ script:
             id(striac) = id(pmax).state;
           }
 
+      # Si mode routeur validé et mode auto et temp OK alors on active le triac 
       - if: 
           condition:
-             switch.is_on: val_router
+            and:
+              - switch.is_on: val_router
+              - switch.is_on: modeauto
+              - binary_sensor.is_on: tempok
           then:
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda |-
-                  return id(striac)/100 ;  
-          else:
+                  return id(striac)/100 ;
+      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
+      - if: 
+          condition:
+              or:
+                - switch.is_off: val_router
+                - binary_sensor.is_off: tempok                    
+          then:
             - lambda: |-
                 id(striac) = 0;
                 id(increment) = 0;
@@ -429,7 +471,6 @@ script:
                 id: gradateur
                 brightness: !lambda |-
                   return id(0) ;  
-
           
 # Pilotage led
   - id: etat_production

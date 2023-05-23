@@ -42,13 +42,14 @@ ota:
 web_server:
   port: 80
 
-
+# Protocole afficheur
 i2c:
   sda: GPIO21 
   scl: GPIO22
   scan: True
   id: bus_a
 
+# Protocole du JSK
 uart:
   id: mod_bus
   tx_pin: 17
@@ -119,11 +120,12 @@ globals:
      initial_value: '900'
 
 
-#sonde Dallas
+# Sonde Temperature Dallas
 dallas:
   - pin: GPIO27 #
     update_interval: 10s
 
+# Informations supplementaires sur le WIFI
 #text_sensor:
 #  - platform: wifi_info
 #    ip_address:
@@ -149,7 +151,7 @@ binary_sensor:
 
 # Input Number
 number:
-  # Seuil Min/Max de la sortie triac
+  # Seuil Min/Max sortie triac
   - platform: template
     name: "${friendly_name} P Max"
     id: pmax
@@ -190,7 +192,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: senspince
-# name: "${friendly_name} Sens_Pince JSKPV" Inutile de l'afficher dans HA
+#  name: "${friendly_name} Sens_Pince JSKPV" Inutile de l'afficher dans HA
     address: 0x004E
     register_type: holding
     value_type: U_DWORD
@@ -240,7 +242,7 @@ sensor:
     entity_category: "diagnostic"
 
 ############### TEMPLATE  ######################"
-# 
+# Permet de l'afficher dans HA et sur l'afficheur
   - platform: template
     name: "${friendly_name} Pu Reseau"
     id: pureseau1
@@ -307,7 +309,7 @@ switch:
     name: "${friendly_name} Restart"
 
 output:
-  #LEDS -----------------------------------------------------------------------------------------
+#LEDS --------------------------------------
   - id: led_conso
     platform: gpio
     pin: GPIO32
@@ -315,7 +317,7 @@ output:
   - id: led_injec
     platform: gpio
     pin: GPIO25
-
+# Pilotage du Dimmer ------------------------
   - platform: ac_dimmer
     id: ecs
     gate_pin: GPIO33
@@ -325,7 +327,7 @@ output:
       mode:
         input: true
       inverted: yes
-    min_power: 25%
+    min_power: 5%
 
 light:
   - platform: monochromatic
@@ -352,11 +354,7 @@ display:
 #  - interval: 0.5s
 #    then:
 
-    #calcul niveau d'injection et injection dans triac
-    #  - script.execute: calcul_injection 
-
-    #script affichage
-    #  - script.execute: etat_production 
+     #  - script.execute: 
 
 #Scripts
 script:
@@ -439,24 +437,25 @@ script:
           args: [ 'id(striac)']
 
       - lambda: |-
-          if (id(striac) <= id(pmin).state) {
+          if (id(striac) <= 0){
             id(striac) = 0;
           } else if(id(striac)>=id(pmax).state){
             id(striac) = id(pmax).state;
           }
 
-      # Si mode routeur validé et mode auto et temp OK alors on active le triac 
+      # Si mode routeur validé et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
       - if: 
           condition:
             and:
               - switch.is_on: val_router
               - switch.is_on: modeauto
               - binary_sensor.is_on: tempok
+              - lambda: 'return id(striac) >= id(pmin).state;'
           then:
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(striac)/100 ;
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return id(striac)/100 ;
       # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
       - if: 
           condition:

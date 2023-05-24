@@ -54,7 +54,7 @@ uart:
   id: mod_bus
   tx_pin: 17
   rx_pin: 16
-  baud_rate: 4800
+  baud_rate: 38400
   stop_bits: 1
 #  debug:
 #    direction: BOTH
@@ -74,7 +74,7 @@ modbus_controller:
     ## the Modbus device addr
     address: 0x1
     modbus_id: modbus1
-    update_interval: 1s
+    update_interval: 0.75s
     # setup_priority: -10
 
 globals:

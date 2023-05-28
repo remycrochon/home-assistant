@@ -73,9 +73,23 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
+# Input Number
+number:
+  # Seuil Min/Max sortie triac
+  - platform: template
+    name: "${friendly_name} Consigne P"
+    id: cons_p
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "W"
+    step: 1
+
 sensor:
   - platform: pzemac
-    update_interval: 1s
+    update_interval: 0.5s
     current:
       name: "${friendly_name} courant"
       unit_of_measurement: "A"
@@ -172,16 +186,21 @@ climate:
     id: pid_climate
     name: "PID Climate Controller"
     sensor: pureseau
-    default_target_temperature: 500
+    default_target_temperature: 20
     heat_output: ecs
     control_parameters:
-      kp: 0.0
-      ki: 0.0
-      kd: 0.0
-
+      kp: 0.00949
+      ki: 0.00527
+      kd: 0.00427
+   
 button:
   - platform: template
     name: "PID Climate Autotune"
     on_press:
       - climate.pid.autotune: pid_climate
+      - climate.pid.autotune:
+          id: pid_climate
+          noiseband: 0.25
+          positive_output: 20%
+          negative_output: -25%
 

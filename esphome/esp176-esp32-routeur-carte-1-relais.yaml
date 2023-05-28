@@ -227,7 +227,7 @@ sensor:
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: Itore
-    #name: "${friendly_name} I_Tore JSYMK"
+    name: "${friendly_name} I_ECS JSYMK"
     address: 0x0049
     unit_of_measurement: "A"
     register_type: holding

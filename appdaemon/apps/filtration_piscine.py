@@ -1,3 +1,4 @@
+# Version du 02/06/2023 -> Modif sur la mémorisation de la T° piscine (new_state_>state)
 # Version du 14/09/2022 -> Affichage heure début/fin au format hh:mm
 import hassapi as hass
 import datetime
@@ -59,8 +60,8 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
-        self.listen_state(self.raz_temporisation_mesure_temp,self.args["cde_pompe"],new_state="off")
-        self.listen_state(self.fin_temporisation_mesure_temp,self.args["cde_pompe"],new_state="on", duration=float(self.get_state(self.args["tempo_eau"])))        
+        self.listen_state(self.raz_temporisation_mesure_temp,self.args["cde_pompe"],state="off")
+        self.listen_state(self.fin_temporisation_mesure_temp,self.args["cde_pompe"],state="on", duration=float(self.get_state(self.args["tempo_eau"])))        
         self.listen_state(self.change_arret_force,self.args["arret_force"])
         self.run_every(self.touteslesxminutes, "now", 5 * 60)
         self.listen_state(self.change_tempo_circulation_eau,self.args["tempo_eau"])

@@ -260,6 +260,7 @@ class FiltrationPiscine(hass.Hass):
             ma_ppe=0
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
+            FIN_TEMPO = 0
 
         # Mode Marche Forcée
         elif mode_de_fonctionnement == TAB_MODE[3]:
@@ -286,6 +287,7 @@ class FiltrationPiscine(hass.Hass):
             else:
                 self.turn_off(pompe)
                 self.notification("Arret Pompe",1)
+                FIN_TEMPO = 0
 
     # Fonction Notification
     # message =  Texte à afficher

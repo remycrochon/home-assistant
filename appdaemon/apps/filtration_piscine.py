@@ -1,5 +1,5 @@
-# Version du 02/06/2023 -> Modif sur la mémorisation de la T° piscine (new_state_>state)
-# Version du 14/09/2022 -> Affichage heure début/fin au format hh:mm
+# Version du 02/06/2023 -> Modif sur la mémorisation de la T° piscine (new_state_>new) L63/64
+
 import hassapi as hass
 import datetime
 from datetime import timedelta
@@ -60,8 +60,8 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
-        self.listen_state(self.raz_temporisation_mesure_temp,self.args["cde_pompe"],state="off")
-        self.listen_state(self.fin_temporisation_mesure_temp,self.args["cde_pompe"],state="on", duration=float(self.get_state(self.args["tempo_eau"])))        
+        self.listen_state(self.raz_temporisation_mesure_temp,self.args["cde_pompe"],new="off")
+        self.listen_state(self.fin_temporisation_mesure_temp,self.args["cde_pompe"],new="on", duration=float(self.get_state(self.args["tempo_eau"])))        
         self.listen_state(self.change_arret_force,self.args["arret_force"])
         self.run_every(self.touteslesxminutes, "now", 5 * 60)
         self.listen_state(self.change_tempo_circulation_eau,self.args["tempo_eau"])
@@ -260,7 +260,6 @@ class FiltrationPiscine(hass.Hass):
             ma_ppe=0
             text_affichage = "At manuel"
             self.set_textvalue(periode_filtration,text_affichage)
-            FIN_TEMPO = 0
 
         # Mode Marche Forcée
         elif mode_de_fonctionnement == TAB_MODE[3]:
@@ -287,7 +286,7 @@ class FiltrationPiscine(hass.Hass):
             else:
                 self.turn_off(pompe)
                 self.notification("Arret Pompe",1)
-                FIN_TEMPO = 0
+
 
     # Fonction Notification
     # message =  Texte à afficher

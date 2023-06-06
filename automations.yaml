@@ -2636,38 +2636,6 @@
     entity_id: switch.spots_ext_sud
     domain: switch
   mode: single
-- id: '1672317557269'
-  alias: 10-01-01 Eclairage 1
-  description: ''
-  trigger:
-  - type: turned_on
-    platform: device
-    device_id: 4426c2e7eae7885c0d4b21db4405ae40
-    entity_id: binary_sensor.esp149_bp1
-    domain: binary_sensor
-  condition: []
-  action:
-  - type: toggle
-    device_id: e62c133861b9ca712b5539e51c07d05b
-    entity_id: switch.esp170_relais1
-    domain: switch
-  mode: single
-- id: '1672318040631'
-  alias: 10-00-02 Eclairage 2
-  description: ''
-  trigger:
-  - type: turned_on
-    platform: device
-    device_id: 4426c2e7eae7885c0d4b21db4405ae40
-    entity_id: binary_sensor.esp149_bp2
-    domain: binary_sensor
-  condition: []
-  action:
-  - type: toggle
-    device_id: e62c133861b9ca712b5539e51c07d05b
-    entity_id: switch.esp170_relais2
-    domain: switch
-  mode: single
 - id: '1675070973773'
   alias: 09-2-0 Pilotage Chauffage Chambre Parents
   description: Affectation consigne

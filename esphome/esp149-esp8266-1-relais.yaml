@@ -11,12 +11,8 @@ esphome:
   
 wifi:
   networks:
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 1
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 0
   reboot_timeout: 5min
 
   manual_ip:
@@ -40,11 +36,12 @@ status_led:
   pin:
     number: GPIO16
     inverted: true
+    
 #sonde Dallas
 dallas:
   - pin: GPIO2 #D4
+    update_interval: 10s
 
-update_interval: 10s
 binary_sensor:
   - platform: gpio
     pin:
@@ -61,117 +58,82 @@ binary_sensor:
 
 number:
   - platform: template
-    name: "${friendly_name} P Max"
-    id: pmax
+    name: "${friendly_name} T Max"
+    id: tmax
     optimistic: true
     restore_value: true
-    min_value: 50
+    mode: box
+    min_value: 10
     max_value: 100
+    unit_of_measurement: "C°"
     step: 1
 
   - platform: template
-    name: "${friendly_name} P Min"
-    id: pmin
+    name: "${friendly_name} T Hyst"
+    id: thyst
     optimistic: true
     restore_value: true
-    min_value: 5
-    max_value: 25
+    mode: box
+    min_value: 0
+    max_value: 10
     step: 1
 
 sensor:
-############### TEMPLATE  ######################"
-# 
-  - platform: template
-    name: "${friendly_name} Ecs"
-    id: _ecs
-    icon: mdi:flash
-    unit_of_measurement: "%"
-    accuracy_decimals: 4
-
-#rapatriement valeur commande triac-----------------------------------------------------------          
-
-  - platform: template
-    name: "${friendly_name} Triac HTTP"
-    id: triac
-    unit_of_measurement: "%"
-    accuracy_decimals: 4 
-    state_class: "measurement"
-
-  - platform: template
-    name: "${friendly_name} Triac HTTP2"
-    id: triac2
-    unit_of_measurement: "%"
-    accuracy_decimals: 4 
-    state_class: "measurement"
-    update_interval: 1s
-    lambda: |-
-      if ((id(triac).state/10)>id(pmax).state) {
-        return id(pmax).state;
-        }
-        else
-        {
-         if ((id(triac).state/10)<id(pmin).state) {
-        return id(pmin).state;}
-        else
-        {
-        return id(triac).state/10;}
-        }
+# Sonde Temperature radiateur
+  - platform: dallas
+    address: 0xab0321117f919d28
+    name: "${friendly_name}_Temperature"
+    id: temp
     on_value:
       then:
-        - output.set_level:
-            id: ecs
-            level: !lambda "return x;"
+        - script.execute: ventilateur
+        - lambda: id(aftemp).publish_state( id(temp).state );
+
+############### TEMPLATE  ######################"
+# Affichage dans HA et sur l'afficheur
+  - platform: template
+    name: "${friendly_name}_Temp"
+    id: aftemp
+    unit_of_measurement: "°C"
+    state_class: "measurement"  
+ 
 
 switch:
   - platform: gpio
-    name: "${friendly_name} Relais"
+    name: "${friendly_name} ventilo"
     pin: GPIO5
-    id: relais
+    id: ventilo
     
   - platform: restart
     name: "${friendly_name} Restart"
 
+#interval:
+#  - interval: 1s
+#    then:
+#     - script.execute: ventilateur
 
+# ------------------------  Scripts
 
- # Configuration du serveur HTTP
-
-#AC dimmer level 0 à 1-----------------------------------------------------------------------
-
-output:
-  - platform: ac_dimmer
-    id: ecs
-    gate_pin: GPIO13 #D7
-    method: leading
-    zero_cross_pin:
-      number: GPIO14 #D5
-      mode:
-        input: true
-      inverted: yes
-    min_power: 0%
-    
-
-light:
-  - platform: monochromatic
-    output: ecs
-    id: gradateur
-    default_transition_length: 0s
-
-#HTTP request------------------------------------------------------------------------------------
-http_request:
-  useragent: esphome/device
-  timeout: 10s
-  id: http_request_data
-
-interval:
-  - interval: 1s
-    then:    
-      - http_request.get: 
-          url: http://192.168.0.37:1880/endpoint/triac?valeur
-          on_response:
-            then:
-             - lambda: |-
-                json::parse_json(id(http_request_data).get_string(), [](JsonObject root) {
-                id(triac).publish_state(root["value"]);
-                });
+script:
+ 
+# ------------------------
+  - id: ventilateur
+    mode: single
+    then:
+      # Si mode routeur validé et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      - if: 
+          condition:
+            - lambda: 'return id(temp).state >= id(tmax).state;'
+          then:
+              - switch.turn_on:
+                  id: ventilo
+            
+      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
+      - if: 
+          condition:
+            - lambda: 'return id(temp).state < id(tmax).state-id(thyst).state;'                  
+          then:
+              - switch.turn_off:
+                  id: ventilo
                 
       

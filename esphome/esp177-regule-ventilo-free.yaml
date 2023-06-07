@@ -6,11 +6,8 @@ substitutions:
   
 esphome:
   name: ${device_name}
-
-esp32:
-  board: nodemcu-32s
-  framework:
-    type: arduino
+  platform: ESP32
+  board: esp32dev
 
 # Enable logging
 logger:
@@ -51,6 +48,7 @@ number:
   - platform: template
     name: kp
     icon: mdi:chart-bell-curve
+    optimistic: true
     restore_value: true
     initial_value: 0.3
     min_value: 0
@@ -64,6 +62,7 @@ number:
   - platform: template
     name: ki
     icon: mdi:chart-bell-curve
+    optimistic: true
     restore_value: true
     initial_value: 0.0015
     min_value: 0
@@ -76,6 +75,7 @@ number:
   - platform: template
     name: kd
     icon: mdi:chart-bell-curve
+    optimistic: true
     restore_value: true
     initial_value: 0.0
     min_value: -50
@@ -88,6 +88,7 @@ number:
   - platform: template
     name: Deadband Threshold Low
     icon: mdi:chart-bell-curve
+    optimistic: true
     restore_value: true
     initial_value: -1.0
     min_value: -20
@@ -120,64 +121,20 @@ number:
     set_action: 
       lambda: id(console_thermostat).set_ki_multiplier( x );
 
-text_sensor:
-
-  # Send IP Address
-  - platform: wifi_info
-    ip_address:
-      name: $friendly_name IP Address
-
-  # Send Uptime in raw seconds
-  - platform: template
-    name: $friendly_name Uptime
-    id: uptime_human
-    icon: mdi:clock-start
-
 sensor:
-
-  # Send WiFi signal strength & uptime to HA
-  - platform: wifi_signal
-    name: $friendly_name WiFi Strength
-    update_interval: 60s
-
-  # This is a bit of overkill. It sends a human readable 
-  # uptime string 1h 41m 32s instead of 6092 seconds
-  - platform: uptime
-    name: $friendly_name Uptime
-    id: uptime_sensor
-    update_interval: 60s
-    on_raw_value:
-      then:
-        - text_sensor.template.publish:
-            id: uptime_human
-            # Custom C++ code to generate the result
-            state: !lambda |-
-              int seconds = round(id(uptime_sensor).raw_state);
-              int days = seconds / (24 * 3600);
-              seconds = seconds % (24 * 3600);
-              int hours = seconds / 3600;
-              seconds = seconds % 3600;
-              int minutes = seconds /  60;
-              seconds = seconds % 60;
-              return (
-                (days ? to_string(days) + "d " : "") +
-                (hours ? to_string(hours) + "h " : "") +
-                (minutes ? to_string(minutes) + "m " : "") +
-                (to_string(seconds) + "s")
-              ).c_str();
 
   # Read the Tacho PIN and show measured RPM as a sensor (only with 4-pin PWM fans!)
 
-#  - platform: pulse_counter
-#    pin: 
-#      number: GPIO25   # Connect to any input PIN on the ESP
-#      mode: INPUT_PULLUP
-#    unit_of_measurement: 'RPM'
-#    id: fan_speed
-#    name: $friendly_name Fan Speed
-#    accuracy_decimals: 0
-#    filters:
-#      - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
+  - platform: pulse_counter
+    pin: 
+      number: GPIO25   # Connect to any input PIN on the ESP
+      mode: INPUT_PULLUP
+    unit_of_measurement: 'RPM'
+    id: fan_speed
+    name: $friendly_name Fan Speed
+    accuracy_decimals: 0
+    filters:
+      - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
 
 
 ########################################################
@@ -230,10 +187,10 @@ sensor:
             alpha: 0.1
             send_every: 1
 
-  # Take the "COOL" value of the pid and send 
-  # it to the frontend to graph the output voltage
+# Recopie la vitesse du Ventilo et l'envoyer
+# à l'interface pour représenter graphiquement la tension de sortie
   - platform: pid
-    name: "Fan Speed (PWM Voltage)"
+    name: "${friendly_name} Fan Speed (PWM Voltage)"
     climate_id: console_thermostat
     type: COOL
 

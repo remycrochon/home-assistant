@@ -46,7 +46,7 @@ number:
 
   # KP
   - platform: template
-    name: kp
+    name: "$friendly_name kp"
     icon: mdi:chart-bell-curve
     optimistic: true
     restore_value: true
@@ -60,7 +60,7 @@ number:
 
   # KI
   - platform: template
-    name: ki
+    name: "$friendly_name ki"
     icon: mdi:chart-bell-curve
     optimistic: true
     restore_value: true
@@ -73,7 +73,7 @@ number:
 
   # KD
   - platform: template
-    name: kd
+    name: "$friendly_name kd"
     icon: mdi:chart-bell-curve
     optimistic: true
     restore_value: true
@@ -86,7 +86,7 @@ number:
 
   # Set threshold low
   - platform: template
-    name: Deadband Threshold Low
+    name: "$friendly_name Bande Morte Basse"
     icon: mdi:chart-bell-curve
     optimistic: true
     restore_value: true
@@ -99,7 +99,7 @@ number:
 
   # Set threshold high
   - platform: template
-    name: Deadband Threshold High
+    name: "$friendly_name bande Morte Haute"
     icon: mdi:chart-bell-curve
     restore_value: true
     initial_value: 0.4
@@ -111,7 +111,7 @@ number:
 
   # Set ki multiplier
   - platform: template
-    name: Deadband ki Multiplier
+    name: "$friendly_name Bande morte Coeff"
     icon: mdi:chart-bell-curve
     restore_value: true
     initial_value: 0.04
@@ -131,7 +131,7 @@ sensor:
       mode: INPUT_PULLUP
     unit_of_measurement: 'RPM'
     id: fan_speed
-    name: $friendly_name Fan Speed
+    name: "$friendly_name Fan Speed"
     accuracy_decimals: 0
     filters:
       - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
@@ -141,36 +141,36 @@ sensor:
 # START THE FAN CONTROLLER SETUP
 
   - platform: template
-    name: $friendly_name p term
+    name: "$friendly_name p term"
     id: p_term
     unit_of_measurement: "%"
     accuracy_decimals: 2
 
   - platform: template
-    name: $friendly_name i term
+    name: "$friendly_name i term"
     id: i_term
     unit_of_measurement: "%"
     accuracy_decimals: 2
 
   - platform: template
-    name: $friendly_name d term
+    name: "$friendly_name d term"
     id: d_term
     unit_of_measurement: "%"
     accuracy_decimals: 2
 
   - platform: template
-    name: $friendly_name output value
+    name: "$friendly_name output value"
     unit_of_measurement: "%"
     id: o_term
     accuracy_decimals: 2
 
   - platform: template
-    name: $friendly_name error value
+    name: "$friendly_name error value"
     id: e_term
     accuracy_decimals: 2
 
   - platform: template
-    name: $friendly_name is in deadband
+    name: "$friendly_name is in deadband"
     id: in_deadband_term
     accuracy_decimals: 0
 
@@ -190,7 +190,7 @@ sensor:
 # Recopie la vitesse du Ventilo et l'envoyer
 # à l'interface pour représenter graphiquement la tension de sortie
   - platform: pid
-    name: "${friendly_name} Fan Speed (PWM Voltage)"
+    name: "${friendly_name} Fan Speed"
     climate_id: console_thermostat
     type: COOL
 
@@ -214,13 +214,13 @@ output:
 fan:
   - platform: speed
     output: console_fan_speed
-    name: "Console Fan Speed"
+    name: "$friendly_name Console Fan Speed"
 
 # Exposez un thermostat contrôlé par PID
 # Manual: https://esphome.io/components/climate/pid.html
 climate:
   - platform: pid
-    name: "Console Fan Thermostat"
+    name: "$friendly_name Console Fan Thermostat"
     id: console_thermostat
     sensor: console_fan_temperature
   
@@ -277,7 +277,7 @@ climate:
 switch:
   # Expose an ESP32 restart button to HA
   - platform: restart
-    name: ${friendly_name} ESP32 Restart
+    name: "${friendly_name} ESP32 Restart"
     id: console_fan_restart
 
 # Redémarrage tous les jours à 00h30.
@@ -300,6 +300,6 @@ time:
 # See more at: https://esphome.io/components/climate/pid.html#climate-pid-autotune-action
 button:
 - platform: template
-  name: "PID Climate Autotune"
+  name: "$friendly_name PID Climate Autotune"
   on_press: 
     - climate.pid.autotune: console_thermostat  

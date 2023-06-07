@@ -64,8 +64,13 @@ sensor:
     unit_of_measurement: "°C"
     value_template: '{{ value | multiply(0.001) | round(1) }}'
 
-
-
+  # Chekc si Portainer est en run
+  # https://forum.hacf.fr/t/scan-interval-dun-sensor-command-line/5182
+  #- platform: command_line
+  #  name: "Portainer Online"
+  #  command: response=$(curl -LIk -m 3 http://192.168.0.153:9000 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"
+  #  scan_interval: 90
+  #  value_template: "{{ value }}"
 
 switch:
 # Commande de reboot du RPI Weex

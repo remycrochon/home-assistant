@@ -8,9 +8,15 @@ esphome:
   name: ${device_name}
   platform: ESP32
   board: esp32dev
+  on_boot:
+    priority: 800
+    # Maj des coeff au demmarrage
+    then: 
+      - script.execute: maj_coeff
 
 # Enable logging
 logger:
+
 
 # Enable Home Assistant API
 api:
@@ -39,15 +45,15 @@ dallas:
 number:
 
  ## FACULTATIF:
-  # RECEVOIR les paramètres KP, KI et KD des assistants input_text.kx dans
-  # Assistant à domicile. Voir le contrôleur PID ci-dessous
-  # Ces valeurs d'assistance seront enregistrées pour flasher, remplaçant ainsi de manière permanente
-  # les valeurs initiales définies dans le PID ci-dessous.
+  # Modif des coeff KP, KI et KD dans HA
+  # Pratique pour la mise au point
+  # Ces valeurs sont mémorisées.
 
   # KP
   - platform: template
     name: "$friendly_name kp"
     icon: mdi:chart-bell-curve
+    id: coeff_kp
     optimistic: true
     restore_value: true
     mode: box
@@ -55,14 +61,12 @@ number:
     min_value: 0
     max_value: 50
     step: 0.001
-    set_action: 
-      lambda: |- 
-        id(console_thermostat).set_kp( x );
 
   # KI
   - platform: template
     name: "$friendly_name ki"
     icon: mdi:chart-bell-curve
+    id: coeff_ki
     optimistic: true
     restore_value: true
     mode: box
@@ -70,13 +74,12 @@ number:
     min_value: 0
     max_value: 50
     step: 0.0001
-    set_action: 
-      lambda: id(console_thermostat).set_ki( x );
 
   # KD
   - platform: template
     name: "$friendly_name kd"
     icon: mdi:chart-bell-curve
+    id: coeff_kd
     optimistic: true
     restore_value: true
     mode: box
@@ -84,13 +87,12 @@ number:
     min_value: -50
     max_value: 50
     step: 0.001
-    set_action: 
-      lambda: id(console_thermostat).set_kd( x );
 
   # Set threshold low
   - platform: template
     name: "$friendly_name Bande Morte Basse"
     icon: mdi:chart-bell-curve
+    id: coeff_bdl
     optimistic: true
     restore_value: true
     mode: box
@@ -98,34 +100,34 @@ number:
     min_value: -20
     max_value: 0
     step: 0.1
-    set_action: 
-      lambda: id(console_thermostat).set_threshold_low( x );
 
   # Set threshold high
   - platform: template
     name: "$friendly_name bande Morte Haute"
     icon: mdi:chart-bell-curve
+    id: coeff_bdh
+    optimistic: true    
     restore_value: true
     mode: box
     initial_value: 0.5
     min_value: 0
     max_value: 20
     step: 0.1
-    set_action: 
-      lambda: id(console_thermostat).set_threshold_high( x );
+
 
   # Set ki multiplier
   - platform: template
     name: "$friendly_name Bande morte Coeff"
     icon: mdi:chart-bell-curve
+    id: coeff_kim
+    optimistic: true    
     restore_value: true
     mode: box
     initial_value: 0.04
     min_value: 0
     max_value: .2
     step: 0.01
-    set_action: 
-      lambda: id(console_thermostat).set_ki_multiplier( x );
+
 
 sensor:
 
@@ -140,55 +142,61 @@ sensor:
     accuracy_decimals: 0
     update_interval: 2s
     filters:
-      - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
+      - calibrate_linear:
+        - 0.0 -> 0.0
+        - 5000.0 -> 2200.0
 
-# Senspr PID
+
+############### TEMPLATE  ######################"
+
+# Sensor PID
   - platform: pid
     name: "$friendly_name Sortie PID"
     type: COOL
-
-########################################################
-# START THE FAN CONTROLLER SETUP
-
-  - platform: template
-    name: "$friendly_name p term"
-    id: p_term
-    unit_of_measurement: "%"
     accuracy_decimals: 2
+    
+  - platform: pid
+    name: "$friendly_name PID Climate Result"
+    type: RESULT
+    accuracy_decimals: 3
 
-  - platform: template
-    name: "$friendly_name i term"
-    id: i_term
-    unit_of_measurement: "%"
-    accuracy_decimals: 2
-
-  - platform: template
-    name: "$friendly_name d term"
-    id: d_term
-    unit_of_measurement: "%"
-    accuracy_decimals: 2
-
-  - platform: template
-    name: "$friendly_name output value"
-    unit_of_measurement: "%"
-    id: o_term
-    accuracy_decimals: 2
-
-  - platform: template
-    name: "$friendly_name error value"
-    id: e_term
-    accuracy_decimals: 2
-
-  - platform: template
-    name: "$friendly_name is in deadband"
-    id: in_deadband_term
-    accuracy_decimals: 0
+  - platform: pid
+    name: "$friendly_name PID Climate ERROR"
+    type: ERROR
+  - platform: pid
+    name: "$friendly_name PID Climate PROPORTIONAL"
+    type: PROPORTIONAL
+    accuracy_decimals: 3
+  - platform: pid
+    name: "$friendly_name PID Climate INTEGRAL"
+    type: INTEGRAL
+    accuracy_decimals: 3
+  - platform: pid
+    name: "$friendly_name PID Climate PROPORTIONAL"
+    type: PROPORTIONAL
+    accuracy_decimals: 3
+  - platform: pid
+    name: "$friendly_name PID Climate DERIVATIVE"
+    type: DERIVATIVE
+    accuracy_decimals: 3
+  - platform: pid
+    name: "$friendly_name PID Climate KP"
+    type: KP
+    accuracy_decimals: 3
+  - platform: pid
+    name: "$friendly_name PID Climate KI"
+    type: KI
+    accuracy_decimals: 3
+  - platform: pid
+    name: "$friendly_name PID Climate KD"
+    type: KD
+    accuracy_decimals: 3
 
   # Sonde Temperature radiateur
   - platform: dallas
     address: 0x82012111efe81d28
     name: "${friendly_name} Temperature"
-    id: console_fan_temperature
+    id: temperature
     accuracy_decimals: 3
     # If you don't smooth the temperature readings 
     # the PID controller over reacts to small changes.
@@ -196,13 +204,6 @@ sensor:
         - exponential_moving_average:  
             alpha: 0.1
             send_every: 1
-
-# Recopier la vitesse du Ventilo et l'envoyer
-# à l'interface pour représenter graphiquement la tension de sortie
-  - platform: pid
-    name: "${friendly_name} Fan Speed"
-    climate_id: console_thermostat
-    type: COOL
 
 output:
 # Câblez cette broche (13) dans la broche PWM de votre ventilateur 12v
@@ -212,11 +213,6 @@ output:
     pin: GPIO13
     # 25KHz is standard PC fan frequency, minimises buzzing
     frequency: "25000 Hz" 
-
-# mes ventilateurs cessent de fonctionner en dessous de 13 % de puissance.
-# ils sont aussi puissants et bruyants, limitez leur vitesse maximale à 80 %
-#    min_power: 13%
-#    max_power: 80%
 
 # Bon pour le débogage, vous pouvez régler manuellement le ventilateur
 # vitesse. Assurez-vous simplement que l'appareil Climate est désactivé, sinon il continuera à être annulé.
@@ -231,32 +227,10 @@ climate:
   - platform: pid
     name: "$friendly_name Console Fan Thermostat"
     id: console_thermostat
-    sensor: console_fan_temperature
-    default_target_temperature: 30°C
+    sensor: temperature
+    default_target_temperature: 32
     cool_output: console_fan_speed
 
-# ON changement d'état, publier les valeurs aux nombres x_term définis
-# ci-dessus, afin qu'ils puissent être visualisés en HA
-    on_state:
-      - sensor.template.publish:
-          id: p_term
-          state: !lambda 'return -id(console_thermostat).get_proportional_term() * 100.0;'
-      - sensor.template.publish:
-          id: i_term
-          state: !lambda 'return -id(console_thermostat).get_integral_term()* 100.0;'
-      - sensor.template.publish:
-          id: d_term
-          state: !lambda 'return -id(console_thermostat).get_derivative_term()* 100.0;'
-      - sensor.template.publish:
-          id: o_term
-          state: !lambda 'return -id(console_thermostat).get_output_value()* 100.0;'
-      - sensor.template.publish:
-          id: in_deadband_term
-          state: !lambda 'return id(console_thermostat).in_deadband();'
-      - sensor.template.publish:
-          id: e_term
-          state: !lambda 'return -id(console_thermostat).get_error_value();'
-        
     # Les étendues du thermostat HA
     visual:
       min_temperature: 20 °C
@@ -299,13 +273,26 @@ time:
       then:
        - switch.turn_on: swrestart
 
+interval:
+  - interval: 0.5s
+    then:
+     - script.execute: maj_coeff
 
-# J'ai pu trouver de bonnes valeurs KP, KI, KD manuellement, selon les instructions,
-# mais vous pouvez essayer d'appuyer sur le bouton de réglage automatique de l'assistant domestique et de copier le
-# valeurs qu'il produit.
-# See more at: https://esphome.io/components/climate/pid.html#climate-pid-autotune-action
-button:
-- platform: template
-  name: "$friendly_name PID Climate Autotune"
-  on_press: 
-    - climate.pid.autotune: console_thermostat  
+# --------------- SCRIPT
+script:
+# 
+# --------------- Recopie des input number dans les coeeff du PID
+  - id: maj_coeff
+    mode: single
+    then:
+      - lambda: |-
+          id(console_thermostat).set_kp(id(coeff_kp).state);
+      - lambda: |-
+          id(console_thermostat).set_ki(id(coeff_ki).state);
+      - lambda: |-
+          id(console_thermostat).set_kd(id(coeff_kd).state);
+      - lambda: |-          
+          id(console_thermostat).set_threshold_low(id(coeff_bdl).state);
+      - lambda: |-          
+          id(console_thermostat).set_threshold_high(id(coeff_bdh).state);
+          id(console_thermostat).set_ki_multiplier(id(coeff_ki).state);

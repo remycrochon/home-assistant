@@ -142,6 +142,11 @@ sensor:
     filters:
       - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
 
+# Senspr PID
+  - platform: pid
+    name: "$friendly_name Sortie PID"
+    type: COOL
+
 ########################################################
 # START THE FAN CONTROLLER SETUP
 

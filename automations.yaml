@@ -1135,7 +1135,7 @@
       initial_delay: 300
       max_alerts: 100
 - id: '1634570304569'
-  alias: 02-01-09 Alarme Blueprints Notification Discordance PAC
+  alias: 02-01-09 Al Bp Notif Discordance PAC
   description: ' Surveillance discordance PAC entre l''état du thermostat et l''état
     du switch de commande '
   use_blueprint:
@@ -1172,7 +1172,7 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634571065075'
-  alias: 02-01-10 Alarme Blueprints Notification Porte frigo garage ouverte
+  alias: 02-01-10 Al Bp Notif Porte frigo garage ouverte
   description: '# Alarme porte frigo garage ouverte   '
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1207,7 +1207,7 @@
       initial_delay: 60
       max_alerts: 100
 - id: '1634571983587'
-  alias: 02-01-11 Alarme Blueprints Notification Temperature congelateur haute
+  alias: 02-01-11 Al Bp Notif Temp congelo haute
   description: '# Surveillance de la temperature du congelateur  '
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1242,7 +1242,7 @@
       initial_delay: 300
       max_alerts: 100
 - id: '1634621594490'
-  alias: 02-01-14 Alarme Blueprints Notification Def Com VP2
+  alias: 02-01-14 Al Bp Notif Def Com VP2
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1412,7 +1412,7 @@
       entity_id: cover.garage_rdc
   mode: single
 - id: '1638119466260'
-  alias: 02-01-13 Alarme Blueprints Notification Def Com Linky
+  alias: 02-01-13 Al Bp Notif Def Com Linky
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1832,7 +1832,7 @@
     data: {}
   mode: single
 - id: '1647538159020'
-  alias: 02-01-15 Alarme Blueprints Notification Def connection Tablette
+  alias: 02-01-15 Al Bp Notif Def connection Tablette
   description: ''
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -2183,7 +2183,7 @@
     default: []
   mode: single
 - id: '1656059504847'
-  alias: 02-01-12 Alarme Blueprints Notification Temps lames robot AM435 atteint
+  alias: 02-01-12 Al Bp Notif Tps lames robot AM435 atteint
   description: Surveillance du temps d'utilisation des lame du robot
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -3076,3 +3076,28 @@
     target:
       entity_id: switch.chalet_s1
   mode: single
+- id: '1686145474191'
+  alias: 02-01-17 Al Bp Def Com FREE
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.freebox_server_wan_status
+      alert_state: 'off'
+      alert_action:
+      - service: notify.telegram
+        data:
+          message: Freebox off Line{{-"\n"-}}{{states("sensor.date_time") }}
+          title: FREE NOK !!!
+      resolved_action:
+      - service: notify.telegram
+        data:
+          message: Freebox On Line{{-"\n"-}} {{states("sensor.date_time") }}
+          title: FREE OK!!!
+      notify_device: 62cdce054a9d3448484b4df8e44cc499
+      repeat_delay: 300
+      initial_delay: 1
+      max_alerts: 100
+      resolved_message: Alerte {{ entity_name }} Résolu
+      notify_message: Alerte {{ entity_name }}Déclenché

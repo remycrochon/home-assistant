@@ -1,48 +1,50 @@
 
 #EcoLegrand
 # Les puissances sont converties en kwh dans "entrée"
-sensor:
-  - platform: command_line
-    name: "EcoCompteur ECS_0"  
-    unique_id: "ecocompteur_ecs_0"
-    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
-    scan_interval: 10
-    unit_of_measurement: W
 
-  - platform: command_line
-    name: "EcoCompteur WC_0"
-    unique_id: "ecocompteur_wc_0"
-    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data2'
-    scan_interval: 60
-    unit_of_measurement: W
+# Example configuration.yaml entry
+command_line:
+  - sensor:
+      name: "EcoCompteur ECS_0"  
+      unique_id: "ecocompteur_ecs_0"
+      command: curl -s 'http://192.168.0.26/inst.json' | jq '.data1'
+      scan_interval: 10
+      unit_of_measurement: W
 
-  - platform: command_line
-    name: "EcoCompteur PAC_0"
-    unique_id: "ecocompteur_pac_0"
-    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data3'
-    scan_interval: 10
-    unit_of_measurement: W
+  - sensor:
+      name: "EcoCompteur WC_0"
+      unique_id: "ecocompteur_wc_0"
+      command: curl -s 'http://192.168.0.26/inst.json' | jq '.data2'
+      scan_interval: 60
+      unit_of_measurement: W
 
-  - platform: command_line
-    name: "EcoCompteur Clim_0"
-    unique_id: "ecocompteur_clim_0"
-    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data4'
-    scan_interval: 60
-    unit_of_measurement: W
+  - sensor:
+      name: "EcoCompteur PAC_0"
+      unique_id: "ecocompteur_pac_0"
+      command: curl -s 'http://192.168.0.26/inst.json' | jq '.data3'
+      scan_interval: 10
+      unit_of_measurement: W
 
-  - platform: command_line
-    name: "EcoCompteur VMC Niv0 brut_0"
-    unique_id: "ecocompteur_vmc_niv0_brut_0"
-    command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
-    scan_interval: 60
-    unit_of_measurement: W
+  - sensor:
+      name: "EcoCompteur Clim_0"
+      unique_id: "ecocompteur_clim_0"
+      command: curl -s 'http://192.168.0.26/inst.json' | jq '.data4'
+      scan_interval: 60
+      unit_of_measurement: W
 
-  - platform: command_line
-    name: "EcoCompteur Date_Time"
-    unique_id: "ecocompteur_date_time"
-    command: curl -s 'http://192.168.0.26/inst.json' | jq '.Date_Time'
-    scan_interval: 120
-    unit_of_measurement: s
+  - sensor:
+      name: "EcoCompteur VMC Niv0 brut_0"
+      unique_id: "ecocompteur_vmc_niv0_brut_0"
+      command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
+      scan_interval: 60
+      unit_of_measurement: W
+      
+  - sensor:
+      name: "EcoCompteur Date_Time"
+      unique_id: "ecocompteur_date_time"
+      command: curl -s 'http://192.168.0.26/inst.json' | jq '.Date_Time'
+      scan_interval: 120
+      unit_of_measurement: s
 
 # Conversion Puissance Eco Compteur en W/Device_classe/State_class
 template:

@@ -134,7 +134,7 @@ sensor:
   # Mesure RPM Ventilo avec 4-pin PWM)
   - platform: pulse_counter
     pin: 
-      number: GPIO25   
+      number: GPIO22 #GPIO25   
       mode: INPUT_PULLUP
     unit_of_measurement: 'RPM'
     id: fan_speed
@@ -194,7 +194,7 @@ sensor:
 
   # Sonde Temperature radiateur
   - platform: dallas
-    address: 0x82012111efe81d28
+    address: 0xab0321117f919d28
     name: "${friendly_name} Temperature"
     id: temperature
     accuracy_decimals: 3
@@ -210,7 +210,7 @@ output:
   # ledc est le nom du système de sortie pwm sur un esp32
   - platform: ledc
     id: console_fan_speed
-    pin: GPIO13
+    pin: GPIO21  # GPIO13
     # 25KHz is standard PC fan frequency, minimises buzzing
     frequency: "25000 Hz" 
 

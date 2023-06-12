@@ -9,37 +9,6 @@ input_boolean:
     name: Alim Tablette OK=On
 
 sensor:
-  - platform: systemmonitor
-    resources:
-      - type: disk_use_percent
-        arg: /config
-      - type: disk_use
-      - type: disk_free
-      - type: memory_use_percent
-      - type: memory_free
-      - type: processor_use
-      - type: memory_use
-      - type: swap_use
-      - type: swap_use_percent
-      - type: swap_free
-      - type: load_1m
-      - type: load_5m
-      - type: load_15m
-      - type: last_boot
-      - type: network_in
-        arg: hassio
-      - type: network_out
-        arg: enp3s0
-
-      - type: disk_use_percent
-        arg: / 
-      - type: processor_temperature
-      - type: ipv4_address
-        arg: eth0
-      - type: throughput_network_in
-        arg: eth0
-      - type: throughput_network_out
-        arg: eth0
 
   - platform: time_date
     display_options:
@@ -51,18 +20,6 @@ sensor:
       - 'time_date'
       - 'time_utc'
       - 'beat'
-
-  - platform: command_line
-    name: processor_temperature_z0
-    command: "cat /sys/class/thermal/thermal_zone0/temp"
-    unit_of_measurement: "°C"
-    value_template: '{{ value | multiply(0.001) | round(1) }}'
-    
-  - platform: command_line
-    name: processor_temperature_z1
-    command: "cat /sys/class/thermal/thermal_zone1/temp"
-    unit_of_measurement: "°C"
-    value_template: '{{ value | multiply(0.001) | round(1) }}'
 
   # Chekc si Portainer est en run
   # https://forum.hacf.fr/t/scan-interval-dun-sensor-command-line/5182

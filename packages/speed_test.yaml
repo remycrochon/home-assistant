@@ -30,31 +30,32 @@
 
 
 # https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436
-sensor:
-  - platform: command_line
-    name: "SpeedTest CLI"
-    unique_id: speedtest_cli_data
-    command: "/config/3rparty/speedtest/speedtest -s 5022 --format=json --accept-license --accept-gdpr"
-    #Toutes les 4 heures, 60 * 60 * 4 = 14400
-    #Toutes les heures: 3600 = 1 heure
-    #Toutes les 10 mn: 600
-    scan_interval: 600    
-    command_timeout: 60
-    value_template: >-
-      {{ 
-        { 
-          "ping": value_json.ping.latency, 
-          "download": value_json.download.bandwidth, 
-          "upload": value_json.upload.bandwidth, 
-          "isp": value_json.isp,
-          "country": value_json.server.country,
-          "location": value_json.server.location,
-          "id": value_json.server.id,
-          "server_name": value_json.server.name,
-          "server_host": value_json.server.host
-        }
-        | to_json 
-      }}
+# Example configuration.yaml entry
+command_line:
+  - sensor:
+      name: "SpeedTest CLI"
+      unique_id: speedtest_cli_data
+      command: "/config/3rparty/speedtest/speedtest -s 5022 --format=json --accept-license --accept-gdpr"
+      #Toutes les 4 heures, 60 * 60 * 4 = 14400
+      #Toutes les heures: 3600 = 1 heure
+      #Toutes les 10 mn: 600
+      scan_interval: 600    
+      command_timeout: 60
+      value_template: >-
+        {{ 
+          { 
+            "ping": value_json.ping.latency, 
+            "download": value_json.download.bandwidth, 
+            "upload": value_json.upload.bandwidth, 
+            "isp": value_json.isp,
+            "country": value_json.server.country,
+            "location": value_json.server.location,
+            "id": value_json.server.id,
+            "server_name": value_json.server.name,
+            "server_host": value_json.server.host
+          }
+          | to_json 
+        }}
 
 
 # Suite de Speedtest CLI

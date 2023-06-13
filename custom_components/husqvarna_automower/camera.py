@@ -35,22 +35,22 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up select platform."""
-    session = hass.data[DOMAIN][entry.entry_id]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
     if entry.options.get(ENABLE_CAMERA):
         async_add_entities(
-            AutomowerCamera(session, idx, entry)
-            for idx, ent in enumerate(session.data["data"])
+            AutomowerCamera(coordinator, idx, entry)
+            for idx, ent in enumerate(coordinator.session.data["data"])
         )
 
 
 class AutomowerCamera(HusqvarnaAutomowerStateMixin, Camera, AutomowerEntity):
     """Representation of the AutomowerCamera element."""
 
-    _attr_entity_registry_enabled_default = False
     _attr_frame_interval: float = 300
     _attr_name = "Map"
+    _attr_translation_key = "quirk"
 
-    def __init__(self, session, idx, entry):
+    def __init__(self, session, idx, entry) -> None:
         """Initialize AutomowerCamera."""
         Camera.__init__(self)
         AutomowerEntity.__init__(self, session, idx)
@@ -62,12 +62,10 @@ class AutomowerCamera(HusqvarnaAutomowerStateMixin, Camera, AutomowerEntity):
         self._image_bytes = None
         self._image_to_bytes()
 
-        self.session = session
-
         if self.entry.options.get(ENABLE_CAMERA, False):
             self.top_left_coord = self.entry.options.get(GPS_TOP_LEFT)
             self.bottom_right_coord = self.entry.options.get(GPS_BOTTOM_RIGHT)
-            self.session.register_data_callback(
+            self.coordinator.session.register_data_callback(
                 lambda data: self._generate_image(data), schedule_immediately=True
             )
         else:
@@ -97,7 +95,7 @@ class AutomowerCamera(HusqvarnaAutomowerStateMixin, Camera, AutomowerEntity):
     async def async_camera_image(
         self, width: Optional[int] = None, height: Optional[int] = None
     ) -> Optional[bytes]:
-        """Return the caerma image."""
+        """Return the camera image."""
         return self._image_bytes
 
     def _image_to_bytes(self):
@@ -107,13 +105,15 @@ class AutomowerCamera(HusqvarnaAutomowerStateMixin, Camera, AutomowerEntity):
 
     def turn_on(self):
         """Turn the camera on."""
-        self.session.register_data_callback(
+        self.coordinator.session.register_data_callback(
             lambda data: self._generate_image(data), schedule_immediately=True
         )
 
     def turn_off(self):
         """Turn the camera off."""
-        self.session.unregister_data_callback(lambda data: self._generate_image(data))
+        self.coordinator.session.unregister_data_callback(
+            lambda data: self._generate_image(data)
+        )
 
     @property
     def supported_features(self) -> int:

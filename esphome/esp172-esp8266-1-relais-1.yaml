@@ -79,7 +79,7 @@ binary_sensor:
 sensor:
   # DS18B20
   - platform: dallas
-    address: 0xab0321117f919d28
+    address: 0xab0321117f919d
     name: "${friendly_name} Temperature"
     id: temp
     

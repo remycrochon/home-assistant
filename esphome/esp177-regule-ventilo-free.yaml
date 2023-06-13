@@ -148,6 +148,14 @@ sensor:
 
 
 ############### TEMPLATE  ######################"
+  - platform: template
+    name: "${friendly_name} Temp"
+    id: aftemp
+    accuracy_decimals: 2
+    update_interval: 2s
+    unit_of_measurement: "°C"
+    device_class: temperature
+
 
 # Sensor PID
   - platform: pid
@@ -163,10 +171,6 @@ sensor:
   - platform: pid
     name: "$friendly_name PID Climate ERROR"
     type: ERROR
-  - platform: pid
-    name: "$friendly_name PID Climate PROPORTIONAL"
-    type: PROPORTIONAL
-    accuracy_decimals: 3
   - platform: pid
     name: "$friendly_name PID Climate INTEGRAL"
     type: INTEGRAL
@@ -195,7 +199,7 @@ sensor:
   # Sonde Temperature radiateur
   - platform: dallas
     address: 0xab0321117f919d28
-    name: "${friendly_name} Temperature"
+    name: "${friendly_name} Temperature1"
     id: temperature
     accuracy_decimals: 3
     # If you don't smooth the temperature readings 
@@ -204,6 +208,9 @@ sensor:
         - exponential_moving_average:  
             alpha: 0.1
             send_every: 1
+    on_value:
+      then:
+          - lambda: id(aftemp).publish_state(x);
 
 output:
 # Câblez cette broche (13) dans la broche PWM de votre ventilateur 12v
@@ -295,4 +302,5 @@ script:
           id(console_thermostat).set_threshold_low(id(coeff_bdl).state);
       - lambda: |-          
           id(console_thermostat).set_threshold_high(id(coeff_bdh).state);
+      - lambda: |-   
           id(console_thermostat).set_ki_multiplier(id(coeff_ki).state);

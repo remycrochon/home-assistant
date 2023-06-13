@@ -5,7 +5,7 @@ from homeassistant.const import Platform
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2023.5.0"
+INTEGRATION_VERSION = "2023.6.0"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
 HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/login"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
@@ -119,7 +119,7 @@ ERRORCODES = {
     59: "Temporary battery problem",
     60: "Temporary battery problem",
     61: "Temporary battery problem",
-    62: "Temporary battery problem",
+    62: "Battery restriction due to ambient temperature",
     63: "Temporary battery problem",
     64: "Temporary battery problem",
     65: "Temporary battery problem",

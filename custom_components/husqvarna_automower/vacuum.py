@@ -19,7 +19,7 @@ from homeassistant.components.vacuum import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConditionErrorMessage
+from homeassistant.exceptions import ConditionErrorMessage, HomeAssistantError
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.storage import Store
@@ -45,10 +45,10 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up vacuum platform."""
-    session = hass.data[DOMAIN][entry.entry_id]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        HusqvarnaAutomowerEntity(session, idx)
-        for idx, ent in enumerate(session.data["data"])
+        HusqvarnaAutomowerEntity(coordinator, idx)
+        for idx, ent in enumerate(coordinator.session.data["data"])
     )
     platform = entity_platform.current_platform.get()
 
@@ -143,11 +143,12 @@ class HusqvarnaAutomowerEntity(
     _attr_device_class = f"{DOMAIN}__mower"
     _attr_icon = "mdi:robot-mower"
     _attr_supported_features = SUPPORT_STATE_SERVICES
+    _attr_translation_key = "quirk"
 
     def __init__(self, session, idx):
         """Set up HusqvarnaAutomowerEntity."""
         super().__init__(session, idx)
-        self._attr_unique_id = self.session.data["data"][self.idx]["id"]
+        self._attr_unique_id = self.coordinator.session.data["data"][self.idx]["id"]
 
     @property
     def available(self) -> bool:
@@ -238,7 +239,7 @@ class HusqvarnaAutomowerEntity(
         command_type = "actions"
         payload = '{"data": {"type": "ResumeSchedule"}}'
         try:
-            await self.session.action(self.mower_id, payload, command_type)
+            await self.coordinator.session.action(self.mower_id, payload, command_type)
         except ClientResponseError as exception:
             _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
 
@@ -247,7 +248,7 @@ class HusqvarnaAutomowerEntity(
         command_type = "actions"
         payload = '{"data": {"type": "Pause"}}'
         try:
-            await self.session.action(self.mower_id, payload, command_type)
+            await self.coordinator.session.action(self.mower_id, payload, command_type)
         except ClientResponseError as exception:
             _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
 
@@ -256,7 +257,7 @@ class HusqvarnaAutomowerEntity(
         command_type = "actions"
         payload = '{"data": {"type": "ParkUntilNextSchedule"}}'
         try:
-            await self.session.action(self.mower_id, payload, command_type)
+            await self.coordinator.session.action(self.mower_id, payload, command_type)
         except ClientResponseError as exception:
             _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
 
@@ -265,7 +266,7 @@ class HusqvarnaAutomowerEntity(
         command_type = "actions"
         payload = '{"data": {"type": "ParkUntilFurtherNotice"}}'
         try:
-            await self.session.action(self.mower_id, payload, command_type)
+            await self.coordinator.session.action(self.mower_id, payload, command_type)
         except ClientResponseError as exception:
             _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
 
@@ -313,9 +314,10 @@ class HusqvarnaAutomowerEntity(
         }
         payload = json.dumps(string)
         try:
-            await self.session.action(self.mower_id, payload, command_type)
+            await self.coordinator.session.action(self.mower_id, payload, command_type)
         except ClientResponseError as exception:
             _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
+            raise HomeAssistantError("Command not allowed") from exception
 
     async def async_schedule_selector(
         self,
@@ -367,15 +369,21 @@ class HusqvarnaAutomowerEntity(
                 }
                 payload = json.dumps(string)
                 try:
-                    await self.session.action(self.mower_id, payload, command_type)
+                    await self.coordinator.session.action(
+                        self.mower_id, payload, command_type
+                    )
                 except ClientResponseError as exception:
                     _LOGGER.error(
                         "Command couldn't be sent to the command que: %s", exception
                     )
+                    raise HomeAssistantError("Command not allowed.") from exception
 
     async def async_custom_command(self, command_type, json_string, **kwargs) -> None:
         """Send a custom command to the mower."""
         try:
-            await self.session.action(self.mower_id, json_string, command_type)
+            await self.coordinator.session.action(
+                self.mower_id, json_string, command_type
+            )
         except ClientResponseError as exception:
             _LOGGER.error("Command couldn't be sent to the command que: %s", exception)
+            raise HomeAssistantError("Command not allowed.") from exception

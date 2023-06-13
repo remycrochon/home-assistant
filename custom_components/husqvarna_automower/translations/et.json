@@ -28,7 +28,6 @@
                     "gps_bottom_right": "Pildi parempoolse alumise nurga GPS koordinaadid",
                     "mower_img_path": "Niiduki asukoha kujutise failitee",
                     "map_img_path": "Kaardikujutise failitee"
-
                 },
                 "description": "Kaamera seaded",
                 "title": "Husqvarna Automower suvandid"
@@ -58,10 +57,11 @@
 					"sensor": "Ilmataimer",
 					"daily_limit": "Päevane limiit",
 					"fota": "Püsivara uuendamine",
-					"frost": "Härmatis"
+					"frost": "Härmatis",
+                    "parked_until_further_notice": "Pargitud kuni edasise korralduseni"
 				}
 			},
-			"mode_list":{
+			"mode_list": {
 				"state": {
                     "main_area": "Peamine niiduala",
                     "secondary_area": "Teisene niiduala",
@@ -70,6 +70,33 @@
                     "unknown": "Teadmata"
                 }
 			}
-		}
-	}
+		},
+        "vacuum": {
+            "quirk": {
+                "state": {
+                    "cleaning": "Niidab"
+                }
+            }
+        },
+        "camera": {
+            "quirk": {
+                "state": {
+                    "cleaning": "Niidab",
+					"docked": "Dokitud",
+					"error": "Viga",
+					"idle": "[%key:common::state::idle%]",
+					"off": "[%key:common::state::off%]",
+					"on": "[%key:common::state::on%]",
+					"paused": "[%key:common::state::paused%]",
+					"returning": "Läheb laadimisjaama"
+                }
+            }
+        }
+	},
+    "issues": {
+        "wrong_scope": {
+            "title": "Sinu juurdepääsutõendi kehtivusala on vale",
+            "description": "Websocket kaudu niiduki oleku viivitusteta uuendamiseks muuda seda. Loe täpsemalt siit: https://developer.husqvarnagroup.cloud/apis/automower-connect-api#websocket"
+        }
+    }
 }

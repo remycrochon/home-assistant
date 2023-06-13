@@ -19,12 +19,14 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up select platform."""
-    session = hass.data[DOMAIN][entry.entry_id]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        AutomowerSelect(session, idx)
-        for idx, ent in enumerate(session.data["data"])
-        if not session.data["data"][idx]["attributes"]["system"]["model"]
+        AutomowerSelect(coordinator, idx)
+        for idx, ent in enumerate(coordinator.session.data["data"])
+        if not coordinator.session.data["data"][idx]["attributes"]["system"]["model"]
         in ["550", "Ceora"]
+        and coordinator.session.data["data"][idx]["attributes"]["headlight"]["mode"]
+        is not None
     )
 
 
@@ -64,6 +66,6 @@ class AutomowerSelect(SelectEntity, AutomowerEntity):
         }
         payload = json.dumps(string)
         try:
-            await self.session.action(self.mower_id, payload, command_type)
+            await self.coordinator.session.action(self.mower_id, payload, command_type)
         except Exception as exception:
             raise UpdateFailed(exception) from exception

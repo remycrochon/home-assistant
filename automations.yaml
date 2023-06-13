@@ -3101,3 +3101,142 @@
       max_alerts: 100
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
+- id: '1686558835024'
+  alias: 3_1_1 Filtration Piscine- Calendrier
+  description: ''
+  trigger:
+  - platform: time
+    at: '12:12:00'
+    id: MaPPe
+  - platform: time
+    at: '12:13:00'
+    id: AtPPe
+  - platform: time
+    at: '12:14:00'
+    id: defCal
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temp_piscine
+        above: 9
+        below: 12
+      - condition: trigger
+        id: defCal
+      sequence:
+      - service: calendar.create_event
+        data:
+          summary: Filtration
+          start_date_time: '{{ now().replace(hour=12, minute=30, second=0) }}'
+          end_date_time: '{{ now().replace(hour=14, minute=30, second=0) }}'
+        target:
+          entity_id: calendar.filtration
+      - service: calendar.create_event
+        data:
+          summary: Filtration
+          start_date_time: '{{ now().replace(hour=16, minute=00, second=0) }}'
+          end_date_time: '{{ now().replace(hour=18, minute=00, second=0) }}'
+        target:
+          entity_id: calendar.filtration
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temp_piscine
+        above: 12
+        below: 17
+      - condition: trigger
+        id: defCal
+      sequence:
+      - service: calendar.create_event
+        data:
+          summary: Filtration
+          start_date_time: '{{ now().replace(hour=11, minute=30, second=0) }}'
+          end_date_time: '{{ now().replace(hour=14, minute=30, second=0) }}'
+        target:
+          entity_id: calendar.filtration
+      - service: calendar.create_event
+        data:
+          summary: Filtration
+          start_date_time: '{{ now().replace(hour=15, minute=30, second=0) }}'
+          end_date_time: '{{ now().replace(hour=18, minute=30, second=0) }}'
+        target:
+          entity_id: calendar.filtration
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temp_piscine
+        above: 17
+        below: 23.8
+      - condition: trigger
+        id: defCal
+      sequence:
+      - service: calendar.create_event
+        data:
+          summary: Filtration
+          start_date_time: '{{ now().replace(hour=10, minute=0, second=0) }}'
+          end_date_time: '{{ now().replace(hour=18, minute=0, second=0) }}'
+        target:
+          entity_id: calendar.filtration
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.temp_piscine
+        above: 24
+      - condition: trigger
+        id: defCal
+      sequence:
+      - service: calendar.create_event
+        data:
+          summary: Filtration
+          start_date_time: '{{ now().replace(hour=9, minute=0, second=0) }}'
+          end_date_time: '{{ now().replace(hour=21, minute=0, second=0) }}'
+        target:
+          entity_id: calendar.filtration
+    - conditions:
+      - condition: trigger
+        id: MaPPe
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Calendar Marche ppe 1
+          title: Test Calendar
+    - conditions:
+      - condition: trigger
+        id: AtPPe
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Calendar Arret ppe 1
+          title: Test Calendar
+  mode: single
+- id: '1686560576944'
+  alias: 3_1_0 Activation filtration selon planning
+  description: ''
+  trigger:
+  - platform: calendar
+    event: start
+    entity_id: calendar.filtration
+  - platform: calendar
+    event: end
+    entity_id: calendar.filtration
+  condition:
+  - condition: template
+    value_template: '{{ ''Filtration'' in trigger.calendar_event.summary }}'
+  action:
+  - if:
+    - condition: template
+      value_template: trigger.event == 'start'
+    then:
+    - service: switch.turn_on
+      entity_id: switch.ppe_filtration
+      enabled: false
+    - service: notify.telegram
+      data:
+        message: 'Calendrier: Marche PPE'
+        title: Test Calendar Filtration
+    else:
+    - service: switch.turn_off
+      entity_id: switch.ppe_filtration
+      enabled: false
+    - service: notify.telegram
+      data:
+        message: 'Calendrier: Arret PPE'
+        title: Test Calendar Filtration

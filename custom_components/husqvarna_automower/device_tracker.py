@@ -16,10 +16,18 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up device_tracker platform."""
-    session = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(
-        AutomowerTracker(session, idx) for idx, ent in enumerate(session.data["data"])
-    )
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    entity_list = []
+    for idx, ent in enumerate(coordinator.session.data["data"]):
+        try:
+            coordinator.session.data["data"][idx]["attributes"]["positions"][0][
+                "latitude"
+            ]
+            entity_list.append(AutomowerTracker(coordinator, idx))
+        except IndexError:
+            pass
+
+    async_add_entities(entity_list)
 
 
 class AutomowerTracker(TrackerEntity, AutomowerEntity):

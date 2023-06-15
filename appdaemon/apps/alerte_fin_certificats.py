@@ -75,8 +75,6 @@ class AlerteFinCertificats(hass.Hass):
         else:
             self.set_state("binary_sensor.certificat_tous_valides",state="off", replace=True, attributes= {"icon": "mdi:alert-octagram","device_class": "connectivity"})
 
-
-
                 
     # Fonction Notification
     # message =  Texte à afficher
@@ -91,5 +89,5 @@ class AlerteFinCertificats(hass.Hass):
             if notif=="teleg":
                 self.call_service('notify/telegram', message=message_notification)
                 self.call_service('persistent_notification/create', message=message_notification)
-                self.call_service('dwains_dashboard/notification_create', message=message_notification)
+                
     

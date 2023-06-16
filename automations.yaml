@@ -2955,12 +2955,16 @@
         entity_id: sensor.mp2_status_bus_ve
         above: 3
         below: 6
+        enabled: false
       - condition: state
         entity_id: input_boolean.ecs_av_pv
         state: 'off'
       - condition: numeric_state
         entity_id: sensor.mp2_pc_ac_couplet_on_l1
         above: 1000
+      - condition: numeric_state
+        entity_id: sensor.mp2_niveau_charge_batteries
+        above: input_number.mp2_seuil_validation_routeur
       sequence:
       - service: input_boolean.turn_on
         data: {}
@@ -2983,9 +2987,13 @@
           entity_id: sensor.mp2_status_bus_ve
           above: 3
           below: 6
+        enabled: false
       - condition: state
         entity_id: input_boolean.ecs_av_pv
         state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.mp2_niveau_charge_batteries
+        below: input_number.mp2_seuil_devalidation_routeur
       sequence:
       - service: input_boolean.turn_off
         data: {}

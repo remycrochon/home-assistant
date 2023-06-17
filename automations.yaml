@@ -2955,7 +2955,7 @@
         entity_id: sensor.mp2_status_bus_ve
         above: 3
         below: 6
-        enabled: false
+        enabled: true
       - condition: state
         entity_id: input_boolean.ecs_av_pv
         state: 'off'
@@ -2965,6 +2965,7 @@
       - condition: numeric_state
         entity_id: sensor.mp2_niveau_charge_batteries
         above: input_number.mp2_seuil_validation_routeur
+        enabled: false
       sequence:
       - service: input_boolean.turn_on
         data: {}
@@ -2987,13 +2988,14 @@
           entity_id: sensor.mp2_status_bus_ve
           above: 3
           below: 6
-        enabled: false
+        enabled: true
       - condition: state
         entity_id: input_boolean.ecs_av_pv
         state: 'on'
       - condition: numeric_state
         entity_id: sensor.mp2_niveau_charge_batteries
         below: input_number.mp2_seuil_devalidation_routeur
+        enabled: false
       sequence:
       - service: input_boolean.turn_off
         data: {}
@@ -3105,10 +3107,10 @@
           title: FREE OK!!!
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
-      initial_delay: 1
       max_alerts: 100
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
+      initial_delay: 60
 - id: '1686558835024'
   alias: 3_1_1 Filtration Piscine- Calendrier
   description: ''

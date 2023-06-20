@@ -2189,7 +2189,7 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: binary_sensor.am435x_temps_usage_lame_atteint
+      sensor_entity: binary_sensor.robot_temps_usage_lames_atteint_2
       alert_state: 'on'
       alert_action:
       - service: notify.telegram

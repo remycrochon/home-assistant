@@ -1483,5 +1483,25 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-tag-memory/tag-memory.js"
             }
         }
+    },
+    "node-red-contrib-oauth2": {
+        "name": "node-red-contrib-oauth2",
+        "version": "5.0.4",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "oauth2": {
+                "name": "oauth2",
+                "types": [
+                    "oauth2",
+                    "oauth2-credentials"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-oauth2",
+                "file": "/config/node-red/node_modules/node-red-contrib-oauth2/src/oauth2.js"
+            }
+        }
     }
 }

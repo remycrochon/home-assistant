@@ -446,7 +446,12 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: sensor.myip
+    entity_id:
+    - sensor.myip
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
   condition: []
   action:
   - service: notify.telegram
@@ -3107,10 +3112,10 @@
           title: FREE OK!!!
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
-      max_alerts: 100
+      max_alerts: 10
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
-      initial_delay: 60
+      initial_delay: 180
 - id: '1686558835024'
   alias: 3_1_1 Filtration Piscine- Calendrier
   description: ''

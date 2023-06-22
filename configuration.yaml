@@ -18,3 +18,9 @@ sensor:
     username: !secret my_zwift_username
     password: !secret my_zwift_password
 
+panel_iframe:
+  glances:
+    title: Grafana
+    icon: mdi:chip
+    url: http://192.168.0.153:3002
+    require_admin: false

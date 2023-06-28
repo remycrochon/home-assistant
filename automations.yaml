@@ -3255,3 +3255,18 @@
       data:
         message: 'Calendrier: Arret PPE'
         title: Test Calendar Filtration
+- id: '1687859491524'
+  alias: 00-0-3 Temperature haute stérilisateur
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.esp127_temperature
+    above: 98
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: T° = {{states('sensor.esp127_temperature') }}{{-"\n"-}}{{states("sensor.date_time")
+        }}
+      title: Temperature Haute Stérilisateur !!!
+  mode: single

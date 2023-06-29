@@ -55,19 +55,23 @@ sensor:
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 60s
+    update_interval: 60s # Mettre 1 s pour etalonnage attendre 2/3 minutes que la valeur se tabilise
   #  moyenne sur 15 mn-affichage toutes les 5mn
-  # Etalonné le 6 juillet 2022
     filters:
-      - calibrate_linear:
-        - 4.44 -> 4.0
-        - 7.17 -> 6.86
-        - 9.41 -> 9.18
       - sliding_window_moving_average:
           window_size: 15
           send_every: 5
           send_first_at: 1
-
+  # Etalonné le 28 juin 2023          
+      - calibrate_linear:
+        - 4.547 -> 4.0
+        - 7.282 -> 6.86
+        - 9.447 -> 9.18
+  # Etalonné le 6 juillet 2022          
+  #    - calibrate_linear:
+  #      - 4.44 -> 4.0
+  #      - 7.17 -> 6.86
+  #      - 9.41 -> 9.18
 # Mesure de l'ORP
 # Etalonné le 6 juillet 2022
   - platform: ezo

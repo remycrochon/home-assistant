@@ -102,40 +102,14 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
+  - platform: homeassistant
+    name: "Conso"
+    entity_id: binary_sensor.freebox_server_wan_status
+    id: free
 
 sensor:
 # Lecture dans HA
-  - platform: homeassistant
-    name: "Conso"
-    entity_id: sensor.envoy_122103023124_current_power_consumption
-    id: conso
-
-  - platform: homeassistant
-    name: "Sout"
-    entity_id: sensor.envoy_puissance_soutiree_reseau
-    id: sout
-    
-  - platform: homeassistant
-    name: "Inj"
-    entity_id: sensor.envoy_puissance_injectee_reseau
-    id: inj
-    
-  - platform: homeassistant
-    name: "Ecs_surplus"
-    entity_id: sensor.puissance_ecs_surplus_injectee_w
-    id: p_surplus
-
-  - platform: homeassistant
-    name: "Prod Inst"
-    unit_of_measurement: "W"
-    entity_id: sensor.envoy_122103023124_current_power_production
-    id: prod
-    
-  - platform: homeassistant
-    name: "P dispo"
-    unit_of_measurement: "W"
-    entity_id: sensor.puissance_dispo_sans_ecs
-    id: p_dispo 
+ 
 
 
 ############### TEMPLATE  ######################"
@@ -148,7 +122,7 @@ sensor:
     accuracy_decimals: 0
     lambda: |-
       return (id(p_dispo).state);
-#       return (id(inj).state+id(p_surplus).state);
+
     on_value:
 # de 0 à 4200 / 8 leds    
 # Led 1

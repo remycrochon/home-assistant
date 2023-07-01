@@ -48,36 +48,6 @@ time:
   - platform: homeassistant
     timezone:  ${time_timezone} 
 
-font:
-  - file: "fonts/arial.ttf"
-    id: arial
-    size: 15
-  - file: "fonts/arial.ttf"
-    id: arial30
-    size: 30
-  - file: "fonts/arial.ttf"
-    id: arial10
-    size: 10
-#uart:
-#  rx_pin: GPIO3 # RX=pin 21
-#  tx_pin: GPIO1 # TX=pin 22
-#  baud_rate: 9600
-i2c:
-  sda: GPIO4 #D2=pin 19
-  scl: GPIO5 #D1=pin 20
-  scan: True
-  id: bus_a
-
-uart:
-  rx_pin: GPIO2 #D4
-  baud_rate: 9600
-
-#i2c:
-#  sda: GPIO00 #
-#  scl: GPIO02 #
-#  scan: true
-#  id: bus_a
-
 # Led WS2812 RGB  
 light:
 
@@ -105,57 +75,28 @@ binary_sensor:
   - platform: homeassistant
     name: "Conso"
     entity_id: binary_sensor.freebox_server_wan_status
-    id: free
-
-sensor:
-# Lecture dans HA
+    id: free_ok
  
+interval:
 
+  - interval: 0.25s
+    then:
+      - script.execute: calcul_led
 
-############### TEMPLATE  ######################"
-# Calcul P Dispo
-  - platform: template
-    name: "P Disponible"
-    id: pdispo
-    icon: mdi:flash
-    unit_of_measurement: "w"
-    accuracy_decimals: 0
-    lambda: |-
-      return (id(p_dispo).state);
-
-    on_value:
-# de 0 à 4200 / 8 leds    
-# Led 1
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                below: 1
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 0
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 100%
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 1
-                  range_to: 7
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 0%  
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 1
-                below: 500
-            then: 
-              - light.addressable_set:
+# ------------------------  Scripts
+script:
+# 
+# ------------------------ Calcul Led 1
+  - id: calcul_led
+    mode: single
+    then:
+      # Si 
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: free_ok
+          then:
+            - light.addressable_set:
                   id: rgb_led
                   range_from: 0
                   range_to: 0
@@ -163,187 +104,28 @@ sensor:
                   green: 100%
                   blue: 0%
                   color_brightness: 100%
-              - light.addressable_set:
+            - light.addressable_set:
                   id: rgb_led
                   range_from: 1
                   range_to: 7
                   red: 0%
                   green: 0%
                   blue: 0%
-                  color_brightness: 0%  
-# led 2                  
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 500
-                below: 1000
-            then: 
-              - light.addressable_set:
+                  color_brightness: 0%
+          else:
+            - light.addressable_set:
                   id: rgb_led
                   range_from: 0
-                  range_to: 1
-                  red: 0%
-                  green: 100%
+                  range_to: 0
+                  red: 100%
+                  green: 0%
                   blue: 0%
                   color_brightness: 100%
-              - light.addressable_set:
+            - light.addressable_set:
                   id: rgb_led
-                  range_from: 2
+                  range_from: 1
                   range_to: 7
                   red: 0%
                   green: 0%
                   blue: 0%
-                  color_brightness: 0%  
-# Led 3              
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 1000
-                below: 1500
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 2
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 3
-                  range_to: 7
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 0%     
-# led 4                  
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 1500
-                below: 2000
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 3
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 4
-                  range_to: 7
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 0%     
-# led 5
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 2000
-                below: 2500
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 4
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 5
-                  range_to: 7
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 0%  
-# led 6
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 2500
-                below: 3000
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 5
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 6
-                  range_to: 7
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 0%      
-# led 7
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 3000
-                below: 3500
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 6
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 7
-                  range_to: 7
-                  red: 0%
-                  green: 0%
-                  blue: 0%
-                  color_brightness: 0%    
-# Led 8
-        - if:
-            condition:
-              sensor.in_range:
-                id: pdispo
-                above: 3500
-            then: 
-              - light.addressable_set:
-                  id: rgb_led
-                  range_from: 0
-                  range_to: 7
-                  red: 0%
-                  green: 100%
-                  blue: 0%
-                  color_brightness: 100%
-
-
-display:
-  - platform: ssd1306_i2c
-    model: "SSD1306 64x48"
-    reset_pin: D0
-    address: 0x3C
-    brightness: 100%
-    rotation: 0
-    lambda: |-
-      it.printf(0, 0, id(arial30),"%.0f",id(pdispo).state);  
-#      it.printf(0, 0, id(arial10),"P:%.0f W",id(prod).state);
-#      it.printf(0, 10, id(arial10),"C:%.0f W",id(conso).state);
-#      it.printf(0, 20, id(arial10),"S:%.0f ",id(sout).state);
-#      it.printf(32, 20, id(arial10),"I:%.0f W",id(inj).state);
-#      it.printf(0, 30, id(arial10),"Disp:%.0f W",id(pdispo).state);   
- 
+                  color_brightness: 0%

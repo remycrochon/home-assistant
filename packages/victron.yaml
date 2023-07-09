@@ -510,7 +510,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.envoy_122103023124_current_power_production')|float(default=0)*1)|int(default=0) }}"
+      state: "{{ (states('sensor.mp2_puissance_production_pv')|float(default=0)*1)|int(default=0) }}"
 
 # le capteur de batterie doit être positif lors de la charge et négatif lors de la décharge
     - name: APF Battery Entity

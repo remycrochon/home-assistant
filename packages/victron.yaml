@@ -683,12 +683,18 @@ template:
       unique_id: mp2_affichage_temps_depuis_derniere_charge
       state:  >
         {{ states('sensor.mp2_temps_depuis_derniere_pleine_batteries')|int(default=0)|timestamp_custom('%H:%M:%S', false) }}
-
+    
+    # Determine le niveau de SOC en fonction de la prévision de production solaire du jour
     - name: MP2 Cible SOC pour charge nocturne
       unique_id: mp2_cible_soc
       unit_of_measurement: "%"
       state: >-
-        {% set state = 2.5 * states('sensor.energy_production_today') | float(0) %}
+        {% set prod = states('sensor.energy_production_today') | float(0) %}
+        {% set state = 2.5 * prod %}
         {% set state = 100 - state | float(0) %}
         {% set y = (((state/5) | int) +1) * 5 %}
-        {{ ([35, y, 95] | sort)[1] }}
+        {% if prod != 0 %}
+          {{ ([35, y, 95] | sort)[1] }}
+        {% else %}
+          {{ 20 }}
+        {% endif %}

@@ -83,6 +83,39 @@ modbus:
         device_class: "energy"
         state_class: "total"
 
+# MPPT N1 250/70
+      # 
+      - name: "MP2 MPPT1 Tension PV "
+        unique_id: "mp2_mppt1_tension_pv"
+        data_type: uint16
+        unit_of_measurement: "V"
+        slave: 226
+        address: 776
+        scale: 0.01
+        device_class: voltage
+        state_class: measurement
+
+      - name: "MP2 MPPT1 Intensité PV"
+        unique_id: "mp2_mppt1_intensite_pv"
+        data_type: int16
+        unit_of_measurement: "A"
+        slave: 226
+        address: 777
+        scale: 0.1
+        device_class: current
+        state_class: measurement
+
+      - name: "MP2 MPPT1 Puissance Production PV"
+        unique_id: "mp2_mppt1_puissance_production_pv"
+        data_type: uint16
+        unit_of_measurement: "W"
+        slave: 226
+        address: 789
+        scale: 0.1
+        device_class: power
+        state_class: measurement
+
+
 # Multiplus 2
       # PV - AC-coupled on input L1
       # Production PV couplée sur L1
@@ -510,7 +543,10 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_puissance_production_pv')|float(default=0)*1)|int(default=0) }}"
+      state: >- 
+        {% set mc=(states('sensor.mp2_puissance_production_pv')|float(default=0)*1)|int(default=0) %}
+        {% set mppt1=(states('sensor.mp2_mppt1_puissance_production_pv')|float(default=0)*1)|int(default=0) %}
+        {{ mc+mppt1 }}
 
 # le capteur de batterie doit être positif lors de la charge et négatif lors de la décharge
     - name: APF Battery Entity

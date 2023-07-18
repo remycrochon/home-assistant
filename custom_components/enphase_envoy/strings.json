@@ -1,0 +1,39 @@
+{
+  "config": {
+    "flow_title": "{serial} ({host})",
+    "step": {
+      "user": {
+        "description": "- If your Envoy is on Firmware 7.x or later, validate or enter the Host IP address of your Envoy, your Enphase website username, password, Envoy serial number, and tick the `Use Enlighten` box.\n- For older models do not tick `Use Enlighten` and use either usernames `envoy` without a password, `installer` without a password or a valid username and password and validate or enter the Host ip address.",
+        "data": {
+          "host": "[%key:common::config_flow::data::host%]",
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]",
+          "serial": "envoy serial number",
+          "use_enlighten": "Use Enlighten"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "title": "Envoy options",
+        "data": {
+          "data_interval": "Time between entity updates [s]"
+        },
+        "data_description": {
+          "data_interval": "Time between data updates, minimum 5 sec. After changes reload the envoy"
+        }
+      }
+    }
+  }
+}

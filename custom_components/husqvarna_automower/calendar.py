@@ -39,6 +39,7 @@ class AutomowerCalendar(CalendarEntity, AutomowerEntity):
     """Representation of the Automower Calendar element."""
 
     _attr_entity_category = EntityCategory.CONFIG
+    _attr_name: str | None = None
     _attr_supported_features = (
         CalendarEntityFeature.CREATE_EVENT
         | CalendarEntityFeature.DELETE_EVENT
@@ -149,7 +150,7 @@ class AutomowerCalendar(CalendarEntity, AutomowerEntity):
         """Add a new event to calendar."""
         mower_attributes = AutomowerEntity.get_mower_attributes(self)
         current_event_list = mower_attributes["calendar"]["tasks"]
-        task_list = await self.aysnc_parse_to_husqvarna_string(kwargs)
+        task_list = await self.async_parse_to_husqvarna_string(kwargs)
         await self.aysnc_send_command_to_mower(current_event_list + task_list)
 
     async def async_update_event(
@@ -162,7 +163,7 @@ class AutomowerCalendar(CalendarEntity, AutomowerEntity):
         """Update an existing event on the calendar."""
         mower_attributes = AutomowerEntity.get_mower_attributes(self)
         current_event_list = mower_attributes["calendar"]["tasks"]
-        task_list = await self.aysnc_parse_to_husqvarna_string(event)
+        task_list = await self.async_parse_to_husqvarna_string(event)
         current_event_list[int(uid)] = task_list[0]
         await self.aysnc_send_command_to_mower(current_event_list)
         await self.async_update_ha_state(force_refresh=True)
@@ -182,9 +183,9 @@ class AutomowerCalendar(CalendarEntity, AutomowerEntity):
         current_event_list.pop(int(uid))
         await self.aysnc_send_command_to_mower(current_event_list)
 
-    async def aysnc_parse_to_husqvarna_string(
+    async def async_parse_to_husqvarna_string(
         self,
-        event: str,
+        event: dict,
     ) -> list:
         """Parse from calendar rrule to mower compatible string."""
         try:

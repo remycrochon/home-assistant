@@ -23,9 +23,10 @@ template:
         {% set i = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(2) %}
         {% set j = states('sensor.ecocompteur_clim') | float(default=0) | round(2) %}
         {% set k = states('sensor.pc_onduleur_eaton_puissance') | float(default=0) | round(2) %}
-        
-        {% if (a-b-c-d-e-f-g-h-i-j-k) >= 0 %}
-          {{ (a-b-c-d-e-f-g-h-i-j-k) | round(2) }}
+        {% set l = states('sensor.pc_lidl_2023_b_garage_active_power') | float(default=0) | round(2) %}
+
+        {% if (a-b-c-d-e-f-g-h-i-j-k-l) >= 0 %}
+          {{ (a-b-c-d-e-f-g-h-i-j-k-l) | round(2) }}
         {% else%}
           0
         {%endif%}

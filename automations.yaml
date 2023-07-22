@@ -2296,49 +2296,6 @@
         }} l {{-"\n"-}}{{states("sensor.date_time") }}
       title: Piscine Fin injection pH !!!
   mode: single
-- id: '1661426812138'
-  alias: 3_1_0 Piscine Delestage sur Photovoltaique V0
-  description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.envoy_122103023124_current_power_production
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    above: input_number.seuil_haut_delestage_piscine
-    id: pv_ma_ppe
-  - platform: numeric_state
-    entity_id: sensor.envoy_122103023124_current_power_production
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    below: input_number.seuil_bas_delestage_piscine
-    id: pv_at_ppe
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: pv_ma_ppe
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id:
-          - input_boolean.mem_delestage
-    - conditions:
-      - condition: trigger
-        id: pv_at_ppe
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id:
-          - input_boolean.mem_delestage
-    default: []
-  mode: single
 - id: '1668506550340'
   alias: 0_0_2 Alim tablette BP
   description: ' '

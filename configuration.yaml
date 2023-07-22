@@ -24,3 +24,7 @@ panel_iframe:
     icon: mdi:chip
     url: http://192.168.0.153:3002
     require_admin: false
+
+daikin_residential:
+  email: !secret daikin_user
+  password: !secret daikin_pwd

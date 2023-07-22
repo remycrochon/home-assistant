@@ -475,7 +475,7 @@
     },
     "node-red-contrib-home-assistant-websocket": {
         "name": "node-red-contrib-home-assistant-websocket",
-        "version": "0.49.1",
+        "version": "0.50.0",
         "local": false,
         "user": false,
         "nodes": {
@@ -498,11 +498,13 @@
                     "ha-fire-event",
                     "ha-get-entities",
                     "api-get-history",
+                    "ha-number",
                     "poll-state",
                     "api-render-template",
                     "ha-sensor",
                     "ha-switch",
                     "ha-tag",
+                    "ha-text",
                     "ha-time",
                     "trigger-state",
                     "ha-update-config",
@@ -1049,7 +1051,7 @@
     },
     "node-red-node-email": {
         "name": "node-red-node-email",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "local": false,
         "user": false,
         "nodes": {

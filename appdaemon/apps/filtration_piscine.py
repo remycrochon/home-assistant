@@ -1,4 +1,15 @@
-# Version du 02/06/2023 -> Modif sur la mémorisation de la T° piscine (new_state_>new) L63/64
+# Version du 24/07/2023 
+# refonte du calcul de la durée de filtration en été
+# elle est maintenant fixée manuellement par le "input_number.duree_filtration_ete"
+# elle pivote autour de l'heure pivot pour moitié/moitié
+# elle ne dépend plus de la température
+# la durée est calculée manuellement par rapport au volume de la piscine: V=9*4*1.4=50.4 m3
+# et le débit de la pompe: Qppe Théorique=12m3/h -> retenu:10m3/h
+# il faut filtrer au moins 2*le volume d'eau
+# soit dans mon cas tmini=50.4/10=5.04 h * 2=10h
+# Le coeffcient Coef permet d'ajuster en fonction de la fréquentation et des conditions météo
+# si beaucoup de baigneurs alors augmenter le coeff
+
 
 import hassapi as hass
 import datetime
@@ -60,6 +71,7 @@ class FiltrationPiscine(hass.Hass):
         self.listen_state(self.change_coef,self.args["coef"])
         self.listen_state(self.ecretage_h_pivot,self.args["h_pivot"])
         self.listen_state(self.change_mode_calcul,self.args["mode_calcul"])
+        self.listen_state(self.change_duree_ete,self.args["duree_filtration_ete"])
         self.listen_state(self.raz_temporisation_mesure_temp,self.args["cde_pompe"],new="off")
         self.listen_state(self.fin_temporisation_mesure_temp,self.args["cde_pompe"],new="on", duration=float(self.get_state(self.args["tempo_eau"])))        
         self.listen_state(self.change_arret_force,self.args["arret_force"])
@@ -97,6 +109,12 @@ class FiltrationPiscine(hass.Hass):
         self.notification('Appel traitement changement mode de calcul.',2)
         self.traitement(kwargs)
 
+# Appelé sur changement de la durée ete
+    def change_duree_ete(self, entity, attribute, old, new, kwargs):
+        global JOURNAL
+        self.notification('Appel traitement changement duree ete.',2)
+        self.traitement(kwargs)
+
 # Appelé sur changement arret forcé
     def change_arret_force(self, entity, attribute, old, new, kwargs):
         global JOURNAL
@@ -122,8 +140,8 @@ class FiltrationPiscine(hass.Hass):
 # Ecretage Heure pivot entre h_pivot_min et h_pivot_max
     def ecretage_h_pivot(self, entity, attribute, old, new, kwargs):
         h_pivot= new
-        h_pivot_max="14:00:00"
-        h_pivot_min="11:00:00"
+        h_pivot_max="15:00:00"
+        h_pivot_min="10:00:00"
         if h_pivot>h_pivot_max:
             self.set_state(self.args["h_pivot"], state = h_pivot_max)
         if h_pivot<h_pivot_min:
@@ -157,6 +175,7 @@ class FiltrationPiscine(hass.Hass):
         coef=float(self.get_state(self.args["coef"]))/100
         mode_calcul= self.get_state(self.args["mode_calcul"])
         periode_filtration=self.args["periode_filtration"]
+        duree_ete= self.get_state(self.args["duree_filtration_ete"])
 
         # Flag FIN_TEMPO
         self.notification("Flag fin tempo= "+str(FIN_TEMPO),2)
@@ -174,21 +193,13 @@ class FiltrationPiscine(hass.Hass):
         #  Mode Ete
         if mode_de_fonctionnement == TAB_MODE[0]:
 
-            if mode_calcul == "on": # Calcul selon Abaque
-                temps_filtration = (duree_abaque(Temperature_eau)) * coef
-                nb_h_avant = en_heure(float(temps_filtration / 2))
-                nb_h_apres = en_heure(float(temps_filtration / 2))
-                # nb_h_avant = en_heure(float(temps_filtration / 3)) Répartition 1/3-2/3
-                # nb_h_apres = en_heure(float(temps_filtration / 3*2))
-                nb_h_total = en_heure(float(temps_filtration))
-                self.notification("Duree Filtration Mode Abaque: "+ str(temps_filtration)[:6]+" h",2)
-            
-            else: # Calcul selon méthode classique
-                temps_filtration = (duree_classique(Temperature_eau))*coef
-                nb_h_avant = en_heure(float(temps_filtration / 2))
-                nb_h_apres = en_heure(float(temps_filtration / 2))
-                nb_h_total = en_heure(float(temps_filtration))
-                self.notification("Duree Filtration Mode Classique: "+ str(temps_filtration)[:6]+" h",2)
+            temps_filtration = float(duree_ete) * coef
+            nb_h_avant = en_heure(float(temps_filtration / 2))
+            nb_h_apres = en_heure(float(temps_filtration / 2))
+            # nb_h_avant = en_heure(float(temps_filtration / 3)) Répartition 1/3-2/3
+            # nb_h_apres = en_heure(float(temps_filtration / 3*2))
+            nb_h_total = en_heure(float(temps_filtration))
+            self.notification("Duree Filtration Mode simple: "+ str(temps_filtration)[:6]+" h",2)
 
             # Calcul des heures de début et fin filtration en fontion
             # du temps de filtration avant et apres l'heure pivot
@@ -216,9 +227,6 @@ class FiltrationPiscine(hass.Hass):
             # Affichage plage horaire
             affichage_texte =f"{str(h_debut).zfill(8)[:5]}/{str(h_pivot).zfill(8)[:5]}/{str(h_fin).zfill(8)[:5]}"
             self.set_textvalue(periode_filtration,affichage_texte)
-            # Ajouté le 30 mai 2022
-            self.set_value("input_number.duree_filtration_ete",round(temps_filtration,2))
-            # fin ajout
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
                 ma_ppe=1

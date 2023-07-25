@@ -148,37 +148,6 @@
       entity_id: alarm_control_panel.alarmo
     data: {}
   mode: single
-- id: '1622182531449'
-  alias: 3_5_1 Piscine-Volet Ouv/Ferm Horaires
-  description: Suivant tranches horaires
-  trigger:
-  - platform: time
-    at: input_datetime.heure_ferm_volet_pisc
-    id: ferm
-  - platform: time
-    at: input_datetime.heure_ouv_volet_pisc
-    id: ouv
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: ferm
-      - condition: state
-        entity_id: input_boolean.volet_piscine_auto
-        state: 'on'
-      sequence:
-      - service: script.volet_piscine_fermeture
-    - conditions:
-      - condition: trigger
-        id: ouv
-      - condition: state
-        entity_id: input_boolean.volet_piscine_auto
-        state: 'on'
-      sequence:
-      - service: script.volet_piscine_ouverture
-    default: []
-  mode: single
 - id: '1624083693650'
   alias: 3_2_1 Piscine-pH Validation Automatismes
   description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '
@@ -929,7 +898,7 @@
     default: []
   mode: single
 - id: '1634389653339'
-  alias: 3_4_1 Piscine-EV Appoint EAU
+  alias: 3_4_1 V0 Piscine-EV Appoint EAU
   description: 'Appoint EAU uniquement si volet ouvert depuis 15 mn  '
   trigger:
   - platform: state
@@ -960,18 +929,24 @@
       minutes: 0
       seconds: 20
     id: lsh_off
+  - platform: time_pattern
+    minutes: /1
+    id: minute
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: trigger
-        id: vol_ouv
-      - condition: state
-        entity_id: input_boolean.ev_eau_piscine
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.tp_plein_lsh
-        state: 'on'
+      - condition: and
+        conditions:
+        - condition: trigger
+          id:
+          - vol_ouv
+        - condition: state
+          entity_id: binary_sensor.tp_plein_lsh
+          state: 'on'
+        - condition: state
+          entity_id: switch.ev_eau
+          state: 'off'
       sequence:
       - service: switch.turn_on
         target:
@@ -1000,8 +975,24 @@
         data:
           message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
           title: Piscine Appoint Eau!
+    - conditions:
+      - condition: and
+        conditions:
+        - condition: trigger
+          id:
+          - minute
+        - condition: state
+          entity_id: switch.ev_eau
+          state: 'off'
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.ev_eau
+        data: {}
     default: []
   mode: single
+  trace:
+    stored_traces: 10
 - id: '1634569261594'
   alias: 02-01-04 Alarme Blueprints Notification Status PAC
   description: Blue Print
@@ -3073,112 +3064,6 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
       initial_delay: 180
-- id: '1686558835024'
-  alias: 3_1_1 Filtration Piscine- Calendrier
-  description: ''
-  trigger:
-  - platform: time
-    at: 08:00:00
-    id: MaPPe
-  - platform: time
-    at: 08:05:00
-    id: AtPPe
-  - platform: time
-    at: 08:10:00
-    id: defCal
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.temp_piscine
-        above: 9
-        below: 12
-      - condition: trigger
-        id: defCal
-      sequence:
-      - service: calendar.create_event
-        data:
-          summary: Filtration
-          start_date_time: '{{ now().replace(hour=12, minute=30, second=0) }}'
-          end_date_time: '{{ now().replace(hour=14, minute=30, second=0) }}'
-        target:
-          entity_id: calendar.filtration
-      - service: calendar.create_event
-        data:
-          summary: Filtration
-          start_date_time: '{{ now().replace(hour=16, minute=00, second=0) }}'
-          end_date_time: '{{ now().replace(hour=18, minute=00, second=0) }}'
-        target:
-          entity_id: calendar.filtration
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.temp_piscine
-        above: 12
-        below: 17
-      - condition: trigger
-        id: defCal
-      sequence:
-      - service: calendar.create_event
-        data:
-          summary: Filtration
-          start_date_time: '{{ now().replace(hour=11, minute=30, second=0) }}'
-          end_date_time: '{{ now().replace(hour=14, minute=30, second=0) }}'
-        target:
-          entity_id: calendar.filtration
-      - service: calendar.create_event
-        data:
-          summary: Filtration
-          start_date_time: '{{ now().replace(hour=15, minute=30, second=0) }}'
-          end_date_time: '{{ now().replace(hour=18, minute=30, second=0) }}'
-        target:
-          entity_id: calendar.filtration
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.temp_piscine
-        above: 17
-        below: 23.8
-      - condition: trigger
-        id: defCal
-      sequence:
-      - service: calendar.create_event
-        data:
-          summary: Filtration
-          start_date_time: '{{ now().replace(hour=10, minute=0, second=0) }}'
-          end_date_time: '{{ now().replace(hour=18, minute=0, second=0) }}'
-        target:
-          entity_id: calendar.filtration
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.temp_piscine
-        above: 24
-      - condition: trigger
-        id: defCal
-      sequence:
-      - service: calendar.create_event
-        data:
-          summary: Filtration
-          start_date_time: '{{ now().replace(hour=9, minute=0, second=0) }}'
-          end_date_time: '{{ now().replace(hour=21, minute=0, second=0) }}'
-        target:
-          entity_id: calendar.filtration
-    - conditions:
-      - condition: trigger
-        id: MaPPe
-      sequence:
-      - service: notify.telegram
-        data:
-          message: Calendar Marche ppe 1
-          title: Test Calendar
-    - conditions:
-      - condition: trigger
-        id: AtPPe
-      sequence:
-      - service: notify.telegram
-        data:
-          message: Calendar Arret ppe 1
-          title: Test Calendar
-  mode: single
 - id: '1686560576944'
   alias: 3_1_0 Activation filtration selon planning
   description: ''
@@ -3227,3 +3112,148 @@
         }}
       title: Temperature Haute Stérilisateur !!!
   mode: single
+- id: '1690208400524'
+  description: 'Appoint EAU uniquement si volet ouvert depuis 15 mn  '
+  trigger:
+  - platform: state
+    entity_id:
+    - cover.volet_piscine
+    to: open
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+    id: vol_ouv
+  - platform: state
+    entity_id: input_boolean.ev_eau_piscine
+    to: 'on'
+    id: valid_ev
+    from: 'off'
+  - platform: state
+    entity_id: input_boolean.ev_eau_piscine
+    id: devalid_ev
+    to: 'off'
+    from: 'on'
+  - platform: state
+    entity_id: binary_sensor.tp_plein_lsh
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+    id: lsh_off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: and
+        conditions:
+        - condition: trigger
+          id:
+          - vol_ouv
+        - condition: state
+          entity_id: binary_sensor.tp_plein_lsh
+          state: 'on'
+        - condition: state
+          entity_id: switch.ev_eau
+          state: 'off'
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.ev_eau
+        data: {}
+      - service: notify.telegram
+        data:
+          message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Appoint Eau!
+    - conditions:
+      - condition: state
+        entity_id: switch.ev_eau
+        state: 'on'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: devalid_ev
+        - condition: trigger
+          id: lsh_off
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.ev_eau
+        data: {}
+      - service: notify.telegram
+        data:
+          message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Appoint Eau!
+    default: []
+  mode: single
+- id: '1690208438733'
+  alias: 3_4_1 V1 Piscine-EV Appoint EAU
+  description: 'Appoint EAU uniquement si volet ouvert depuis 15 mn  '
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.tp_plein_lsh
+        state: 'on'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 10
+      - condition: state
+        entity_id: switch.ev_eau
+        state: 'off'
+      - condition: state
+        entity_id: cover.volet_piscine
+        state: open
+        for:
+          hours: 0
+          minutes: 5
+          seconds: 0
+      sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.ev_eau
+        data: {}
+      - service: notify.telegram
+        data:
+          message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Appoint Eau!
+    - conditions:
+      - condition: state
+        entity_id: switch.ev_eau
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.tp_plein_lsh
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 15
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.ev_eau
+        data: {}
+      - service: notify.telegram
+        data:
+          message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Piscine Appoint Eau!
+    - conditions:
+      - condition: state
+        entity_id: switch.ev_eau
+        state: 'off'
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.ev_eau
+        data: {}
+    default: []
+  mode: single
+  trace:
+    stored_traces: 10

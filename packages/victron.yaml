@@ -725,12 +725,14 @@ template:
       unique_id: mp2_cible_soc
       unit_of_measurement: "%"
       state: >-
+        {% set a=80 %}
+        {% set b=1.5 %}
         {% set prod = states('sensor.energy_production_today') | float(0) %}
-        {% set state = 2.5 * prod %}
-        {% set state = 100 - state | float(0) %}
+        {% set state = b * prod %}
+        {% set state = a - state | float(0) %}
         {% set y = (((state/5) | int) +1) * 5 %}
         {% if prod != 0 %}
-          {{ ([35, y, 95] | sort)[1] }}
+          {{ ([15, y, 75] | sort)[1] }}
         {% else %}
           {{ 40 }}
         {% endif %}

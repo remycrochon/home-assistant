@@ -2379,7 +2379,7 @@
           entity_id: automation.thermostat_chambre_nord
   mode: single
 - id: '1670934948268'
-  alias: 06-1-4 MP2 Affection puissance reduite decharge batterie
+  alias: 06-2-2 MP2 Affection puissance reduite decharge batterie
   description: ''
   trigger:
   - platform: state
@@ -2784,7 +2784,7 @@
   trigger:
   - platform: numeric_state
     entity_id: sensor.pc_onduleur_eaton_puissance
-    above: 110
+    above: 222
   condition:
   - condition: time
     after: '23:00:00'
@@ -2796,7 +2796,7 @@
         }}
   mode: single
 - id: '1679471551125'
-  alias: 06-1-5 MP2 Calcul SOC Charge Nocturne
+  alias: 06-2-1 MP2 Calcul SOC Charge Nocturne
   description: En lien avec NodRED
   trigger:
   - platform: time_pattern
@@ -2840,77 +2840,62 @@
   alias: 01-2-4 ECS Validation Routeur sur Absorption V2
   description: float alors routeur ECS Actif
   trigger:
-  - platform: time_pattern
-    minutes: /1
+  - platform: state
+    entity_id:
+    - sensor.mp2_status_bus_ve
+  - platform: state
+    entity_id:
+    - sensor.mp2_pc_ac_couplet_on_l1
+  - platform: state
+    entity_id:
+    - sensor.mp2_puissance_batteries
+  - platform: state
+    entity_id:
+    - sensor.mp2_niveau_charge_batteries
   condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.mp2_status_bus_ve
-        above: 3
-        below: 6
-        enabled: true
-      - condition: state
+  - if:
+    - condition: numeric_state
+      entity_id: sensor.mp2_status_bus_ve
+      above: 3
+      below: 6
+      enabled: true
+    - condition: numeric_state
+      entity_id: sensor.mp2_pc_ac_couplet_on_l1
+      above: 400
+    - condition: numeric_state
+      entity_id: sensor.mp2_puissance_batteries
+      above: -200
+    - condition: numeric_state
+      entity_id: sensor.mp2_niveau_charge_batteries
+      above: input_number.mp2_seuil_validation_routeur
+      enabled: true
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id:
+        - switch.esp176_validation_router
+        - input_boolean.ecs_av_p
+    - service: input_boolean.turn_on
+      data: {}
+      target:
         entity_id: input_boolean.ecs_av_pv
-        state: 'off'
-      - condition: numeric_state
-        entity_id: sensor.mp2_pc_ac_couplet_on_l1
-        above: 1000
-      - condition: numeric_state
-        entity_id: sensor.mp2_niveau_charge_batteries
-        above: input_number.mp2_seuil_validation_routeur
-        enabled: false
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id:
-          - switch.esp176_validation_router
-      - service: notify.telegram
-        data:
-          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
-            {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Validation Routeur ECS
-    - conditions:
-      - condition: not
-        conditions:
-        - condition: numeric_state
-          entity_id: sensor.mp2_status_bus_ve
-          above: 3
-          below: 6
-        enabled: true
-      - condition: state
+    else:
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id:
+        - switch.esp176_validation_router
+    - service: input_boolean.turn_off
+      data: {}
+      target:
         entity_id: input_boolean.ecs_av_pv
-        state: 'on'
-      - condition: numeric_state
-        entity_id: sensor.mp2_niveau_charge_batteries
-        below: input_number.mp2_seuil_devalidation_routeur
-        enabled: false
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id:
-          - switch.esp176_validation_router
-      - service: notify.telegram
-        data:
-          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
-            {{-"\n"-}}{{states("sensor.date_time") }}
-          title: De-Validation Routeur ECS
   mode: single
   trace:
     stored_traces: 10
 - id: '1680974992963'
-  alias: 06-1-5 MP2 Calcul SOC Charge Nocturne V2
+  alias: 06-2-1 MP2 Calcul SOC Charge Nocturne V2
   description: En lien avec NodRED
   trigger:
   - platform: time
@@ -3159,3 +3144,135 @@
     data:
       addon: a0d7b954_nut
   mode: single
+- id: '1690434314772'
+  alias: 06-2-2 MP2 Memorisation Production Jour
+  description: ''
+  trigger:
+  - platform: time
+    at: 03:48:00
+  condition: []
+  action:
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.mp2_memoire_estimation_production_jour
+      value: '{% set a=states(''sensor.energy_production_today'')|float %}  {{a }}'
+  mode: single
+- id: '1690442325979'
+  alias: 01-2-4 V3 ECS Validation Routeur sur Absorption
+  description: float alors routeur ECS Actif
+  trigger:
+  - platform: time_pattern
+    minutes: /1
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.mp2_status_bus_ve
+        above: 3
+        below: 6
+        enabled: true
+      - condition: state
+        entity_id: input_boolean.ecs_av_pv
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.mp2_pc_ac_couplet_on_l1
+        above: 1000
+      - condition: numeric_state
+        entity_id: sensor.mp2_niveau_charge_batteries
+        above: input_number.mp2_seuil_validation_routeur
+        enabled: false
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id:
+          - switch.esp176_validation_router
+      - service: notify.telegram
+        data:
+          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
+            {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Validation Routeur ECS
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.mp2_status_bus_ve
+          above: 3
+          below: 6
+        enabled: true
+      - condition: state
+        entity_id: input_boolean.ecs_av_pv
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.mp2_niveau_charge_batteries
+        below: input_number.mp2_seuil_devalidation_routeur
+        enabled: false
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id:
+          - switch.esp176_validation_router
+      - service: notify.telegram
+        data:
+          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
+            {{-"\n"-}}{{states("sensor.date_time") }}
+          title: De-Validation Routeur ECS
+  mode: single
+  trace:
+    stored_traces: 10
+- id: '1690444310583'
+  alias: 01-2-6 ECS message Validation Routeur
+  description: float alors routeur ECS Actif
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.esp176_validation_router
+    id: off-on
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - switch.esp176_validation_router
+    id: on-off
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - off-on
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Bus VE={{states('sensor.mp2_status_bus_ve')}} (4 ou 5) {{-"\n"-}}SOC={{states('input_number.mp2_seuil_validation_routeur')}}<{{states('sensor.mp2_niveau_charge_batteries')}}%
+            {{-"\n"-}}PV Batteries=-200<{{states('sensor.mp2_puissance_batteries')}}W
+            {{-"\n"-}}Pu MO=400<{{states('sensor.mp2_pc_ac_couplet_on_l1')}}W {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: Validation Routeur ECS
+    - conditions:
+      - condition: trigger
+        id:
+        - on-off
+      sequence:
+      - service: notify.telegram
+        data:
+          message: Bus VE={{states('sensor.mp2_status_bus_ve')}} (<>4 ou 5) {{-"\n"-}}SOC={{states('input_number.mp2_seuil_validation_routeur')}}>{{states('sensor.mp2_niveau_charge_batteries')}}%
+            {{-"\n"-}}PV Batteries={{states('sensor.mp2_puissance_batteries')}}>-200W
+            {{-"\n"-}}Pu MO={{states('sensor.mp2_pc_ac_couplet_on_l1')}}W<400 {{-"\n"-}}{{states("sensor.date_time")
+            }}
+          title: De-validation Routeur ECS
+  mode: single
+  trace:
+    stored_traces: 20

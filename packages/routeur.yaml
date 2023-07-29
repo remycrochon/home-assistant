@@ -1,5 +1,5 @@
-template:
-  - sensor:
+#template:
+#  - binary_sensor:
 #    - name: Consigne Puissance Dimmer
 #      unique_id: "consigne_puissance_dimmer"
 #      unit_of_measurement: "%"
@@ -11,17 +11,4 @@ template:
 #          0
 #        {%endif%}  
 
-        
-    - name: Consigne Puissance Dimmer
-      unique_id: "consigne_puissance_dimmer"
-      unit_of_measurement: "%"
-      state: >-
-        {% set p = states('input_number.consigne_dimmer_ecs') | float(default=0) %}
-        {% if (p<0) %}
-          {{ 0 }}
-        {%else%}
-          {% if (p>100) %}
-            {{ 100 }}
-          {%endif%}
-          {{ p }}
-        {%endif%}
+

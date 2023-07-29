@@ -2843,54 +2843,42 @@
   - platform: state
     entity_id:
     - sensor.mp2_status_bus_ve
-  - platform: state
-    entity_id:
     - sensor.mp2_pc_ac_couplet_on_l1
-  - platform: state
-    entity_id:
-    - sensor.mp2_puissance_batteries
-  - platform: state
-    entity_id:
     - sensor.mp2_niveau_charge_batteries
+  - platform: numeric_state
+    entity_id: sensor.mp2_puissance_batteries
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    above: -200
+    id: pubat
   condition: []
   action:
   - if:
-    - condition: numeric_state
-      entity_id: sensor.mp2_status_bus_ve
-      above: 3
-      below: 6
-      enabled: true
-    - condition: numeric_state
-      entity_id: sensor.mp2_pc_ac_couplet_on_l1
-      above: 400
-    - condition: numeric_state
-      entity_id: sensor.mp2_puissance_batteries
-      above: -200
-    - condition: numeric_state
-      entity_id: sensor.mp2_niveau_charge_batteries
-      above: input_number.mp2_seuil_validation_routeur
-      enabled: true
+    - condition: template
+      value_template: "    {% set status = states('sensor.mp2_status_bus_ve') | float(default=0)
+        %}\n    {% set prod = states('sensor.mp2_pc_ac_couplet_on_l1') | float(default=0)
+        %}\n    {% set pu_bat = states('sensor.mp2_puissance_batteries') | float(default=0)
+        %}\n    {% set soc = states('sensor.mp2_niveau_charge_batteries') | float(default=0)
+        %}\n    {% set seuil_soc = states('input_number.mp2_seuil_validation_routeur')
+        |  float(default=0) %}\n    {{ (status==4 or status==5) and prod>400  and
+        soc>seuil_soc}}"
+    - condition: trigger
+      id:
+      - pubat
     then:
     - service: switch.turn_on
       data: {}
       target:
         entity_id:
         - switch.esp176_validation_router
-        - input_boolean.ecs_av_p
-    - service: input_boolean.turn_on
-      data: {}
-      target:
-        entity_id: input_boolean.ecs_av_pv
     else:
     - service: switch.turn_off
       data: {}
       target:
         entity_id:
         - switch.esp176_validation_router
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.ecs_av_pv
   mode: single
   trace:
     stored_traces: 10
@@ -3276,3 +3264,34 @@
   mode: single
   trace:
     stored_traces: 20
+- id: '1690522711186'
+  alias: 01-2-2 ECS Validation Relais PV
+  description: Activation du Relais ECS PV sur seuil Puissance Production
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.mp2_puissance_production_totale
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.mp2_puissance_production_totale
+        above: 200
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.mp2_puissance_production_totale
+        below: 100
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.ecs_av_pv
+  mode: single
+  trace:
+    stored_traces: 10

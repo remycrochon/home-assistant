@@ -2845,28 +2845,25 @@
     - sensor.mp2_status_bus_ve
     - sensor.mp2_pc_ac_couplet_on_l1
     - sensor.mp2_niveau_charge_batteries
-  - platform: numeric_state
-    entity_id: sensor.mp2_puissance_batteries
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    above: -200
-    id: pubat
+    - sensor.mp2_puissance_batteries_moyenne
+    enabled: true
   condition: []
   action:
   - if:
-    - condition: template
-      value_template: "    {% set status = states('sensor.mp2_status_bus_ve') | float(default=0)
-        %}\n    {% set prod = states('sensor.mp2_pc_ac_couplet_on_l1') | float(default=0)
-        %}\n    {% set pu_bat = states('sensor.mp2_puissance_batteries') | float(default=0)
-        %}\n    {% set soc = states('sensor.mp2_niveau_charge_batteries') | float(default=0)
-        %}\n    {% set seuil_soc = states('input_number.mp2_seuil_validation_routeur')
-        |  float(default=0) %}\n    {{ (status==4 or status==5) and prod>400  and
-        soc>seuil_soc}}"
-    - condition: trigger
-      id:
-      - pubat
+    - condition: numeric_state
+      entity_id: sensor.mp2_status_bus_ve
+      above: 3
+      below: 6
+    - condition: numeric_state
+      entity_id: sensor.mp2_pc_ac_couplet_on_l1
+      above: 400
+    - condition: numeric_state
+      entity_id: sensor.mp2_niveau_charge_batteries
+      above: input_number.mp2_seuil_validation_routeur
+    - condition: numeric_state
+      entity_id: sensor.mp2_puissance_batteries_moyenne
+      above: -300
+      enabled: true
     then:
     - service: switch.turn_on
       data: {}

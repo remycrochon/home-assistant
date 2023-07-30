@@ -1,14 +1,9 @@
-#template:
-#  - binary_sensor:
-#    - name: Consigne Puissance Dimmer
-#      unique_id: "consigne_puissance_dimmer"
-#      unit_of_measurement: "%"
-#      state: >-
-#        {% set p = states('sensor.mp2_grid_l1') | float(default=0) %}
-#        {% if (p<0) %}
-#          {{ p*-1/20}}
-#        {%else%}
-#          0
-#        {%endif%}  
-
+sensor:
+  - platform: statistics
+    name: mp2_puissance_batteries_moyenne
+    entity_id: sensor.mp2_puissance_batteries
+    state_characteristic: mean
+    sampling_size: 30
+    max_age:
+      minutes: 30
 

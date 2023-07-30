@@ -156,7 +156,7 @@ number:
     min_value: 0
     max_value: 75
     unit_of_measurement: "C°"
-    step: 1
+    step: 0.1
 
 # Coeff Réactivité
   - platform: template
@@ -168,7 +168,7 @@ number:
     min_value: 0
     max_value: 1000
     unit_of_measurement: ""
-    step: 1
+    step: 0.1
 
 
 sensor:  

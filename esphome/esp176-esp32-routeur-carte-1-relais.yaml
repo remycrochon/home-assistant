@@ -476,13 +476,12 @@ switch:
     name: "${friendly_name} Validation Router"    
     id: val_router
     optimistic: true
-    restore_state: true   
 
   - platform: template
     name: "${friendly_name} Mode Auto"    
     id: modeauto
     optimistic: true
-    restore_state: false  
+    restore_mode: always_on
 
   - platform: restart
     name: "${friendly_name} Restart"

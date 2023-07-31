@@ -2845,7 +2845,7 @@
     - sensor.mp2_status_bus_ve
     - sensor.mp2_pc_ac_couplet_on_l1
     - sensor.mp2_niveau_charge_batteries
-    - sensor.mp2_puissance_batteries_moyenne
+    - sensor.mp2_puissance_batteries_moyenne_2
     enabled: true
   condition: []
   action:
@@ -2861,7 +2861,7 @@
       entity_id: sensor.mp2_niveau_charge_batteries
       above: input_number.mp2_seuil_validation_routeur
     - condition: numeric_state
-      entity_id: sensor.mp2_puissance_batteries_moyenne
+      entity_id: sensor.mp2_puissance_batteries_moyenne_2
       above: -300
       enabled: true
     then:

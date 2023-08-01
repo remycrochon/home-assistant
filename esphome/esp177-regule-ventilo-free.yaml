@@ -3,9 +3,11 @@ substitutions:
   adress_ip: "192.168.0.177"
   friendly_name: esp177
   time_timezone: "Europe/Paris"
+  commentaire: esp177-regule-ventilo-free
   
 esphome:
   name: ${device_name}
+  comment: ${commentaire}
   platform: ESP32
   board: esp32dev
   on_boot:
@@ -35,6 +37,8 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+  
+  
 
 captive_portal:
 # Sonde Temperature Dallas

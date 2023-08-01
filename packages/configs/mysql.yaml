@@ -25,6 +25,8 @@ recorder:
       - weather
       - group   
       - person
+      - number
+      - climate
       
   exclude:
     domains:
@@ -35,6 +37,5 @@ recorder:
       - script
       - pool_pump
       - alarm_control_panel
-      - climate
       - persistent_notification
 

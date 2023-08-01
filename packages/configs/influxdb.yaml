@@ -29,6 +29,8 @@ influxdb:
       - utility_meter
       - vacuum
       - sun
+      - number
+      - climate
   exclude:
     domains:
       - camera
@@ -41,6 +43,5 @@ influxdb:
       - pool_pump
       - device_tracker
       - alarm_control_panel
-      - climate
       - persistent_notification
       - person

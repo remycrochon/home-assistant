@@ -476,6 +476,7 @@ switch:
     name: "${friendly_name} Validation Router"    
     id: val_router
     optimistic: true
+    restore_mode: RESTORE_INVERTED_DEFAULT_OFF
 
   - platform: template
     name: "${friendly_name} Mode Auto"    

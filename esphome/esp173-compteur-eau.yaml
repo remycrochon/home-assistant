@@ -1,5 +1,5 @@
 substitutions:
-  device_name: esp173-dimmer
+  device_name: esp173-cpt-eau
   adress_ip: "192.168.0.173"
   friendly_name: esp173
   time_timezone: "Europe/Paris"
@@ -33,13 +33,31 @@ ota:
 web_server:
   port: 80
 
-
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
-sensor:  
+sensor:
+  # USS-HS43TI
+  # D4
+
+  - platform: pulse_meter
+    pin: D4
+    name: "${friendly_name} Cpt Eau General"
+    unit_of_measurement: "litre/min"
+    icon: "mdi:water"
+    filters:
+     - lambda: return (x+5)/(8.1*60);
+    total:
+      name: "${friendly_name} Cpt Eau General Total"
+      unit_of_measurement: "m³"
+      accuracy_decimals: 3
+      device_class: water
+      state_class: total_increasing
+      filters:
+        - multiply: 0.001
+
 # Informations WI_FI
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "${friendly_name} WiFi Signal dB"
@@ -61,24 +79,4 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
-#AC dimmer level 0 à 1-----------------------------------------------------------------------
-
-output:
-  - platform: ac_dimmer
-    id: ecs
-    gate_pin: D2
-    method: leading
-    init_with_half_cycle: false
-    zero_cross_pin:
-      number: D1
-      mode: INPUT_PULLUP
-      inverted: yes
-#    min_power: 0%
-
-light:
-  - platform: monochromatic
-    name: "${friendly_name}+STriac"
-    output: ecs
-    id: gradateur
-    default_transition_length: 50ms
 

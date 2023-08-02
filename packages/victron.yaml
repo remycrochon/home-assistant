@@ -314,12 +314,12 @@ modbus:
       - name: "MP2 Temps depuis derniere pleine batteries"
         unique_id: "mp2_temps_depuis_derniere_batteries_pleines"
         data_type: uint16
-        unit_of_measurement: "seconds"
+        unit_of_measurement: "s"
         slave: 223
         address: 289
         scale: 100
         device_class: duration
-        state_class: measurement
+        
 
       # Energy Décharge
       - name: "MP2 Energy décharge batteries"
@@ -347,12 +347,12 @@ modbus:
       - name: "MP2 Temps restant batteries"
         unique_id: "mp2_temps_restant_batteries"
         data_type: uint16
-        unit_of_measurement: "seconds"
+        unit_of_measurement: "s"
         slave: 223
         address: 303
         scale: 100
         device_class: duration
-        state_class: measurement
+        
 
 # Modbus MP2
       - name: "MP2 Tension Entrée L1"
@@ -729,6 +729,8 @@ template:
     - name: MP2 Cible SOC pour charge nocturne
       unique_id: mp2_cible_soc
       unit_of_measurement: "%"
+      device_class: battery
+      state_class: measurement
       state: >-
         {% set a=80 %}
         {% set b=1.5 %}

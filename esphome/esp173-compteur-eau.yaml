@@ -45,10 +45,10 @@ sensor:
   - platform: pulse_meter
     pin: D4
     name: "${friendly_name} Cpt Eau General"
-    unit_of_measurement: "litre/min"
+    unit_of_measurement: "litre/mn"
     icon: "mdi:water"
     filters:
-     - lambda: return (x+5)/(8.1*60);
+     - lambda: return (x/(8.1*60-5));
     total:
       name: "${friendly_name} Cpt Eau General Total"
       unit_of_measurement: "m³"
@@ -56,7 +56,7 @@ sensor:
       device_class: water
       state_class: total_increasing
       filters:
-        - multiply: 0.001
+        - lambda: return (x/(8.1*60-5)/1000);
 
 # Informations WI_FI
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB

@@ -34,7 +34,7 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
-  level: DEBUG
+  level: debug
 #  logs:
 #    modbus.component: INFO
 # Enable Home Assistant API
@@ -358,7 +358,6 @@ sensor:
             }
         - lambda: id(afincrement).publish_state( id(increment) );
         - script.execute: calcul_injectionv2
-        - script.execute: etat_production 
         - lambda: id(afstriac).publish_state( id(striac) );
     
 # Energie lue dans la pince
@@ -408,17 +407,7 @@ sensor:
 # Informations WI_FI
   - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
     name: "${friendly_name} WiFi Signal dB"
-    id: wifi_signal_db
     update_interval: 60s
-    entity_category: "diagnostic"
-
-  - platform: copy # Affiche le signal WiFi strength en %
-    source_id: wifi_signal_db
-    name: "${friendly_name} WiFi Signal Percent"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "Signal %"
-    entity_category: "diagnostic"
 
 ############### TEMPLATE  ######################"
 # Affichage dans HA et sur l'afficheur
@@ -489,11 +478,11 @@ switch:
 
 output:
 #LEDS --------------------------------------
-  - id: led_conso
+  - id: led_jaune
     platform: gpio
     pin: GPIO32
     
-  - id: led_injec
+  - id: led_rouge
     platform: gpio
     pin: GPIO25
 # Pilotage du Dimmer ------------------------
@@ -529,13 +518,12 @@ display:
       it.printf(0,2,"Tp=%0.1fc", id(temp_triac).state);
       it.printf(10,2,"Etat=%s", id(tempok).state ? "OK" : "NOK");
       it.printf(0,3,"Mode=%s", id(modeauto).state ? "Auto" : "Manu");
-      it.printf(10,3,"Inc=%0.1f ",id(increment));     
-#interval:
+      it.printf(10,3,"Inc=%0.1f ",id(increment));    
 
-#  - interval: 0.5s
-#    then:
-
-     #  - script.execute: 
+interval:
+  - interval: 2s
+    then:
+      - script.execute: etat_production 
 
 # ------------------------  Scripts
 script:
@@ -574,6 +562,8 @@ script:
                   id: gradateur
                   brightness: !lambda |-
                     return id(striac)/100 ;
+
+
       # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
       - if: 
           condition:
@@ -589,35 +579,26 @@ script:
                 brightness: !lambda |-
                   return id(0) ;  
 
+
 # -------------------------------------------  Pilotage led
   - id: etat_production
     mode: single
     then:
-     - if: 
-         condition:
-           sensor.in_range:
+      - if: 
+          condition:
+            sensor.in_range:
               id: pureseau1
-              below: 50
-              above: -50
-         then:
-           - output.turn_on: led_conso
-           - output.turn_on: led_injec
-                
-     - if: 
-         condition:
-           sensor.in_range:
-             id: pureseau1
-             above: 50
-         then:
-           - output.turn_off: led_injec
-           - output.turn_on: led_conso
-
-     - if: 
-         condition:
-           sensor.in_range:
-             id: pureseau1
-             below: -50
-         then:
-          - output.turn_off: led_conso
-          - output.turn_on: led_injec
+              below: -50
+          then:
+            - output.turn_on: led_rouge
+          else:
+            - output.turn_off: led_rouge
+            
+      - if: 
+          condition:
+            switch.is_on: val_router
+          then:
+            - output.turn_on: led_jaune
+          else:
+            - output.turn_off: led_jaune
 

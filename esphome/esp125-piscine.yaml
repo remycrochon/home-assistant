@@ -122,6 +122,10 @@ sensor:
     name: "T° Eau Piscine"
     id: temp_piscine
     entity_id: sensor.temp_piscine
+   
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal Sensor"
+    update_interval: 60s
 
 #  - platform: homeassistant
 #    #name: "mode de fonctionnemment"

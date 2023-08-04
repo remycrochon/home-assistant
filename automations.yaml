@@ -2843,27 +2843,32 @@
   - platform: state
     entity_id:
     - sensor.mp2_status_bus_ve
-    - sensor.mp2_pc_ac_couplet_on_l1
-    - sensor.mp2_niveau_charge_batteries
-    - sensor.mp2_puissance_batteries_moyenne_2
     enabled: true
+  - platform: state
+    entity_id:
+    - sensor.mp2_puissance_batteries_moyenne_2
+  - platform: state
+    entity_id:
+    - sensor.mp2_puissance_production_totale
   condition: []
   action:
   - if:
     - condition: numeric_state
-      entity_id: sensor.mp2_status_bus_ve
-      above: 3
-      below: 6
+      entity_id: sensor.mp2_puissance_production_totale
+      above: input_number.mp2_seuil_pu_produite_validation_routeur
     - condition: numeric_state
-      entity_id: sensor.mp2_pc_ac_couplet_on_l1
-      above: 400
+      entity_id: sensor.mp2_puissance_batteries_moyenne_2
+      above: input_number.mp2_seuil_pu_batteries_validation_routeur
+      enabled: true
     - condition: numeric_state
       entity_id: sensor.mp2_niveau_charge_batteries
       above: input_number.mp2_seuil_validation_routeur
+      enabled: false
     - condition: numeric_state
-      entity_id: sensor.mp2_puissance_batteries_moyenne_2
-      above: -300
-      enabled: true
+      entity_id: sensor.mp2_status_bus_ve
+      above: 3
+      below: 6
+      enabled: false
     then:
     - service: switch.turn_on
       data: {}
@@ -3168,20 +3173,11 @@
         above: input_number.mp2_seuil_validation_routeur
         enabled: false
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
       - service: switch.turn_on
         data: {}
         target:
           entity_id:
           - switch.esp176_validation_router
-      - service: notify.telegram
-        data:
-          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
-            {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Validation Routeur ECS
     - conditions:
       - condition: not
         conditions:
@@ -3198,20 +3194,11 @@
         below: input_number.mp2_seuil_devalidation_routeur
         enabled: false
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
       - service: switch.turn_off
         data: {}
         target:
           entity_id:
           - switch.esp176_validation_router
-      - service: notify.telegram
-        data:
-          message: Bus VE={{states('sensor.mp2_affichage_status_bus_ve')}} {{-"\n"-}}SOC={{states('sensor.mp2_niveau_charge_batteries')}}%
-            {{-"\n"-}}{{states("sensor.date_time") }}
-          title: De-Validation Routeur ECS
   mode: single
   trace:
     stored_traces: 10

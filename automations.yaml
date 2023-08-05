@@ -2850,6 +2850,9 @@
   - platform: state
     entity_id:
     - sensor.mp2_puissance_production_totale
+  - platform: state
+    entity_id:
+    - sensor.mp2_niveau_charge_batteries
   condition: []
   action:
   - if:
@@ -2863,7 +2866,7 @@
     - condition: numeric_state
       entity_id: sensor.mp2_niveau_charge_batteries
       above: input_number.mp2_seuil_validation_routeur
-      enabled: false
+      enabled: true
     - condition: numeric_state
       entity_id: sensor.mp2_status_bus_ve
       above: 3

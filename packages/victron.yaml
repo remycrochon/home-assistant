@@ -92,6 +92,7 @@ modbus:
         slave: 226
         address: 776
         scale: 0.01
+        precision: 2
         device_class: voltage
         state_class: measurement
 
@@ -102,6 +103,7 @@ modbus:
         slave: 226
         address: 777
         scale: 0.1
+        precision: 2
         device_class: current
         state_class: measurement
 
@@ -170,6 +172,7 @@ modbus:
         slave: 100
         address: 840
         scale: 0.1
+        precision: 2
         device_class: voltage
         state_class: measurement
 
@@ -181,6 +184,7 @@ modbus:
         slave: 100
         address: 841
         scale: 0.1
+        precision: 2
         device_class: current
         state_class: measurement
 

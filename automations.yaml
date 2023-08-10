@@ -2739,11 +2739,6 @@
         data: {}
         target:
           entity_id: input_boolean.ecs_av_pv
-      - service: notify.telegram
-        data:
-          message: SOC:{{states('sensor.mp2_niveau_charge_batteries')}} % < {{states('input_number.mp2_seuil_devalidation_routeur')}}
-            %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: De-Validation Routeur ECS - Float to Bulk
     - conditions:
       - condition: trigger
         id: levee_sun
@@ -2756,11 +2751,6 @@
         data: {}
         target:
           entity_id: input_boolean.ecs_av_pv
-      - service: notify.telegram
-        data:
-          message: Bus VE passe en mode:{{states('sensor.mp2_affichage_status_bus_ve')}}{{-"\n"-}}
-            Marche routeur ECS %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Validation Routeur ECS_ Bulk to Absorption
   mode: single
 - id: '1676284606975'
   alias: Dimmer V2

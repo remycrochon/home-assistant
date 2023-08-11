@@ -2852,7 +2852,7 @@
     - condition: numeric_state
       entity_id: sensor.mp2_puissance_batteries_moyenne_2
       above: input_number.mp2_seuil_pu_batteries_validation_routeur
-      enabled: true
+      enabled: false
     - condition: numeric_state
       entity_id: sensor.mp2_niveau_charge_batteries
       above: input_number.mp2_seuil_validation_routeur
@@ -2861,7 +2861,18 @@
       entity_id: sensor.mp2_status_bus_ve
       above: 3
       below: 6
-      enabled: false
+      enabled: true
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.mp2_puissance_batterie_filtree
+        state: 'on'
+        enabled: true
+      - condition: template
+        value_template: "delay_on:\n  minutes: 1\nstate: >\n  {% set pu_batt = states('sensor.mp2_puissance_batteries')
+          | float(default=0) | round(2) %}\n  {% set pu_seuil = states('input_number.mp2_seuil_pu_batteries_validation_routeur')
+          | float(default=0) | round(2) %}\n  {{ pu_batt<pu_seuil}}"
+        enabled: false
     then:
     - service: switch.turn_on
       data: {}

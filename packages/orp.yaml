@@ -164,13 +164,14 @@ template:
       unique_id: "orp_piscine_orp"
       state: >
         {% set orp = states('sensor.orp_ezo') | float(default=0) | round(2) %}
+        {% set orp_mem = states('sensor.orp_piscine_orp') | float(default=0) | round(2) %}
         {% set orp_median = states('sensor.orp_stat_median') | float(default=0) | round(2) %}
         {% set ppe = states('binary_sensor.ppe_piscine_en_marche') %}
         {% set plage_H = states('binary_sensor.plage_horaire_mesure_orp') %}
-        {% if ppe == 'on' and plage_H == 'on'%}
+        {% if ppe == 'on' %}
           {{ orp | round(2) }}
         {% else %}
-          {{ orp_median }}
+          {{ this.state }}
         {%endif%}
       unit_of_measurement: "mV"
     

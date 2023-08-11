@@ -747,3 +747,13 @@ template:
         {% else %}
           {{ 40 }}
         {% endif %}
+
+  - binary_sensor:
+    # Determine si la puissance batterie est inférieure à un seuil depuis au moins 1 minute
+      - name: "MP2 Puissance Batterie filtrée"
+        delay_on:
+          minutes: 1
+        state: >
+          {% set pu_batt = states('sensor.mp2_puissance_batteries') | float(default=0) | round(2) %}
+          {% set pu_seuil = states('input_number.mp2_seuil_pu_batteries_validation_routeur') | float(default=0) | round(2) %}
+          {{ pu_batt<pu_seuil}}

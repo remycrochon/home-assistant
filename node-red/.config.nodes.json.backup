@@ -475,7 +475,7 @@
     },
     "node-red-contrib-home-assistant-websocket": {
         "name": "node-red-contrib-home-assistant-websocket",
-        "version": "0.50.0",
+        "version": "0.55.1",
         "local": false,
         "user": false,
         "nodes": {
@@ -501,11 +501,14 @@
                     "ha-number",
                     "poll-state",
                     "api-render-template",
+                    "ha-select",
                     "ha-sensor",
+                    "ha-sentence",
                     "ha-switch",
                     "ha-tag",
                     "ha-text",
                     "ha-time",
+                    "ha-time-entity",
                     "trigger-state",
                     "ha-update-config",
                     "ha-wait-until",
@@ -725,7 +728,7 @@
     },
     "node-red-contrib-moment": {
         "name": "node-red-contrib-moment",
-        "version": "4.0.0",
+        "version": "5.0.0",
         "local": false,
         "user": false,
         "nodes": {

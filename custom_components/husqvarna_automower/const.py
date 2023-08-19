@@ -1,12 +1,11 @@
 """The constants for the Husqvarna Automower integration."""
 from homeassistant.const import Platform
-from shapely.geometry import Polygon
 
 # Base component constants
 NAME = "husqvarna_automower"
 DOMAIN = "husqvarna_automower"
 DOMAIN_DATA = f"{DOMAIN}_data"
-INTEGRATION_VERSION = "2023.7.0"
+INTEGRATION_VERSION = "2023.8.0"
 ISSUE_URL = "https://github.com/Thomas55555/husqvarna_automower"
 HUSQVARNA_URL = "https://developer.husqvarnagroup.cloud/login"
 OAUTH2_AUTHORIZE = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/authorize"
@@ -16,7 +15,7 @@ OAUTH2_TOKEN = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/token"
 PLATFORMS = [
     Platform.BINARY_SENSOR,
     Platform.CALENDAR,
-    Platform.CAMERA,
+    Platform.IMAGE,
     Platform.DEVICE_TRACKER,
     Platform.NUMBER,
     Platform.SELECT,
@@ -34,16 +33,16 @@ ACCESS_TOKEN_RAW = "access_token_raw"
 POSITIONS = "positions"
 HOME_LOCATION = "home_location"
 
-# Camera configuration
-SEL_CAMERA = "selected_camera"
-ENABLE_CAMERA = "enable_camera"
+# Image configuration
+SEL_IMAGE = "selected_image"
+ENABLE_IMAGE = "enable_image"
 GPS_TOP_LEFT = "gps_top_left"
 GPS_BOTTOM_RIGHT = "gps_bottom_right"
 MOWER_IMG_PATH = "mower_img_path"
 MAP_IMG_PATH = "map_img_path"
 MAP_IMG_ROTATION = "map_img_rotation"
 MAP_PATH_COLOR = "map_path_color"
-ADD_CAMERAS = "additional_mowers"
+ADD_IMAGES = "additional_mowers"
 
 
 # Zone configuration
@@ -58,7 +57,6 @@ ZONE_NEW = "new"
 ZONE_ID = "zone_id"
 ZONE_FINISH = "save"
 ZONE_MOWERS = "sel_mowers"
-LAT_LON_BOUNDS = Polygon.from_bounds(xmin=-90.0, ymin=-180.0, xmax=90.0, ymax=180.0)
 
 
 # Defaults
@@ -277,32 +275,4 @@ CHANGING_CUTTING_HEIGHT_SUPPORT = list(
     set(ELECTRONIC_CUTTING_HEIGHT_SUPPORT) - set(NO_SUPPORT_FOR_CHANGING_CUTTING_HEIGHT)
 )
 
-MWR_STATE_TO_STATUS = {
-    "UNKNOWN": "unknown",
-    "NOT_APPLICABLE": "not_applicable",
-    "PAUSED": "paused",
-    "WAIT_UPDATING": "updating",
-    "WAIT_POWER_UP": "powering_up",
-    "OFF": "off",
-    "STOPPED": "stopped",
-}
-
-MWR_ACTIVITY_TO_STATUS = {
-    "UNKNOWN": "unknown",
-    "NOT_APPLICABLE": "not_applicable",
-    "MOWING": "mowing",
-    "GOING_HOME": "going_to_charging_station",
-    "LEAVING": "leaving_charging_station",
-    "PARKED_IN_CS": "parked",
-    "STOPPED_IN_GARDEN": "stopped",
-}
-
-MWR_RES_REASON_TO_STATUS = {
-    "PARK_OVERRIDE": "park_override",
-    "SENSOR": "weather_timer",
-    "DAILY_LIMIT": "daily_limit",
-    "NOT_APPLICABLE": "parked_until_further_notice",
-}
-
-PREV_CONFIG_VER = 2
-CURRENT_CONFIG_VER = 3
+CURRENT_CONFIG_VER = 4

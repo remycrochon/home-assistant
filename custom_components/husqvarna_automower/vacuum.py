@@ -6,7 +6,6 @@ import voluptuous as vol
 from aiohttp import ClientResponseError
 from homeassistant.components.schedule import DOMAIN as SCHEDULE_DOMAIN
 from homeassistant.components.vacuum import (
-    ATTR_STATUS,
     STATE_CLEANING,
     STATE_DOCKED,
     STATE_ERROR,
@@ -24,26 +23,15 @@ from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.storage import Store
 
-from .const import (
-    DOMAIN,
-    ERROR_ACTIVITIES,
-    ERROR_STATES,
-    ERRORCODES,
-    MWR_ACTIVITY_TO_STATUS,
-    MWR_RES_REASON_TO_STATUS,
-    MWR_STATE_TO_STATUS,
-    WEEKDAYS,
-)
+from .const import DOMAIN, ERROR_ACTIVITIES, WEEKDAYS
 from .entity import AutomowerEntity
 
 SUPPORT_STATE_SERVICES = (
     VacuumEntityFeature.STATE
-    | VacuumEntityFeature.BATTERY
     | VacuumEntityFeature.PAUSE
     | VacuumEntityFeature.RETURN_HOME
     | VacuumEntityFeature.SEND_COMMAND
     | VacuumEntityFeature.START
-    | VacuumEntityFeature.STATUS
     | VacuumEntityFeature.STOP
 )
 
@@ -95,8 +83,24 @@ async def async_setup_entry(
     )
 
 
-class HusqvarnaAutomowerStateMixin(object):
-    """Don't know, what this is."""
+class HusqvarnaAutomowerEntity(StateVacuumEntity, AutomowerEntity):
+    """Defining each mower Entity."""
+
+    _attr_icon = "mdi:robot-mower"
+    _attr_name: str | None = None
+    _attr_supported_features = SUPPORT_STATE_SERVICES
+    _attr_translation_key = "mower"
+
+    def __init__(self, session, idx):
+        """Set up HusqvarnaAutomowerEntity."""
+        super().__init__(session, idx)
+        self._attr_unique_id = self.coordinator.session.data["data"][self.idx]["id"]
+
+    @property
+    def available(self) -> bool:
+        """Return True if the device is available."""
+        available = self.get_mower_attributes()["metadata"]["connected"]
+        return available
 
     @property
     def state(self) -> str:
@@ -132,84 +136,12 @@ class HusqvarnaAutomowerStateMixin(object):
             return STATE_ERROR
 
     @property
-    def error(self) -> str:
-        """Define an error message if the vacuum is in STATE_ERROR."""
-        if self.state == STATE_ERROR:
-            mower_attributes = AutomowerEntity.get_mower_attributes(self)
-            errorcode = mower_attributes["mower"]["errorCode"]
-            return ERRORCODES.get(errorcode, f"error_{errorcode}")
-        return None
-
-
-class HusqvarnaAutomowerEntity(
-    HusqvarnaAutomowerStateMixin, StateVacuumEntity, AutomowerEntity
-):
-    """Defining each mower Entity."""
-
-    _attr_icon = "mdi:robot-mower"
-    _attr_name: str | None = None
-    _attr_supported_features = SUPPORT_STATE_SERVICES
-    _attr_translation_key = "mower"
-
-    def __init__(self, session, idx):
-        """Set up HusqvarnaAutomowerEntity."""
-        super().__init__(session, idx)
-        self._attr_unique_id = self.coordinator.session.data["data"][self.idx]["id"]
-
-    @property
-    def available(self) -> bool:
-        """Return True if the device is available."""
-        available = self.get_mower_attributes()["metadata"]["connected"]
-        return available
-
-    @property
-    def battery_level(self) -> int:
-        """Return the current battery level of the mower."""
-        return max(
-            0,
-            min(
-                100,
-                AutomowerEntity.get_mower_attributes(self)["battery"]["batteryPercent"],
-            ),
-        )
-
-    def __get_status(self) -> str:
-        mower_attributes = AutomowerEntity.get_mower_attributes(self)
-        next_start_short = ""
-        if mower_attributes["planner"]["nextStartTimestamp"] != 0:
-            next_start_dt_obj = AutomowerEntity.datetime_object(
-                self, mower_attributes["planner"]["nextStartTimestamp"]
-            )
-            next_start_short = next_start_dt_obj.strftime(", next start: %a %H:%M")
-        if mower_attributes["mower"]["state"] in MWR_STATE_TO_STATUS:
-            return MWR_STATE_TO_STATUS.get(mower_attributes["mower"]["state"])
-        if mower_attributes["mower"]["state"] == "IN_OPERATION":
-            if mower_attributes["mower"]["activity"] in MWR_ACTIVITY_TO_STATUS:
-                return MWR_ACTIVITY_TO_STATUS.get(mower_attributes["mower"]["activity"])
-            if mower_attributes["mower"]["activity"] == "CHARGING":
-                return f"Charging{next_start_short}"
-        if mower_attributes["mower"]["state"] == "RESTRICTED":
-            if (
-                mower_attributes["planner"]["restrictedReason"]
-                in MWR_RES_REASON_TO_STATUS
-            ):
-                return MWR_RES_REASON_TO_STATUS.get(
-                    mower_attributes["planner"]["restrictedReason"]
-                )
-            if mower_attributes["planner"]["restrictedReason"] == "WEEK_SCHEDULE":
-                return f"Schedule{next_start_short}"
-        if mower_attributes["mower"]["state"] in ERROR_STATES:
-            return ERRORCODES.get(mower_attributes["mower"]["errorCode"])
-        return None
-
-    @property
     def extra_state_attributes(self) -> dict:
         """Return the specific state attributes of this mower."""
         mower_attributes = AutomowerEntity.get_mower_attributes(self)
         action = mower_attributes["planner"]["override"]["action"]
         action = action.lower() if action is not None else action
         return {
-            ATTR_STATUS: self.__get_status(),
             "action": action,
         }
 
@@ -260,7 +192,7 @@ class HusqvarnaAutomowerEntity(
         friday,
         saturday,
         sunday,
-        **kwargs,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> None:
         """Send a custom calendar command to the mower."""
         start_in_minutes = start.hour * 60 + start.minute
@@ -301,7 +233,7 @@ class HusqvarnaAutomowerEntity(
     async def async_schedule_selector(
         self,
         schedule_selector,
-        **kwargs,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> None:
         """Send a schedule created by the schedule helper to the mower."""
         schedule_list = schedule_selector.split(".")
@@ -357,6 +289,7 @@ class HusqvarnaAutomowerEntity(
                     )
                     raise HomeAssistantError("Command not allowed.") from exception
 
+    # pylint: disable=unused-argument
     async def async_custom_command(self, command_type, json_string, **kwargs) -> None:
         """Send a custom command to the mower."""
         try:

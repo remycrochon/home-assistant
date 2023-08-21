@@ -33,12 +33,34 @@ ota:
 web_server:
   port: 80
 
+mqtt:
+  broker: 192.168.0.86
+  on_json_message:
+      topic: N/c0619ab1db0d/battery/277/Dc/0/Power
+      then:
+        - lambda: |-
+            if (x.containsKey("value")){
+                const float svalue = x["value"];
+                id(pu_batteries).publish_state( svalue);
+              }
+
+
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
 sensor:
+
+  - platform: template
+    name: "${friendly_name} Pu batterie"
+    id: pu_batteries
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+
+
+
   # USS-HS43TI
   # D4
 

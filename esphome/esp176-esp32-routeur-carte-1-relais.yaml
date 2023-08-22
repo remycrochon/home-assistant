@@ -34,8 +34,9 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
-  level: debug
-#  logs:
+  level: info
+  logs:
+    wifi.component: debug
 #    modbus.component: INFO
 # Enable Home Assistant API
 api:
@@ -83,15 +84,9 @@ modbus_controller:
     # setup_priority: -10
 
 mqtt:
-  broker: 192.168.0.86
-  on_json_message:
-      topic: N/c0619ab1db0d/battery/277/Dc/0/Power
-      then:
-        - lambda: |-
-            if (x.containsKey("value")){
-                const float svalue = x["value"];
-                id(pu_batteries).publish_state( svalue);
-              }
+  broker: 192.168.0.37
+  username: !secret mqtt_ha_name
+  password: !secret mqtt_ha_pw
 
 globals:
    - id: increment
@@ -186,7 +181,7 @@ number:
     optimistic: true
     restore_value: true
     mode: box
-    min_value: -500
+    min_value: -2500
     max_value: 0
     unit_of_measurement: "W"
     step: 1
@@ -463,9 +458,10 @@ sensor:
     state_class: "measurement"  
     accuracy_decimals: 2
 
-  - platform: template
+  - platform: mqtt_subscribe
     name: "${friendly_name} Pu batterie"
     id: pu_batteries
+    topic: mp2/batteries/puissance
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
@@ -571,11 +567,12 @@ script:
   - id: calcul_injectionv2
     mode: single
     then:
+      # si Pu Batteries <= à un seuil, alors on decremente l'increment
       - lambda: |-
-         id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
-      - lambda: |-
-          if (id(pu_batteries).state <= id(seuil_pubatt).state){
-            id(increment) = id(pu_batteries).state*id(coeff_rbat);
+          if (id(pu_batteries).state >= id(seuil_pubatt).state){
+            id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
+          } else { 
+            id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
           } 
  
       - lambda: |-
@@ -613,7 +610,7 @@ script:
               or:
                 - switch.is_off: val_router
                 - binary_sensor.is_off: tempok                    
-                - switch.is_off: modeauto
+                
           then:
             - lambda: |-
                 id(striac) = 0;

@@ -24,7 +24,10 @@ wifi:
 
 # Enable logging
 logger:
-
+  level: debug
+  logs:
+    wifi.component: debug
+    mqtt.component: debug
 # Enable Home Assistant API
 api:
 
@@ -33,17 +36,11 @@ ota:
 web_server:
   port: 80
 
-mqtt:
-  broker: 192.168.0.86
-  on_json_message:
-      topic: N/c0619ab1db0d/battery/277/Dc/0/Power
-      then:
-        - lambda: |-
-            if (x.containsKey("value")){
-                const float svalue = x["value"];
-                id(pu_batteries).publish_state( svalue);
-              }
 
+mqtt:
+  broker: 192.168.0.37
+  username: !secret mqtt_ha_name
+  password: !secret mqtt_ha_pw
 
 binary_sensor:
 #Etat de la connection
@@ -52,14 +49,13 @@ binary_sensor:
 
 sensor:
 
-  - platform: template
-    name: "${friendly_name} Pu batterie"
+  - platform: mqtt_subscribe
+    name: "${friendly_name} Pu batteries"
     id: pu_batteries
+    topic: mp2/batteries/puissance
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
-
-
 
   # USS-HS43TI
   # D4

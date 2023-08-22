@@ -2837,6 +2837,7 @@
   - platform: state
     entity_id:
     - sensor.mp2_puissance_batteries_moyenne_2
+    enabled: false
   - platform: state
     entity_id:
     - sensor.mp2_puissance_production_totale
@@ -2873,6 +2874,7 @@
           | float(default=0) | round(2) %}\n  {% set pu_seuil = states('input_number.mp2_seuil_pu_batteries_validation_routeur')
           | float(default=0) | round(2) %}\n  {{ pu_batt<pu_seuil}}"
         enabled: false
+      enabled: false
     then:
     - service: switch.turn_on
       data: {}

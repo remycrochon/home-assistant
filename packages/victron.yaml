@@ -1,3 +1,13 @@
+mqtt:
+  sensor:
+# Pu Batteries
+    - name: "MP2 Pu Batteries par MQTT"
+      unique_id: mp2_pu_batteries_par_mqtt" 
+      state_topic: "mp2/batteries/puissance"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement
+
 # Victron
 modbus:
   - name: cerbo
@@ -747,13 +757,3 @@ template:
         {% else %}
           {{ 40 }}
         {% endif %}
-
-  - binary_sensor:
-    # Determine si la puissance batterie est inférieure à un seuil depuis au moins 1 minute
-      - name: "MP2 Puissance Batterie filtrée"
-        delay_on:
-          seconds: 30
-        state: >
-          {% set pu_batt = states('sensor.mp2_puissance_batteries') | float(default=0) | round(2) %}
-          {% set pu_seuil = states('input_number.mp2_seuil_pu_batteries_validation_routeur') | float(default=0) | round(2) %}
-          {{ pu_batt<pu_seuil}}

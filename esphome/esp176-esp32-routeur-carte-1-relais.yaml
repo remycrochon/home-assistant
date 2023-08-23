@@ -17,7 +17,7 @@ esphome:
     then: 
       - switch.turn_on: modeauto
       - binary_sensor.template.publish:
-          id: tempok
+          id: temperatureok
           state: ON
 
 wifi:
@@ -35,8 +35,7 @@ wifi:
 logger:
   baud_rate: 0
   level: info
-  logs:
-    wifi.component: debug
+
 #    modbus.component: INFO
 # Enable Home Assistant API
 api:
@@ -124,7 +123,7 @@ binary_sensor:
 
   - platform: template
     name: "${friendly_name} Temp Ok"
-    id: tempok
+    id: temperatureok
 
 # Input Number
 number:
@@ -481,12 +480,12 @@ sensor:
         # Si Temp Triac inferieur au seuil alors OK
           then:
             - binary_sensor.template.publish:
-                id: tempok
+                id: temperatureok
                 state: ON
         # Sinon attendre 60s avant retour à la normal
           else:
             - binary_sensor.template.publish:
-                id: tempok
+                id: temperatureok
                 state: OFF
             - delay: 60s
  
@@ -551,7 +550,7 @@ display:
       it.printf(0,1,"Tr=%0.1f%%",id(striac));
       it.printf(10,1,"Val:%s", id(val_router).state ? "OK" : "NOK");
       it.printf(0,2,"Tp=%0.1fc", id(temp_triac).state);
-      it.printf(10,2,"Etat=%s", id(tempok).state ? "OK" : "NOK");
+      it.printf(10,2,"Etat=%s", id(temperatureok).state ? "OK" : "NOK");
       it.printf(0,3,"Mode=%s", id(modeauto).state ? "Auto" : "Manu");
       it.printf(10,3,"Inc=%0.1f ",id(increment));    
 
@@ -595,7 +594,7 @@ script:
             and:
               - switch.is_on: val_router
               - switch.is_on: modeauto
-              - binary_sensor.is_on: tempok
+              - binary_sensor.is_on: temperatureok
               - lambda: 'return id(striac) >= id(pmin).state;'
           then:
               - light.turn_on:
@@ -607,10 +606,12 @@ script:
       # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
       - if: 
           condition:
-              or:
+            and:
+              - switch.is_on: modeauto
+              - or:
                 - switch.is_off: val_router
-                - binary_sensor.is_off: tempok                    
-                
+                - binary_sensor.is_off: temperatureok                    
+
           then:
             - lambda: |-
                 id(striac) = 0;

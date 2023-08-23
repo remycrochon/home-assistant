@@ -2406,7 +2406,7 @@
           address: 2704
           slave: 100
           hub: cerbo
-          value: 300
+          value: 400
     - conditions:
       - condition: trigger
         id: HP-HC
@@ -2881,12 +2881,26 @@
       target:
         entity_id:
         - switch.esp176_validation_router
+    - service: modbus.write_register
+      data:
+        address: 2704
+        slave: 100
+        hub: cerbo
+        value: 20
+      enabled: false
     else:
     - service: switch.turn_off
       data: {}
       target:
         entity_id:
         - switch.esp176_validation_router
+    - service: modbus.write_register
+      data:
+        address: 2704
+        slave: 100
+        hub: cerbo
+        value: 400
+      enabled: false
   mode: single
   trace:
     stored_traces: 10

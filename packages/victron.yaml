@@ -319,6 +319,7 @@ modbus:
         unique_id: "mp2_niveau_charge_batteries"
         data_type: uint16
         unit_of_measurement: "%"
+        precision: 2
         slave: 223
         address: 266
         scale: 0.1

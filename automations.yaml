@@ -2773,8 +2773,8 @@
   description: ''
   trigger:
   - platform: numeric_state
-    entity_id: sensor.pc_onduleur_eaton_puissance
-    above: 222
+    entity_id: sensor.pc_lidl_2023_a_active_power
+    above: 20
   condition:
   - condition: time
     after: '23:00:00'

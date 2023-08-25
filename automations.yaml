@@ -2862,7 +2862,7 @@
       entity_id: sensor.mp2_status_bus_ve
       above: 3
       below: 6
-      enabled: true
+      enabled: false
     - condition: not
       conditions:
       - condition: state

@@ -2927,6 +2927,8 @@
     target:
       entity_id: input_boolean.mp2_valid_ess_charge_prog_1
   mode: single
+  trace:
+    stored_traces: 20
 - id: '1681195839898'
   alias: Nouvelle automatisation
   description: ''

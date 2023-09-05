@@ -197,6 +197,17 @@ number:
     unit_of_measurement: ""
     step: 0.1
 
+  - platform: template
+    name: "${friendly_name} Consigne Pu Batteries"
+    id: cons_pubatt
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -2500
+    max_value: 2500
+    unit_of_measurement: "W"
+    step: 1
+
 sensor:  
 
 # tension de l'alimentation
@@ -457,6 +468,10 @@ sensor:
     state_class: "measurement"  
     accuracy_decimals: 2
 
+
+# Les MQTT sont déclarés dans le Node Red du Cerbo GX
+# https://venus.local:1881/#flow/dbd727f16cbe7b5f
+
   - platform: mqtt_subscribe
     name: "${friendly_name} Pu batterie"
     id: pu_batteries
@@ -464,6 +479,26 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
+
+  - platform: mqtt_subscribe
+    name: "${friendly_name} Pu Mppt1"
+    id: pu_mppt1
+    topic: mp2/mppt1/puissance
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+
+  - platform: mqtt_subscribe
+    name: "${friendly_name} Etat Bus VE"
+    id: etatbus_ve
+    topic: mp2/multiplus2/etatbusve
+    accuracy_decimals: 0
+
+
+  - platform: homeassistant
+    name: "${friendly_name} Status Bus VE"
+    entity_id: sensor.mp2_status_bus_ve
+    id: statusbusve
 
 # Sonde Temperature radiateur
   - platform: dallas
@@ -488,7 +523,14 @@ sensor:
                 id: temperatureok
                 state: OFF
             - delay: 60s
- 
+
+text_sensor:
+  - platform: template
+    name: "${friendly_name} Mode Régulation"
+    id: moderegul
+    
+    
+
 switch:
   - platform: gpio
     name: "${friendly_name} Relais"
@@ -566,13 +608,26 @@ script:
   - id: calcul_injectionv2
     mode: single
     then:
-      # si Pu Batteries <= à un seuil, alors on decremente l'increment
+      # Si Bus Ve en Float on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
+      # Sinon
+      # Si on regule autour du zero grid et d'un seuil puissance batteries
+      # La régule consiste à incrementer ou decrementer la sortie triac 
       - lambda: |-
-          if (id(pu_batteries).state >= id(seuil_pubatt).state){
-            id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
-          } else { 
-            id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
-          } 
+          if (id(statusbusve).state ==3){
+            id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
+          } else {
+            if (id(pu_batteries).state >= id(seuil_pubatt).state){
+              id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
+            } else { 
+              id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
+            } 
+          }  
+      - lambda: |-
+          if (id(statusbusve).state ==3){
+            id(moderegul).publish_state( "Regul Pu batteries");
+          } else {
+            id(moderegul).publish_state( "Regul Pu reseau");
+          }  
  
       - lambda: |-
          id(striac) = id(striac)+id(increment);            

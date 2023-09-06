@@ -624,9 +624,9 @@ script:
           }  
       - lambda: |-
           if (id(statusbusve).state ==3){
-            id(moderegul).publish_state( "Regul Pu batteries");
+            id(moderegul).publish_state( "Sur Pu batteries");
           } else {
-            id(moderegul).publish_state( "Regul Pu reseau");
+            id(moderegul).publish_state( "Sur Pu reseau");
           }  
  
       - lambda: |-

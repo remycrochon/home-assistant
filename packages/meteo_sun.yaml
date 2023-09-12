@@ -340,88 +340,7 @@ sensor:
       mf_o3:
         value_template: >-
           {{ state_attr('weather.albi','ozone') }}
-        
-      mf_weather_condition_0d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[0].condition  }}
-      mf_weather_condition_1d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[1].condition }}
-      mf_weather_condition_2d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[2].condition }}
-      mf_weather_condition_3d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[3].condition  }}
-      mf_weather_condition_4d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[4].condition  }}
 
-      mf_temperature_maximum_0d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[0].temperature }}
-        unit_of_measurement: °C
-      mf_temperature_maximum_1d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[1].temperature }}
-        unit_of_measurement: °C
-      mf_temperature_maximum_2d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[2].temperature }}
-        unit_of_measurement: °C
-      mf_temperature_maximum_3d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[3].temperature }}
-        unit_of_measurement: °C
-      mf_temperature_maximum_4d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[4].temperature }}
-        unit_of_measurement: °C
-        
-      mf_temperature_minimum_0d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[0].templow }}
-        unit_of_measurement: °C
-      mf_temperature_minimum_1d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[1].templow }}
-        unit_of_measurement: °C        
-      mf_temperature_minimum_2d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[2].templow }}
-        unit_of_measurement: °C
-      mf_temperature_minimum_3d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[3].templow }}
-        unit_of_measurement: °C
-      mf_temperature_minimum_4d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[4].templow }}
-        unit_of_measurement: °C
-
-      mf_precipitation_intensity_0d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[0].precipitation }}
-
-      mf_precipitation_probability_0d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[0].precipitation }}
-
-      mf_precipitation_probability_1d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[1].precipitation }}
-
-      mf_precipitation_probability_2d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[2].precipitation }}
-
-      mf_precipitation_probability_3d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[3].precipitation }}
-
-      mf_precipitation_probability_4d:
-        value_template: >-
-          {{ state_attr('weather.albi','forecast')[4].precipitation }}
 
 # Meteo france
     # Utilisés dans boutton-card de la page /remy-2/home 
@@ -579,3 +498,70 @@ sensor:
     state_characteristic: median
     sampling_size: 20
 
+template:
+  - trigger:
+      - platform: time_pattern
+        hours: "/1"
+    action:
+      - service: weather.get_forecast
+        target:
+          entity_id: weather.albi
+        data:
+          type: daily
+        response_variable: forecast
+    sensor:
+      - name: mf_weather_condition_0d
+        state: "{{ forecast.forecast[0].condition }}"
+      - name: mf_weather_condition_1d
+        state: "{{ forecast.forecast[1].condition }}"
+      - name: mf_weather_condition_2d
+        state: "{{ forecast.forecast[2].condition }}"
+      - name: mf_weather_condition_3d
+        state: "{{ forecast.forecast[3].condition }}"
+      - name: mf_weather_condition_4d
+        state: "{{ forecast.forecast[4].condition }}"        
+        
+      - name: mf_temperature_maximum_0d
+        state: "{{ forecast.forecast[0].temperature }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_maximum_1d
+        state: "{{ forecast.forecast[1].temperature }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_maximum_2d
+        state: "{{ forecast.forecast[2].temperature }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_maximum_3d
+        state: "{{ forecast.forecast[3].temperature }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_maximum_4d
+        state: "{{ forecast.forecast[4].temperature }}"
+        unit_of_measurement: °C                
+        
+      - name: mf_temperature_minimum_0d
+        state: "{{ forecast.forecast[0].templow }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_minimum_1d
+        state: "{{ forecast.forecast[1].templow }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_minimum_2d
+        state: "{{ forecast.forecast[2].templow }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_minimum_3d
+        state: "{{ forecast.forecast[3].templow }}"
+        unit_of_measurement: °C
+      - name: mf_temperature_minimum_4d
+        state: "{{ forecast.forecast[4].templow }}"
+        unit_of_measurement: °C
+
+      - name: mf_precipitation_intensity_0d
+        state: "{{ forecast.forecast[0].precipitation }}"
+      - name: mf_precipitation_probability_0d
+        state: "{{ forecast.forecast[0].precipitation }}"
+      - name: mf_precipitation_probability_1d
+        state: "{{ forecast.forecast[1].precipitation }}" 
+      - name: mf_precipitation_probability_2d
+        state: "{{ forecast.forecast[2].precipitation }}"
+      - name: mf_precipitation_probability_3d
+        state: "{{ forecast.forecast[3].precipitation }}"
+      - name: mf_precipitation_probability_4d
+        state: "{{ forecast.forecast[4].precipitation }}"

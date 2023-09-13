@@ -8,6 +8,19 @@ mqtt:
       device_class: power
       state_class: measurement
 
+    - name: "MP2 Prod VRM MO MQTT"
+      unique_id: mp2_prod_vrm_mo_mqtt" 
+      state_topic: "mp2/prediction/prod_onduleur"
+      unit_of_measurement: 'kW'
+      device_class: power
+      state_class: measurement
+
+    - name: "MP2 Prod VRM MPPT1 MQTT"
+      unique_id: mp2_prod_vrm_mppt1_mqtt" 
+      state_topic: "mp2/prediction/prod_mppt1"
+      unit_of_measurement: 'kW'
+      device_class: power
+      state_class: measurement
 # Victron
 modbus:
   - name: cerbo

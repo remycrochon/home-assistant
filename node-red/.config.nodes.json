@@ -1508,5 +1508,156 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-oauth2/src/oauth2.js"
             }
         }
+    },
+    "node-red-contrib-boolean-logic-ultimate": {
+        "name": "node-red-contrib-boolean-logic-ultimate",
+        "version": "1.0.63",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "BooleanLogicUltimate": {
+                "name": "BooleanLogicUltimate",
+                "types": [
+                    "BooleanLogicUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/BooleanLogicUltimate.js"
+            },
+            "InvertUltimate": {
+                "name": "InvertUltimate",
+                "types": [
+                    "InvertUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/InvertUltimate.js"
+            },
+            "FilterUltimate": {
+                "name": "FilterUltimate",
+                "types": [
+                    "FilterUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/FilterUltimate.js"
+            },
+            "InterruptFlowUltimate": {
+                "name": "InterruptFlowUltimate",
+                "types": [
+                    "InterruptFlowUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/InterruptFlowUltimate.js"
+            },
+            "BlinkerUltimate": {
+                "name": "BlinkerUltimate",
+                "types": [
+                    "BlinkerUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/BlinkerUltimate.js"
+            },
+            "SimpleOutputUltimate": {
+                "name": "SimpleOutputUltimate",
+                "types": [
+                    "SimpleOutputUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/SimpleOutputUltimate.js"
+            },
+            "InjectUltimate": {
+                "name": "InjectUltimate",
+                "types": [
+                    "InjectUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/InjectUltimate.js"
+            },
+            "StatusUltimate": {
+                "name": "StatusUltimate",
+                "types": [
+                    "StatusUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/StatusUltimate.js"
+            },
+            "ImpulseUltimate": {
+                "name": "ImpulseUltimate",
+                "types": [
+                    "ImpulseUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/ImpulseUltimate.js"
+            },
+            "SumUltimate": {
+                "name": "SumUltimate",
+                "types": [
+                    "SumUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/SumUltimate.js"
+            },
+            "toggleUltimate": {
+                "name": "toggleUltimate",
+                "types": [
+                    "toggleUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/toggleUltimate.js"
+            },
+            "RailwaySwitchUltimate": {
+                "name": "RailwaySwitchUltimate",
+                "types": [
+                    "RailwaySwitchUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/RailwaySwitchUltimate.js"
+            },
+            "Comparator": {
+                "name": "Comparator",
+                "types": [
+                    "Comparator"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/Comparator.js"
+            }
+        }
     }
 }

@@ -1,15 +1,13 @@
 {
     "node-red": {
         "name": "node-red",
-        "version": "3.0.2",
+        "version": "3.1.0",
         "local": false,
         "user": false,
         "nodes": {
             "junction": {
                 "name": "junction",
-                "types": [
-                    "junction"
-                ],
+                "types": [],
                 "enabled": true,
                 "local": false,
                 "user": false,
@@ -94,6 +92,17 @@
                 "user": false,
                 "module": "node-red",
                 "file": "/opt/node_modules/@node-red/nodes/core/common/90-comment.js"
+            },
+            "global-config": {
+                "name": "global-config",
+                "types": [
+                    "global-config"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/opt/node_modules/@node-red/nodes/core/common/91-global-config.js"
             },
             "unknown": {
                 "name": "unknown",
@@ -475,7 +484,7 @@
     },
     "node-red-contrib-home-assistant-websocket": {
         "name": "node-red-contrib-home-assistant-websocket",
-        "version": "0.56.0",
+        "version": "0.56.1",
         "local": false,
         "user": false,
         "nodes": {
@@ -566,7 +575,7 @@
     },
     "node-red-contrib-modbus": {
         "name": "node-red-contrib-modbus",
-        "version": "5.26.0",
+        "version": "5.27.2",
         "local": false,
         "user": false,
         "nodes": {
@@ -723,6 +732,17 @@
                 "user": false,
                 "module": "node-red-contrib-modbus",
                 "file": "/opt/node_modules/node-red-contrib-modbus/modbus/modbus-flex-sequencer.js"
+            },
+            "Modbus-Flex-Fc": {
+                "name": "Modbus-Flex-Fc",
+                "types": [
+                    "modbus-flex-fc"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red-contrib-modbus",
+                "file": "/opt/node_modules/node-red-contrib-modbus/modbus/modbus-flex-fc.js"
             }
         }
     },
@@ -796,7 +816,7 @@
     },
     "node-red-dashboard": {
         "name": "node-red-dashboard",
-        "version": "3.5.0",
+        "version": "3.6.0",
         "local": false,
         "user": false,
         "nodes": {
@@ -1440,8 +1460,7 @@
                 "types": [
                     "alexa-smart-home-v3-conf",
                     "alexa-smart-home-v3",
-                    "alexa-smart-home-v3-state",
-                    "alexa-smart-home-v3-resp"
+                    "alexa-smart-home-v3-state"
                 ],
                 "enabled": true,
                 "local": true,
@@ -1498,14 +1517,164 @@
             "oauth2": {
                 "name": "oauth2",
                 "types": [
-                    "oauth2",
-                    "oauth2-credentials"
+                    "oauth2"
                 ],
                 "enabled": true,
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-oauth2",
                 "file": "/config/node-red/node_modules/node-red-contrib-oauth2/src/oauth2.js"
+            }
+        }
+    },
+    "node-red-contrib-boolean-logic-ultimate": {
+        "name": "node-red-contrib-boolean-logic-ultimate",
+        "version": "1.0.63",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "BooleanLogicUltimate": {
+                "name": "BooleanLogicUltimate",
+                "types": [
+                    "BooleanLogicUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/BooleanLogicUltimate.js"
+            },
+            "InvertUltimate": {
+                "name": "InvertUltimate",
+                "types": [
+                    "InvertUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/InvertUltimate.js"
+            },
+            "FilterUltimate": {
+                "name": "FilterUltimate",
+                "types": [
+                    "FilterUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/FilterUltimate.js"
+            },
+            "InterruptFlowUltimate": {
+                "name": "InterruptFlowUltimate",
+                "types": [
+                    "InterruptFlowUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/InterruptFlowUltimate.js"
+            },
+            "BlinkerUltimate": {
+                "name": "BlinkerUltimate",
+                "types": [
+                    "BlinkerUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/BlinkerUltimate.js"
+            },
+            "SimpleOutputUltimate": {
+                "name": "SimpleOutputUltimate",
+                "types": [
+                    "SimpleOutputUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/SimpleOutputUltimate.js"
+            },
+            "InjectUltimate": {
+                "name": "InjectUltimate",
+                "types": [
+                    "InjectUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/InjectUltimate.js"
+            },
+            "StatusUltimate": {
+                "name": "StatusUltimate",
+                "types": [
+                    "StatusUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/StatusUltimate.js"
+            },
+            "ImpulseUltimate": {
+                "name": "ImpulseUltimate",
+                "types": [
+                    "ImpulseUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/ImpulseUltimate.js"
+            },
+            "SumUltimate": {
+                "name": "SumUltimate",
+                "types": [
+                    "SumUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/SumUltimate.js"
+            },
+            "toggleUltimate": {
+                "name": "toggleUltimate",
+                "types": [
+                    "toggleUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/toggleUltimate.js"
+            },
+            "RailwaySwitchUltimate": {
+                "name": "RailwaySwitchUltimate",
+                "types": [
+                    "RailwaySwitchUltimate"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/RailwaySwitchUltimate.js"
+            },
+            "Comparator": {
+                "name": "Comparator",
+                "types": [
+                    "Comparator"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-boolean-logic-ultimate",
+                "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/Comparator.js"
             }
         }
     }

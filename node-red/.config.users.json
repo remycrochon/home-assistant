@@ -14,12 +14,17 @@
             },
             "tours": {
                 "welcome": "3.1.0"
+            },
+            "dialog": {
+                "export": {
+                    "pretty": false
+                }
             }
         },
         "menu-deploymenu-item-flow": false,
         "menu-deploymenu-item-full": true,
         "menu-deploymenu-item-node": false,
-        "menu-menu-item-sidebar": false,
+        "menu-menu-item-sidebar": true,
         "debug": {
             "filter": "filterCurrent",
             "filteredNodes": [

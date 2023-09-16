@@ -3147,7 +3147,7 @@
   - service: input_number.set_value
     data_template:
       entity_id: input_number.mp2_memoire_estimation_production_jour
-      value: '{% set a=states(''sensor.energy_production_today'')|float %}  {{a }}'
+      value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a }}'
   mode: single
 - id: '1690442325979'
   alias: 01-2-4 V3 ECS Validation Routeur sur Absorption

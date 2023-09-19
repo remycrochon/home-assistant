@@ -28,6 +28,27 @@ mqtt:
       unit_of_measurement: 'kW'
       device_class: power
       state_class: measurement      
+
+    - name: "MP2 Pu Grid L1 AC MQTT"
+      unique_id: mp2_pu_grid_l1_mqtt" 
+      state_topic: "mp2/multiplus2/grid_l1_ac"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement           
+
+    - name: "MP2 Conso Out1 MQTT"
+      unique_id: mp2_conso_ac_l1_mqtt" 
+      state_topic: "mp2/multiplus2/conso_out1"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement   
+
+    - name: "MP2 Prod Totale MQTT"
+      unique_id: mp2_prod_totale_mqtt" 
+      state_topic: "mp2/multiplus2/prod_totale"
+      unit_of_measurement: 'W'
+      device_class: power
+      state_class: measurement         
 # Victron
 modbus:
   - name: cerbo
@@ -567,7 +588,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_grid_l1')|float(default=0)*-1)|int(default=0) }}"
+      state: "{{ (states('sensor.mp2_pu_grid_l1_ac_mppt')|float(default=0)*-1)|int(default=0) }}"
 
 # le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
     - name: APF House Entity
@@ -575,7 +596,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_conso_ac_l1')|float(default=0)*1)|int(default=0) }}"
+      state: "{{ (states('sensor.mp2_conso_out1_mqtt')|float(default=0)*1)|int(default=0) }}"
 
 # le capteur doit toujours être 0 ou positif (je pense qu'ils le sont toujours)
     - name: APF Generation Entity
@@ -583,10 +604,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: >- 
-        {% set mc=(states('sensor.mp2_puissance_production_pv')|float(default=0)*1)|int(default=0) %}
-        {% set mppt1=(states('sensor.mp2_mppt1_puissance_production_pv')|float(default=0)*1)|int(default=0) %}
-        {{ mc+mppt1 }}
+      state: "{{ (states('sensor.mp2_prod_totale_mqtt')|float(default=0)*1)|int(default=0) }}"
 
 # le capteur de batterie doit être positif lors de la charge et négatif lors de la décharge
     - name: APF Battery Entity
@@ -594,7 +612,7 @@ template:
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-      state: "{{ (states('sensor.mp2_puissance_batteries')|float(default=0)*1)|int(default=0) }}"
+      state: "{{ (states('sensor.mp2_pu_batteries_par_mqtt')|float(default=0)*1)|int(default=0) }}"
 
 # Nécessaire pour réduire le code plus tard
     - name: APF Grid Import

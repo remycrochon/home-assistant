@@ -1,0 +1,256 @@
+substitutions:
+  device_name: "esp178-esp32-piscine"
+  friendly_name: esp178
+  adress_ip: "192.168.0.178"
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP32
+  board: esp32dev
+  project:
+    name: "rem81.esp178-esp32-piscine"
+    version: "0.0.0"
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO23
+    inverted: true
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+captive_portal:
+ 
+web_server:
+  port: 80
+
+
+# Configuration ESP32
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+dallas:
+  - pin: GPIO23
+
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
+
+  # Entrées logiques permettant de lire des contacts ou des BP
+  - platform: gpio
+    pin:
+      number: GPIO00
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_bp1"
+
+  - platform: gpio
+    pin:
+      number: GPIO16
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_volet_ferme"
+
+  - platform: gpio
+    pin:
+      number: GPIO17
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_mode_auto"
+
+  - platform: gpio
+    pin:
+      number: GPIO04
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_mode_manu"
+
+  - platform: gpio
+    pin:
+      number: GPIO18
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_tp_plein_lsh"
+
+  - platform: gpio
+    pin:
+      number: GPIO5
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_tp_plein_lsl"
+
+   
+sensor:
+
+  - platform: dallas
+    address: 0xCA00AA2D00000328
+    name: "${friendly_name} temp_eau"
+    
+    
+# Mesure du pH
+  - platform: ezo
+    id: ph_ezo
+    name: ${friendly_name} ph_ezo
+    address: 99
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    update_interval: 60s # Mettre 1 s pour etalonnage attendre 2/3 minutes que la valeur se tabilise
+  #  moyenne sur 15 mn-affichage toutes les 5mn
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 5
+          send_first_at: 1
+  # Etalonné le 28 juin 2023          
+      - calibrate_linear:
+        - 4.547 -> 4.0
+        - 7.282 -> 6.86
+        - 9.447 -> 9.18
+  # Etalonné le 6 juillet 2022          
+  #    - calibrate_linear:
+  #      - 4.44 -> 4.0
+  #      - 7.17 -> 6.86
+  #      - 9.41 -> 9.18
+# Mesure de l'ORP
+# Etalonné le 6 juillet 2022
+  - platform: ezo
+    id: orp_ezo
+    name: ${friendly_name} orp_ezo
+    address: 98
+    unit_of_measurement: "mV"
+    accuracy_decimals: 1
+    update_interval: 60s
+    filters:
+      - multiply: 10
+      - calibrate_linear:
+          - 0 -> 0
+          - 216.9 -> 256
+# moyenne sur 15 mn-affichage toutes les 5mn
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 5
+          send_first_at: 1
+
+# Mesure de la pression filtre
+  - platform: adc
+    pin: A0
+    id: pression_filtre
+    name: "${friendly_name} Pression filtre"
+    unit_of_measurement: "Bars"
+    update_interval: 60s
+    attenuation: 11db
+    filters:
+      - calibrate_linear:
+        - 0.58 -> 0.0
+        - 0.82 -> 0.8
+# moyenne sur 30 mn + affichage toutes les mn
+      - sliding_window_moving_average:
+          window_size: 30
+          send_every: 1
+# Avec le 30PSI
+#    filters:
+#      - calibrate_linear:
+#        - 0.5 -> 0.0
+#""        - 2.21 -> 0.8
+# moyenne sur 30 mn + affichage toutes les mn
+#      - sliding_window_moving_average:
+#          window_size: 30
+#          send_every: 1
+
+  - platform: homeassistant
+    name: "T° Eau Piscine"
+    id: temp_piscine
+    entity_id: sensor.temp_piscine
+
+
+switch:
+  - platform: gpio
+    name: "${friendly_name} cde_pompe_filtration"
+    pin: GPIO32
+    id: ppe_filtration
+
+  - platform: gpio
+    name: "${friendly_name} cde_ppe_ph"
+    pin: GPIO33
+    id: ppe_ph
+
+  - platform: gpio
+    name: "${friendly_name} cde_eclairage"
+    pin: GPIO25
+    id: ecl
+
+  - platform: gpio
+    name: "${friendly_name} cde_volet_ouverture"
+    pin: GPIO26
+    id: ouv_volet
+
+  - platform: gpio
+    name: "${friendly_name} cde_volet_fermeture"
+    pin: GPIO27
+    id: ferm_volet
+
+  - platform: gpio
+    name: "${friendly_name} cde_ev_eau"
+    pin: GPIO14
+    id: ev_eau
+
+  - platform: gpio
+    name: "${friendly_name} cde_ppe_chlore"
+    pin: GPIO12
+    id: ppe_chlore
+
+  - platform: gpio
+    name: "${friendly_name} relais8"
+    pin: GPIO13
+    id: relais8
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+# gestion afficheur
+display:
+  - platform: lcd_pcf8574
+    dimensions: 16x2
+    address: 0x27
+    update_interval: 5s
+    lambda: |-
+      it.printf(0,0,"Ph=%.2f",id(ph_ezo).state);
+      it.printf(0,1,"Or=%.2f",id(orp_ezo).state);
+      it.printf(8,0,"P=%.3f",id(pression_filtre).state);
+      it.printf(8,1,"T=%.1f",id(temp_piscine).state);
+#it.printf(15,1,"T=%.1s",id(mode_f).state);

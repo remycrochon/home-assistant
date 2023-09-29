@@ -47,6 +47,23 @@ def duree_classique(Temperature_eau):
     duree = temperature_min / 2
     return duree
 
+# Fonction de calcul du temps de filtration par palier
+def duree_palier(Temperature_eau):
+    #
+    if (Temperature_eau<9):
+        duree=1
+    elif (Temperature_eau>=9 and Temperature_eau<12):
+        duree=4
+    elif (Temperature_eau>=12 and Temperature_eau<17):
+        duree=6
+    elif (Temperature_eau>=17 and Temperature_eau<24):
+        duree=8
+    else:
+        duree=10
+    return duree
+
+
+
 # Fonction de Convertion Int en heure "HH:MM:SS"
 def en_heure(t):
     h = int(t)
@@ -192,8 +209,8 @@ class FiltrationPiscine(hass.Hass):
 
         #  Mode Ete
         if mode_de_fonctionnement == TAB_MODE[0]:
-
-            temps_filtration = float(duree_ete) * coef
+            temps_filtration = (duree_palier(Temperature_eau)) * coef
+            #temps_filtration = float(duree_ete) * coef
             nb_h_avant = en_heure(float(temps_filtration / 2))
             nb_h_apres = en_heure(float(temps_filtration / 2))
             # nb_h_avant = en_heure(float(temps_filtration / 3)) Répartition 1/3-2/3
@@ -227,6 +244,7 @@ class FiltrationPiscine(hass.Hass):
             # Affichage plage horaire
             affichage_texte =f"{str(h_debut).zfill(8)[:5]}/{str(h_pivot).zfill(8)[:5]}/{str(h_fin).zfill(8)[:5]}"
             self.set_textvalue(periode_filtration,affichage_texte)
+            self.set_value("input_number.duree_filtration_ete",round(temps_filtration,2))
             # Marche pompe si dans plage horaire sinon Arret
             if self.now_is_between(str(h_debut),str(h_fin)):
                 ma_ppe=1

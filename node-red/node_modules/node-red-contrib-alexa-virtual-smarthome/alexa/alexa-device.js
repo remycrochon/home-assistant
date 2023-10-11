@@ -233,7 +233,7 @@ module.exports = function (RED) {
             if (node.isVerbose()) node._debug("onInput " + JSON.stringify(msg));
             if (node.isVerbose()) node._debug("onInput " + topic);
             if (topic === 'REPORTSTATE') {
-                node.alexa.send_change_report(node.id).then(() => { });
+                node.alexa.send_change_report(node.id).then(() => { }).catch(() => {});
             } else if (topic === 'GETSTATE') {
                 node.send({
                     topic: "getState",
@@ -391,7 +391,7 @@ module.exports = function (RED) {
                 if (modified.length > 0) {
                     node.alexa.scheduleGetState();
                     process.nextTick(() => {
-                        node.alexa.send_change_report(node.id, modified).then(() => { });
+                        node.alexa.send_change_report(node.id, modified).then(() => { }).catch(() => {});
                     });
                 }
                 if (node.config.passthru) {

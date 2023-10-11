@@ -4,17 +4,15 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
-        "node-red-contrib-alexa-home": "~1.4.0",
+        "node-red-contrib-alexa-home": "~2.0.2",
         "node-red-contrib-alexa-smart-home": "~0.4.68",
-        "node-red-contrib-alexa-virtual-smarthome": "~0.0.33",
+        "node-red-contrib-alexa-virtual-smarthome": "~0.0.34",
         "node-red-contrib-boolean-logic": "0.0.3",
-        "node-red-contrib-boolean-logic-ultimate": "~1.0.63",
-        "node-red-contrib-oauth2": "~5.0.4",
+        "node-red-contrib-boolean-logic-ultimate": "~1.1.0",
+        "node-red-contrib-home-assistant-websocket": "~0.57.3",
+        "node-red-contrib-oauth2": "~5.2.6",
         "node-red-contrib-pid": "~1.1.7",
-        "node-red-contrib-power-monitor": "~1.2.1",
         "node-red-contrib-scheduler": "~1.0.5",
-        "node-red-contrib-tag-memory": "~1.0.2",
-        "node-red-contrib-unit-converter": "~0.0.3",
-        "node-red-contrib-virtual-smart-home": "~3.0.9"
+        "node-red-contrib-unit-converter": "~0.0.3"
     }
 }

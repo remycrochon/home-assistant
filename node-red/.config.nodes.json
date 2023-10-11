@@ -488,7 +488,7 @@
         "name": "node-red-contrib-home-assistant-websocket",
         "version": "0.57.2",
         "local": false,
-        "user": false,
+        "user": true,
         "nodes": {
             "all": {
                 "name": "all",
@@ -1274,25 +1274,6 @@
             }
         }
     },
-    "node-red-contrib-power-monitor": {
-        "name": "node-red-contrib-power-monitor",
-        "version": "1.2.1",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "power-monitor": {
-                "name": "power-monitor",
-                "types": [
-                    "power-monitor"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-power-monitor",
-                "file": "/config/node-red/node_modules/node-red-contrib-power-monitor/power-monitor/power-monitor.js"
-            }
-        }
-    },
     "node-red-contrib-unit-converter": {
         "name": "node-red-contrib-unit-converter",
         "version": "0.0.3",
@@ -1378,37 +1359,8 @@
                 "module": "node-red-contrib-alexa-home",
                 "file": "/config/node-red/node_modules/node-red-contrib-alexa-home/alexa/alexa-home-controller.js"
             }
-        }
-    },
-    "node-red-contrib-virtual-smart-home": {
-        "name": "node-red-contrib-virtual-smart-home",
-        "version": "3.0.9",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "vsh-connection": {
-                "name": "vsh-connection",
-                "types": [
-                    "vsh-connection"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-virtual-smart-home",
-                "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/connection.js"
-            },
-            "vsh-virtual-device": {
-                "name": "vsh-virtual-device",
-                "types": [
-                    "vsh-virtual-device"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-virtual-smart-home",
-                "file": "/config/node-red/node_modules/node-red-contrib-virtual-smart-home/virtual-device.js"
-            }
-        }
+        },
+        "pending_version": "2.0.2"
     },
     "node-red-contrib-alexa-virtual-smarthome": {
         "name": "node-red-contrib-alexa-virtual-smarthome",
@@ -1449,7 +1401,8 @@
                 "module": "node-red-contrib-alexa-virtual-smarthome",
                 "file": "/config/node-red/node_modules/node-red-contrib-alexa-virtual-smarthome/alexa/alexa-management.js"
             }
-        }
+        },
+        "pending_version": "0.0.34"
     },
     "node-red-contrib-alexa-smart-home": {
         "name": "node-red-contrib-alexa-smart-home",
@@ -1492,25 +1445,6 @@
             }
         }
     },
-    "node-red-contrib-tag-memory": {
-        "name": "node-red-contrib-tag-memory",
-        "version": "1.0.2",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "tag-memory": {
-                "name": "tag-memory",
-                "types": [
-                    "tag-memory"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "node-red-contrib-tag-memory",
-                "file": "/config/node-red/node_modules/node-red-contrib-tag-memory/tag-memory.js"
-            }
-        }
-    },
     "node-red-contrib-oauth2": {
         "name": "node-red-contrib-oauth2",
         "version": "5.0.4",
@@ -1529,7 +1463,8 @@
                 "module": "node-red-contrib-oauth2",
                 "file": "/config/node-red/node_modules/node-red-contrib-oauth2/src/oauth2.js"
             }
-        }
+        },
+        "pending_version": "5.2.6"
     },
     "node-red-contrib-boolean-logic-ultimate": {
         "name": "node-red-contrib-boolean-logic-ultimate",
@@ -1680,6 +1615,7 @@
                 "module": "node-red-contrib-boolean-logic-ultimate",
                 "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/Comparator.js"
             }
-        }
+        },
+        "pending_version": "1.1.0"
     }
 }

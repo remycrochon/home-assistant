@@ -1,0 +1,30 @@
+{
+  "name": "brackets2dots",
+  "version": "1.1.0",
+  "description": "Convert string with bracket notation to dot property notation for Node.js and the browser.",
+  "author": "Wil Moore III <wil.moore@wilmoore.com>",
+  "keywords": [
+    "string",
+    "object",
+    "property",
+    "access",
+    "deep",
+    "nested"
+  ],
+  "main": "./index",
+  "license": "MIT",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wilmoore/brackets2dots.js"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "browserify": "*"
+  },
+  "volo": {
+    "url": "https://raw.github.com/wilmoore/brackets2dots.js/v{version}/brackets2dots.js"
+  }
+}

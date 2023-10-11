@@ -888,7 +888,7 @@ module.exports = function (RED) {
                                         // if (node.verbose) node._debug("CCHI report_state async response NOT SENT YET " + JSON.stringify(report_state));
                                         if (r_name != 'DeferredResponse' && r_name != 'ErrorResponse' && r_namespace != "Alexa.SceneController") {
                                             process.nextTick(() => {
-                                                node.send_change_report(endpointId, changed_property_names, VOICE_INTERACTION, cmd_res).then(() => { });
+                                                node.send_change_report(endpointId, changed_property_names, VOICE_INTERACTION, cmd_res).then(() => { }).catch(() => {});
                                             });
                                         }
                                     })
@@ -1413,7 +1413,7 @@ module.exports = function (RED) {
         sendAllChangeReports() {
             const node = this;
             Object.keys(node.devices).forEach(function (deviceId) {
-                node.send_change_report(deviceId).then(() => { });
+                node.send_change_report(deviceId).then(() => { }).catch(() => {});
             });
         }
 

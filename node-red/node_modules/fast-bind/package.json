@@ -1,0 +1,33 @@
+{
+  "name": "fast-bind",
+  "version": "1.0.0",
+  "description": "the fastest version of Function#bind I could make",
+  "main": "bind-loop.js",
+  "scripts": {
+    "test": "mocha -R spec && node bench.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nathan7/fast-bind.git"
+  },
+  "keywords": [
+    "function",
+    "prototype",
+    "bind",
+    "perf",
+    "performance",
+    "fast"
+  ],
+  "author": "Nathan Zadoks",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nathan7/fast-bind/issues"
+  },
+  "homepage": "https://github.com/nathan7/fast-bind",
+  "devDependencies": {
+    "benchmark": "^1.0.0",
+    "expect": "^0.1.1",
+    "microtime": "^1.0.1",
+    "mocha": "^2.0.1"
+  }
+}

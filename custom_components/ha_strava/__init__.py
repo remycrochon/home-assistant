@@ -31,12 +31,15 @@ from .const import (  # noqa: F401
     CONF_ACTIVITY_TYPE_RIDE,
     CONF_ACTIVITY_TYPE_RUN,
     CONF_ACTIVITY_TYPE_SWIM,
+    CONF_ATTR_COMMUTE,
     CONF_ATTR_END_LATLONG,
+    CONF_ATTR_PRIVATE,
     CONF_ATTR_SPORT_TYPE,
     CONF_ATTR_START_LATLONG,
     CONF_CALLBACK_URL,
     CONF_GEOCODE_XYZ_API_KEY,
     CONF_IMG_UPDATE_EVENT,
+    CONF_PHOTOS,
     CONF_SENSOR_ACTIVITY_COUNT,
     CONF_SENSOR_ACTIVITY_TYPE,
     CONF_SENSOR_BIGGEST_ELEVATION_GAIN,
@@ -154,9 +157,32 @@ class StravaWebhookView(HomeAssistantView):
         activities = []
         for activity in await response.json():
             athlete_id = int(activity["athlete"]["id"])
-            activities.append(
-                self._sensor_activity(activity, await self._geocode_activity(activity=activity, auth=auth))
+            activity_id = int(activity["id"])
+
+            activity_response = await self.oauth_websession.async_request(
+                method="GET",
+                url=f"https://www.strava.com/api/v3/activities/{activity_id}",
             )
+
+            activity_dto = None
+            if activity_response:
+                if activity_response.status == 200:
+                    activity_dto = await activity_response.json()
+                    calories = int(activity_dto.get("calories", -1))
+                    if calories != -1:
+                        activity[CONF_SENSOR_CALORIES] = calories
+                elif activity_response.status == 429:
+                    _LOGGER.warning(f"Strava API rate limit has been reached")
+                else:
+                    text = await activity_response.text()
+                    _LOGGER.error(f"Error getting activity by ID. Status: {activity_response.status}: {text}")   
+            else:
+                _LOGGER.error(f"Failed to get activity by ID!") 
+
+            activities.append(
+                self._sensor_activity(activity, await self._geocode_activity(activity=activity, activity_dto=activity_dto, auth=auth))
+            )
+
         _LOGGER.debug("Publishing activities event")
         self.event_factory(
             data={
@@ -170,8 +196,17 @@ class StravaWebhookView(HomeAssistantView):
         )
         return athlete_id, activities
 
-    async def _geocode_activity(self, activity: dict, auth: str) -> str:
+    async def _geocode_activity(self, activity: dict, activity_dto: dict, auth: str) -> str:
         """Fetch the best geocode possible from the activity's start location."""
+        if activity_dto:
+            segment_efforts = activity_dto.get("segment_efforts", None)
+            if segment_efforts and len(segment_efforts) > 0:
+                segment = segment_efforts[0].get("segment", None)
+                _LOGGER.debug(f"activity_dto.segment_efforts[0].segment: {segment}")
+                if segment and segment.get("city", None):
+                    city = segment["city"]
+                    _LOGGER.debug(f"Using activity_dto.segment_efforts.0.city: {city}")
+                    return city
         if activity.get("location_city", None):
             return activity.get("location_city")
         if activity.get("location_state", None):
@@ -226,6 +261,15 @@ class StravaWebhookView(HomeAssistantView):
         )
 
     async def _fetch_images(self, activities: list[dict]):
+        config_entries = self.hass.config_entries.async_entries(domain=DOMAIN)
+        photos_enabled = None if (not config_entries or len(config_entries) < 1) else (
+            config_entries[0].options.get(CONF_PHOTOS, False)
+        )
+
+        if not photos_enabled:
+            _LOGGER.debug("Fetch photos DISABLED")
+            return
+
         _LOGGER.debug("Fetching images")
         img_urls = []
         for idx, activity in enumerate(activities):
@@ -292,8 +336,11 @@ class StravaWebhookView(HomeAssistantView):
             CONF_SENSOR_MOVING_TIME: float(activity.get("moving_time", -1)),
             CONF_SENSOR_KUDOS: int(activity.get("kudos_count", -1)),
             CONF_SENSOR_CALORIES: int(
-                activity.get("kilojoules", (-1 / FACTOR_KILOJOULES_TO_KILOCALORIES))
-                * FACTOR_KILOJOULES_TO_KILOCALORIES
+                activity.get(
+                    CONF_SENSOR_CALORIES,
+                    activity.get("kilojoules", (-1 / FACTOR_KILOJOULES_TO_KILOCALORIES))
+                    * FACTOR_KILOJOULES_TO_KILOCALORIES
+                )
             ),
             CONF_SENSOR_ELEVATION: int(activity.get("total_elevation_gain", -1)),
             CONF_SENSOR_POWER: int(activity.get("average_watts", -1)),
@@ -306,6 +353,8 @@ class StravaWebhookView(HomeAssistantView):
             CONF_ATTR_START_LATLONG: activity.get("start_latlng"),
             CONF_ATTR_END_LATLONG: activity.get("end_latlng"),
             CONF_ATTR_SPORT_TYPE: activity.get("sport_type"),
+            CONF_ATTR_COMMUTE: activity.get("commute", False),
+            CONF_ATTR_PRIVATE: activity.get("private", False),
         }
 
     def _sensor_summary_stats(self, summary_stats: dict) -> dict:

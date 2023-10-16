@@ -37,7 +37,9 @@ from .const import (
     CONF_ATTR_ACTIVITY_URL,
     CONF_ATTR_ATHLETE_ID,
     CONF_ATTR_ATHLETE_URL,
+    CONF_ATTR_COMMUTE,
     CONF_ATTR_LOCATION,
+    CONF_ATTR_PRIVATE,
     CONF_ATTR_SPORT_TYPE,
     CONF_ATTR_START_LATLONG,
     CONF_ATTR_TITLE,
@@ -60,7 +62,7 @@ from .const import (
     CONF_SENSOR_ID,
     CONF_SENSOR_MOVING_TIME,
     CONF_SENSOR_PACE,
-    CONF_SENSOR_POWER,
+    CONF_SENSOR_POWER, 
     CONF_SENSOR_SPEED,
     CONF_SENSOR_TITLE,
     CONF_SENSORS,
@@ -75,8 +77,8 @@ from .const import (
     EVENT_ACTIVITIES_UPDATE,
     EVENT_SUMMARY_STATS_UPDATE,
     MAX_NB_ACTIVITIES,
-    STRAVA_ACTHLETE_BASE_URL,
     STRAVA_ACTIVITY_BASE_URL,
+    STRAVA_ACTHLETE_BASE_URL,
     UNIT_BEATS_PER_MINUTE,
     UNIT_KILO_CALORIES,
     UNIT_PACE_MINUTES_PER_KILOMETER,
@@ -173,11 +175,11 @@ class StravaSummaryStatsSensor(
     def device_info(self):
         athlete_id = self._data.get(CONF_SENSOR_ID, "") if self._data else ""
         return {
-            "identifiers": {(DOMAIN, "strava_stats")},
-            "name": "Strava Summary",
+            "identifiers": {(DOMAIN, f"strava_stats")},
+            "name": f"Strava Summary",
             "manufacturer": "Strava",
             "model": "Activity Summary",
-            "configuration_url": f"{STRAVA_ACTHLETE_BASE_URL}{athlete_id}",
+            "configuration_url": f"{STRAVA_ACTHLETE_BASE_URL}",
         }
 
     @property
@@ -480,22 +482,16 @@ class StravaStatsSensor(SensorEntity):  # pylint: disable=missing-class-docstrin
             seconds = int(pace_final - minutes * 60)
 
             unit = (
-                (
                     UNIT_PACE_MINUTES_PER_MILE
                     if self.hass.config.units is US_CUSTOMARY_SYSTEM
                     else UNIT_PACE_MINUTES_PER_KILOMETER
-                )
-                if self._is_unit_metric_default
-                else (
-                    UNIT_PACE_MINUTES_PER_KILOMETER
-                    if self._is_unit_metric
-                    else UNIT_PACE_MINUTES_PER_MILE
-                )
+                ) if self._is_unit_metric_default else (
+                UNIT_PACE_MINUTES_PER_KILOMETER
+                if self._is_unit_metric
+                else UNIT_PACE_MINUTES_PER_MILE
             )
 
-            return "".join(
-                ["0:" if minutes == 0 else f"{minutes}:", f"{seconds:02}", f" {unit}"]
-            )  # noqa: E501
+            return "".join(["0:" if minutes == 0 else f"{minutes}:", f"{seconds:02}", f" {unit}"])
 
         if metric == CONF_SENSOR_SPEED:
             speed = (self._data[CONF_SENSOR_DISTANCE] / 1000) / (
@@ -710,6 +706,8 @@ class StravaStatsSensor(SensorEntity):  # pylint: disable=missing-class-docstrin
             attr[CONF_ATTR_SPORT_TYPE] = self._data[CONF_ATTR_SPORT_TYPE]
             attr[CONF_ATTR_LOCATION] = self._data[CONF_SENSOR_CITY]
             attr[CONF_ATTR_TITLE] = self._data[CONF_SENSOR_TITLE]
+            attr[CONF_ATTR_COMMUTE] = self._data[CONF_ATTR_COMMUTE]
+            attr[CONF_ATTR_PRIVATE] = self._data[CONF_ATTR_PRIVATE]
             attr[CONF_ATTR_ACTIVITY_URL] = f"{STRAVA_ACTIVITY_BASE_URL}{activity_id}"
             if self._data[CONF_ATTR_START_LATLONG]:
                 attr[CONF_LATITUDE] = float(

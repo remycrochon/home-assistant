@@ -31,7 +31,7 @@ CONF_DISTANCE_UNIT_OVERRIDE_IMPERIAL = "imperial"
 CONF_GEOCODE_XYZ_API_KEY = "geocode_xyz_api_key"
 
 STRAVA_ACTIVITY_BASE_URL = "https://www.strava.com/activities/"
-STRAVA_ACTHLETE_BASE_URL = "https://www.strava.com/athletes/"
+STRAVA_ACTHLETE_BASE_URL = "https://www.strava.com/dashboard"
 
 # Event Specs
 CONF_STRAVA_DATA_UPDATE_EVENT = "strava_data_update"
@@ -79,6 +79,8 @@ CONF_ACTIVITY_TYPE_CANOEING = "canoeing"
 CONF_ACTIVITY_TYPE_GYM = "weighttraining"
 CONF_ACTIVITY_TYPE_WORKOUT = "workout"
 CONF_ACTIVITY_TYPE_SNOWBOARD = "snowboard"
+
+CONF_ACTIVITES_RIDE = [CONF_ACTIVITY_TYPE_RIDE, CONF_ACTIVITY_TYPE_MTB_RIDE]
 
 CONF_SUMMARY_RECENT = "summary_recent"
 CONF_SUMMARY_YTD = "summary_ytd"
@@ -148,6 +150,8 @@ CONF_ATTR_ACTIVITY_ID = "activity_id"
 CONF_ATTR_ACTIVITY_URL = "activity_url"
 CONF_ATTR_ATHLETE_ID = "athlete_id"
 CONF_ATTR_ATHLETE_URL = "athlete_url"
+CONF_ATTR_COMMUTE = "commute"
+CONF_ATTR_PRIVATE = "private"
 
 UNIT_BEATS_PER_MINUTE = "bpm"
 UNIT_PACE_MINUTES_PER_KILOMETER = "min/km"

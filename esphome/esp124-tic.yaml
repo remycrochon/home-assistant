@@ -115,7 +115,7 @@ sensor:
 #- Heures Creuses Jours Rouges : HCJR
 #- Heures Pleines Jours Rouges : HPJR
 
-# Energie Active soutirée Index01
+# Energie Active soutirée Index01 HC Bleu
   - platform: teleinfo
     id: hchc
     tag_name: "EASF01"
@@ -126,11 +126,55 @@ sensor:
     filters:
       - filter_out: 0.0
     
-# Energie Active soutirée Index02    
+# Energie Active soutirée Index02 HP Bleu
   - platform: teleinfo
     id: hchp
     tag_name: "EASF02"
     name: "Linky HP Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0    
+
+# Energie Active soutirée Index03 HC Blanc
+  - platform: teleinfo
+    id: hcblanc
+    tag_name: "EASF03"
+    name: "Linky HC Blanc Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0
+
+# Energie Active soutirée Index04 HP Blanc
+  - platform: teleinfo
+    id: hpblanc
+    tag_name: "EASF04"
+    name: "Linky HP Blanc Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0    
+
+# Energie Active soutirée Index05 HC Rouge
+  - platform: teleinfo
+    id: hcrouge
+    tag_name: "EASF05"
+    name: "Linky HC Rouge Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0
+
+# Energie Active soutirée Index06 HP Rouge
+  - platform: teleinfo
+    id: hprouge
+    tag_name: "EASF06"
+    name: "Linky HP Blanc Wh"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -254,7 +298,7 @@ text_sensor:
     id: tarif
     name: "Linky PTEC"
     lambda: |-
-      if ( id(ntarif).state == 1 ) {
+      if ( id(ntarif).state == 1 || id(ntarif).state == 3 || id(ntarif).state == 5){
         return { "HC.." };
       } else {
         return { "HP.." };
@@ -264,7 +308,6 @@ text_sensor:
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
-
 
 # Affichage
 display:

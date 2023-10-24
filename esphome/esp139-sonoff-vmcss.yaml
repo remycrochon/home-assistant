@@ -1,5 +1,10 @@
+substitutions:
+  device_name: esp139-vmc-soussol
+  adress_ip: "192.168.0.139"
+  friendly_name: esp139
+
 esphome:
-  name: esp139-sonoff-vmcss
+  name: ${device_name}
   platform: ESP8266
   board: d1_mini
   
@@ -11,7 +16,7 @@ wifi:
   
   manual_ip:
     # Set this to the IP of the ESP
-    static_ip: 192.168.0.139
+    static_ip: ${adress_ip}
     # Set this to the IP address of the router. Often ends with .1
     gateway: 192.168.0.254
     # The subnet of the network. 255.255.255.0 works for most home networks.
@@ -31,24 +36,24 @@ web_server:
 binary_sensor:
 #Etat de la connection
   - platform: status
-    name: "esp139_Status"
+    name: "${friendly_name}_Status"
   - platform: gpio
     pin:
       number: GPIO0
       mode: INPUT_PULLUP
       inverted: True
-    name: "bp_vmc_ssol"
+    name: "${friendly_name}_bp"
     on_press:
       - switch.toggle: relay
 
 switch:
   - platform: gpio
-    name: "vmc_ssol"
+    name: "${friendly_name}_cde_spot_cuisine"
     pin: D1
     id: relay
     
   - platform: restart
-    name: "ESP139_Restart"
+    name: "${friendly_name}_Restart"
 
 status_led:
   pin:

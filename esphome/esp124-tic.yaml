@@ -174,7 +174,7 @@ sensor:
   - platform: teleinfo
     id: hprouge
     tag_name: "EASF06"
-    name: "Linky HP Blanc Wh"
+    name: "Linky HP Rouge Wh"
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
@@ -292,7 +292,23 @@ text_sensor:
     name: "linky Statuts"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    
+
+# nom du calendrier tarifaire
+  - platform: teleinfo
+    id: ngtf
+    tag_name: "NGTF"
+    name: "linky Nom calendrier tarifaire"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Libellé tarif fournisseur en cours
+  - platform: teleinfo
+    id: ltarf
+    tag_name: "LTARF"
+    name: "linky Libellé tarif fournisseur en cours"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
 # Convertion du tarif en cours
   - platform: template
     id: tarif

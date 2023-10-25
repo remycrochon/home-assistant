@@ -45,7 +45,7 @@ sensor:
     attenuation: 11db
     filters:
       - calibrate_linear:
-         - 0.4 -> 0.0  # 4 ma
+         - 0.86 -> 0.5  # 4 ma
          - 1.88 -> 3.23  # 12.61
       - sliding_window_moving_average:
           window_size: 10 # moyenne sur x lectures

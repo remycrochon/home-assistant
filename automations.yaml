@@ -3323,3 +3323,21 @@
     domain: switch
     enabled: true
   mode: single
+- id: '1698142750238'
+  alias: 06-1-7 Notification niveau bas puit
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.esp140_niveau_puit
+    above: 0.8
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: Niveau eau puit inferieur à 0.8 ml{{-"\n"-}}{{states("sensor.date_time")
+        }}
+  mode: single

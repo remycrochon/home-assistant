@@ -145,8 +145,8 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    filters:
-      - filter_out: 0.0
+#    filters:
+#      - filter_out: 0.0
 
 # Energie Active soutirée Index04 HP Blanc
   - platform: teleinfo
@@ -156,8 +156,8 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    filters:
-      - filter_out: 0.0    
+#    filters:
+#      - filter_out: 0.0    
 
 # Energie Active soutirée Index05 HC Rouge
   - platform: teleinfo
@@ -167,8 +167,8 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    filters:
-      - filter_out: 0.0
+#    filters:
+#      - filter_out: 0.0
 
 # Energie Active soutirée Index06 HP Rouge
   - platform: teleinfo
@@ -178,8 +178,8 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    filters:
-      - filter_out: 0.0    
+#    filters:
+#      - filter_out: 0.0    
 
 #Puissance apparente de coupure
   - platform: teleinfo
@@ -201,41 +201,7 @@ sensor:
     state_class: "measurement"  
     icon: mdi:flash
     teleinfo_id: myteleinfo
-    on_value:
-      - if:
-          condition:
-            sensor.in_range:
-              id: papp
-              below: 1000
-          then: 
-            - light.control:
-                id: led1
-                red: 0%
-                green: 100% # vert
-                blue: 0%
-      - if:
-          condition:
-            sensor.in_range:
-              id: papp
-              above: 1000
-              below: 3000
-          then: 
-            - light.control:
-                id: led1
-                red: 0%
-                green: 0% # bleu
-                blue: 100%
-      - if:
-          condition:
-            sensor.in_range:
-              id: papp
-              above: 3000
-          then: 
-            - light.control:
-                id: led1
-                red: 100% #rouge
-                green: 0%
-                blue: 0%    
+
 
 #Tension moyenne ph1
   - platform: teleinfo
@@ -336,9 +302,53 @@ display:
       it.printf(75,0,id(arial),"-%.0f %%",id(p100).state);
       it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
       it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
-      std::string tarif_ = id(tarif).state;
-      it.printf(0,45,id(arial), "Tarif: %s", tarif_.c_str());      
+      std::string tarif_ = id(ltarf).state;
+      it.printf(0,45,id(arial), tarif_.c_str());      
+##      it.printf(0,45,id(arial), "Tarif:%s", tarif_.c_str());      
 
 
-      
+interval:
+  - interval: 1s
+    then:
+      - script.execute: calcul_led_jour
+
+# ------------------------  Scripts
+script:
+# 
+# Couleur du Jour en cours
+  - id: calcul_led_jour
+    mode: single
+    then:
+      - if: 
+          condition:
+            - lambda: |-
+                return (strcmp(id(ltarf).state.c_str(),"HP BLEU") == 0 || strcmp(id(ltarf).state.c_str(),"HC BLEU") == 0 );
+          then:
+            - light.control:
+                id: led1
+                red: 0% 
+                green: 0%
+                blue: 100%    
+
+      - if: 
+          condition:
+            - lambda: |-
+                return (strcmp(id(ltarf).state.c_str(),"HP BLANC") == 0 || strcmp(id(ltarf).state.c_str(),"HC BLANC") == 0 );
+          then:
+            - light.control:
+                id: led1
+                red: 100% 
+                green: 100%
+                blue: 100%    
+          
+      - if: 
+          condition:
+            - lambda: |-
+                return (strcmp(id(ltarf).state.c_str(),"HP ROUGE") == 0 || strcmp(id(ltarf).state.c_str(),"HC ROUGE") == 0 );
+          then:
+            - light.control:
+                id: led1
+                red: 100% 
+                green: 0%
+                blue: 0%    
    

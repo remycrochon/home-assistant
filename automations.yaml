@@ -594,10 +594,13 @@
       - condition: state
         entity_id: sensor.linky_ptec
         state: HC..
-      - condition: numeric_state
-        entity_id: sensor.energy_production_today
-        below: 8
+        for:
+          hours: 4
+          minutes: 0
+          seconds: 0
         enabled: false
+      - condition: time
+        after: 03:00:00
       sequence:
       - service: script.ecs_on
         data: {}
@@ -2984,7 +2987,7 @@
       notify_message: Alerte {{ entity_name }}Déclenché
       initial_delay: 180
 - id: '1686560576944'
-  alias: 3_1_0 Activation filtration selon planning
+  alias: 3_1_0 Piscine Activation filtration selon planning
   description: ''
   trigger:
   - platform: calendar

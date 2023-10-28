@@ -2232,16 +2232,6 @@
         }} l {{-"\n"-}}{{states("sensor.date_time") }}
       title: Piscine Fin injection pH !!!
   mode: single
-- id: '1668506550340'
-  alias: 0_0_2 Alim tablette BP
-  description: ' '
-  use_blueprint:
-    path: seamus65/wallpanel-battery-management.yaml
-    input:
-      battery: sensor.s6_pro_battery
-      charger: switch.pc2_tablette
-      low_percent: 30
-      charged_percent: 90
 - id: '1669803250640'
   alias: 1_2_5 ECS Arret Forcé sur Puissance Réseau Haute
   description: Si PU Réseau > Seuil alors on force l'ECS à l'Arret
@@ -2864,26 +2854,12 @@
       target:
         entity_id:
         - switch.esp176_validation_router
-    - service: modbus.write_register
-      data:
-        address: 2704
-        slave: 100
-        hub: cerbo
-        value: 20
-      enabled: false
     else:
     - service: switch.turn_off
       data: {}
       target:
         entity_id:
         - switch.esp176_validation_router
-    - service: modbus.write_register
-      data:
-        address: 2704
-        slave: 100
-        hub: cerbo
-        value: 400
-      enabled: false
   mode: single
   trace:
     stored_traces: 10
@@ -3343,4 +3319,23 @@
     data:
       message: Niveau eau puit inferieur à 0.8 ml{{-"\n"-}}{{states("sensor.date_time")
         }}
+  mode: single
+- id: '1698395745098'
+  alias: 00-0-1 Redemarage NODERED
+  description: ''
+  trigger:
+  - type: not_running
+    platform: device
+    device_id: 9ad222aef3f7f02a2f584a7d6fc827a3
+    entity_id: 4a7f7c7dab3b3e7161a7f5c493c3ff0a
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: hassio.addon_restart
+    data:
+      addon: a0d7b954_nodered
   mode: single

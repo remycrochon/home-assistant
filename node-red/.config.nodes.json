@@ -1624,5 +1624,51 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-boolean-logic-ultimate/boolean-logic-ultimate/translator-config.js"
             }
         }
+    },
+    "node-red-node-telegrambot": {
+        "name": "node-red-node-telegrambot",
+        "version": "0.1.4",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "telegrambot": {
+                "name": "telegrambot",
+                "types": [
+                    "telegram client config",
+                    "telegram client receiver",
+                    "telegram client sender"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-node-telegrambot",
+                "file": "/config/node-red/node_modules/node-red-node-telegrambot/telegrambot/telegrambot.js"
+            }
+        }
+    },
+    "node-red-contrib-telegrambot": {
+        "name": "node-red-contrib-telegrambot",
+        "version": "15.1.7",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "telegrambot": {
+                "name": "telegrambot",
+                "types": [
+                    "telegram bot",
+                    "telegram receiver",
+                    "telegram command",
+                    "telegram event",
+                    "telegram sender",
+                    "telegram reply",
+                    "telegram control"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-telegrambot",
+                "file": "/config/node-red/node_modules/node-red-contrib-telegrambot/telegrambot/99-telegrambot.js"
+            }
+        }
     }
 }

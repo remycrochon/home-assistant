@@ -1,6 +1,13 @@
 mqtt:
   sensor:
-# Pu Batteries
+# MQTT
+    - name: "MP2 Tension Batteries par MQTT"
+      unique_id: mp2_tension_batteries_par_mqtt" 
+      state_topic: "mp2/batteries/tension"
+      unit_of_measurement: 'V'
+      device_class: voltage
+      state_class: measurement
+
     - name: "MP2 Pu Batteries par MQTT"
       unique_id: mp2_pu_batteries_par_mqtt" 
       state_topic: "mp2/batteries/puissance"
@@ -57,6 +64,19 @@ mqtt:
       device_class: battery
       state_class: measurement
 
+    - name: "MP2 SOC theorique par MQTT"
+      unique_id: mp2_soc_theorique_par_mqtt" 
+      state_topic: "mp2/batteries/soc_theorique"
+      unit_of_measurement: '%'
+      device_class: battery
+      state_class: measurement
+
+    - name: "MP2 SOC MQTT"
+      unique_id: mp2_soc_par_mqtt" 
+      state_topic: "mp2/batteries/soc"
+      unit_of_measurement: '%'
+      device_class: battery
+      state_class: measurement
 # Victron
 modbus:
   - name: cerbo
@@ -569,7 +589,7 @@ template:
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {{ max(0, states('sensor.mp2_puissance_batteries') | float(default=0)) }}
+        {{ max(0, states('sensor.mp2_pu_batteries_par_mqtt') | float(default=0)) }}
 
     - name: "MP2 Pu decharge batterie"
       unique_id: "mp2_pu_decharge_batterie"
@@ -577,7 +597,7 @@ template:
       state_class: "measurement"
       unit_of_measurement: "W"
       state: >-
-        {{ max(0, 0 - states('sensor.mp2_puissance_batteries') | float(default=0)) }}
+        {{ max(0, 0 - states('sensor.mp2_pu_batteries_par_mqtt') | float(default=0)) }}
 
 #
 # Modèles pour les diagrammes de transfert de Powerflow réel (APF - PowerFlow réel)

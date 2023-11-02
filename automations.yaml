@@ -1075,21 +1075,11 @@
           message: Porte Sous Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Etat Portes !!!
-          data:
-            inline_keyboard:
-            - Ferme porte:/ferme_soussol, Cancel:/cancel
-      - service: notify.telegram
-        data:
-          message: Porte Sous Sol ouverte après le coucher du soleil{{-"\n"-}}{{states("sensor.date_time")
-            }}
       resolved_action:
       - service: notify.telegram
         data:
           message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Portes!!!
-      - service: notify.telegram
-        data:
-          message: Porte Sous Sol OK{{-"\n"-}}{{states("sensor.date_time") }}
       notify_message: Porte Sous _Sol Ouverte
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       resolved_message: Porte Sous Sol Ok
@@ -1269,36 +1259,6 @@
       max_alerts: 50
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
-- id: '1634766452141'
-  alias: 02-02-02 Alarme Acquittement Porte Sous Sol
-  description: Ferme la porte du sous sol
-  trigger:
-  - platform: event
-    event_type: telegram_callback
-    event_data:
-      data: /ferme_soussol
-  condition: []
-  action:
-  - service: cover.close_cover
-    target:
-      entity_id: cover.garage_soussol
-    data: {}
-  mode: single
-- id: '1634766777070'
-  alias: 02-02-01 Alarme Acquittement Porte Garage
-  description: Ferme la porte du sous sol
-  trigger:
-  - platform: event
-    event_type: telegram_callback
-    event_data:
-      data: /ferme_garage
-  condition: []
-  action:
-  - service: cover.close_cover
-    target:
-      entity_id: cover.garage_rdc
-    data: {}
-  mode: single
 - id: '1634916685737'
   alias: 01-1-3 Pusch gitub
   description: pousse vers githtub
@@ -1309,24 +1269,6 @@
   action:
   - service: shell_command.push_to_github
     data: {}
-  mode: single
-- id: '1635590853335'
-  alias: 01-1-4 Choix du theme jour ou nuit
-  description: ''
-  trigger:
-  - platform: homeassistant
-    event: start
-  - platform: state
-    entity_id: sun.sun
-    to: above_horizon
-  - platform: state
-    entity_id: sun.sun
-    to: below_horizon
-  action:
-  - service: frontend.set_theme
-    data:
-      name: "{% if states.sun.sun.state == \"above_horizon\" %}\n  Dwains Light Theme\n{%
-        else %}\n  Dwains Dark Theme\n{% endif %}\n"
   mode: single
 - id: '1637073026237'
   alias: 4_2_2 Volet Balise ouverture sous sol
@@ -1772,34 +1714,6 @@
   - service: script.create_all_scripts_group
     data: {}
   mode: single
-- id: '1647538159020'
-  alias: 02-01-15 Al Bp Notif Def connection Tablette
-  description: ''
-  use_blueprint:
-    path: pavax/nagging_alert_notification.yaml
-    input:
-      condition_entity_state: 'on'
-      sensor_entity: binary_sensor.tablette_etat_connection
-      alert_state: 'off'
-      alert_action:
-      - service: notify.telegram
-        data:
-          message: Connection Tablette NOK  {{-"\n"-}}{{states("sensor.date_time")
-            }}
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.pc2_tablette
-      resolved_action:
-      - service: notify.telegram
-        data:
-          message: Connection Tablette OK{{-"\n"-}}{{states("sensor.date_time") }}
-      notify_device: 62cdce054a9d3448484b4df8e44cc499
-      repeat_delay: 300
-      initial_delay: 1
-      max_alerts: 10
-      resolved_message: Alerte {{ entity_name }} Résolu
-      notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1649766635520'
   alias: 4_1_3 Volet-Suivi Azimuth Soleil (old)
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
@@ -2232,28 +2146,6 @@
         }} l {{-"\n"-}}{{states("sensor.date_time") }}
       title: Piscine Fin injection pH !!!
   mode: single
-- id: '1669803250640'
-  alias: 1_2_5 ECS Arret Forcé sur Puissance Réseau Haute
-  description: Si PU Réseau > Seuil alors on force l'ECS à l'Arret
-  trigger:
-  - platform: template
-    value_template: "  value_template: |2-\n          {% set pu=states('sensor.mp2_conso_ac_l1')
-      | float %}\n          {% set seuil=states('input_number.ecs_seuil_delestage_pu_haute')
-      | float %}\n          {{ pu > seuil }}"
-  condition: []
-  action:
-  - service: input_select.select_option
-    data:
-      option: At Forcé
-    target:
-      entity_id: input_select.ecs_ssol
-  - service: notify.telegram
-    data:
-      message: Delestage ECS Seuil Haut Pu Reseau:{{-"\n"-}}{{states('sensor.mp2_conso_ac_l1')}}
-        W > {{states('input_number.ecs_seuil_delestage_pu_haute')}} W{{-"\n"-}}{{states("sensor.date_time")
-        }}
-      title: Alarme Delestage ECS
-  mode: single
 - id: '1669919504303'
   alias: 02-01-16 Alarme BP Temp basse Chalet
   description: '# Surveillance de la temperature du chalet'
@@ -2411,103 +2303,6 @@
           hub: cerbo
           value: 5
   mode: single
-- id: '1671263456762'
-  alias: Essai filtration piscine
-  description: ''
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  - platform: state
-    entity_id:
-    - input_select.mode_fonctionnement_piscine_test
-    id: at_force
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine_test
-        state: Auto
-      - condition: numeric_state
-        entity_id: input_number.temp_piscine
-        below: 1
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.chalet_s1
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine_test
-        state: Auto
-      - condition: numeric_state
-        entity_id: input_number.temp_piscine
-        above: 1
-        below: 10.1
-      - condition: or
-        conditions:
-        - condition: time
-          after: 06:00:00
-          before: 08:00:00
-        - condition: time
-          after: '11:00:00'
-          before: '12:00:00'
-        - condition: time
-          after: '16:00:00'
-          before: '17:00:00'
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.chalet_s1
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine_test
-        state: Auto
-      - condition: numeric_state
-        entity_id: input_number.temp_piscine
-        above: 10
-        below: 12.1
-      - condition: or
-        conditions:
-        - condition: time
-          after: 06:00:00
-          before: 07:33:00
-        - condition: time
-          after: 09:00:00
-          before: '12:33:00'
-        - condition: time
-          after: '16:00:00'
-          before: '17:33:00'
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.chalet_s1
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine_test
-        state: Ma F
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.chalet_s1
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonctionnement_piscine_test
-        state: At F
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.chalet_s1
-    default:
-    - service: switch.turn_off
-      data: {}
-      target:
-        entity_id: switch.chalet_s1
-  mode: single
 - id: '1671811895133'
   alias: 10-00-00 Spot Terrasse
   description: ''
@@ -2663,87 +2458,6 @@
   action:
   - service: rest_command.cde_dimmer
     data: {}
-  mode: single
-- id: '1675765119907'
-  alias: 1_2_4 ECS Validation Routeur sur Absorption
-  description: float alors routeur ECS Actif
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.mp2_status_bus_ve
-    to: '4'
-    id: bulk to Absorption
-    from: '3'
-  - platform: template
-    value_template: "      {% set soc=states('sensor.mp2_niveau_charge_batteries')
-      | float %}\n      {% set deval=states('input_number.mp2_seuil_devalidation_routeur')
-      | float -5 %}\n      {{ soc < deval }}"
-    id: devalid_routeur_seuil2
-  - platform: numeric_state
-    entity_id: sensor.mp2_niveau_charge_batteries
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    below: input_number.mp2_seuil_devalidation_routeur
-    id: devalid_routeur_seuil1
-  - platform: state
-    entity_id:
-    - sensor.mp2_status_bus_ve
-    to: '3'
-    id: Float to bulk
-    from: '5'
-  - platform: sun
-    event: sunrise
-    offset: 0
-    id: levee_sun
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: bulk to Absorption
-      - condition: sun
-        before: sunset
-        after: sunrise
-        after_offset: 02:00:00
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
-      - service: notify.telegram
-        data:
-          message: Bus VE passe en mode:{{states('sensor.mp2_affichage_status_bus_ve')}}{{-"\n"-}}
-            Marche routeur ECS %{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Validation Routeur ECS_ Bulk to Absorption
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: devalid_routeur_seuil1
-        - condition: trigger
-          id: devalid_routeur_seuil2
-        enabled: false
-      - condition: trigger
-        id: Float to bulk
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
-    - conditions:
-      - condition: trigger
-        id: levee_sun
-      - condition: numeric_state
-        entity_id: sensor.mp2_status_bus_ve
-        above: 2
-        below: 6
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.ecs_av_pv
   mode: single
 - id: '1676284606975'
   alias: Dimmer V2
@@ -2962,39 +2676,6 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
       initial_delay: 180
-- id: '1686560576944'
-  alias: 3_1_0 Piscine Activation filtration selon planning
-  description: ''
-  trigger:
-  - platform: calendar
-    event: start
-    entity_id: calendar.filtration
-  - platform: calendar
-    event: end
-    entity_id: calendar.filtration
-  condition:
-  - condition: template
-    value_template: '{{ ''Filtration'' in trigger.calendar_event.summary }}'
-  action:
-  - if:
-    - condition: template
-      value_template: trigger.event == 'start'
-    then:
-    - service: switch.turn_on
-      entity_id: switch.ppe_filtration
-      enabled: false
-    - service: notify.telegram
-      data:
-        message: 'Calendrier: Marche PPE'
-        title: Test Calendar Filtration
-    else:
-    - service: switch.turn_off
-      entity_id: switch.ppe_filtration
-      enabled: false
-    - service: notify.telegram
-      data:
-        message: 'Calendrier: Arret PPE'
-        title: Test Calendar Filtration
 - id: '1687859491524'
   alias: 00-0-3 Temperature haute stérilisateur
   description: ''
@@ -3128,61 +2809,6 @@
       entity_id: input_number.mp2_memoire_estimation_production_jour
       value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a }}'
   mode: single
-- id: '1690442325979'
-  alias: 01-2-4 V3 ECS Validation Routeur sur Absorption
-  description: float alors routeur ECS Actif
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.mp2_status_bus_ve
-        above: 3
-        below: 6
-        enabled: true
-      - condition: state
-        entity_id: input_boolean.ecs_av_pv
-        state: 'off'
-      - condition: numeric_state
-        entity_id: sensor.mp2_pc_ac_couplet_on_l1
-        above: 1000
-      - condition: numeric_state
-        entity_id: sensor.mp2_niveau_charge_batteries
-        above: input_number.mp2_seuil_validation_routeur
-        enabled: false
-      sequence:
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id:
-          - switch.esp176_validation_router
-    - conditions:
-      - condition: not
-        conditions:
-        - condition: numeric_state
-          entity_id: sensor.mp2_status_bus_ve
-          above: 3
-          below: 6
-        enabled: true
-      - condition: state
-        entity_id: input_boolean.ecs_av_pv
-        state: 'on'
-      - condition: numeric_state
-        entity_id: sensor.mp2_niveau_charge_batteries
-        below: input_number.mp2_seuil_devalidation_routeur
-        enabled: false
-      sequence:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id:
-          - switch.esp176_validation_router
-  mode: single
-  trace:
-    stored_traces: 10
 - id: '1690444310583'
   alias: 01-2-6 ECS message Validation Routeur
   description: float alors routeur ECS Actif

@@ -7,9 +7,7 @@
         "nodes": {
             "junction": {
                 "name": "junction",
-                "types": [
-                    "junction"
-                ],
+                "types": [],
                 "enabled": true,
                 "local": false,
                 "user": false,
@@ -1413,8 +1411,7 @@
                 "types": [
                     "alexa-smart-home-v3-conf",
                     "alexa-smart-home-v3",
-                    "alexa-smart-home-v3-state",
-                    "alexa-smart-home-v3-resp"
+                    "alexa-smart-home-v3-state"
                 ],
                 "enabled": true,
                 "local": true,
@@ -1452,8 +1449,7 @@
             "oauth2": {
                 "name": "oauth2",
                 "types": [
-                    "oauth2",
-                    "oauth2-credentials"
+                    "oauth2"
                 ],
                 "enabled": true,
                 "local": true,
@@ -1643,6 +1639,31 @@
                 "user": false,
                 "module": "node-red-node-telegrambot",
                 "file": "/config/node-red/node_modules/node-red-node-telegrambot/telegrambot/telegrambot.js"
+            }
+        }
+    },
+    "node-red-contrib-telegrambot": {
+        "name": "node-red-contrib-telegrambot",
+        "version": "15.1.7",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "telegrambot": {
+                "name": "telegrambot",
+                "types": [
+                    "telegram bot",
+                    "telegram receiver",
+                    "telegram command",
+                    "telegram event",
+                    "telegram sender",
+                    "telegram reply",
+                    "telegram control"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-telegrambot",
+                "file": "/config/node-red/node_modules/node-red-contrib-telegrambot/telegrambot/99-telegrambot.js"
             }
         }
     }

@@ -6,11 +6,11 @@ input_boolean:
   com_vp2:
     name: Comm VP2 OK=On
 
-
+# https://forum.hacf.fr/t/alerte-meteo/23930/61
 command_line:
   - sensor:
       name: meteo_france_alertes_81
-      scan_interval: 3600
+      scan_interval: 10800
       command: >         
         curl -X GET "https://public-api.meteofrance.fr/public/DPVigilance/v1/cartevigilance/encours" -H "accept: */*" -H "apikey:eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZW15LmNyb2Nob25AY2FyYm9uLnN1cGVyIiwiYXBwbGljYXRpb24iOnsib3duZXIiOiJyZW15LmNyb2Nob24iLCJ0aWVyUXVvdGFUeXBlIjpudWxsLCJ0aWVyIjoiVW5saW1pdGVkIiwibmFtZSI6IkRlZmF1bHRBcHBsaWNhdGlvbiIsImlkIjoyMTcwLCJ1dWlkIjoiM2JlNDlhZTktZTljZi00N2NmLWFkNzAtMzQyZGM1MWVhY2VjIn0sImlzcyI6Imh0dHBzOlwvXC9wb3J0YWlsLWFwaS5tZXRlb2ZyYW5jZS5mcjo0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6eyI2MFJlcVBhck1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInBlcm1pdHRlZFJlZmVyZXIiOiIiLCJzdWJzY3JpYmVkQVBJcyI6W3sic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzVmlnaWxhbmNlIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFZpZ2lsYW5jZVwvdjEiLCJwdWJsaXNoZXIiOiJhZG1pbiIsInZlcnNpb24iOiJ2MSIsInN1YnNjcmlwdGlvblRpZXIiOiI2MFJlcVBhck1pbiJ9XSwidG9rZW5fdHlwZSI6ImFwaUtleSIsInBlcm1pdHRlZElQIjoiIiwiaWF0IjoxNjk4ODYxNDExLCJqdGkiOiIwMzk3NWQ2Yy1kMjFlLTQzNGEtYWYyYi1jYzRlYTZmNWIwNzIifQ==.Oq7NX1VNSQAspuVPbwucOc2eyzirkPKdZJv6kozV5WcvH071niq9_OkVfmhea0V_b9QVUZLxaG8WfeDRQIV1mqvwg36-PChrzjRdXlMdZqwWvDrEWl02Q6h9PcgFYqcQj_LoP8zSGX7JQsdZBnXbU4PEsQFUnlvEwKm1wpozs4jSLRv-swJtcyElWqKudnYatSh06qrwEXJsFjOslgpcgp1rJjpRge_-sDHQ2XvcUoICB0PIBg0v0XYuk0FJMoTBEgREPUmHTijJt0WXT3z-vRfhbhnAVI9ekUIilcyGtHizl-0o0wytmIsDJY_l0KXuwo2EcT_ZcQVNGbT8JXU1UQ==" | jq '{details: {"domain_max_color_id_today": .product.periods[0].timelaps.domain_ids[68].max_color_id,"domain_max_color_id_tomorrow": .product.periods[1].timelaps.domain_ids[68].max_color_id, "update_time": .product.update_time}, "today": .product.periods[0].timelaps.domain_ids[79].phenomenon_items | sort_by(.phenomenon_id), "tomorrow": .product.periods[1].timelaps.domain_ids[79].phenomenon_items | sort_by(.phenomenon_id)}'
       value_template: "{{ value_json.details.domain_max_color_id_today }}"
@@ -19,6 +19,33 @@ command_line:
           - details
           - today
           - tomorrow
+
+  - sensor:
+          name: meteo_france_alerts_picture_today
+          scan_interval: 14400
+          command: >  
+              curl -X GET "https://public-api.meteofrance.fr/public/DPVigilance/v1/vignettenationale-J/encours" -H "accept: */*" -H "apikey:eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZW15LmNyb2Nob25AY2FyYm9uLnN1cGVyIiwiYXBwbGljYXRpb24iOnsib3duZXIiOiJyZW15LmNyb2Nob24iLCJ0aWVyUXVvdGFUeXBlIjpudWxsLCJ0aWVyIjoiVW5saW1pdGVkIiwibmFtZSI6IkRlZmF1bHRBcHBsaWNhdGlvbiIsImlkIjoyMTcwLCJ1dWlkIjoiM2JlNDlhZTktZTljZi00N2NmLWFkNzAtMzQyZGM1MWVhY2VjIn0sImlzcyI6Imh0dHBzOlwvXC9wb3J0YWlsLWFwaS5tZXRlb2ZyYW5jZS5mcjo0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6eyI2MFJlcVBhck1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInBlcm1pdHRlZFJlZmVyZXIiOiIiLCJzdWJzY3JpYmVkQVBJcyI6W3sic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzVmlnaWxhbmNlIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFZpZ2lsYW5jZVwvdjEiLCJwdWJsaXNoZXIiOiJhZG1pbiIsInZlcnNpb24iOiJ2MSIsInN1YnNjcmlwdGlvblRpZXIiOiI2MFJlcVBhck1pbiJ9XSwidG9rZW5fdHlwZSI6ImFwaUtleSIsInBlcm1pdHRlZElQIjoiIiwiaWF0IjoxNjk4ODYxNDExLCJqdGkiOiIwMzk3NWQ2Yy1kMjFlLTQzNGEtYWYyYi1jYzRlYTZmNWIwNzIifQ==.Oq7NX1VNSQAspuVPbwucOc2eyzirkPKdZJv6kozV5WcvH071niq9_OkVfmhea0V_b9QVUZLxaG8WfeDRQIV1mqvwg36-PChrzjRdXlMdZqwWvDrEWl02Q6h9PcgFYqcQj_LoP8zSGX7JQsdZBnXbU4PEsQFUnlvEwKm1wpozs4jSLRv-swJtcyElWqKudnYatSh06qrwEXJsFjOslgpcgp1rJjpRge_-sDHQ2XvcUoICB0PIBg0v0XYuk0FJMoTBEgREPUmHTijJt0WXT3z-vRfhbhnAVI9ekUIilcyGtHizl-0o0wytmIsDJY_l0KXuwo2EcT_ZcQVNGbT8JXU1UQ==" > ./www/images/meteo_france_alerte_today.png
+          value_template: "mf_alert_today"
+          unique_id: meteo_france_alerts_picture_today
+          
+  - sensor:
+        name: meteo_france_alerts_picture_tomorrow
+        scan_interval: 14400
+        command: >  
+            curl -X GET "https://public-api.meteofrance.fr/public/DPVigilance/v1/vignettenationale-J1/encours" -H "accept: */*" -H "apikey:eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyZW15LmNyb2Nob25AY2FyYm9uLnN1cGVyIiwiYXBwbGljYXRpb24iOnsib3duZXIiOiJyZW15LmNyb2Nob24iLCJ0aWVyUXVvdGFUeXBlIjpudWxsLCJ0aWVyIjoiVW5saW1pdGVkIiwibmFtZSI6IkRlZmF1bHRBcHBsaWNhdGlvbiIsImlkIjoyMTcwLCJ1dWlkIjoiM2JlNDlhZTktZTljZi00N2NmLWFkNzAtMzQyZGM1MWVhY2VjIn0sImlzcyI6Imh0dHBzOlwvXC9wb3J0YWlsLWFwaS5tZXRlb2ZyYW5jZS5mcjo0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6eyI2MFJlcVBhck1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInBlcm1pdHRlZFJlZmVyZXIiOiIiLCJzdWJzY3JpYmVkQVBJcyI6W3sic3Vic2NyaWJlclRlbmFudERvbWFpbiI6ImNhcmJvbi5zdXBlciIsIm5hbWUiOiJEb25uZWVzUHVibGlxdWVzVmlnaWxhbmNlIiwiY29udGV4dCI6IlwvcHVibGljXC9EUFZpZ2lsYW5jZVwvdjEiLCJwdWJsaXNoZXIiOiJhZG1pbiIsInZlcnNpb24iOiJ2MSIsInN1YnNjcmlwdGlvblRpZXIiOiI2MFJlcVBhck1pbiJ9XSwidG9rZW5fdHlwZSI6ImFwaUtleSIsInBlcm1pdHRlZElQIjoiIiwiaWF0IjoxNjk4ODYxNDExLCJqdGkiOiIwMzk3NWQ2Yy1kMjFlLTQzNGEtYWYyYi1jYzRlYTZmNWIwNzIifQ==.Oq7NX1VNSQAspuVPbwucOc2eyzirkPKdZJv6kozV5WcvH071niq9_OkVfmhea0V_b9QVUZLxaG8WfeDRQIV1mqvwg36-PChrzjRdXlMdZqwWvDrEWl02Q6h9PcgFYqcQj_LoP8zSGX7JQsdZBnXbU4PEsQFUnlvEwKm1wpozs4jSLRv-swJtcyElWqKudnYatSh06qrwEXJsFjOslgpcgp1rJjpRge_-sDHQ2XvcUoICB0PIBg0v0XYuk0FJMoTBEgREPUmHTijJt0WXT3z-vRfhbhnAVI9ekUIilcyGtHizl-0o0wytmIsDJY_l0KXuwo2EcT_ZcQVNGbT8JXU1UQ==" > ./www/images/meteo_france_alerte_tomorrow.png
+        value_template: "mf_alert_tomorrow"
+        unique_id: meteo_france_alerts_picture_tomorrow
+
+camera:
+  - platform: local_file
+    name: MF_alerte_today
+    file_path: ./www/images/meteo_france_alerte_today.png
+    
+  - platform: local_file
+    name: MF_alerte_tomorrow
+    file_path: ./www/images/meteo_france_alerte_tomorrow.png
+
+
 mqtt:
   sensor:
 # Vantage Pro2 -> WEEXWX

@@ -608,7 +608,7 @@ script:
   - id: calcul_injectionv2
     mode: single
     then:
-      # Si Bus Ve en Float on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
+      # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
       # Sinon
       # Si on regule autour du zero grid et d'un seuil puissance batteries
       # La régule consiste à incrementer ou decrementer la sortie triac 

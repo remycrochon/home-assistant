@@ -2950,18 +2950,62 @@
   alias: 00-0-1 Redemarage NODERED
   description: ''
   trigger:
-  - type: not_running
-    platform: device
-    device_id: 9ad222aef3f7f02a2f584a7d6fc827a3
-    entity_id: 4a7f7c7dab3b3e7161a7f5c493c3ff0a
-    domain: binary_sensor
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
+  - platform: time_pattern
+    minutes: /3
   condition: []
   action:
-  - service: hassio.addon_restart
-    data:
-      addon: a0d7b954_nodered
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.node_red_en_cours_d_execution
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
+        state: ''
+    then:
+    - service: hassio.addon_restart
+      data:
+        addon: a0d7b954_nodered
+    else: []
+  mode: single
+- id: '1698923695048'
+  alias: Alerte Météo actualisation
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: time_pattern
+    hours: /6
+  - platform: time
+    at: 06:30:00
+  - platform: time
+    at: '16:30:00'
+  condition: []
+  action:
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: sensor.meteo_france_alertes_81
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: sensor.meteo_france_alertes_image_today
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - sensor.meteo_france_alertes_image_tomorrow
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - camera.mf_alerte_today
+      - camera.mf_alerte_tomorrow
   mode: single

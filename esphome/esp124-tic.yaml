@@ -123,9 +123,24 @@ sensor:
     unit_of_measurement: "Wh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
+  
     filters:
       - filter_out: 0.0
-    
+
+# Energie Active soutirée Index01 HC Bleu
+  - platform: teleinfo
+    id: hcbleu
+    tag_name: "EASF01"
+    name: "Linky HC Bleu kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
+      - filter_out: 0.0
+
 # Energie Active soutirée Index02 HP Bleu
   - platform: teleinfo
     id: hchp
@@ -137,48 +152,73 @@ sensor:
     filters:
       - filter_out: 0.0    
 
+  - platform: teleinfo
+    id: hpbleu
+    tag_name: "EASF02"
+    name: "Linky HP Bleu kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;      
+      - filter_out: 0.0    
+
 # Energie Active soutirée Index03 HC Blanc
   - platform: teleinfo
     id: hcblanc
     tag_name: "EASF03"
-    name: "Linky HC Blanc Wh"
-    unit_of_measurement: "Wh"
+    name: "Linky HC Blanc kWh"
+    unit_of_measurement: "kWh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-#    filters:
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
 #      - filter_out: 0.0
 
 # Energie Active soutirée Index04 HP Blanc
   - platform: teleinfo
     id: hpblanc
     tag_name: "EASF04"
-    name: "Linky HP Blanc Wh"
-    unit_of_measurement: "Wh"
+    name: "Linky HP Blanc kWh"
+    unit_of_measurement: "kWh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-#    filters:
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
 #      - filter_out: 0.0    
 
 # Energie Active soutirée Index05 HC Rouge
   - platform: teleinfo
     id: hcrouge
     tag_name: "EASF05"
-    name: "Linky HC Rouge Wh"
-    unit_of_measurement: "Wh"
+    name: "Linky HC Rouge kWh"
+    unit_of_measurement: "kWh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-#    filters:
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
 #      - filter_out: 0.0
 
 # Energie Active soutirée Index06 HP Rouge
   - platform: teleinfo
     id: hprouge
     tag_name: "EASF06"
-    name: "Linky HP Rouge Wh"
-    unit_of_measurement: "Wh"
+    name: "Linky HP Rouge kWh"
+    unit_of_measurement: "kWh"
     icon: mdi:flash
     teleinfo_id: myteleinfo
-#    filters:
+    device_class: "energy"
+    state_class: "total_increasing"  
+    filters:
+      - lambda: return x / 1000;
 #      - filter_out: 0.0    
 
 #Puissance apparente de coupure

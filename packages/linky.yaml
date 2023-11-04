@@ -4,14 +4,18 @@
 #                                                  #
 ####################################################
 
-utility_meter:
+# Sensor à conserver l'historique dans le tableau Energy
+# le sensor sensor.linky_hphc_kwh est mis à zero dans tic Linky 
+# depuis le 3/12/2023
+# Date à laquelle le comptage des tarifs tempo a été mis en place
+#utility_meter:
 # usage jour  
-  energy_total_usage_daily:
-    source: sensor.linky_hphc_kwh
-    cycle: daily
-    tariffs:
-      - hp
-      - hc
+#  energy_total_usage_daily:
+#    source: sensor.linky_hphc_kwh
+#    cycle: daily
+#    tariffs:
+#      - hp
+#      - hc
 
 ## 
 input_boolean:
@@ -52,52 +56,88 @@ template:
       state: >-
         {{ states('sensor.linky_n_tarif')|int(default=0) == 1 }} # =1 si HC =2 si HP
 
-# Consommation journalière HP + HC - addition des utility meter
   - sensor:
-    - name: "Energie Totale Jour"
-      unique_id: "energy_total_daily"
+
+    # Template utilisés dans le tableau Energy, ils ont pris le relais des Utility Meter supprimés le 3/11/2023
+# Donc NE PAS SUPPRIMER sinon perte de l'historique des consommations
+# ou alors modifier bd:
+# dans la table "statistics" -> remplacer meta_id 29 par 1820 et 28 par 1821
+    - name: "energy_total_usage_daily_hc"
+      unique_id: "energy_total_usage_daily_hc"
       state: >-
-        {% set p = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set o = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
-        {{ (o + p) | round(2) }}
+        {% set hc = states('sensor.compteur_energie_hc_bleu_jour') | float(default=0) | round(2) %}
+        {{ hc }}
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "total_increasing"    
+
+    - name: "energy_total_usage_daily_hp"
+      unique_id: "energy_total_usage_daily_hp"
+      state: >-
+        {% set hp = states('sensor.compteur_energie_hp_bleu_jour') | float(default=0) | round(2) %}
+          {{ hp }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total_increasing"
 
-
-# Cout de l'Energie
-# les couts du kWh HP et HC sont calculés dans excel en fonction des factures recues
-# et saisis manuellement dans HA
-
-    - name: "Cout Energy Total Jour HPHC"
+# Calcul du Cout Journalier de l'Energie en fonction du tarif en cours
+# Apres passage en Tempo le 3/11/2023
+    - name: "Cout Energie HC Bleu Jour"
       state: >-
-        {% set hp = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
-        {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
-        {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
-        {{((hc*chc) + (hp*chp)) | round(2) }}
+        {% set en = states('sensor.compteur_energie_hc_bleu_jour') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_bleu_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
       unit_of_measurement: "€"
       device_class: "monetary"
       state_class: "total"  
-      unique_id: "cout_energy_total_jour_hphc"
+      unique_id: "cout_energie_hc_bleu_jour"
 
-    - name: "Cout Energy Total Jour HP"
+    - name: "Cout Energie HP Bleu Jour"
       state: >-
-        {% set hp = states('sensor.energy_total_usage_daily_hp') | float(default=0) | round(2) %}
-        {% set chp = states('input_number.cout_kwh_hp') | float(default=0) | round(5) %}
-        {{(hp*chp) | round(2) }}
+        {% set en = states('sensor.compteur_energie_hp_bleu_jour') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_bleu_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
       unit_of_measurement: "€"
       device_class: "monetary"
       state_class: "total"  
-      unique_id: "cout_energy_total_jour_hp"
-      
-    - name: "Cout Energy Total Jour HC"
+      unique_id: "cout_energie_hp_bleu_jour"
+
+    - name: "Cout Energie HC Blanc Jour"
       state: >-
-        {% set hc = states('sensor.energy_total_usage_daily_hc') | float(default=0) | round(2) %}
-        {% set chc = states('input_number.cout_kwh_hc') | float(default=0) | round(5) %}
-        {{(hc*chc) | round(2) }}
+        {% set en = states('sensor.compteur_energie_hc_blanc_jour') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_blanc_hc') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
       unit_of_measurement: "€"
       device_class: "monetary"
       state_class: "total"  
-      unique_id: "cout_energy_total_jour_hc"
-      
+      unique_id: "cout_energie_hc_blanc_jour"
+
+    - name: "Cout Energie HP Blanc Jour"
+      state: >-
+        {% set en = states('sensor.compteur_energie_hp_blanc_jour') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_blanc_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hp_blanc_jour"
+
+    - name: "Cout Energie HC Rouge Jour"
+      state: >-
+        {% set en = states('sensor.compteur_energie_hc_rouge_jour') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_rouge_hc') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hc_rouge_jour"
+
+    - name: "Cout Energie HP Rouge Jour"
+      state: >-
+        {% set en = states('sensor.compteur_energie_hp_rouge_jour') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_rouge_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hp_rouge_jour"

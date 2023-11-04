@@ -2987,16 +2987,28 @@
   - service: homeassistant.update_entity
     data: {}
     target:
-      entity_id: sensor.meteo_france_alertes_81
-  - service: homeassistant.update_entity
-    data: {}
-    target:
-      entity_id: sensor.meteo_france_alertes_image_today
+      entity_id:
+      - sensor.meteo_france_alertes_81
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
   - service: homeassistant.update_entity
     data: {}
     target:
       entity_id:
-      - sensor.meteo_france_alertes_image_tomorrow
+      - sensor.meteo_france_alerts_picture_today
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_tomorrow
   - delay:
       hours: 0
       minutes: 0

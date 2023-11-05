@@ -22,25 +22,7 @@ input_boolean:
   com_linky:
     name: Comm Linky OK=On
 
-input_number:
-  # Calcul des coûts journaliers
-  cout_kwh_hp:
-    name: Cout du Kwh HP
-    min: 0
-    max: 10
-    unit_of_measurement: EUR/kWh
-    icon: mdi:currency-eur
-    step: 0.00001
-    mode: box
 
-  cout_kwh_hc:
-    name: Cout du Kwh HC
-    min: 0
-    max: 10
-    unit_of_measurement: EUR/kWh
-    icon: mdi:currency-eur
-    step: 0.00001
-    mode: box
 
 input_text:
   # Permet de simuler des Statuts pour les tests unitaires
@@ -58,15 +40,14 @@ template:
 
   - sensor:
 
-    # Template utilisés dans le tableau Energy, ils ont pris le relais des Utility Meter supprimés le 3/11/2023
+# Template utilisés dans le tableau Energy, ils ont pris le relais des Utility Meter supprimés le 3/11/2023
 # Donc NE PAS SUPPRIMER sinon perte de l'historique des consommations
 # ou alors modifier bd:
 # dans la table "statistics" -> remplacer meta_id 29 par 1820 et 28 par 1821
     - name: "energy_total_usage_daily_hc"
       unique_id: "energy_total_usage_daily_hc"
       state: >-
-        {% set hc = states('sensor.compteur_energie_hc_bleu_jour') | float(default=0) | round(2) %}
-        {{ hc }}
+        {{ 0 }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total_increasing"    
@@ -74,8 +55,7 @@ template:
     - name: "energy_total_usage_daily_hp"
       unique_id: "energy_total_usage_daily_hp"
       state: >-
-        {% set hp = states('sensor.compteur_energie_hp_bleu_jour') | float(default=0) | round(2) %}
-          {{ hp }}
+        {{ 0 }}
       unit_of_measurement: "kWh"
       device_class: "energy"
       state_class: "total_increasing"

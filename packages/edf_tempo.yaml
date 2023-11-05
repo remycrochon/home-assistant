@@ -103,7 +103,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   # EDF Tarif Bleu Option HP/HC
   tarif_edf_base_hc:
@@ -113,7 +113,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   tarif_edf_base_hp:
     name: EDF Base HP
@@ -122,7 +122,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   # EDF Tarif Bleu Option Tempo
   tarif_edf_tempo_bleu_hc:
@@ -132,7 +132,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   tarif_edf_tempo_bleu_hp:
     name: EDF Tempo Bleu HP
@@ -141,7 +141,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   tarif_edf_tempo_blanc_hc:
     name: EDF Tempo Blanc HC
@@ -150,7 +150,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   tarif_edf_tempo_blanc_hp:
     name: EDF Tempo Blanc HP
@@ -159,7 +159,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   tarif_edf_tempo_rouge_hc:
     name: EDF Tempo Rouge HC
@@ -168,7 +168,7 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock
   tarif_edf_tempo_rouge_hp:
     name: EDF Tempo Rouge HP
@@ -177,5 +177,5 @@ input_number:
     max: 1
     step: 0.0001
     mode: box
-    unit_of_measurement: "€ /kWh"
+    unit_of_measurement: "EUR/kWh"
     icon: mdi:cash-lock  

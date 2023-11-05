@@ -117,18 +117,6 @@ sensor:
 
 # Energie Active soutirée Index01 HC Bleu
   - platform: teleinfo
-    id: hchc
-    tag_name: "EASF01"
-    name: "Linky HC Wh"
-    unit_of_measurement: "Wh"
-    icon: mdi:flash
-    teleinfo_id: myteleinfo
-  
-    filters:
-      - filter_out: 0.0
-
-# Energie Active soutirée Index01 HC Bleu
-  - platform: teleinfo
     id: hcbleu
     tag_name: "EASF01"
     name: "Linky HC Bleu kWh"
@@ -142,16 +130,6 @@ sensor:
       - filter_out: 0.0
 
 # Energie Active soutirée Index02 HP Bleu
-  - platform: teleinfo
-    id: hchp
-    tag_name: "EASF02"
-    name: "Linky HP Wh"
-    unit_of_measurement: "Wh"
-    icon: mdi:flash
-    teleinfo_id: myteleinfo
-    filters:
-      - filter_out: 0.0    
-
   - platform: teleinfo
     id: hpbleu
     tag_name: "EASF02"

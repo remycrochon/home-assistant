@@ -1666,5 +1666,46 @@
                 "file": "/config/node-red/node_modules/node-red-contrib-telegrambot/telegrambot/99-telegrambot.js"
             }
         }
+    },
+    "node-red-contrib-edge-trigger": {
+        "name": "node-red-contrib-edge-trigger",
+        "version": "1.0.1",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "falling-edge": {
+                "name": "falling-edge",
+                "types": [
+                    "falling-edge"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-edge-trigger",
+                "file": "/config/node-red/node_modules/node-red-contrib-edge-trigger/edge-trigger/falling-edge.js"
+            },
+            "rising-edge": {
+                "name": "rising-edge",
+                "types": [
+                    "rising-edge"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-edge-trigger",
+                "file": "/config/node-red/node_modules/node-red-contrib-edge-trigger/edge-trigger/rising-edge.js"
+            },
+            "hysteresis": {
+                "name": "hysteresis",
+                "types": [
+                    "hysteresis"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-edge-trigger",
+                "file": "/config/node-red/node_modules/node-red-contrib-edge-trigger/edge-trigger/hysteresis.js"
+            }
+        }
     }
 }

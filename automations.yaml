@@ -2201,68 +2201,6 @@
         }}'
       title: Conso Electrique du jour en kWh
   mode: single
-- id: '1670917693978'
-  alias: 09-1-1 Thermostat  Chambre Nord
-  description: PID Chauffage
-  use_blueprint:
-    path: argonaute199/thermostat_tpi.yaml
-    input:
-      coeff_c: 0.6
-      coeff_t: 0.01
-      entity_temp_ext: sensor.vp2_temp_out
-      entity_temp_int: sensor.chambre_nord_temperature
-      entity_puissance: input_number.affichage_puissance_chauffe_chambre_nord
-      entity_consigne: input_number.consigne_temperature_chambre_nord
-      entity_chauffage: switch.esp147_relais
-      entity_fenetre: binary_sensor.porte_frigo
-- id: '1670919556060'
-  alias: 09-1-0 Pilotage Chauffage Chambre Nord
-  description: Affectation consigne
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.mode_chauffage_chambre_nord
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_nord
-        state: Present
-      sequence:
-      - service: input_number.set_value
-        data:
-          value: 19
-        target:
-          entity_id: input_number.consigne_temperature_chambre_nord
-      - service: automation.turn_on
-        data: {}
-        target:
-          entity_id: automation.thermostat_chambre_nord
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_nord
-        state: Eco
-      sequence:
-      - service: input_number.set_value
-        data:
-          value: 17
-        target:
-          entity_id: input_number.consigne_temperature_chambre_nord
-      - service: automation.turn_on
-        data: {}
-        target:
-          entity_id: automation.thermostat_chambre_nord
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_nord
-        state: Arret
-      sequence:
-      - service: automation.turn_off
-        data: {}
-        target:
-          entity_id: automation.thermostat_chambre_nord
-  mode: single
 - id: '1670934948268'
   alias: 06-2-2 MP2 Affection puissance reduite decharge batterie
   description: ''
@@ -2318,134 +2256,6 @@
     device_id: 216e88150c3bb7fa0e5a68ac407485f9
     entity_id: switch.spots_ext_sud
     domain: switch
-  mode: single
-- id: '1675070973773'
-  alias: 09-2-0 Pilotage Chauffage Chambre Parents
-  description: Affectation consigne
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.mode_chauffage_chambre_parents
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_parents
-        state: Present
-      sequence:
-      - service: input_number.set_value
-        data:
-          value: 19
-        target:
-          entity_id: input_number.consigne_temperature_chambre_parents
-      - service: automation.turn_on
-        data: {}
-        target:
-          entity_id: automation.thermostat_chambre_parents
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_parents
-        state: Eco
-      sequence:
-      - service: input_number.set_value
-        data:
-          value: 17
-        target:
-          entity_id: input_number.consigne_temperature_chambre_parents
-      - service: automation.turn_on
-        data: {}
-        target:
-          entity_id: automation.thermostat_chambre_parents
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_parents
-        state: Arret
-      sequence:
-      - service: automation.turn_off
-        data: {}
-        target:
-          entity_id: automation.thermostat_chambre_parents
-  mode: single
-- id: '1675071105131'
-  alias: 09-2-1 Thermostat Chambre Parents
-  description: PID Chauffage
-  use_blueprint:
-    path: argonaute199/thermostat_tpi.yaml
-    input:
-      coeff_c: 0.6
-      coeff_t: 0.01
-      entity_temp_ext: sensor.vp2_temp_out
-      entity_temp_int: sensor.chamb_parents_temperature
-      entity_puissance: input_number.affichage_puissance_chauffe_chambre_parents
-      entity_fenetre: binary_sensor.porte_frigo
-      entity_consigne: input_number.consigne_temperature_chambre_parents
-      entity_chauffage: switch.esp171_rel_chauf_chambre_parents
-- id: '1675073061732'
-  alias: 09-3-1 Thermostat  Chambre Sud
-  description: PID Chauffage
-  use_blueprint:
-    path: argonaute199/thermostat_tpi.yaml
-    input:
-      coeff_c: 0.6
-      coeff_t: 0.01
-      entity_temp_ext: sensor.vp2_temp_out
-      entity_temp_int: sensor.chambre_sud_temperature
-      entity_puissance: input_number.affichage_puissance_chauffe_chambre_sud
-      entity_fenetre: binary_sensor.porte_frigo
-      entity_consigne: input_number.consigne_temperature_chambre_sud
-      entity_chauffage: switch.esp171_rel_chauf_chambre_sud
-- id: '1675073156647'
-  alias: 09-3-0 Pilotage Chauffage Chambre Sud
-  description: Affectation consigne
-  trigger:
-  - platform: state
-    entity_id:
-    - input_select.mode_chauffage_chambre_sud
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_sud
-        state: Present
-      sequence:
-      - service: input_number.set_value
-        data:
-          value: 19
-        target:
-          entity_id: input_number.consigne_temperature_chambre_sud
-      - service: automation.turn_on
-        data: {}
-        target:
-          entity_id:
-          - automation.09_3_1_thermostat_chambre_sud
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_sud
-        state: Eco
-      sequence:
-      - service: input_number.set_value
-        data:
-          value: 17
-        target:
-          entity_id:
-          - input_number.consigne_temperature_chambre_sud
-      - service: automation.turn_on
-        data: {}
-        target:
-          entity_id:
-          - automation.09_3_1_thermostat_chambre_sud
-    - conditions:
-      - condition: state
-        entity_id: input_select.mode_chauffage_chambre_sud
-        state: Arret
-      sequence:
-      - service: automation.turn_off
-        data: {}
-        target:
-          entity_id:
-          - automation.09_3_1_thermostat_chambre_sud
   mode: single
 - id: '1675530085157'
   alias: Dimmer
@@ -3020,4 +2830,16 @@
       entity_id:
       - camera.mf_alerte_today
       - camera.mf_alerte_tomorrow
+  mode: single
+- id: '1699429641790'
+  alias: 00-0-2 Backup total HA 1:00 du matin
+  description: ''
+  trigger:
+  - platform: time
+    at: 01:00:00
+  condition: []
+  action:
+  - service: hassio.backup_full
+    data:
+      compressed: true
   mode: single

@@ -1,0 +1,374 @@
+{
+  "title": "Versatile Thermostat configuration",
+  "config": {
+    "flow_title": "Versatile Thermostat configuration",
+    "step": {
+      "user": {
+        "title": "Add new Versatile Thermostat",
+        "description": "Main mandatory attributes",
+        "data": {
+          "name": "Name",
+          "thermostat_type": "Thermostat type",
+          "temperature_sensor_entity_id": "Temperature sensor entity id",
+          "external_temperature_sensor_entity_id": "External temperature sensor entity id",
+          "cycle_min": "Cycle duration (minutes)",
+          "temp_min": "Minimal temperature allowed",
+          "temp_max": "Maximal temperature allowed",
+          "device_power": "Device power",
+          "use_window_feature": "Use window detection",
+          "use_motion_feature": "Use motion detection",
+          "use_power_feature": "Use power management",
+          "use_presence_feature": "Use presence detection"
+        }
+      },
+      "type": {
+        "title": "Linked entities",
+        "description": "Linked entities attributes",
+        "data": {
+          "heater_entity_id": "1rst heater switch",
+          "heater_entity2_id": "2nd heater switch",
+          "heater_entity3_id": "3rd heater switch",
+          "heater_entity4_id": "4th heater switch",
+          "proportional_function": "Algorithm",
+          "climate_entity_id": "1rst underlying climate",
+          "climate_entity2_id": "2nd underlying climate",
+          "climate_entity3_id": "3rd underlying climate",
+          "climate_entity4_id": "4th underlying climate",
+          "ac_mode": "AC mode",
+          "valve_entity_id": "1rst valve number",
+          "valve_entity2_id": "2nd valve number",
+          "valve_entity3_id": "3rd valve number",
+          "valve_entity4_id": "4th valve number",
+          "auto_regulation_mode": "Self-regulation",
+          "auto_regulation_dtemp": "Regulation threshold",
+          "auto_regulation_periode_min": "Regulation minimal period",
+          "inverse_switch_command": "Inverse switch command"
+        },
+        "data_description": {
+          "heater_entity_id": "Mandatory heater entity id",
+          "heater_entity2_id": "Optional 2nd Heater entity id. Leave empty if not used",
+          "heater_entity3_id": "Optional 3rd Heater entity id. Leave empty if not used",
+          "heater_entity4_id": "Optional 4th Heater entity id. Leave empty if not used",
+          "proportional_function": "Algorithm to use (TPI is the only one for now)",
+          "climate_entity_id": "Underlying climate entity id",
+          "climate_entity2_id": "2nd underlying climate entity id",
+          "climate_entity3_id": "3rd underlying climate entity id",
+          "climate_entity4_id": "4th underlying climate entity id",
+          "ac_mode": "Use the Air Conditioning (AC) mode",
+          "valve_entity_id": "1rst valve number entity id",
+          "valve_entity2_id": "2nd valve number entity id",
+          "valve_entity3_id": "3rd valve number entity id",
+          "valve_entity4_id": "4th valve number entity id",
+          "auto_regulation_mode": "Auto adjustment of the target temperature",
+          "auto_regulation_dtemp": "The threshold in ° under which the temperature change will not be send",
+          "auto_regulation_periode_min": "Duration in minutes between two regulation update",
+          "inverse_switch_command": "For switch with pilot wire and diode you may need to inverse the command"
+        }
+      },
+      "tpi": {
+        "title": "TPI",
+        "description": "Time Proportional Integral attributes",
+        "data": {
+          "tpi_coef_int": "Coefficient to use for internal temperature delta",
+          "tpi_coef_ext": "Coefficient to use for external temperature delta"
+        }
+      },
+      "presets": {
+        "title": "Presets",
+        "description": "For each presets, give the target temperature (0 to ignore preset)",
+        "data": {
+          "eco_temp": "Temperature in Eco preset",
+          "comfort_temp": "Temperature in Comfort preset",
+          "boost_temp": "Temperature in Boost preset",
+          "eco_ac_temp": "Temperature in Eco preset for AC mode",
+          "comfort_ac_temp": "Temperature in Comfort preset for AC mode",
+          "boost_ac_temp": "Temperature in Boost preset for AC mode"
+        }
+      },
+      "window": {
+        "title": "Window management",
+        "description": "Open window management.\nLeave corresponding entity_id empty if not used\nYou can also configure automatic window open detection based on temperature decrease",
+        "data": {
+          "window_sensor_entity_id": "Window sensor entity id",
+          "window_delay": "Window sensor delay (seconds)",
+          "window_auto_open_threshold": "Temperature decrease threshold for automatic window open detection (in °/min)",
+          "window_auto_close_threshold": "Temperature increase threshold for end of automatic detection (in °/min)",
+          "window_auto_max_duration": "Maximum duration of automatic window open detection (in min)"
+        },
+        "data_description": {
+          "window_sensor_entity_id": "Leave empty if no window sensor should be use",
+          "window_delay": "The delay in seconds before sensor detection is taken into account",
+          "window_auto_open_threshold": "Recommended value: between 0.05 and 0.1. Leave empty if automatic window open detection is not use",
+          "window_auto_close_threshold": "Recommended value: 0. Leave empty if automatic window open detection is not use",
+          "window_auto_max_duration": "Recommended value: 60 (one hour). Leave empty if automatic window open detection is not use"
+        }
+      },
+      "motion": {
+        "title": "Motion management",
+        "description": "Motion sensor management. Preset can switch automatically depending of a motion detection\nLeave corresponding entity_id empty if not used.\nmotion_preset and no_motion_preset should be set to the corresponding preset name",
+        "data": {
+          "motion_sensor_entity_id": "Motion sensor entity id",
+          "motion_delay": "Activation delay",
+          "motion_off_delay": "Deactivation delay",
+          "motion_preset": "Motion preset",
+          "no_motion_preset": "No motion preset"
+        },
+        "data_description": {
+          "motion_sensor_entity_id": "The entity id of the motion sensor",
+          "motion_delay": "Motion activation activation delay (seconds)",
+          "motion_off_delay": "Motion deactivation delay (seconds)",
+          "motion_preset": "Preset to use when motion is detected",
+          "no_motion_preset": "Preset to use when no motion is detected"
+        }
+      },
+      "power": {
+        "title": "Power management",
+        "description": "Power management attributes.\nGives the power and max power sensor of your home.\nThen specify the power consumption of the heater when on.\nAll sensors and device power should have the same unit (kW or W).\nLeave corresponding entity_id empty if not used.",
+        "data": {
+          "power_sensor_entity_id": "Power sensor entity id",
+          "max_power_sensor_entity_id": "Max power sensor entity id",
+          "power_temp": "Temperature for Power shedding"
+        }
+      },
+      "presence": {
+        "title": "Presence management",
+        "description": "Presence management attributes.\nGives the a presence sensor of your home (true is someone is present).\nThen specify either the preset to use when presence sensor is false or the offset in temperature to apply.\nIf preset is given, the offset will not be used.\nLeave corresponding entity_id empty if not used.",
+        "data": {
+          "presence_sensor_entity_id": "Presence sensor entity id",
+          "eco_away_temp": "Temperature in Eco preset when no presence",
+          "comfort_away_temp": "Temperature in Comfort preset when no presence",
+          "boost_away_temp": "Temperature in Boost preset when no presence",
+          "eco_ac_away_temp": "Temperature in Eco preset when no presence in AC mode",
+          "comfort_ac_away_temp": "Temperature in Comfort preset when no presence in AC mode",
+          "boost_ac_away_temp": "Temperature in Boost preset when no presence in AC mode"
+        }
+      },
+      "advanced": {
+        "title": "Advanced parameters",
+        "description": "Configuration of advanced parameters. Leave the default values if you don't know what you are doing.\nThis parameters can lead to a very bad temperature or power regulation.",
+        "data": {
+          "minimal_activation_delay": "Minimal activation delay",
+          "security_delay_min": "Security delay (in minutes)",
+          "security_min_on_percent": "Minimal power percent to enable security mode",
+          "security_default_on_percent": "Power percent to use in security mode"
+        },
+        "data_description": {
+          "minimal_activation_delay": "Delay in seconds under which the equipment will not be activated",
+          "security_delay_min": "Maximum allowed delay in minutes between two temperature mesures. Above this delay, the thermostat will turn to a security off state",
+          "security_min_on_percent": "Minimal heating percent value for security preset activation. Below this amount of power percent the thermostat won't go into security preset",
+          "security_default_on_percent": "The default heating power percent value in security preset. Set to 0 to switch off heater in security present"
+        }
+      }
+    },
+    "error": {
+      "unknown": "Unexpected error",
+      "unknown_entity": "Unknown entity id",
+      "window_open_detection_method": "Only one window open detection method should be used. Use sensor or automatic detection through temperature threshold but not both"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "flow_title": "Versatile Thermostat configuration",
+    "step": {
+      "user": {
+        "title": "Add new Versatile Thermostat",
+        "description": "Main mandatory attributes",
+        "data": {
+          "name": "Name",
+          "thermostat_type": "Thermostat type",
+          "temperature_sensor_entity_id": "Temperature sensor entity id",
+          "external_temperature_sensor_entity_id": "External temperature sensor entity id",
+          "cycle_min": "Cycle duration (minutes)",
+          "temp_min": "Minimal temperature allowed",
+          "temp_max": "Maximal temperature allowed",
+          "device_power": "Device power (kW)",
+          "use_window_feature": "Use window detection",
+          "use_motion_feature": "Use motion detection",
+          "use_power_feature": "Use power management",
+          "use_presence_feature": "Use presence detection"
+        }
+      },
+      "type": {
+        "title": "Linked entities",
+        "description": "Linked entities attributes",
+        "data": {
+          "heater_entity_id": "1rst heater switch",
+          "heater_entity2_id": "2nd heater switch",
+          "heater_entity3_id": "3rd heater switch",
+          "heater_entity4_id": "4th heater switch",
+          "proportional_function": "Algorithm",
+          "climate_entity_id": "1rst underlying climate",
+          "climate_entity2_id": "2nd underlying climate",
+          "climate_entity3_id": "3rd underlying climate",
+          "climate_entity4_id": "4th underlying climate",
+          "ac_mode": "AC mode",
+          "valve_entity_id": "1rst valve number",
+          "valve_entity2_id": "2nd valve number",
+          "valve_entity3_id": "3rd valve number",
+          "valve_entity4_id": "4th valve number",
+          "auto_regulation_mode": "Self-regulation",
+          "auto_regulation_dtemp": "Regulation threshold",
+          "auto_regulation_periode_min": "Regulation minimal period",
+          "inverse_switch_command": "Inverse switch command"
+        },
+        "data_description": {
+          "heater_entity_id": "Mandatory heater entity id",
+          "heater_entity2_id": "Optional 2nd Heater entity id. Leave empty if not used",
+          "heater_entity3_id": "Optional 3rd Heater entity id. Leave empty if not used",
+          "heater_entity4_id": "Optional 4th Heater entity id. Leave empty if not used",
+          "proportional_function": "Algorithm to use (TPI is the only one for now)",
+          "climate_entity_id": "Underlying climate entity id",
+          "climate_entity2_id": "2nd underlying climate entity id",
+          "climate_entity3_id": "3rd underlying climate entity id",
+          "climate_entity4_id": "4th underlying climate entity id",
+          "ac_mode": "Use the Air Conditioning (AC) mode",
+          "valve_entity_id": "1rst valve number entity id",
+          "valve_entity2_id": "2nd valve number entity id",
+          "valve_entity3_id": "3rd valve number entity id",
+          "valve_entity4_id": "4th valve number entity id",
+          "auto_regulation_mode": "Auto adjustment of the target temperature",
+          "auto_regulation_dtemp": "The threshold in ° under which the temperature change will not be send",
+          "auto_regulation_periode_min": "Duration in minutes between two regulation update",
+          "inverse_switch_command": "For switch with pilot wire and diode you may need to inverse the command"
+        }
+      },
+      "tpi": {
+        "title": "TPI",
+        "description": "Time Proportional Integral attributes",
+        "data": {
+          "tpi_coef_int": "Coefficient to use for internal temperature delta",
+          "tpi_coef_ext": "Coefficient to use for external temperature delta"
+        }
+      },
+      "presets": {
+        "title": "Presets",
+        "description": "For each presets, give the target temperature (0 to ignore preset)",
+        "data": {
+          "eco_temp": "Temperature in Eco preset",
+          "comfort_temp": "Temperature in Comfort preset",
+          "boost_temp": "Temperature in Boost preset",
+          "eco_ac_temp": "Temperature in Eco preset for AC mode",
+          "comfort_ac_temp": "Temperature in Comfort preset for AC mode",
+          "boost_ac_temp": "Temperature in Boost preset for AC mode"
+        }
+      },
+      "window": {
+        "title": "Window management",
+        "description": "Open window management.\nLeave corresponding entity_id empty if not used\nYou can also configure automatic window open detection based on temperature decrease",
+        "data": {
+          "window_sensor_entity_id": "Window sensor entity id",
+          "window_delay": "Window sensor delay (seconds)",
+          "window_auto_open_threshold": "Temperature decrease threshold for automatic window open detection (in °/min)",
+          "window_auto_close_threshold": "Temperature increase threshold for end of automatic detection (in °/min)",
+          "window_auto_max_duration": "Maximum duration of automatic window open detection (in min)"
+        },
+        "data_description": {
+          "window_sensor_entity_id": "Leave empty if no window sensor should be use",
+          "window_delay": "The delay in seconds before sensor detection is taken into account",
+          "window_auto_open_threshold": "Recommended value: between 0.05 and 0.1. Leave empty if automatic window open detection is not use",
+          "window_auto_close_threshold": "Recommended value: 0. Leave empty if automatic window open detection is not use",
+          "window_auto_max_duration": "Recommended value: 60 (one hour). Leave empty if automatic window open detection is not use"
+        }
+      },
+      "motion": {
+        "title": "Motion management",
+        "description": "Motion sensor management. Preset can switch automatically depending of a motion detection\nLeave corresponding entity_id empty if not used.\nmotion_preset and no_motion_preset should be set to the corresponding preset name",
+        "data": {
+          "motion_sensor_entity_id": "Motion sensor entity id",
+          "motion_delay": "Activation delay",
+          "motion_off_delay": "Deactivation delay",
+          "motion_preset": "Motion preset",
+          "no_motion_preset": "No motion preset"
+        },
+        "data_description": {
+          "motion_sensor_entity_id": "The entity id of the motion sensor",
+          "motion_delay": "Motion activation activation delay (seconds)",
+          "motion_off_delay": "Motion deactivation delay (seconds)",
+          "motion_preset": "Preset to use when motion is detected",
+          "no_motion_preset": "Preset to use when no motion is detected"
+        }
+      },
+      "power": {
+        "title": "Power management",
+        "description": "Power management attributes.\nGives the power and max power sensor of your home.\nThen specify the power consumption of the heater when on.\nAll sensors and device power should have the same unit (kW or W).\nLeave corresponding entity_id empty if not used.",
+        "data": {
+          "power_sensor_entity_id": "Power sensor entity id",
+          "max_power_sensor_entity_id": "Max power sensor entity id",
+          "power_temp": "Temperature for Power shedding"
+        }
+      },
+      "presence": {
+        "title": "Presence management",
+        "description": "Presence management attributes.\nGives the a presence sensor of your home (true is someone is present).\nThen specify either the preset to use when presence sensor is false or the offset in temperature to apply.\nIf preset is given, the offset will not be used.\nLeave corresponding entity_id empty if not used.",
+        "data": {
+          "presence_sensor_entity_id": "Presence sensor entity id (true is present)",
+          "eco_away_temp": "Temperature in Eco preset when no presence",
+          "comfort_away_temp": "Temperature in Comfort preset when no presence",
+          "boost_away_temp": "Temperature in Boost preset when no presence",
+          "eco_ac_away_temp": "Temperature in Eco preset when no presence in AC mode",
+          "comfort_ac_away_temp": "Temperature in Comfort preset when no presence in AC mode",
+          "boost_ac_away_temp": "Temperature in Boost preset when no presence in AC mode"
+        }
+      },
+      "advanced": {
+        "title": "Advanced parameters",
+        "description": "Configuration of advanced parameters. Leave the default values if you don't know what you are doing.\nThis parameters can lead to a very bad temperature or power regulation.",
+        "data": {
+          "minimal_activation_delay": "Minimal activation delay",
+          "security_delay_min": "Security delay (in minutes)",
+          "security_min_on_percent": "Minimal power percent for security mode",
+          "security_default_on_percent": "Power percent to use in security mode"
+        },
+        "data_description": {
+          "minimal_activation_delay": "Delay in seconds under which the equipment will not be activated",
+          "security_delay_min": "Maximum allowed delay in minutes between two temperature mesures. Above this delay, the thermostat will turn to a security off state",
+          "security_min_on_percent": "Minimal heating percent value for security preset activation. Below this amount of power percent the thermostat won't go into security preset",
+          "security_default_on_percent": "The default heating power percent value in security preset. Set to 0 to switch off heater in security present"
+        }
+      }
+    },
+    "error": {
+      "unknown": "Unexpected error",
+      "unknown_entity": "Unknown entity id",
+      "window_open_detection_method": "Only one window open detection method should be used. Use sensor or automatic detection through temperature threshold but not both"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "selector": {
+    "thermostat_type": {
+      "options": {
+        "thermostat_over_switch": "Thermostat over a switch",
+        "thermostat_over_climate": "Thermostat over a climate",
+        "thermostat_over_valve": "Thermostat over a valve"
+      }
+    },
+    "auto_regulation_mode": {
+      "options": {
+        "auto_regulation_slow": "Slow",
+        "auto_regulation_strong": "Strong",
+        "auto_regulation_medium": "Medium",
+        "auto_regulation_light": "Light",
+        "auto_regulation_none": "No auto-regulation"
+      }
+    }
+  },
+  "entity": {
+    "climate": {
+      "versatile_thermostat": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "power": "Shedding",
+              "security": "Security",
+              "none": "Manual"
+            }
+          }
+        }
+      }
+    }
+  }
+}

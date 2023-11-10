@@ -2843,3 +2843,40 @@
     data:
       compressed: true
   mode: single
+- id: '1699543194087'
+  alias: VMC Asservissements aux Saisons
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.vp2_temp_out
+    below: 5
+  - platform: sun
+    event: sunset
+    offset: +01:30:00
+  condition:
+  - condition: and
+    conditions:
+    - condition: and
+      conditions:
+      - after: sunset
+        after_offset: 01:29:00
+        condition: sun
+      - below: 5
+        condition: numeric_state
+        entity_id: sensor.vp2_temp_out
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: sensor.season
+        state: autumn
+      - condition: state
+        entity_id: sensor.season
+        state: winter
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.relais_cde_vmc_niv0_on_off
+  mode: single

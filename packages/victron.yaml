@@ -599,6 +599,23 @@ template:
       state: >-
         {{ max(0, 0 - states('sensor.mp2_pu_batteries_par_mqtt') | float(default=0)) }}
 
+    # Puissance instantanée injectée ou soutirée
+    - name: "MP2 Pu Grid Mqtt Soutirée"
+      unique_id: "mp2_pu_grid_l1_mqtt_soutiree"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {{ max(0, states('sensor.mp2_pu_grid_l1_ac_mppt') | float(default=0)) }}
+
+    - name: "MP2 Pu Grid Mqtt Injectée"
+      unique_id: "mp2_pu_grid_l1_mqtt_injectee"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {{ max(0, 0 - states('sensor.mp2_pu_grid_l1_ac_mppt') | float(default=0)) }}
+
 #
 # Modèles pour les diagrammes de transfert de Powerflow réel (APF - PowerFlow réel)
 #

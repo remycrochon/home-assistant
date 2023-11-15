@@ -78,16 +78,14 @@ template:
 ############################################ 21/12/2022
 # sensor.ecocompteur_ecs:
 # Si switch.cde_relais_ecs->
-#   template: sensor.puissance_ecs_reseau_w->
-#     template: sensor.puissance_ecs_reseau_kw
+#   template: sensor.puissance_ecs_reseau_kw
 #     Integration en kW: sensor.energie_ecs_reseau->
 #       utility_meter: energy_ecs_reseau_usage_daily->
 #         sensor.compteur_energie_ecs_reseau_jour_hp
 #         sensor.compteur_energie_ecs_reseau_jour_hc
 
 # Si switch.cde_relais_ecs_router_pv->
-#   template: sensor.puissance_ecs_pv_w->
-#     template: sensor.puissance_ecs_pv_kw
+#   template: sensor.puissance_ecs_pv_kw
 #     Integration en kW: sensor.energie_ecs_pv->
 #       utility_meter: energy_ecs_pv_usage_daily->
 #         sensor.compteur_energie_ecs_pv_jour_hp
@@ -95,53 +93,35 @@ template:
 
 # Calcul puissance ECS si mode réseau
 # L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
-    - name: puissance_ecs_reseau_w
-      unique_id: "puissance_ecs_reseau_w"
-      device_class: "power"
-      state_class: "measurement"    
-      unit_of_measurement: "W"
-      state: >-
-        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set rel_ecs=states('switch.cde_relais_ecs')%}
-        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
-          {{ pu_ecs }}
-        {%else%}
-          0
-        {%endif%}
-
     - name: puissance_ecs_reseau_kw
       unique_id: "puissance_ecs_reseau_kw"
       device_class: "power"
       state_class: "measurement"    
       unit_of_measurement: "kW"
       state: >-
-        {% set p=states('sensor.puissance_ecs_reseau_w')|float(default=0) %}
-        {{ p/1000 }}
-
-# Calcul puissance ECS si mode PV
-    - name: puissance_ecs_pv_w
-      unique_id: "puissance_ecs_pv_w"
-      device_class: "power"
-      state_class: "measurement"    
-      unit_of_measurement: "W"
-      state: >-
         {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
+        {% set rel_ecs=states('switch.cde_relais_ecs')%}
         {% if (pu_ecs>0) and (rel_ecs=="on")%}          
-          {{ pu_ecs }}
+          {{ pu_ecs/1000 }}
         {%else%}
           0
         {%endif%}
-        
+
+# Calcul puissance ECS si mode PV
     - name: puissance_ecs_pv_kw
       unique_id: "puissance_ecs_pv_kw"
       device_class: "power"
       state_class: "measurement"    
       unit_of_measurement: "kW"
       state: >-
-        {% set p=states('sensor.puissance_ecs_pv_w')|float(default=0) %}
-        {{ p/1000 }}
-
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
+        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
+          {{ pu_ecs/1000 }}
+        {%else%}
+          0
+        {%endif%}
+        
 # L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
 # Totalisation des energies HC+HP
     - name: Compteur Energie ECS PV Jour HP_HC

@@ -54,13 +54,6 @@ sensor:
     start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
     end: '{{ now() }}'
 
-# Energie ECS surplus injection->utilisée dans tableau Energie
-  - platform: integration
-    source: sensor.puissance_ecs_surplus_injectee_w
-    name: energy_ecs_surplus_injectee
-    unit_prefix: k
-    method: left
-    round: 2
 
 template:
 ####################################
@@ -84,13 +77,7 @@ template:
 #         sensor.compteur_energie_ecs_reseau_jour_hp
 #         sensor.compteur_energie_ecs_reseau_jour_hc
 
-# Si switch.cde_relais_ecs_router_pv->
-#   template: sensor.puissance_ecs_pv_kw
-#     Integration en kW: sensor.energie_ecs_pv->
-#       utility_meter: energy_ecs_pv_usage_daily->
-#         sensor.compteur_energie_ecs_pv_jour_hp
-#         sensor.compteur_energie_ecs_pv_jour_hc
-
+# Le compteur PV est inclus dans l'ESP Routeur
 # Calcul puissance ECS si mode réseau
 # L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
     - name: puissance_ecs_reseau_kw
@@ -107,52 +94,11 @@ template:
           0
         {%endif%}
 
-# Calcul puissance ECS si mode PV
-    - name: puissance_ecs_pv_kw
-      unique_id: "puissance_ecs_pv_kw"
-      device_class: "power"
-      state_class: "measurement"    
-      unit_of_measurement: "kW"
-      state: >-
-        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
-        {% set rel_ecs=states('switch.cde_relais_ecs_router_pv')%}
-        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
-          {{ pu_ecs/1000 }}
-        {%else%}
-          0
-        {%endif%}
-        
-# L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
-# Totalisation des energies HC+HP
-    - name: Compteur Energie ECS PV Jour HP_HC
-      unique_id: "compteur_energie_ecs_pv_jour_hp_hc"
-      device_class: "energy"
-      state_class: "total_increasing"    
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set hp=states('sensor.compteur_energie_ecs_pv_jour_hp')|float(default=0) %}
-        {% set hc=states('sensor.compteur_energie_ecs_pv_jour_hc')|float(default=0) %}
-        {{ hp+hc }}
+# L'integrale de rieumman
+# Les utily_meter
+# Totalisation des energies PV ET RESEAU
+# sont déclarés dans "/config/helpers"
 
-    - name: Compteur Energie ECS Reseau Jour HP-HC
-      unique_id: "compteur_energie_ecs_reseau_jour_hp_hc"
-      device_class: "energy"
-      state_class: "total_increasing"    
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set hp=states('sensor.compteur_energie_ecs_reseau_jour_hp')|float(default=0) %}
-        {% set hc=states('sensor.compteur_energie_ecs_reseau_jour_hc')|float(default=0) %}
-        {{ hp+hc }}
-
-    - name: Compteur Energie ECS PV Reseau Jour HP-HC
-      unique_id: "compteur_energie_ecs_pv_reseau_jour_hp_hc"
-      device_class: "energy"
-      state_class: "total_increasing"    
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set p=states('sensor.compteur_energie_ecs_reseau_jour_hp_hc')|float(default=0) %}
-        {% set r=states('sensor.compteur_energie_ecs_pv_jour_hp_hc')|float(default=0) %}
-        {{ p+r }}
 
 
 

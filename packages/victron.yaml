@@ -77,6 +77,14 @@ mqtt:
       unit_of_measurement: '%'
       device_class: battery
       state_class: measurement
+
+    - name: "MP2 SOC MINI MQTT"
+      unique_id: mp2_soc_mini_par_mqtt" 
+      state_topic: "mp2/multiplus2/soc_mini"
+      unit_of_measurement: '%'
+      device_class: battery
+      state_class: measurement
+
 # Victron
 modbus:
   - name: cerbo
@@ -332,14 +340,6 @@ modbus:
         address: 2704
         scale: 10
 
-      # Point de consigne ESS
-      - name: 'MP2 ESS Minimum SoC Consigne'
-        unique_id: 'mp2_ess_minimum_soc_consigne'
-        unit_of_measurement: "%"
-        data_type: uint16
-        slave: 100
-        address: 2901
-        scale: 0.1
 
 # Modbus Smart Shunt
         # State of charge - SOC
@@ -382,17 +382,6 @@ modbus:
         address: 265
         scale: 0.1
         device_class: current
-        state_class: measurement
-
-      - name: "MP2 Niveau Charge Batteries"
-        unique_id: "mp2_niveau_charge_batteries"
-        data_type: uint16
-        unit_of_measurement: "%"
-        precision: 2
-        slave: 223
-        address: 266
-        scale: 0.1
-        device_class: battery
         state_class: measurement
 
       - name: "MP2 Temps depuis derniere pleine batteries"
@@ -530,7 +519,7 @@ modbus:
         data_type: uint16
         scale: 1
 
-      # Alarme Réseau Perdu
+      # Alarme Réseau Perdu (Grid Lost)
       - name : 'Mp2 Alarme perte réseau' 
         unique_id: 'mp2_alarme_perte_reseau'
         unit_of_measurement : "marche/arrêt" 
@@ -631,3 +620,27 @@ template:
     # Determine le niveau de SOC en fonction de la prévision de production solaire du jour
     # calculé dans "helpers" http://192.168.0.37:8123/config/integrations/integration/template#config_entry=ce7906995d5c7143ca2db7634d556039
     
+
+    # Calcul du temps restant sur la batterie jusqu'a SOC MINI
+    # https://github.com/Danie10/gadgeteerza-homeassistant/tree/main
+    # Calculez les heures restantes jusqu'au SOC min actuel en fonction de la capacité maximale de la batterie à 100 % de charge, c'est-à-dire. quand il reviendra au réseau électrique
+    # Heures restantes = (SOC%-MinSOC) * Battery_max_capacity (Ah) divisé par le courant en ampères, par exemple. 86 %-40 % à 11 ampères correspond à (0,46 * 206)/11
+    # Condition 1 pour vérifier si le SoC n'a pas déjà atteint MinSOC ou en dessous, car le temps pour atteindre MinSOC a atteint 0 heure, alors faites 0
+    # Condition 2 pour vérifier que la batterie se décharge (le courant en ampères sera un nombre négatif), puis utilisez l'ABS de Battery_current pour faire circuler un courant négatif, un nombre flottant positif. Réglez-le sur -1 A (50 W à 52 V) au lieu de 0 A pour éviter de très petites décharges lorsqu'elles sont pleines et de projeter des heures extrêmement longues sur la jauge.
+    # Condition 3 pour vérifier si le courant de la batterie est nul ou en charge, puis calculer le temps restant en fonction de la charge CA (Watts AC convertis en courant DC Amps - car Watts AC = Watts DC)
+    # J'ai dû tout convertir en flottants pour une précision des heures partielles, puis arrondi à 2 décimales
+    - name: MP2 Temps Restant Batteries Mini SOC
+      unique_id: "mp2_temps restant_batteries_mini_soc" 
+      unit_of_measurement: "Hours"
+      icon: mdi:sort-clock-ascending
+      state: >-
+        {% set battery_current = states('sensor.mp2_intensite_batteries')|float %}
+        {% set battery_soc = states('sensor.mp2_soc_mqtt')|float %}
+        {% set loads_current = states('sensor.mp2_conso_out1_mqtt')|float/states('sensor.mp2_tension_batteries_par_mqtt')|float %}
+        {% set battery_min_soc = states('sensor.mp2_soc_mini_mqtt')|float %}
+        {% set battery_max_capacity = 300 %}
+        {% if (battery_soc-battery_min_soc) < 0 %}
+          {{ 0 }}
+        {% else %}
+          {{ ((((battery_soc-battery_min_soc)*battery_max_capacity)/100)/loads_current | float ) | round(2) }}
+        {% endif %}

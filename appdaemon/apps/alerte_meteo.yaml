@@ -1,7 +1,0 @@
-# Version du 1 juin 2022
-alerte_meteo:
-  class: AlerteMeteo
-  module: alerte_meteo
-  entité: sensor.albi_next_rain #h_arrivee_pluie
-  alerte: sensor.81_weather_alert
-  

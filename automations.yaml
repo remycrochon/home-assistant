@@ -1362,6 +1362,15 @@
       hours: 0
       minutes: 5
       seconds: 0
+  - platform: numeric_state
+    entity_id:
+    - sensor.esp136_tdeg_air_neuf
+    below: 5
+    id: temp_basse
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: levee_soleil
   condition: []
   action:
   - choose:
@@ -1465,6 +1474,38 @@
         target:
           entity_id:
           - switch.relais_cde_vmc_niv0_on_off
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - temp_basse
+      - condition: sun
+        before: sunrise
+        after: sunset
+        after_offset: 01:30:00
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.season
+          state: autumn
+        - condition: state
+          entity_id: sensor.season
+          state: winter
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id:
+          - switch.relais_cde_vmc_niv0_on_off
+    - conditions:
+      - condition: trigger
+        id:
+        - levee_soleil
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: CO2 PM2.5
+      sequence:
+      - service: switch.turn_on
         data: {}
     default: []
   mode: single
@@ -2501,75 +2542,6 @@
         }}
       title: Temperature Haute Stérilisateur !!!
   mode: single
-- id: '1690208438733'
-  alias: 3_4_1 V1 Piscine-EV Appoint EAU
-  description: 'Appoint EAU uniquement si volet ouvert depuis 15 mn  '
-  trigger:
-  - platform: time_pattern
-    minutes: /1
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.tp_plein_lsh
-        state: 'on'
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 10
-      - condition: state
-        entity_id: switch.ev_eau
-        state: 'off'
-      - condition: state
-        entity_id: cover.volet_piscine
-        state: open
-        for:
-          hours: 0
-          minutes: 5
-          seconds: 0
-      sequence:
-      - service: switch.turn_on
-        target:
-          entity_id: switch.ev_eau
-        data: {}
-      - service: notify.telegram
-        data:
-          message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Piscine Appoint Eau!
-    - conditions:
-      - condition: state
-        entity_id: switch.ev_eau
-        state: 'on'
-      - condition: state
-        entity_id: binary_sensor.tp_plein_lsh
-        state: 'off'
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 15
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.ev_eau
-        data: {}
-      - service: notify.telegram
-        data:
-          message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Piscine Appoint Eau!
-    - conditions:
-      - condition: state
-        entity_id: switch.ev_eau
-        state: 'off'
-      sequence:
-      - service: switch.turn_off
-        target:
-          entity_id: switch.ev_eau
-        data: {}
-    default: []
-  mode: single
-  trace:
-    stored_traces: 10
 - id: '1690353892596'
   alias: 06-1-6 Surveillance Pu Chalet
   description: ''
@@ -2851,32 +2823,41 @@
     entity_id:
     - sensor.vp2_temp_out
     below: 5
+    id: temp_basse
   - platform: sun
-    event: sunset
-    offset: +01:30:00
-  condition:
-  - condition: and
-    conditions:
-    - condition: and
-      conditions:
-      - after: sunset
-        after_offset: 01:29:00
-        condition: sun
-      - below: 5
-        condition: numeric_state
-        entity_id: sensor.vp2_temp_out
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: sensor.season
-        state: autumn
-      - condition: state
-        entity_id: sensor.season
-        state: winter
+    event: sunrise
+    offset: 0
+    id: levee_soleil
+  condition: []
   action:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.relais_cde_vmc_niv0_on_off
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - temp_basse
+      - condition: sun
+        before: sunrise
+        after: sunset
+        after_offset: 01:30:00
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.season
+          state: autumn
+        - condition: state
+          entity_id: sensor.season
+          state: winter
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id:
+          - switch.relais_cde_vmc_niv0_on_off
+    - conditions:
+      - condition: trigger
+        id:
+        - levee_soleil
+      sequence:
+      - service: switch.turn_on
+        data: {}
   mode: single

@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:true});exports.default=void 0;var toDeg=function toDeg(value){return value*180/Math.PI};var _default=toDeg;exports.default=_default;

@@ -11,6 +11,7 @@
 
 climate:
   - platform: generic_thermostat
+    unique_id: "altherma_thermostat"
     name: Altherma
     heater: switch.altherma # organe de commande
     target_sensor: sensor.temperature_salon_zb # Capteur de température
@@ -25,7 +26,7 @@ climate:
     comfort_temp: 23 # Temperature de confort
     sleep_temp: 19 # Nuit
     activity_temp: 20
-    home_temp: 20.5 # Jour
+    home_temp: 20 # Jour
     precision: 0.1 # Précision souhaitée pour cet appareil. 0.1/0.5/1.0
     initial_hvac_mode: "off" # Demarre sur Arret ou heat ou cool
     ac_mode: false

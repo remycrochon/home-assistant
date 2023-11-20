@@ -31,52 +31,17 @@
     default: []
   mode: single
 - id: '1610371647929'
-  alias: 01-1-2 Purge base de données
+  alias: 01-01-02 Purge base de données
   description: ''
   trigger:
   - platform: time
-    at: 01:30
+    at: 00:05:00
   condition: []
   action:
   - service: recorder.purge
     data:
       keep_days: 7
       repack: true
-  mode: single
-- id: '1611218307411'
-  alias: 01-1-1 Mode Present/Absent
-  description: Passage du mode Presence de Absent ou Vacances à Present
-  trigger:
-  - platform: state
-    entity_id: input_select.presence
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.presence
-        state: Vacance
-      - condition: state
-        entity_id: input_select.presence
-        state: Absent
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id:
-          - input_select.volets
-        data:
-          option: Absent
-    - conditions:
-      - condition: state
-        entity_id: input_select.presence
-        state: Present
-      sequence:
-      - service: input_select.select_option
-        target:
-          entity_id: input_select.volets
-        data:
-          option: Auto
-    default: []
   mode: single
 - id: '1617185147880'
   alias: 3_4_2 Piscine-Notification Alarme Appoint d'eau
@@ -1491,6 +1456,9 @@
         - condition: state
           entity_id: sensor.season
           state: winter
+      - condition: state
+        entity_id: input_select.vmc_niv0
+        state: CO2 PM2.5
       sequence:
       - service: switch.turn_off
         data: {}
@@ -1507,6 +1475,8 @@
       sequence:
       - service: switch.turn_on
         data: {}
+        target:
+          entity_id: switch.relais_cde_vmc_niv0_on_off
     default: []
   mode: single
   trace:
@@ -2528,7 +2498,7 @@
       notify_message: Alerte {{ entity_name }}Déclenché
       initial_delay: 180
 - id: '1687859491524'
-  alias: 00-0-3 Temperature haute stérilisateur
+  alias: 00-00-03 Temperature haute stérilisateur
   description: ''
   trigger:
   - platform: numeric_state
@@ -2561,7 +2531,7 @@
         }}
   mode: single
 - id: '1690355630909'
-  alias: 00-0-4 Restart Addon UPS si en défaut
+  alias: 00-00-04 Restart Addon UPS si en défaut
   description: ''
   trigger:
   - platform: state
@@ -2729,7 +2699,7 @@
         }}
   mode: single
 - id: '1698395745098'
-  alias: 00-0-1 Redemarage NODERED
+  alias: 00-00-01 Redemarage NODERED
   description: ''
   trigger:
   - platform: time_pattern
@@ -2737,20 +2707,18 @@
   condition: []
   action:
   - if:
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: binary_sensor.node_red_en_cours_d_execution
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 0
-        state: ''
-    then:
+    - condition: state
+      entity_id: binary_sensor.node_red_en_cours_d_execution
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 0
+      state: ''
+    then: []
+    else:
     - service: hassio.addon_restart
       data:
         addon: a0d7b954_nodered
-    else: []
   mode: single
 - id: '1698923695048'
   alias: Alerte Météo actualisation
@@ -2804,60 +2772,64 @@
       - camera.mf_alerte_tomorrow
   mode: single
 - id: '1699429641790'
-  alias: 00-0-2 Backup total HA 1:00 du matin
+  alias: 00-00-02 Backup total HA 1:00 du matin
   description: ''
   trigger:
   - platform: time
-    at: 01:00:00
+    at: 02:00:00
   condition: []
   action:
   - service: hassio.backup_full
     data:
       compressed: true
   mode: single
-- id: '1699543194087'
-  alias: VMC Asservissements aux Saisons
-  description: ''
+- id: '1700469604629'
+  alias: 01-03-00 Chauffage Salon Asservissement HP Rouge
+  description: Si HP Rouge Force la PAC à mode Absent
   trigger:
-  - platform: numeric_state
+  - platform: state
     entity_id:
-    - sensor.vp2_temp_out
-    below: 5
-    id: temp_basse
-  - platform: sun
-    event: sunrise
-    offset: 0
-    id: levee_soleil
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    to: HP ROUGE
+    id: hprouge
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    from: HP ROUGE
+    id: non hp rouge
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
         id:
-        - temp_basse
-      - condition: sun
-        before: sunrise
-        after: sunset
-        after_offset: 01:30:00
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: sensor.season
-          state: autumn
-        - condition: state
-          entity_id: sensor.season
-          state: winter
+        - hprouge
       sequence:
-      - service: switch.turn_off
-        data: {}
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: away
         target:
-          entity_id:
-          - switch.relais_cde_vmc_niv0_on_off
+          entity_id: climate.altherma
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Passage en mode HP ROUGE-Clim en mode Absent
     - conditions:
       - condition: trigger
         id:
-        - levee_soleil
+        - non hp rouge
       sequence:
-      - service: switch.turn_on
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: home
+        target:
+          entity_id: climate.altherma
+      - service: climate.turn_on
         data: {}
+        target:
+          entity_id: climate.altherma
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Sortie du mode HP ROUGE-Clim en mode Present
   mode: single

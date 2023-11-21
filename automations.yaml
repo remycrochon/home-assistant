@@ -1,5 +1,5 @@
 - id: '1610184966825'
-  alias: 4_1_2 Volet Boolean Nuit/Jour
+  alias: 04-01-02 Volet Boolean Nuit/Jour
   description: ''
   trigger:
   - platform: template
@@ -21,6 +21,7 @@
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.nuit_jour
+        data: {}
     - conditions:
       - condition: trigger
         id: jour->nuit
@@ -28,6 +29,7 @@
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.nuit_jour
+        data: {}
     default: []
   mode: single
 - id: '1610371647929'
@@ -361,20 +363,6 @@
   mode: single
   trace:
     stored_traces: 10
-- id: '1629792204535'
-  alias: 4_1_4 Volet  Proport_Bureau_droit
-  description: Mise à jour Position fermé (=0)
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.volet_buro_droit
-    to: 'off'
-  condition: []
-  action:
-  - service: cover_rf_time_based.set_known_position
-    data:
-      entity_id: cover.volet_droit_p
-      position: 0
-  mode: single
 - id: '1632232387237'
   alias: 05-01-01 Reseau Notification Nouvelle IP
   description: ''
@@ -399,7 +387,7 @@
       title: Reseau
   mode: single
 - id: '1632989157968'
-  alias: 4_1_1 Volet Automatismes
+  alias: 04-01-01 Volet Automatismes
   description: 'Ete/Hiver/Absent '
   trigger:
   - platform: state
@@ -488,7 +476,7 @@
     default: []
   mode: single
 - id: '1632995598078'
-  alias: 1_2_3 ECS Automatismes
+  alias: 01_02_03 ECS Automatismes
   description: ''
   trigger:
   - platform: state
@@ -1225,7 +1213,7 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634916685737'
-  alias: 01-1-3 Pusch gitub
+  alias: 01-01-03 Pusch gitub
   description: pousse vers githtub
   trigger:
   - platform: time
@@ -1236,7 +1224,7 @@
     data: {}
   mode: single
 - id: '1637073026237'
-  alias: 4_2_2 Volet Balise ouverture sous sol
+  alias: 04-02-02 Volet Balise ouverture sous sol
   description: ''
   trigger:
   - platform: tag
@@ -1246,9 +1234,10 @@
   - service: cover.open_cover
     target:
       entity_id: cover.garage_soussol
+    data: {}
   mode: single
 - id: '1637074521273'
-  alias: 4_2_1 Volet Balise ouverture garage
+  alias: 04-02-01 Volet Balise ouverture garage
   description: ''
   trigger:
   - platform: tag
@@ -1258,6 +1247,7 @@
   - service: cover.open_cover
     target:
       entity_id: cover.garage_rdc
+    data: {}
   mode: single
 - id: '1638119466260'
   alias: 02-01-13 Al Bp Notif Def Com Linky
@@ -1285,7 +1275,7 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1638433932226'
-  alias: 1_2_1 VMC Niv0 Automatismes
+  alias: 01-02-01 VMC Niv0 Automatismes
   description: ' '
   trigger:
   - platform: state
@@ -1615,25 +1605,27 @@
     default: []
   mode: single
 - id: '1642614758763'
-  alias: 06-1-0 Energie Changement HP<->HC
+  alias: 06-01-00 Energie Changement HP<->HC
   description: ''
   trigger:
   - platform: state
-    entity_id: sensor.linky_n_tarif
-    id: tarif_hc
-    from: '2'
-    to: '1'
-  - platform: state
-    entity_id: sensor.linky_n_tarif
-    from: '1'
-    id: tarif_hp
-    to: '2'
+    entity_id:
+    - sensor.linky_n_tarif
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: trigger
-        id: tarif_hc
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.linky_n_tarif
+          state: '1'
+        - condition: state
+          entity_id: sensor.linky_n_tarif
+          state: '3'
+        - condition: state
+          entity_id: sensor.linky_n_tarif
+          state: '5'
       sequence:
       - service: select.select_option
         data:
@@ -1654,8 +1646,17 @@
           - select.compteur_energie_cuisine_jour
           - select.compteur_energie_mal_jour
     - conditions:
-      - condition: trigger
-        id: tarif_hp
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.linky_n_tarif
+          state: '2'
+        - condition: state
+          entity_id: sensor.linky_n_tarif
+          state: '4'
+        - condition: state
+          entity_id: sensor.linky_n_tarif
+          state: '6'
       sequence:
       - service: select.select_option
         data:
@@ -1724,75 +1725,6 @@
     data: {}
   - service: script.create_all_scripts_group
     data: {}
-  mode: single
-- id: '1649766635520'
-  alias: 4_1_3 Volet-Suivi Azimuth Soleil (old)
-  description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
-  trigger:
-  - platform: time_pattern
-    minutes: /15
-  - platform: state
-    entity_id:
-    - binary_sensor.position_soleil_midi
-    id: posmidi
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id:
-    - binary_sensor.position_soleil_soir
-    id: possoir
-    from: 'off'
-    to: 'on'
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.position_soleil_matin
-        state: 'on'
-      - condition: numeric_state
-        entity_id: sensor.vp2_radiation_moyenne
-        above: input_number.radiation_seuil_ferm_volet
-      sequence:
-      - service: cover.set_cover_position
-        data:
-          position: 10
-        target:
-          entity_id:
-          - cover.volet_sdb_p
-          - cover.volet_amis_nord_p
-    - conditions:
-      - condition: trigger
-        id: posmidi
-      sequence:
-      - service: cover.open_cover
-        data: {}
-        target:
-          entity_id: cover.volet_sdb_p
-      - condition: state
-        entity_id: input_boolean.presence_amis_ch_nord
-        state: 'off'
-      - service: cover.open_cover
-        target:
-          entity_id:
-          - cover.volet_amis_nord_p
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.position_soleil_am
-        state: 'on'
-      - condition: numeric_state
-        entity_id: sensor.vp2_radiation_moyenne
-        above: input_number.radiation_seuil_ferm_volet
-      sequence:
-      - service: cover.set_cover_position
-        data:
-          position: 10
-        target:
-          entity_id:
-          - cover.volet_amis_sud_p
-          - cover.volet_ch_parent_p
-    default: []
   mode: single
 - id: '1652251351095'
   alias: 3_2_2 Piscine-pH Injection
@@ -1869,7 +1801,7 @@
       title: Piscine Fin injection pH !!!
   mode: single
 - id: '1653294353395'
-  alias: 4_3_3 sous sol position ouverte
+  alias: 04-03-03 sous sol position ouverte
   description: ''
   trigger:
   - platform: state
@@ -1887,7 +1819,7 @@
       entity_id: cover.porte_sous_sol
   mode: single
 - id: '1653294805612'
-  alias: 4_3_2 garage position fermee
+  alias: 04-03-02 garage position fermee
   description: ''
   trigger:
   - platform: state
@@ -1905,7 +1837,7 @@
       entity_id: cover.porte_garage
   mode: single
 - id: '1653294983774'
-  alias: 4_3_4 sous sol position fermee
+  alias: 04-03-04 sous sol position fermee
   description: ''
   trigger:
   - platform: state
@@ -1923,7 +1855,7 @@
       entity_id: cover.porte_sous_sol
   mode: single
 - id: '1653295223147'
-  alias: 4_3_1 garage position ouverte
+  alias: 04-03-01 garage position ouverte
   description: ''
   trigger:
   - platform: state
@@ -1941,7 +1873,7 @@
       entity_id: cover.porte_garage
   mode: single
 - id: '1653409072754'
-  alias: 4_3_5 volet parents grand position ouvert
+  alias: 04-03-05 volet parents grand position ouvert
   description: ''
   trigger:
   - platform: state
@@ -1959,7 +1891,7 @@
       entity_id: cover.volet_parents_grand_p
   mode: single
 - id: '1653410044804'
-  alias: 4_3_6 volet amis sud grand position ouvert
+  alias: 04-03-06 volet amis sud grand position ouvert
   description: ''
   trigger:
   - platform: state
@@ -1977,7 +1909,7 @@
       entity_id: cover.volet_amis_sud_grand_p
   mode: single
 - id: '1655448600753'
-  alias: 4_1_3 Volet-Suivi Azimuth Soleil
+  alias: 04-01-03 Volet-Suivi Azimuth Soleil
   description: Ouvre et ferme les volets en fonction de la course (azimuth) du soleil
   trigger:
   - platform: template
@@ -2185,7 +2117,7 @@
       initial_delay: 300
       max_alerts: 10
 - id: '1670851911088'
-  alias: 06-1-3 Energie Message Journalier Bilan puissance
+  alias: 06-01-03 Energie Message Journalier Bilan puissance
   description: ''
   trigger:
   - platform: time
@@ -2268,36 +2200,8 @@
     entity_id: switch.spots_ext_sud
     domain: switch
   mode: single
-- id: '1675530085157'
-  alias: Dimmer
-  description: Voir routeur.yaml
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.consigne_puissance_dimmer
-  condition: []
-  action:
-  - service: rest_command.cde_dimmer
-    data: {}
-  mode: single
-- id: '1676284606975'
-  alias: Dimmer V2
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.consigne_puissance_dimmer
-  condition: []
-  action:
-  - service: light.turn_on
-    data:
-      transition: 3
-      brightness_pct: '{{ states("sensor.consigne_puissance_dimmer")|int }}'
-    target:
-      entity_id: light.esp174_puissance_dimmer_ecs
-  mode: single
 - id: '1678531257946'
-  alias: 06-1-2 Surveillance Puissance Onduleur Bureau la nuit
+  alias: 06-01-02 Surveillance Puissance Onduleur Bureau la nuit
   description: ''
   trigger:
   - platform: numeric_state
@@ -2312,47 +2216,6 @@
     data:
       message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
         }}
-  mode: single
-- id: '1679471551125'
-  alias: 06-2-1 MP2 Calcul SOC Charge Nocturne
-  description: En lien avec NodRED
-  trigger:
-  - platform: time_pattern
-    minutes: /5
-  - platform: time
-    at: 03:48:00
-    id: debut
-  - platform: time
-    at: 06:50:00
-    id: fin
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: time
-        after: 03:48:00
-        before: 06:50:00
-        enabled: true
-      sequence:
-      - service: input_number.set_value
-        target:
-          entity_id: input_number.mp2_niveau_soc_cp1
-        data_template:
-          value: '{{ states(''sensor.mp2_cible_soc_pour_charge_nocturne'') }}'
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 1
-          milliseconds: 0
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.mp2_valid_ess_charge_prog_1
-    default:
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.mp2_valid_ess_charge_prog_1
   mode: single
 - id: '1679654722410'
   alias: 01-2-4 ECS Validation Routeur sur Absorption V2
@@ -2398,80 +2261,6 @@
   mode: single
   trace:
     stored_traces: 10
-- id: '1680974992963'
-  alias: 06-2-1 MP2 Calcul SOC Charge Nocturne V2
-  description: En lien avec NodRED
-  trigger:
-  - platform: time
-    at: 03:48:00
-    id: debut
-  condition:
-  - condition: template
-    value_template: '{% set soc=states(''sensor.mp2_niveau_charge_batteries'') | float
-      %}
-
-      {% set cons=states(''sensor.mp2_cible_soc_pour_charge_nocturne'') | float %}
-
-      {{ soc < cons }}'
-  action:
-  - service: input_number.set_value
-    target:
-      entity_id: input_number.mp2_niveau_soc_cp1
-    data_template:
-      value: '{{ states(''sensor.mp2_cible_soc_pour_charge_nocturne'') }}'
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 1
-      milliseconds: 0
-  - service: input_boolean.turn_on
-    data: {}
-    target:
-      entity_id: input_boolean.mp2_valid_ess_charge_prog_1
-  - wait_template: '{% set soc=states(''sensor.mp2_niveau_charge_batteries'') | float
-      %}
-
-      {% set cons=states(''input_number.mp2_niveau_soc_cp1'') | float %}
-
-      {{ soc >= cons }}'
-    continue_on_timeout: false
-    timeout: 03:00:00
-  - service: input_boolean.turn_off
-    data: {}
-    target:
-      entity_id: input_boolean.mp2_valid_ess_charge_prog_1
-  mode: single
-  trace:
-    stored_traces: 20
-- id: '1681195839898'
-  alias: Nouvelle automatisation
-  description: ''
-  trigger:
-  - platform: time_pattern
-    seconds: /10
-  condition:
-  - condition: template
-    value_template: '{% set m=states(''input_number.temp_piscine'') | float %}
-
-      {% set c=states(''input_number.ph_cible'') | float %}
-
-      {{ m <= 10 }}'
-  action:
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.chalet_s1
-  - wait_template: '{% set m=states(''input_number.temp_piscine'') | float %}
-
-      {% set c=states(''input_number.ph_cible'') | float %}
-
-      {{ m > 10 }}'
-    continue_on_timeout: true
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id: switch.chalet_s1
-  mode: single
 - id: '1686145474191'
   alias: 02-01-17 Al Bp Def Com FREE
   description: Blue Print
@@ -2513,7 +2302,7 @@
       title: Temperature Haute Stérilisateur !!!
   mode: single
 - id: '1690353892596'
-  alias: 06-1-6 Surveillance Pu Chalet
+  alias: 06-01-06 Surveillance Pu Chalet
   description: ''
   trigger:
   - platform: numeric_state
@@ -2562,7 +2351,7 @@
       value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a }}'
   mode: single
 - id: '1690444310583'
-  alias: 01-2-6 ECS message Validation Routeur
+  alias: 01-02-06 ECS message Validation Routeur
   description: float alors routeur ECS Actif
   trigger:
   - platform: state
@@ -2608,7 +2397,7 @@
   trace:
     stored_traces: 20
 - id: '1690522711186'
-  alias: 01-2-2 ECS Validation Relais PV
+  alias: 01-02-02 ECS Validation Relais PV
   description: Activation du Relais ECS PV sur seuil Puissance Production
   trigger:
   - platform: state
@@ -2681,16 +2470,17 @@
     enabled: true
   mode: single
 - id: '1698142750238'
-  alias: 06-1-7 Notification niveau bas puit
+  alias: 06-01-07 Notification niveau bas puit
   description: ''
   trigger:
   - platform: numeric_state
-    entity_id: sensor.esp140_niveau_puit
-    above: 0.8
+    entity_id:
+    - sensor.esp140_niveau_puit
     for:
       hours: 0
       minutes: 5
       seconds: 0
+    below: 0.8
   condition: []
   action:
   - service: notify.telegram

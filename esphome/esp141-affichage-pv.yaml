@@ -183,7 +183,7 @@ script:
       - if: 
           condition:
             - lambda: |-
-                return strcmp(id(tempo_jour).state.c_str(),"Bleu") == 0;
+                return strcmp(id(tempo_jour1).state.c_str(),"Bleu") == 0;
           then:
             - light.addressable_set:
                   id: rgb_led
@@ -205,7 +205,7 @@ script:
       - if: 
           condition:
             - lambda: |-
-                return strcmp(id(tempo_jour).state.c_str(),"Blanc") == 0;
+                return strcmp(id(tempo_jour1).state.c_str(),"Blanc") == 0;
           then:
             - light.addressable_set:
                   id: rgb_led
@@ -229,7 +229,7 @@ script:
       - if: 
           condition:
             - lambda: |-
-                return strcmp(id(tempo_jour).state.c_str(),"Rouge") == 0;
+                return strcmp(id(tempo_jour1).state.c_str(),"Rouge") == 0;
           then:
             - light.addressable_set:
                   id: rgb_led

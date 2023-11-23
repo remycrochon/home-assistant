@@ -1632,8 +1632,6 @@
           option: hc
         target:
           entity_id:
-          - select.energy_total_usage_daily
-          - select.linky_energie_jour
           - select.compteur_energie_pac
           - select.compteur_energie_piscine_jour
           - select.compteur_energie_autres_jour
@@ -1641,8 +1639,6 @@
           - select.compteur_energie_vmc_jour
           - select.compteur_energie_sdb_jour
           - select.compteur_energie_wc_jour
-          - select.compteur_energie_ecs_pv_jour
-          - select.compteur_energie_ecs_reseau_jour
           - select.compteur_energie_cuisine_jour
           - select.compteur_energie_mal_jour
     - conditions:
@@ -1663,8 +1659,6 @@
           option: hp
         target:
           entity_id:
-          - select.energy_total_usage_daily
-          - select.linky_energie_jour
           - select.compteur_energie_pac
           - select.compteur_energie_piscine_jour
           - select.compteur_energie_autres_jour
@@ -1672,8 +1666,6 @@
           - select.compteur_energie_vmc_jour
           - select.compteur_energie_sdb_jour
           - select.compteur_energie_wc_jour
-          - select.compteur_energie_ecs_pv_jour
-          - select.compteur_energie_ecs_reseau_jour
           - select.compteur_energie_cuisine_jour
           - select.compteur_energie_mal_jour
     default: []
@@ -2503,7 +2495,7 @@
         hours: 0
         minutes: 0
         seconds: 0
-      state: ''
+      state: 'on'
     then: []
     else:
     - service: hassio.addon_restart

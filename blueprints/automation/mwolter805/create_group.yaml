@@ -1,0 +1,140 @@
+blueprint:
+  name: Create Group
+  description: "# Create Group Blueprint\n\nThis blueprint creates a group with either
+    static or dynamic members. \n\nIt has two main functions to add members\n  - Dynamically
+    include multiple members based on a common string in their object ID's. (```Dynamic
+    Include List```)\n  - Or statically add individual members. (```Static Entities
+    To Add```)\n\nThen the group can be refined by\n  - Dynamically excluding multiple
+    members based on a common string in their object ID. (```Dynamic Exclude List```)\n
+    \ - Or statically removing individual members. (```Static Entities To Remove```)\n\n##
+    Group Types\nSimple (Static) Group\n  - If you would like to create a group and
+    manage its members manually, you only need to use the ```Static Entities To Add```
+    field to select entities. \n      - If you add or remove devices from home assistant,
+    the group will need to be updated manually.\n\nDynamic Group\n  - If you would
+    like members to be automatically added or removed from the group, use the ```Dynamic
+    Domain List```, ```Dynamic Include List```, and ```Dynamic Exclude List``` fields
+    and enter identifying strings. \n      - You can still add or remove members statically
+    by using the ```Static Entities To Add``` or ```Static Entities To Remove``` fields.\n\n##
+    Recommended Steps for Creating a Dynamic Group\nFirst familarize yourself with
+    domain and object_id state objects.\n  - [Home Assistant state objects][3]\n\nStart
+    with a broad brush.\n  - Add a domain in ```Dynamic Domain List```. Example: -
+    light \n  - Add a string in ```Dynamic Include List```. Example: - bedroom\n  -
+    Save the automation and run it.\n  - View the group created, (Configuration ->
+    Entities -> in the search bar enter 'group', click the group) and its members.\n
+    \ - Make note of the members that need to be removed and strings they have in
+    common. \n  - If necessary, edit the object IDs of the members and add identifiers
+    to make them easier to exclude. \n\nThen narrow the scope.\n  - Go back to the
+    automation and in ```Dynamic Exclude List``` add a list of common strings to exclude.\n
+    \ - Save and run the automation then go back to the group to view updated list
+    members.\n\nRince and repeat.\n  - Continue this process until only the members
+    you want are in the group.\n\n## Order of Operation\nThis blueprint follows a
+    specific order of operation when adding members to a group.\n  1. If a domain
+    is entered in ```Dynamic Domain```, all entities in those domain are added to
+    an internal list. Otherwise all entities are added to the list if ```Dynamic Include
+    List``` or ```Dynamic Exclude List``` are used.\n  2. If an include string is
+    entered in ```Dynamic Include List```, only entities with object ID's containing
+    that string remain in the list.\n  3. If an exclude string is entered in ```Dynamic
+    Exclude List```, all entities with that string are removed from the list.\n  4.
+    Then static members are added or removed from the list\n    a. If specific entities
+    are selected in ```Static Entities To Add```, those entities will be added to
+    the list.\n    b. If specific entities are selected in ```Static Entities To Remove```,
+    those entities will be removed from the list.\n\n## Field Types\n```Dynamic Domain
+    List```, ```Dynamic Include List```, and ```Dynamic Exclude List```\nStrings entered
+    in these fields need to be entered as a yaml list. For example:\n  ```yaml\n  -
+    light\n  ```\n  or for multiple strings\n  ```yaml\n  - light\n  - lock\n  ```\n\n```Static
+    Entities To Add```, and ```Static Entities To Remove```\nMultiple entities can
+    be added to these fields. If devices are added, expand the device and remove unnecessary
+    entities.\n\n## Notes\n  - The only way to see what entities are added to the
+    group is to actually view the group members. \n  - Recommend opening two home
+    assistant windows, one with the automation (Configuration -> Automations) and
+    another with the entities list (Configuration -> Entities) filtered for 'group'.\n
+    \ - ```Dynamic Domain List```, ```Dynamic Include List```, and ```Dynamic Exclude
+    List``` fields are lists and need to be entered with a hyphen, then a space, then
+    the string. Example: - light\n  - Automations created with this blueprint are
+    ran at home assistant start and when groups are reloaded (Configuration -> Server
+    Controls -> Click Groups, Group Entities... ). Groups will be recreated at this
+    time also.\n    - If you would like to update groups while home assistant is running,
+    all you have to do is run the automation.\n  - To delete a group, delete the automation
+    that created it and restart home assistant or reload the groups. \n\n## Credits\nPortions
+    of this blueprint are from the following repositories or posts\n  - [Frigate Notification
+    Blueprint][1]\n  - [Taras' post re: group creation][2]\n  - [petro][3]'s assistance\n\n[1]:
+    https://gist.github.com/hunterjm/23c1588a9f2b8b9c2a62ffc364e17f8c\n[2]: https://community.home-assistant.io/t/template-loop-detected-while-processing-event/243057/22?u=mwolter\n[3]:
+    https://www.home-assistant.io/docs/configuration/state_object/\n[4]: https://community.home-assistant.io/u/petro\n"
+  domain: automation
+  source_url: https://gist.github.com/mwolter805/965fb5c3b4d6bf8e9aeba8acd82fd224
+  input:
+    group_name:
+      name: 'Name to assign to the group. Example: All Lights'
+      default: Group Name
+    group_object_id:
+      name: 'object_id to assign to the group. Example: all_lights'
+      default: group_id
+    search_domain:
+      name: Dynamic Domain List
+      description: 'Domains to search. Format: List (-) of strings.'
+      default: []
+      selector:
+        object: {}
+    search_includes:
+      name: Dynamic Include List
+      description: 'Entity object ID''s to include. Format: List (-) of strings.'
+      default: []
+      selector:
+        object: {}
+    search_excludes:
+      name: Dynamic Exclude List
+      description: 'Entity object ID''s to exclude. Format: List (-) of strings.'
+      default: []
+      selector:
+        object: {}
+    entities_to_add:
+      name: Static Entities To Add
+      description: Select the entities to add to the group.
+      default:
+        entity_id: []
+      selector:
+        target:
+          entity:
+          - {}
+    entities_to_remove:
+      name: Static Entities To Remove
+      description: Select the entities to remove from the group.
+      default:
+        entity_id: []
+      selector:
+        target:
+          entity:
+          - {}
+mode: single
+max_exceeded: silent
+trigger:
+- platform: homeassistant
+  event: start
+- platform: event
+  event_type: call_service
+  event_data:
+    domain: group
+    service: reload
+variables:
+  input_group_name: !input group_name
+  input_group_group_object_id: !input group_object_id
+  domains: !input search_domain
+  includes: !input search_includes
+  excludes: !input search_excludes
+  add: !input entities_to_add
+  rem: !input entities_to_remove
+action:
+- service: group.set
+  data_template:
+    name: '{{ input_group_name }}'
+    object_id: '{{ input_group_group_object_id }}'
+    entities: "{%- set entities = states | selectattr('domain','in', domains) | list
+      if domains else states | list if ( includes or excludes ) %} {%- set ns = namespace(include=[],
+      exclude=[]) %} {%- for item in includes %}\n  {%- set ns.include = ns.include
+      + entities | selectattr('object_id', 'search', item) | list %}\n{%- endfor %}
+      {%- for item in excludes %}\n  {%- set ns.exclude = ns.exclude + entities |
+      selectattr('object_id', 'search', item) | list %}\n{%- endfor %} {%- set entities
+      = entities | select('in', ns.include if includes else entities ) | reject('in',
+      ns.exclude) | map(attribute=\"entity_id\") | list %} {%- set entities = ( entities
+      + add.entity_id | list ) | reject('in', rem.entity_id) | list %}\n{{ entities
+      | unique | sort }}"

@@ -42,8 +42,7 @@ template:
 
 # Template utilisés dans le tableau Energy, ils ont pris le relais des Utility Meter supprimés le 3/11/2023
 # Donc NE PAS SUPPRIMER sinon perte de l'historique des consommations
-# ou alors modifier bd:
-# dans la table "statistics" -> remplacer meta_id 29 par 1820 et 28 par 1821
+
     - name: "energy_total_usage_daily_hc"
       unique_id: "energy_total_usage_daily_hc"
       state: >-

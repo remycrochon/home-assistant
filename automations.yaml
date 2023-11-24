@@ -1322,6 +1322,10 @@
     - sensor.esp136_tdeg_air_neuf
     below: 5
     id: temp_basse
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
   - platform: sun
     event: sunrise
     offset: 0
@@ -2615,3 +2619,14 @@
           message: '{{states("sensor.date_time") }}'
           title: Sortie du mode HP ROUGE-Clim en mode Present
   mode: single
+- id: '1700737009791'
+  alias: Nouvelle automatisation
+  description: ''
+  use_blueprint:
+    path: mwolter805/create_group.yaml
+    input:
+      group_object_id: tout_update
+      search_includes: '*_update'
+      entities_to_remove:
+        entity_id: []
+        device_id: f0b0096211850ac9d0ff54acc7545e5e

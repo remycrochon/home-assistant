@@ -1227,3 +1227,11 @@ ouverture_volet_bureau_droit:
       - cover.volet_salon_p
   mode: single
   icon: mdi:window-shutter-open
+creation_groupe_update:
+  alias: Création Groupe Update
+  sequence:
+  - service: group.set
+    data_template:
+      object_id: all_update
+      entities: '{{ states.update | map(attribute=''entity_id'') | join('','') }}     '
+  mode: single

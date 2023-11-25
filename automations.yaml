@@ -2570,8 +2570,8 @@
       compressed: true
   mode: single
 - id: '1700469604629'
-  alias: 01-03-00 Chauffage Salon Asservissement HP Rouge
-  description: Si HP Rouge Force la PAC à mode Absent
+  alias: 01-03-00 Chauffage Salon Asservissement HP-HC
+  description: ''
   trigger:
   - platform: state
     entity_id:
@@ -2580,9 +2580,14 @@
     id: hprouge
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
-    from: HP ROUGE
-    id: non hp rouge
+    - sensor.linky_ptec
+    id: hc
+    to: HC..
+  - platform: numeric_state
+    entity_id:
+    - sensor.mp2_soc_mqtt
+    below: 25
+    id: soc
   condition: []
   action:
   - choose:
@@ -2599,7 +2604,90 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Passage en mode HP ROUGE-Clim en mode Absent
+          title: Passage PAC en mode Absent sur HP ROUGE
+    - conditions:
+      - condition: trigger
+        id:
+        - soc
+      - condition: state
+        entity_id: sensor.linky_ptec
+        state: HP..
+      sequence:
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: away
+        target:
+          entity_id: climate.altherma
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Passage APC en mode Absent sur SOC<25
+    - conditions:
+      - condition: trigger
+        id:
+        - hc
+      sequence:
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: home
+        target:
+          entity_id: climate.altherma
+      - service: climate.turn_on
+        data: {}
+        target:
+          entity_id: climate.altherma
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Sortie PAC en mode Present sur sortie HP ROUGE
+  mode: single
+- id: '1700839832402'
+  alias: Update Group-Uptime_kuma
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: event
+    event_type: call_service
+    event_data:
+      domain: group
+      service: reload
+  action:
+  - service: group.set
+    data_template:
+      name: uptime_kuma_3
+      object_id: uptime_kuma_3
+      entities: "{% set ns = namespace(entities=[]) %} {% for s in states.sensor if
+        s.object_id.endswith('uptimekuma_') %}\n  {% set ns.entities = ns.entities
+        + [ s.entity_id ] %}\n{% endfor %} {{ ns.entities }}      "
+- id: '1700843541167'
+  alias: arret pac sur soc
+  description: Si HP Rouge Force la PAC à mode Absent
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.mp2_soc_mqtt
+    below: 25
+    id: soc
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - soc
+      - condition: state
+        entity_id: sensor.linky_ptec
+        state: HP..
+      sequence:
+      - service: climate.set_preset_mode
+        data:
+          preset_mode: away
+        target:
+          entity_id: climate.altherma
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Passage PACen Mode absent car SOC<25
     - conditions:
       - condition: trigger
         id:
@@ -2619,14 +2707,3 @@
           message: '{{states("sensor.date_time") }}'
           title: Sortie du mode HP ROUGE-Clim en mode Present
   mode: single
-- id: '1700737009791'
-  alias: Nouvelle automatisation
-  description: ''
-  use_blueprint:
-    path: mwolter805/create_group.yaml
-    input:
-      group_object_id: tout_update
-      search_includes: '*_update'
-      entities_to_remove:
-        entity_id: []
-        device_id: f0b0096211850ac9d0ff54acc7545e5e

@@ -67,22 +67,8 @@ binary_sensor:
 #    host: 192.168.0.121
 #    name: "ping_Arduino Piscine"
 
-  - platform: group
-    name: ping_reseau
-    all: true
-    device_class: "connectivity"
-    entities:
-      - binary_sensor.ping_module_adam
-      - binary_sensor.ping_module_wago_piscine
-      - binary_sensor.ping_routeur_dlink
-      - binary_sensor.ping_eco_compteur
-      - binary_sensor.ping_cam_cuisine
-      - binary_sensor.ping_cam_garage_ext
-      - binary_sensor.ping_cam_garage_int
-      - binary_sensor.ping_cam_piscine
-      - binary_sensor.ping_cam_salon
 
-  #    - binary_sensor.cam_terrasse    
+# groupe Ping reseau dans Entrées
 
   - platform: group
     name: esp_reseau
@@ -106,18 +92,9 @@ binary_sensor:
       - binary_sensor.esp147_status
       - binary_sensor.test_reseau
 
-  - platform: group
-    name: uptime_reseau
-    all: true
-    device_class: "connectivity"
-    entities:
-      - binary_sensor.uptimekuma_domo
-      - binary_sensor.uptimekuma_ha
-      - binary_sensor.uptimekuma_kobold
-      - binary_sensor.uptimekuma_matamo
-      - binary_sensor.uptimekuma_meteo_weewx
-      - binary_sensor.uptimekuma_motion
-      - binary_sensor.uptimekuma_vtt
+# Groupe Uptimekuma dans Entrées
+      
+
 
 
 

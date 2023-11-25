@@ -263,7 +263,7 @@ sensor:
   - platform: homeassistant
     name: "HCHP J"
     unit_of_measurement: "kWh"
-    entity_id: sensor.energie_totale_jour
+    entity_id: sensor.compteur_energie_total_jour_tous_tarifs
     id: hphcj
 
     

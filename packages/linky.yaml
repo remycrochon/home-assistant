@@ -36,7 +36,7 @@ template:
     - name: "display_hp_hc"
       unique_id: "display_hp_hc"
       state: >-
-        {{ states('sensor.linky_n_tarif')|int(default=0) == 1 }} # =1 si HC =2 si HP
+        {{ states('sensor.linky_ptec')|int(default=0) == "HC.." }} # =1 si HC =2 si HP
 
   - sensor:
 
@@ -64,7 +64,7 @@ template:
     - name: "Cout Energie HC Bleu Jour"
       state: >-
         {% set en = states('sensor.compteur_energie_hc_bleu_jour') | float(default=0) | round(2) %}
-        {% set ct = states('input_number.tarif_edf_tempo_bleu_hp') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_bleu_hc') | float(default=0) | round(2) %}
         {{(en*ct) | round(2) }}
       unit_of_measurement: "€"
       device_class: "monetary"

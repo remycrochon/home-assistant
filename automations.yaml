@@ -1317,19 +1317,24 @@
       hours: 0
       minutes: 5
       seconds: 0
-  - platform: numeric_state
-    entity_id:
-    - sensor.esp136_tdeg_air_neuf
-    below: 5
-    id: temp_basse
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
   - platform: sun
     event: sunrise
     offset: 0
     id: levee_soleil
+  - platform: template
+    value_template: '{% set temp=states(''sensor.vp2_temp_out'') | float(0) %}
+
+      {% set saison=states(''sensor.season'') | default("") %}
+
+      {% set mode=states(''input_select.vmc_niv0'') | default("") %}
+
+      {% set soleil=states(''sun.sun'') | default("") %}
+
+      {{ (temp< 5) and (saison == "autumn" or saison=="winter") and (mode=="CO2 PM2.5")
+      and (soleil == ''below_horizon'')}}
+
+      '
+    id: temp_basse
   condition: []
   action:
   - choose:
@@ -1438,21 +1443,6 @@
       - condition: trigger
         id:
         - temp_basse
-      - condition: sun
-        before: sunrise
-        after: sunset
-        after_offset: 01:30:00
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: sensor.season
-          state: autumn
-        - condition: state
-          entity_id: sensor.season
-          state: winter
-      - condition: state
-        entity_id: input_select.vmc_niv0
-        state: CO2 PM2.5
       sequence:
       - service: switch.turn_off
         data: {}
@@ -2542,7 +2532,7 @@
       compressed: true
   mode: single
 - id: '1700469604629'
-  alias: 01-03-00 Chauffage Salon Asservissement HP-HC
+  alias: 01-03-00 PAC Chauffage Salon Asservissement HP-HC
   description: 'Si HP Rouge->Consigne Economique (15°)
 
     Si HC->Consigne Confort (20°)
@@ -2561,16 +2551,18 @@
     - sensor.linky_ptec
     id: hc
     to: HC..
-  - platform: numeric_state
-    entity_id:
-    - sensor.mp2_soc_mqtt
-    below: 25
-    id: soc
+    from: HP..
   - platform: state
     entity_id:
     - sensor.linky_ptec
     id: hp
     to: HP..
+    from: HC..
+  - platform: numeric_state
+    entity_id:
+    - sensor.mp2_soc_mqtt
+    below: 25
+    id: soc
   condition: []
   action:
   - choose:
@@ -2681,51 +2673,3 @@
       entities: "{% set ns = namespace(entities=[]) %} {% for s in states.sensor if
         s.object_id.endswith('uptimekuma_') %}\n  {% set ns.entities = ns.entities
         + [ s.entity_id ] %}\n{% endfor %} {{ ns.entities }}      "
-- id: '1700843541167'
-  alias: arret pac sur soc
-  description: Si HP Rouge Force la PAC à mode Absent
-  trigger:
-  - platform: numeric_state
-    entity_id:
-    - sensor.mp2_soc_mqtt
-    below: 25
-    id: soc
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - soc
-      - condition: state
-        entity_id: sensor.linky_ptec
-        state: HP..
-      sequence:
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: away
-        target:
-          entity_id: climate.altherma
-      - service: notify.telegram
-        data:
-          message: '{{states("sensor.date_time") }}'
-          title: Passage PACen Mode absent car SOC<25
-    - conditions:
-      - condition: trigger
-        id:
-        - non hp rouge
-      sequence:
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: home
-        target:
-          entity_id: climate.altherma
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.altherma
-      - service: notify.telegram
-        data:
-          message: '{{states("sensor.date_time") }}'
-          title: Sortie du mode HP ROUGE-Clim en mode Present
-  mode: single

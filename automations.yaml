@@ -2289,6 +2289,18 @@
       hours: 0
       minutes: 2
       seconds: 0
+  - platform: state
+    entity_id:
+    - binary_sensor.network_ups_tools_en_cours_d_execution
+    from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.network_ups_tools_en_cours_d_execution
+    to: unavailable
+  - platform: state
+    entity_id:
+    - binary_sensor.network_ups_tools_en_cours_d_execution
+    to: unknown
   condition: []
   action:
   - service: hassio.addon_restart
@@ -2580,7 +2592,8 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Passage PAC sur 15° car HP ROUGE
+          title: Consigne PAC={{ states('input_number.pac_consigne_economique') |
+            float(0) }}°C car HP ROUGE
       - service: number.set_value
         data:
           value: '{{ states(''input_number.pac_consigne_economique'') | float(0) }}'
@@ -2603,7 +2616,8 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Passage PAC sur 15° car SOC<25
+          title: Consigne PAC={{ states('input_number.pac_consigne_economique') |
+            float(0) }}°C car SOC<25
       - service: number.set_value
         data:
           value: '{{ states(''input_number.pac_consigne_economique'') | float(0) }}'
@@ -2628,7 +2642,8 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Sortie PAC sur 20° car passage en HC
+          title: Consigne PAC={{ states('input_number.pac_consigne_confort') | float(0)
+            }}°C car passage en HC
       - service: number.set_value
         data:
           value: '{{ states(''input_number.pac_consigne_confort'') | float(0) }}'
@@ -2648,13 +2663,16 @@
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Passage PAC sur 19° car passage en HP
+          title: Consigne PAC={{ states('input_number.pac_consigne_reduite') | float(0)
+            }}°C car passage en HP
       - service: number.set_value
         data:
           value: '{{ states(''input_number.pac_consigne_reduite'') | float(0) }}'
         target:
           entity_id: number.room_temperature
   mode: single
+  trace:
+    stored_traces: 15
 - id: '1700839832402'
   alias: Update Group-Uptime_kuma
   trigger:

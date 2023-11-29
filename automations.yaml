@@ -2599,6 +2599,11 @@
           value: '{{ states(''input_number.pac_consigne_economique'') | float(0) }}'
         target:
           entity_id: number.room_temperature
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.piscine_arret_force
     - conditions:
       - condition: trigger
         id:

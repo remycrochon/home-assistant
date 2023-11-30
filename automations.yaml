@@ -2658,6 +2658,11 @@
       - condition: trigger
         id:
         - hp
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: sensor.linky_libelle_tarif_fournisseur_en_cours
+          state: HP ROUGE
       sequence:
       - service: climate.set_preset_mode
         data:

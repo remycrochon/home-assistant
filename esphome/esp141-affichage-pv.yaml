@@ -103,9 +103,30 @@ interval:
 script:
 # 
 # Couleur du Jour en cours
+# Si indisponible alors Led Eteinte
   - id: calcul_led_jour
     mode: single
     then:
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour).state.c_str(),"Indisponible") == 0;
+          then:
+            - light.addressable_set:
+                  id: rgb_led
+                  range_from: 0
+                  range_to: 0
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+
+            - light.addressable_set:
+                  id: rgb_led
+                  range_from: 2
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%          
       - if: 
           condition:
             - lambda: |-
@@ -180,6 +201,26 @@ script:
     mode: single
     then:
       # Si 
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour1).state.c_str(),"Indisponible") == 0;
+          then:
+            - light.addressable_set:
+                  id: rgb_led
+                  range_from: 1
+                  range_to: 1
+                  red: 0%
+                  green: 0%
+                  blue: 0%
+
+            - light.addressable_set:
+                  id: rgb_led
+                  range_from: 2
+                  range_to: 7
+                  red: 0%
+                  green: 0%
+                  blue: 0%      
       - if: 
           condition:
             - lambda: |-

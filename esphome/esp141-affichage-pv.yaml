@@ -115,7 +115,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 0
-                  range_to: 0
+                  range_to: 1
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -123,7 +123,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%          
@@ -135,7 +135,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 0
-                  range_to: 0
+                  range_to: 1
                   red: 0%
                   green: 0%
                   blue: !lambda |-
@@ -144,7 +144,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -157,7 +157,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 0
-                  range_to: 0
+                  range_to: 1
                   red: !lambda |-
                     return id(intlum1);
                   green: !lambda |-
@@ -168,7 +168,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -182,7 +182,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 0
-                  range_to: 0
+                  range_to: 1
                   red: !lambda |-
                     return id(intlum1);
                   green: 0%
@@ -191,7 +191,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -208,8 +208,8 @@ script:
           then:
             - light.addressable_set:
                   id: rgb_led
-                  range_from: 1
-                  range_to: 1
+                  range_from: 6
+                  range_to: 7
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -217,7 +217,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%      
@@ -228,8 +228,8 @@ script:
           then:
             - light.addressable_set:
                   id: rgb_led
-                  range_from: 1
-                  range_to: 1
+                  range_from: 6
+                  range_to: 7
                   red: 0%
                   green: 0%
                   blue: !lambda |-
@@ -238,7 +238,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -250,8 +250,8 @@ script:
           then:
             - light.addressable_set:
                   id: rgb_led
-                  range_from: 1
-                  range_to: 1
+                  range_from: 6
+                  range_to: 7
                   red: !lambda |-
                     return id(intlum1);
                   green:  !lambda |-
@@ -262,7 +262,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%
@@ -274,8 +274,8 @@ script:
           then:
             - light.addressable_set:
                   id: rgb_led
-                  range_from: 1
-                  range_to: 1
+                  range_from: 6
+                  range_to: 7
                   red:  !lambda |-
                     return id(intlum1);
                   green: 00%
@@ -284,7 +284,7 @@ script:
             - light.addressable_set:
                   id: rgb_led
                   range_from: 2
-                  range_to: 7
+                  range_to: 5
                   red: 0%
                   green: 0%
                   blue: 0%

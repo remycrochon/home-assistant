@@ -1,0 +1,89 @@
+substitutions:
+  device_name: "esp179-daikin-clim-salon"
+  friendly_name: esp179
+  adress_ip: "192.168.0.179"
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+captive_portal:
+
+web_server:
+  port: 80
+
+logger:
+  baud_rate: 0  # Disable UART logger if using UART0 (pins 1,3)
+
+external_components:
+  - source: github://joshbenner/esphome-daikin-s21@main
+    components: [ daikin_s21 ]
+
+uart:
+  - id: s21_uart
+    tx_pin: GPIO1
+    rx_pin: GPIO3
+    baud_rate: 2400
+    data_bits: 8
+    parity: EVEN
+    stop_bits: 2
+
+# The base UART communication hub.
+daikin_s21:
+  tx_uart: s21_uart
+  rx_uart: s21_uart
+
+climate:
+  - name: "${friendly_name} Clim salon" 
+    platform: daikin_s21
+    visual:
+      temperature_step: 1.0
+    # Optional HA sensor used to alter setpoint.
+    room_temperature_sensor: room_temp  # See homeassistant sensor below
+
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
+
+# Optional additional sensors.
+sensor:
+  - platform: daikin_s21
+    inside_temperature:
+      name: "${friendly_name} Temperature Unité intérieure"
+    outside_temperature:
+      name: "${friendly_name} Temperature Echangeur Exterieure"
+    coil_temperature:
+      name: "${friendly_name} Temperature Serpentin Unite Int"
+    fan_speed:
+      name: "${friendly_name} Vitesse Ventilateur"
+  - platform: homeassistant
+    id: room_temp
+    entity_id: sensor.temperature_salon_zb
+    unit_of_measurement: °C
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"

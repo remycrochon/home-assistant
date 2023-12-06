@@ -3,11 +3,15 @@ substitutions:
   adress_ip: "192.168.0.142"
   friendly_name: esp142
   time_timezone: "Europe/Paris"
+  name: jsy194
+  current_address: '1'
+  current_baud_rate: '9600'
+  updates: 2s
+  modbus_throttle: 1000ms
+  offset_select: '2'  
   
 esphome:
   name: ${device_name}
-  platform: ESP32
-  board: esp32dev
 
 wifi:
   networks:
@@ -27,180 +31,167 @@ logger:
 #  logs:
 #    modbus.component: INFO
 # Enable Home Assistant API
+
+
+ 
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    version: 2.0.11 #2.0.5 2.0.9
+    platform_version: 6.4.0 #4.4.0 6.2.0   
+ 
+
+
+# Enable Home Assistant API
 api:
 
 ota:
 
-web_server:
-  port: 80
 
+external_components:
+  - source: "github://SeByDocKy/myESPhome/"
+    components: [jsy194]
+    refresh: 0s
 
-# Protocole du JSK
 uart:
-  id: mod_bus
-  tx_pin: 17
-  rx_pin: 16
-  baud_rate: 9600
-  stop_bits: 1
-#  debug:
-#    direction: BOTH
-#    dummy_receiver: false
-#    after:
-#      timeout: 150ms
-#    sequence:
-#      - lambda: |-
-#          UARTDebug::log_string(direction, bytes);
+  - id: uart_0
+    tx_pin: GPIO1
+    rx_pin: GPIO03 
+    baud_rate: ${current_baud_rate}
+    stop_bits: 1 # 2 for ESP32, 1 for ESP8266
+        
+modbus:
+   id: modbus_0
+   uart_id: uart_0
+   send_wait_time: ${modbus_throttle}
 
-
-
-# Informations supplementaires sur le WIFI
-#text_sensor:
-#  - platform: wifi_info
-#    ip_address:
-#      name: ${friendly_name}_ESP IP Address
-#    ssid:
-#      name: ${friendly_name}_ESP Connected SSID
-#    bssid:
-#      name: ${friendly_name}_ESP Connected BSSID
-#    mac_address:
-#      name: ${friendly_name}_ESP Mac Wifi Address
-#    scan_results:
-#      name: ${friendly_name}_ESP Latest Scan Results
-
-
-binary_sensor:
-#Etat de la connection
-  - platform: status
-    name: "${friendly_name}_Status"
-
-# Input Number
-number:
-  # Seuil Min/Max sortie triac
-  - platform: template
-    name: "${friendly_name} Consigne P"
-    id: cons_p
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    unit_of_measurement: "W"
-    step: 1
-
-sensor:
-  - platform: pzemac
-    update_interval: 0.5s
-    current:
-      name: "${friendly_name} courant"
-      unit_of_measurement: "A"
-    voltage:
-      name: "${friendly_name} tension"
-      unit_of_measurement: "V"
-    energy:
-      name: "${friendly_name} energy"
-      unit_of_measurement: "kWh"
-      filters:
-        - multiply: 0.001
-    power:
-      name: "${friendly_name} puissance"
-      id: pureseau
-      unit_of_measurement: "W"
-    
-    frequency:
-      name: "${friendly_name} frequence"
-      unit_of_measurement: "hz"
-    power_factor:
-      name: "${friendly_name} factpuiss"
-   
-    
-# Informations WI_FI
-  - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
-    name: "${friendly_name} WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
-
-  - platform: copy # Affiche le signal WiFi strength en %
-    source_id: wifi_signal_db
-    name: "${friendly_name} WiFi Signal Percent"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "Signal %"
-    entity_category: "diagnostic"
-
-  - platform: pid
-    name: "PID Climate Result"
-    type: RESULT
-  - platform: pid
-    name: "PID Climate ERROR"
-    type: ERROR
-  - platform: pid
-    name: "PID Climate PROPORTIONAL"
-    type: PROPORTIONAL
-  - platform: pid
-    name: "PID Climate INTEGRAL"
-    type: INTEGRAL
-  - platform: pid
-    name: "PID Climate PROPORTIONAL"
-    type: PROPORTIONAL
-  - platform: pid
-    name: "PID Climate DERIVATIVE"
-    type: DERIVATIVE
-  - platform: pid
-    name: "PID Climate HEAT"
-    type: HEAT
-  - platform: pid
-    name: "PID Climate COOL"
-    type: COOL
-  - platform: pid
-    name: "PID Climate KP"
-    type: KP
-  - platform: pid
-    name: "PID Climate KI"
-    type: KI
-  - platform: pid
-    name: "PID Climate KD"
-    type: KD
-
- 
-switch:
-  - platform: restart
-    name: "${friendly_name} Restart"
-
-output:
-
-# Pilotage du Dimmer ------------------------
-  - platform: ac_dimmer
-    id: ecs
-    gate_pin: GPIO33
-    method: leading
-    zero_cross_pin:
-      number: GPIO34 
-      mode:
-        input: true
-      inverted: yes
-    min_power: 5%
-
-climate:
-  - platform: pid
-    id: pid_climate
-    name: "PID Climate Controller"
-    sensor: pureseau
-    default_target_temperature: 20
-    heat_output: ecs
-    control_parameters:
-      kp: 0.00949
-      ki: 0.00527
-      kd: 0.00427
-   
 button:
   - platform: template
-    name: "PID Climate Autotune"
+    name: ${name}_reset_energy1
+    id: ${name}_reset_energy1
+    icon: "mdi:button-pointer"
     on_press:
-      - climate.pid.autotune: pid_climate
-      - climate.pid.autotune:
-          id: pid_climate
-          noiseband: 0.25
-          positive_output: 20%
-          negative_output: -25%
+      then:
+        - jsy194.reset_energy1: 
+           id: ${name}_id
 
+  - platform: template
+    name: ${name}_reset_energy2
+    id: ${name}_reset_energy2
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.reset_energy2: 
+           id: ${name}_id    
+
+  - platform: template
+    name: ${name}_write_register04
+    id: ${name}_write_register04
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.write_com_setting:
+            id: ${name}_id
+            new_address: !lambda 'return stoi(id(new_address).state);'
+            new_baudrate: !lambda |-
+              auto index = id(new_baudrate).active_index();
+              return uint8_t( index.value() + ${offset_select}  );
+          
+  - platform: template
+    name: ${name}_read_register04
+    id: ${name}_read_register04
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - lambda: |-
+           uint8_t current_address, current_baudrate;
+           esphome::jsy194::JSY194 *sen =  id(${name}_id);
+           sen->read_register04();
+           current_address = sen->get_address();
+           auto address = id(new_address).make_call();
+           address.set_value(std::to_string(current_address));
+           address.perform();
+           current_baudrate = sen->get_baudrate();
+           auto baudrate = id(new_baudrate).make_call();
+           baudrate.set_index(current_baudrate - ${offset_select});
+           baudrate.perform();        
+
+text:
+  - platform: template
+    name: ${name}_new_address
+    id: new_address
+    optimistic: true
+    min_length: 0
+    max_length: 3
+    mode: text
+    initial_value: '   '
+    restore_value: false
+
+select:
+  - platform: template
+    name: ${name}_new_baudrate
+    id: new_baudrate
+    optimistic: true
+    options:
+      - '              '
+      - '3 - 1200 bauds'
+      - '4 - 2400 bauds'
+      - '5 - 4800 bauds'
+      - '6 - 9600 bauds'
+      - '7 - 19200 bauds'
+      - '8 - 38400 bauds'
+    initial_option: '              '
+    restore_value: false
+
+            
+sensor:
+  - platform: jsy194
+    address: ${current_address}
+    current1:
+      name: ${name}_current1
+      accuracy_decimals: 2
+    voltage1:
+      name: ${name}_voltage1
+      accuracy_decimals: 2
+    power1:
+      name: ${name}_power1
+      accuracy_decimals: 2
+    frequency1:
+      name: ${name}_frequency1
+      accuracy_decimals: 2
+    power_factor1:
+      name: ${name}_power_factor1
+      accuracy_decimals: 2
+    pos_energy1:
+      name: ${name}_pos_energy1
+      accuracy_decimals: 1
+    neg_energy1:
+      name: ${name}_neg_energy1
+      accuracy_decimals: 1
+
+    current2:
+      name: ${name}_current2
+      accuracy_decimals: 2
+    voltage2:
+      name: ${name}_voltage2
+      accuracy_decimals: 2
+    power2:
+      name: ${name}_power2
+      unit_of_measurement: W
+      accuracy_decimals: 2
+    frequency2:
+      name: ${name}_frequency2
+      accuracy_decimals: 2
+    power_factor2:
+      name: ${name}_power_factor2
+      accuracy_decimals: 2
+    pos_energy2:
+      name: ${name}_pos_energy2
+      accuracy_decimals: 1
+    neg_energy2:
+      name: ${name}_neg_energy2
+      accuracy_decimals: 1     
+    update_interval: ${updates}
+    modbus_id: modbus_0
+    id: ${name}_id

@@ -2701,3 +2701,88 @@
       entities: "{% set ns = namespace(entities=[]) %} {% for s in states.sensor if
         s.object_id.endswith('uptimekuma_') %}\n  {% set ns.entities = ns.entities
         + [ s.entity_id ] %}\n{% endfor %} {{ ns.entities }}      "
+- id: '1702130253915'
+  alias: 01-03-00 PAC Chauffage Salon Asservissement HP-HC V Loi Eau
+  description: 'Si HP Rouge ou (SOC<25 et HP) ->Delta P =-5°
+
+    Si HC->Delta P = 0°'
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    to: HP ROUGE
+    id: hprouge
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    id: hc
+    to: HC..
+    from: HP..
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    id: hp
+    to: HP..
+    from: HC..
+  - platform: numeric_state
+    entity_id:
+    - sensor.mp2_soc_mqtt
+    below: 25
+    id: soc
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - hprouge
+      sequence:
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Decalage Temp Sort PAC de {{ states('number.temperature_control')
+            | float(0) }}°C car HP ROUGE
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.piscine_arret_force
+      - service: input_number.set_value
+        data:
+          value: -5
+        target:
+          entity_id: input_number.pac_nr_input_decalage_temperature
+    - conditions:
+      - condition: trigger
+        id:
+        - soc
+      sequence:
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Decalage Temp Sort PAC de {{ states('number.temperature_control')
+            | float(0) }}°C car SOC={{ states('sensor.mp2_soc_mqtt') | float(0) }}<
+            25%
+      - service: input_number.set_value
+        data:
+          value: -5
+        target:
+          entity_id: input_number.pac_nr_input_decalage_temperature
+    - conditions:
+      - condition: trigger
+        id:
+        - hc
+      sequence:
+      - service: notify.telegram
+        data:
+          message: '{{states("sensor.date_time") }}'
+          title: Decalage Temp Sort PAC de {{ states('number.temperature_control')
+            | float(0)}} car passage en HC
+      - service: input_number.set_value
+        data:
+          value: 0
+        target:
+          entity_id: input_number.pac_nr_input_decalage_temperature
+  mode: single
+  trace:
+    stored_traces: 15

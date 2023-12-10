@@ -182,16 +182,17 @@ template:
         {%endif%}
 
 # Calcul Température de départ
+# {% set t = states('sensor.espaltherma_temp_air_ext_r1t') | float(default=0) %}
     - name: "espaltherma_temp_dep_calculee"
       unique_id: "espaltherma_temp_dep_calculee"
       state: >-
         {% set p102=37 %}
-        {% set p103=25 %}
+        {% set p103=22 %}
         {% set p100=-10 %}
         {% set p101=20 %}
         {% set a=(p102-p103)/(p100-p101) | float(default=0) %}
         {% set b=p103-a*p101 | float %}
-        {% set t = states('sensor.espaltherma_temp_air_ext_r1t') | float(default=0) %}
+        {% set t = states('sensor.espaltherma_temp_air_ext_r6t') | float(default=0) %}
         {% if t<= p100 %}
           {{ p100 }}
         {%else%}

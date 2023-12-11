@@ -2549,9 +2549,7 @@
 
     Si HC->Consigne Confort (20°)
 
-    Si SOC<25 et HP->Consigne Economique (15°)
-
-    Si HP ->Consigne Réduite (19°)'
+    Si HP->Consigne Réduite (19°)'
   trigger:
   - platform: state
     entity_id:
@@ -2560,21 +2558,9 @@
     id: hprouge
   - platform: state
     entity_id:
-    - sensor.linky_ptec
-    id: hc
-    to: HC..
-    from: HP..
-  - platform: state
-    entity_id:
-    - sensor.linky_ptec
-    id: hp
-    to: HP..
-    from: HC..
-  - platform: numeric_state
-    entity_id:
-    - sensor.mp2_soc_mqtt
-    below: 25
-    id: soc
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    id: sortiehprouge
+    from: HP ROUGE
   condition: []
   action:
   - choose:
@@ -2588,17 +2574,12 @@
           preset_mode: away
         target:
           entity_id: climate.altherma
-        enabled: false
+        enabled: true
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC={{ states('input_number.pac_consigne_economique') |
-            float(0) }}°C car HP ROUGE
-      - service: number.set_value
-        data:
-          value: '{{ states(''input_number.pac_consigne_economique'') | float(0) }}'
-        target:
-          entity_id: number.room_temperature
+          title: Consigne PAC={{ state_attr("climate.altherma", "temperature") }}°C
+            car HP ROUGE
       - service: input_boolean.turn_on
         data: {}
         target:
@@ -2607,79 +2588,30 @@
     - conditions:
       - condition: trigger
         id:
-        - soc
-      - condition: state
-        entity_id: sensor.linky_ptec
-        state: HP..
-      sequence:
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: away
-        target:
-          entity_id: climate.altherma
-        enabled: false
-      - service: notify.telegram
-        data:
-          message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC={{ states('input_number.pac_consigne_economique') |
-            float(0) }}°C car SOC<25
-      - service: number.set_value
-        data:
-          value: '{{ states(''input_number.pac_consigne_economique'') | float(0) }}'
-        target:
-          entity_id: number.room_temperature
-    - conditions:
-      - condition: trigger
-        id:
-        - hc
+        - sortiehprouge
       sequence:
       - service: climate.set_preset_mode
         data:
           preset_mode: home
         target:
           entity_id: climate.altherma
-        enabled: false
+        enabled: true
       - service: climate.turn_on
         data: {}
         target:
           entity_id: climate.altherma
-        enabled: false
+        enabled: true
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC={{ states('input_number.pac_consigne_confort') | float(0)
-            }}°C car passage en HC
+          title: Consigne PAC={{ state_attr("climate.altherma", "temperature") }}°C
+            car sortie HP ROUGE
       - service: number.set_value
         data:
           value: '{{ states(''input_number.pac_consigne_confort'') | float(0) }}'
         target:
           entity_id: number.room_temperature
-    - conditions:
-      - condition: trigger
-        id:
-        - hp
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: sensor.linky_libelle_tarif_fournisseur_en_cours
-          state: HP ROUGE
-      sequence:
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: away
-        target:
-          entity_id: climate.altherma
         enabled: false
-      - service: notify.telegram
-        data:
-          message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC={{ states('input_number.pac_consigne_reduite') | float(0)
-            }}°C car passage en HP
-      - service: number.set_value
-        data:
-          value: '{{ states(''input_number.pac_consigne_reduite'') | float(0) }}'
-        target:
-          entity_id: number.room_temperature
   mode: single
   trace:
     stored_traces: 15

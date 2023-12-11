@@ -65,7 +65,6 @@ template:
       state_class: "measurement"
       device_class: "temperature"
 
-
     # L149
     - name: "espaltherma_temp_eau_depart_echangeur_plaque"
       unique_id: "espaltherma_temp_eau_depart_echangeur_plaque"
@@ -186,7 +185,7 @@ template:
     - name: "espaltherma_temp_dep_calculee"
       unique_id: "espaltherma_temp_dep_calculee"
       state: >-
-        {% set p102=37 %}
+        {% set p102=35 %}
         {% set p103=22 %}
         {% set p100=-10 %}
         {% set p101=20 %}

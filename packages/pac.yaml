@@ -22,7 +22,21 @@ template:
       unique_id: "espaltherma_thermostat_ext"
       state: >-
         {{ state_attr('sensor.althermasensors','Thermostat ON/OFF Ext') }}
-
+    # L31
+    - name: "espaltherma_degivrage"
+      unique_id: "espaltherma_degivrage"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Dégivrage') }}
+    # L138
+    - name: "espaltherma_palier_buh1"
+      unique_id: "espaltherma_palier_buh1"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Palier1 BUH') }}
+    # L139
+    - name: "espaltherma_palier_buh2"
+      unique_id: "espaltherma_palier_buh2"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Palier2 BUH') }}        
     # L167
     - name: "espaltherma_consigne_thermostat_int"
       unique_id: "espaltherma_consigne_thermostat_int"

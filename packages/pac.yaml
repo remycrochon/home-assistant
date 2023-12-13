@@ -27,6 +27,62 @@ template:
       unique_id: "espaltherma_degivrage"
       state: >-
         {{ state_attr('sensor.althermasensors','Dégivrage') }}
+    # L39
+    - name: "espaltherma_temp_cible"
+      unique_id: "espaltherma_temp_cible"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Temp. cond. cible')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      device_class: "temperature"
+      state_class: "measurement"
+    # L59
+    - name: "espaltherma_temp_air_ext_r1t"
+      unique_id: "espaltherma_temp_air_ext_r1t"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Temp. d air extérieur(R1T)')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      state_class: "measurement"
+      device_class: "temperature"
+    # L60
+    - name: "espaltherma_temp_air_ext_r6t"
+      unique_id: "espaltherma_temp_air_ext_r6t"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Capteur ext. de temp. ambiante intérieure (R6T)')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      state_class: "measurement"
+      device_class: "temperature"
+    # L66
+    - name: "espaltherma_pression"
+      unique_id: "espaltherma_pression"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Capteur de pression') }}
+      unit_of_measurement: 'bars'
+      state_class: "measurement"
+      device_class: "pressure"      
+    # L69
+    - name: "espaltherma_courant_primaire"
+      unique_id: "espaltherma_courant_primaire"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Courant primaire INV (A)') }}
+      unit_of_measurement: 'A'
+      state_class: "measurement"
+      device_class: "current"
+    # L92
+    - name: "espaltherma_ventilateur1"
+      unique_id: "espaltherma_ventilateur1"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Ventilateur 1 (10 rpm)') }}
+    # L93
+    - name: "espaltherma_ventilateur2"
+      unique_id: "espaltherma_ventilateur2"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Ventilateur 2 (palier)') }}
+
+    # L117
+    - name: "espaltherma_thermostat_int"
+      unique_id: "espaltherma_thermostat_int"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Thermostat ON/OFF Int') }}
     # L138
     - name: "espaltherma_palier_buh1"
       unique_id: "espaltherma_palier_buh1"
@@ -37,48 +93,6 @@ template:
       unique_id: "espaltherma_palier_buh2"
       state: >-
         {{ state_attr('sensor.althermasensors','Palier2 BUH') }}        
-    # L167
-    - name: "espaltherma_consigne_thermostat_int"
-      unique_id: "espaltherma_consigne_thermostat_int"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Consigne Thermostat int')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      device_class: "temperature"
-      state_class: "measurement"
-
-    # L39
-    - name: "espaltherma_temp_cible"
-      unique_id: "espaltherma_temp_cible"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Temp. cond. cible')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      device_class: "temperature"
-      state_class: "measurement"
-
-    # L117
-    - name: "espaltherma_thermostat_int"
-      unique_id: "espaltherma_thermostat_int"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Thermostat ON/OFF Int') }}
-
-    # L154
-    - name: "espaltherma_temp_ambiante_int_r1t"
-      unique_id: "espaltherma_temp_ambiante_int_r1t"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Temp. ambiante intérieure (R1T)')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      state_class: "measurement"
-      device_class: "temperature"
-
-    # L152
-    - name: "espaltherma_temp_eau_retour_rt4"
-      unique_id: "espaltherma_temp_eau_retour_rt4"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Temp. d eau d entrée (R4T)')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      state_class: "measurement"
-      device_class: "temperature"
-
     # L149
     - name: "espaltherma_temp_eau_depart_echangeur_plaque"
       unique_id: "espaltherma_temp_eau_depart_echangeur_plaque"
@@ -87,7 +101,6 @@ template:
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
-
     # L150
     - name: "espaltherma_temp_eau_depart"
       unique_id: "espaltherma_temp_eau_depart"
@@ -96,25 +109,6 @@ template:
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
-
-    # L59
-    - name: "espaltherma_temp_air_ext_r1t"
-      unique_id: "espaltherma_temp_air_ext_r1t"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Temp. d air extérieur(R1T)')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      state_class: "measurement"
-      device_class: "temperature"
-
-    # L60
-    - name: "espaltherma_temp_air_ext_r6t"
-      unique_id: "espaltherma_temp_air_ext_r6t"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Capteur ext. de temp. ambiante intérieure (R6T)')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      state_class: "measurement"
-      device_class: "temperature"
-
     # L151
     - name: "espaltherma_temp_liquid_r3t"
       unique_id: "espaltherma_temp_liquid_r3t"
@@ -123,7 +117,30 @@ template:
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
-
+    # L152
+    - name: "espaltherma_temp_eau_retour_rt4"
+      unique_id: "espaltherma_temp_eau_retour_rt4"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Temp. d eau d entrée (R4T)')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      state_class: "measurement"
+      device_class: "temperature"
+    # L154
+    - name: "espaltherma_temp_ambiante_int_r1t"
+      unique_id: "espaltherma_temp_ambiante_int_r1t"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Temp. ambiante intérieure (R1T)')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      state_class: "measurement"
+      device_class: "temperature"            
+    # L167
+    - name: "espaltherma_consigne_thermostat_int"
+      unique_id: "espaltherma_consigne_thermostat_int"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Consigne Thermostat int')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      device_class: "temperature"
+      state_class: "measurement"
     # L184
     - name: "espaltherma_capteur_debit"
       unique_id: "espaltherma_capteur_debit"
@@ -132,16 +149,6 @@ template:
       unit_of_measurement: 'l/min'
       state_class: "measurement"
       device_class: "pressure"
-
-    # L69
-    - name: "espaltherma_courant_primaire"
-      unique_id: "espaltherma_courant_primaire"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Courant primaire INV (A)') }}
-      unit_of_measurement: 'A'
-      state_class: "measurement"
-      device_class: "current"
-
     # L186
     - name: "espaltherma_signal_ppe_eau"
       unique_id: "espaltherma_signal_ppe_eau"
@@ -150,15 +157,6 @@ template:
       unit_of_measurement: '%'
       state_class: "measurement"
       device_class: "signal_strength"
-
-    # L66
-    - name: "espaltherma_pression"
-      unique_id: "espaltherma_pression"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Capteur de pression') }}
-      unit_of_measurement: 'bars'
-      state_class: "measurement"
-      device_class: "pressure"
 
 # Extraction des attributs climate.althermat
     # Consigne Chauffage
@@ -169,7 +167,6 @@ template:
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
-
 
 # Calcul du COP
     - name: "espaltherma_cop"

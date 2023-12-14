@@ -27,14 +27,7 @@ template:
       unique_id: "espaltherma_degivrage"
       state: >-
         {{ state_attr('sensor.althermasensors','Dégivrage') }}
-    # L39
-    - name: "espaltherma_temp_cible"
-      unique_id: "espaltherma_temp_cible"
-      state: >-
-        {{ state_attr('sensor.althermasensors','Temp. cond. cible')|round(1,default=0) }}
-      unit_of_measurement: '°C'
-      device_class: "temperature"
-      state_class: "measurement"
+
     # L59
     - name: "espaltherma_temp_air_ext_r1t"
       unique_id: "espaltherma_temp_air_ext_r1t"
@@ -71,7 +64,8 @@ template:
     - name: "espaltherma_ventilateur1"
       unique_id: "espaltherma_ventilateur1"
       state: >-
-        {{ state_attr('sensor.althermasensors','Ventilateur 1 (10 rpm)') }}
+        {% set vit=state_attr('sensor.althermasensors','Ventilateur 1 (10 rpm)') %}        
+        {{ vit*10 }}
     # L93
     - name: "espaltherma_ventilateur2"
       unique_id: "espaltherma_ventilateur2"
@@ -83,6 +77,14 @@ template:
       unique_id: "espaltherma_thermostat_int"
       state: >-
         {{ state_attr('sensor.althermasensors','Thermostat ON/OFF Int') }}
+    # L26
+    - name: "espaltherma_temp_cible"
+      unique_id: "espaltherma_temp_cible"
+      state: >-
+        {{ state_attr('sensor.althermasensors','Consigne LW (principal)')|round(1,default=0) }}
+      unit_of_measurement: '°C'
+      device_class: "temperature"
+      state_class: "measurement"
     # L138
     - name: "espaltherma_palier_buh1"
       unique_id: "espaltherma_palier_buh1"
@@ -196,8 +198,8 @@ template:
     - name: "espaltherma_temp_dep_calculee"
       unique_id: "espaltherma_temp_dep_calculee"
       state: >-
-        {% set p102=35 %}
-        {% set p103=22 %}
+        {% set p102=37 %}
+        {% set p103=25 %}
         {% set p100=-10 %}
         {% set p101=20 %}
         {% set a=(p102-p103)/(p100-p101) | float(default=0) %}

@@ -144,3 +144,7 @@ display:
       it.printf(8,0,"P=%.3f",id(esp125_pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(temp_piscine).state);
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"

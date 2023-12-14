@@ -7,66 +7,6 @@
 binary_sensor:
 
 
-#  - platform: ping
-#    host: 192.168.0.21
-#    name: "ping_cam_terrasse"
-
-  - platform: ping
-    host: 192.168.0.26
-    name: "ping_ECO COMPTEUR"
-
-  - platform: ping
-    host: 192.168.0.36
-    name: "ping_cam_cuisine"
-
-  - platform: ping
-    host: 192.168.0.39
-    name: "ping_cam_garage_ext"
-
-  - platform: ping
-    host: 192.168.0.47
-    name: "ping_Module Adam"
-
-  - platform: ping
-    host: 192.168.0.50
-    name: "ping_routeur dlink"
-
-  - platform: ping
-    host: 192.168.0.54
-    name: "ping_cam_salon"
-
-  - platform: ping
-    host: 192.168.0.56
-    name: "ping_cam_sous_sol"
-
-  - platform: ping
-    host: 192.168.0.57
-    name: "ping_cam_garage_int"
-
-  - platform: ping
-    host: 192.168.0.61
-    name: "ping_cam_piscine"
-
-  - platform: ping
-    host: 192.168.0.62
-    name: "ping_RPI Weewx"
-
-  - platform: ping
-    host: 192.168.0.86
-    name: "ping_Cerbo GX"
-
-  - platform: ping
-    host: 192.168.0.101
-    name: "ping_Module Wago Piscine"
-
-  - platform: ping
-    host: 192.168.0.102
-    name: "ping_Module Wago Chalet"
-
-#  - platform: ping
-#    host: 192.168.0.121
-#    name: "ping_Arduino Piscine"
-
 
 # groupe Ping reseau dans Entrées
 

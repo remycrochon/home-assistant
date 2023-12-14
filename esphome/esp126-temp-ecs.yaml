@@ -44,7 +44,7 @@ dallas:
 #Etat de la connection
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"
         
 sensor:
   - platform: dallas
@@ -52,4 +52,8 @@ sensor:
     name: "${friendly_name} temp_ecs"
     filters:
       - offset: 2.0
-    
+
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"

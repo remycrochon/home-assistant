@@ -2718,3 +2718,17 @@
   mode: single
   trace:
     stored_traces: 15
+- id: '1702593337646'
+  alias: Ma clim salon a 4:00
+  description: ''
+  trigger:
+  - platform: time
+    at: 04:00:00
+  condition: []
+  action:
+  - device_id: 0479a12dc57c19473060ca9d4fe6f2a7
+    domain: climate
+    entity_id: d6f217e78df201820f68d2892341f74d
+    type: set_hvac_mode
+    hvac_mode: heat
+  mode: single

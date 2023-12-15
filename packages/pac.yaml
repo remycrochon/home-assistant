@@ -64,8 +64,7 @@ template:
     - name: "espaltherma_ventilateur1"
       unique_id: "espaltherma_ventilateur1"
       state: >-
-        {% set vit=state_attr('sensor.althermasensors','Ventilateur 1 (10 rpm)') %}        
-        {{ vit*10 }}
+        {{ 10*state_attr('sensor.althermasensors','Ventilateur 1 (10 rpm)') }}
     # L93
     - name: "espaltherma_ventilateur2"
       unique_id: "espaltherma_ventilateur2"

@@ -7,7 +7,8 @@ substitutions:
 esphome:
   name: ${device_name}
   platform: ESP32
-  board: esp32dev
+#  board: esp32dev
+  board: mhetesp32minikit
 
 wifi:
   networks:
@@ -60,22 +61,112 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
   - platform: esp32_touch
-    name: "${friendly_name} Touch Pad GPIO27"
-    pin: GPIO27
+    name: "${friendly_name} BP Ma"
+    pin: GPIO4
     threshold: 500
     filters:
       - delayed_on: 100ms
       - delayed_off: 100ms
     on_press:
       then:
-        - switch.toggle: relais_1
+        - switch.toggle: r1
+
+  - platform: esp32_touch
+    name: "${friendly_name} BP V1"
+    pin: GPIO00
+    threshold: 500
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+
+  - platform: esp32_touch
+    name: "${friendly_name} BP V2"
+    pin: GPIO02
+    threshold: 500
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+
+  - platform: esp32_touch
+    name: "${friendly_name} BP V3"
+    pin: GPIO15
+    threshold: 500
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+
+  - platform: esp32_touch
+    name: "${friendly_name} BP VMax"
+    pin: GPIO12
+    threshold: 500
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+
+  - platform: esp32_touch
+    name: "${friendly_name} BP Lum"
+    pin: GPIO14
+    threshold: 500
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+
 
 switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
   - platform: gpio
-    name: "${friendly_name} Relais"
-    pin: GPIO23 #D23
-    id: relais_1
+    name: "${friendly_name} R1"
+    pin: GPIO25 
+    id: r1
 
+  - platform: gpio
+    name: "${friendly_name} R2"
+    pin: GPIO22
+    id: r2
+
+  - platform: gpio
+    name: "${friendly_name} R3"
+    pin: GPIO32
+    id: r3
+
+  - platform: gpio
+    name: "${friendly_name} R4"
+    pin: GPIO21
+    id: r4
+
+  - platform: gpio
+    name: "${friendly_name} Buzzer"
+    pin: GPIO27
+    id: buzzer
+# Sortie LED
+  - platform: gpio
+    name: "${friendly_name} Led Ma"
+    pin: GPIO16
+    id: led_ma
+
+  - platform: gpio
+    name: "${friendly_name} Led V1"
+    pin: GPIO17
+    id: led_v1
+
+  - platform: gpio
+    name: "${friendly_name} Led V2"
+    pin: GPIO33
+    id: led_v2
+
+  - platform: gpio
+    name: "${friendly_name} Led V3"
+    pin: GPIO13
+    id: led_v3
+
+  - platform: gpio
+    name: "${friendly_name} Led Max"
+    pin: GPIO5
+    id: led_Max
+
+  - platform: gpio
+    name: "${friendly_name} Led Ecl"
+    pin: GPIO18
+    id: led_ecl

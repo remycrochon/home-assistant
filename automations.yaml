@@ -2561,6 +2561,9 @@
     - sensor.linky_libelle_tarif_fournisseur_en_cours
     id: sortiehprouge
     from: HP ROUGE
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
   condition: []
   action:
   - choose:

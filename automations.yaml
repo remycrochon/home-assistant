@@ -2554,6 +2554,22 @@
   - platform: state
     entity_id:
     - sensor.linky_libelle_tarif_fournisseur_en_cours
+    to: HC BLEU
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    to: HP BLEU
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    to: HC BLANC
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    to: HP BLANC
+  - platform: state
+    entity_id:
+    - sensor.linky_libelle_tarif_fournisseur_en_cours
     to: HP ROUGE
     id: hprouge
   - platform: state
@@ -2561,9 +2577,6 @@
     - sensor.linky_libelle_tarif_fournisseur_en_cours
     id: sortiehprouge
     from: HP ROUGE
-  - platform: state
-    entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
   condition: []
   action:
   - choose:

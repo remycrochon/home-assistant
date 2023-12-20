@@ -73,7 +73,7 @@ binary_sensor:
 
   - platform: esp32_touch
     name: "${friendly_name} BP V1"
-    pin: GPIO00
+    pin: GPIO32
     threshold: 500
     filters:
       - delayed_on: 100ms
@@ -81,7 +81,7 @@ binary_sensor:
 
   - platform: esp32_touch
     name: "${friendly_name} BP V2"
-    pin: GPIO02
+    pin: GPIO33
     threshold: 500
     filters:
       - delayed_on: 100ms
@@ -128,7 +128,7 @@ switch:
 
   - platform: gpio
     name: "${friendly_name} R3"
-    pin: GPIO32
+    pin: GPIO26
     id: r3
 
   - platform: gpio
@@ -153,7 +153,7 @@ switch:
 
   - platform: gpio
     name: "${friendly_name} Led V2"
-    pin: GPIO33
+    pin: GPIO23
     id: led_v2
 
   - platform: gpio

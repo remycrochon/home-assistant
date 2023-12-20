@@ -103,7 +103,7 @@ template:
 
     - name: "Cout Energie HC Rouge Jour"
       state: >-
-        {% set en = states('sensor.compteur_energie_hc_rouge_jour') | float(default=0) | round(2) %}
+        {% set en = states('sensor.compteur_energie_hc_rouge_jour_2') | float(default=0) | round(2) %}
         {% set ct = states('input_number.tarif_edf_tempo_rouge_hc') | float(default=0) | round(2) %}
         {{(en*ct) | round(2) }}
       unit_of_measurement: "€"

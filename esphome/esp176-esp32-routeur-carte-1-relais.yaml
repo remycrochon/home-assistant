@@ -15,6 +15,15 @@ substitutions:
 
 esphome:
   name: ${device_name}
+  on_boot:
+    priority: 800
+    # Force mode auto et tempok au demarrage
+    then: 
+      - switch.turn_on: modeauto
+      - binary_sensor.template.publish:
+          id: temperatureok
+          state: ON
+      - lambda: id(afstriac).publish_state( 0 );           
  
 esp32:
   board: esp32dev
@@ -307,6 +316,8 @@ sensor:
       name: "${friendly_name} I_ECS JSYMK"
       accuracy_decimals: 2
       id: Itore
+      filters:
+        - multiply: -1
     voltage1:
       name: ${name}_voltage1
       accuracy_decimals: 2
@@ -314,6 +325,8 @@ sensor:
       name: "${friendly_name} P_ECS JSYMK"
       id: puecs
       accuracy_decimals: 2
+      filters:
+        - multiply: -1      
     frequency1:
       name: ${name}_frequency1
       accuracy_decimals: 2
@@ -590,7 +603,6 @@ script:
                 id: gradateur
                 brightness: !lambda |-
                   return id(0) ;  
-
 
 # -------------------------------------------  Pilotage led
   - id: etat_production

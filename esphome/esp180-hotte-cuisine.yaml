@@ -9,7 +9,9 @@ esphome:
   platform: ESP32
 #  board: esp32dev
   board: mhetesp32minikit
-
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+    
 wifi:
   networks:
     - ssid: !secret wifi
@@ -24,9 +26,9 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
-  level: DEBUG
+  level: very_verbose
 #  logs:
-#    modbus.component: INFO
+#    light.component: very_verbose
 # Enable Home Assistant API
 api:
 
@@ -48,12 +50,115 @@ web_server:
 #      name: ${friendly_name}_ESP Mac Wifi Address
 #    scan_results:
 #      name: ${friendly_name}_ESP Latest Scan Results
+# Led WS2812 RGB  
+light:
+  - platform: neopixelbus
+    num_leds: 10 #1
+    pin: GPIO18
+    name: "Neobus"
+#    variant: ws2812X
+    variant: ws2812x
+    id: w_led
+
+#  - platform: esp32_rmt_led_strip
+#    rgb_order: RGB
+#    pin: GPIO5
+#    num_leds: 6
+#    rmt_channel: 0
+#    chipset: ws2812
+#    name: "rm_led"
+#    id: w_led
+#    is_rgbw: false
+
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 0
+        to: 1
+  - platform: partition
+    name: led2
+    id: led2
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 2
+        to: 3
+  - platform: partition
+    name: led3
+    id: led3
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 4
+        to: 5
+  - platform: partition
+    name: led4
+    id: led4
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 3
+        to: 3
+  - platform: partition
+    name: led5
+    id: led5
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 4
+        to: 4
+  - platform: partition
+    name: led6
+    id: led6
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 5
+        to: 5    
+  - platform: partition
+    name: led7
+    id: led7
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 6
+        to: 6
+  - platform: partition
+    name: led8
+    id: led8
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 7
+        to: 7
+  - platform: partition
+    name: led9
+    id: led9
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 8
+        to: 8  
+  - platform: partition
+    name: led10
+    id: led10
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 9
+        to: 9  
+
+
+
+
 
 
 esp32_touch:
   setup_mode: false
   measurement_duration: 5.5ms
-
 
 binary_sensor:
 #Etat de la connection
@@ -111,7 +216,6 @@ binary_sensor:
       - delayed_on: 100ms
       - delayed_off: 100ms
 
-
 switch:
   - platform: restart
     name: "${friendly_name} Restart"
@@ -140,33 +244,73 @@ switch:
     name: "${friendly_name} Buzzer"
     pin: GPIO27
     id: buzzer
-# Sortie LED
-  - platform: gpio
-    name: "${friendly_name} Led Ma"
-    pin: GPIO16
-    id: led_ma
 
-  - platform: gpio
-    name: "${friendly_name} Led V1"
-    pin: GPIO17
-    id: led_v1
+#interval:
+#  - interval: 1s
+#    then:
+#      - script.execute: calcul_led
 
-  - platform: gpio
-    name: "${friendly_name} Led V2"
-    pin: GPIO23
-    id: led_v2
+# ------------------------  Scripts
+script:
+# 
+#  
+  - id: calcul_led
+    mode: single
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: r1
+          then:
+            - light.turn_on:
+                id: led1
+                red: 100% 
+                green: 0%
+                blue: 0%                
+          else:
+            - light.turn_off:
+                id: led1
 
-  - platform: gpio
-    name: "${friendly_name} Led V3"
-    pin: GPIO13
-    id: led_v3
+            
+      - if: 
+          condition:
+            and:
+              - switch.is_on: r2
+          then:
+            - light.turn_on:
+                id: led2
+                red: 100% 
+                green: 0%
+                blue: 0%                
+          else:
+            - light.turn_off:
+                id: led2
+ 
+      - if: 
+          condition:
+            and:
+              - switch.is_on: r3
+          then:
+            - light.turn_on:
+                id: led3
+                red: 100% 
+                green: 0%
+                blue: 0%                
+          else:
+            - light.turn_off:
+                id: led3
 
-  - platform: gpio
-    name: "${friendly_name} Led Max"
-    pin: GPIO5
-    id: led_Max
-
-  - platform: gpio
-    name: "${friendly_name} Led Ecl"
-    pin: GPIO18
-    id: led_ecl
+      - if: 
+          condition:
+            and:
+              - switch.is_on: r4
+          then:
+            - light.turn_on:
+                id: led4
+                red: 100% 
+                green: 0%
+                blue: 0%                
+          else:
+            - light.turn_off:
+                id: led4
+ 

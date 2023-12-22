@@ -79,7 +79,7 @@ template:
 
 # Le compteur PV est inclus dans l'ESP Routeur
 # Calcul puissance ECS si mode réseau
-# L'integrale de rieumman et les utily_meter sont déclarés dans "/config/helpers"
+# 
     - name: puissance_ecs_reseau_w
       unique_id: "puissance_ecs_reseau_w"
       device_class: "power"

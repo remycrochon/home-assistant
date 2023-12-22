@@ -8,7 +8,9 @@ esphome:
   name: ${device_name}
   platform: ESP8266
   board: d1_mini
-  
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+
 wifi:
   networks:
     - ssid: !secret wifi
@@ -24,10 +26,10 @@ wifi:
 
 # Enable logging
 logger:
-  level: debug
-  logs:
-    wifi.component: debug
-    mqtt.component: debug
+  level: very_verbose
+#  logs:
+#    wifi.component: debug
+#    mqtt.component: debug
 # Enable Home Assistant API
 api:
 
@@ -36,11 +38,64 @@ ota:
 web_server:
   port: 80
 
-
 mqtt:
   broker: 192.168.0.37
   username: !secret mqtt_ha_name
   password: !secret mqtt_ha_pw
+
+
+# Led WS2812 RGB  
+light:
+
+  - platform: neopixelbus
+    method:
+      type: esp8266_dma
+    num_leds: 5 #1
+    pin: RX
+    name: "RGB strip"
+    variant: 800KBPS
+    id: w_led
+
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 0
+        to: 0
+  - platform: partition
+    name: led2
+    id: led2
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 1
+        to: 1
+  - platform: partition
+    name: led3
+    id: led3
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 2
+        to: 2
+  - platform: partition
+    name: led4
+    id: led4
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 3
+        to: 3
+  - platform: partition
+    name: led5
+    id: led5
+    default_transition_length: 0s
+    segments:
+      - id: w_led
+        from: 4
+        to: 4
 
 binary_sensor:
 #Etat de la connection
@@ -49,13 +104,6 @@ binary_sensor:
 
 sensor:
 
-  - platform: mqtt_subscribe
-    name: "${friendly_name} Pu batteries"
-    id: pu_batteries
-    topic: mp2/batteries/puissance
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 2
 
   # USS-HS43TI
   # D4

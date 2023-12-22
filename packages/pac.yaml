@@ -8,15 +8,18 @@
 template:
 
   - sensor:
-
 # Conversion de la trame JSON MQTT en template
 # Numero correspond au numero de ligne du fichier pac_attributs.txt
     # L27
     - name: "espaltherma_mode_fonctionnement"
       unique_id: "espaltherma_mode_fonctionnement"
       state: >-
-        {{ state_attr('sensor.althermasensors','Mode de fonctionnement') }}
-
+        {% set precedent = this.state|float(0)%}
+        {% if is_state("sensor.althermasensors", "Online") %}
+          {{ state_attr('sensor.althermasensors','Mode de fonctionnement') }}
+        {% else %}
+          {{precedent}}
+        {% endif %}   
     # L28
     - name: "espaltherma_thermostat_ext"
       unique_id: "espaltherma_thermostat_ext"
@@ -26,21 +29,28 @@ template:
     - name: "espaltherma_degivrage"
       unique_id: "espaltherma_degivrage"
       state: >-
-        {{ state_attr('sensor.althermasensors','Dégivrage') }}
+        {% if is_state("sensor.althermasensors", "Online") %}
+          {{ state_attr('sensor.althermasensors','Dégivrage') }}
+        {% endif %}
 
     # L59
     - name: "espaltherma_temp_air_ext_r1t"
       unique_id: "espaltherma_temp_air_ext_r1t"
       state: >-
-        {{ state_attr('sensor.althermasensors','Temp. d air extérieur(R1T)')|round(1,default=0) }}
+        {% if is_state("sensor.althermasensors", "Online") %}
+          {{ state_attr('sensor.althermasensors','Temp. d air extérieur(R1T)')|round(1,default=0) }}
+        {% endif %}
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
+
     # L60
     - name: "espaltherma_temp_air_ext_r6t"
       unique_id: "espaltherma_temp_air_ext_r6t"
       state: >-
-        {{ state_attr('sensor.althermasensors','Capteur ext. de temp. ambiante intérieure (R6T)')|round(1,default=0) }}
+        {% if is_state("sensor.althermasensors", "Online") %}        
+          {{ state_attr('sensor.althermasensors','Capteur ext. de temp. ambiante intérieure (R6T)')|round(1,default=0) }}
+        {% endif %}
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
@@ -106,7 +116,13 @@ template:
     - name: "espaltherma_temp_eau_depart"
       unique_id: "espaltherma_temp_eau_depart"
       state: >-
-        {{ state_attr('sensor.althermasensors','Laisser temp. eau après BUH (R2T)')|round(1,default=0) }}
+        {% set precedent = this.state|float(0)%}
+        {% if is_state("sensor.althermasensors", "Online") %}
+          {{ state_attr('sensor.althermasensors','Laisser temp. eau après BUH (R2T)')|round(1,default=0) }}
+        {% else %}
+          {{precedent}}
+        {% endif %}             
+        
       unit_of_measurement: '°C'
       state_class: "measurement"
       device_class: "temperature"
@@ -154,7 +170,13 @@ template:
     - name: "espaltherma_signal_ppe_eau"
       unique_id: "espaltherma_signal_ppe_eau"
       state: >-
-        {{ 100-state_attr('sensor.althermasensors','Signal de pompe à eau (0:max-100:arrêt)')|int(default=0) }}
+        {% set precedent = this.state|float(0)%}
+        {% if is_state("sensor.althermasensors", "Online") %}
+          {{ 100-state_attr('sensor.althermasensors','Signal de pompe à eau (0:max-100:arrêt)')|int(default=0) }}
+        {% else %}
+          {{precedent}}
+        {% endif %}           
+        
       unit_of_measurement: '%'
       state_class: "measurement"
       device_class: "signal_strength"

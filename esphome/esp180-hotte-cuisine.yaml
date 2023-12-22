@@ -26,7 +26,7 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
-  level: very_verbose
+  level: debug
 #  logs:
 #    light.component: very_verbose
 # Enable Home Assistant API
@@ -152,12 +152,8 @@ light:
         to: 9  
 
 
-
-
-
-
 esp32_touch:
-  setup_mode: false
+  setup_mode: true
   measurement_duration: 5.5ms
 
 binary_sensor:
@@ -166,7 +162,7 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
   - platform: esp32_touch
-    name: "${friendly_name} BP Ma"
+    name: "${friendly_name} BP1 Ma"
     pin: GPIO4
     threshold: 500
     filters:
@@ -177,45 +173,60 @@ binary_sensor:
         - switch.toggle: r1
 
   - platform: esp32_touch
-    name: "${friendly_name} BP V1"
+    name: "${friendly_name} BP2 V1"
     pin: GPIO32
-    threshold: 500
+    threshold: 300
     filters:
       - delayed_on: 100ms
       - delayed_off: 100ms
+    on_press:
+      then:
+        - switch.toggle: r2      
 
   - platform: esp32_touch
-    name: "${friendly_name} BP V2"
+    name: "${friendly_name} BP3 V2"
     pin: GPIO33
     threshold: 500
     filters:
       - delayed_on: 100ms
       - delayed_off: 100ms
+    on_press:
+      then:
+        - switch.toggle: r3      
 
   - platform: esp32_touch
-    name: "${friendly_name} BP V3"
+    name: "${friendly_name} BP4 V3"
     pin: GPIO15
     threshold: 500
     filters:
       - delayed_on: 100ms
       - delayed_off: 100ms
+    on_press:
+      then:
+        - switch.toggle: r3
 
   - platform: esp32_touch
-    name: "${friendly_name} BP VMax"
+    name: "${friendly_name} BP5 VMax"
     pin: GPIO12
-    threshold: 500
+    threshold: 400
     filters:
       - delayed_on: 100ms
       - delayed_off: 100ms
+    on_press:
+      then:
+        - switch.toggle: r4
+
 
   - platform: esp32_touch
-    name: "${friendly_name} BP Lum"
+    name: "${friendly_name} BP6 Lum"
     pin: GPIO14
-    threshold: 500
+    threshold: 550
     filters:
       - delayed_on: 100ms
       - delayed_off: 100ms
-
+    on_press:
+      then:
+        - switch.toggle: r4
 switch:
   - platform: restart
     name: "${friendly_name} Restart"

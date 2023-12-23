@@ -57,11 +57,62 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
 switch:
+  - platform: template
+    name: "${friendly_name} Hotte V1"    
+    id: v1
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v2
+      - switch.turn_off: v3
+      - delay: 500 ms
+      - switch.turn_on: r3
+    turn_off_action:
+      - switch.turn_off: r3
+
+  - platform: template
+    name: "${friendly_name} Hotte V2"    
+    id: v2
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v3      
+      - delay: 500 ms      
+      - switch.turn_on: r2
+    turn_off_action:
+      - switch.turn_off: r2
+               
+  - platform: template
+    name: "${friendly_name} Hotte V3"    
+    id: v3
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - delay: 500 ms      
+      - switch.turn_on: r3
+      - delay: 200ms
+      - switch.turn_on: r4
+
+    turn_off_action:
+      - switch.turn_off: r3
+      - delay: 250ms
+      - switch.turn_off: r4
+
+  - platform: template
+    name: "${friendly_name} Hotte Arret"    
+    id: stop
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - switch.turn_off: v3      
+
+
   - platform: restart
     name: "${friendly_name} Restart"
 
   - platform: gpio
-    name: "${friendly_name} R1"
+    name: "${friendly_name} Hotte Lumiere"
     pin: GPIO25 
     id: r1
 
@@ -80,7 +131,3 @@ switch:
     pin: GPIO21
     id: r4
 
-  - platform: gpio
-    name: "${friendly_name} Buzzer"
-    pin: GPIO27
-    id: buzzer

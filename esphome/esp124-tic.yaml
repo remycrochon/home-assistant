@@ -185,7 +185,7 @@ sensor:
       - multiply: 0.001
       - filter_out: 0.0
       - lambda: |-
-          float MAX_DIFFERENCE = 1000.0;  // adjust this!
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;

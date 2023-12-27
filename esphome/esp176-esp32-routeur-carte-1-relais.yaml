@@ -295,7 +295,7 @@ number:
     max_value: 1000
     unit_of_measurement: ""
     step: 0.1
-
+# Consigne sur Puissance Batteries
   - platform: template
     name: "${friendly_name} Consigne Pu Batteries"
     id: cons_pubatt
@@ -304,6 +304,17 @@ number:
     mode: box
     min_value: -2500
     max_value: 2500
+    unit_of_measurement: "W"
+    step: 1
+# Consigne sur Puissance Batteries
+  - platform: template
+    name: "${friendly_name} Consigne Pu Heure Creuse"
+    id: cons_puhc
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 8000
     unit_of_measurement: "W"
     step: 1
 
@@ -354,8 +365,14 @@ sensor:
         then:
           - lambda: id(pureseau1).publish_state( id(pureseau).state );
           - lambda: id(afincrement).publish_state( id(increment) );
-          - script.execute: calcul_injectionv2
-          - lambda: id(afstriac).publish_state( id(striac) );      
+          - lambda: |-
+              if (id(hc).state == 2 || id(hc).state == 4 || id(hc).state == 6){
+                id(calcul_injection_mode_hp).execute();
+              } else {
+                id(calcul_injection_mode_hc).execute();
+              }            
+          - lambda: id(afstriac).publish_state( id(striac) );
+           
 #    frequency2:
 #      name: ${name}_frequency2
 #      accuracy_decimals: 2
@@ -423,11 +440,16 @@ sensor:
     id: etatbus_ve
     topic: mp2/multiplus2/etatbusve
     accuracy_decimals: 0
-
+# lecture sensor Home Assistant
   - platform: homeassistant
     name: "${friendly_name} Status Bus VE"
     entity_id: sensor.mp2_status_bus_ve
     id: statusbusve
+
+  - platform: homeassistant
+    name: "${friendly_name} Tarif Num"
+    entity_id: sensor.linky_n_tarif
+    id: hc
 
 # Sonde Temperature radiateur
   - platform: dallas
@@ -531,8 +553,8 @@ interval:
 # ------------------------  Scripts
 script:
 # 
-# ------------------------ Calcul puissance injection V2
-  - id: calcul_injectionv2
+# Calcul puissance injection mode HP
+  - id: calcul_injection_mode_hp
     mode: single
     then:
       # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
@@ -550,7 +572,7 @@ script:
             } 
           }  
       - lambda: |-
-          if (id(statusbusve).state == 3 ){
+          if (id(statusbusve).state == 3){
             id(moderegul).publish_state( "Sur Pu batteries");
           } else {
             id(moderegul).publish_state( "Sur Pu reseau");
@@ -603,7 +625,66 @@ script:
                 brightness: !lambda |-
                   return id(0) ;  
 
-# -------------------------------------------  Pilotage led
+# Injection en mode HC
+  - id: calcul_injection_mode_hc
+    mode: single
+    then:
+      # En HC on régule autour de la consigne pu Heure creuse
+      # Le but est de ne pas trop solliciter le reseau
+      # La régule consiste à incrementer ou decrementer la sortie triac 
+      - lambda: |-
+          id(increment) = (id(cons_puhc).state-id(pureseau1).state)*id(coeff_r).state/1000;
+          id(moderegul).publish_state( "Sur Pu Heure Creuse");
+       
+      - lambda: |-
+         id(striac) = id(striac)+id(increment);            
+
+      - logger.log:
+          format: "Log S Triac= %f"
+          args: [ 'id(striac)']
+
+      - lambda: |-
+          if (id(striac) <= 0){
+            id(striac) = 0;
+          } else if(id(striac)>=id(pmax).state){
+            id(striac) = id(pmax).state;
+          }
+
+      # Si mode routeur validé et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      - if: 
+          condition:
+            and:
+              - switch.is_on: val_router
+              - switch.is_on: modeauto
+              - binary_sensor.is_on: temperatureok
+              - lambda: 'return id(striac) >= id(pmin).state;'
+          then:
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return id(striac)/100 ;
+
+
+      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
+      - if: 
+          condition:
+            and:
+              - switch.is_on: modeauto
+              - or:
+                - switch.is_off: val_router
+                - binary_sensor.is_off: temperatureok                    
+
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(0) ;  
+
+
+# ------------  Pilotage led
   - id: etat_production
     mode: single
     then:

@@ -224,6 +224,12 @@ binary_sensor:
     name: "${friendly_name} Temp Ok"
     id: temperatureok
 
+  - platform: template
+    name: "${friendly_name} Seuil Prod Ok"
+    id: seuil_prod_ok
+
+
+
 # Input Number
 number:
   # Seuil Min/Max sortie triac
@@ -272,7 +278,7 @@ number:
     max_value: 1000
     unit_of_measurement: ""
     step: 0.1
-
+# seuil Puissance batteries 
   - platform: template
     name: "${friendly_name} Seuil Pu Batteries"
     id: seuil_pubatt
@@ -306,7 +312,7 @@ number:
     max_value: 2500
     unit_of_measurement: "W"
     step: 1
-# Consigne sur Puissance Batteries
+# Consigne sur Puissance Heure Creuses
   - platform: template
     name: "${friendly_name} Consigne Pu Heure Creuse"
     id: cons_puhc
@@ -317,7 +323,17 @@ number:
     max_value: 8000
     unit_of_measurement: "W"
     step: 1
-
+# seuil Production validation routeur 
+  - platform: template
+    name: "${friendly_name} Seuil Production Val Routeur"
+    id: seuil_prod
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 500
+    max_value: 3000
+    unit_of_measurement: "W"
+    step: 1
 sensor:
   - platform: jsy194
     address: ${current_address}
@@ -436,6 +452,29 @@ sensor:
     accuracy_decimals: 2
 
   - platform: mqtt_subscribe
+    name: "${friendly_name} Pu Produite"
+    id: pu_prod
+    topic: mp2/multiplus2/prod_totale
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    on_value:
+      then:
+        if:
+          condition:
+            lambda: 'return id(pu_prod).state > id(seuil_prod).state;'
+        # Si Production > au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: seuil_prod_ok
+                state: ON
+        # Sin
+          else:
+            - binary_sensor.template.publish:
+                id: seuil_prod_ok
+                state: OFF
+            
+  - platform: mqtt_subscribe
     name: "${friendly_name} Etat Bus VE"
     id: etatbus_ve
     topic: mp2/multiplus2/etatbusve
@@ -487,14 +526,15 @@ switch:
     id: relais
 
   - platform: template
-    name: "${friendly_name} Validation Router"    
-    id: val_router
-    optimistic: true
-    restore_mode: RESTORE_INVERTED_DEFAULT_OFF
-
-  - platform: template
     name: "${friendly_name} Mode Auto"    
     id: modeauto
+    optimistic: true
+    restore_mode: always_on
+
+# Switch de Validation Routeur
+  - platform: template
+    name: "${friendly_name} Validation Routeur"    
+    id: val_routeur
     optimistic: true
     restore_mode: always_on
 
@@ -539,7 +579,7 @@ display:
       it.printf(0,0,"Pr=%0.0fW",id(pureseau1).state);
       it.printf(10,0,"Pe=%0.0fW ",id(puecs).state);
       it.printf(0,1,"Tr=%0.1f%%",id(striac));
-      it.printf(10,1,"Val:%s", id(val_router).state ? "OK" : "NOK");
+      it.printf(10,1,"Val:%s", id(val_routeur).state ? "OK" : "NOK");
       it.printf(0,2,"Tp=%0.1fc", id(temp_triac).state);
       it.printf(10,2,"Etat=%s", id(temperatureok).state ? "OK" : "NOK");
       it.printf(0,3,"Mode=%s", id(modeauto).state ? "Auto" : "Manu");
@@ -558,24 +598,22 @@ script:
     mode: single
     then:
       # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
-      # Sinon
+      #   Sinon
       # Si on regule autour du zero grid et d'un seuil puissance batteries
+      # 
       # La régule consiste à incrementer ou decrementer la sortie triac 
       - lambda: |-
           if (id(statusbusve).state == 3){
             id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
+            id(moderegul).publish_state( "Sur Pu batteries Bulk");
           } else {
             if (id(pu_batteries).state >= id(seuil_pubatt).state){
               id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
+              id(moderegul).publish_state( "Sur Pu reseau");
             } else { 
               id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
+              id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
             } 
-          }  
-      - lambda: |-
-          if (id(statusbusve).state == 3){
-            id(moderegul).publish_state( "Sur Pu batteries");
-          } else {
-            id(moderegul).publish_state( "Sur Pu reseau");
           }  
  
       - lambda: |-
@@ -592,12 +630,13 @@ script:
             id(striac) = id(pmax).state;
           }
 
-      # Si mode routeur validé et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
       - if: 
           condition:
             and:
-              - switch.is_on: val_router
+              - switch.is_on: val_routeur
               - switch.is_on: modeauto
+              - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
               - lambda: 'return id(striac) >= id(pmin).state;'
           then:
@@ -613,7 +652,7 @@ script:
             and:
               - switch.is_on: modeauto
               - or:
-                - switch.is_off: val_router
+                - switch.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
 
           then:
@@ -654,7 +693,6 @@ script:
       - if: 
           condition:
             and:
-              - switch.is_on: val_router
               - switch.is_on: modeauto
               - binary_sensor.is_on: temperatureok
               - lambda: 'return id(striac) >= id(pmin).state;'
@@ -671,7 +709,7 @@ script:
             and:
               - switch.is_on: modeauto
               - or:
-                - switch.is_off: val_router
+                - switch.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
 
           then:
@@ -700,7 +738,7 @@ script:
             
       - if: 
           condition:
-            switch.is_on: val_router
+            switch.is_on: val_routeur
           then:
             - output.turn_on: led_jaune
           else:

@@ -65,7 +65,7 @@ sensor:
     uart_id: uart_a
     type: PMSX003
     pm_1_0:
-      name: "Concentration de particules <1.0µm"
+      name: "Concentration de particules 1.0µm"
       id: pm1_0
       accuracy_decimals: 0
       filters:
@@ -75,7 +75,7 @@ sensor:
             send_first_at: 1
 
     pm_2_5:
-      name: "Concentration de particules <2.5µm"
+      name: "Concentration de particules 2.5µm"
       id: pm2_5
       accuracy_decimals: 0
       filters:
@@ -85,7 +85,7 @@ sensor:
             send_first_at: 1
 
     pm_10_0:
-      name: "Concentration de particules <10.0µm"
+      name: "Concentration de particules 10.0µm"
       id: pm10_0
       accuracy_decimals: 0
       filters:
@@ -95,37 +95,37 @@ sensor:
             send_first_at: 1
             
     pm_0_3um:
-      name: "Nb de particules >0.3"
+      name: "Nb de particules 0.3"
       id: pm_03_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_0_5um:
-      name: "Nb de particules >0.5"
+      name: "Nb de particules 0.5"
       id: pm_05_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_1_0um:
-      name: "Nb de particules >1.0"
+      name: "Nb de particules 1.0"
       id: pm_10_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_2_5um:
-      name: "Nb de particules >2.5"
+      name: "Nb de particules 2.5"
       id: pm_25_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_5_0um:
-      name: "Nb de particules >5.0"
+      name: "Nb de particules 5.0"
       id: pm_50_um
       unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_10_0um:
-      name: "Nb de particules >10.0"
+      name: "Nb de particules 10.0"
       id: pm_100_um
       unit_of_measurement: "ppd"
       accuracy_decimals: 0
@@ -159,7 +159,7 @@ sensor:
 # il supprime les valeurs aberrantes et de rendre le contrôle plus fluide
 
   - platform: template
-    name: "Concentration de particules <2.5µm median"
+    name: "Concentration de particules 2.5µm median"
     id: pm2_5_median
     icon: mdi:chemical-weapon
     unit_of_measurement: µg/m³

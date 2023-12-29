@@ -46,7 +46,7 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
-  level: info
+  level: none
 #  logs:
 #    modbus.component: INFO
 
@@ -228,7 +228,10 @@ binary_sensor:
     name: "${friendly_name} Seuil Prod Ok"
     id: seuil_prod_ok
 
-
+  - platform: homeassistant
+    name: "Validation Routeur"
+    entity_id: "input_boolean.inter_validation_routeur"
+    id: val_routeur
 
 # Input Number
 number:
@@ -516,7 +519,7 @@ sensor:
 
 text_sensor:
   - platform: template
-    name: "${friendly_name} Mode Régulation"
+    name: "${friendly_name} Mode Regulation"
     id: moderegul
 
 switch:
@@ -528,13 +531,6 @@ switch:
   - platform: template
     name: "${friendly_name} Mode Auto"    
     id: modeauto
-    optimistic: true
-    restore_mode: always_on
-
-# Switch de Validation Routeur
-  - platform: template
-    name: "${friendly_name} Validation Routeur"    
-    id: val_routeur
     optimistic: true
     restore_mode: always_on
 
@@ -564,7 +560,7 @@ output:
 
 light:
   - platform: monochromatic
-    name: "${friendly_name}+STriac"
+    name: "${friendly_name} STriac"
     output: ecs
     id: gradateur
     default_transition_length: 50ms
@@ -634,7 +630,7 @@ script:
       - if: 
           condition:
             and:
-              - switch.is_on: val_routeur
+              - binary_sensor.is_on: val_routeur
               - switch.is_on: modeauto
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
@@ -652,7 +648,7 @@ script:
             and:
               - switch.is_on: modeauto
               - or:
-                - switch.is_off: val_routeur
+                - binary_sensor.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
 
           then:
@@ -709,7 +705,7 @@ script:
             and:
               - switch.is_on: modeauto
               - or:
-                - switch.is_off: val_routeur
+                - binary_sensor.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
 
           then:
@@ -738,7 +734,7 @@ script:
             
       - if: 
           condition:
-            switch.is_on: val_routeur
+            binary_sensor.is_on: val_routeur
           then:
             - output.turn_on: led_jaune
           else:

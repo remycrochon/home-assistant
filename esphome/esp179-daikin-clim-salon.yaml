@@ -42,8 +42,8 @@ external_components:
 
 uart:
   - id: s21_uart
-    tx_pin: GPIO1
-    rx_pin: GPIO3
+    tx_pin: GPIO3
+    rx_pin: GPIO1
     baud_rate: 2400
     data_bits: 8
     parity: EVEN
@@ -72,7 +72,7 @@ binary_sensor:
 sensor:
   - platform: daikin_s21
     inside_temperature:
-      name: "${friendly_name} Temperature Unité intérieure"
+      name: "${friendly_name} Temperature Unite interieure"
     outside_temperature:
       name: "${friendly_name} Temperature Echangeur Exterieure"
     coil_temperature:

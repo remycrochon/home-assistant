@@ -106,6 +106,13 @@ sensor:
       - filter_out: 0.0
       - lambda: |-
           return x/1000;
+      - lambda: |-
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};          
           
 # C'est facile, c'est PTEC : période tarifaire en cours :
 #- Heures Creuses Jours Bleus : HCJB
@@ -128,6 +135,13 @@ sensor:
     filters:
       - lambda: return x / 1000;
       - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};      
 
 # Energie Active soutirée Index02 HP Bleu
   - platform: teleinfo
@@ -141,7 +155,14 @@ sensor:
     state_class: "total_increasing"      
     filters:
       - lambda: return x / 1000;      
-      - filter_out: 0.0    
+      - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};      
 
 # Energie Active soutirée Index03 HC Blanc
   - platform: teleinfo
@@ -156,6 +177,13 @@ sensor:
     filters:
       - lambda: return x / 1000;
       - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};      
 
 # Energie Active soutirée Index04 HP Blanc
   - platform: teleinfo
@@ -169,7 +197,14 @@ sensor:
     state_class: "total_increasing"      
     filters:
       - lambda: return x / 1000;
-      - filter_out: 0.0    
+      - filter_out: 0.0   
+      - lambda: |-
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};       
 
 # Energie Active soutirée Index05 HC Rouge
   - platform: teleinfo
@@ -203,7 +238,14 @@ sensor:
     state_class: "total_increasing"  
     filters:
       - lambda: return x / 1000;
-      - filter_out: 0.0    
+      - filter_out: 0.0   
+      - lambda: |-
+          float MAX_DIFFERENCE = 1000.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};       
 
 #Puissance apparente de coupure
   - platform: teleinfo
@@ -295,7 +337,7 @@ text_sensor:
   - platform: teleinfo
     id: ltarf
     tag_name: "LTARF"
-    name: "linky Libellé tarif fournisseur en cours"
+    name: "linky Libelle tarif fournisseur en cours"
     icon: mdi:flash
     teleinfo_id: myteleinfo
 

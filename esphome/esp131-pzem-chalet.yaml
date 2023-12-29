@@ -52,7 +52,7 @@ binary_sensor:
 sensor:
   - platform: pzemac
     current:
-      name: "${friendly_name} Intensité"
+      name: "${friendly_name} Intensite"
     voltage:
       name: "${friendly_name} Tension"
     energy:

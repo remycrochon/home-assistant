@@ -1965,46 +1965,6 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       initial_delay: 300
       max_alerts: 10
-- id: '1670934948268'
-  alias: 06-2-2 MP2 Affection puissance reduite decharge batterie
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.linky_ptec
-    from: HC..
-    to: HP..
-    id: HC-HP
-  - platform: state
-    entity_id:
-    - sensor.linky_ptec
-    from: HP..
-    to: HC..
-    id: HP-HC
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: HC-HP
-      sequence:
-      - service: modbus.write_register
-        data:
-          address: 2704
-          slave: 100
-          hub: cerbo
-          value: 400
-    - conditions:
-      - condition: trigger
-        id: HP-HC
-      sequence:
-      - service: modbus.write_register
-        data:
-          address: 2704
-          slave: 100
-          hub: cerbo
-          value: 5
-  mode: single
 - id: '1671811895133'
   alias: 10-00-00 Spot Terrasse
   description: ''
@@ -2476,17 +2436,3 @@
   mode: single
   trace:
     stored_traces: 15
-- id: '1702593337646'
-  alias: Ma clim salon a 4:00
-  description: ''
-  trigger:
-  - platform: time
-    at: 04:00:00
-  condition: []
-  action:
-  - device_id: 0479a12dc57c19473060ca9d4fe6f2a7
-    domain: climate
-    entity_id: d6f217e78df201820f68d2892341f74d
-    type: set_hvac_mode
-    hvac_mode: heat
-  mode: single

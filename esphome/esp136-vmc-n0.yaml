@@ -42,27 +42,27 @@ dallas:
 sensor:
   - platform: dallas
     address: 0x5A012111F0026A28
-    name: "${friendly_name} T° Air Neuf"
+    name: "${friendly_name} T Air Neuf"
     id: out
 
   - platform: dallas
     address: 0xBE012113327ECD28
-    name: "${friendly_name} T° Air Vicié"
+    name: "${friendly_name} T Air Vicié"
     id: airv
 
   - platform: dallas
     address: 0x570121130B1F6B28
-    name: "${friendly_name} T° insufflation"
+    name: "${friendly_name} T insufflation"
     id: insuf
 
   - platform: dallas
     address: 0xC90121137D4EA028
-    name: "${friendly_name} T° aspiration"
+    name: "${friendly_name} T aspiration"
     id: aspi
     
   - platform: dallas
     address: 0x28012112F58CF028
-    name: "${friendly_name} T°Combles"
+    name: "${friendly_name} T Combles"
     id: combles
 
   - platform: template

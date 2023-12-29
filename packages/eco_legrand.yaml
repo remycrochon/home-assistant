@@ -29,7 +29,7 @@ command_line:
       name: "EcoCompteur Clim_0"
       unique_id: "ecocompteur_clim_0"
       command: curl -s 'http://192.168.0.26/inst.json' | jq '.data4'
-      scan_interval: 60
+      scan_interval: 10
       unit_of_measurement: W
 
   - sensor:

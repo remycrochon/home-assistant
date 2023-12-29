@@ -47,11 +47,11 @@ sensor:
       name: "${device_name} Temperature"
       id: temperature
     humidity:
-      name: "${device_name} Humidité"
+      name: "${device_name} Humidite"
       id: humidite
     update_interval: 60s
 
   - platform: absolute_humidity
-    name: "${device_name} Humidité Absolue"
+    name: "${device_name} Humidite Absolue"
     temperature: temperature
     humidity: humidite

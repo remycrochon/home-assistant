@@ -388,7 +388,7 @@ sensor:
               if (id(hc).state == 2 || id(hc).state == 4 || id(hc).state == 6){
                 id(calcul_injection_mode_hp).execute();
               } else {
-                id(calcul_injection_mode_hc).execute();
+                id(calcul_injection_mode_hp).execute();
               }            
           - lambda: id(afstriac).publish_state( id(striac) );
            

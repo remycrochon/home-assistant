@@ -37,6 +37,23 @@ ota:
 web_server:
   port: 80
 
+
+# Configuration detecteur ouverture BLE
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 10ms
+    window: 10ms
+    active: false
+
+external_components:
+  - source: github://Fabian-Schmidt/esphome-xiaomi_mccgq02hl
+    components: [ xiaomi_ble, xiaomi_mccgq02hl ]
+
+xiaomi_mccgq02hl:
+  - id: window_one
+    mac_address: "E4:AA:EC:36:C5:44"
+    bindkey: "3627f27701709d3ac77a41111db9afe9"
+
 # Informations supplementaires sur le WIFI
 #text_sensor:
 #  - platform: wifi_info
@@ -52,9 +69,34 @@ web_server:
 #      name: ${friendly_name}_ESP Latest Scan Results
   
 binary_sensor:
+  - platform: xiaomi_mccgq02hl
+    id: window_one
+    #light:
+    #  name: "${friendly_name} Contact OUV1 Light"
+
+    open:
+      name: "${friendly_name} Contact OUV1 Open" 
+      id: ouv
+      filters:
+        - delayed_on: 500ms
+        - delayed_off: 500ms      
+      on_release:
+        then:
+          - switch.turn_off: v1
+          - switch.turn_off: r1
+      on_press:
+          - switch.turn_on: v1
+          - switch.turn_on: r1
+
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
+
+sensor:
+  - platform: xiaomi_mccgq02hl
+    id: window_one
+    battery_level:
+      name: "${friendly_name} Battery Level"
 
 switch:
   - platform: template
@@ -130,4 +172,5 @@ switch:
     name: "${friendly_name} R4"
     pin: GPIO21
     id: r4
+
 

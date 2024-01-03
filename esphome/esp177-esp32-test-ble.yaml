@@ -4,7 +4,6 @@ substitutions:
   adress_ip: "192.168.0.177"
   time_timezone: "Europe/Paris"
 
-
 esphome:
   name: ${device_name}
 
@@ -15,25 +14,59 @@ esp32:
 
 # Enable logging
 logger:
-  level: VERY_VERBOSE
+  level: debug
 # Enable Home Assistant API
 api:
-
 ota:
-
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
 
 web_server:
   port: 80
 
 captive_portal:
-
   
-# Example configuration entry
+# Configuration detecteur ouverture BLE
 esp32_ble_tracker:
+  scan_parameters:
+    interval: 10ms
+    window: 10ms
+    active: false
 
-text_sensor:
-  - platform: ble_scanner
-    name: "BLE Devices Scanner"
+external_components:
+  - source: github://Fabian-Schmidt/esphome-xiaomi_mccgq02hl
+    components: [ xiaomi_ble, xiaomi_mccgq02hl ]
+
+xiaomi_mccgq02hl:
+  - id: ouv1
+    mac_address: "E4:AA:EC:36:C5:44"
+    bindkey: "3627f27701709d3ac77a41111db9afe9"
+  - id: ouv2
+    mac_address: "E4:AA:EC:35:09:66"
+    bindkey: "556ecfc7f5974b540a6650816486dd9c"
+
+binary_sensor:
+  - platform: xiaomi_mccgq02hl
+    id: ouv1
+    open:
+      name: "${friendly_name} Contact OUV1"
+  - platform: xiaomi_mccgq02hl
+    id: ouv2
+    open:
+      name: "${friendly_name} Contact OUV2"
+
+sensor:
+  - platform: xiaomi_mccgq02hl
+    id: ouv1
+    battery_level:
+      name: "${friendly_name} Battery ouv1"
+  - platform: xiaomi_mccgq02hl
+    id: ouv2
+    battery_level:
+      name: "${friendly_name} Battery ouv2"

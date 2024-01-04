@@ -9,8 +9,11 @@ esphome:
   platform: ESP32
 #  board: esp32dev
   board: mhetesp32minikit
-  platformio_options:
-    lib_deps: NeoPixelBus@2.6.0
+
+#  on_boot:
+#    priority: 800
+#    then: 
+#      - script.execute: calcul_vitesse    
     
 wifi:
   networks:
@@ -38,67 +41,70 @@ web_server:
   port: 80
 
 
-# Configuration detecteur ouverture BLE
-esp32_ble_tracker:
-  scan_parameters:
-    interval: 10ms
-    window: 10ms
-    active: false
+# Input Number
+number:
+  # Seuil humidité v1->v2
+  - platform: template
+    name: "${friendly_name} Seuil_V2 Hum"
+    id: seuilv2_hum
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    initial_value: 55
+    unit_of_measurement: "%"
+    step: 1
 
-external_components:
-  - source: github://Fabian-Schmidt/esphome-xiaomi_mccgq02hl
-    components: [ xiaomi_ble, xiaomi_mccgq02hl ]
+  # Seuil humidité v2->v3
+  - platform: template
+    name: "${friendly_name} Seuil_V3 Hum"
+    id: seuilv3_hum
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    initial_value: 80
+    unit_of_measurement: "%"
+    step: 1
 
-xiaomi_mccgq02hl:
-  - id: window_one
-    mac_address: "E4:AA:EC:36:C5:44"
-    bindkey: "3627f27701709d3ac77a41111db9afe9"
-
-# Informations supplementaires sur le WIFI
-#text_sensor:
-#  - platform: wifi_info
-#    ip_address:
-#      name: ${friendly_name}_ESP IP Address
-#    ssid:
-#      name: ${friendly_name}_ESP Connected SSID
-#    bssid:
-#      name: ${friendly_name}_ESP Connected BSSID
-#    mac_address:
-#      name: ${friendly_name}_ESP Mac Wifi Address
-#    scan_results:
-#      name: ${friendly_name}_ESP Latest Scan Results
-  
 binary_sensor:
-  - platform: xiaomi_mccgq02hl
-    id: window_one
-    #light:
-    #  name: "${friendly_name} Contact OUV1 Light"
-
-    open:
-      name: "${friendly_name} Contact OUV1 Open" 
-      id: ouv
-      filters:
-        - delayed_on: 500ms
-        - delayed_off: 500ms      
-      on_release:
-        then:
-          - switch.turn_off: v1
-          - switch.turn_off: r1
-      on_press:
-          - switch.turn_on: v1
-          - switch.turn_on: r1
-
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
 sensor:
-  - platform: xiaomi_mccgq02hl
-    id: window_one
-    battery_level:
-      name: "${friendly_name} Battery Level"
+
+  - platform: homeassistant
+    entity_id: "sensor.temperature_hotte_zb"
+    id: temp_hotte
+
+  - platform: homeassistant
+    entity_id: "sensor.humidite_hotte_zb"
+    id: hum_hotte
+    on_value:
+      then:
+        - script.execute: calcul_vitesse
 
 switch:
+  - platform: template
+    name: "${friendly_name} Hotte"    
+    id: hotte
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: v1
+      - delay: 500ms
+      - switch.turn_on: r1
+
+    turn_off_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - switch.turn_off: v3  
+      - delay: 500ms
+      - switch.turn_off: r1
+
+
   - platform: template
     name: "${friendly_name} Hotte V1"    
     id: v1
@@ -140,16 +146,6 @@ switch:
       - delay: 250ms
       - switch.turn_off: r4
 
-  - platform: template
-    name: "${friendly_name} Hotte Arret"    
-    id: stop
-    optimistic: true
-    turn_on_action:
-      - switch.turn_off: v1
-      - switch.turn_off: v2
-      - switch.turn_off: v3      
-
-
   - platform: restart
     name: "${friendly_name} Restart"
 
@@ -173,4 +169,44 @@ switch:
     pin: GPIO21
     id: r4
 
+
+script:
+  # Calcul vitesse aspiration
+  - id: calcul_vitesse
+    mode: single
+    then:
+
+      # Si Hotte en marche
+      # Si Humidité hotte < seuil v2 alors on enclenche V1
+      - if:
+          condition:
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
+          then:
+            - switch.turn_on: v1
+            - delay: 1500ms
+            - switch.turn_on: r1
+      
+      # Si Hotte en marche
+      # Si Humidité hotte > au seuil V1 et < seuil v2 alors on enclenche V2
+      - if:
+          condition:
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
+            - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
+          then:
+            - switch.turn_on: v2
+            - delay: 1500ms
+            - switch.turn_on: r1
+      
+      # Si Hotte en marche
+      # Si Humidité hotte > au seuil V3 alors on enclenche V3 pendant 2mn    
+      - if:
+          condition:
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
+          then:
+            - switch.turn_on: v3
+            - delay: 1500ms            
+            - switch.turn_on: r1
 

@@ -39,34 +39,23 @@ esp32_ble_tracker:
     window: 10ms
     active: false
 
-external_components:
-  - source: github://Fabian-Schmidt/esphome-xiaomi_mccgq02hl
-    components: [ xiaomi_ble, xiaomi_mccgq02hl ]
-
-xiaomi_mccgq02hl:
-  - id: ouv1
-    mac_address: "E4:AA:EC:36:C5:44"
-    bindkey: "3627f27701709d3ac77a41111db9afe9"
+xiaomi_rtcgq02lm:
   - id: ouv2
     mac_address: "E4:AA:EC:35:09:66"
     bindkey: "556ecfc7f5974b540a6650816486dd9c"
 
 binary_sensor:
-  - platform: xiaomi_mccgq02hl
-    id: ouv1
-    open:
-      name: "${friendly_name} Contact OUV1"
-  - platform: xiaomi_mccgq02hl
+  - platform: xiaomi_rtcgq02lm
     id: ouv2
-    open:
-      name: "${friendly_name} Contact OUV2"
+    motion:
+      name: "Mi Motion"
+    light:
+      name: "Mi Motion Sensor Light"
+    button:
+      name: "Mi Motion Sensor Button"
 
 sensor:
-  - platform: xiaomi_mccgq02hl
-    id: ouv1
-    battery_level:
-      name: "${friendly_name} Battery ouv1"
-  - platform: xiaomi_mccgq02hl
+  - platform: xiaomi_rtcgq02lm
     id: ouv2
     battery_level:
-      name: "${friendly_name} Battery ouv2"
+      name: "Mi Motion Sensor Battery Level"      

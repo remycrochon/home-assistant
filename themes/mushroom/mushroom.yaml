@@ -3,7 +3,32 @@
 # If you want to customize it, copy the content in another folder and file and change the name.
 # https://www.home-assistant.io/integrations/frontend/#defining-themes
 Mushroom:
+    ha-card-border-width: 0
+    # Bleu nuit: HC Bleu
+    energy-grid-consumption-color-5: "#9BE1FD"
+    # Bleu -magenta : HP Bleu
+    energy-grid-consumption-color-6: "#039DE0"
+    # Gris: HC Blanc
+    energy-grid-consumption-color-0: "#C8D9E5"
+    # Blanc : HP Blanc
+    energy-grid-consumption-color-1: "#8BAAC0"
+    # Rouge sang: HC Rouge
+    energy-grid-consumption-color-7: "#F49D9A"
+    # Red : HP Rouge
+    energy-grid-consumption-color-2: "#D9534F"
+    # Standard : Tarif Base HP
+    energy-grid-consumption-color-4: "#9eb75c"
+    # Standard : Tarif Base HC 
+    energy-grid-consumption-color-3: "#73b75c"
     # Nothing here as it's the default HA theme since 2022.11
+    energy-grid-consumption-color: "#488fc2"
+    energy-grid-return-color: "#8353d1"
+    energy-solar-color: "#ff9800"
+    energy-non-fossil-color: "#0f9d58"
+    energy-battery-out-color: "#4db6ac"
+    energy-battery-in-color: "#62f081"
+    #  "#d662f0"
+    energy-gas-color: "#8E021b"    
     modes:
         light: {}
         dark: {}

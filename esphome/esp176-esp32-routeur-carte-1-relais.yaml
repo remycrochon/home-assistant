@@ -47,9 +47,6 @@ wifi:
 logger:
   baud_rate: 0
   level: none
-#  logs:
-#    modbus.component: INFO
-
 
 web_server:
   port: 80
@@ -77,6 +74,22 @@ globals:
      type: float
      restore_value: yes
 
+# Variable PID
+   - id: erreur_precedente
+     type: float
+     restore_value: yes
+   - id: erreur
+     type: float
+     restore_value: yes
+   - id: somme_erreurs
+     type: float
+     restore_value: yes
+   - id: variation_erreur
+     type: float
+     restore_value: yes
+   - id: sortie
+     type: float
+     restore_value: yes
 # Sonde Temperature Dallas
 dallas:
   - pin: GPIO27 #
@@ -116,104 +129,6 @@ modbus:
 #    update_interval: 0.75s
 #    command_throttle: 50ms
     # setup_priority: -10
-
-
-button:
-  - platform: template
-    name: ${name}_reset_energy1pos
-    id: ${name}_reset_energy1pos
-    icon: "mdi:button-pointer"
-    on_press:
-      then:
-        - jsy194.reset_energy1pos: 
-           id: ${name}_id
-
-  - platform: template
-    name: ${name}_reset_energy1neg
-    id: ${name}_reset_energy1neg
-    icon: "mdi:button-pointer"
-    on_press:
-      then:
-        - jsy194.reset_energy1neg: 
-           id: ${name}_id          
-
-  - platform: template
-    name: ${name}_reset_energy2pos
-    id: ${name}_reset_energy2pos
-    icon: "mdi:button-pointer"
-    on_press:
-      then:
-        - jsy194.reset_energy2pos: 
-           id: ${name}_id
-
-  - platform: template
-    name: ${name}_reset_energy2neg
-    id: ${name}_reset_energy2neg
-    icon: "mdi:button-pointer"
-    on_press:
-      then:
-        - jsy194.reset_energy2neg: 
-           id: ${name}_id
-
-  - platform: template
-    name: ${name}_write_register04
-    id: ${name}_write_register04
-    icon: "mdi:button-pointer"
-    on_press:
-      then:
-        - jsy194.write_com_setting:
-            id: ${name}_id
-            new_address: !lambda 'return stoi(id(new_address).state);'
-            new_baudrate: !lambda |-
-              auto index = id(new_baudrate).active_index();
-              return uint8_t( index.value() + ${offset_select}  );
-          
-  - platform: template
-    name: ${name}_read_register04
-    id: ${name}_read_register04
-    icon: "mdi:button-pointer"
-    on_press:
-      then:
-        - lambda: |-
-           uint8_t current_address, current_baudrate;
-           esphome::jsy194::JSY194 *sen =  id(${name}_id);
-           sen->read_register04();
-           current_address = sen->get_address();
-           auto address = id(new_address).make_call();
-           address.set_value(std::to_string(current_address));
-           address.perform();
-           current_baudrate = sen->get_baudrate();
-           auto baudrate = id(new_baudrate).make_call();
-           baudrate.set_index(current_baudrate - ${offset_select});
-           baudrate.perform();        
-
-text:
-  - platform: template
-    name: ${name}_new_address
-    id: new_address
-    optimistic: true
-    min_length: 0
-    max_length: 3
-    mode: text
-    initial_value: '   '
-    restore_value: false
-
-select:
-  - platform: template
-    name: ${name}_new_baudrate
-    id: new_baudrate
-    optimistic: true
-    options:
-      - '              '
-      - '3 - 1200 bauds'
-      - '4 - 2400 bauds'
-      - '5 - 4800 bauds'
-      - '6 - 9600 bauds'
-      - '7 - 19200 bauds'
-      - '8 - 38400 bauds'
-    initial_option: '              '
-    restore_value: false
-
 
 binary_sensor:
 #Etat de la connection
@@ -337,6 +252,53 @@ number:
     max_value: 3000
     unit_of_measurement: "W"
     step: 1
+
+# regulation PID
+# Consigne sur Puissance PID
+  - platform: template
+    name: "${friendly_name} Consigne Pu PID"
+    id: cons_pid
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -100
+    max_value: 8000
+    unit_of_measurement: "W"
+    step: 1
+
+  - platform: template
+    name: "${friendly_name} Coeff Kp"
+    id: kp
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: ""
+    step: 0.01
+
+  - platform: template
+    name: "${friendly_name} Coeff Ki"
+    id: ki
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: ""
+    step: 0.01
+
+  - platform: template
+    name: "${friendly_name} Coeff Kd"
+    id: kd
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: ""
+    step: 0.01
+
 sensor:
   - platform: jsy194
     address: ${current_address}
@@ -586,9 +548,89 @@ interval:
     then:
       - script.execute: etat_production 
 
+#  - interval: 500ms
+#   then:
+#      - script.execute: pid
 # ------------------------  Scripts
 script:
 # 
+# Calcul PID
+# https://www.ferdinandpiette.com/blog/2011/08/implementer-un-pid-sans-faire-de-calculs/
+#    erreur = consigne - mesure;
+#    somme_erreurs += erreur;
+#    variation_erreur = erreur - erreur_précédente;
+#    commande = Kp * erreur + Ki * somme_erreurs + Kd * variation_erreur;
+#    erreur_précédente = erreur
+  - id: pid
+    mode: single
+    then:
+      - lambda: |-
+          if (id(statusbusve).state == 3){
+            id(cons_pid).publish_state(id(cons_pubatt).state);
+            id(moderegul).publish_state( "Sur Pu batteries Bulk PID");
+          } else {
+            if (id(pu_batteries).state >= id(seuil_pubatt).state){
+              id(cons_pid).publish_state(0);
+              id(moderegul).publish_state( "Sur Pu reseau PID");
+            } else { 
+              id(cons_pid).publish_state(id(cons_pubatt).state);
+              id(moderegul).publish_state( "Sur Pu batteries Non Bulk PID");
+            } 
+          }  
+
+      - lambda: |-
+          id(erreur) = id(cons_pid).state-id(pureseau).state;
+          id(somme_erreurs) += id(erreur);
+          id(variation_erreur)=id(erreur)-id(erreur_precedente);
+          id(sortie) = id(kp).state*id(erreur)+id(ki).state*id(somme_erreurs)+id(kd).state*id(variation_erreur);
+          id(erreur_precedente)= id(erreur);
+
+      - lambda: |-
+         id(striac) = id(sortie);            
+
+      - logger.log:
+          format: "Log S Triac= %f"
+          args: [ 'id(sortie)']
+
+      - lambda: |-
+          if (id(striac) <= 0){
+            id(striac) = 0;
+          } else if(id(striac)>=id(pmax).state){
+            id(striac) = id(pmax).state;
+          }
+
+      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: val_routeur
+              - switch.is_on: modeauto
+              - binary_sensor.is_on: seuil_prod_ok
+              - binary_sensor.is_on: temperatureok
+              - lambda: 'return id(striac) >= id(pmin).state;'
+          then:
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return id(striac)/100 ;
+
+      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
+      - if: 
+          condition:
+            and:
+              - switch.is_on: modeauto
+              - or:
+                - binary_sensor.is_off: val_routeur
+                - binary_sensor.is_off: temperatureok                    
+
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(0) ;          
 # Calcul puissance injection mode HP
   - id: calcul_injection_mode_hp
     mode: single
@@ -616,8 +658,9 @@ script:
          id(striac) = id(striac)+id(increment);            
 
       - logger.log:
-          format: "Log S Triac= %f"
-          args: [ 'id(striac)']
+          format: "Log S Triac %f - Increment %f"
+          args: [ 'id(striac)', 'id(increment)' ]
+          level: "info"
 
       - lambda: |-
           if (id(striac) <= 0){

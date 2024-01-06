@@ -106,7 +106,7 @@ uart:
     tx_pin: 17
     rx_pin: 16 
     baud_rate: ${current_baud_rate}
-    stop_bits: 1 # 2 for ESP32, 1 for ESP8266
+    stop_bits: 1 
 #    debug:
 #      direction: BOTH
 #      dummy_receiver: false
@@ -582,7 +582,7 @@ script:
           id(erreur) = id(cons_pid).state-id(pureseau).state;
           id(somme_erreurs) += id(erreur);
           id(variation_erreur)=id(erreur)-id(erreur_precedente);
-          id(sortie) = id(kp).state*id(erreur)+id(ki).state*id(somme_erreurs)+id(kd).state*id(variation_erreur);
+          id(sortie) = (id(kp).state*id(erreur))+(id(ki).state*id(somme_erreurs))+id((kd).state*id(variation_erreur));
           id(erreur_precedente)= id(erreur);
 
       - lambda: |-

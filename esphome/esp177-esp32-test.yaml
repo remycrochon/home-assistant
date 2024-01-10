@@ -6,7 +6,13 @@ substitutions:
 
 esphome:
   name: ${device_name}
-
+  on_boot:
+    priority: -10
+    then:
+    - wait_until:
+        api.connected:
+    - logger.log: API is connected!
+    
 esp32:
   board: esp32dev
   framework:
@@ -14,7 +20,9 @@ esp32:
 
 # Enable logging
 logger:
-  level: verbose
+  level: info
+
+
 # Enable Home Assistant API
 api:
 ota:
@@ -31,68 +39,138 @@ web_server:
   port: 80
 
 captive_portal:
-  
-i2c:
-  sda: GPIO21 #
-  scl: GPIO22 #
-  scan: True
-  id: bus_a
-  
-# Example configuration entry
-mpr121:
-  id: mpr121_component
-  address: 0x5A
-  touch_threshold: 6
-  release_threshold: 5
+
+globals:
+   - id: increment
+     type: float
+     restore_value: no
+     initial_value: '0'
+   - id: striac
+     type: float
+     restore_value: yes
+
+# Variable PID
+   - id: erreur_precedente
+     type: float
+     restore_value: no
+
+   - id: erreur
+     type: float
+     restore_value: no
+
+   - id: somme_erreurs_old
+     type: float
+     restore_value: no
+     initial_value: '0'
+
+   - id: variation_erreur
+     type: float
+     restore_value: no
+
+   - id: sortie
+     type: float
+     restore_value: no
+
+# Input Number
+number:
+
+
+# regulation PID
+# Consigne sur Puissance PID
+  - platform: template
+    name: "${friendly_name} Consigne Pu PID"
+    id: cons_pid
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -100
+    max_value: 8000
+    unit_of_measurement: "W"
+    step: 1
+
+  - platform: template
+    name: "${friendly_name} Coeff Kp"
+    id: kp
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: ""
+    step: 0.01
+
+  - platform: template
+    name: "${friendly_name} Coeff Ki"
+    id: ki
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: ""
+    step: 0.01
+
+  - platform: template
+    name: "${friendly_name} Coeff Kd"
+    id: kd
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: ""
+    step: 0.01
+
 
 binary_sensor:
+#Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
-  - platform: mpr121
-    id: touch_key0
-    channel: 0
-    name: "${friendly_name}_Touch 0"
 
-
-  - platform: mpr121
-    id: touch_key1
-    channel: 1
-    name: "${friendly_name}_Touch 1"
-
-
-  - platform: mpr121
-    id: touch_key2
-    channel: 2
-    name: "${friendly_name}_Touch 2"
-
-
-  - platform: mpr121
-    id: touch_key3
-    channel: 3
-    name: "${friendly_name}_Touch 3"
-
+sensor:
+############### TEMPLATE  ######################"
+# Affichage dans HA et sur l'afficheur
+  - platform: template
+    name: "${friendly_name} Pu Reseau"
+    id: pureseau
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+ 
     
-  - platform: mpr121
-    id: touch_key4
-    channel: 4
-    name: "${friendly_name}_Touch 4"
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: pid
+# ------------------------  Scripts
+script:
+# 
+# Calcul PID
+# https://www.ferdinandpiette.com/blog/2011/08/implementer-un-pid-sans-faire-de-calculs/
+#    erreur = consigne - mesure;
+#    somme_erreurs += erreur;
+#    variation_erreur = erreur - erreur_précédente;
+#    commande = Kp * erreur + Ki * somme_erreurs + Kd * variation_erreur;
+#    erreur_précédente = erreur
+  - id: pid
+    mode: single
+    then:
 
-    
-  - platform: mpr121
-    id: touch_key5
-    channel: 5
-    name: "${friendly_name}_Touch 5"
+      - lambda: |-
+          static float somme_erreurs = 0;
+          id(erreur) = id(cons_pid).state-id(pureseau).state;
+          somme_erreurs = somme_erreurs + id(erreur);
+          id(somme_erreurs_old)=somme_erreurs;
+          id(variation_erreur)=id(erreur)-id(erreur_precedente);
+          id(sortie) = (id(kp).state*id(erreur))+(id(ki).state*(somme_erreurs))+(id(kd).state*id(variation_erreur));
+          id(erreur_precedente)= id(erreur);
+          ESP_LOGD("info", "SomErr %f", somme_erreurs);
 
-    
-  - platform: mpr121
-    id: touch_key6
-    channel: 6
-    name: "${friendly_name}_Touch 6"        
-        
-    
-  - platform: mpr121
-    id: touch_key7
-    channel: 7
-    name: "${friendly_name}_Touch 7"
-    
+      - lambda: |-
+         id(striac) = id(sortie);            
+
+      - logger.log:
+          format: "Log Err:%f-SomErr:%f-VarErr:%f-ErrPre:%f- STriac:%f - Sortie:%f"
+          args: [ 'id(erreur)','id(somme_erreurs_old)','id(variation_erreur)','id(erreur_precedente)','id(striac)', 'id(sortie)' ]
+          level: "info"          
+

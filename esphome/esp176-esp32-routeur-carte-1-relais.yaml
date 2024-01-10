@@ -46,6 +46,7 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
+#  level: info
   level: none
 
 web_server:
@@ -77,19 +78,25 @@ globals:
 # Variable PID
    - id: erreur_precedente
      type: float
-     restore_value: yes
+     restore_value: no
+
    - id: erreur
      type: float
-     restore_value: yes
-   - id: somme_erreurs
+     restore_value: no
+
+   - id: somme_erreurs_old
      type: float
-     restore_value: yes
+     restore_value: no
+     initial_value: '0'
+
    - id: variation_erreur
      type: float
-     restore_value: yes
+     restore_value: no
+
    - id: sortie
      type: float
-     restore_value: yes
+     restore_value: no
+
 # Sonde Temperature Dallas
 dallas:
   - pin: GPIO27 #
@@ -347,7 +354,7 @@ sensor:
           - lambda: id(pureseau1).publish_state( id(pureseau).state );
           - lambda: id(afincrement).publish_state( id(increment) );
           - lambda: |-
-              if (id(hc).state == 2 || id(hc).state == 4 || id(hc).state == 6){
+             if (id(hc).state == 2 || id(hc).state == 4 || id(hc).state == 6){
                 id(calcul_injection_mode_hp).execute();
               } else {
                 id(calcul_injection_mode_hp).execute();
@@ -549,7 +556,7 @@ interval:
       - script.execute: etat_production 
 
 #  - interval: 500ms
-#   then:
+#    then:
 #      - script.execute: pid
 # ------------------------  Scripts
 script:
@@ -579,18 +586,22 @@ script:
           }  
 
       - lambda: |-
+          static float somme_erreurs = 0;
           id(erreur) = id(cons_pid).state-id(pureseau).state;
-          id(somme_erreurs) += id(erreur);
+          somme_erreurs = somme_erreurs + id(erreur);
+          id(somme_erreurs_old)=somme_erreurs;
           id(variation_erreur)=id(erreur)-id(erreur_precedente);
-          id(sortie) = (id(kp).state*id(erreur))+(id(ki).state*id(somme_erreurs))+id((kd).state*id(variation_erreur));
+          id(sortie) = (id(kp).state*id(erreur))+(id(ki).state*(somme_erreurs))+(id(kd).state*id(variation_erreur));
           id(erreur_precedente)= id(erreur);
+          ESP_LOGD("info", "SomErr %f", somme_erreurs);
 
       - lambda: |-
          id(striac) = id(sortie);            
 
       - logger.log:
-          format: "Log S Triac= %f"
-          args: [ 'id(sortie)']
+          format: "Log Err:%f-SomErr:%f-VarErr:%f-ErrPre:%f- STriac:%f - Sortie:%f"
+          args: [ 'id(erreur)','id(somme_erreurs_old)','id(variation_erreur)','id(erreur_precedente)','id(striac)', 'id(sortie)' ]
+          level: "info"          
 
       - lambda: |-
           if (id(striac) <= 0){

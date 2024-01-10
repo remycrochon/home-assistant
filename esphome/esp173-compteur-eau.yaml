@@ -8,9 +8,13 @@ esphome:
   name: ${device_name}
   platform: ESP8266
   board: d1_mini
-  platformio_options:
-    lib_deps: NeoPixelBus@2.6.0
-
+  on_boot:
+    priority: -10
+    then:
+    - wait_until:
+        api.connected:
+    - logger.log: API is connected!
+    
 wifi:
   networks:
     - ssid: !secret wifi
@@ -26,7 +30,7 @@ wifi:
 
 # Enable logging
 logger:
-  level: very_verbose
+  level: verbose
 #  logs:
 #    wifi.component: debug
 #    mqtt.component: debug
@@ -38,91 +42,63 @@ ota:
 web_server:
   port: 80
 
-mqtt:
-  broker: 192.168.0.37
-  username: !secret mqtt_ha_name
-  password: !secret mqtt_ha_pw
+
+i2c:
+  sda: D3
+  scl: D2
 
 
-# Led WS2812 RGB  
-light:
+mpr121:
+  id: mpr121_component
+  touch_threshold: 8
+  release_threshold: 7
 
-  - platform: neopixelbus
-    method:
-      type: esp8266_dma
-    num_leds: 5 #1
-    pin: RX
-    name: "RGB strip"
-    variant: 800KBPS
-    id: w_led
-
-  - platform: partition
-    name: led1
-    id: led1
-    default_transition_length: 0s
-    segments:
-      - id: w_led
-        from: 0
-        to: 0
-  - platform: partition
-    name: led2
-    id: led2
-    default_transition_length: 0s
-    segments:
-      - id: w_led
-        from: 1
-        to: 1
-  - platform: partition
-    name: led3
-    id: led3
-    default_transition_length: 0s
-    segments:
-      - id: w_led
-        from: 2
-        to: 2
-  - platform: partition
-    name: led4
-    id: led4
-    default_transition_length: 0s
-    segments:
-      - id: w_led
-        from: 3
-        to: 3
-  - platform: partition
-    name: led5
-    id: led5
-    default_transition_length: 0s
-    segments:
-      - id: w_led
-        from: 4
-        to: 4
 
 binary_sensor:
-#Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
+  - platform: mpr121
+    id: touch_key0
+    channel: 0
+    name: "${friendly_name}_Touch 0"
+
+  - platform: mpr121
+    id: touch_key1
+    channel: 1
+    name: "${friendly_name}_Touch 1"
+
+  - platform: mpr121
+    id: touch_key2
+    channel: 2
+    name: "${friendly_name}_Touch 2"
+
+  - platform: mpr121
+    id: touch_key3
+    channel: 3
+    name: "${friendly_name}_Touch 3"
+   
+  - platform: mpr121
+    id: touch_key4
+    channel: 4
+    name: "${friendly_name}_Touch 4"
+    
+  - platform: mpr121
+    id: touch_key5
+    channel: 5
+    name: "${friendly_name}_Touch 5"
+    
+  - platform: mpr121
+    id: touch_key6
+    channel: 6
+    name: "${friendly_name}_Touch 6"        
+    
+  - platform: mpr121
+    id: touch_key7
+    channel: 7
+    name: "${friendly_name}_Touch 7"
+
 sensor:
-
-
-  # USS-HS43TI
-  # D4
-
-  - platform: pulse_meter
-    pin: D4
-    name: "${friendly_name} Cpt Eau General"
-    unit_of_measurement: "litre/mn"
-    icon: "mdi:water"
-    filters:
-     - lambda: return (x/(8.1*60-5));
-    total:
-      name: "${friendly_name} Cpt Eau General Total"
-      unit_of_measurement: "m³"
-      accuracy_decimals: 3
-      device_class: water
-      state_class: total_increasing
-      filters:
-        - lambda: return (x/(8.1*60-5)/1000);
 
 # Informations WI_FI
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB

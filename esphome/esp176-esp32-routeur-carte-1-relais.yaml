@@ -75,28 +75,6 @@ globals:
      type: float
      restore_value: yes
 
-# Variable PID
-   - id: erreur_precedente
-     type: float
-     restore_value: no
-
-   - id: erreur
-     type: float
-     restore_value: no
-
-   - id: somme_erreurs_old
-     type: float
-     restore_value: no
-     initial_value: '0'
-
-   - id: variation_erreur
-     type: float
-     restore_value: no
-
-   - id: sortie
-     type: float
-     restore_value: no
-
 # Sonde Temperature Dallas
 dallas:
   - pin: GPIO27 #
@@ -352,14 +330,16 @@ sensor:
       on_value:
         then:
           - lambda: id(pureseau1).publish_state( id(pureseau).state );
-          - lambda: id(afincrement).publish_state( id(increment) );
-          - lambda: |-
-             if (id(hc).state == 2 || id(hc).state == 4 || id(hc).state == 6){
-                id(calcul_injection_mode_hp).execute();
-              } else {
-                id(calcul_injection_mode_hp).execute();
-              }            
-          - lambda: id(afstriac).publish_state( id(striac) );
+          - lambda: id(calcul_injection_mode_hp).execute();  
+
+
+#          - lambda: |-
+#             if (id(hc).state == 2 || id(hc).state == 4 || id(hc).state == 6){
+#                id(calcul_injection_mode_hp).execute();
+#              } else {
+#                id(calcul_injection_mode_hp).execute();
+#              }            
+  
            
 #    frequency2:
 #      name: ${name}_frequency2
@@ -502,6 +482,8 @@ switch:
     id: modeauto
     optimistic: true
     restore_mode: always_on
+    on_turn_off:
+      - light.turn_off: gradateur
 
   - platform: restart
     name: "${friendly_name} Restart"
@@ -572,43 +554,48 @@ script:
     mode: single
     then:
       - lambda: |-
+          static float erreur;
+          static float somme_erreurs;
+          static float variation_erreur;
+          static float erreur_precedente;
+          static float sortie;
+          somme_erreurs = 0.0;
+
           if (id(statusbusve).state == 3){
             id(cons_pid).publish_state(id(cons_pubatt).state);
+            erreur = id(pu_batteries).state-id(cons_pid).state;
             id(moderegul).publish_state( "Sur Pu batteries Bulk PID");
           } else {
             if (id(pu_batteries).state >= id(seuil_pubatt).state){
               id(cons_pid).publish_state(0);
+              erreur = id(pureseau).state-id(cons_pid).state;
               id(moderegul).publish_state( "Sur Pu reseau PID");
             } else { 
               id(cons_pid).publish_state(id(cons_pubatt).state);
+              erreur = id(pu_batteries).state-id(cons_pid).state;
               id(moderegul).publish_state( "Sur Pu batteries Non Bulk PID");
             } 
           }  
 
-      - lambda: |-
-          static float somme_erreurs = 0;
-          id(erreur) = id(cons_pid).state-id(pureseau).state;
-          somme_erreurs = somme_erreurs + id(erreur);
-          id(somme_erreurs_old)=somme_erreurs;
-          id(variation_erreur)=id(erreur)-id(erreur_precedente);
-          id(sortie) = (id(kp).state*id(erreur))+(id(ki).state*(somme_erreurs))+(id(kd).state*id(variation_erreur));
-          id(erreur_precedente)= id(erreur);
-          ESP_LOGD("info", "SomErr %f", somme_erreurs);
-
-      - lambda: |-
-         id(striac) = id(sortie);            
-
-      - logger.log:
-          format: "Log Err:%f-SomErr:%f-VarErr:%f-ErrPre:%f- STriac:%f - Sortie:%f"
-          args: [ 'id(erreur)','id(somme_erreurs_old)','id(variation_erreur)','id(erreur_precedente)','id(striac)', 'id(sortie)' ]
-          level: "info"          
-
-      - lambda: |-
-          if (id(striac) <= 0){
-            id(striac) = 0;
-          } else if(id(striac)>=id(pmax).state){
-            id(striac) = id(pmax).state;
+          somme_erreurs += erreur;
+          variation_erreur=erreur-erreur_precedente;
+          sortie = (id(kp).state*erreur)+(id(ki).state*somme_erreurs)+(id(kd).state*variation_erreur);
+          erreur_precedente= erreur;
+          if (sortie <= 0){
+            sortie = 0;
+          } else if (sortie>=id(pmax).state){
+            sortie = id(pmax).state;
           }
+
+          id(striac) = sortie; 
+
+          ESP_LOGI("Log","Erreurs: %f", erreur);
+          ESP_LOGI("Log","SomErr: %f", somme_erreurs);
+          ESP_LOGI("Log","VarPre: %f", variation_erreur);          
+          ESP_LOGI("Log","ErrPre: %f", erreur_precedente);
+          ESP_LOGI("Log","Sortie: %f",sortie);          
+     
+
 
       # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
       - if: 
@@ -632,16 +619,17 @@ script:
               - switch.is_on: modeauto
               - or:
                 - binary_sensor.is_off: val_routeur
-                - binary_sensor.is_off: temperatureok                    
-
+                - binary_sensor.is_off: temperatureok   
+                - binary_sensor.is_off: seuil_prod_ok                                 
           then:
             - lambda: |-
                 id(striac) = 0;
                 id(increment) = 0;
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(0) ;          
+            - light.turn_off: gradateur
+      - lambda: |-
+            id(afstriac).publish_state( id(striac) );
+
+
 # Calcul puissance injection mode HP
   - id: calcul_injection_mode_hp
     mode: single
@@ -664,22 +652,20 @@ script:
               id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
             } 
           }  
- 
-      - lambda: |-
-         id(striac) = id(striac)+id(increment);            
+          
+          id(striac) = id(striac)+id(increment);
 
+          if (id(striac) <= 0){
+            id(striac) = 0;
+          } else if(id(striac)>=id(pmax).state){
+            id(striac) = id(pmax).state;
+          }        
       - logger.log:
           format: "Log S Triac %f - Increment %f"
           args: [ 'id(striac)', 'id(increment)' ]
           level: "info"
 
-      - lambda: |-
-          if (id(striac) <= 0){
-            id(striac) = 0;
-          } else if(id(striac)>=id(pmax).state){
-            id(striac) = id(pmax).state;
-          }
-
+      
       # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
       - if: 
           condition:
@@ -704,15 +690,21 @@ script:
               - or:
                 - binary_sensor.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
+                - binary_sensor.is_off: seuil_prod_ok
 
           then:
             - lambda: |-
                 id(striac) = 0;
                 id(increment) = 0;
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(0) ;  
+            - light.turn_off: gradateur
+            - logger.log:
+                format: "Log2 S Triac %f - Increment %f"
+                args: [ 'id(striac)', 'id(increment)' ]
+                level: "info"
+
+      - lambda: |-
+            id(afstriac).publish_state( id(striac) );
+            id(afincrement).publish_state( id(increment) );
 
 # Injection en mode HC
   - id: calcul_injection_mode_hc
@@ -769,7 +761,7 @@ script:
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda |-
-                  return id(0) ;  
+                  return id(striac) ;  
 
 
 # ------------  Pilotage led

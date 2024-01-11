@@ -22,7 +22,12 @@ esp32:
 logger:
   level: info
 
-
+mqtt:
+  broker: 192.168.0.37
+  username: !secret mqtt_ha_name
+  password: !secret mqtt_ha_pw
+  #internal_mqtt_default: internal
+  
 # Enable Home Assistant API
 api:
 ota:
@@ -49,27 +54,7 @@ globals:
      type: float
      restore_value: yes
 
-# Variable PID
-   - id: erreur_precedente
-     type: float
-     restore_value: no
 
-   - id: erreur
-     type: float
-     restore_value: no
-
-   - id: somme_erreurs_old
-     type: float
-     restore_value: no
-     initial_value: '0'
-
-   - id: variation_erreur
-     type: float
-     restore_value: no
-
-   - id: sortie
-     type: float
-     restore_value: no
 
 # Input Number
 number:
@@ -129,17 +114,20 @@ binary_sensor:
 
 
 sensor:
-############### TEMPLATE  ######################"
-# Affichage dans HA et sur l'afficheur
-  - platform: template
+
+# Les MQTT sont déclarés dans le Node Red du Cerbo GX
+# https://venus.local:1881/#flow/dbd727f16cbe7b5f
+
+  - platform: mqtt_subscribe
     name: "${friendly_name} Pu Reseau"
     id: pureseau
+    topic: mp2/multiplus2/grid_l1_ac
     unit_of_measurement: "W"
     state_class: "measurement"  
- 
+    accuracy_decimals: 2
     
 interval:
-  - interval: 500ms
+  - interval: 1500ms
     then:
       - script.execute: pid
 # ------------------------  Scripts
@@ -155,22 +143,29 @@ script:
   - id: pid
     mode: single
     then:
+      - lambda: |-
+          static float num_executions = 0.0;
+          ESP_LOGI("main", "I am at execution number %f", num_executions);
+          num_executions += 1;
 
       - lambda: |-
-          static float somme_erreurs = 0;
-          id(erreur) = id(cons_pid).state-id(pureseau).state;
-          somme_erreurs = somme_erreurs + id(erreur);
-          id(somme_erreurs_old)=somme_erreurs;
-          id(variation_erreur)=id(erreur)-id(erreur_precedente);
-          id(sortie) = (id(kp).state*id(erreur))+(id(ki).state*(somme_erreurs))+(id(kd).state*id(variation_erreur));
-          id(erreur_precedente)= id(erreur);
-          ESP_LOGD("info", "SomErr %f", somme_erreurs);
+          static float erreur;
+          static float somme_erreurs;
+          static float variation_erreur;
+          static float erreur_precedente;
+          static float sortie;
 
-      - lambda: |-
-         id(striac) = id(sortie);            
+          somme_erreurs = 0.0;
 
-      - logger.log:
-          format: "Log Err:%f-SomErr:%f-VarErr:%f-ErrPre:%f- STriac:%f - Sortie:%f"
-          args: [ 'id(erreur)','id(somme_erreurs_old)','id(variation_erreur)','id(erreur_precedente)','id(striac)', 'id(sortie)' ]
-          level: "info"          
+          erreur = id(cons_pid).state-id(pureseau).state;
+          somme_erreurs += erreur;
+          variation_erreur=erreur-erreur_precedente;
+          sortie = (id(kp).state*erreur)+(id(ki).state*somme_erreurs)+(id(kd).state*variation_erreur);
+          erreur_precedente= erreur;
+          id(striac) = sortie; 
+
+          ESP_LOGI("Log","Erreurs: %f", erreur);
+          ESP_LOGI("Log","SomErr: %f", somme_erreurs);
+          ESP_LOGI("Log","ErrPre: %f", erreur_precedente);
+          ESP_LOGI("Log","Sortie: %f",sortie);          
 

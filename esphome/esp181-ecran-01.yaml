@@ -1,0 +1,57 @@
+substitutions:
+  device_name: esp181-ecran-01
+  adress_ip: "192.168.0.181"
+  fr_name: esp181
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  friendly_name: ${fr_name}
+
+esp32:
+  board: m5stack-core2
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+web_server:
+  port: 80
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+
+captive_portal:
+# Example configuration entry
+
+i2c:
+  sda: GPIO18
+  scl: GPIO19
+  scan: false
+
+output:
+  - platform: ledc
+    pin: GPIO23
+    id: screen_led
+
+light:
+  - platform: monochromatic
+    output: screen_led
+    default_transition_length: 0.2s
+    name: 'Backlight'
+    restore_mode: ALWAYS_ON
+
+touchscreen:
+  - platform: ft63x6
+    interrupt_pin: GPIO39
+    on_touch:
+      - logger.log:
+          format: Touch %d at (%d, %d)
+          args: [touch.id, touch.x, touch.y]    

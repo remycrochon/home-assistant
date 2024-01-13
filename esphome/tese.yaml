@@ -1,0 +1,31 @@
+esphome:
+  name: tese
+  friendly_name: tese
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "V63KqzoAp27MIMRu8OAmOyGNUeMmdnmV4KW+URf+S7w="
+
+ota:
+  password: "a9aff997a6980d20fb0130d11d84f168"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Tese Fallback Hotspot"
+    password: "5ULBxMzp6z4W"
+
+captive_portal:
+    

@@ -3,11 +3,10 @@ from homeassistant.components.water_heater import (
     STATE_OFF,
     STATE_ON,
     STATE_PERFORMANCE,
-    SUPPORT_OPERATION_MODE,
-    SUPPORT_TARGET_TEMPERATURE,
     WaterHeaterEntity,
+    WaterHeaterEntityFeature
 )
-from homeassistant.const import ATTR_TEMPERATURE, TEMP_CELSIUS
+from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
 )
@@ -20,7 +19,7 @@ OPERATION_LIST = [STATE_OFF, STATE_ON, STATE_PERFORMANCE]
 
 OPERATION_LIST_NO_PERF = [STATE_OFF, STATE_ON]
 
-SUPPORT_FLAGS_HEATER = SUPPORT_TARGET_TEMPERATURE | SUPPORT_OPERATION_MODE
+SUPPORT_FLAGS_HEATER = WaterHeaterEntityFeature.TARGET_TEMPERATURE | WaterHeaterEntityFeature.OPERATION_MODE
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -34,7 +33,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
-    _attr_temperature_unit = TEMP_CELSIUS
+    _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_operation_list = OPERATION_LIST
     _attr_supported_features = SUPPORT_FLAGS_HEATER
 
@@ -69,6 +68,14 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
 
     def _is_settable_target_temp(self):
         device = self._api.device.hot_water_tank
+        if device is None:
+            return False
+
+        if device._unit is None:
+            return False
+        if 'DomesticHotWaterTemperatureHeating' not in device._unit.operation_config:
+            return False
+
         conf = device._unit.operation_config['DomesticHotWaterTemperatureHeating']
         if 'settable' in conf:
             return conf['settable']
@@ -90,7 +97,7 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
         states = status['states']
         if 'WeatherDependentState' in states:
             if states['WeatherDependentState']:
-                return SUPPORT_OPERATION_MODE
+                return WaterHeaterEntityFeature.OPERATION_MODE
         return SUPPORT_FLAGS_HEATER
 
     @property
@@ -105,7 +112,6 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
     @property
     def current_temperature(self) -> float:
         status = self._get_status()
-        #_LOGGER.warning(f"Hot Water status: {status}")
         if "sensors" in status:
             sensors = status["sensors"]
             if "TankTemperature" in sensors:
@@ -117,10 +123,6 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
             if "SensorTemperature" in operations:
                 return operations["SensorTemperature"]
         return 0
-        #current_temperature = status[
-        #    "sensors"
-        #]["TankTemperature"]
-        #return current_temperature
 
     @property
     def current_operation(self):
@@ -128,11 +130,19 @@ class AlthermaWaterHeater(WaterHeaterEntity, CoordinatorEntity):
 
     @property
     def min_temp(self):
-        return self._api.water_tank_target_temp_config["minValue"]
+        if self._api.water_tank_target_temp_config is None:
+            return None
+        if 'minValue' in self._api.water_tank_target_temp_config:
+            return self._api.water_tank_target_temp_config["minValue"]
+        return None
 
     @property
     def max_temp(self):
-        return self._api.water_tank_target_temp_config["maxValue"]
+        if self._api.water_tank_target_temp_config is None:
+            return None
+        if 'maxValue' in self._api.water_tank_target_temp_config:
+            return self._api.water_tank_target_temp_config["maxValue"]
+        return None
 
     async def async_update(self):
         await self._api.async_update()

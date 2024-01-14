@@ -446,38 +446,7 @@ sensor:
           {% else -%}
           {% endif -%}
           
-      today_icon:
-          value_template: >-
-            {% if state_attr("weather.albi","forecast")[0].condition =='clear-night' %}
-              3
-            {% elif state_attr("weather.albi","forecast")[0].condition =='cloudy' %}
-              5
-            {% elif state_attr("weather.albi","forecast")[0].condition =='fog' %}
-              16
-            {% elif state_attr("weather.albi","forecast")[0].condition =='hail' %}
-              6
-            {% elif state_attr("weather.albi","forecast")[0].condition =='lightning' %}
-              13
-            {% elif state_attr("weather.albi","forecast")[0].condition =='lightning-rainy' %}
-              17
-            {% elif state_attr("weather.albi","forecast")[0].condition =='partlycloudy' %}
-              8
-            {% elif state_attr("weather.albi","forecast")[0].condition =='pouring' %}
-              18
-            {% elif state_attr("weather.albi","forecast")[0].condition =='rainy' %}
-              9
-            {% elif state_attr("weather.albi","forecast")[0].condition =='snowy' %}
-              11
-            {% elif state_attr("weather.albi","forecast")[0].condition =='snowy-rainy' %}
-              7
-            {% elif state_attr("weather.albi","forecast")[0].condition =='windy' %}
-              14
-            {% elif state_attr("weather.albi","forecast")[0].condition =='windy-variant' %}
-              14
-            {% else %}
-              12
-            {% endif %}
-          friendly_name: Today weather forecast  
+
 
   # Statistiques
   # Pluviometrie - sert à gestion robot tonte
@@ -536,72 +505,4 @@ sensor:
     name: vp2_radiation_moyenne
     state_characteristic: median
     sampling_size: 20
-
-template:
-  - trigger:
-      - platform: time_pattern
-        hours: "/1"
-    action:
-      - service: weather.get_forecast
-        target:
-          entity_id: weather.albi
-        data:
-          type: daily
-        response_variable: forecast
-    sensor:
-      - name: mf_weather_condition_0d
-        state: "{{ forecast.forecast[0].condition }}"
-      - name: mf_weather_condition_1d
-        state: "{{ forecast.forecast[1].condition }}"
-      - name: mf_weather_condition_2d
-        state: "{{ forecast.forecast[2].condition }}"
-      - name: mf_weather_condition_3d
-        state: "{{ forecast.forecast[3].condition }}"
-      - name: mf_weather_condition_4d
-        state: "{{ forecast.forecast[4].condition }}"        
-        
-      - name: mf_temperature_maximum_0d
-        state: "{{ forecast.forecast[0].temperature }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_maximum_1d
-        state: "{{ forecast.forecast[1].temperature }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_maximum_2d
-        state: "{{ forecast.forecast[2].temperature }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_maximum_3d
-        state: "{{ forecast.forecast[3].temperature }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_maximum_4d
-        state: "{{ forecast.forecast[4].temperature }}"
-        unit_of_measurement: °C                
-        
-      - name: mf_temperature_minimum_0d
-        state: "{{ forecast.forecast[0].templow }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_minimum_1d
-        state: "{{ forecast.forecast[1].templow }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_minimum_2d
-        state: "{{ forecast.forecast[2].templow }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_minimum_3d
-        state: "{{ forecast.forecast[3].templow }}"
-        unit_of_measurement: °C
-      - name: mf_temperature_minimum_4d
-        state: "{{ forecast.forecast[4].templow }}"
-        unit_of_measurement: °C
-
-      - name: mf_precipitation_intensity_0d
-        state: "{{ forecast.forecast[0].precipitation }}"
-      - name: mf_precipitation_probability_0d
-        state: "{{ forecast.forecast[0].precipitation }}"
-      - name: mf_precipitation_probability_1d
-        state: "{{ forecast.forecast[1].precipitation }}" 
-      - name: mf_precipitation_probability_2d
-        state: "{{ forecast.forecast[2].precipitation }}"
-      - name: mf_precipitation_probability_3d
-        state: "{{ forecast.forecast[3].precipitation }}"
-      - name: mf_precipitation_probability_4d
-        state: "{{ forecast.forecast[4].precipitation }}"
 

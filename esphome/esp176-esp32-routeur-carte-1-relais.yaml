@@ -46,8 +46,8 @@ wifi:
 # Enable logging
 logger:
   baud_rate: 0
-#  level: info
-  level: none
+  level: info
+# level: none
 
 web_server:
   port: 80
@@ -394,7 +394,12 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
+    on_value:
+      then:
+        - lambda: id(pureseau1).publish_state( id(pureseau).state );
+        - lambda: id(calcul_injection_mode_hp).execute();  
 
+        
   - platform: mqtt_subscribe
     name: "${friendly_name} Pu Mppt1"
     id: pu_mppt1
@@ -593,9 +598,7 @@ script:
           ESP_LOGI("Log","SomErr: %f", somme_erreurs);
           ESP_LOGI("Log","VarPre: %f", variation_erreur);          
           ESP_LOGI("Log","ErrPre: %f", erreur_precedente);
-          ESP_LOGI("Log","Sortie: %f",sortie);          
-     
-
+          ESP_LOGI("Log","Sortie: %f",sortie);    
 
       # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
       - if: 
@@ -607,10 +610,18 @@ script:
               - binary_sensor.is_on: temperatureok
               - lambda: 'return id(striac) >= id(pmin).state;'
           then:
-              - light.turn_on:
-                  id: gradateur
-                  brightness: !lambda |-
+#""              - light.turn_on:
+#                  id: gradateur
+#                  brightness: !lambda |-
+#                    return id(striac)/100 ;
+              - output.set_level:
+                  id: ecs                   
+                  level: !lambda |-
                     return id(striac)/100 ;
+              - logger.log:
+                  format: "Log2 S Triac %f - Increment %f"
+                  args: [ 'id(striac)', 'id(increment)' ]
+                  level: "info"                   
 
       # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
       - if: 
@@ -625,9 +636,15 @@ script:
             - lambda: |-
                 id(striac) = 0;
                 id(increment) = 0;
-            - light.turn_off: gradateur
+            #- light.turn_off: gradateur
+            - output.turn_off: ecs
+
       - lambda: |-
             id(afstriac).publish_state( id(striac) );
+      - logger.log:
+          format: "Log3 S Triac %f - Increment %f"
+          args: [ 'id(striac)', 'id(increment)' ]
+          level: "info"
 
 
 # Calcul puissance injection mode HP
@@ -674,13 +691,16 @@ script:
               - switch.is_on: modeauto
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
-              - lambda: 'return id(striac) >= id(pmin).state;'
+
           then:
               - light.turn_on:
                   id: gradateur
                   brightness: !lambda |-
                     return id(striac)/100 ;
-
+              - logger.log:
+                  format: "Log Auto OK STriac %f - Increment %f"
+                  args: [ 'id(striac)', 'id(increment)' ]
+                  level: "info"         
 
       # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
       - if: 
@@ -691,20 +711,40 @@ script:
                 - binary_sensor.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
                 - binary_sensor.is_off: seuil_prod_ok
-
           then:
             - lambda: |-
                 id(striac) = 0;
                 id(increment) = 0;
             - light.turn_off: gradateur
             - logger.log:
-                format: "Log2 S Triac %f - Increment %f"
+                format: "Log Auto NOk STriac %f - Increment %f"
                 args: [ 'id(striac)', 'id(increment)' ]
-                level: "info"
+                level: "info"                         
 
+
+      # Si mode routeur manu
+      - if: 
+          condition:
+            and:
+              - switch.is_off: modeauto
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - logger.log:
+                format: "Log Manu STriac %f - Increment %f"
+                args: [ 'id(striac)', 'id(increment)' ]
+                level: "info"                         
+# Affichage STriac et Increment
       - lambda: |-
             id(afstriac).publish_state( id(striac) );
             id(afincrement).publish_state( id(increment) );
+
+      - logger.log:
+          format: "Log Fin STriac %f - Increment %f"
+          args: [ 'id(striac)', 'id(increment)' ]
+          level: "info"
+
 
 # Injection en mode HC
   - id: calcul_injection_mode_hc

@@ -273,3 +273,61 @@ openhasp:
       - obj: "p3b132"
         properties:
           "text": "{{ states('sensor.umidita_cameretta') }}"  
+
+# page energy
+      - obj: "p0b4"
+        properties:
+          "val": "{{states('openhasp.ecran01') | int(0) -1}}"
+      - obj: "p0b5"
+        properties:
+          "text": "{% if states('sensor.vp2_temp_out') != 'unknown' %} {{ '%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}{{'\\u00b0'}}C {% else %} -.-{{'\\u00b0'}}C{% endif %}"
+      - obj: "p0b7"
+        properties:
+          "text_color": "{% if -50 <= state_attr('openhasp.ecran01','rssi') | int(0) %}green{% elif -51 > state_attr('openhasp.ecran01','rssi') | int(0) >= -60 %}olive{% elif -61 > state_attr('openhasp.ecran01','rssi') | int(0) >= -70 %}orange{% elif -71 > state_attr('openhasp.ecran01','rssi') |int (0) >= -80 %}maroon{% else %}red{% endif %}"
+    
+    
+      - obj: "p4b2"
+        properties:
+          "value_color": >
+            {% if states('binary_sensor.solivia_night_status') == 'on' %}#F0E68C{% else %}#FFFF00{% endif %}
+          "value_str": >
+            {% if states('binary_sensor.solivia_night_status') == 'on' %}{{'\ue594'}}{% else %}{{'\ue599'}}{% endif %}
+          "val": "{{ states('sensor.mp2_prod_totale_mqtt') | int(0) }}"
+      - obj: "p4b5"
+        properties:
+          "text": "{{ states('sensor.mp2_prod_totale_mqtt') | int(0) }} W"
+          "text_color": "{% if 500 > states('sensor.mp2_prod_totale_mqtt') | int(0) %}red{% elif 1000 > states('sensor.mp2_prod_totale_mqtt') | int(0) >= 500 %}orange{% elif 1500 > states('sensor.mp2_prod_totale_mqtt') |int (0) >= 1000 %}yellow{% else %}lime{% endif %}"
+      - obj: "p4b3"
+        properties:
+          "val": "{{ states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) }}"
+      - obj: "p4b4"
+        properties:
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) }} kWh"
+          "text_color": "{% if 0 > states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) %}lime{% elif 750 > states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) >= 0 %}yellow{% elif 1500 > states('sensor.mp2_energy_conso_ac_l1_jour') |int (0) >= 750 %}orange{% else %}red{% endif %}"
+      - obj: "p4b10"
+        properties:
+          "text": "{{ (states('sensor.mp2_total_energie_produite_jour') | float(0.001) / 1000) | round(1) }} kWh"
+      - obj: "p4b11"
+        properties:
+          "text": "\ue04d{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour') | float(0) | round(1) }} kWh"
+      - obj: "p4b12"
+        properties:
+          "text": "\ue054{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0) | round(1) }} kWh"
+      - obj: "p4b13"
+        properties:
+          "text": "{{ (states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0) + states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0)) | round(1) }} kWh"
+      - obj: "p4b20"
+        properties:
+          "text": "{{ (states('sensor.mp2_total_energie_produite_jour') | float(0) | round(2)) }} dkk"
+      - obj: "p4b40"
+        properties:
+          "max": "{{ states('sensor.mp2_total_energie_produite_jour') | float(0.001) * 1000 }}"
+          "val": "{{ states('sensor.mp2_total_energie_produite_jour') | int(0) }}"
+      - obj: "p4b41"
+        properties:
+          "max": "{{ (states('sensor.mp2_energie_injectee_ds_reseau_par_jour') | float(0.001) * 1000 + states('sensor.daily_energy_import_total') | float(1) * 1000) | int(0) }}"
+          "val": "{{ (states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0.001) * 1000) | int(0) }}"
+      - obj: "p4b42"
+        properties:
+          "max": "{{ (states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0.001) * 1000 + states('sensor.mp2_total_energie_produite_jour') | float(0) *1000) | int(0) }}"
+          "val": "{{ (states('sensor.mp2_total_energie_produite_jour') | float(0.001) * 1000) | int(0) }}"

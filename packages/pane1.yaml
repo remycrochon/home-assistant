@@ -7,6 +7,9 @@ openhasp:
       - obj: "p0b2"
         properties:
           "text": "{{ states('sensor.time') }}"
+      - obj: "p0b6"
+        properties:
+          "text": "{% if states('sensor.vp2_temp_out') != 'unknown' %} {{ '%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}{{'\\u00b0'}}C {% else %} -.-{{'\\u00b0'}}C{% endif %}"
           
       - obj: "p1b111"  
         properties:
@@ -24,14 +27,16 @@ openhasp:
           "up":
             - service: switch.toggle
               entity_id: "switch.relais_cde_vmc_niv0_on_off" 
+
       - obj: "p1b113"  
         properties:
-          "val": '{{ 1 if states("light.luce_cappa") == "on" else 0 }}'
-          "text": '{{ "\uE6E8" if is_state("light.luce_cappa", "on") else "\uE335" | e }}'
+          "val": '{{ 1 if states("switch.spots_ext_sud") == "on" else 0 }}'
+          "text": '{{ "\uE6E8" if is_state("switch.spots_ext_sud", "on") else "\uE335" | e }}'
         event:
           "up":
-            - service: homeassistant.toggle
-              entity_id: "light.luce_cappa" 
+            - service: switch.toggle
+              entity_id: "switch.spots_ext_sud"
+
       - obj: "p1b114"  
         properties:
           "val": '{{ 1 if states("light.luce_bar") == "on" else 0 }}'
@@ -48,44 +53,28 @@ openhasp:
           "up":
             - service: homeassistant.toggle
               entity_id: "light.luce_ingresso"
-      - obj: "p1b116"  
-        properties:
-          "val": '{{ 1 if states("script.scenafilm") == "on" else 0 }}'
-          "text": '{{ "\uE502" if is_state("script.scenafilm", "on") else "\uE502" | e }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.scenafilm"
-      - obj: "p1b117"  
-        properties:
-          "val": '{{ 1 if states("script.scenanotte") == "on" else 0 }}'
-          "text": '{{ "\uE594" if is_state("script.scenanotte", "on") else "\uE594" | e }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.scenanotte"        
-      - obj: "p1b118"  
-        properties:
-          "val": '{{ 1 if states("script.scenagiorno") == "on" else 0 }}'
-          "text": '{{ "\uE5A8" if is_state("script.scenagiorno", "on") else "\uE5A8" | e }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.scenagiorno"
-      - obj: "p1b119"  
-        properties:
-          "val": '{{ 1 if states("script.scenauscita") == "on" else 0 }}'
-          "text": '{{ "\uE70E" if is_state("script.scenauscita", "on") else "\uE70E" | e }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.scenauscita"              
-      - obj: "p1b120"  
-        properties:
-          "val": '{{ 1 if states("binary_sensor.deviceupdown") == "on" else 0 }}'
-          "text": '{{ "\uE5A9" if is_state("binary_sensor.deviceupdown", "on") else "\uE5A9" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('binary_sensor.deviceupdown', 'on') else '#ff9100' }}"
 
+# page 1 - Rangée 2 
+      - obj: "p1b123"
+        properties: 
+          "color": >
+            {{'#F20505'}}
+
+      - obj: "p1b125"
+        properties:
+          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }}"
+#          "val": '{{ 127 if states("sensor.rte_tempo_couleur_actuelle") == "Rouge" else 0 }}'              
+
+
+# page 1 - Rangée 3 
+      - obj: "p1b223"
+        properties:
+          "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }}"              
+      - obj: "p1b225"
+        properties:
+          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }}"
+
+# Page2
       - obj: "p2b111"
         properties:
           "text": "{{ states('sensor.reedgaragelastreduce') }}"
@@ -278,9 +267,6 @@ openhasp:
       - obj: "p0b4"
         properties:
           "val": "{{states('openhasp.ecran01') | int(0) -1}}"
-      - obj: "p0b5"
-        properties:
-          "text": "{% if states('sensor.vp2_temp_out') != 'unknown' %} {{ '%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}{{'\\u00b0'}}C {% else %} -.-{{'\\u00b0'}}C{% endif %}"
       - obj: "p0b7"
         properties:
           "text_color": "{% if -50 <= state_attr('openhasp.ecran01','rssi') | int(0) %}green{% elif -51 > state_attr('openhasp.ecran01','rssi') | int(0) >= -60 %}olive{% elif -61 > state_attr('openhasp.ecran01','rssi') | int(0) >= -70 %}orange{% elif -71 > state_attr('openhasp.ecran01','rssi') |int (0) >= -80 %}maroon{% else %}red{% endif %}"

@@ -14,7 +14,19 @@ openhasp:
       - obj: "p1b111"  
         properties:
           "val": '{{ 1 if states("switch.esp180_hotte") == "on" else 0 }}'
-          "text": '{{ "\uE6E8" if is_state("switch.esp180_hotte", "on") else "\uE335" | e }}'
+          "text": >
+            {% set v1=states('switch.esp180_hotte_v1') | default("") %}
+            {% set v2=states('switch.esp180_hotte_v2') | default("") %}
+            {% set v3=states('switch.esp180_hotte_v3') | default("") %}
+            {% if v1=="on" %}
+            {{ 'V1'}}
+            {% elif v2=="on" %}
+            {{ 'V2'}}
+            {% elif v3=="on" %}
+            {{ 'V3'}}
+            {% else %}
+            {{ 'At'}}
+            {% endif %}
         event:
           "up":
             - service: switch.toggle
@@ -55,15 +67,58 @@ openhasp:
               entity_id: "light.luce_ingresso"
 
 # page 1 - Rangée 2 
-      - obj: "p1b123"
+      - obj: "p1b123" # Couleur du Jour
         properties: 
-          "color": >
-            {{'#F20505'}}
+          "line_color": >
+            {% set j=states('sensor.rte_tempo_couleur_actuelle') | default("") %}
+            {% if j=="Bleu" %}
+              {{ '#0000FF'}}
+            {% elif j=="Blanc" %}
+              {{ '#FCFCFC'}}            
+            {% elif j=="Rouge" %}
+              {{ '#F20505'}}
+            {% else %}
+              {{ '#000000'}}
+            {% endif %}
+
+          "line_color10": >
+            {% set j=states('sensor.rte_tempo_couleur_actuelle') | default("") %}
+            {% if j=="Bleu" %}
+              {{ '#0000FF'}}
+            {% elif j=="Blanc" %}
+              {{ '#FCFCFC'}}            
+            {% elif j=="Rouge" %}
+              {{ '#F20505'}}
+            {% else %}
+              {{ '#000000'}}
+            {% endif %}
 
       - obj: "p1b125"
-        properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }}"
-#          "val": '{{ 127 if states("sensor.rte_tempo_couleur_actuelle") == "Rouge" else 0 }}'              
+        properties: 
+          "line_color": >
+            {% set j=states('sensor.rte_tempo_prochaine_couleur') | default("") %}
+            {% if j=="Bleu" %}
+              {{ '#0000FF'}}
+            {% elif j=="Blanc" %}
+              {{ '#FCFCFC'}}            
+            {% elif j=="Rouge" %}
+              {{ '#F20505'}}
+            {% else %}
+              {{ '#000000'}}
+            {% endif %}
+
+          "line_color10": >
+            {% set j=states('sensor.rte_tempo_prochaine_couleur') | default("") %}
+            {% if j=="Bleu" %}
+              {{ '#0000FF'}}
+            {% elif j=="Blanc" %}
+              {{ '#FCFCFC'}}            
+            {% elif j=="Rouge" %}
+              {{ '#F20505'}}
+            {% else %}
+              {{ '#000000'}}
+            {% endif %}
+             
 
 
 # page 1 - Rangée 3 

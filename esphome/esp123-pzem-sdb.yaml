@@ -65,3 +65,6 @@ sensor:
       name: "PZEM-SdB FactPuiss"
     update_interval: 30s
 
+switch:
+  - platform: restart
+    name: "PZEM-SdB Restart"

@@ -114,13 +114,6 @@ sensor:
           else
             return {};          
           
-# C'est facile, c'est PTEC : période tarifaire en cours :
-#- Heures Creuses Jours Bleus : HCJB
-#- Heures Pleines Jours Bleus : HPJB
-#- Heures Creuses Jours Blancs : HCJW
-#- Heures Pleines Jours Blancs : HPJW
-#- Heures Creuses Jours Rouges : HCJR
-#- Heures Pleines Jours Rouges : HPJR
 
 # Energie Active soutirée Index01 HC Bleu
   - platform: teleinfo
@@ -356,6 +349,10 @@ text_sensor:
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"
 
 # Affichage
 display:

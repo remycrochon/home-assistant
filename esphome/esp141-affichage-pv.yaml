@@ -91,9 +91,12 @@ text_sensor:
     name: "Tempo j+1"
     entity_id: sensor.rte_tempo_prochaine_couleur
     id: tempo_jour1
- 
-interval:
 
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart" 
+
+interval:
   - interval: 1s
     then:
       - script.execute: calcul_led_jour

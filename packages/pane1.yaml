@@ -9,8 +9,11 @@ openhasp:
           "text": "{{ states('sensor.time') }}"
       - obj: "p0b6"
         properties:
-          "text": "{% if states('sensor.vp2_temp_out') != 'unknown' %} {{ '%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}{{'\\u00b0'}}C {% else %} -.-{{'\\u00b0'}}C{% endif %}"
-          
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}°C"
+      - obj: "p0b7"
+        properties:
+          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
+
       - obj: "p1b111"  
         properties:
           "val": '{{ 1 if states("switch.esp180_hotte") == "on" else 0 }}'
@@ -118,16 +121,23 @@ openhasp:
             {% else %}
               {{ '#000000'}}
             {% endif %}
-             
-
-
+# Afichage conso du jour
+      - obj: "p1b129"
+        properties:
+          "text": "{{ states('sensor.cout_energie_hc_hp_tous_tarifs')|float(0) |round(2)}} €" 
+      - obj: "p1b131"
+        properties:
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|float(0) |round(0)}} kWh" 
+      - obj: "p1b133"
+        properties:
+          "text": "{{ states('sensor.mp2_pu_grid_l1_ac_mppt')|float(0) |round(0)}} W" 
 # page 1 - Rangée 3 
       - obj: "p1b223"
         properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }}"              
+          "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }} °C"              
       - obj: "p1b225"
         properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }}"
+          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }} %"
 
 # Page2
       - obj: "p2b111"

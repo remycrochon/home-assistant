@@ -121,7 +121,7 @@ openhasp:
             {% else %}
               {{ '#000000'}}
             {% endif %}
-# Afichage conso du jour
+# Affichage conso du jour
       - obj: "p1b129"
         properties:
           "text": "{{ states('sensor.cout_energie_hc_hp_tous_tarifs')|float(0) |round(2)}} €" 
@@ -131,6 +131,12 @@ openhasp:
       - obj: "p1b133"
         properties:
           "text": "{{ states('sensor.mp2_pu_grid_l1_ac_mppt')|float(0) |round(0)}} W" 
+      - obj: "p1b135"
+        properties:
+          "text": "{{ states('sensor.mp2_soc_mqtt')|float(0) |round(0)}} %"
+      - obj: "p1b137"
+        properties:
+          "text": "{{ states('sensor.mp2_prod_totale_mqtt')|float(0)|round(0)}} W"          
 # page 1 - Rangée 3 
       - obj: "p1b223"
         properties:

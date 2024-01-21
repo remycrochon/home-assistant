@@ -72,9 +72,11 @@ globals:
      type: float
      restore_value: no
      initial_value: '0'
+
    - id: striac
      type: float
      restore_value: yes
+
 
 # Sonde Temperature Dallas
 dallas:
@@ -182,6 +184,17 @@ number:
     max_value: 1000
     unit_of_measurement: ""
     step: 0.1
+# Coeff Réactivité Puissance Batteries
+  - platform: template
+    name: "${friendly_name} Coeff R bat"
+    id: coeff_rbat
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 1000
+    unit_of_measurement: ""
+    step: 0.1    
 # seuil Puissance batteries 
   - platform: template
     name: "${friendly_name} Seuil Pu Batteries"
@@ -194,17 +207,6 @@ number:
     unit_of_measurement: "W"
     step: 1
 
-# Coeff Réactivité Puissance Batteries
-  - platform: template
-    name: "${friendly_name} Coeff R bat"
-    id: coeff_rbat
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 1000
-    unit_of_measurement: ""
-    step: 0.1
 # Consigne sur Puissance Batteries
   - platform: template
     name: "${friendly_name} Consigne Pu Batteries"
@@ -556,16 +558,27 @@ script:
 #    variation_erreur = erreur - erreur_précédente;
 #    commande = Kp * erreur + Ki * somme_erreurs + Kd * variation_erreur;
 #    erreur_précédente = erreur
+
+#        erreur = setpoint - process_variable;
+#        // Terme proportionnel
+#        P = Kp * erreur;
+#        // Terme intégral
+#        integralErreur += erreur;
+#        I = Ki * integralErreur;
+#        // Terme dérivé
+#        derivative = erreur - lastErreur;
+#        D = Kd * derivative;
+#        // Calcul de la sortie du régulateur PID
+#        output = P + I + D;
+#       // Mise à jour de la dernière erreur
+#        lastErreur = erreur;
+
   - id: pid
     mode: single
     then:
       - lambda: |-
-          static float erreur;
-          static float somme_erreurs;
-          static float variation_erreur;
-          static float erreur_precedente;
-          static float sortie;
-          somme_erreurs = 0.0;
+          static float P,I,D,erreur,lastErreur,derivative,sortie;
+          static float integralErreur = 0;
 
           if (id(statusbusve).state == 3){
             id(cons_pid).publish_state(id(cons_pubatt).state);
@@ -581,87 +594,40 @@ script:
               erreur = id(pu_batteries).state-id(cons_pid).state;
               id(moderegul).publish_state( "Sur Pu batteries Non Bulk PID");
             } 
-          }  
-
-          somme_erreurs += erreur;
-          variation_erreur=erreur-erreur_precedente;
-          sortie = (id(kp).state*erreur)+(id(ki).state*somme_erreurs)+(id(kd).state*variation_erreur);
-          erreur_precedente= erreur;
-          if (sortie <= 0){
-            sortie = 0;
-          } else if (sortie>=id(pmax).state){
-            sortie = id(pmax).state;
           }
+          // terme proportionnel  
+          P = (id(kp).state * erreur);
+          // Terme intégral
+          if (!isnan(erreur)) {
+            integralErreur += erreur;
+          } else {
+            integralErreur = 0;
+          }
+          I = id(ki).state * integralErreur; 
+          // Terme dérivé
+          derivative = erreur - lastErreur;
+          D = id(kd).state * derivative;
+          // Calcul de la sortie du régulateur PID
+          sortie = P + I + D;
+          // Mise à jour de la dernière erreur          
+          lastErreur = erreur;
 
-          id(striac) = sortie; 
+          //if (sortie <= 0){
+          //  sortie = 0;
+          //} else if (sortie>=id(pmax).state){
+          //  sortie = id(pmax).state;
+          //}
+
+          //id(striac) = sortie; 
 
           ESP_LOGI("Log","Erreurs: %f", erreur);
-          ESP_LOGI("Log","SomErr: %f", somme_erreurs);
-          ESP_LOGI("Log","VarPre: %f", variation_erreur);          
-          ESP_LOGI("Log","ErrPre: %f", erreur_precedente);
+          ESP_LOGI("Log","IntErr: %f", integralErreur);
+          ESP_LOGI("Log","Derivée: %f", derivative);          
+          ESP_LOGI("Log","lastErr: %f", lastErreur);
           ESP_LOGI("Log","Sortie: %f",sortie);    
           ESP_LOGI("Log","Seuil: %c",seuil_prod_ok); 
 
-      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
-      - if: 
-          condition:
-            and:
-              - binary_sensor.is_on: val_routeur
-              - switch.is_on: modeauto
-              - binary_sensor.is_on: seuil_prod_ok
-              - binary_sensor.is_on: temperatureok
 
-          then:
-#""              - light.turn_on:
-#                  id: gradateur
-#                  brightness: !lambda |-
-#                    return id(striac)/100 ;
-              - output.set_level:
-                  id: ecs                   
-                  level: !lambda |-
-                    return id(striac)/100 ;
-              - logger.log:
-                  format: "Log2 S Triac %f - Increment %f"
-                  args: [ 'id(striac)', 'id(increment)' ]
-                  level: "info"                   
-
-      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
-      - if: 
-          condition:
-            and:
-              - switch.is_on: modeauto
-              - or:
-                - binary_sensor.is_off: val_routeur
-                - binary_sensor.is_off: temperatureok   
-                - binary_sensor.is_off: seuil_prod_ok                                 
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            #- light.turn_off: gradateur
-            - output.turn_off: ecs
-
-
-      # Si mode routeur manu
-      - if: 
-          condition:
-            and:
-              - switch.is_off: modeauto
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - logger.log:
-                format: "Log Manu STriac %f - Increment %f"
-                args: [ 'id(striac)', 'id(increment)' ]
-                level: "info"   
-
-      - lambda: |-
-            id(afstriac).publish_state( id(striac) );
-      - logger.log:
-          format: "Log3 S Triac %f - Increment %f"
-          args: [ 'id(striac)', 'id(increment)' ]
-          level: "info"
 
 
 # Calcul puissance injection mode HP

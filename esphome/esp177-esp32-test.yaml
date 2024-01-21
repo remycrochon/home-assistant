@@ -50,15 +50,14 @@ globals:
      type: float
      restore_value: no
      initial_value: '0'
+     
    - id: striac
      type: float
      restore_value: yes
 
 
-
 # Input Number
 number:
-
 
 # regulation PID
 # Consigne sur Puissance PID
@@ -125,11 +124,14 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
-    
-interval:
-  - interval: 1500ms
-    then:
-      - script.execute: pid
+    on_value:
+      then:
+        - script.execute: pid
+        
+#interval:
+#  - interval: 60s
+#    then:
+#      - script.execute: pid
 # ------------------------  Scripts
 script:
 # 
@@ -144,28 +146,35 @@ script:
     mode: single
     then:
       - lambda: |-
-          static float num_executions = 0.0;
-          ESP_LOGI("main", "I am at execution number %f", num_executions);
-          num_executions += 1;
+          static float P,I,D,erreur,lastErreur,derivative,sortie;
+          static float integralErreur = 0  ;
+          erreur = id(pureseau).state-id(cons_pid).state;
+          // terme proportionnel  
+          P = (id(kp).state * erreur);
+          // Terme intégral
+          if (!isnan(erreur)) {
+            integralErreur = integralErreur + erreur;
+          }
+          I = id(ki).state * integralErreur; 
+          // Terme dérivé
+          derivative = erreur - lastErreur;
+          D = id(kd).state * derivative;
+          // Calcul de la sortie du régulateur PID
+          sortie = P + I + D;
+          // Mise à jour de la dernière erreur          
+          lastErreur = erreur;
 
-      - lambda: |-
-          static float erreur;
-          static float somme_erreurs;
-          static float variation_erreur;
-          static float erreur_precedente;
-          static float sortie;
+          //if (sortie <= 0){
+          //  sortie = 0;
+          //} else if (sortie>=id(pmax).state){
+          //  sortie = id(pmax).state;
+          //}
 
-          somme_erreurs = 0.0;
-
-          erreur = id(cons_pid).state-id(pureseau).state;
-          somme_erreurs += erreur;
-          variation_erreur=erreur-erreur_precedente;
-          sortie = (id(kp).state*erreur)+(id(ki).state*somme_erreurs)+(id(kd).state*variation_erreur);
-          erreur_precedente= erreur;
-          id(striac) = sortie; 
+          //id(striac) = sortie; 
 
           ESP_LOGI("Log","Erreurs: %f", erreur);
-          ESP_LOGI("Log","SomErr: %f", somme_erreurs);
-          ESP_LOGI("Log","ErrPre: %f", erreur_precedente);
-          ESP_LOGI("Log","Sortie: %f",sortie);          
+          ESP_LOGI("Log","IntErr: %f", integralErreur);
+          ESP_LOGI("Log","Derivée: %f", derivative);          
+          ESP_LOGI("Log","lastErr: %f", lastErreur);
+          ESP_LOGI("Log","Sortie: %f",sortie);    
 

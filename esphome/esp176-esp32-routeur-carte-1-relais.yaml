@@ -61,10 +61,11 @@ i2c:
   scan: True
   id: bus_a
 
+# Mosquitto OMV6
 mqtt:
-  broker: 192.168.0.37
-  username: !secret mqtt_ha_name
-  password: !secret mqtt_ha_pw
+  broker: 192.168.0.153
+#  username: !secret mqtt_ha_name
+#  password: !secret mqtt_ha_pw
   #internal_mqtt_default: internal
 
 globals:
@@ -404,14 +405,6 @@ sensor:
 #        - lambda: id(pid).execute();  
         
   - platform: mqtt_subscribe
-    name: "${friendly_name} Pu Mppt1"
-    id: pu_mppt1
-    topic: mp2/mppt1/puissance
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 2
-
-  - platform: mqtt_subscribe
     name: "${friendly_name} Pu Produite"
     id: pu_prod
     topic: mp2/multiplus2/prod_totale
@@ -577,24 +570,27 @@ script:
     mode: single
     then:
       - lambda: |-
-          static float P,I,D,erreur,lastErreur,derivative,sortie;
+          static float P,I,D,erreur,lastErreur,derivative,sortie,consigne,mesure;
           static float integralErreur = 0;
-
+          
+          id(cons_pid).publish_state(id(cons_pubatt).state);
           if (id(statusbusve).state == 3){
-            id(cons_pid).publish_state(id(cons_pubatt).state);
-            erreur = id(pu_batteries).state-id(cons_pid).state;
+            consigne=id(cons_pid).state;
+            mesure=id(pu_batteries).state;
             id(moderegul).publish_state( "Sur Pu batteries Bulk PID");
           } else {
             if (id(pu_batteries).state >= id(seuil_pubatt).state){
               id(cons_pid).publish_state(0);
-              erreur = id(pureseau).state-id(cons_pid).state;
+              consigne=id(cons_pid).state;
+              mesure=id(pureseau).state;
               id(moderegul).publish_state( "Sur Pu reseau PID");
             } else { 
-              id(cons_pid).publish_state(id(cons_pubatt).state);
-              erreur = id(pu_batteries).state-id(cons_pid).state;
+              consigne=id(cons_pid).state;
+              mesure=id(pu_batteries).state;             
               id(moderegul).publish_state( "Sur Pu batteries Non Bulk PID");
             } 
           }
+          erreur=mesure-consigne;
           // terme proportionnel  
           P = (id(kp).state * erreur);
           // Terme intégral
@@ -612,24 +608,83 @@ script:
           // Mise à jour de la dernière erreur          
           lastErreur = erreur;
 
-          //if (sortie <= 0){
-          //  sortie = 0;
-          //} else if (sortie>=id(pmax).state){
-          //  sortie = id(pmax).state;
-          //}
+          if (sortie <= 0){
+            sortie = 0;
+          } else if (sortie>=id(pmax).state){
+            sortie = id(pmax).state;
+          }
 
-          //id(striac) = sortie; 
+          id(striac) = sortie; 
 
           ESP_LOGI("Log","Erreurs: %f", erreur);
           ESP_LOGI("Log","IntErr: %f", integralErreur);
           ESP_LOGI("Log","Derivée: %f", derivative);          
           ESP_LOGI("Log","lastErr: %f", lastErreur);
           ESP_LOGI("Log","Sortie: %f",sortie);    
-          ESP_LOGI("Log","Seuil: %c",seuil_prod_ok); 
+ 
+      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: val_routeur
+              - switch.is_on: modeauto
+              - binary_sensor.is_on: seuil_prod_ok
+              - binary_sensor.is_on: temperatureok
 
+          then:
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return id(striac)/100 ;
+              - logger.log:
+                  format: "Log Auto OK STriac %f "
+                  args: [ 'id(striac)' ]
+                  level: "info"         
 
+      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
+      - if: 
+          condition:
+            and:
+              - switch.is_on: modeauto
+              - or:
+                - binary_sensor.is_off: val_routeur
+                - binary_sensor.is_off: temperatureok                    
+                - binary_sensor.is_off: seuil_prod_ok
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - light.turn_off: gradateur
+            - logger.log:
+                format: "Log Auto NOk STriac %f"
+                args: [ 'id(striac)' ]
+                level: "info"                         
 
+      # Si mode routeur manu
+      - if: 
+          condition:
+            and:
+              - switch.is_off: modeauto
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - logger.log:
+                format: "Log Manu STriac %f "
+                args: [ 'id(striac)' ]
+                level: "info"     
 
+# Affichage STriac et Increment
+      - lambda: |-
+            id(afstriac).publish_state( id(striac) );
+            id(afincrement).publish_state( id(increment) );
+
+      - logger.log:
+          format: "Log Fin STriac %f"
+          args: [ 'id(striac)' ]
+          level: "info"
+
+########################################################################""
 # Calcul puissance injection mode HP
   - id: calcul_injection_mode_hp
     mode: single

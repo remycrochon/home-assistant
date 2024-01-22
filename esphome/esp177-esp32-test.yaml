@@ -6,12 +6,7 @@ substitutions:
 
 esphome:
   name: ${device_name}
-  on_boot:
-    priority: -10
-    then:
-    - wait_until:
-        api.connected:
-    - logger.log: API is connected!
+
     
 esp32:
   board: esp32dev
@@ -22,15 +17,19 @@ esp32:
 logger:
   level: info
 
+# mosquitto OMV6
 mqtt:
-  broker: 192.168.0.37
-  username: !secret mqtt_ha_name
-  password: !secret mqtt_ha_pw
+  broker: 192.168.0.153
+#  username: !secret mqtt_ha_name
+#  password: !secret mqtt_ha_pw
+#"  discovery: true
   #internal_mqtt_default: internal
   
 # Enable Home Assistant API
 api:
+
 ota:
+  
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -71,6 +70,7 @@ number:
     max_value: 8000
     unit_of_measurement: "W"
     step: 1
+    
 
   - platform: template
     name: "${friendly_name} Coeff Kp"
@@ -124,6 +124,7 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
+
     on_value:
       then:
         - script.execute: pid

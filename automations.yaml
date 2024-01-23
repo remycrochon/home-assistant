@@ -2246,7 +2246,7 @@
       compressed: true
   mode: single
 - id: '1700469604629'
-  alias: 01-03-00 PAC Chauffage Salon Asservissement HP-HC
+  alias: 06-01-01 Energie Asservissements Tarifs Tempos
   description: 'Si HP Rouge->Consigne Economique (15°)
 
     Si HC->Consigne Confort (20°)
@@ -2255,30 +2255,34 @@
   trigger:
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
-    to: HC BLEU
+    - sensor.linky_n_tarif
+    to: '1'
+    id: HC Bleu
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
-    to: HP BLEU
+    - sensor.linky_n_tarif
+    to: '2'
+    id: HP Bleu
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
-    to: HC BLANC
+    - sensor.linky_n_tarif
+    to: '3'
+    id: HC Blanc
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
-    to: HP BLANC
+    - sensor.linky_n_tarif
+    to: '4'
+    id: HP Blanc
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
-    to: HP ROUGE
+    - sensor.linky_n_tarif
+    to: '6'
     id: hprouge
   - platform: state
     entity_id:
-    - sensor.linky_libelle_tarif_fournisseur_en_cours
+    - sensor.linky_n_tarif
     id: sortiehprouge
-    from: HP ROUGE
+    from: '6'
   condition: []
   action:
   - choose:

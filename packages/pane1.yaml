@@ -122,21 +122,33 @@ openhasp:
               {{ '#000000'}}
             {% endif %}
 # Affichage conso du jour
-      - obj: "p1b129"
-        properties:
-          "text": "{{ states('sensor.cout_energie_hc_hp_tous_tarifs')|float(0) |round(2)}} €" 
-      - obj: "p1b131"
-        properties:
-          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|float(0) |round(0)}} kWh" 
       - obj: "p1b133"
         properties:
+          "text": "{{ states('sensor.cout_energie_hc_hp_tous_tarifs')|float(0) |round(2)}} €" 
+      - obj: "p1b132"
+        properties:
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|float(0) |round(0)}} kWh" 
+      - obj: "p1b131"
+        properties:
           "text": "{{ states('sensor.mp2_pu_grid_l1_ac_mppt')|float(0) |round(0)}} W" 
-      - obj: "p1b135"
+      - obj: "p1b141"
+        properties:
+          "text": "{{ states('sensor.esp176_pu_batterie')|float(0)|round(0)}} W"  
+      - obj: "p1b142"
         properties:
           "text": "{{ states('sensor.mp2_soc_mqtt')|float(0) |round(0)}} %"
-      - obj: "p1b137"
+      - obj: "p1b151"
         properties:
           "text": "{{ states('sensor.mp2_prod_totale_mqtt')|float(0)|round(0)}} W"          
+      - obj: "p1b152"
+        properties:
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|float(0)|round(0)}} kWh"          
+      - obj: "p1b161"
+        properties:
+          "text": "{{ states('sensor.ecocompteur_pac')|float(0)|round(0)}} W"          
+      - obj: "p1b162"
+        properties:
+          "text": "{{ states('sensor.compteur_energie_pac_jour_hp_hc')|float(0)|round(0)}} kWh"          
 # page 1 - Rangée 3 
       - obj: "p1b223"
         properties:

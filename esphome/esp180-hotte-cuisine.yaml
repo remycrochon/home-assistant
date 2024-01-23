@@ -177,34 +177,43 @@ script:
     then:
 
       # Si Hotte en marche
-      # Si Humidité hotte < seuil v2 alors on enclenche V1
+      # Si Humidité hotte < seuil v2 depuis 2 mn alors on enclenche V1
       - if:
           condition:
-            - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
+            for:
+              time: 2min
+              condition:
+                - switch.is_on: hotte
+                - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
           then:
             - switch.turn_on: v1
             - delay: 1500ms
             - switch.turn_on: r1
       
       # Si Hotte en marche
-      # Si Humidité hotte > au seuil V1 et < seuil v2 alors on enclenche V2
+      # Si (humidité hotte > au seuil V1 et < seuil v2) depuis 2 mn alors on enclenche V2
       - if:
           condition:
-            - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
-            - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
+            for:
+              time: 2min
+              condition:            
+                - switch.is_on: hotte
+                - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
+                - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
           then:
             - switch.turn_on: v2
             - delay: 1500ms
             - switch.turn_on: r1
       
       # Si Hotte en marche
-      # Si Humidité hotte > au seuil V3 alors on enclenche V3 pendant 2mn    
+      # Si Humidité hotte > au seuil V3 depuis 2 mn alors on enclenche V3 pendant 2mn    
       - if:
           condition:
-            - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
+            for:
+              time: 2min
+              condition:            
+              - switch.is_on: hotte
+              - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
           then:
             - switch.turn_on: v3
             - delay: 1500ms            

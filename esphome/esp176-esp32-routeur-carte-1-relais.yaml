@@ -264,7 +264,7 @@ number:
     min_value: 0
     max_value: 10
     unit_of_measurement: ""
-    step: 0.01
+    step: 0.001
 
   - platform: template
     name: "${friendly_name} Coeff Ki"
@@ -275,7 +275,7 @@ number:
     min_value: 0
     max_value: 10
     unit_of_measurement: ""
-    step: 0.01
+    step: 0.001
 
   - platform: template
     name: "${friendly_name} Coeff Kd"
@@ -286,7 +286,7 @@ number:
     min_value: 0
     max_value: 10
     unit_of_measurement: ""
-    step: 0.01
+    step: 0.001
 
 sensor:
   - platform: jsy194
@@ -614,8 +614,12 @@ script:
             sortie = id(pmax).state;
           }
 
-          id(striac) = sortie; 
-
+          id(striac) = sortie;
+          ESP_LOGI("Log","Consigne: %f", consigne);
+          ESP_LOGI("Log","Mesure: %f", mesure);
+          ESP_LOGI("Log","P: %f", P);
+          ESP_LOGI("Log","I: %f", I);
+          ESP_LOGI("Log","D: %f", D);
           ESP_LOGI("Log","Erreurs: %f", erreur);
           ESP_LOGI("Log","IntErr: %f", integralErreur);
           ESP_LOGI("Log","Derivée: %f", derivative);          
@@ -708,7 +712,11 @@ script:
             } 
           }  
           
-          id(striac) = id(striac)+id(increment);
+          if (!isnan(id(striac))) {
+            id(striac) = id(striac)+id(increment);
+          }else{
+            id(striac)=0;
+            }
 
           if (id(striac) <= 0){
             id(striac) = 0;

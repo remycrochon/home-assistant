@@ -2244,6 +2244,7 @@
   - service: hassio.backup_full
     data:
       compressed: true
+      location: omv6nfs
   mode: single
 - id: '1700469604629'
   alias: 06-01-01 Energie Asservissements Tarifs Tempos

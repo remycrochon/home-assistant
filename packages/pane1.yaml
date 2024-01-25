@@ -143,13 +143,31 @@ openhasp:
       - obj: "p1b152"
         properties:
           "text": "{{ states('sensor.mp2_total_energie_produite_jour')|float(0)|round(0)}} kWh"          
-      - obj: "p1b161"
+      - obj: "p1b181"
         properties:
           "text": "{{ states('sensor.ecocompteur_pac')|float(0)|round(0)}} W"          
-      - obj: "p1b162"
+      - obj: "p1b182"
         properties:
-          "text": "{{ states('sensor.compteur_energie_pac_jour_hp_hc')|float(0)|round(0)}} kWh"          
-# page 1 - Rangée 3 
+          "text": "{{ states('sensor.compteur_energie_pac_jour_hp_hc')|float(0)|round(0)}} kWh"
+      - obj: "p1b191"
+        properties:
+          "text": "{{ states('sensor.ecocompteur_clim')|float(0)|round(0)}} W"          
+      - obj: "p1b192"
+        properties:
+          "text": "{{ states('sensor.energie_climatisations_jour')|float(0)|round(0)}} kWh"
+      - obj: "p1b201"
+        properties:
+          "text": "{{ states('sensor.ecocompteur_ecs')|float(0)|round(0)}} W"          
+      - obj: "p1b202"
+        properties:
+          "text": "{{ states('sensor.compteur_energie_ecs_pv_reseau')|float(0)|round(0)}} kWh"
+      - obj: "p1b211"
+        properties:
+          "text": "{{ states('sensor.pzem_pisc_puissance')|float(0)|round(0)}} W"          
+      - obj: "p1b212"
+        properties:
+          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc')|float(0)|round(0)}} kWh"
+          # page 1 - Rangée 3 
       - obj: "p1b223"
         properties:
           "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }} °C"              

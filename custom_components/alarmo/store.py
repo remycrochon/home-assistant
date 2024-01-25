@@ -15,9 +15,7 @@ from homeassistant.const import (
     STATE_ALARM_ARMED_VACATION
 )
 
-from homeassistant.components.alarm_control_panel import (
-    FORMAT_NUMBER as CODE_FORMAT_NUMBER,
-)
+from homeassistant.components.alarm_control_panel import CodeFormat
 
 from .const import DOMAIN
 
@@ -32,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 DATA_REGISTRY = f"{DOMAIN}_storage"
 STORAGE_KEY = f"{DOMAIN}.storage"
 STORAGE_VERSION_MAJOR = 6
-STORAGE_VERSION_MINOR = 2
+STORAGE_VERSION_MINOR = 3
 SAVE_DELAY = 10
 
 
@@ -89,7 +87,7 @@ class Config:
     code_arm_required = attr.ib(type=bool, default=False)
     code_mode_change_required = attr.ib(type=bool, default=False)
     code_disarm_required = attr.ib(type=bool, default=False)
-    code_format = attr.ib(type=str, default=CODE_FORMAT_NUMBER)
+    code_format = attr.ib(type=str, default=CodeFormat.NUMBER)
     disarm_after_trigger = attr.ib(type=bool, default=False)
     master = attr.ib(type=MasterConfig, default=MasterConfig())
     mqtt = attr.ib(type=MqttConfig, default=MqttConfig())
@@ -283,6 +281,17 @@ class MigratableStore(Store):
                 **omit(data["config"], ["code_mode_change_required"]),
                 code_mode_change_required=data["config"]["code_arm_required"]
             ))
+
+        if old_major_version <= 5 or (old_major_version == 6 and old_minor_version < 3):
+            data["sensor_groups"] = [
+                attr.asdict(SensorGroupEntry(
+                    **{
+                        **omit(sensorGroup, ["entities"]),
+                        "entities": list(set(sensorGroup["entities"]))
+                    }
+                ))
+                for sensorGroup in data["sensor_groups"]
+            ]
 
         return data
 

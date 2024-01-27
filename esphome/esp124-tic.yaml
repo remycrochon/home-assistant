@@ -90,6 +90,13 @@ light:
     id: rgb_led
     default_transition_length: 0s  
 
+globals:
+  # Ecart maximum admissible en tre deux lectures
+   - id: ecart_max
+     type: float
+     restore_value: no
+     initial_value: '50'
+
 
 sensor:
 # Energie Active soutirée totale
@@ -107,7 +114,7 @@ sensor:
       - lambda: |-
           return x/1000;
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;
@@ -129,7 +136,7 @@ sensor:
       - lambda: return x / 1000;
       - filter_out: 0.0
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;
@@ -150,7 +157,7 @@ sensor:
       - lambda: return x / 1000;      
       - filter_out: 0.0
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;
@@ -171,7 +178,7 @@ sensor:
       - lambda: return x / 1000;
       - filter_out: 0.0
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;
@@ -192,7 +199,7 @@ sensor:
       - lambda: return x / 1000;
       - filter_out: 0.0   
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;
@@ -213,7 +220,7 @@ sensor:
       - multiply: 0.001
       - filter_out: 0.0
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;
@@ -233,7 +240,7 @@ sensor:
       - lambda: return x / 1000;
       - filter_out: 0.0   
       - lambda: |-
-          float MAX_DIFFERENCE = 10.0;  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
           static float last_value = NAN;
           if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
             return last_value = x;

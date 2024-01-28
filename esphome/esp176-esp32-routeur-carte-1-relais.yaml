@@ -79,6 +79,7 @@ globals:
      restore_value: yes
 
 
+
 # Sonde Temperature Dallas
 dallas:
   - pin: GPIO27 #
@@ -207,6 +208,17 @@ number:
     max_value: 0
     unit_of_measurement: "W"
     step: 1
+# seuil SOC validation routeur
+  - platform: template
+    name: "${friendly_name} Seuil SOC"
+    id: seuil_soc
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
 
 # Consigne sur Puissance Batteries
   - platform: template
@@ -334,7 +346,7 @@ sensor:
       on_value:
         then:
           - lambda: id(pureseau1).publish_state( id(pureseau).state );
-          - lambda: id(calcul_injection_mode_hp).execute();  
+#          - lambda: id(calcul_injection_mode_hp).execute();  
 #          - lambda: id(pid).execute();  
 
 #          - lambda: |-
@@ -401,7 +413,7 @@ sensor:
     on_value:
       then:
         - lambda: id(pureseau1).publish_state( id(pureseau).state );
-        - lambda: id(calcul_injection_mode_hp).execute();  
+#        - lambda: id(calcul_injection_mode_hp).execute();  
 #        - lambda: id(pid).execute();  
         
   - platform: mqtt_subscribe
@@ -426,12 +438,21 @@ sensor:
             - binary_sensor.template.publish:
                 id: seuil_prod_ok
                 state: OFF
-            
+
+  - platform: mqtt_subscribe
+    name: "${friendly_name} Soc"
+    id: soc
+    topic: mp2/batteries/soc
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+
   - platform: mqtt_subscribe
     name: "${friendly_name} Etat Bus VE"
     id: etatbus_ve
     topic: mp2/multiplus2/etatbusve
     accuracy_decimals: 0
+
 # lecture sensor Home Assistant
   - platform: homeassistant
     name: "${friendly_name} Status Bus VE"
@@ -538,9 +559,10 @@ interval:
     then:
       - script.execute: etat_production 
 
-#  - interval: 500ms
-#    then:
-#      - script.execute: pid
+  - interval: 1s
+    then:
+      - script.execute: calcul_injection_mode_hp
+
 # ------------------------  Scripts
 script:
 # 
@@ -634,6 +656,7 @@ script:
               - switch.is_on: modeauto
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
+              - lambda: 'return id(soc).state >= id(seuil_soc).state;'
 
           then:
               - light.turn_on:
@@ -654,6 +677,7 @@ script:
                 - binary_sensor.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
                 - binary_sensor.is_off: seuil_prod_ok
+                - lambda: 'return id(soc).state < (id(seuil_soc).state-2);'
           then:
             - lambda: |-
                 id(striac) = 0;
@@ -737,6 +761,7 @@ script:
               - switch.is_on: modeauto
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
+              - lambda: 'return id(soc).state >= id(seuil_soc).state;'              
 
           then:
               - light.turn_on:
@@ -757,6 +782,7 @@ script:
                 - binary_sensor.is_off: val_routeur
                 - binary_sensor.is_off: temperatureok                    
                 - binary_sensor.is_off: seuil_prod_ok
+                - lambda: 'return id(soc).state < id(seuil_soc).state;'                    
           then:
             - lambda: |-
                 id(striac) = 0;

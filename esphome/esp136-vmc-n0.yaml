@@ -83,7 +83,7 @@ sensor:
         return ((id(insuf).state-id(out).state)/(id(aspi).state-id(out).state)*100);
         }
       }
-      
+# Rendement (en %) = (Température d'insufflation - Température extérieure) / (Température d'extraction de l'air vicié - Température extérieure) x 100.     
   
 #Etat de la connection
 binary_sensor:

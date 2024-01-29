@@ -45,7 +45,7 @@ ouverture_volet:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: script.ouverture_volet_chamb_sud
+  - service: script.1_3_2_ouverture_volet_chamb_sud_rts
     data: {}
     enabled: false
   mode: single
@@ -62,7 +62,7 @@ fermeture_volet:
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: script.0_0_fermeture_volet_bureau_droit
+  - service: script.1706465454834
     data: {}
   - delay:
       hours: 0
@@ -1235,3 +1235,366 @@ creation_groupe_update:
       object_id: all_update
       entities: '{{ states.update | map(attribute=''entity_id'') | join('','') }}     '
   mode: single
+'1706464871250':
+  alias: 0_0_0 Fermeture Volets RTS
+  sequence:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.gauche
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1706465454834
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1706465520258
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_sdb_rts
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1_1_0_fermeture_volet_chambre_nord_rts
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_parts_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_parents_grand_p
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_sud
+    enabled: false
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+    enabled: false
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_sud
+    enabled: false
+  mode: single
+  icon: mdi:window-shutter
+'1706465454834':
+  alias: 1_0_0 Fermeture Volet Bureau droit RTS
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.bureau_droit_2
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.bureau_droit_2
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.bureau_droit_2
+  mode: single
+  icon: mdi:window-shutter
+'1706465520258':
+  alias: 1_2_0 Fermeture Volet salon petit RTS
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+  mode: single
+  icon: mdi:window-shutter
+1_1_0_fermeture_volet_chambre_nord_rts:
+  alias: 1_1_0 Fermeture Volet Chambre nord RTS
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_nord
+  mode: single
+  icon: mdi:window-shutter
+0_0_1_ouverture_volets_rts:
+  alias: 0_0_1 Ouverture Volets RTS
+  sequence:
+  - service: script.1_2_1_ouverture_volet_salon_petit_rts
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_cuisine
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_sdb_rts
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_sam_grand_p
+  - service: script.1_0_2_ouverture_volets_bureau_rts
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1_1_1_ouverture_volet_chambre_nord_rts
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1_3_2_ouverture_volet_chamb_sud_rts
+    data: {}
+  mode: single
+  icon: mdi:window-shutter-open
+1_0_1_ouverture_volet_bureau_droit_rts:
+  alias: 1_0_1 Ouverture Volet Bureau droit RTS
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.bureau_droit_2
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.bureau_droit_2
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.bureau_droit_2
+  mode: single
+  icon: mdi:window-shutter-open
+1_0_2_ouverture_volets_bureau_rts:
+  alias: 1_0_2 Ouverture Volets Bureau RTS
+  sequence:
+  - condition: state
+    entity_id: input_boolean.presence_amis_bureau
+    state: 'off'
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.gauche
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: script.1_0_1_ouverture_volet_bureau_droit_rts
+    data: {}
+  mode: single
+  icon: mdi:window-shutter-open
+1_2_1_ouverture_volet_salon_petit_rts:
+  alias: 1_2_1 Ouverture Volet salon petit RTS
+  sequence:
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 9
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+  mode: single
+  icon: mdi:window-shutter-open
+1_3_2_ouverture_volet_chamb_sud_rts:
+  alias: 1_3_2 Ouverture Volet Chamb Sud RTS
+  sequence:
+  - condition: state
+    entity_id: input_boolean.presence_amis_ch_sud
+    state: 'off'
+  - service: cover.open_cover
+    target:
+      entity_id:
+      - cover.volet_ch_sud
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: cover.open_cover
+    target:
+      entity_id:
+      - cover.volet_ch_sud
+    data: {}
+  mode: single
+  icon: mdi:window-shutter-open
+1_1_1_ouverture_volet_chambre_nord_rts:
+  alias: 1_1_1 Ouverture Volet Chambre Nord RTS
+  sequence:
+  - condition: state
+    entity_id: input_boolean.presence_amis_ch_nord
+    state: 'off'
+  - service: cover.stop_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.volet_ch_nord
+  mode: single
+  icon: mdi:window-shutter-open

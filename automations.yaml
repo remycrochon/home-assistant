@@ -2464,3 +2464,92 @@
     entity_id: caf58cffba51ee848ade4eaa4c57a127
     domain: light
   mode: single
+- id: '1706466237260'
+  alias: 04-01-01 Volet Automatismes RTS
+  description: 'Ete/Hiver/Absent '
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.nuit_jour
+    from: 'on'
+    to: 'off'
+    id: jour->nuit
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  - platform: time
+    at: input_datetime.horaire_ete_volet_ouv
+    id: heure_ouv
+  - platform: time
+    at: input_datetime.horaire_ete_volet_ferm
+    id: heure_ferm
+  - platform: state
+    entity_id:
+    - input_boolean.nuit_jour
+    id: nuit->jour
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - service: script.1706464871250
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: heure_ouv
+      sequence:
+      - service: script.0_0_1_ouverture_volets_rts
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id: heure_ouv
+      sequence:
+      - service: script.0_0_1_ouverture_volets_rts
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id: heure_ferm
+      sequence:
+      - service: script.1706464871250
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - service: script.fermeture_volet_absent
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - service: script.ouverture_volet_absent
+        data: {}
+    default: []
+  mode: single

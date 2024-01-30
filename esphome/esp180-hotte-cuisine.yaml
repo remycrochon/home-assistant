@@ -181,7 +181,7 @@ script:
       - if:
           condition:
             for:
-              time: 2min
+              time: 30s
               condition:
                 - switch.is_on: hotte
                 - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
@@ -195,7 +195,7 @@ script:
       - if:
           condition:
             for:
-              time: 2min
+              time: 30s
               condition:            
                 - switch.is_on: hotte
                 - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
@@ -210,7 +210,7 @@ script:
       - if:
           condition:
             for:
-              time: 2min
+              time: 30s
               condition:            
               - switch.is_on: hotte
               - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'

@@ -2540,7 +2540,7 @@
       - condition: trigger
         id: jour->nuit
       sequence:
-      - service: script.fermeture_volet_absent
+      - service: script.0_1_0_fermeture_volets_mode_absent_rts
         data: {}
     - conditions:
       - condition: state
@@ -2549,7 +2549,7 @@
       - condition: trigger
         id: nuit->jour
       sequence:
-      - service: script.ouverture_volet_absent
+      - service: script.0_1_1_ouverture_volets_mode_absent_rts
         data: {}
     default: []
   mode: single

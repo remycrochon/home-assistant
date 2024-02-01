@@ -676,7 +676,8 @@ creation_groupe_update:
       milliseconds: 0
   - service: cover.close_cover
     target:
-      entity_id: cover.volets_salon_rts
+      entity_id:
+      - cover.volet_salon_petit
     data: {}
   - delay:
       hours: 0

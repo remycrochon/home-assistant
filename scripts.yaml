@@ -660,69 +660,12 @@ creation_groupe_update:
     target:
       entity_id:
       - cover.gauche
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    target:
-      entity_id: cover.bureau_droit_2
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    target:
-      entity_id:
+      - cover.bureau_droit_2
       - cover.volet_salon_petit
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    data: {}
-    target:
-      entity_id:
       - cover.volet_sdb_rts
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    target:
-      entity_id: cover.volet_ch_nord
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    data: {}
-    target:
-      entity_id:
-      - cover.volet_ch_parts_petit
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.close_cover
-    data: {}
-    target:
-      entity_id:
+      - cover.volet_ch_nord
+      - cover.volets_ch_parents_rts
       - cover.volet_parents_grand_p
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
   - service: cover.close_cover
     data: {}
     target:
@@ -838,38 +781,12 @@ creation_groupe_update:
   sequence:
   - service: cover.open_cover
     target:
-      entity_id: cover.volet_salon_petit
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
-    data: {}
-    target:
       entity_id:
+      - cover.volet_salon_petit
       - cover.volet_cuisine
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
-    data: {}
-    target:
-      entity_id:
       - cover.volet_sdb_rts
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
+      - cover.volet_sam_volets_zb
     data: {}
-    target:
-      entity_id:
-      - cover.volet_sam_grand_p
   - service: script.1_0_2_ouverture_volets_bureau_rts
     data: {}
   - delay:
@@ -1202,7 +1119,7 @@ creation_groupe_update:
       - cover.volet_ch_nord
       - cover.volets_ch_parents_rts
       - cover.volet_parents_grand_p
-      - cover.volet_sam_grand_p
+      - cover.volet_sam_volets_zb
   - delay:
       hours: 0
       minutes: 0
@@ -1232,7 +1149,7 @@ creation_groupe_update:
       - cover.volet_ch_nord
       - cover.volets_ch_parents_rts
       - cover.volet_parents_grand_p
-      - cover.volet_sam_grand_p
+      - cover.volet_sam_volets_zb
   - delay:
       hours: 0
       minutes: 0

@@ -2292,49 +2292,34 @@
         id:
         - hprouge
       sequence:
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: away
-        target:
-          entity_id: climate.altherma
-        enabled: true
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC={{ state_attr("climate.altherma", "temperature") }}°C
-            car HP ROUGE
+          title: Consigne PAC= 18 °C car Passage HP ROUGE FORCAGE ARRET PISCINE
       - service: input_boolean.turn_on
         data: {}
         target:
           entity_id:
           - input_boolean.piscine_arret_force
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.pac_nr_input_consigne_temperature
+        data:
+          value: 18
     - conditions:
       - condition: trigger
         id:
         - sortiehprouge
       sequence:
-      - service: climate.set_preset_mode
-        data:
-          preset_mode: home
-        target:
-          entity_id: climate.altherma
-        enabled: true
-      - service: climate.turn_on
-        data: {}
-        target:
-          entity_id: climate.altherma
-        enabled: true
       - service: notify.telegram
         data:
           message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC={{ state_attr("climate.altherma", "temperature") }}°C
-            car sortie HP ROUGE
-      - service: number.set_value
-        data:
-          value: '{{ states(''input_number.pac_consigne_confort'') | float(0) }}'
+          title: Consigne PAC=20°C car sortie HP ROUGE
+      - service: input_number.set_value
         target:
-          entity_id: number.room_temperature
-        enabled: false
+          entity_id: input_number.pac_nr_input_consigne_temperature
+        data:
+          value: 20
   mode: single
   trace:
     stored_traces: 15

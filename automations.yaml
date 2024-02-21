@@ -2538,3 +2538,94 @@
         data: {}
     default: []
   mode: single
+- id: '1708433020641'
+  alias: 03-01-01 ECS Automatismes
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_select.ecs_ssol
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: levee_soleil
+  - platform: sun
+    event: sunset
+    offset: 0
+    id: couche_soleil
+  - platform: time
+    at: 03:00:00
+    id: a3h
+  - platform: time
+    at: 05:59:00
+    id: a6h
+  - platform: state
+    entity_id:
+    - sensor.esp126_temp_ecs
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: numeric_state
+        entity_id: sensor.esp126_temp_ecs
+        below: input_number.ecs_seuil_bas_temp
+      - condition: trigger
+        id:
+        - a3h
+      sequence:
+      - service: script.ecs_on
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.esp126_temp_ecs
+          above: input_number.ecs_seuil_haut_temp
+        - condition: trigger
+          id:
+          - a6h
+      sequence:
+      - service: script.ecs_off_off
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: sun
+        before: sunset
+        after: sunrise
+      sequence:
+      - service: script.ecs_off
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - service: script.ecs_off_off
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: At Forcé
+      sequence:
+      - service: script.ecs_off_off
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: input_select.ecs_ssol
+        state: Ma Forcée
+      sequence:
+      - service: script.ecs_on
+        data: {}
+    default: []
+  mode: single

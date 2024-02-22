@@ -2562,6 +2562,15 @@
   - platform: state
     entity_id:
     - sensor.esp126_temp_ecs
+  - platform: numeric_state
+    entity_id:
+    - sensor.esp126_temp_ecs
+    id: tempbasse
+    below: input_number.ecs_seuil_bas_temp
+  - platform: numeric_state
+    entity_id:
+    - sensor.esp126_temp_ecs
+    above: input_number.ecs_seuil_haut_temp
   condition: []
   action:
   - choose:
@@ -2597,19 +2606,20 @@
       - condition: state
         entity_id: input_select.ecs_ssol
         state: Auto
-      - condition: sun
-        before: sunset
-        after: sunrise
+      - condition: trigger
+        id:
+        - levee_soleil
       sequence:
       - service: script.ecs_off
         data: {}
+        enabled: false
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol
         state: Auto
-      - condition: sun
-        before: sunrise
-        after: sunset
+      - condition: trigger
+        id:
+        - couche_soleil
       sequence:
       - service: script.ecs_off_off
         data: {}
@@ -2629,3 +2639,5 @@
         data: {}
     default: []
   mode: single
+  trace:
+    stored_traces: 15

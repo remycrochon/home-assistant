@@ -5,10 +5,10 @@
 influxdb:
   api_version: 2
   ssl: false
-  host: 192.168.0.153
+  host: 192.168.0.203
   port: 8086
-  token: P6GgxdDMTuwdBeEnlWQeULACEgezENS2T_ddkRhb_SmnfL5UQlxqwmIoTzILXd9530-Qn4FjY-fxYj2Y9CoUDg==
-  organization: homeassistant
+  token: MIHpxE0nvvcBM7BBPB9LUotWxEvh6JPJDJVqv33JBY8syCNN7BvyS43NDdVy945UUMjBnVyzyaBvovzWKf9wIg==
+  organization: 859933fbd6d2be44
   bucket: homeassistant
   tags:
     source: HA

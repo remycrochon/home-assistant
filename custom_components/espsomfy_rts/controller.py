@@ -52,6 +52,8 @@ from .const import (
     EVT_UPDPROGRESS,
     EVT_WIFISTRENGTH,
     EVT_ETHERNET,
+    PLATFORMS,
+
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -176,19 +178,25 @@ class SocketListener(threading.Thread):
 
     def ws_onmessage(self, wsapp, message: str):
         """Process the incoming message"""
-        if message.startswith("42["):
-            ndx = message.find(",")
-            event = message[3:ndx]
-            if not self.filter or event in self.filter:
-                payload = message[ndx + 1 : -1]
-                # print(f"Event:{event} Payload:{payload}")
-                data = json.loads(payload)
-                data["event"] = event
-                self.hass.loop.call_soon_threadsafe(self.onpacket, data)
-        else:
-            if message.lower() == "connected":
-                self.reconnects = 0
-                self.connected = True
+        try:
+            if message is None:
+                _LOGGER.debug("Got an empty socket payload")
+            elif message.startswith("42["):
+                ndx = message.find(",")
+                event = message[3:ndx]
+                if not self.filter or event in self.filter:
+                    payload = message[ndx + 1 : -1]
+                    # print(f"Event:{event} Payload:{payload}")
+                    data = json.loads(payload)
+                    data["event"] = event
+                    self.hass.loop.call_soon_threadsafe(self.onpacket, data)
+            else:
+                if message.lower() == "connected":
+                    self.reconnects = 0
+                    self.connected = True
+        except Exception as e:
+            _LOGGER.debug(e.message)
+            raise e
 
 
 class ESPSomfyController(DataUpdateCoordinator):
@@ -230,6 +238,15 @@ class ESPSomfyController(DataUpdateCoordinator):
     def latest_version(self) -> str:
         """Gets the current version for the controller"""
         return self.api.latest_version
+    @property
+    def check_for_update(self) -> bool:
+        """Indicates whether the firmware should check for updates"""
+        return self.api.check_for_update
+
+    @property
+    def internet_available(self) -> bool:
+        """Indicates whether the firmware should check for updates"""
+        return self.api.internet_available
 
     @property
     def can_update(self) -> bool:
@@ -297,6 +314,7 @@ class ESPSomfyController(DataUpdateCoordinator):
     def ensure_shade_configured(self, data):
         """Ensures the shade exists on Home Assistant"""
         uuid = f"{self.unique_id}_{data['shadeId']}"
+
         devices = device_registry.async_get(self.hass)
         device = devices.async_get_device({(DOMAIN, self.unique_id)})
 
@@ -367,13 +385,25 @@ class ESPSomfyController(DataUpdateCoordinator):
         if "event" in data and data["event"] == EVT_FWSTATUS:
             self.api.set_firmware(data)
 
+
         self.async_set_updated_data(data=data)
 
     def ws_onopen(self):
         """Callback when the websocket is opened"""
-        # print("Websocket is connected")
-        data = {"event": EVT_CONNECTED, "connected": True}
-        self.async_set_updated_data(data=data)
+        _LOGGER.debug("ESPSomfy RTS Socket was opened")
+        if self.api.is_configured:
+            _LOGGER.debug("ESPSomfy RTS Already Configured")
+            data = {"event": EVT_CONNECTED, "connected": True}
+            self.async_set_updated_data(data=data)
+        else:
+            _LOGGER.debug("ESPSomfy RTS configuring entities")
+            loop = asyncio.get_event_loop()
+            coro = loop.create_task(self.api.get_initial())
+            def handle_connected(_coro):
+                data = {"event": EVT_CONNECTED, "connected": True}
+                self.async_set_updated_data(data=data)
+            coro.add_done_callback(handle_connected)
+
 
     def ws_onerror(self, exception):
         """An error occurred on the socket connection"""
@@ -391,7 +421,7 @@ class ESPSomfyController(DataUpdateCoordinator):
 class ESPSomfyAPI:
     """API for sending data to nodejs-PoolController"""
 
-    def __init__(self, hass: HomeAssistant, data) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry_id, data) -> None:
         self.hass = hass
         self.data = data
         self._host = data[CONF_HOST]
@@ -405,6 +435,8 @@ class ESPSomfyAPI:
         self._canLogin = False
         self._deviceName = data[CONF_HOST]
         self._can_update = False
+        self._config_entry_id = config_entry_id
+        self._configured = False
 
     @property
     def shades(self) -> Any:
@@ -438,6 +470,8 @@ class ESPSomfyAPI:
     def latest_version(self) -> str | None:
         """Getter for the latest version"""
         if "latest" in self._config:
+            if self._config["latest"] == "":
+                return None
             return self._config["latest"]
         return None
 
@@ -448,7 +482,7 @@ class ESPSomfyAPI:
 
     @property
     def apiKey(self) -> str:
-        """Gettter for the api key"""
+        """Getter for the api key"""
         return self._config["apiKey"]
 
     @property
@@ -464,6 +498,20 @@ class ESPSomfyAPI:
     def backup_dir(self) -> str:
         """Gets the backup directory for the device"""
         return self.hass.config.path(f"ESPSomfyRTS_{self.server_id}")
+    @property
+    def check_for_update(self) -> bool:
+        if "checkForUpdate" in self._config:
+            return self._config["checkForUpdate"]
+        return self._can_update
+    @property
+    def internet_available(self) -> bool:
+        if "inetAvailable" in self._config:
+            return self._config["inetAvailable"]
+        return self._can_update
+    @property
+    def is_configured(self) -> bool:
+        """Indicates whether the integration has been configured"""
+        return self._configured
 
     def get_sock_url(self):
         """Get the socket interface url"""
@@ -476,6 +524,7 @@ class ESPSomfyAPI:
     def get_config(self):
         """Return the initial config"""
         return self._config
+
     def get_data(self):
         """Return the internal data"""
         return self.data
@@ -497,6 +546,10 @@ class ESPSomfyAPI:
             if "name" in latest_ver:
                 latest_ver = latest_ver["name"]
             self._config["latest"] = latest_ver
+        if "checkForUpdate" in data:
+            self._config["checkForUpdate"] = data["checkForUpdate"]
+        if "inetAvailable" in data:
+            self._config["inetAvailable"] = data["inetAvailable"]
 
         self._config["version"] = new_ver
         v = version_parse(new_ver)
@@ -522,7 +575,7 @@ class ESPSomfyAPI:
             if  resp.status == 200:
                 if not os.path.exists(self.backup_dir):
                     os.mkdir(self.backup_dir)
-                data = await resp.text()
+                data = await resp.text(encoding=None)
                 fpath = self.hass.config.path(f"{self.backup_dir}/{datetime.now().strftime('%Y-%m-%dT%H_%M_%S')}.backup")
                 with open(file=fpath, mode="wb+") as f:
                     if f is not None:
@@ -575,6 +628,7 @@ class ESPSomfyAPI:
                 if self._config["authType"] > 0:
                     if self._config["permissions"] != 1:
                         self._needsKey = True
+
                 return await resp.json()
             _LOGGER.error(await resp.text())
             raise DiscoveryError(f"{url} - {await resp.text()}")
@@ -745,6 +799,11 @@ class ESPSomfyAPI:
             async with self._session.get(f"{self._api_url}{API_DISCOVERY}") as resp:
                 if resp.status == 200:
                     self._config = await resp.json()
+                    entry = self.hass.config_entries.async_get_entry(self._config_entry_id)
+                    if(self._configured == False):
+                        _LOGGER.debug("ESPSomfy RTS Setting up entities")
+                        await self.hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+                        self._configured = True
                 else:
                     _LOGGER.error(await resp.text())
         except aiohttp.ClientError:

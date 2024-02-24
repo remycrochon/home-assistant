@@ -5,7 +5,7 @@
 ####################################################
 
 #mqtt:
-#  sensor: 
+#  sensor:
 
 # Speed Test - Contenair dans NAS OMV
 # supprimé car le contenair s'arretait tout seul sur défaut -> pas fiable
@@ -13,29 +13,31 @@
 #    - name: "speedtest.download"
 #      state_topic: "speedtest/download"
 #      unit_of_measurement: Mbit/s
-#      icon: mdi:speedometer      
-#      state_class: measurement  
+#      icon: mdi:speedometer
+#      state_class: measurement
 
 #    - name: "speedtest.upload"
 #      state_topic: "speedtest/upload"
 #      unit_of_measurement: Mbit/s
-#      icon: mdi:speedometer      
-#      state_class: measurement 
+#      icon: mdi:speedometer
+#      state_class: measurement
 
 #    - name: "speedtest.ping"
 #      state_topic: "speedtest/ping"
-#      unit_of_measurement: ms      
-#      icon: mdi:speedometer      
-#      state_class: measurement  
-
+#      unit_of_measurement: ms
+#      icon: mdi:speedometer
+#      state_class: measurement
 
 # https://forum.hacf.fr/t/integrer-speedtest-cli-officielle-a-home-assistant/15436
 # Example configuration.yaml entry
+# command: "/config/3rparty/speedtest/speedtest -s 5022 --format=json --accept-license --accept-gdpr"
+
+# Suite de Speedtest CLI
 command_line:
   - sensor:
       name: "SpeedTest CLI"
       unique_id: speedtest_cli_data
-      command: "/config/3rparty/speedtest/speedtest -s 5022 --format=json --accept-license --accept-gdpr"
+      command: "/config/3rparty/speedtest/speedtest --format=json --accept-license --accept-gdpr"
       #Toutes les 4 heures, 60 * 60 * 4 = 14400
       #Toutes les heures: 3600 = 1 heure
       #Toutes les 10 mn: 600
@@ -57,11 +59,10 @@ command_line:
           | to_json 
         }}
 
-
-# Suite de Speedtest CLI
 template:
+
   - sensor:
-      - name: 'SpeedTest Ping'
+      - name: "SpeedTest Ping"
         unique_id: "speedtest_ping"
         icon: mdi:speedometer
         unit_of_measurement: ms
@@ -69,7 +70,7 @@ template:
         state: >-
           {{ (states('sensor.speedtest_cli_data') | from_json).ping | round(2) }}
 
-      - name: 'Speedtest Download'
+      - name: "Speedtest Download"
         unique_id: "speedtest_download"
         icon: mdi:speedometer
         unit_of_measurement: Mbit/s
@@ -77,7 +78,7 @@ template:
         state: >-
           {{ ((states('sensor.speedtest_cli_data') | from_json).download * 8 / 1000 /1000 ) | round(2) }}
 
-      - name: 'SpeedTest Upload'
+      - name: "SpeedTest Upload"
         unique_id: "speedtest_upload"
         icon: mdi:speedometer
         unit_of_measurement: Mbit/s
@@ -85,14 +86,12 @@ template:
         state: >-
           {{ ((states('sensor.speedtest_cli_data') | from_json).upload * 8 / 1000 / 1000 ) | round(2) }}
 
-      - name: 'Speedtest location'
+      - name: "Speedtest location"
         unique_id: "speedtest_location"
         state: >-
           {{ ((states('sensor.speedtest_cli.data') | from_json).location) }}
 
-      - name: 'Speedtest Server Name'
+      - name: "Speedtest Server Name"
         unique_id: "speedtest_server_same"
         state: >-
           {{ ((states('sensor.speedtest_cli_data') | from_json).server_name) }}
-
-

@@ -1,5 +1,9 @@
 """Constants for the ESPSomfy RTS integration."""
-VERSION = "v2.3.1"
+
+from homeassistant.const import Platform
+
+
+VERSION = "v2.4.0"
 DOMAIN = "espsomfy_rts"
 MANUFACTURER = "rstrouse"
 API_CONTROLLER = "/controller"
@@ -28,3 +32,12 @@ EVT_WIFISTRENGTH = "wifiStrength"
 EVT_ETHERNET = "ethernet"
 
 ATTR_RESTOREFILE = "Restore File"
+
+PLATFORMS: list[Platform] = [
+    Platform.BINARY_SENSOR,
+    Platform.COVER,
+    Platform.SWITCH,
+    Platform.UPDATE,
+    Platform.SENSOR,
+    Platform.BUTTON
+]

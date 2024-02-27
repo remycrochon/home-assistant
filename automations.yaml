@@ -2562,6 +2562,7 @@
   - platform: state
     entity_id:
     - sensor.esp126_temp_ecs
+    enabled: false
   - platform: numeric_state
     entity_id:
     - sensor.esp126_temp_ecs
@@ -2612,7 +2613,7 @@
       sequence:
       - service: script.ecs_off
         data: {}
-        enabled: false
+        enabled: true
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol

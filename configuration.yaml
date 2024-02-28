@@ -13,17 +13,17 @@ ovh:
   username: !secret ovh_username
   password: !secret ovh_password
 
-sensor:
-  - platform: zwift
-    username: !secret my_zwift_username
-    password: !secret my_zwift_password
+#sensor:
+#  - platform: zwift
+#    username: !secret my_zwift_username
+#    password: !secret my_zwift_password
 
-panel_iframe:
-  glances:
-    title: Grafana
-    icon: mdi:chip
-    url: http://192.168.0.153:3002
-    require_admin: false
+#panel_iframe:
+#  glances:
+#    title: Grafana
+#    icon: mdi:chip
+#    url: http://192.168.0.153:3002
+#    require_admin: false
 
 daikin_residential:
   email: !secret daikin_user

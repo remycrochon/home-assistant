@@ -2592,6 +2592,9 @@
       - condition: state
         entity_id: input_select.ecs_ssol
         state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
       - condition: or
         conditions:
         - condition: numeric_state
@@ -2613,7 +2616,6 @@
       sequence:
       - service: script.ecs_off
         data: {}
-        enabled: true
     - conditions:
       - condition: state
         entity_id: input_select.ecs_ssol

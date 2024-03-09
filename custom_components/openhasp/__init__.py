@@ -5,12 +5,11 @@ import logging
 import os
 import pathlib
 import re
-import jsonschema
 
-from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
-from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.binary_sensor import DOMAIN as BINARY_SENSOR_DOMAIN
+from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.const import CONF_NAME, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import callback
@@ -24,10 +23,14 @@ from homeassistant.helpers.reload import async_integration_yaml_config
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.service import async_call_from_config
 from homeassistant.util import slugify
+import jsonschema
 import voluptuous as vol
 
 from .common import HASP_IDLE_SCHEMA
 from .const import (
+    ATTR_COMMAND_KEYWORD,
+    ATTR_COMMAND_PARAMETERS,
+    ATTR_CONFIG_PARAMETERS,
     ATTR_CONFIG_SUBMODULE,
     ATTR_FORCE_FITSCREEN,
     ATTR_HEIGHT,
@@ -36,9 +39,6 @@ from .const import (
     ATTR_OBJECT,
     ATTR_PAGE,
     ATTR_PATH,
-    ATTR_COMMAND_KEYWORD,
-    ATTR_COMMAND_PARAMETERS,
-    ATTR_CONFIG_PARAMETERS,
     ATTR_WIDTH,
     CONF_COMPONENT,
     CONF_EVENT,
@@ -72,14 +72,14 @@ from .const import (
     MAJOR,
     MINOR,
     SERVICE_CLEAR_PAGE,
+    SERVICE_COMMAND,
+    SERVICE_CONFIG,
     SERVICE_LOAD_PAGE,
     SERVICE_PAGE_CHANGE,
     SERVICE_PAGE_NEXT,
     SERVICE_PAGE_PREV,
     SERVICE_PUSH_IMAGE,
     SERVICE_WAKEUP,
-    SERVICE_COMMAND,
-    SERVICE_CONFIG,
 )
 from .image import ImageServeView, image_to_rgb565
 
@@ -291,6 +291,7 @@ async def async_unload_entry(hass, entry):
 
     return True
 
+
 async def async_remove_entry(hass, entry):
     plate = entry.data[CONF_NAME]
 
@@ -314,8 +315,9 @@ async def async_remove_entry(hass, entry):
         device_registry.async_remove_device(dev.id)
 
     # Component does not remove entity from entity_registry, so we must do it
-    registry = await entity_registry.async_get_registry(hass)
+    registry = entity_registry.async_get(hass)
     registry.async_remove(hass.data[DOMAIN][CONF_PLATE][plate].entity_id)
+
 
 # pylint: disable=R0902
 class SwitchPlate(RestoreEntity):
@@ -403,15 +405,7 @@ class SwitchPlate(RestoreEntity):
 
                 major, minor, _ = message["version"].split(".")
                 if (major, minor) != (MAJOR, MINOR):
-                    self.hass.components.persistent_notification.create(
-                        f"You require firmware version {MAJOR}.{MINOR}.x \
-                            in plate {self._entry.data[CONF_NAME]} \
-                            for this component to work properly.\
-                            <br>Some features will simply not work!",
-                        title="openHASP Firmware mismatch",
-                        notification_id="openhasp_firmware_notification",
-                    )
-                    _LOGGER.error(
+                    _LOGGER.warning(
                         "%s firmware mismatch %s <> %s",
                         self._entry.data[CONF_NAME],
                         (major, minor),
@@ -601,7 +595,9 @@ class SwitchPlate(RestoreEntity):
             retain=False,
         )
 
-    async def async_push_image(self, image, obj, width=None, height=None, fitscreen=False):
+    async def async_push_image(
+        self, image, obj, width=None, height=None, fitscreen=False
+    ):
         """Update object image."""
 
         image_id = hashlib.md5(image.encode("utf-8")).hexdigest()

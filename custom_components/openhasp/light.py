@@ -6,8 +6,7 @@ from typing import Callable
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_HS_COLOR,
-    SUPPORT_BRIGHTNESS,
-    SUPPORT_COLOR,
+    ColorMode,
     LightEntity,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -106,6 +105,8 @@ async def async_setup_entry(
 class HASPLight(HASPToggleEntity, LightEntity):
     """Representation of openHASP Light."""
 
+    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+
     def __init__(self, name, hwid, topic, gpio):
         """Initialize the light."""
         super().__init__(name, hwid, topic, gpio)
@@ -160,11 +161,13 @@ class HASPLight(HASPToggleEntity, LightEntity):
 class HASPDimmableLight(HASPToggleEntity, LightEntity):
     """Representation of openHASP Light."""
 
+    _attr_color_mode = ColorMode.BRIGHTNESS
+    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+
     def __init__(self, name, hwid, topic, gpio):
         """Initialize the dimmable light."""
         super().__init__(name, hwid, topic, gpio)
         self._brightness = None
-        self._attr_supported_features = SUPPORT_BRIGHTNESS
         self._gpio = gpio
         self._attr_name = f"{name} dimmable light {self._gpio}"
 
@@ -242,13 +245,15 @@ class HASPDimmableLight(HASPToggleEntity, LightEntity):
 class HASPBackLight(HASPToggleEntity, LightEntity, RestoreEntity):
     """Representation of HASP LVGL Backlight."""
 
+    _attr_color_mode = ColorMode.BRIGHTNESS
+    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+
     def __init__(self, name, hwid, topic, brightness):
         """Initialize the light."""
         super().__init__(name, hwid, topic, "backlight")
         self._awake_brightness = 255
         self._brightness = None
         self._idle_brightness = brightness
-        self._attr_supported_features = SUPPORT_BRIGHTNESS
         self._attr_name = f"{name} backlight"
 
     @property
@@ -330,13 +335,13 @@ class HASPBackLight(HASPToggleEntity, LightEntity, RestoreEntity):
 
             if message == HASP_IDLE_OFF:
                 brightness = self._awake_brightness
-                backlight = 1
+                backlight = "on"
             elif message == HASP_IDLE_SHORT:
                 brightness = self._idle_brightness
-                backlight = 1
+                backlight = "on"
             elif message == HASP_IDLE_LONG:
                 brightness = self._awake_brightness
-                backlight = 0
+                backlight = "off"
             else:
                 return
 
@@ -369,7 +374,7 @@ class HASPBackLight(HASPToggleEntity, LightEntity, RestoreEntity):
         """Sync local state back to plate."""
         cmd_topic = f"{self._topic}/command"
 
-        new_state = {"state": self._state, "brightness": self._brightness}
+        new_state = {"state": "on" if self._state else "off", "brightness": self._brightness}
 
         _LOGGER.debug("refresh(%s) backlight - %s", self.name, new_state)
 
@@ -396,12 +401,14 @@ class HASPBackLight(HASPToggleEntity, LightEntity, RestoreEntity):
 class HASPMoodLight(HASPToggleEntity, LightEntity, RestoreEntity):
     """Representation of HASP LVGL Moodlight."""
 
+    _attr_color_mode = ColorMode.HS
+    _attr_supported_color_modes = {ColorMode.HS}
+
     def __init__(self, name, hwid, topic):
         """Initialize the light."""
         super().__init__(name, hwid, topic, "moodlight")
         self._hs = None
         self._brightness = None
-        self._attr_supported_features = SUPPORT_COLOR | SUPPORT_BRIGHTNESS
         self._attr_name = f"{name} moodlight"
 
     @property

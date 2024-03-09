@@ -430,6 +430,7 @@ const Ce=1,Oe=t=>(...e)=>({_$litDirective$:t,values:e});let Ee=class{constructor
         <h1
           aria-label=${`${this.config.title}`}
           class="card-header"
+          .entity=${`${this.config.entity}`}
           @action=${this._handleAction}
           .actionHandler=${je({hasHold:te(this.config.hold_action),hasDoubleClick:te(this.config.double_tap_action)})}
         >
@@ -448,4 +449,4 @@ const Ce=1,Oe=t=>(...e)=>({_$litDirective$:t,values:e});let Ee=class{constructor
           ${this.renderHistory(this.history,this.config)}
         </div>
       </ha-card>
-    `}};i([ht({type:Object})],an.prototype,"hass",void 0),i([mt()],an.prototype,"config",void 0),i([mt()],an.prototype,"history",void 0),an=i([lt("multiple-logbook-card")],an),console.info("%c LOGBOOK-CARD %c 2.4.0 ","color: orange; font-weight: bold; background: black","color: darkblue; font-weight: bold; background: white");
+    `}};i([ht({type:Object})],an.prototype,"hass",void 0),i([mt()],an.prototype,"config",void 0),i([mt()],an.prototype,"history",void 0),an=i([lt("multiple-logbook-card")],an),console.info("%c LOGBOOK-CARD %c 2.4.1 ","color: orange; font-weight: bold; background: black","color: darkblue; font-weight: bold; background: white");

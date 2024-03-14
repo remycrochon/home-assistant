@@ -1,6 +1,11 @@
 mqtt:
   sensor:
 # MQTT
+    # 1=Charger Only;2=Inverter Only;3=On;4=Off
+    - name: "MP2 Mode Fonctionnement par MQTT"
+      unique_id: mp2_mode_fonctionnement_par_mqtt" 
+      state_topic: "mp2/multiplus2/mode"
+
     - name: "MP2 Tension Batteries par MQTT"
       unique_id: mp2_tension_batteries_par_mqtt" 
       state_topic: "mp2/batteries/tension"
@@ -535,6 +540,18 @@ modbus:
 
 template:
   - sensor:
+    # 1=Charger Only;2=Inverter Only;3=On;4=Off
+    - name: "MP2 Mode Fonctionnement Texte"
+      unique_id: mp2_mode_fonctionnement_texte" 
+      state: >-
+        {% set st = states('sensor.mp2_mode_fonctionnement_par_mqtt') | int(default=0) %}
+        {% for num, text in [(0,'Défaut'),(1, 'Chargeur Seul'), (2, 'Convertisseur Seul'),(3, 'Normal')
+        ,(4, 'Arret')
+        ] %}
+            {% if st == num %}
+              {{ text }}
+            {%endif%}
+        {% endfor %} 
 
     # Affichage Ac Load
     - name: MP2_ac_loads

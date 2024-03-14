@@ -2087,7 +2087,7 @@
       addon: a0d7b954_nut
   mode: single
 - id: '1690434314772'
-  alias: 06-2-2 MP2 Memorisation Production Jour
+  alias: 06-02-02 MP2 Memorisation Production Jour
   description: ''
   trigger:
   - platform: time
@@ -2644,3 +2644,17 @@
   mode: single
   trace:
     stored_traces: 15
+- id: '1710317639852'
+  alias: 06-02-01 MP2 Etat Mode de Fonctionnement
+  description: Alarme Mode de fonctionnement MP2
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.mp2_mode_fonctionnement_par_mqtt
+  condition: []
+  action:
+  - service: notify.telegram
+    data:
+      message: MP2-Mode de fonctionnement -> {{states("sensor.mp2_mode_fonctionnement_texte")
+        }}{{-"\n"-}}{{states("sensor.date_time") }}
+  mode: single

@@ -533,13 +533,25 @@ modbus:
 
       # Alarme Réseau Perdu (Grid Lost)
       - name : 'Mp2 Alarme perte réseau' 
-        unique_id: 'mp2_alarme_perte_reseau'
-        unit_of_measurement : "marche/arrêt" 
+        unique_id: mp2_alarme_perte_reseau
+        data_type: uint16
         slave : 227 
         address : 64
+        scale: 1        
 
 template:
   - sensor:
+    # 0= Normal - 2= Off Grid
+    - name: "MP2 Alarme Perte Reseau Affichage"
+      unique_id: 'mp2_alarme_perte_reseau_affichage' 
+      state: >-
+        {% set st = states('sensor.mp2_alarme_perte_reseau') | int(default=0) %}
+        {% for num, text in [(0,'Normal'),(2, 'Perte Reseau') ] %}
+            {% if st == num %}
+              {{ text }}
+            {%endif%}
+        {% endfor %} 
+
     # 1=Charger Only;2=Inverter Only;3=On;4=Off
     - name: "MP2 Mode Fonctionnement Texte"
       unique_id: mp2_mode_fonctionnement_texte" 

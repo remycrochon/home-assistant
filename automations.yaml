@@ -2479,6 +2479,9 @@
       hours: 0
       minutes: 0
       seconds: 0
+  - platform: time
+    at: input_datetime.horaire_hiver_volet_ouv
+    id: ouv_hiv
   condition: []
   action:
   - choose:
@@ -2496,7 +2499,8 @@
         entity_id: input_select.volets
         state: Auto Hiv
       - condition: trigger
-        id: heure_ouv
+        id:
+        - ouv_hiv
       sequence:
       - service: script.0_0_1_ouverture_volets_rts
         data: {}

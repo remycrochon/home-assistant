@@ -86,12 +86,3 @@ template:
         state: >-
           {{ ((states('sensor.speedtest_cli_data') | from_json).upload * 8 / 1000 / 1000 ) | round(2) }}
 
-      - name: "Speedtest location"
-        unique_id: "speedtest_location"
-        state: >-
-          {{ ((states('sensor.speedtest_cli.data') | from_json).location) }}
-
-      - name: "Speedtest Server Name"
-        unique_id: "speedtest_server_same"
-        state: >-
-          {{ ((states('sensor.speedtest_cli_data') | from_json).server_name) }}

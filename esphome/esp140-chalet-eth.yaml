@@ -40,7 +40,9 @@ sensor:
     pin: GPIO39 #A0
     id: niveau_eau
     name: "${friendly_name}_niveau_puit"
-    unit_of_measurement: "ml"
+    unit_of_measurement: "mL"
+    device_class: volume
+    state_class: total
     update_interval: 60s
     attenuation: 11db
     filters:
@@ -58,7 +60,8 @@ sensor:
     name: "volume_puit"
     id: volume
     icon: mdi:flash
-    unit_of_measurement: "m3"
+    unit_of_measurement: "m³"
+    device_class: volume
     accuracy_decimals: 2
     lambda: |-
       return (id(niveau_eau).state*0.6*0.6*3.14159);
@@ -77,6 +80,7 @@ sensor:
     id: niveau_reserve
     icon: mdi:flash
     unit_of_measurement: "m"
+    device_class: distance
     accuracy_decimals: 2
     lambda: |-
       return (5.8-id(niveau_eau).state);

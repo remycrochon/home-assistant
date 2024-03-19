@@ -393,7 +393,6 @@ modbus:
         slave: 223
         address: 265
         scale: 0.1
-        device_class: current
         state_class: measurement
 
       - name: "MP2 Temps depuis derniere pleine batteries"

@@ -27,6 +27,11 @@ input_datetime:
     name: Horaire ete volets fermeture
     has_date: false
     has_time: true
+  # Horaires Volets hiver
+  horaire_hiver_volet_ouv:
+    name: Horaire hiver volets ouverture
+    has_date: false
+    has_time: true
 
 # Horaire surveillance porte
   heure_debut_alarme_porte:

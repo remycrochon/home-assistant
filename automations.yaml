@@ -2103,15 +2103,6 @@
   alias: 10-01-00 Spot Ext Cuisine
   description: ''
   trigger:
-  - type: motion
-    platform: device
-    device_id: 2d249d1ffc712f4ec1c489cc0fa81f03
-    entity_id: 16a044dd5dcf0557c473c93b43cc2c25
-    domain: binary_sensor
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
   - type: opened
     platform: device
     device_id: 193f4cea2f12db0ab1a4d044df803df3

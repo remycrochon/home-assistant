@@ -389,10 +389,15 @@ script:
   - id: calcul_led_jour
     mode: single
     then:
+      - logger.log:
+          format: "Ltarf= %f"
+          args: [ 'id(ntarif).state']
+
       - if: 
           condition:
             - lambda: |-
-                return (strcmp(id(ltarf).state.c_str(),"HP BLEU") == 0 || strcmp(id(ltarf).state.c_str(),"HC BLEU") == 0 );
+                return ( id(ntarif).state == 1 || id(ntarif).state == 2);
+
           then:
             - light.control:
                 id: led1
@@ -403,7 +408,7 @@ script:
       - if: 
           condition:
             - lambda: |-
-                return (strcmp(id(ltarf).state.c_str(),"HP BLANC") == 0 || strcmp(id(ltarf).state.c_str(),"HC BLANC") == 0 );
+                return ( id(ntarif).state == 3 || id(ntarif).state == 4);
           then:
             - light.control:
                 id: led1
@@ -414,11 +419,10 @@ script:
       - if: 
           condition:
             - lambda: |-
-                return (strcmp(id(ltarf).state.c_str(),"HP ROUGE") == 0 || strcmp(id(ltarf).state.c_str(),"HC ROUGE") == 0 );
+                return ( id(ntarif).state == 5 || id(ntarif).state == 6);
           then:
             - light.control:
                 id: led1
                 red: 100% 
                 green: 0%
                 blue: 0%    
-   

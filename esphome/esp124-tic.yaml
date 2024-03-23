@@ -13,12 +13,8 @@ esphome:
     version: "1.0.1"
   platformio_options:
     lib_deps: NeoPixelBus@2.6.0
-  on_boot:
-    then:
-      - light.control:
-          id: led1
-          brightness: 0.25
-          state: on
+ 
+
 wifi:
   networks:
     - ssid: !secret wifi_esp
@@ -401,6 +397,8 @@ script:
           then:
             - light.control:
                 id: led1
+                brightness: 75%
+                state: on
                 red: 0% 
                 green: 0%
                 blue: 100%    
@@ -412,6 +410,8 @@ script:
           then:
             - light.control:
                 id: led1
+                brightness: 75%
+                state: on
                 red: 100% 
                 green: 100%
                 blue: 100%    
@@ -423,6 +423,8 @@ script:
           then:
             - light.control:
                 id: led1
+                brightness: 75%
+                state: on
                 red: 100% 
                 green: 0%
                 blue: 0%    

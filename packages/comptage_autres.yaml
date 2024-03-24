@@ -16,18 +16,17 @@ template:
         {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
         {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
         {% set d = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
-        {% set e = states('sensor.ecocompteur_ecs') | float(default=0) | round(2) %}          
+        {% set e = states('sensor.puissance_ecs_reseau_w') | float(default=0) | round(2) %}          
         {% set f = states('sensor.pc_mal') | float(default=0) | round(2) %}
         {% set g = states('sensor.ecocompteur_wc') | float(default=0) | round(2) %}
         {% set h = states('sensor.pzem_cuisine_puissance') | float(default=0) | round(2) %}
         {% set i = states('sensor.ecocompteur_vmc_niv0') | float(default=0) | round(2) %}
         {% set j = states('sensor.ecocompteur_clim') | float(default=0) | round(2) %}
         {% set k = states('sensor.pc_onduleur_eaton_puissance') | float(default=0) | round(2) %}
-        {% set l = states('sensor.pc_lidl_2023_b_garage_active_power') | float(default=0) | round(2) %}
-        {% set m = states('sensor.esp131_pzem_chalet_puissance') | float(default=0) | round(2) %}
-        
-        {% if (a-b-c-d-e-f-g-h-i-j-k-l-m) >= 0 %}
-          {{ (a-b-c-d-e-f-g-h-i-j-k-l-m) | round(2) }}
+        {% set l = states('sensor.esp131_pzem_chalet_puissance') | float(default=0) | round(2) %}
+        {% set total=(a-b-c-d-e-f-g-h-i-j-k) | round(2)%}
+        {% if total >= 0 %}
+          {{ total }}
         {% else%}
           0
         {%endif%}

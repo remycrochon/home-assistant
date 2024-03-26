@@ -35,24 +35,6 @@ web_server:
   port: 80
 
 
-# Protocole du JSK
-uart:
-  id: mod_bus
-  tx_pin: 17
-  rx_pin: 16
-  baud_rate: 9600
-  stop_bits: 1
-#  debug:
-#    direction: BOTH
-#    dummy_receiver: false
-#    after:
-#      timeout: 150ms
-#    sequence:
-#      - lambda: |-
-#          UARTDebug::log_string(direction, bytes);
-
-
-
 # Informations supplementaires sur le WIFI
 #text_sensor:
 #  - platform: wifi_info
@@ -72,135 +54,38 @@ binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
-
-# Input Number
-number:
-  # Seuil Min/Max sortie triac
-  - platform: template
-    name: "${friendly_name} Consigne P"
-    id: cons_p
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    unit_of_measurement: "W"
-    step: 1
-
-sensor:
-  - platform: pzemac
-    update_interval: 0.5s
-    current:
-      name: "${friendly_name} courant"
-      unit_of_measurement: "A"
-    voltage:
-      name: "${friendly_name} tension"
-      unit_of_measurement: "V"
-    energy:
-      name: "${friendly_name} energy"
-      unit_of_measurement: "kWh"
-      filters:
-        - multiply: 0.001
-    power:
-      name: "${friendly_name} puissance"
-      id: pureseau
-      unit_of_measurement: "W"
-    
-    frequency:
-      name: "${friendly_name} frequence"
-      unit_of_measurement: "hz"
-    power_factor:
-      name: "${friendly_name} factpuiss"
-   
-    
-# Informations WI_FI
-  - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
-    name: "${friendly_name} WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
-
-  - platform: copy # Affiche le signal WiFi strength en %
-    source_id: wifi_signal_db
-    name: "${friendly_name} WiFi Signal Percent"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "Signal %"
-    entity_category: "diagnostic"
-
-  - platform: pid
-    name: "PID Climate Result"
-    type: RESULT
-  - platform: pid
-    name: "PID Climate ERROR"
-    type: ERROR
-  - platform: pid
-    name: "PID Climate PROPORTIONAL"
-    type: PROPORTIONAL
-  - platform: pid
-    name: "PID Climate INTEGRAL"
-    type: INTEGRAL
-  - platform: pid
-    name: "PID Climate PROPORTIONAL"
-    type: PROPORTIONAL
-  - platform: pid
-    name: "PID Climate DERIVATIVE"
-    type: DERIVATIVE
-  - platform: pid
-    name: "PID Climate HEAT"
-    type: HEAT
-  - platform: pid
-    name: "PID Climate COOL"
-    type: COOL
-  - platform: pid
-    name: "PID Climate KP"
-    type: KP
-  - platform: pid
-    name: "PID Climate KI"
-    type: KI
-  - platform: pid
-    name: "PID Climate KD"
-    type: KD
-
  
+
+select:
+  - platform: template
+    name: Mode
+    id: mode
+    options:
+     - "Option1"
+     - "Option2"
+     - "Option3"
+    initial_option: "Option1"
+    optimistic: true
+    set_action:
+      - logger.log:
+          format: "Chosen option: %s"
+          args: ["x.c_str()"]
+
+datetime:
+  - platform: template
+    id: my_date
+    type: date
+    name: Pick a Date
+    optimistic: yes
+    initial_value:
+      year: 2023
+      month: 12
+      day: 4
+    restore_value: true
+
+
 switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
-output:
-
-# Pilotage du Dimmer ------------------------
-  - platform: ac_dimmer
-    id: ecs
-    gate_pin: GPIO33
-    method: leading
-    zero_cross_pin:
-      number: GPIO34 
-      mode:
-        input: true
-      inverted: yes
-    min_power: 5%
-
-climate:
-  - platform: pid
-    id: pid_climate
-    name: "PID Climate Controller"
-    sensor: pureseau
-    default_target_temperature: 20
-    heat_output: ecs
-    control_parameters:
-      kp: 0.00949
-      ki: 0.00527
-      kd: 0.00427
-   
-button:
-  - platform: template
-    name: "PID Climate Autotune"
-    on_press:
-      - climate.pid.autotune: pid_climate
-      - climate.pid.autotune:
-          id: pid_climate
-          noiseband: 0.25
-          positive_output: 20%
-          negative_output: -25%
 

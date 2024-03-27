@@ -2653,3 +2653,15 @@
       message: MP2-Mode de fonctionnement -> {{states("sensor.mp2_mode_fonctionnement_texte")
         }}{{-"\n"-}}{{states("sensor.date_time") }}
   mode: single
+- id: '1711452164943'
+  alias: Nouvelle automatisation
+  description: ''
+  trigger:
+  - device_id: d77c1d0ca21349e462286aedbcc553cf
+    domain: zha
+    platform: device
+    type: device_slid
+    subtype: face_1
+  condition: []
+  action: []
+  mode: single

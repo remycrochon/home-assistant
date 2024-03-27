@@ -71,21 +71,71 @@ select:
           format: "Chosen option: %s"
           args: ["x.c_str()"]
 
-datetime:
+
+# Input Number
+number:
+  # Seuil Declenchement relais
   - platform: template
-    id: my_date
-    type: date
-    name: Pick a Date
-    optimistic: yes
-    initial_value:
-      year: 2023
-      month: 12
-      day: 4
+    name: "${friendly_name} S Relais"
+    id: seuilrelais
+    optimistic: true
     restore_value: true
+    mode: box
+    min_value: 00
+    max_value: 2000
+    unit_of_measurement: "w"
+    step: 1
+
+# Simule Puissance
+  - platform: template
+    name: "${friendly_name} Simule Pu"
+    id: pureseau1
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -1000
+    max_value: 1000
+    unit_of_measurement: "w"
+    step: 0.1
 
 
 switch:
+  - platform: gpio
+    name: "${friendly_name} Relais"
+    pin: GPIO5
+    id: relais
+
   - platform: restart
     name: "${friendly_name} Restart"
 
 
+interval:
+
+  - interval: 15s
+    then:
+      - script.execute: calcul_relais
+
+# ------------------------  Scripts
+script:
+# 
+# ------------------------ Calcul puissance injection 
+  - id: calcul_relais
+    mode: single
+    then:
+     # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      - if: 
+          condition:
+            and:
+              - lambda: 'return id(pureseau1).state<id(seuilrelais).state;'              
+
+          then:
+              - delay: 10s
+              - switch.turn_on: relais
+
+      - if: 
+          condition:
+            or:
+              - lambda: 'return id(pureseau1).state>id(seuilrelais).state+100;'         
+          then:
+              - switch.turn_off: relais
+      

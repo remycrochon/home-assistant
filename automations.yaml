@@ -2662,6 +2662,35 @@
     platform: device
     type: device_slid
     subtype: face_1
+  - device_id: d77c1d0ca21349e462286aedbcc553cf
+    domain: zha
+    platform: device
+    type: device_slid
+    subtype: face_2
+  - device_id: d77c1d0ca21349e462286aedbcc553cf
+    domain: zha
+    platform: device
+    type: device_slid
+    subtype: face_any
+  - device_id: d77c1d0ca21349e462286aedbcc553cf
+    domain: zha
+    platform: device
+    type: device_knocked
+    subtype: face_any
   condition: []
   action: []
   mode: single
+- id: '1711527591458'
+  alias: Aqara Magic Cube
+  description: ''
+  use_blueprint:
+    path: brent/zha-aqara-magic-cube-57-actions.yaml
+    input:
+      remote: d77c1d0ca21349e462286aedbcc553cf
+      one_to_one: []
+      slide_on_two: []
+      slide_on_one:
+      - service: switch.toggle
+        target:
+          entity_id: switch.lumiere_salon
+        data: {}

@@ -2100,7 +2100,7 @@
       value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a }}'
   mode: single
 - id: '1698053985865'
-  alias: 10-01-00 Spot Ext Cuisine
+  alias: 10-01-00 Spot Ext Cuisine old
   description: ''
   trigger:
   - type: opened
@@ -2653,33 +2653,6 @@
       message: MP2-Mode de fonctionnement -> {{states("sensor.mp2_mode_fonctionnement_texte")
         }}{{-"\n"-}}{{states("sensor.date_time") }}
   mode: single
-- id: '1711452164943'
-  alias: Nouvelle automatisation
-  description: ''
-  trigger:
-  - device_id: d77c1d0ca21349e462286aedbcc553cf
-    domain: zha
-    platform: device
-    type: device_slid
-    subtype: face_1
-  - device_id: d77c1d0ca21349e462286aedbcc553cf
-    domain: zha
-    platform: device
-    type: device_slid
-    subtype: face_2
-  - device_id: d77c1d0ca21349e462286aedbcc553cf
-    domain: zha
-    platform: device
-    type: device_slid
-    subtype: face_any
-  - device_id: d77c1d0ca21349e462286aedbcc553cf
-    domain: zha
-    platform: device
-    type: device_knocked
-    subtype: face_any
-  condition: []
-  action: []
-  mode: single
 - id: '1711527591458'
   alias: Aqara Magic Cube
   description: ''
@@ -2694,3 +2667,38 @@
         target:
           entity_id: switch.lumiere_salon
         data: {}
+- id: '1711609776550'
+  alias: 10-01-00 Spot Ext Cuisine
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: f63a7a8078a6c8ad8bff217525241849
+    entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
+    domain: binary_sensor
+  condition:
+  - condition: sun
+    before: sunrise
+    after: sunset
+    enabled: false
+  - condition: numeric_state
+    entity_id: sensor.tze200_3towulqd_ts0601_eclairement
+    below: 300
+  action:
+  - type: turn_on
+    device_id: c7b28db8c025b2f0bd975382bc4011f0
+    entity_id: 6cf8b08e53c983c0c298cedd8a864449
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: c7b28db8c025b2f0bd975382bc4011f0
+    entity_id: 6cf8b08e53c983c0c298cedd8a864449
+    domain: switch
+    enabled: true
+  mode: single
+  trace:
+    stored_traces: 15

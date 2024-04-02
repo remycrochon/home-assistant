@@ -2702,3 +2702,9 @@
   mode: single
   trace:
     stored_traces: 15
+- id: '1711979815836'
+  alias: Low Battery Notifications & Actions
+  description: ''
+  use_blueprint:
+    path: Blackshome/low-battery-notifications-and-actions.yaml
+    input: {}

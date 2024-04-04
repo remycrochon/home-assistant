@@ -534,21 +534,6 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
-    on_value:
-      then:
-        if:
-          condition:
-            lambda: 'return id(pu_prod).state > id(seuil_prod).state;'
-        # Si Production > au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: seuil_prod_ok
-                state: ON
-        # Sinon
-          else:
-            - binary_sensor.template.publish:
-                id: seuil_prod_ok
-                state: OFF
 
   - platform: mqtt_subscribe
     name: "${friendly_name} Soc"
@@ -557,25 +542,6 @@ sensor:
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
-    on_value:
-      then:
-        if:
-          condition:
-            lambda: 'return id(soc).state >= id(seuil_soc).state;'
-        # Si SOC > au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: seuil_soc_ok
-                state: ON
-        # Sinon
-          else:
-            if:
-              condition:
-                lambda: 'return id(soc).state < (id(seuil_soc).state-2);'
-              then:
-                - binary_sensor.template.publish:
-                    id: seuil_soc_ok
-                    state: OFF     
 
   - platform: mqtt_subscribe
     name: "${friendly_name} Etat Bus VE"
@@ -601,22 +567,6 @@ sensor:
     id: temp_triac
     filters:
       - filter_out: NAN
-    on_value:
-      then:
-        if:
-          condition:
-            lambda: 'return id(temp_triac).state < id(tmax).state;'
-        # Si Temp Triac inferieur au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: temperatureok
-                state: ON
-        # Sinon attendre 60s avant retour à la normal
-          else:
-            - binary_sensor.template.publish:
-                id: temperatureok
-                state: OFF
-            - delay: 60s
 
 text_sensor:
   - platform: template
@@ -706,6 +656,53 @@ script:
   - id: calcul_injection_mode_hp
     mode: single
     then:
+      # Validation du seuil de production
+      - if:
+          condition:
+            lambda: 'return id(pu_prod).state > id(seuil_prod).state;'
+        # Si Production > au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: seuil_prod_ok
+                state: ON
+        # Sinon
+          else:
+            - binary_sensor.template.publish:
+                id: seuil_prod_ok
+                state: OFF      
+      # validation du seuil soc
+      - if:
+          condition:
+            lambda: 'return id(soc).state >= id(seuil_soc).state;'
+        # Si SOC > au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: seuil_soc_ok
+                state: ON
+        # Sinon
+          else:
+            if:
+              condition:
+                lambda: 'return id(soc).state < (id(seuil_soc).state-2);'
+              then:
+                - binary_sensor.template.publish:
+                    id: seuil_soc_ok
+                    state: OFF
+      # Validation du seuil de temperature triac
+      - if:
+          condition:
+            lambda: 'return id(temp_triac).state < id(tmax).state;'
+        # Si Temp Triac inferieur au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: temperatureok
+                state: ON
+        # Sinon attendre 60s avant retour à la normal
+          else:
+            - binary_sensor.template.publish:
+                id: temperatureok
+                state: OFF
+            - delay: 60s                    
       # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
       #   Sinon
       # Si on regule autour du zero grid et d'un seuil puissance batteries
@@ -811,6 +808,7 @@ script:
   - id: calcul_injection_mode_hc
     mode: single
     then:
+
       # En HC on régule autour de la consigne pu Heure creuse
       # Le but est de ne pas trop solliciter le reseau
       # La régule consiste à incrementer ou decrementer la sortie triac 

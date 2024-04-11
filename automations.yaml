@@ -2080,6 +2080,8 @@
     entity_id:
     - binary_sensor.network_ups_tools_en_cours_d_execution
     to: unknown
+  - platform: time
+    at: 00:30:00
   condition: []
   action:
   - service: hassio.addon_restart

@@ -14,7 +14,7 @@ from homeassistant.const import (
     ATTR_NAME,
 )
 from homeassistant.core import HomeAssistant, asyncio
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.dispatcher import (
@@ -330,23 +330,23 @@ class AlarmoCoordinator(DataUpdateCoordinator):
 
             if action == const.EVENT_ACTION_FORCE_ARM:
                 _LOGGER.info("Received request for force arming")
-                await alarm_entity.async_handle_arm_request(arm_mode, skip_code=True, bypass_open_sensors=True)
+                alarm_entity.async_handle_arm_request(arm_mode, skip_code=True, bypass_open_sensors=True)
             elif action == const.EVENT_ACTION_RETRY_ARM:
                 _LOGGER.info("Received request for retry arming")
-                await alarm_entity.async_handle_arm_request(arm_mode, skip_code=True)
+                alarm_entity.async_handle_arm_request(arm_mode, skip_code=True)
             elif action == const.EVENT_ACTION_DISARM:
                 _LOGGER.info("Received request for disarming")
-                await alarm_entity.async_alarm_disarm(code=None, skip_code=True)
+                alarm_entity.async_alarm_disarm(code=None, skip_code=True)
             else:
                 _LOGGER.info("Received request for arming with mode {}".format(arm_mode))
-                await alarm_entity.async_handle_arm_request(arm_mode, skip_code=True)
+                alarm_entity.async_handle_arm_request(arm_mode, skip_code=True)
 
         self._subscriptions.append(
             self.hass.bus.async_listen(const.PUSH_EVENT, async_handle_push_event)
         )
 
     async def async_remove_entity(self, area_id: str):
-        entity_registry = self.hass.helpers.entity_registry.async_get(self.hass)
+        entity_registry = er.async_get(self.hass)
         if area_id == "master":
             entity = self.hass.data[const.DOMAIN]["master"]
             entity_registry.async_remove(entity.entity_id)

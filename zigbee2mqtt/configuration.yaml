@@ -1,0 +1,35 @@
+homeassistant: true
+advanced:
+  network_key:
+    - 246
+    - 149
+    - 200
+    - 237
+    - 0
+    - 65
+    - 94
+    - 92
+    - 78
+    - 180
+    - 212
+    - 236
+    - 104
+    - 94
+    - 44
+    - 231
+  pan_id: 25777
+  ext_pan_id:
+    - 244
+    - 185
+    - 227
+    - 179
+    - 198
+    - 153
+    - 36
+    - 195
+mqtt:
+  server: mqtt://core-mosquitto:1883
+  user: addons
+  password: Aeseush3Loo4ve9lohy7ongo4ookuH6ohSh3Aechi7gah1iel9jiChoo7maiGee6
+frontend:
+  port: 8099

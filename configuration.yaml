@@ -8,10 +8,10 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-ovh:
-  domain: maj.rem81.com
-  username: !secret ovh_username
-  password: !secret ovh_password
+#ovh:
+#""  domain: maj.rem81.com
+#  username: !secret ovh_username
+#  password: !secret ovh_password
 
 #sensor:
 #  - platform: zwift
@@ -25,6 +25,6 @@ ovh:
 #    url: http://192.168.0.153:3002
 #    require_admin: false
 
-daikin_residential:
-  email: !secret daikin_user
-  password: !secret daikin_pwd
+#daikin_residential:
+#  email: !secret daikin_user
+#  password: !secret daikin_pwd

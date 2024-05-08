@@ -357,8 +357,8 @@
       - service: notify.telegram
         data:
           message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
-            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot
-            ')}} mm {{-"\n"-}}{{states("sensor.date_time") }}
+            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
+            mm {{-"\n"-}}{{states("sensor.date_time") }}
           title: Robot- Fin Alerte Meteo Pluie !!!
   mode: single
   trace:

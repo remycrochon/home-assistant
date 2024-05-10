@@ -140,6 +140,7 @@ binary_sensor:
     - platform: homeassistant
       name: "Validation Routeur"
       entity_id: "input_boolean.inter_validation_routeur"
+      publish_initial_state: true
       id: val_routeur
   
 # Input Number
@@ -691,25 +692,29 @@ script:
       # Validation du seuil de temperature triac
       - if:
           condition:
-            lambda: 'return id(temp_triac).state < id(tmax).state;'
-        # Si Temp Triac inferieur au seuil alors OK
+            lambda: 'return id(temp_triac).state < (id(tmax).state-2);'
+        # Si Temp Triac inferieur au seuil-2° alors OK
           then:
             - binary_sensor.template.publish:
                 id: temperatureok
                 state: ON
-        # Sinon attendre 60s avant retour à la normal
-          else:
+        # Dévalidation du seuil de température
+      - if:
+          condition:
+            lambda: 'return id(temp_triac).state >= id(tmax).state;'
+        # Si Temp Triac supérieur ou égale au seuil alors NOK
+          then:
             - binary_sensor.template.publish:
                 id: temperatureok
                 state: OFF
-            - delay: 60s                    
+                              
       # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
       #   Sinon
       # Si on regule autour du zero grid et d'un seuil puissance batteries
       # 
       # La régule consiste à incrementer ou decrementer la sortie triac 
       - lambda: |-
-          if (id(statusbusve).state == 3){
+          if (id(etatbus_ve).state == 3){
             id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
             id(moderegul).publish_state( "Sur Pu batteries Bulk");
           } else {
@@ -803,65 +808,7 @@ script:
           args: [ 'id(striac)', 'id(increment)' ]
           level: "info"
 
-
-  # Injection en mode HC
-  - id: calcul_injection_mode_hc
-    mode: single
-    then:
-
-      # En HC on régule autour de la consigne pu Heure creuse
-      # Le but est de ne pas trop solliciter le reseau
-      # La régule consiste à incrementer ou decrementer la sortie triac 
-      - lambda: |-
-          id(increment) = (id(cons_puhc).state-id(pureseau1).state)*id(coeff_r).state/1000;
-          id(moderegul).publish_state( "Sur Pu Heure Creuse");
-      
-      - lambda: |-
-          id(striac) = id(striac)+id(increment);            
-
-      - logger.log:
-          format: "Log S Triac= %f"
-          args: [ 'id(striac)']
-
-      - lambda: |-
-          if (id(striac) <= 0){
-            id(striac) = 0;
-          } else if(id(striac)>=id(pmax).state){
-            id(striac) = id(pmax).state;
-          }
-
-      # Si mode routeur validé et mode auto et temp OK alors on active le triac 
-      - if: 
-          condition:
-            and:
-              - switch.is_on: modeauto
-              - binary_sensor.is_on: temperatureok
-          then:
-              - light.turn_on:
-                  id: gradateur
-                  brightness: !lambda |-
-                    return id(striac)/100 ;
-
-
-      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
-      - if: 
-          condition:
-            and:
-              - switch.is_on: modeauto
-              - or:
-                - binary_sensor.is_off: val_routeur
-                - binary_sensor.is_off: temperatureok                    
-
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - light.turn_on:   
-                id: gradateur
-                brightness: !lambda |-
-                  return id(striac) ;  
-
-
+ ########################################################################""
     # ------------  Pilotage led
   - id: etat_production
     mode: single
@@ -883,7 +830,8 @@ script:
             - output.turn_on: led_jaune
           else:
             - output.turn_off: led_jaune
-
+ 
+ ########################################################################""
   - id: calcul_relais_surprod
     mode: single
     then:

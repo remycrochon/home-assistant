@@ -140,7 +140,7 @@ binary_sensor:
     - platform: homeassistant
       name: "Validation Routeur"
       entity_id: "input_boolean.inter_validation_routeur"
-      publish_initial_state: true
+      #publish_initial_state: true
       id: val_routeur
   
 # Input Number

@@ -136,12 +136,6 @@ binary_sensor:
     - platform: template
       name: "${friendly_name} Seuil SOC Ok"
       id: seuil_soc_ok
-
-    - platform: homeassistant
-      name: "Validation Routeur"
-      entity_id: "input_boolean.inter_validation_routeur"
-      #publish_initial_state: true
-      id: val_routeur
   
 # Input Number
 number:
@@ -444,7 +438,6 @@ sensor:
             } else {
               id(pureseau1).publish_state( id(pureseau).state );
             }
-
     
 # Energie lue dans la pince
   - platform: modbus_controller
@@ -588,6 +581,12 @@ switch:
     on_turn_off:
       - light.turn_off: gradateur
 
+  - platform: template
+    name: "${friendly_name} Valid Routeur"    
+    id: validrouteur
+    optimistic: true
+    restore_mode: always_on
+
   - platform: restart
     name: "${friendly_name} Restart"
 
@@ -629,7 +628,7 @@ display:
       it.printf(0,0,"Pr=%0.0fW",id(pureseau1).state);
       it.printf(10,0,"Pe=%0.0fW ",id(puecs).state);
       it.printf(0,1,"Tr=%0.1f%%",id(striac));
-      it.printf(10,1,"Val:%s", id(val_routeur).state ? "OK" : "NOK");
+      it.printf(10,1,"Val:%s", id(validrouteur).state ? "OK" : "NOK");
       it.printf(0,2,"Tp=%0.1fc", id(temp_triac).state);
       it.printf(10,2,"Etat=%s", id(temperatureok).state ? "OK" : "NOK");
       it.printf(0,3,"Mode=%s", id(modeauto).state ? "Auto" : "Manu");
@@ -748,7 +747,7 @@ script:
       - if: 
           condition:
             and:
-              - binary_sensor.is_on: val_routeur
+              - switch.is_on: validrouteur
               - switch.is_on: modeauto
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
@@ -770,7 +769,7 @@ script:
             and:
               - switch.is_on: modeauto
               - or:
-                - binary_sensor.is_off: val_routeur
+                - switch.is_off: validrouteur
                 - binary_sensor.is_off: temperatureok                    
                 - binary_sensor.is_off: seuil_prod_ok
                 - lambda: 'return id(soc).state < id(seuil_soc).state;'                    
@@ -825,7 +824,7 @@ script:
             
       - if: 
           condition:
-            binary_sensor.is_on: val_routeur
+            switch.is_on: validrouteur
           then:
             - output.turn_on: led_jaune
           else:

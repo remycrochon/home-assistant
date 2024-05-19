@@ -1841,13 +1841,14 @@
       alert_action:
       - service: notify.telegram
         data:
-          message: Lames robot à remplacer = {{states("sensor.am435x_awd_cutting_blade_usage_time")
+          message: Lames robot à remplacer = {{states("sensor.robot_temps_usage_lames")
             }} {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Robot tonte !!!
       - service: notify.telegram
         data:
-          message: Lames robot à remplacer = {{states("sensor.am435x_awd_cutting_blade_usage_time")
+          message: Lames robot à remplacer = {{states("sensor.robot_temps_usage_lames")
             }} {{-"\n"-}}{{states("sensor.date_time") }}
+        enabled: false
       resolved_action:
       - service: notify.telegram
         data:
@@ -1858,6 +1859,7 @@
         data:
           message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
             }}
+        enabled: false
       notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 3600

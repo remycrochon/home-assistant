@@ -152,16 +152,9 @@ input_boolean:
     icon: mdi:chart-bar
 
 # selection du mode de fonctionnement de la filtration
-input_select:
+  # voir le "input select" dans "config/helpers"
 
-  mode_fonctionnement_piscine:
-    name: Mode Fonct Piscine
-    options:
-      - "Ete"
-      - "Hiver"
-      - "Ma F"
-      - "At F"
-    icon: mdi:pool
+input_select:
 # sert aux tests AppDaemon
   mode_fonctionnement_piscine_test:
     name: Mode Fonct Piscine

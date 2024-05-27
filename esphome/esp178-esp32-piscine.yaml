@@ -51,9 +51,21 @@ i2c:
   id: bus_a
 
 dallas:
-  - pin: GPIO23
+  - pin: GPIO19
 
 
+select:
+  - platform: template
+    name: "${friendly_name}_Mode_Fonctionnement"
+    optimistic: true
+    options:
+      - Palier
+      - Classique
+      - Abaque
+      - Ma_f
+      - At_f
+    initial_option: Palier
+    
 binary_sensor:
 #Etat de la connection
   - platform: status

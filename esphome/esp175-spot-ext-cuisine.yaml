@@ -40,12 +40,10 @@ status_led:
     number: GPIO16
     inverted: true
 
-
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
-
 
 # 
 switch:

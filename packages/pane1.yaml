@@ -14,160 +14,49 @@ openhasp:
         properties:
           "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
 
-      - obj: "p1b111"  
-        properties:
-          "val": '{{ 1 if states("switch.esp180_hotte") == "on" else 0 }}'
-          "text": >
-            {% set v1=states('switch.esp180_hotte_v1') | default("") %}
-            {% set v2=states('switch.esp180_hotte_v2') | default("") %}
-            {% set v3=states('switch.esp180_hotte_v3') | default("") %}
-            {% if v1=="on" %}
-            {{ 'V1'}}
-            {% elif v2=="on" %}
-            {{ 'V2'}}
-            {% elif v3=="on" %}
-            {{ 'V3'}}
-            {% else %}
-            {{ 'At'}}
-            {% endif %}
-        event:
-          "up":
-            - service: switch.toggle
-              entity_id: "switch.esp180_hotte"
-      - obj: "p1b112"  
-        properties:
-          "val": '{{ 1 if states("switch.relais_cde_vmc_niv0_on_off") == "on" else 0 }}'
-          "text": '{{ "\uE6E8" if is_state("switch.relais_cde_vmc_niv0_on_off", "on") else "\uE335" | e }}'
-        event:
-          "up":
-            - service: switch.toggle
-              entity_id: "switch.relais_cde_vmc_niv0_on_off" 
 
-      - obj: "p1b113"  
-        properties:
-          "val": '{{ 1 if states("switch.spots_ext_sud") == "on" else 0 }}'
-          "text": '{{ "\uE6E8" if is_state("switch.spots_ext_sud", "on") else "\uE335" | e }}'
-        event:
-          "up":
-            - service: switch.toggle
-              entity_id: "switch.spots_ext_sud"
 
-      - obj: "p1b114"  
-        properties:
-          "val": '{{ 1 if states("light.luce_bar") == "on" else 0 }}'
-          "text": '{{ "\uE6E8" if is_state("light.luce_bar", "on") else "\uE335" | e }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.luce_bar" 
-      - obj: "p1b115"  
-        properties:
-          "val": '{{ 1 if states("light.luce_ingresso") == "on" else 0 }}'
-          "text": '{{ "\uE6E8" if is_state("light.luce_ingresso", "on") else "\uE335" | e }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.luce_ingresso"
-
-# page 1 - Rangée 2 
-      - obj: "p1b123" # Couleur du Jour
-        properties: 
-          "line_color": >
-            {% set j=states('sensor.rte_tempo_couleur_actuelle') | default("") %}
-            {% if j=="Bleu" %}
-              {{ '#0000FF'}}
-            {% elif j=="Blanc" %}
-              {{ '#FCFCFC'}}            
-            {% elif j=="Rouge" %}
-              {{ '#F20505'}}
-            {% else %}
-              {{ '#000000'}}
-            {% endif %}
-
-          "line_color10": >
-            {% set j=states('sensor.rte_tempo_couleur_actuelle') | default("") %}
-            {% if j=="Bleu" %}
-              {{ '#0000FF'}}
-            {% elif j=="Blanc" %}
-              {{ '#FCFCFC'}}            
-            {% elif j=="Rouge" %}
-              {{ '#F20505'}}
-            {% else %}
-              {{ '#000000'}}
-            {% endif %}
-
-      - obj: "p1b125"
-        properties: 
-          "line_color": >
-            {% set j=states('sensor.rte_tempo_prochaine_couleur') | default("") %}
-            {% if j=="Bleu" %}
-              {{ '#0000FF'}}
-            {% elif j=="Blanc" %}
-              {{ '#FCFCFC'}}            
-            {% elif j=="Rouge" %}
-              {{ '#F20505'}}
-            {% else %}
-              {{ '#000000'}}
-            {% endif %}
-
-          "line_color10": >
-            {% set j=states('sensor.rte_tempo_prochaine_couleur') | default("") %}
-            {% if j=="Bleu" %}
-              {{ '#0000FF'}}
-            {% elif j=="Blanc" %}
-              {{ '#FCFCFC'}}            
-            {% elif j=="Rouge" %}
-              {{ '#F20505'}}
-            {% else %}
-              {{ '#000000'}}
-            {% endif %}
-# Affichage conso du jour
-      - obj: "p1b133"
-        properties:
-          "text": "{{ states('sensor.cout_energie_hc_hp_tous_tarifs')|float(0) |round(2)}} €" 
-      - obj: "p1b132"
-        properties:
-          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|float(0) |round(0)}} kWh" 
+# Affichage piscine
       - obj: "p1b131"
         properties:
-          "text": "{{ states('sensor.mp2_pu_grid_l1_ac_mppt')|float(0) |round(0)}} W" 
+          "text": "{{ states('input_number.mem_temp_piscine')|float(0) |round(1)}} C°" 
+      - obj: "p1b136"
+        properties:
+          "text": "{{ states('sensor.ph_piscine_ph')|float(0) |round(1)}} pH" 
       - obj: "p1b141"
         properties:
-          "text": "{{ states('sensor.esp176_pu_batterie')|float(0)|round(0)}} W"  
-      - obj: "p1b142"
+          "text": "{{ states('input_number.affichage_duree_filtration_piscine')}} h" 
+      - obj: "p1b146"
         properties:
-          "text": "{{ states('sensor.mp2_soc_mqtt')|float(0) |round(0)}} %"
+          "text": "{{ states('input_text.piscine_periode_filtration')}}" 
+
       - obj: "p1b151"
         properties:
-          "text": "{{ states('sensor.mp2_prod_totale_mqtt')|float(0)|round(0)}} W"          
-      - obj: "p1b152"
-        properties:
-          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|float(0)|round(0)}} kWh"          
-      - obj: "p1b181"
-        properties:
-          "text": "{{ states('sensor.ecocompteur_pac')|float(0)|round(0)}} W"          
-      - obj: "p1b182"
-        properties:
-          "text": "{{ states('sensor.compteur_energie_pac_jour_hp_hc')|float(0)|round(0)}} kWh"
-      - obj: "p1b191"
-        properties:
-          "text": "{{ states('sensor.ecocompteur_clim')|float(0)|round(0)}} W"          
-      - obj: "p1b192"
-        properties:
-          "text": "{{ states('sensor.energie_climatisations_jour')|float(0)|round(0)}} kWh"
-      - obj: "p1b201"
-        properties:
-          "text": "{{ states('sensor.ecocompteur_ecs')|float(0)|round(0)}} W"          
-      - obj: "p1b202"
-        properties:
-          "text": "{{ states('sensor.compteur_energie_ecs_pv_reseau')|float(0)|round(0)}} kWh"
-      - obj: "p1b211"
-        properties:
-          "text": "{{ states('sensor.pzem_pisc_puissance')|float(0)|round(0)}} W"          
-      - obj: "p1b212"
-        properties:
-          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc')|float(0)|round(0)}} kWh"
-          # page 1 - Rangée 3 
+          "val": >
+            {% if states('input_select.mode_fonctionnement_piscine') not in ['unavailable', 'unknown'] %}{%for source in state_attr('input_select.mode_fonctionnement_piscine','options')%}
+            {{loop.index -1 if source == state_attr('input_select.mode_fonctionnement_piscine','options') }}
+            {%-endfor%}{% endif %}
+
+        event:
+          "changed":
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.mode_fonctionnement_piscine
+              data:
+                option: >
+                  {% if text == "Palier" -%}
+                  Palier
+                  {% elif text == 'Classique' -%}
+                  Classique
+                  {% elif text == 'Abaque' -%}
+                  Abaque
+                  {% elif text == 'Horaire' -%}
+                  Horaire
+                  {% elif text == 'At F' -%}
+                  At F
+                  {% elif text == 'Ma F' -%}
+                  Ma F
+                  {% endif -%}
       - obj: "p1b223"
         properties:
           "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }} °C"              
@@ -176,86 +65,77 @@ openhasp:
           "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }} %"
 
 # Page2
-      - obj: "p2b111"
-        properties:
-          "text": "{{ states('sensor.reedgaragelastreduce') }}"
-      - obj: "p2b112"
-        properties:
-          "text": "{{ states('sensor.reedcancellolastreduce') }}"
-      - obj: "p2b113"
-        properties:
-          "text": "{{ states('sensor.reedingressolastreduce') }}"
-      - obj: "p2b114"
-        properties:
-          "text": "{{ states('sensor.reedcasalastreduce') }}"
-      - obj: "p2b115"
-        properties:
-          "text": "{{ states('sensor.reedstubeinternolastreduce') }}"
-      - obj: "p2b116"
-        properties:
-          "text": "{{ states('sensor.reedstubeesternolastreduce') }}"
-      - obj: "p2b117"
-        properties:
-          "text": "{{ states('sensor.pirgaragelastreduce') }}"
-      - obj: "p2b118"
-        properties:
-          "text": "{{ states('sensor.pirgiroscalealtolastreduce') }}"
-      - obj: "p2b119"
-        properties:
-          "text": "{{ states('sensor.pirgiroscalebassolastreduce') }}"
-      - obj: "p2b120"
-        properties:
-          "text": "{{ states('sensor.pirdepuratorelastreduce') }}" 
+
       - obj: "p2b121"  
         properties:
-          "val": '{{ 1 if states("binary_sensor.reed_garage") == "on" else 0 }}'
-          "text": '{{ "\uF2D4" if is_state("binary_sensor.reed_garage", "on") else "\uF2D3" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.reed_garage', 'on') else '#00ff00' }}" 
+          "val": '{{ 1 if states("switch.ppe_filtration") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.ppe_filtration", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.ppe_filtration', 'on') else '#00ff00' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.cde_ppe_filtration"
+
       - obj: "p2b122"  
         properties:
-          "val": '{{ 1 if states("binary_sensor.reed_cancello") == "on" else 0 }}'
-          "text": '{{ "\uE81C" if is_state("binary_sensor.reed_cancello", "on") else "\uF0AF" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.reed_cancello', 'on') else '#00ff00' }}"          
-      - obj: "p2b123"  
+          "val": '{{ 1 if states("switch.ppe_ph") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.ppe_ph", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.ppe_ph', 'on') else '#00ff00' }}"          
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.ppe_ph"   
+
+      - obj: "p2b123"
         properties:
-          "val": '{{ 1 if states("binary_sensor.reed_ingresso") == "on" else 0 }}'
-          "text": '{{ "\uE81C" if is_state("binary_sensor.reed_ingresso", "on") else "\uF0AF" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.reed_ingresso', 'on') else '#00ff00' }}"          
+          "val": '{{ 1 if states("switch.ppe_chlore") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.ppe_chlore", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.ppe_chlore', 'on') else '#00ff00' }}"
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.ppe_chlore"   
+
       - obj: "p2b124"  
         properties:
-          "val": '{{ 1 if states("binary_sensor.reed_casa") == "on" else 0 }}'
-          "text": '{{ "\uE81C" if is_state("binary_sensor.reed_casa", "on") else "\uF0AF" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.reed_casa', 'on') else '#00ff00' }}"          
+          "val": '{{ 1 if states("switch.cde_ouv_volet_piscine") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.cde_ouv_volet_piscine", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.cde_ouv_volet_piscine', 'on') else '#00ff00' }}"
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.cde_ouv_volet_piscine"
+
       - obj: "p2b125"  
         properties:
-          "val": '{{ 1 if states("binary_sensor.reed_stube_interno") == "on" else 0 }}'
-          "text": '{{ "\uE81C" if is_state("binary_sensor.reed_stube_interno", "on") else "\uF0AF" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.reed_stube_interno', 'on') else '#00ff00' }}"          
+          "val": '{{ 1 if states("bswitch.cde_ferm_volet_piscine") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.cde_ferm_volet_piscine", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.cde_ferm_volet_piscine', 'on') else '#00ff00' }}"
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.cde_ferm_volet_piscine"
+
       - obj: "p2b126"  
         properties:
-          "val": '{{ 1 if states("binary_sensor.reed_stube_esterno") == "on" else 0 }}'
-          "text": '{{ "\uE81C" if is_state("binary_sensor.reed_stube_esterno", "on") else "\uF0AF" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.reed_stube_esterno', 'on') else '#00ff00' }}"          
+          "val": '{{ 1 if states("switch.cde_ecl_piscine") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.cde_ecl_piscine", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.cde_ecl_piscine', 'on') else '#00ff00' }}"          
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.cde_ecl_piscine"   
+
       - obj: "p2b127"  
         properties:
-          "val": '{{ 1 if states("binary_sensor.pir_garage") == "on" else 0 }}'
-          "text": '{{ "\uE70E" if is_state("binary_sensor.pir_garage", "on") else "\uE70E" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.pir_garage', 'on') else '#00ff00' }}"          
-      - obj: "p2b128"  
-        properties:
-          "val": '{{ 1 if states("binary_sensor.pir_giroscale_alto") == "on" else 0 }}'
-          "text": '{{ "\uE70E" if is_state("binary_sensor.pir_giroscale_alto", "on") else "\uE70E" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.pir_giroscale_alto', 'on') else '#00ff00' }}"          
-      - obj: "p2b129"  
-        properties:
-          "val": '{{ 1 if states("binary_sensor.pir_giroscale_basso") == "on" else 0 }}'
-          "text": '{{ "\uE70E" if is_state("binary_sensor.pir_giroscale_basso", "on") else "\uE70E" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.pir_giroscale_basso', 'on') else '#00ff00' }}"          
-      - obj: "p2b130"  
-        properties:
-          "val": '{{ 1 if states("binary_sensor.pir_depuratore") == "on" else 0 }}'
-          "text": '{{ "\uE70E" if is_state("binary_sensor.pir_depuratore", "on") else "\uE70E" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('binary_sensor.pir_depuratore', 'on') else '#00ff00' }}"          
+          "val": '{{ 1 if states("switch.ev_eau") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.ev_eau", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.ev_eau', 'on') else '#00ff00' }}"          
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.ev_eau"   
+
 
       - obj: "p3b109"
         properties:

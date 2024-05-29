@@ -127,10 +127,6 @@ input_boolean:
     name: Valid Hors Gel Piscine (si=1)
     icon: mdi:snowflake-alert
 
-  # Calcul du temps de filtration selon Abaque Abacus sinon mode classique
-  calcul_mode_abaque:
-    name: Cacul mode Abaque (si=1)
-    icon: mdi:chart-bar
 
 # selection du mode de fonctionnement de la filtration
   # voir le "input select" dans "config/helpers"

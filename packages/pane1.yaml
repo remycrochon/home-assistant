@@ -20,22 +20,40 @@ openhasp:
       - obj: "p1b131"
         properties:
           "text": "{{ states('input_number.mem_temp_piscine')|float(0) |round(1)}} C°" 
+
+      - obj: "p1b133"  
+        properties:
+          "val": '{{ 1 if states("switch.ppe_filtration") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.ppe_filtration", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('switch.ppe_filtration', 'on') else '#00ff00' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.cde_ppe_filtration"
+
       - obj: "p1b136"
         properties:
           "text": "{{ states('sensor.ph_piscine_ph')|float(0) |round(1)}} pH" 
-      - obj: "p1b141"
+
+      - obj: "p1b138"  
         properties:
-          "text": "{{ states('input_number.affichage_duree_filtration_piscine')}} h" 
-      - obj: "p1b146"
+          "val": '{{ 1 if states("cover.volet_piscine") == "on" else 0 }}'
+          "text": '{{ "\uF11E" if is_state("cover.volet_piscine", "open") else "\uF11C" | e }}'
+          "text_color": "{{ '#ff9100' if is_state('cover.volet_piscine', 'open') else '#00ff00' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "cover.volet_piscine"
+
+      - obj: "p1b141"
         properties:
           "text": "{{ states('input_text.piscine_periode_filtration')}}" 
 
-      - obj: "p1b151"
+      - obj: "p1b146"
         properties:
-          "val": >
-            {% if states('input_select.mode_fonctionnement_piscine') not in ['unavailable', 'unknown'] %}{%for source in state_attr('input_select.mode_fonctionnement_piscine','options')%}
-            {{loop.index -1 if source == state_attr('input_select.mode_fonctionnement_piscine','options') }}
-            {%-endfor%}{% endif %}
+          "text": "{{ states('input_number.affichage_duree_filtration_piscine')}} h" 
+
+      - obj: "p1b151"
 
         event:
           "changed":
@@ -59,10 +77,10 @@ openhasp:
                   {% endif -%}
       - obj: "p1b223"
         properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }} °C"              
+          "text": "{{ states('sensor.pression_filtre') }} bars"              
       - obj: "p1b225"
         properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }} %"
+          "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
 
 # Page2
 
@@ -136,165 +154,3 @@ openhasp:
             - service: homeassistant.toggle
               entity_id: "switch.ev_eau"   
 
-
-      - obj: "p3b109"
-        properties:
-          "text": "{{ states('sensor.statoriscaldamentosala') }}" 
-      - obj: "p3b110"
-        properties:
-          "text": "{{ states('sensor.statoriscaldamentobagno') }}"      
-      - obj: "p3b111"
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.termostatosalagiu"            
-      - obj: "p3b112"
-        properties:
-          "text": "{{ states('sensor.espaltherma_temp_ambiante_int_r1t') }}"
-          "text_color": "{{ '#ff0000' if is_state('climate.altherma', 'off') else '#000000' }}"      
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.termostatosalaonoff"
-      - obj: "p3b113"
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.termostatosalasu"   
-      - obj: "p3b114"
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.termostatobagnogiu"            
-      - obj: "p3b115"
-        properties:
-          "text": "{{ states('sensor.settemperaturabagno') }}"
-          "text_color": "{{ '#ff0000' if is_state('climate.termostato_bagno', 'off') else '#000000' }}"      
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.termostatobagnoonoff"
-      - obj: "p3b116"
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "script.termostatobagnosu"                
-               
-      - obj: "p3b117"  
-        properties:
-          "val": '{{ 1 if states("switch.ventola1") == "on" else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "switch.ventola1"  
-      - obj: "p3b118"  
-        properties:
-          "val": '{{ 1 if states("switch.ventola2") == "on" else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "switch.ventola2"
-      - obj: "p3b119"  
-        properties:
-          "val": '{{ 1 if states("switch.ventola3") == "on" else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "switch.ventola3"
-      - obj: "p3b120"  
-        properties:
-          "val": '{{ 1 if states("switch.caldaia") == "on" else 0 }}'
-          "text_color": "{{ '#2C3E50' if is_state('switch.caldaia', 'off') else '#fffb00' }}"
-          "bg_color": "{{ '#2C3E50' if is_state('switch.caldaia', 'on') else '#ffffff'}}"
-
-      - obj: "p3b121"
-        properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_temperature') }}"
-      - obj: "p3b122"
-        properties:
-          "text": "{{ states('sensor.temperatura_dispensa') }}"
-      - obj: "p3b124"
-        properties:
-          "text": "{{ states('sensor.temperatura_bagno') }}"          
-      - obj: "p3b123"
-        properties:
-          "text": "{{ states('sensor.temperatura_camera') }}"
-      - obj: "p3b125"
-        properties:
-          "text": "{{ states('sensor.temperatura_cabina') }}"
-      - obj: "p3b126"
-        properties:
-          "text": "{{ states('sensor.temperatura_cameretta') }}"  
-      - obj: "p3b127"
-        properties:
-          "text": "{{ states('sensor.lywsd03mmc_salon_humidite') }}"          
-      - obj: "p3b128"
-        properties:
-          "text": "{{ states('sensor.umidita_dispensa') }}"        
-      - obj: "p3b130"
-        properties:
-          "text": "{{ states('sensor.umidita_bagno') }}"        
-      - obj: "p3b129"
-        properties:
-          "text": "{{ states('sensor.umidita_camera') }}"        
-      - obj: "p3b131"
-        properties:
-          "text": "{{ states('sensor.umidita_cabina') }}"        
-      - obj: "p3b132"
-        properties:
-          "text": "{{ states('sensor.umidita_cameretta') }}"  
-
-# page energy
-      - obj: "p0b4"
-        properties:
-          "val": "{{states('openhasp.ecran01') | int(0) -1}}"
-      - obj: "p0b7"
-        properties:
-          "text_color": "{% if -50 <= state_attr('openhasp.ecran01','rssi') | int(0) %}green{% elif -51 > state_attr('openhasp.ecran01','rssi') | int(0) >= -60 %}olive{% elif -61 > state_attr('openhasp.ecran01','rssi') | int(0) >= -70 %}orange{% elif -71 > state_attr('openhasp.ecran01','rssi') |int (0) >= -80 %}maroon{% else %}red{% endif %}"
-    
-    
-      - obj: "p4b2"
-        properties:
-          "value_color": >
-            {% if states('binary_sensor.solivia_night_status') == 'on' %}#F0E68C{% else %}#FFFF00{% endif %}
-          "value_str": >
-            {% if states('binary_sensor.solivia_night_status') == 'on' %}{{'\ue594'}}{% else %}{{'\ue599'}}{% endif %}
-          "val": "{{ states('sensor.mp2_prod_totale_mqtt') | int(0) }}"
-      - obj: "p4b5"
-        properties:
-          "text": "{{ states('sensor.mp2_prod_totale_mqtt') | int(0) }} W"
-          "text_color": "{% if 500 > states('sensor.mp2_prod_totale_mqtt') | int(0) %}red{% elif 1000 > states('sensor.mp2_prod_totale_mqtt') | int(0) >= 500 %}orange{% elif 1500 > states('sensor.mp2_prod_totale_mqtt') |int (0) >= 1000 %}yellow{% else %}lime{% endif %}"
-      - obj: "p4b3"
-        properties:
-          "val": "{{ states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) }}"
-      - obj: "p4b4"
-        properties:
-          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) }} kWh"
-          "text_color": "{% if 0 > states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) %}lime{% elif 750 > states('sensor.mp2_energy_conso_ac_l1_jour') | int(0) >= 0 %}yellow{% elif 1500 > states('sensor.mp2_energy_conso_ac_l1_jour') |int (0) >= 750 %}orange{% else %}red{% endif %}"
-      - obj: "p4b10"
-        properties:
-          "text": "{{ (states('sensor.mp2_total_energie_produite_jour') | float(0.001) / 1000) | round(1) }} kWh"
-      - obj: "p4b11"
-        properties:
-          "text": "\ue04d{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour') | float(0) | round(1) }} kWh"
-      - obj: "p4b12"
-        properties:
-          "text": "\ue054{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0) | round(1) }} kWh"
-      - obj: "p4b13"
-        properties:
-          "text": "{{ (states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0) + states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0)) | round(1) }} kWh"
-      - obj: "p4b20"
-        properties:
-          "text": "{{ (states('sensor.mp2_total_energie_produite_jour') | float(0) | round(2)) }} dkk"
-      - obj: "p4b40"
-        properties:
-          "max": "{{ states('sensor.mp2_total_energie_produite_jour') | float(0.001) * 1000 }}"
-          "val": "{{ states('sensor.mp2_total_energie_produite_jour') | int(0) }}"
-      - obj: "p4b41"
-        properties:
-          "max": "{{ (states('sensor.mp2_energie_injectee_ds_reseau_par_jour') | float(0.001) * 1000 + states('sensor.daily_energy_import_total') | float(1) * 1000) | int(0) }}"
-          "val": "{{ (states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0.001) * 1000) | int(0) }}"
-      - obj: "p4b42"
-        properties:
-          "max": "{{ (states('sensor.mp2_energie_soutiree_du_reseau_par_jour') | float(0.001) * 1000 + states('sensor.mp2_total_energie_produite_jour') | float(0) *1000) | int(0) }}"
-          "val": "{{ (states('sensor.mp2_total_energie_produite_jour') | float(0.001) * 1000) | int(0) }}"

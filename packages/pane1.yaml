@@ -53,8 +53,21 @@ openhasp:
         properties:
           "text": "{{ states('input_number.affichage_duree_filtration_piscine')}} h" 
 
-      - obj: "p1b151"
+      - obj: "p1b148"
+        properties:
+          "text": "{{ states('input_number.filtration_coeff_abaque')}} %" 
 
+
+
+      - obj: "p1b151"
+        properties:
+          "val": >
+            {% set st = states('input_select.mode_fonctionnement_piscine')%}
+            {% for text,num in [('Palier',0),('Classique',1),('Abaque',2),('Horaire',3),('At F',4),('Ma F',5) ] %}
+            {% if st == text %}
+              {{ num }}
+            {%endif%}
+            {% endfor %}
         event:
           "changed":
             - service: input_select.select_option
@@ -154,3 +167,20 @@ openhasp:
             - service: homeassistant.toggle
               entity_id: "switch.ev_eau"   
 
+      - obj: "p2b131"
+        event:
+          "up":
+            - service: input_number.decrement
+              target:
+                entity_id: input_number.filtration_coeff_abaque
+
+      - obj: "p2b132"
+        properties:
+          "text": "{{'%.0f' | format (states('input_number.filtration_coeff_abaque') | round(0)) }}%"
+
+      - obj: "p2b133"
+        event:
+          "up":
+            - service: input_number.increment
+              target:
+                entity_id: input_number.filtration_coeff_abaque

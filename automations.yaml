@@ -2426,7 +2426,7 @@
   description: ''
   trigger:
   - platform: time_pattern
-    minutes: /5
+    minutes: /15
   condition: []
   action:
   - service: mqtt.publish

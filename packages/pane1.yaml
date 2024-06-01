@@ -25,7 +25,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.ppe_filtration") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.ppe_filtration", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.ppe_filtration', 'on') else '#00ff00' }}" 
+          "text_color": "{{ '#00ff00' if is_state('switch.ppe_filtration', 'on') else '#ff0000' }}" 
         event:
           "up":
             - service: homeassistant.toggle
@@ -39,7 +39,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("cover.volet_piscine") == "on" else 0 }}'
           "text": '{{ "\uF11E" if is_state("cover.volet_piscine", "open") else "\uF11C" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('cover.volet_piscine', 'open') else '#00ff00' }}" 
+          "text_color": "{{ '#ff0000' if is_state('cover.volet_piscine', 'open') else '#00ff00' }}" 
         event:
           "up":
             - service: homeassistant.toggle
@@ -91,7 +91,7 @@ openhasp:
       - obj: "p1b223"
         properties:
           "text": "{{ states('sensor.pression_filtre') }} bars"              
-      - obj: "p1b225"
+      - obj: "p1b226"
         properties:
           "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
 
@@ -101,7 +101,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.ppe_filtration") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.ppe_filtration", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.ppe_filtration', 'on') else '#00ff00' }}" 
+          "text_color": "{{ '#00ff00' if is_state('switch.ppe_filtration', 'on') else '#ff0000' }}" 
         event:
           "up":
             - service: homeassistant.toggle
@@ -111,7 +111,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.ppe_ph") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.ppe_ph", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.ppe_ph', 'on') else '#00ff00' }}"          
+          "text_color": "{{ '#00ff00' if is_state('switch.ppe_ph', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
@@ -121,7 +121,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.ppe_chlore") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.ppe_chlore", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.ppe_chlore', 'on') else '#00ff00' }}"
+          "text_color": "{{ '#00ff00' if is_state('switch.ppe_chlore', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
@@ -131,7 +131,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.cde_ouv_volet_piscine") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.cde_ouv_volet_piscine", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.cde_ouv_volet_piscine', 'on') else '#00ff00' }}"
+          "text_color": "{{ '#00ff00' if is_state('switch.cde_ouv_volet_piscine', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
@@ -141,7 +141,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("bswitch.cde_ferm_volet_piscine") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.cde_ferm_volet_piscine", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.cde_ferm_volet_piscine', 'on') else '#00ff00' }}"
+          "text_color": "{{ '#00ff00' if is_state('switch.cde_ferm_volet_piscine', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
@@ -151,7 +151,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.cde_ecl_piscine") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.cde_ecl_piscine", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.cde_ecl_piscine', 'on') else '#00ff00' }}"          
+          "text_color": "{{ '#00ff00' if is_state('switch.cde_ecl_piscine', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
@@ -161,26 +161,91 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.ev_eau") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.ev_eau", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#ff9100' if is_state('switch.ev_eau', 'on') else '#00ff00' }}"          
+          "text_color": "{{ '#00ff00' if is_state('switch.ev_eau', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
               entity_id: "switch.ev_eau"   
 
-      - obj: "p2b131"
+      - obj: "p2b151"
         event:
           "up":
             - service: input_number.decrement
               target:
                 entity_id: input_number.filtration_coeff_abaque
 
-      - obj: "p2b132"
+      - obj: "p2b152"
         properties:
           "text": "{{'%.0f' | format (states('input_number.filtration_coeff_abaque') | round(0)) }}%"
 
-      - obj: "p2b133"
+      - obj: "p2b153"
         event:
           "up":
             - service: input_number.increment
               target:
                 entity_id: input_number.filtration_coeff_abaque
+
+                # Page 3
+      - obj: "p3b121"
+        properties:
+          "val": '{{ 1 if states("automation.piscine_hors_gel_actions") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("automation.piscine_hors_gel_actions", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('automation.piscine_hors_gel_actions', 'on') else '#ff0000' }}"
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "automation.piscine_hors_gel_actions"
+
+
+      - obj: "p3b122"  
+        properties:
+          "val": '{{ 1 if states("automation.piscine_ev_appoint_eau") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("automation.piscine_ev_appoint_eau", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('automation.piscine_ev_appoint_eau', 'on') else '#ff0000' }}"          
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "automation.piscine_ev_appoint_eau"   
+
+      - obj: "p3b123"  
+        properties:
+          "val": '{{ 1 if states("automation.piscine_traitement_ph") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("automation.piscine_traitement_ph", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('automation.piscine_traitement_ph', 'on') else '#ff0000' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "automation.piscine_traitement_ph"
+
+      - obj: "p3b129"  
+        properties:
+          "val": '{{ 1 if states("input_boolean.hors_gel_valid") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("input_boolean.hors_gel_valid", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('input_boolean.hors_gel_valid', 'on') else '#ff0000' }}"          
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "input_boolean.hors_gel_valid"   
+
+      - obj: "p3b131"  
+        properties:
+          "val": '{{ 1 if states("input_boolean.ev_eau_piscine") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("input_boolean.ev_eau_piscine", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('input_boolean.ev_eau_piscine', 'on') else '#ff0000' }}"
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "input_boolean.ev_eau_piscine"   
+
+      - obj: "p3b134"  
+        properties:
+          "text": "{{'%.0f' | format (states('input_number.temps_cartouche_chlore') | round(0)) }}h"
+        event:
+          "up":
+            - service: input_number.set_value
+              data:
+                value: 0
+              target:
+                entity_id: input_number.temps_cartouche_chlore
+
+

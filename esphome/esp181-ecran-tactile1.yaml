@@ -1,6 +1,6 @@
 substitutions:
   device_name: "esp181-ecran-tactile1"
-  friendly_name: esp178
+  friendly_name: esp181
   adress_ip: "192.168.0.181"
   time_timezone: "Europe/Paris"
   
@@ -9,7 +9,7 @@ esphome:
   platform: ESP32
   board: esp32dev
   project:
-    name: "rem81.esp178-esp32-piscine"
+    name: "rem81.esp181-esp32"
     version: "0.0.0"
 
 wifi:

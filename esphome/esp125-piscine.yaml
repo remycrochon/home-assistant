@@ -72,25 +72,7 @@ sensor:
   #      - 4.44 -> 4.0
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
-# Mesure de l'ORP
-# Etalonné le 6 juillet 2022
-  - platform: ezo
-    id: esp125_orp_ezo
-    name: orp_ezo
-    address: 98
-    unit_of_measurement: "mV"
-    accuracy_decimals: 1
-    update_interval: 60s
-    filters:
-      - multiply: 10
-      - calibrate_linear:
-          - 0 -> 0
-          - 216.9 -> 256
-# moyenne sur 15 mn-affichage toutes les 5mn
-      - sliding_window_moving_average:
-          window_size: 15
-          send_every: 5
-          send_first_at: 1
+
 
 # Mesure de la pression filtre
   - platform: adc
@@ -140,7 +122,6 @@ display:
     update_interval: 5s
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(esp125_ph_ezo).state);
-      it.printf(0,1,"Or=%.2f",id(esp125_orp_ezo).state);
       it.printf(8,0,"P=%.3f",id(esp125_pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(temp_piscine).state);
 #it.printf(15,1,"T=%.1s",id(mode_f).state);

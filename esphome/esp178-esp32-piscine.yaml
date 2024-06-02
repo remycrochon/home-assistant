@@ -43,15 +43,16 @@ web_server:
   port: 80
 
 
-# Configuration ESP32
+# Connection Bus i2c (Afficheur, EZO,...)
 i2c:
   sda: 21
   scl: 22
   scan: true
   id: bus_a
 
+# Connection sonde(s) de température DS18b20
 dallas:
-  - pin: GPIO19
+  - pin: GPIO9
 
 
 select:
@@ -71,7 +72,7 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
-  # Entrées logiques permettant de lire des contacts ou des BP
+  # Entrée logique permettant de lire le BP I00 de la carte
   - platform: gpio
     pin:
       number: GPIO00
@@ -81,6 +82,7 @@ binary_sensor:
         pullup: true
     name: "${friendly_name}_bp1"
 
+  # Entrées logiques permettant de lire des contacts exterieurs
   - platform: gpio
     pin:
       number: GPIO16
@@ -97,7 +99,7 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "${friendly_name}_mode_auto"
+    name: "{friendly_name}_tp_plein_lsh"
 
   - platform: gpio
     pin:
@@ -106,7 +108,7 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "${friendly_name}_mode_manu"
+    name: "${friendly_name}_tp_plein_lsl"
 
   - platform: gpio
     pin:
@@ -115,7 +117,7 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "${friendly_name}_tp_plein_lsh"
+    name: "${friendly_name}_ETOR4"
 
   - platform: gpio
     pin:
@@ -124,14 +126,14 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "${friendly_name}_tp_plein_lsl"
+    name: "${friendly_name}_ETOR5"
 
    
 sensor:
-
   - platform: dallas
     address: 0xCA00AA2D00000328
-    name: "${friendly_name} temp_eau"
+    name: "${friendly_name}_temperature_eau"
+    id: temp_piscine
     
     
 # Mesure du pH
@@ -158,29 +160,11 @@ sensor:
   #      - 4.44 -> 4.0
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
-# Mesure de l'ORP
-# Etalonné le 6 juillet 2022
-  - platform: ezo
-    id: orp_ezo
-    name: ${friendly_name} orp_ezo
-    address: 98
-    unit_of_measurement: "mV"
-    accuracy_decimals: 1
-    update_interval: 60s
-    filters:
-      - multiply: 10
-      - calibrate_linear:
-          - 0 -> 0
-          - 216.9 -> 256
-# moyenne sur 15 mn-affichage toutes les 5mn
-      - sliding_window_moving_average:
-          window_size: 15
-          send_every: 5
-          send_first_at: 1
 
-# Mesure de la pression filtre
+
+# Mesure de la pression filtre Entrée ANA 1
   - platform: adc
-    pin: A0
+    pin: GPIO36
     id: pression_filtre
     name: "${friendly_name} Pression filtre"
     unit_of_measurement: "Bars"
@@ -194,21 +178,24 @@ sensor:
       - sliding_window_moving_average:
           window_size: 30
           send_every: 1
-# Avec le 30PSI
-#    filters:
-#      - calibrate_linear:
-#        - 0.5 -> 0.0
-#""        - 2.21 -> 0.8
-# moyenne sur 30 mn + affichage toutes les mn
-#      - sliding_window_moving_average:
-#          window_size: 30
-#          send_every: 1
 
-  - platform: homeassistant
-    name: "T° Eau Piscine"
-    id: temp_piscine
-    entity_id: sensor.temp_piscine
+# Entrée ANA2 GPIO34
+  - platform: adc
+    pin: GPIO34
+    id: eana2
+    name: "${friendly_name}_EANA2"
+    unit_of_measurement: "Bars"
+    update_interval: 60s
+    attenuation: 11db
 
+# Entrée ANA3 GPIO39
+  - platform: adc
+    pin: GPIO39
+    id: eana3
+    name: "${friendly_name}_EANA3"
+    unit_of_measurement: "Bars"
+    update_interval: 60s
+    attenuation: 11db
 
 switch:
   - platform: gpio
@@ -262,7 +249,6 @@ display:
     update_interval: 5s
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(ph_ezo).state);
-      it.printf(0,1,"Or=%.2f",id(orp_ezo).state);
       it.printf(8,0,"P=%.3f",id(pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(temp_piscine).state);
 #it.printf(15,1,"T=%.1s",id(mode_f).state);

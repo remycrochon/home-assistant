@@ -54,19 +54,132 @@ i2c:
 dallas:
   - pin: GPIO9
 
+globals:
+    - id: g_tps_injection_ph_moins
+      type: float
+      restore_value: no
+    - id: g_memoire_temp_eau
+      type: float
+      restore_value: yes
+    - id: g_tps_filtration
+      type: float
+      restore_value: no
+# Palier et temperature mode filtraton "Palier"
+    - id: g_temp_palier1
+      type: float
+      initial_value: '9'
+    - id: g_temp_palier2
+      type: float
+      initial_value: '12'
+    - id: g_temp_palier3
+      type: float
+      initial_value: '17'
+    - id: g_temp_palier4
+      type: float
+      initial_value: '24'      
+    - id: g_tps_palier1
+      type: float
+      initial_value: '1'      
+    - id: g_tps_palier2
+      type: float
+      initial_value: '4'
+    - id: g_tps_palier3
+      type: float
+      initial_value: '6'
+    - id: g_tps_palier4
+      type: float
+      initial_value: '8'
+    - id: g_tps_palier5
+      type: float
+      initial_value: '10'           
+
+# regulation pH
+#    {% set a=states('sensor.ph_stat_median') | float(default=0) %} {% set
+#    x=states('input_number.simul_ph') | float(default=0) %} {% set
+#    b=states('input_number.ph_cible') | float(default=0) %} {% set
+#    d=states('input_number.ph_debit_ppe') | float(default=0) %} {% set
+#    e=states('input_number.ph_concentration') | float(default=0) %} {% set
+#"    r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} {% if r < 0 %} {{ 0 }}
+#    {% else %} {{ (r%60)|int(default=0) }} {% endif %}
 
 select:
   - platform: template
-    name: "${friendly_name}_Mode_Fonctionnement"
+    name: "${friendly_name}_Mode_Fonctionnement_filtration"
     optimistic: true
+    restore_value: true
     options:
       - Palier
       - Classique
       - Abaque
       - Ma_f
       - At_f
-    initial_option: Palier
-    
+    id: _Mode_Fonctionnement_filtration
+    on_value: 
+      then:
+        - script.execute: Fonctionnement_filtration
+
+  - platform: template
+    name: "${friendly_name}_Mode_Fonctionnement_regul_ph"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Ma_f
+      - At_f
+    id: _Mode_Fonctionnement_regul_ph
+    on_value: 
+      then:
+        - script.execute: _regul_ph        
+
+# Input Number
+number:
+  # Simulation Niveau pH
+  - platform: template
+    name: "${friendly_name}_simule_pH"
+    id: simule_ph
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: "pH"
+    step: 0.1  
+
+  # Cible Niveau pH
+  - platform: template
+    name: "${friendly_name}_pH_Cible"
+    id: _ph_cible
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 7
+    max_value: 7.6
+    unit_of_measurement: "pH"
+    step: 0.1
+
+  - platform: template
+    name: "${friendly_name}_debit_ppe_ph_moins"
+    id: _debit_ppe_moins
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 7.2
+    unit_of_measurement: "l/h"
+    step: 0.1
+
+  - platform: template
+    name: "${friendly_name}_taux_concentration_ph_moins"
+    id: _taux_concentration_ph_moins
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 0.1
+    icon: mdi:percent
+
 binary_sensor:
 #Etat de la connection
   - platform: status
@@ -91,6 +204,7 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_volet_ferme"
+    id: volet_ferme
 
   - platform: gpio
     pin:
@@ -99,7 +213,7 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "{friendly_name}_tp_plein_lsh"
+    name: "${friendly_name}_tp_plein_lsh"
 
   - platform: gpio
     pin:
@@ -127,19 +241,19 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_ETOR5"
-
    
 sensor:
   - platform: dallas
     address: 0xCA00AA2D00000328
     name: "${friendly_name}_temperature_eau"
-    id: temp_piscine
-    
-    
+    id: temp_eau
+    filters:
+    - filter_out: 0.0
+
 # Mesure du pH
   - platform: ezo
     id: ph_ezo
-    name: ${friendly_name} ph_ezo
+    name: "${friendly_name}_ph_ezo"
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
@@ -161,12 +275,11 @@ sensor:
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
 
-
 # Mesure de la pression filtre Entrée ANA 1
   - platform: adc
     pin: GPIO36
     id: pression_filtre
-    name: "${friendly_name} Pression filtre"
+    name: "${friendly_name}_Pression_filtre"
     unit_of_measurement: "Bars"
     update_interval: 60s
     attenuation: 11db
@@ -197,41 +310,65 @@ sensor:
     update_interval: 60s
     attenuation: 11db
 
+# calcul temps injection
+  - platform: template
+    name: "${friendly_name}_tps_injection_ph_moins"
+    id: _tps_injection_ph_moins
+    unit_of_measurement: "s"
+    state_class: "measurement"  
+
+cover:
+  - platform: template
+    name: "${friendly_name}_volet_piscine"
+#    lambda: |-
+#      if (id(volet_ferme).state) {
+#        return COVER_OPEN;
+#      } else {
+#        return COVER_CLOSED;
+#      }
+    open_action:
+      - script.execute: script_ouv_volet
+    close_action:
+      - script.execute: script_ferm_volet
+    stop_action:
+      - script.execute: script_stop_volet
+    optimistic: true
+
 switch:
   - platform: gpio
     name: "${friendly_name} cde_pompe_filtration"
     pin: GPIO32
-    id: ppe_filtration
+    id: cde_ppe_filtration
 
   - platform: gpio
-    name: "${friendly_name} cde_ppe_ph"
+    name: "${friendly_name} cde_ppe_ph-"
     pin: GPIO33
-    id: ppe_ph
+    id: cde_ppe_ph_moins
+
+  - platform: gpio
+    name: "${friendly_name} cde_ppe_ph+"
+    pin: GPIO25
+    id: cde_ppe_ph_plus
 
   - platform: gpio
     name: "${friendly_name} cde_eclairage"
-    pin: GPIO25
-    id: ecl
+    pin: GPIO26
+    id: cde_eclairage
 
   - platform: gpio
     name: "${friendly_name} cde_volet_ouverture"
-    pin: GPIO26
-    id: ouv_volet
+    pin: GPIO27
+    id: cde_volet_ouverture
 
   - platform: gpio
     name: "${friendly_name} cde_volet_fermeture"
-    pin: GPIO27
-    id: ferm_volet
+    pin: GPIO14
+    id: cde_volet_fermeture
 
   - platform: gpio
     name: "${friendly_name} cde_ev_eau"
-    pin: GPIO14
-    id: ev_eau
-
-  - platform: gpio
-    name: "${friendly_name} cde_ppe_chlore"
     pin: GPIO12
-    id: ppe_chlore
+    id: cde_ev_eau
 
   - platform: gpio
     name: "${friendly_name} relais8"
@@ -252,3 +389,170 @@ display:
       it.printf(8,0,"P=%.3f",id(pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(temp_piscine).state);
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
+
+interval:
+  - interval: 90s
+    then:
+      - script.execute: _regul_ph
+  - interval: 1s
+    then:      
+      - script.execute: Fonctionnement_filtration
+
+# Script
+script:
+  # Si la pompe tourne depuis au moins 5min on raffraichit la memoire de la temperature eau qui est
+  # prise en compte dans les scripts.
+  # sinon on travaille avec la témpérature mémorisée avant l'arret précédent
+  
+  - id: memorisation_température_eau
+    then:
+      - if:
+        condition:
+          - for:
+              time: 5min
+              condition:
+                switch.is_on: cde_ppe_filtration:
+        then:
+          - lambda: |-
+              id(g_memoire_temp_eau)=id(temp_eau).state
+        else:
+          - lambda: |-
+              id(g_memoire_temp_eau)=id(temp_eau).state
+
+# Calcul de la durée de la filtration
+  - id: Fonctionnement_filtration
+    then:
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "At_f";'
+          then:
+            - switch.turn_off: cde_ppe_filtration
+            - logger.log: "arret_forcé_ppe_filtration"
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Ma_f";'
+          then:
+            - switch.turn_on: cde_ppe_filtration
+            - logger.log: "Marche_forcée_ppe_filtration"
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Palier";'
+          then:
+            - lambda: |-
+                if (id(g_memoire_temp_eau)<id(g_temp_palier1)){
+                  id(g_tps_filtration)=id(g_tps_palier1);
+                } else {
+                  if (id(g_memoire_temp_eau)>=id(g_temp_palier1) && (id(g_memoire_temp_eau)<id(g_temp_palier2))){
+                    id(g_tps_filtration)=id(g_tps_palier2);
+                  } else {
+                    if (id(g_memoire_temp_eau)>=id(g_temp_palier2) && (id(g_memoire_temp_eau)<id(g_temp_palier3))){
+                    id(g_tps_filtration)=id(g_tps_palier3);
+                    } else {
+                      if (id(g_memoire_temp_eau)>=id(g_temp_palier3) && (id(g_memoire_temp_eau)<id(g_temp_palier4))){
+                      id(g_tps_filtration)=id(g_tps_palier4);
+                      } else {
+                        id(g_tps_filtration)=id(g_tps_palier5);
+                      }
+                    }
+                  }
+                }
+
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Classique";'
+          then:
+            - lambda: |-
+                id(g_tps_filtration)=id(g_memoire_temp_eau)/2;
+
+  - id: _calcul_heure_debut_fin_filtration
+    then:
+      - if:
+          condition:
+            lambda: 'return (id(sntp).now() >= '07:00') && (id(sntp).now().hour < '23:00';'
+          then:
+            - switch.turn_on: relais8
+      - if:
+          condition:
+            lambda: 'return (id(sntp).now().hour >= '23:00') || (id(sntp).now().hour < '07:00');'
+          then:
+            - switch.turn_off: relais8
+
+# regulation pH
+#    {% set a=states('sensor.ph_stat_median') | float(default=0) %} {% set
+#    x=states('input_number.simul_ph') | float(default=0) %} {% set
+#    b=states('input_number.ph_cible') | float(default=0) %} {% set
+#    d=states('input_number.ph_debit_ppe') | float(default=0) %} {% set
+#    e=states('input_number.ph_concentration') | float(default=0) %} {% set
+#"    r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} {% if r < 0 %} {{ 0 }}
+#    {% else %} {{ (r%60)|int(default=0) }} {% endif %}
+#          id(g_tps_injection_ph_moins)=(((id(ph_ezo).state-id(_ph_cible).state)/id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state)*3600;
+
+  - id: _regul_ph
+    mode: single  
+    then:
+      - lambda: |-
+          id(g_tps_injection_ph_moins)=(((id(simule_ph).state-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
+          id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
+      
+      - logger.log:
+          format: "Log tps injection: %f"
+          args: [ 'id(g_tps_injection_ph_moins)' ]
+          level: "info"
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
+              - lambda: 'return id(simule_ph).state > id( _ph_cible).state;'
+              - lambda: 'return id(simule_ph).state > 0;'
+              - switch.is_on: cde_ppe_filtration
+          then:
+            - switch.turn_on: cde_ppe_ph_moins
+            - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
+            - switch.turn_off: cde_ppe_ph_moins
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Ma_f";'
+              - switch.is_on: cde_ppe_filtration
+          then:
+            - switch.turn_on: cde_ppe_ph_moins
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "At_f";'
+          then:
+            - switch.turn_off: cde_ppe_ph_moins
+
+
+# Scripts Commande Volet
+  - id: script_ouv_volet
+    then:
+      - switch.turn_off: cde_volet_fermeture
+      - delay: 2s
+      - switch.turn_on: cde_volet_ouverture
+      - delay: 5s
+      - switch.turn_off: cde_volet_ouverture
+          
+  - id: script_ferm_volet
+    then:
+      - switch.turn_off: cde_volet_ouverture
+      - delay: 2s
+      - switch.turn_on: cde_volet_fermeture
+      - switch.turn_on: cde_eclairage
+      - delay: 90s
+      - switch.turn_off: cde_volet_fermeture
+      - switch.turn_off: cde_eclairage
+                    
+  - id: script_stop_volet
+    then:
+      - switch.turn_off: cde_volet_ouverture
+      - switch.turn_off: cde_volet_fermeture
+      - delay: 2s
+      - switch.turn_on: cde_volet_fermeture
+      - delay: 2s
+      - switch.turn_off: cde_volet_fermeture
+      - switch.turn_off: cde_eclairage
+                    

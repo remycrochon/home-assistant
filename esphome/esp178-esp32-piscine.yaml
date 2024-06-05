@@ -42,7 +42,14 @@ captive_portal:
 web_server:
   port: 80
 
-
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
   sda: 21
@@ -64,7 +71,17 @@ globals:
     - id: g_tps_filtration
       type: float
       restore_value: no
-# Palier et temperature mode filtraton "Palier"
+    - id: flag_tempo_ppe_filtre
+      type: bool
+# Limite haute du temps de filtration
+    - id: g_temps_max_filtration
+      type: float
+      initial_value: '17'
+# Limite basse du temps de filtration
+    - id: g_temps_min_filtration
+      type: float
+      initial_value: '5'            
+# Palier temperature/Temps filtration avec le mode "Palier"
     - id: g_temp_palier1
       type: float
       initial_value: '9'
@@ -76,7 +93,8 @@ globals:
       initial_value: '17'
     - id: g_temp_palier4
       type: float
-      initial_value: '24'      
+      initial_value: '24' 
+
     - id: g_tps_palier1
       type: float
       initial_value: '1'      
@@ -91,7 +109,28 @@ globals:
       initial_value: '8'
     - id: g_tps_palier5
       type: float
-      initial_value: '10'           
+      initial_value: '10'
+
+
+# Constante utilisé dans le mode "Abaque"  
+    # coeficients utilisées en duree_abaque():
+#    abaque_a: float = 0.00335
+#    abaque_b: float = -0.14953
+#    abaque_c: float = 2.43489
+#    abaque_d: float = -10.72859
+
+    - id: g_abaque_a
+      type: float
+      initial_value: '0.00335'
+    - id: g_abaque_b
+      type: float
+      initial_value: '-0.14953'
+    - id: g_abaque_c
+      type: float
+      initial_value: '2.43489'
+    - id: g_abaque_d
+      type: float
+      initial_value: '-10.72859'
 
 # regulation pH
 #    {% set a=states('sensor.ph_stat_median') | float(default=0) %} {% set
@@ -133,6 +172,18 @@ select:
 
 # Input Number
 number:
+  # Simulation Temp eau
+  - platform: template
+    name: "${friendly_name}_simule_Temp"
+    id: temp_eau
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -10
+    max_value: 50
+    device_class: temperature
+    step: 0.1  
+
   # Simulation Niveau pH
   - platform: template
     name: "${friendly_name}_simule_pH"
@@ -241,14 +292,57 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_ETOR5"
+
+  - platform: gpio
+    pin:
+      number: GPIO19
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name}_ETOR6"
    
+datetime:
+  - platform: template
+    id: heure_pivot
+    type: time
+    name: "${friendly_name}_heure_pivot"
+    optimistic: yes
+    initial_value: "13:30:00"
+    restore_value: true
+
+  - platform: template
+    id: h_debut
+    type: time
+    name: "${friendly_name}_h_debut"
+    optimistic: yes
+    initial_value: "13:00:00"
+    restore_value: true
+
+  - platform: template
+    id: h_fin
+    type: time
+    name: "${friendly_name}_h_fin"
+    optimistic: yes
+    initial_value: "13:40:00"
+    restore_value: true
+
+  - platform: template
+    id: h_duree
+    type: time
+    name: "${friendly_name}_h_duree"
+    optimistic: yes
+    initial_value: "01:00:00"
+    restore_value: true
+
+
 sensor:
   - platform: dallas
-    address: 0xCA00AA2D00000328
+    address: 0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
-    id: temp_eau
+    id: old_temp_eau
     filters:
-    - filter_out: 0.0
+      - filter_out: 0.0
 
 # Mesure du pH
   - platform: ezo
@@ -339,16 +433,29 @@ switch:
     name: "${friendly_name} cde_pompe_filtration"
     pin: GPIO32
     id: cde_ppe_filtration
+    on_turn_on:
+      then:
+        - delay: 10s
+        - logger.log: "Set tempo cde ppe"
+        - lambda: |-
+            id(flag_tempo_ppe_filtre) = true;
+    on_turn_off: 
+      then:
+        - logger.log: "Reset tempo cde ppe"
+        - lambda: |-
+            id(flag_tempo_ppe_filtre) = false;
 
   - platform: gpio
     name: "${friendly_name} cde_ppe_ph-"
     pin: GPIO33
     id: cde_ppe_ph_moins
+    interlock: [cde_ppe_ph_plus]
 
   - platform: gpio
     name: "${friendly_name} cde_ppe_ph+"
     pin: GPIO25
     id: cde_ppe_ph_plus
+    interlock: [cde_ppe_ph_moins]
 
   - platform: gpio
     name: "${friendly_name} cde_eclairage"
@@ -359,11 +466,13 @@ switch:
     name: "${friendly_name} cde_volet_ouverture"
     pin: GPIO27
     id: cde_volet_ouverture
+    interlock: [cde_volet_fermeture]
 
   - platform: gpio
     name: "${friendly_name} cde_volet_fermeture"
     pin: GPIO14
     id: cde_volet_fermeture
+    interlock: [cde_volet_ouverture]
 
   - platform: gpio
     name: "${friendly_name} cde_ev_eau"
@@ -387,16 +496,20 @@ display:
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(ph_ezo).state);
       it.printf(8,0,"P=%.3f",id(pression_filtre).state);
-      it.printf(8,1,"T=%.1f",id(temp_piscine).state);
+#      it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau);
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
 
 interval:
   - interval: 90s
     then:
       - script.execute: _regul_ph
-  - interval: 1s
+  - interval: 5s
     then:      
       - script.execute: Fonctionnement_filtration
+  - interval: 5s
+    then: 
+      - script.execute: memorisation_temperature_eau
+    
 
 # Script
 script:
@@ -404,20 +517,23 @@ script:
   # prise en compte dans les scripts.
   # sinon on travaille avec la témpérature mémorisée avant l'arret précédent
   
-  - id: memorisation_température_eau
+  - id: memorisation_temperature_eau
     then:
       - if:
-        condition:
-          - for:
-              time: 5min
-              condition:
-                switch.is_on: cde_ppe_filtration:
-        then:
-          - lambda: |-
-              id(g_memoire_temp_eau)=id(temp_eau).state
-        else:
-          - lambda: |-
-              id(g_memoire_temp_eau)=id(temp_eau).state
+          condition:
+            lambda: 'return id(flag_tempo_ppe_filtre) == true;'
+          then:
+            - lambda: |-
+                id(g_memoire_temp_eau)=id(temp_eau).state;            
+            - logger.log:
+                format: "Flag=1 / Valeur Temp Dallas: %.2f / Valeur Mem Temp: %.2f"
+                args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
+          else:
+            - lambda: |-
+                id(g_memoire_temp_eau)=id(g_memoire_temp_eau);
+            - logger.log:
+                format: "Flag=0 / Valeur Temp Dallas: %.2f / Valeur Mem Temp: %.2f"
+                args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
 
 # Calcul de la durée de la filtration
   - id: Fonctionnement_filtration
@@ -456,6 +572,10 @@ script:
                     }
                   }
                 }
+            - logger.log:
+                format: "Mode: Palier / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
+                args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
+            - script.execute: calcul_hdebut_hfin
 
       - if:
           condition:
@@ -463,19 +583,47 @@ script:
           then:
             - lambda: |-
                 id(g_tps_filtration)=id(g_memoire_temp_eau)/2;
+                id(g_tps_filtration)=min(id(g_temps_max_filtration),id(g_tps_filtration));
+                id(g_tps_filtration)=max(id(g_temps_min_filtration),id(g_tps_filtration));
+            - logger.log:
+                format: "Mode Classique / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
+                args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ] 
 
-  - id: _calcul_heure_debut_fin_filtration
-    then:
       - if:
           condition:
-            lambda: 'return (id(sntp).now() >= '07:00') && (id(sntp).now().hour < '23:00';'
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
           then:
-            - switch.turn_on: relais8
-      - if:
-          condition:
-            lambda: 'return (id(sntp).now().hour >= '23:00') || (id(sntp).now().hour < '07:00');'
-          then:
-            - switch.turn_off: relais8
+            - lambda: |-
+                  id(g_tps_filtration)=id(g_abaque_a)*pow(id(g_memoire_temp_eau),3)+id(g_abaque_b)*pow(id(g_memoire_temp_eau),2)+id(g_abaque_c)*id(g_memoire_temp_eau)+id(g_abaque_d);
+                  id(g_tps_filtration)=min(id(g_temps_max_filtration),id(g_tps_filtration));
+                  id(g_tps_filtration)=max(id(g_temps_min_filtration),id(g_tps_filtration));
+            - logger.log:
+                format: "Mode Abaque / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
+                args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
+
+#                 id(g_tps_filtration)=id(g_abaque_a)*pow(id(g_memoire_temp_eau),3)+id(g_abaque_b)*pow(id(g_memoire_temp_eau),2)+id(g_abaque_c)*id(g_memoire_temp_eau)+id(g_abaque_d)*id(g_memoire_temp_eau);                
+#id(g_tps_filtration)=min(id(g_temps_max_filtration),(id(g_abaque_a)*pow(id(g_memoire_temp_eau),3)+id(g_abaque_b)*pow(id(g_memoire_temp_eau),2)+id(g_abaque_c)*id(g_memoire_temp_eau)+id(g_abaque_d)*id(g_memoire_temp_eau)));
+#        duree_m = (
+#               self.abaque_a * temperature_min ** 3
+#                + self.abaque_b * temperature_min ** 2
+#                + self.abaque_c * temperature_min
+#                + self.abaque_d
+#        )        
+#  y = (0.00335 * temperature^3) + (-0.14953 * temperature^2) + (2.43489 * temperature) -10.72859
+
+#  - id: _calcul_heure_debut_fin_filtration
+#    then:
+#      - if:
+#          condition:
+#            lambda: 'return (id(sntp).now() >= '07:00') && (id(sntp).now().hour < '23:00';'
+#          then:
+#            - switch.turn_on: relais8
+#      - if:
+#          condition:
+#            lambda: 'return (id(sntp).now().hour >= '23:00') || (id(sntp).now().hour < '07:00');'
+#          then:
+#            - switch.turn_off: relais8
+# https://www.reddit.com/r/Esphome/comments/13o56md/loggerlog_what_am_i_doing_wrong/?tl=fr
 
 # regulation pH
 #    {% set a=states('sensor.ph_stat_median') | float(default=0) %} {% set
@@ -486,6 +634,22 @@ script:
 #"    r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} {% if r < 0 %} {{ 0 }}
 #    {% else %} {{ (r%60)|int(default=0) }} {% endif %}
 #          id(g_tps_injection_ph_moins)=(((id(ph_ezo).state-id(_ph_cible).state)/id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state)*3600;
+
+
+  - id: calcul_hdebut_hfin
+    mode: single
+    then:
+      - datetime.time.set:
+          id: h_duree
+          time: !lambda |-
+            // Return an ESPTime struct
+            return {.second: 56, .minute: 34, .hour: id(g_tps_filtration)};
+      - lambda: |-
+          
+          id(h_debut).state_as_esptime()=id(heure_pivot).state_as_esptime()-id(h_duree).state_as_esptime();
+          id(h_fin).state_as_esptime()=id(heure_pivot).state_as_esptime()+id(h_duree).state_as_esptime();
+
+          
 
   - id: _regul_ph
     mode: single  

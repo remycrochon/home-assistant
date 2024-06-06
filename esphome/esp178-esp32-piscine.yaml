@@ -132,6 +132,13 @@ globals:
       type: float
       initial_value: '-10.72859'
 
+    - id: g_hh
+      type: int
+    - id: g_mm
+      type: int
+    - id: g_ss
+      type: int
+
 # regulation pH
 #    {% set a=states('sensor.ph_stat_median') | float(default=0) %} {% set
 #    x=states('input_number.simul_ph') | float(default=0) %} {% set
@@ -310,6 +317,7 @@ datetime:
     optimistic: yes
     initial_value: "13:30:00"
     restore_value: true
+    disabled_by_default: false
 
   - platform: template
     id: h_debut
@@ -635,21 +643,64 @@ script:
 #    {% else %} {{ (r%60)|int(default=0) }} {% endif %}
 #          id(g_tps_injection_ph_moins)=(((id(ph_ezo).state-id(_ph_cible).state)/id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state)*3600;
 
+# Convertir la valeur décimale en secondes
+#seconds: {{ decimal_value * 3600 | int }}
+
+# Extraire les parties entières pour les heures, les minutes et les secondes
+#hours: {{ seconds // 3600 }}
+#"minutes: {{ (seconds % 3600) // 60 }}
+#seconds: {{ seconds % 60 }}
+
+# Définir la variable datetime.time.set
+#datetime.time.set:
+#  hours: {{ hours }}
+#  minutes: {{ minutes }}
+#  seconds: {{ seconds }}
+
 
   - id: calcul_hdebut_hfin
     mode: single
     then:
-      - datetime.time.set:
-          id: h_duree
-          time: !lambda |-
-            // Return an ESPTime struct
-            return {.second: 56, .minute: 34, .hour: id(g_tps_filtration)};
       - lambda: |-
+          static int ts = 0;
+          static int hh = 0;
+          static int mm = 0;
+          static int ss = 0;
           
-          id(h_debut).state_as_esptime()=id(heure_pivot).state_as_esptime()-id(h_duree).state_as_esptime();
-          id(h_fin).state_as_esptime()=id(heure_pivot).state_as_esptime()+id(h_duree).state_as_esptime();
+          ts=id(g_tps_filtration)*3600;
+          hh= ts / 3600;
+          mm= (ts-hh)// 60;
+          ss= mm-(mm//60);
+          id(g_hh)=hh;
+          id(g_mm)=mm;
+          id(g_ss)=ss;
+      - logger.log:
+          format: "hh: %2d - mm: %.2d / ss: %2d"
+          args: [ 'id(g_hh)', 'id(g_mm)', 'id(g_ss)' ]
+          
 
-          
+      - datetime.time.set:
+          id: heure_pivot
+          time: !lambda |-
+            return {second: id(g_ss), minute: id(g_mm), hour: id(g_hh)};
+
+      - logger.log:
+          format: "HPivot H: %2d / M: %.2d / Tps Filtrat: %2d"
+          args: [ 'id(heure_pivot).hour', 'id(heure_pivot).minute', 'id(heure_pivot).second' ]
+
+      - switch.turn_on: cde_ppe_filtration          
+
+#      - ESP_LOGI("main", "Value of my datetime: %04d-%02d-%02d", id(heure_pivot).hour, id(heure_pivot).minute, id(heure_pivot).seconde);
+#      - datetime.time.set:
+#          id: h_duree
+#          time: !lambda |-
+#            // Return an ESPTime struct
+#            return {.second: 56, .minute: 34, .hour: id(g_tps_filtration)};
+#      - lambda: |-
+#          id(h_debut).state_as_esptime()=id(heure_pivot).state_as_esptime()-id(h_duree).state_as_esptime();
+#          id(h_fin).state_as_esptime()=id(heure_pivot).state_as_esptime()+id(h_duree).state_as_esptime();
+
+
 
   - id: _regul_ph
     mode: single  

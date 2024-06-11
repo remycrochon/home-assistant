@@ -133,7 +133,7 @@ globals:
     - id: g_abaque_d
       type: float
       initial_value: '-10.72859'
-
+# Variables intermediaires calcul heure debut et fin
     - id: g_hh
       type: int
     - id: g_mm
@@ -178,6 +178,8 @@ select:
     id: _Mode_Fonctionnement_regul_ph
     on_value: 
       then:
+        - script.stop: _regul_ph   
+        - delay: 5s            
         - script.execute: _regul_ph        
 
 # Input Number
@@ -259,6 +261,20 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
+# calcul des niveaux piscine
+# Si LSL ou LSH recouvert alors True sinon False
+  - platform: template
+    name: "${friendly_name}_niv_haut"
+    id: niv_haut
+      
+  - platform: template
+    name: "${friendly_name}_niv_inter"
+    id: niv_inter
+
+  - platform: template
+    name: "${friendly_name}_niv_bas"
+    id: niv_bas
+
   # Entrée logique permettant de lire le BP I00 de la carte
   - platform: gpio
     pin:
@@ -288,6 +304,7 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_tp_plein_lsh"
+    id: lsh
 
   - platform: gpio
     pin:
@@ -297,6 +314,7 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_tp_plein_lsl"
+    id: lsl
 
   - platform: gpio
     pin:
@@ -324,6 +342,8 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_ETOR6"
+
+
 
 # Définiton de l'heure Pivot   
 datetime:
@@ -551,6 +571,9 @@ interval:
   - interval: 5s
     then: 
       - script.execute: memorisation_temperature_eau
+  - interval: 5s
+    then: 
+      - script.execute: calcul_niveau
     
 
 # Script
@@ -809,8 +832,6 @@ script:
           then:
             - switch.turn_off: cde_ppe_ph_moins
 
-
-
 # Scripts Commande Volet
   - id: script_ouv_volet
     then:
@@ -839,4 +860,48 @@ script:
       - delay: 2s
       - switch.turn_off: cde_volet_fermeture
       - switch.turn_off: cde_eclairage
-                    
+# 
+  - id: calcul_niveau
+    then:
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: lsh
+              - binary_sensor.is_on: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_haut
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_haut
+                state: OFF
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_off: lsh
+              - binary_sensor.is_on: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_inter
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_inter
+                state: OFF                
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_off: lsh
+              - binary_sensor.is_off: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_bas
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_bas
+                state: OFF                

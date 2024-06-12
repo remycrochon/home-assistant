@@ -15,16 +15,8 @@ esp32:
 
 # Enable logging
 logger:
-  level: info
+  level: DEBUG
 
-# mosquitto OMV6
-mqtt:
-  broker: 192.168.0.153
-#  username: !secret mqtt_ha_name
-#  password: !secret mqtt_ha_pw
-#"  discovery: true
-  #internal_mqtt_default: internal
-  
 # Enable Home Assistant API
 api:
 
@@ -43,139 +35,59 @@ web_server:
   port: 80
 
 captive_portal:
-
-globals:
-   - id: increment
-     type: float
-     restore_value: no
-     initial_value: '0'
-     
-   - id: striac
-     type: float
-     restore_value: yes
-
-
-# Input Number
-number:
-
-# regulation PID
-# Consigne sur Puissance PID
-  - platform: template
-    name: "${friendly_name} Consigne Pu PID"
-    id: cons_pid
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -100
-    max_value: 8000
-    unit_of_measurement: "W"
-    step: 1
-    
-
-  - platform: template
-    name: "${friendly_name} Coeff Kp"
-    id: kp
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 10
-    unit_of_measurement: ""
-    step: 0.01
-
-  - platform: template
-    name: "${friendly_name} Coeff Ki"
-    id: ki
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 10
-    unit_of_measurement: ""
-    step: 0.01
-
-  - platform: template
-    name: "${friendly_name} Coeff Kd"
-    id: kd
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 10
-    unit_of_measurement: ""
-    step: 0.01
-
-
-binary_sensor:
-#Etat de la connection
-  - platform: status
-    name: "${friendly_name}_Status"
-
-
-sensor:
-
-# Les MQTT sont déclarés dans le Node Red du Cerbo GX
-# https://venus.local:1881/#flow/dbd727f16cbe7b5f
-
-  - platform: mqtt_subscribe
-    name: "${friendly_name} Pu Reseau"
-    id: pureseau
-    topic: mp2/multiplus2/grid_l1_ac
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 2
-
-    on_value:
-      then:
-        - script.execute: pid
-        
-#interval:
-#  - interval: 60s
-#    then:
-#      - script.execute: pid
-# ------------------------  Scripts
-script:
-# 
-# Calcul PID
-# https://www.ferdinandpiette.com/blog/2011/08/implementer-un-pid-sans-faire-de-calculs/
-#    erreur = consigne - mesure;
-#    somme_erreurs += erreur;
-#    variation_erreur = erreur - erreur_précédente;
-#    commande = Kp * erreur + Ki * somme_erreurs + Kd * variation_erreur;
-#    erreur_précédente = erreur
-  - id: pid
-    mode: single
-    then:
+uart:
+  id: mod_bus
+  tx_pin: 17
+  rx_pin: 16
+  baud_rate: 9600
+  stop_bits: 1
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      timeout: 150ms
+    sequence:
       - lambda: |-
-          static float P,I,D,erreur,lastErreur,derivative,sortie;
-          static float integralErreur = 0  ;
-          erreur = id(pureseau).state-id(cons_pid).state;
-          // terme proportionnel  
-          P = (id(kp).state * erreur);
-          // Terme intégral
-          if (!isnan(erreur)) {
-            integralErreur = integralErreur + erreur;
-          }
-          I = id(ki).state * integralErreur; 
-          // Terme dérivé
-          derivative = erreur - lastErreur;
-          D = id(kd).state * derivative;
-          // Calcul de la sortie du régulateur PID
-          sortie = P + I + D;
-          // Mise à jour de la dernière erreur          
-          lastErreur = erreur;
+          UARTDebug::log_string(direction, bytes);
 
-          //if (sortie <= 0){
-          //  sortie = 0;
-          //} else if (sortie>=id(pmax).state){
-          //  sortie = id(pmax).state;
-          //}
+modbus:
+#flow_control_pin: 5
+  #send_wait_time: 200ms
+  id: modbus1
+  flow_control_pin: 5
 
-          //id(striac) = sortie; 
+modbus_controller:
+  - id: afficheur
+    ## the Modbus device addr
+    address: 0x1
+    modbus_id: modbus1
+    update_interval: 10s
+    command_throttle: 50ms
+    # setup_priority: -10
 
-          ESP_LOGI("Log","Erreurs: %f", erreur);
-          ESP_LOGI("Log","IntErr: %f", integralErreur);
-          ESP_LOGI("Log","Derivée: %f", derivative);          
-          ESP_LOGI("Log","lastErr: %f", lastErreur);
-          ESP_LOGI("Log","Sortie: %f",sortie);    
-
+sensor:  
+# tension de l'alimentation
+  - platform: modbus_controller
+    modbus_controller_id: afficheur
+    id: _niv_puit
+    name: "${friendly_name}_Niveau_Puit"
+    address: 0x0001
+    unit_of_measurement: "ml"
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 1
+    #register_count: 1
+    #response_size: 2
+number:
+  - platform: modbus_controller
+    modbus_controller_id: afficheur
+    id: filtre_entree
+    name: "${friendly_name}_Filtre_Entrée"
+    address: 0x0101
+    value_type: U_WORD
+    multiply: 1000
+    min_value: 0.000
+    max_value: 10.000
+    step: 0.1

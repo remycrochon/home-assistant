@@ -1,5 +1,5 @@
 substitutions:
-  device_name: esp174-esp32-eth0-dimmer-ecs
+  device_name: esp174-esp32-eth0-chalet2
   adress_ip: "192.168.0.174"
   friendly_name: esp174
   time_timezone: "Europe/Paris"
@@ -31,333 +31,104 @@ ethernet:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
-
-i2c:
-  sda: GPIO14
-  scl: GPIO15
-  scan: True
-  id: bus_a
-
-globals:
-   - id: increment
-     type: float
-     restore_value: no
-     initial_value: '0'
-   - id: striac
-     type: float
-     restore_value: yes
-
-   - id: palier0
-     type: int
-     restore_value: no
-     initial_value: '0'
-   - id: palier1
-     type: int
-     restore_value: no
-     initial_value: '15'
-   - id: palier2
-     type: int
-     restore_value: no
-     initial_value: '50'
-   - id: palier3
-     type: int
-     restore_value: no
-     initial_value: '100'
-   - id: palier4
-     type: int
-     restore_value: no
-     initial_value: '200'
-   - id: palier5
-     type: int
-     restore_value: no
-     initial_value: '300'
-   - id: palier6
-     type: int
-     restore_value: no
-     initial_value: '600'
-   - id: palier7
-     type: int
-     restore_value: no
-     initial_value: '900'
-
-
-binary_sensor:
-#Etat de la connection
-  - platform: status
-    name: "${friendly_name}_Status"
-
-# Reception de la puissance avant transfert vers le template
-number:
-  - platform: template
-    name: "${friendly_name} Pu_Reseau"
-    id: pureseau
-    optimistic: true
-    restore_value: true
-    min_value: -3000
-    max_value: +3000
-    step: 1
-    mode: box
-    on_value:
-      then:
-        - script.execute: calcul_injection 
-        - script.execute: etat_production 
-
-  - platform: template
-    name: "${friendly_name} P Max"
-    id: pmax
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 50
-    max_value: 100
-    step: 1
-
-  - platform: template
-    name: "${friendly_name} P Min"
-    id: pmin
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 25
-    step: 1
-sensor:  
-############### TEMPLATE  ######################"
-# 
-  - platform: template
-    name: "${friendly_name} Pu Reseau"
-    id: pureseau1
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    update_interval: 0.5s
-    lambda: |-
-     return (id(pureseau).state);
-
-  - platform: template
-    name: "${friendly_name} Increment"
-    id: afincrement
-    unit_of_measurement: ""
-    accuracy_decimals: 2
-    state_class: "measurement"
-    update_interval: 0.5s
-    lambda: |-
-     return id(increment);  
-
-  - platform: template
-    name: "${friendly_name} Sortie Triac"
-    id: afstriac
-    unit_of_measurement: "%"
-    state_class: "measurement"  
-    accuracy_decimals: 2
-    update_interval: 0.5s
-    lambda: |-
-      return id(striac);
-        
-
-switch:
-#  - platform: gpio
-#    name: "${friendly_name} Relais"
-#    pin: GPIO4
-#    id: relais
-  - platform: template
-    name: "${friendly_name} Validation Router"    
-    id: val_router
-    optimistic: true
-    restore_state: true
-
-  - platform: restart
-    name: "${friendly_name} Restart"
-
-#AC dimmer level 0 à 1-----------------------------------------------------------------------
-
-output:
-  #LEDS -----------------------------------------------------------------------------------------
-  - id: led_conso
-    platform: gpio
-    pin: GPIO12
+    dns1: 192.168.0.254
     
-  - id: led_injec
-    platform: gpio
-    pin: GPIO4
+# Connection sonde(s) de température DS18b20
+dallas:
+  pin: 32
+  update_interval: 10s
+  
+uart:
+  id: mod_bus
+  tx_pin: 17
+  rx_pin: 5
+  baud_rate: 9600
+  stop_bits: 1
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      timeout: 150ms
+    sequence:
+      - lambda: |-
+          UARTDebug::log_string(direction, bytes);
 
-  - platform: ac_dimmer
-    id: ecs
-    gate_pin: GPIO2
-    method: leading
-    zero_cross_pin:
-      number: GPIO39 
-      mode:
-        input: true
-      inverted: yes
-    min_power: 0%
+modbus:
+  #send_wait_time: 200ms
+  id: modbus1
+  flow_control_pin: 33
 
-light:
-  - platform: monochromatic
-    name: "${friendly_name}+STriac"
-    output: ecs
-    id: gradateur
-    default_transition_length: 0s
+modbus_controller:
+  - id: afficheur
+    ## the Modbus device addr
+    address: 0x1
+    modbus_id: modbus1
+    update_interval: 10s
+    command_throttle: 50ms
+    # setup_priority: -10
+sensor:  
 
-# Affichage
-display:
-  - platform: lcd_pcf8574
-    dimensions: 20x4
-    address: 0x27
+# tension de l'alimentation
+  - platform: modbus_controller
+    modbus_controller_id: afficheur
+    id: _niv_eau
+    name: "${friendly_name}_Niveau_Puit"
+    address: 0x0001
+    unit_of_measurement: "mL"
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 2
+    #register_count: 1
+    #response_size: 2
+    device_class: volume
+    state_class: total
+    filters:
+      - multiply: 0.01
+#      - sliding_window_moving_average:
+#          window_size: 10 # moyenne sur x lectures
+#          send_every: 5 # envoi toutes les x lectures
+#          send_first_at: 1 # envoi à la premiere lecture
+
+
+  - platform: dallas
+    address: 0x82012111efe81d28
+    name: "${friendly_name}_temperature_air"
+    id: temp_air
+#    filters:
+#      - filter_out: 0.0
+
+############### TEMPLATE  ######################"
+# Calcul volume eau
+  - platform: template
+    name: "${friendly_name}_volume_puit"
+    id: volume
+    icon: mdi:flash
+    unit_of_measurement: "m³"
+    device_class: volume
+    accuracy_decimals: 2
     lambda: |-
-      it.printf(0,0,"Pu=%8.0f W",id(pureseau1).state);
-      it.printf(0,1,"Inc=%7.1f ",id(increment));
-      it.printf(0,2,"Triac=%5.1f %%",id(striac));
-      it.printf(0,3,"Valid: %s", id(val_router).state ? "ON" : "OFF");
+      return (id(_niv_eau).state*0.6*0.6*3.14159);
       
-#interval:
+  - platform: template
+    name: "${friendly_name}_niveau_remplissage_puit"
+    id: niveau
+    icon: mdi:flash
+    unit_of_measurement: "%"
+    accuracy_decimals: 2
+    lambda: |-
+      return (id(_niv_eau).state/5.8*100);
 
-#  - interval: 0.5s
-#    then:
+  - platform: template
+    name: "${friendly_name}_niveau_reserve_puit"
+    id: niveau_reserve
+    icon: mdi:flash
+    unit_of_measurement: "m"
+    device_class: distance
+    accuracy_decimals: 2
+    lambda: |-
+      return (5.8-id(_niv_eau).state);
 
-    #calcul niveau d'injection et injection dans triac
-    #  - script.execute: calcul_injection 
-
-    #script affichage
-    #  - script.execute: etat_production 
-
-#Scripts
-script:
-#calcul puissance injection
-  - id: calcul_injection
-    mode: single
-    then:
-      - lambda: |-
-         id(increment) = 0.0;
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier0) && abs(id(pureseau1).state) < id(palier1);
-          then:
-            - lambda: |-
-                id(increment) = 0.0;
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier1) && abs(id(pureseau1).state) < id(palier2);
-          then:
-            - lambda: |-
-               id(increment) = 0.5;
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier2) && abs(id(pureseau1).state) < id(palier3);
-          then:
-            - lambda: |-
-               id(increment) = 1.0;               
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier3) && abs(id(pureseau1).state) < id(palier4);
-          then:
-            - lambda: |-
-               id(increment) = 1.5;               
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier4) && abs(id(pureseau1).state) < id(palier5);
-          then:
-            - lambda: |-
-               id(increment) = 2.0;
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier5) && abs(id(pureseau1).state) < id(palier6);
-          then:
-            - lambda: |-
-               id(increment) = 2.5;
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier6) && abs(id(pureseau1).state) < id(palier7);
-          then:
-            - lambda: |-
-               id(increment) = 3.0;                                       
-      - if: 
-          condition:
-            lambda: |-
-              return abs(id(pureseau1).state) >= id(palier7);
-          then:
-            - lambda: |-
-               id(increment) = 4.0;
-
-      - if: 
-          condition:
-            lambda: |-
-              return id(pureseau).state < 0;
-          then:
-            - lambda: |-
-                id(striac) = id(striac)+id(increment);
-          else:
-            - lambda: |-
-                id(striac) = id(striac)-id(increment);            
-
-      - logger.log:
-          format: "Log S Triac= %f"
-          args: [ 'id(striac)']
-
-      - lambda: |-
-          if (id(striac) <= id(pmin).state) {
-            id(striac) = 0;
-          } else if(id(striac)>=id(pmax).state){
-            id(striac) = id(pmax).state;
-          }
-
-      - if: 
-          condition:
-             switch.is_on: val_router
-          then:
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(striac)/100 ;  
-          else:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(0) ;  
-
-
-
-          
-# Pilotage led
-  - id: etat_production
-    mode: single
-    then:
-     - if: 
-         condition:
-           sensor.in_range:
-              id: pureseau1
-              below: 50
-              above: -50
-         then:
-           - output.turn_on: led_conso
-           - output.turn_on: led_injec
-                
-     - if: 
-         condition:
-           sensor.in_range:
-             id: pureseau1
-             above: 50
-         then:
-           - output.turn_off: led_injec
-           - output.turn_on: led_conso
-
-     - if: 
-         condition:
-           sensor.in_range:
-             id: pureseau1
-             below: -50
-         then:
-          - output.turn_off: led_conso
-          - output.turn_on: led_injec
-
-       
-
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"

@@ -45,7 +45,7 @@ ota:
 web_server:
   port: 80
 
-# Protocole afficheur
+# Protocole I2C
 i2c:
   sda: GPIO21 
   scl: GPIO22

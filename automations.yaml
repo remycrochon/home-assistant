@@ -638,10 +638,6 @@
             Tps Utilisation cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}}
             h'
           title: Piscine Rapport Fin de journée
-      - service: notify.log_piscine
-        data:
-          message: ',{{states(''sensor.compteur_energie_piscine_jour_hp_hc'')}},{{states(''sensor.ma_ppe_piscine_jour'')}}'
-          title: Rapport jour piscine
     default: []
   mode: single
 - id: '1634389653339'

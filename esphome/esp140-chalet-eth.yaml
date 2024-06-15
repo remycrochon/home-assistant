@@ -1,3 +1,26 @@
+# https://www.gotronic.fr/pj2-wt32-eth01-datasheet-v1-1-1-2810.pdf
+#Pin Name Description
+#1 EN1 Enable signal, active high
+#2 CFG IO32, CFG                       ---<
+#3 485_EN Enable pin of IO33, RS485    
+#4 RXD IO5, RXD2                       
+#5 TXD IO17, TXD2                      
+#6 GND GND
+#7 3V3 3V3 power supply
+#8 GND GND
+#9 5V 5V power supply
+#10 LINK Network connection indicator pin
+#11 GND GND
+#12 IO39 IO39, only supports input
+#13 IO36 IO36, only supports input
+#14 IO15 IO15
+#15 I014 IO14
+#16 IO12 IO12
+#17 IO35 IO35, only supports input
+#18 IO4 IO4                           ---<
+#19 IO2 IO2                           ---<
+#20 GND GND
+
 substitutions:
   device_name: esp140-chalet-eth
   adress_ip: "192.168.0.140"
@@ -33,12 +56,24 @@ ethernet:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+    dns1: 192.168.0.254
+
+# Protocole I2C
+i2c:
+  sda: GPIO4
+  scl: GPIO2
+  scan: True
+  id: bus_a
+
 # Connection sonde(s) de température DS18b20
 dallas:
   pin: 32
   update_interval: 10s
 
-
+# Example configuration entry for the SX1509 device
+sx1509:
+  - id: sx1509_hub1
+    address: 0x3E
 
 sensor:  
   - platform: dallas
@@ -54,7 +89,38 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
+  - platform: sx1509
+    sx1509_id: sx1509_hub1
+    name: "keypadkey_0"
+    row: 0
+    col: 0
+  - platform: sx1509
+    sx1509_id: sx1509_hub1
+    name: "keypadkey_1"
+    row: 0
+    col: 1
 
-    
+# individual binary_sensor inputs
+  - platform: gpio
+    name: "SX1509 Pin #0"
+    pin:
+      sx1509: sx1509_hub1
+      # Use pin number 0 on the SX1509
+      number: 0
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+
+  - platform: gpio
+    name: "SX1509 Pin #1"
+    pin:
+      sx1509: sx1509_hub1
+      # Use pin number 1 on the SX1509
+      number: 1
+      mode:
+        input: true
+        pullup: true
+      inverted: true    
 
     

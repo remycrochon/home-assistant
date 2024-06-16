@@ -212,7 +212,7 @@ number:
   # Simulation Niveau pH
   - platform: template
     name: "${friendly_name}_simule_pH"
-    id: simule_ph
+    id: ph_ezo
     optimistic: true
     restore_value: true
     mode: box
@@ -396,13 +396,26 @@ sensor:
       - filter_out: 0.0
 
 # Mesure du pH
+# Procédure étalonnage:
+  # Mettre 1 s dans "update interval"
+  # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
+  # 1-Faire une mesure avec solution étalon de 4.0
+  # 2-Attendre 2 à 3 minutes que ca se stabilise
+  # 3-relever la valeur du pH
+  # 4-Toujours bien rincer la sonde à l'eau déminéralisée entre deux solutions
+  # Refaire étapes 1 à 3 avec une solution étalon de 6.86
+  # Puis avec une solution étalon de 9.18
+  # Saisir les valeurs relevés dans "Calibrate_linear"
+  # Remettre 60 s dans "update interval"
+  # Compiler
+# Fin procédure étalonnage
   - platform: ezo
-    id: ph_ezo
+    id: old_ph_ezo
     name: "${friendly_name}_ph_ezo"
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 60s # Mettre 1 s pour etalonnage attendre 2/3 minutes que la valeur se tabilise
+    update_interval: 60s
   #  moyenne sur 15 mn-affichage toutes les 5mn
     filters:
       - sliding_window_moving_average:
@@ -427,7 +440,7 @@ sensor:
     name: "${friendly_name}_Pression_filtre"
     unit_of_measurement: "Bars"
     update_interval: 60s
-    attenuation: 11db
+    attenuation: 12db
     filters:
       - calibrate_linear:
         - 0.58 -> 0.0
@@ -444,7 +457,7 @@ sensor:
     name: "${friendly_name}_EANA2"
     unit_of_measurement: "Bars"
     update_interval: 60s
-    attenuation: 11db
+    attenuation: 12db
 
 # Entrée ANA3 GPIO39
   - platform: adc
@@ -453,7 +466,7 @@ sensor:
     name: "${friendly_name}_EANA3"
     unit_of_measurement: "Bars"
     update_interval: 60s
-    attenuation: 11db
+    attenuation: 12db
 
 # calcul temps injection
   - platform: template
@@ -703,7 +716,7 @@ script:
 
             - script.execute: calcul_ma_at_ppe_filtration
 
-# Calcul l'heure de debut et fin de filtration en fonction  la duréé de filtrattion et l'heure pivot
+# Calcul l'heure de debut et fin de filtration en fonction  la durée de filtration et l'heure pivot
   - id: calcul_hdebut_hfin
     mode: single
     then:
@@ -796,7 +809,7 @@ script:
     mode: single  
     then:
       - lambda: |-
-          id(g_tps_injection_ph_moins)=(((id(simule_ph).state-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
+          id(g_tps_injection_ph_moins)=(((id(ph_ezo).state-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
           id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
       
       - logger.log:
@@ -808,8 +821,8 @@ script:
           condition:
             and:
               - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
-              - lambda: 'return id(simule_ph).state > id( _ph_cible).state;'
-              - lambda: 'return id(simule_ph).state > 0;'
+              - lambda: 'return id(ph_ezo).state > id( _ph_cible).state;'
+              - lambda: 'return id(ph_ezo).state > 0;'
               - switch.is_on: cde_ppe_filtration
           then:
             - switch.turn_on: cde_ppe_ph_moins

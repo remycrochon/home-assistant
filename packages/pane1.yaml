@@ -94,7 +94,9 @@ openhasp:
       - obj: "p1b226"
         properties:
           "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
-
+      - obj: "p1b231"
+        properties:
+          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc') }} kWh"
 # Page2
 
       - obj: "p2b121"  

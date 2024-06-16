@@ -91,7 +91,7 @@ modbus_controller:
     # setup_priority: -10
 sensor:  
 
-# tension de l'alimentation
+# Lecture Registre F0-1 -> Valeur affichée
   - platform: modbus_controller
     modbus_controller_id: afficheur
     id: _niv_eau

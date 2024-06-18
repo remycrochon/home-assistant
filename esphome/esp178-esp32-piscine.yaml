@@ -32,6 +32,7 @@ status_led:
 
 # Enable logging
 logger:
+  level: INFO
 
 # Enable Home Assistant API
 api:
@@ -83,7 +84,7 @@ globals:
     - id: g_temps_min_filtration
       type: float
       initial_value: '5'            
-# Palier temperature/Temps filtration avec le mode "Palier"
+# Paliers temperature/Temps filtration avec le mode "Palier"
     - id: g_temp_palier1
       type: float
       initial_value: '9'
@@ -133,22 +134,13 @@ globals:
     - id: g_abaque_d
       type: float
       initial_value: '-10.72859'
-# Variables intermediaires calcul heure debut et fin
+# Variables intermediaires utilisées dans le calcul "heure debut et fin"
     - id: g_hh
       type: int
     - id: g_mm
       type: int
     - id: g_ss
       type: int
-
-# regulation pH
-#    {% set a=states('sensor.ph_stat_median') | float(default=0) %} {% set
-#    x=states('input_number.simul_ph') | float(default=0) %} {% set
-#    b=states('input_number.ph_cible') | float(default=0) %} {% set
-#    d=states('input_number.ph_debit_ppe') | float(default=0) %} {% set
-#    e=states('input_number.ph_concentration') | float(default=0) %} {% set
-#"    r=(((a-b)/(e/100))/d)*3600|round(2)|int(default=0) %} {% if r < 0 %} {{ 0 }}
-#    {% else %} {{ (r%60)|int(default=0) }} {% endif %}
 
 select:
   - platform: template
@@ -165,6 +157,10 @@ select:
     id: _Mode_Fonctionnement_filtration
     on_value: 
       then:
+        - logger.log:
+            format: "Mode Fonct Filtration --> %s"
+            args: [ 'id(_Mode_Fonctionnement_filtration).state.c_str()' ]
+            level: INFO
         - script.execute: Fonctionnement_filtration
 
   - platform: template
@@ -178,9 +174,32 @@ select:
     id: _Mode_Fonctionnement_regul_ph
     on_value: 
       then:
+        - logger.log:
+            format: "Mode Fonct Regul pH --> %s"
+            args: [ 'id(_Mode_Fonctionnement_regul_ph).state.c_str()' ]
+            level: INFO        
         - script.stop: _regul_ph   
-        - delay: 5s            
+        - delay: 1s            
         - script.execute: _regul_ph        
+
+  - platform: template
+    name: "${friendly_name}_Mode_Fonct_appoint_eau"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Ma_f
+      - At_f
+    id: _Mode_Fonctionnement_regul_eau
+    on_value: 
+      then:
+        - logger.log:
+            format: "Mode Fonct Regul Eau --> %s"
+            args: [ 'id(_Mode_Fonctionnement_regul_eau).state.c_str()' ]
+            level: INFO        
+        - script.stop: _regul_eau
+        - delay: 1s            
+        - script.execute: _regul_eau          
 
 # Input Number
 number:
@@ -275,6 +294,10 @@ binary_sensor:
     name: "${friendly_name}_niv_bas"
     id: niv_bas
 
+  - platform: template
+    name: "${friendly_name}_niv_defaut"
+    id: niv_defaut
+
   # Entrée logique permettant de lire le BP I00 de la carte
   - platform: gpio
     pin:
@@ -342,7 +365,6 @@ binary_sensor:
         input: true
         pullup: true
     name: "${friendly_name}_ETOR6"
-
 
 
 # Définiton de l'heure Pivot   
@@ -422,11 +444,16 @@ sensor:
           window_size: 15
           send_every: 5
           send_first_at: 1
-  # Etalonné le 28 juin 2023          
+  # Etalonné le 15 juin 2024          
       - calibrate_linear:
-        - 4.547 -> 4.0
-        - 7.282 -> 6.86
-        - 9.447 -> 9.18
+        - 4.665 -> 4.0
+        - 7.482 -> 6.86
+        - 9.505 -> 9.18          
+  # Etalonné le 28 juin 2023          
+  #    - calibrate_linear:
+  #      - 4.547 -> 4.0
+  #      - 7.282 -> 6.86
+  #      - 9.447 -> 9.18
   # Etalonné le 6 juillet 2022          
   #    - calibrate_linear:
   #      - 4.44 -> 4.0
@@ -499,7 +526,6 @@ text_sensor:
     name: "${friendly_name} affich_duree"
     icon: mdi:timer
 
-
 switch:
   - platform: gpio
     name: "${friendly_name} cde_pompe_filtration"
@@ -508,17 +534,20 @@ switch:
     on_turn_on:
       then:
         - delay: 10s
-        - logger.log: "Set tempo cde ppe"
+        - logger.log:
+            format: "Set tempo cde ppe"
+            level: DEBUG
         - lambda: |-
             id(flag_tempo_ppe_filtre) = true;
     on_turn_off: 
       then:
-        - logger.log: "Reset tempo cde ppe"
+        - logger.log:
+            format: "Reset tempo cde ppe"
+            level: DEBUG
         - lambda: |-
             id(flag_tempo_ppe_filtre) = false;
         - script.stop: _regul_ph
         - switch.turn_off: cde_ppe_ph_moins
-
 
   - platform: gpio
     name: "${friendly_name} cde_ppe_ph-"
@@ -571,7 +600,7 @@ display:
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(ph_ezo).state);
       it.printf(8,0,"P=%.3f",id(pression_filtre).state);
-#      it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau);
+      it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau));
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
 
 interval:
@@ -581,14 +610,12 @@ interval:
   - interval: 5s
     then:      
       - script.execute: Fonctionnement_filtration
+      - script.execute: calcul_niveau_eau
+      - script.execute: _regul_eau
   - interval: 5s
     then: 
       - script.execute: memorisation_temperature_eau
-  - interval: 5s
-    then: 
-      - script.execute: calcul_niveau
     
-
 # Script
 script:
   # Si la pompe tourne depuis au moins 5min on raffraichit la memoire de la temperature eau qui est
@@ -606,14 +633,16 @@ script:
             - logger.log:
                 format: "Flag=1 / Valeur Temp Dallas: %.2f / Valeur Mem Temp: %.2f"
                 args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
+                level: DEBUG
           else:
             - lambda: |-
                 id(g_memoire_temp_eau)=id(g_memoire_temp_eau);
             - logger.log:
                 format: "Flag=0 / Valeur Temp Dallas: %.2f / Valeur Mem Temp: %.2f"
                 args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
+                level: DEBUG
 
-# Calcul de la durée de la filtration en fonction du mode de fonctionnement selectioné
+# Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
 
   - id: Fonctionnement_filtration
     then:
@@ -623,14 +652,19 @@ script:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "At_f";'
           then:
             - switch.turn_off: cde_ppe_filtration
-            - logger.log: "arret_forcé_ppe_filtration"
+            - logger.log: 
+                format: "arret_forcé_ppe_filtration"
+                level: INFO
       # mode Marche forcée
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Ma_f";'
           then:
             - switch.turn_on: cde_ppe_filtration
-            - logger.log: "Marche_forcée_ppe_filtration"
+            - logger.log: 
+                format: "Marche_forcée_ppe_filtration"
+                level: INFO
+
       # mode "Palier"
       - if:
           condition:
@@ -660,6 +694,7 @@ script:
             - logger.log:
                 format: "Mode: Palier / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
+                level: DEBUG
             - script.execute: calcul_hdebut_hfin
       # mode "Classique"
       - if:
@@ -674,6 +709,7 @@ script:
             - logger.log:
                 format: "Mode Classique / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
+                level: DEBUG
             - script.execute: calcul_hdebut_hfin
       # Mode "Abacus"
       - if:
@@ -688,6 +724,7 @@ script:
             - logger.log:
                 format: "Mode Abaque / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
+                level: DEBUG
             - script.execute: calcul_hdebut_hfin
 
       # Mode "Horaire"
@@ -698,6 +735,7 @@ script:
             - logger.log:
                 format: "Mode Abaque / Valeur Mem Temp: %.2f"
                 args: [ 'id(g_memoire_temp_eau)' ]
+                level: DEBUG
 
             - datetime.time.set:
                 id: h_debut
@@ -729,6 +767,7 @@ script:
       - logger.log:
           format: "HPivot %2d:%.2d:%2d"
           args: [ 'id(heure_pivot).hour', 'id(heure_pivot).minute', 'id(heure_pivot).second' ]
+          level: DEBUG
 
       # Heure de debut = Heure pivot converti en minutes - temps filtration converti en minutes
       - lambda: |-
@@ -744,6 +783,7 @@ script:
       - logger.log:
           format: "H debut Filtration %2d: %.2d"
           args: [ 'id(g_hh)', 'id(g_mm)' ]
+          level: DEBUG
 
       - datetime.time.set:
           id: h_debut
@@ -764,6 +804,7 @@ script:
       - logger.log:
           format: "H debut Filtration %2d:%.2d"
           args: [ 'id(g_hh)', 'id(g_mm)' ]
+          level: DEBUG
 
       - datetime.time.set:
           id: h_fin
@@ -776,7 +817,7 @@ script:
 
       - script.execute: calcul_ma_at_ppe_filtration
 
-# Calcul la sortie de commande la pompe de ffiltration en fonction de l'heure actuelle, de l'heure de début et de l'heure de fin
+# Calcul la sortie de commande la pompe de filtration en fonction de l'heure actuelle, de l'heure de début et de l'heure de fin
   - id: calcul_ma_at_ppe_filtration
     mode: single
     then:
@@ -785,16 +826,22 @@ script:
       - logger.log:
           format: "H now: %.2d:%2d:%d"
           args: [ 'id(sntp_time).now().hour', 'id(sntp_time).now().minute', 'id(heure_pivot).second' ]
+          level: DEBUG
       - logger.log:
           format: "HT: %.2d - HD:%2d - HF:%d"
           args: [ 'id(sntp_time).now().hour*60+id(sntp_time).now().minute', 'id(h_debut).hour*60+id(h_debut).minute', 'id(h_fin).hour*60+id(h_fin).minute' ]
+          level: DEBUG
       - if:
           condition:
             time.has_time:
           then:
-            - logger.log: L'heure est inialisée et valide!
+            - logger.log:
+                format: "L'heure est initialisée et valide!"
+                level: INFO
           else:
-            - logger.log: L'heure n'est pas initialisée et valide!
+            - logger.log:
+                format: "L'heure n'est pas initialisée et valide!"
+                level: INFO
       - if:
           condition:
             - lambda: 'return (id(sntp_time).now().is_valid());'
@@ -805,6 +852,10 @@ script:
             - switch.turn_off: cde_ppe_filtration 
 
 # Regulation du pH
+# Calcul du temps d'injection en fonction:
+#   - de l'écart mesure-consigne
+#   - du debit ppe pH
+#   - de la concentration du pH moins
   - id: _regul_ph
     mode: single  
     then:
@@ -815,7 +866,7 @@ script:
       - logger.log:
           format: "Log tps injection: %f"
           args: [ 'id(g_tps_injection_ph_moins)' ]
-          level: "info"
+          level: INFO
 
       - if:
           condition:
@@ -826,8 +877,14 @@ script:
               - switch.is_on: cde_ppe_filtration
           then:
             - switch.turn_on: cde_ppe_ph_moins
+            - logger.log: 
+                format: "Marche ppe Ph moins"
+                level: INFO        
             - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
             - switch.turn_off: cde_ppe_ph_moins
+            - logger.log: 
+                format: "Arret ppe Ph moins"
+                level: INFO
 
       - if:
           condition:
@@ -836,7 +893,9 @@ script:
               - switch.is_on: cde_ppe_filtration
           then:
             - switch.turn_on: cde_ppe_ph_moins
-
+            - logger.log: 
+                format: "Marche ppe Ph moins"
+                level: INFO
       - if:
           condition:
             or:
@@ -844,6 +903,65 @@ script:
               - switch.is_off: cde_ppe_filtration
           then:
             - switch.turn_off: cde_ppe_ph_moins
+            - logger.log: 
+                format: "Arret ppe Ph moins"
+                level: INFO
+
+# Regulation du niveau eau piscine
+  - id: _regul_eau
+    mode: single  
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+              - binary_sensor.is_off: niv_defaut
+              - binary_sensor.is_off: volet_ferme
+              - or:
+                - binary_sensor.is_on: niv_bas
+                - binary_sensor.is_on: niv_inter
+          then:
+            - logger.log: 
+                format: "Ouverture vanne eau Mode Auto"
+                level: INFO
+            - switch.turn_on: cde_ev_eau
+            - delay: 15min
+            - logger.log: 
+                format: "Fermeture vanne eau sur Timeout 15 min"
+                level: WARN
+            - switch.turn_off: cde_ev_eau
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+              - or:
+                - binary_sensor.is_on: niv_haut
+                - binary_sensor.is_on: niv_defaut
+          then:
+            - logger.log: 
+                format: "Fermeture vanne eau Mode Auto"
+                level: INFO
+            - switch.turn_off: cde_ev_eau
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Ma_f";'
+          then: 
+            - logger.log: 
+                format: "Ouverture vanne eau Mode Ma Forçé"
+                level: INFO
+            - switch.turn_on: cde_ev_eau
+
+      - if:
+          condition:
+            or:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "At_f";'
+          then:
+            - logger.log: 
+                format: "Fermeture vanne eau Mode At Forçé"
+                level: INFO
+            - switch.turn_off: cde_ev_eau
 
 # Scripts Commande Volet
   - id: script_ouv_volet
@@ -873,8 +991,10 @@ script:
       - delay: 2s
       - switch.turn_off: cde_volet_fermeture
       - switch.turn_off: cde_eclairage
-# 
-  - id: calcul_niveau
+
+# Calcul des niveaux d'eau en fonction des sondes de niveaux
+# si niveau haut et niveau bas => niveau haut
+  - id: calcul_niveau_eau
     then:
       - if: 
           condition:
@@ -890,6 +1010,7 @@ script:
             - binary_sensor.template.publish:
                 id: niv_haut
                 state: OFF
+# si pas niveau haut et niveau bas => defaut intermédiaire
       - if: 
           condition:
             and:
@@ -903,7 +1024,8 @@ script:
           else:
             - binary_sensor.template.publish:
                 id: niv_inter
-                state: OFF                
+                state: OFF     
+# si pas niveau haut et pas niveau bas => niveau bas
       - if: 
           condition:
             and:
@@ -918,3 +1040,18 @@ script:
             - binary_sensor.template.publish:
                 id: niv_bas
                 state: OFF                
+# si niveau haut et pas niveau bas => defaut niveau
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: lsh
+              - binary_sensor.is_off: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_defaut
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_defaut
+                state: OFF                                

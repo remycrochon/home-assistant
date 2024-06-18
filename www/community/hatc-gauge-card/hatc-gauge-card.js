@@ -7,6 +7,10 @@ function isObject(val) {
     return val instanceof Object; 
 }
 
+function formatStateValue(value, digits) {
+    return parseFloat(value).toFixed(digits);
+}
+
 function calcPercent(sValue, sMax){
     var result = sValue / sMax * 100;
     result = Math.trunc(result);
@@ -91,7 +95,9 @@ class HatcGaugeCard extends LitElement {
     }
 
     static getStubConfig() {
-        return { entity: "sun.sun" }
+        return { 
+            entity: "sun.sun",
+        };
     }
 
     // Whenever the state changes, a new `hass` object is set. Use this to
@@ -161,14 +167,19 @@ class HatcGaugeCard extends LitElement {
             }
 
             var heTitle = showTitleEntity ? hassEntity.attributes.friendly_name : '';
-            var heUnitOfMeasurement = showUnitOfMeasurmentEntity ? hassEntity.entity_id.startsWith('light') && (typeof hassEntity.attributes.brightness == 'number') ? '%' : hassEntity.attributes.unit_of_measurement : '';
-            var heState = showStateEntity ? hassEntity.entity_id.startsWith('light') ? calcStatePercent(hassEntity.attributes.brightness, 254) : hassEntity.state : '';
+            var heUnitOfMeasurement = showUnitOfMeasurmentEntity ? 
+                    hassEntity.entity_id.startsWith('light') && (typeof hassEntity.attributes.brightness == 'number') ? 
+                        '%' : 
+                        hassEntity.attributes.unit_of_measurement : 
+                '';
             var heIcon = showIconEntity ? (typeof h.icon !== 'undefined' ? h.icon : icon) : '';
 
             // Gauge config
             var g = {}; var hGauge = (typeof this.config.gauge !== 'undefined') ? this.config.gauge : '';
             if(isObject(hGauge)){
                 g['textstatecolor'] = (typeof hGauge['text-color'] !== 'undefined') ? hGauge['text-color'] : '';
+                g['flexdirection'] = (typeof hGauge['direction'] !== 'undefined') ? hGauge['direction'] : 'row';
+                g['digits'] = (typeof hGauge['digits'] !== 'undefined') ? hGauge['digits'] : '0';
                 g['iconcolor'] = (typeof hGauge['icon-color'] !== 'undefined') ? hGauge['icon-color'] : g.textstateColor;
                 g['fontsize'] = (typeof hGauge['font-size'] !== 'undefined') ? hGauge['font-size'] : '22px';
                 g['iconsize'] = (typeof hGauge['icon-size'] !== 'undefined') ? hGauge['icon-size'] : g.fontsize;
@@ -177,8 +188,13 @@ class HatcGaugeCard extends LitElement {
                 g['maxvalue'] = (typeof hGauge['max_value'] !== 'undefined') ? hGauge['max_value'] : '100';
 
                 g['state'] = (typeof hGauge['state'] !== 'undefined') ? hGauge['state'] : true;
-                console.log("heIcon", heIcon);
                 g['icon'] = (typeof hGauge['icon'] !== 'undefined') ? hGauge['icon'] : (heIcon !== '' && heIcon !== false && heIcon !== 'hide') ? heIcon : icon;
+
+                var heState = showStateEntity ? 
+                    hassEntity.entity_id.startsWith('light') ? 
+                        calcStatePercent(hassEntity.attributes.brightness, 254) : 
+                        formatStateValue(hassEntity.state, g.digits) : 
+                '';
 
                 // Severity config
                 if(typeof this.config.gauge.severity !== 'undefined'){
@@ -212,7 +228,14 @@ class HatcGaugeCard extends LitElement {
                     textstateColor= 'white';
                 }
             }else{
+                var heState = showStateEntity ? 
+                    hassEntity.entity_id.startsWith('light') ? 
+                        calcStatePercent(hassEntity.attributes.brightness, 254) : 
+                        hassEntity.state : 
+                '';
+
                 g['textstatecolor'] = '';
+                g['flexdirection'] = 'row';
                 g['iconcolor'] = '';
                 g['fontsize'] = '22px';
                 g['iconsize'] = g.fontsize;
@@ -242,6 +265,7 @@ class HatcGaugeCard extends LitElement {
                 "heIcon": heIcon,
                 "hePathStrokeColor" : hePathStrokeColor,
                 "heTextStateColor" : heTextStateColor,
+                "heFlexdirection" : 'flex-direction:'+g.flexdirection+';'
             }
 
 
@@ -279,7 +303,7 @@ class HatcGaugeCard extends LitElement {
 
                             <div class="entities" style="height: ${hEntitiesHeight};">
                                 <div class="outer">
-                                    <div class="inner" style="color: ${hE.heTextStateColor}; font-size: ${g.fontsize};">
+                                    <div class="inner" style="color: ${hE.heTextStateColor}; font-size: ${g.fontsize}; ${hE.heFlexdirection}">
                                         ${gIconHTML}
                                         <div class="datas">
                                             ${gStateHTML}

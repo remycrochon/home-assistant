@@ -23,6 +23,7 @@ CONF_PRECISION_NETWORK_KB = "precision_network_kb"
 CONF_PRECISION_NETWORK_MB = "precision_network_mb"
 CONF_PREFIX = "prefix"
 CONF_RENAME = "rename"
+CONF_RENAME_ENITITY = "rename_entity"
 CONF_RETRY = "retry"
 CONF_SENSORNAME = "sensorname"
 CONF_SWITCHENABLED = "switchenabled"
@@ -210,6 +211,11 @@ CONTAINER_MONITOR_LIST = {
         native_unit_of_measurement=UnitOfInformation.MEBIBYTES,
         icon="mdi:download",
         state_class=SensorStateClass.TOTAL_INCREASING,
+    ),
+    CONTAINER_INFO_ALLINONE: SensorEntityDescription(
+        key=CONTAINER_INFO_ALLINONE,
+        name="State",
+        icon="mdi:checkbox-marked-circle-outline",
     ),
 }
 

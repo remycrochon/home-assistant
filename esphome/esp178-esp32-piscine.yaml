@@ -222,10 +222,10 @@ number:
     optimistic: true
     restore_value: true
     mode: box
-    min_value: 0
-    max_value: 100
+    min_value: 50
+    max_value: 150
     unit_of_measurement: "%"
-    step: 0.1
+    step: 1
     icon: mdi:percent
 
   # Simulation Niveau pH
@@ -470,8 +470,8 @@ sensor:
     attenuation: 12db
     filters:
       - calibrate_linear:
-        - 0.58 -> 0.0
-        - 0.82 -> 0.8
+        - 0.60 -> 0.0
+        - 0.87 -> 0.87
 # moyenne sur 30 mn + affichage toutes les mn
       - sliding_window_moving_average:
           window_size: 30

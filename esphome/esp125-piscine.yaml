@@ -101,12 +101,12 @@ sensor:
     id: esp125_pression_filtre
     name: "Pression filtre"
     unit_of_measurement: "Bars"
-    update_interval: 60s
+    update_interval: 1s
     attenuation: 12db
     filters:
       - calibrate_linear:
-        - 0.58 -> 0.0
-        - 0.82 -> 0.8
+        - 0.60 -> 0.0
+        - 0.87 -> 0.87
 # moyenne sur 30 mn + affichage toutes les mn
       - sliding_window_moving_average:
           window_size: 30

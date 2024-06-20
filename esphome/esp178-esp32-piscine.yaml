@@ -32,7 +32,7 @@ status_led:
 
 # Enable logging
 logger:
-  level: INFO
+  level: DEBUG
 
 # Enable Home Assistant API
 api:
@@ -63,28 +63,37 @@ i2c:
 # Connection sonde(s) de température DS18b20
 dallas:
   - pin: GPIO9
-
+# déclaration des variables "globals"
 globals:
-    - id: g_tps_injection_ph_moins
+    # temps de fonctionnement en début de pompage avant prise en compte de la mesure de température
+    # en secondes
+    - id: g_tps_mesure_temp
       type: float
-      restore_value: no
+      initial_value: '60'
     - id: g_memoire_temp_eau
       type: float
       restore_value: yes
+    - id: flag_tempo_ppe_filtre
+      type: bool
+
+    - id: g_tps_injection_ph_moins
+      type: float
+      restore_value: no
+    # mémorise la durée de filtation dans les différents modes de fonctionnement
     - id: g_tps_filtration
       type: float
       restore_value: no
-    - id: flag_tempo_ppe_filtre
-      type: bool
-# Limite haute du temps de filtration
+
+# Limite haute du temps de filtration "en heure"
     - id: g_temps_max_filtration
       type: float
-      initial_value: '17'
-# Limite basse du temps de filtration
+      initial_value: '23'
+# Limite basse du temps de filtration (en heure)
     - id: g_temps_min_filtration
       type: float
-      initial_value: '5'            
+      initial_value: '5'
 # Paliers temperature/Temps filtration avec le mode "Palier"
+  # Seuils Température en °C
     - id: g_temp_palier1
       type: float
       initial_value: '9'
@@ -97,7 +106,7 @@ globals:
     - id: g_temp_palier4
       type: float
       initial_value: '24' 
-
+  # nb d'heures de filtration (en h)
     - id: g_tps_palier1
       type: float
       initial_value: '1'      
@@ -114,9 +123,7 @@ globals:
       type: float
       initial_value: '10'
 
-
-# Constante utilisé dans le mode "Abaque"  
-    # coeficients utilisées en duree_abaque():
+# Constantes utilisées dans le mode "Abaque"  
 #    abaque_a: float = 0.00335
 #    abaque_b: float = -0.14953
 #    abaque_c: float = 2.43489
@@ -134,6 +141,7 @@ globals:
     - id: g_abaque_d
       type: float
       initial_value: '-10.72859'
+
 # Variables intermediaires utilisées dans le calcul "heure debut et fin"
     - id: g_hh
       type: int
@@ -142,6 +150,7 @@ globals:
     - id: g_ss
       type: int
 
+# déclaration des modes de fonctionnement dans des "input select"
 select:
   - platform: template
     name: "${friendly_name}_Mode_Fonctionnement_filtration"
@@ -272,7 +281,7 @@ number:
     min_value: 0
     max_value: 100
     unit_of_measurement: "%"
-    step: 0.1
+    step: 1
     icon: mdi:percent
 
 binary_sensor:
@@ -417,20 +426,20 @@ sensor:
     filters:
       - filter_out: 0.0
 
-# Mesure du pH
-# Procédure étalonnage:
-  # Mettre 1 s dans "update interval"
-  # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
-  # 1-Faire une mesure avec solution étalon de 4.0
-  # 2-Attendre 2 à 3 minutes que ca se stabilise
-  # 3-relever la valeur du pH
-  # 4-Toujours bien rincer la sonde à l'eau déminéralisée entre deux solutions
-  # Refaire étapes 1 à 3 avec une solution étalon de 6.86
-  # Puis avec une solution étalon de 9.18
-  # Saisir les valeurs relevés dans "Calibrate_linear"
-  # Remettre 60 s dans "update interval"
-  # Compiler
-# Fin procédure étalonnage
+  # Mesure du pH
+  # Procédure étalonnage:
+    # Mettre 1 s dans "update interval"
+    # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
+    # 1-Faire une mesure avec solution étalon de 4.0
+    # 2-Attendre 2 à 3 minutes que ca se stabilise
+    # 3-relever la valeur du pH
+    # 4-Toujours bien rincer la sonde à l'eau déminéralisée entre deux solutions
+    # Refaire étapes 1 à 3 avec une solution étalon de 6.86
+    # Puis avec une solution étalon de 9.18
+    # Saisir les valeurs relevés dans "Calibrate_linear"
+    # Remettre 60 s dans "update interval"
+    # Compiler
+  # Fin procédure étalonnage
   - platform: ezo
     id: old_ph_ezo
     name: "${friendly_name}_ph_ezo"
@@ -495,13 +504,15 @@ sensor:
     update_interval: 60s
     attenuation: 12db
 
-# calcul temps injection
+# mémorise le temps d'injection calculé
   - platform: template
     name: "${friendly_name}_tps_injection_ph_moins"
     id: _tps_injection_ph_moins
     unit_of_measurement: "s"
     state_class: "measurement"  
 
+# Déclaration des "Covers" 
+# Volet piscine dans mon cas
 cover:
   - platform: template
     name: "${friendly_name}_volet_piscine"
@@ -519,13 +530,15 @@ cover:
       - script.execute: script_stop_volet
     optimistic: true
 
+# déclaration des "text_sensors"
 text_sensor:
-# Affichage du temps de filtration
+  # Affichage des heures de filtration dans Home Assistant
   - platform: template
     id: aff_duree
     name: "${friendly_name} affich_duree"
     icon: mdi:timer
 
+# Déclaration des switches: cde des relais
 switch:
   - platform: gpio
     name: "${friendly_name} cde_pompe_filtration"
@@ -533,7 +546,7 @@ switch:
     id: cde_ppe_filtration
     on_turn_on:
       then:
-        - delay: 10s
+        - delay: !lambda "return id(g_tps_mesure_temp)*1000;" # Durée de fonctionnement de la pompe avant prise en compte de la température eau
         - logger.log:
             format: "Set tempo cde ppe"
             level: DEBUG
@@ -591,7 +604,7 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
-# gestion afficheur
+# Gestion de l'afficheur 
 display:
   - platform: lcd_pcf8574
     dimensions: 16x2
@@ -603,6 +616,7 @@ display:
       it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau));
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
 
+# Déclenchement des scripts à intervalles réguliers
 interval:
   - interval: 90s
     then:
@@ -616,12 +630,12 @@ interval:
     then: 
       - script.execute: memorisation_temperature_eau
     
-# Script
+# Déclaration des "Scripts"
 script:
+
   # Si la pompe tourne depuis au moins 5min on raffraichit la memoire de la temperature eau qui est
   # prise en compte dans les scripts.
   # sinon on travaille avec la témpérature mémorisée avant l'arret précédent
-  
   - id: memorisation_temperature_eau
     then:
       - if:
@@ -642,8 +656,8 @@ script:
                 args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
                 level: DEBUG
 
-# Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
 
+  # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: Fonctionnement_filtration
     then:
       # Mode Arret forcé
@@ -655,7 +669,7 @@ script:
             - logger.log: 
                 format: "arret_forcé_ppe_filtration"
                 level: INFO
-      # mode Marche forcée
+      # Mode Marche forcée
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Ma_f";'
@@ -665,7 +679,16 @@ script:
                 format: "Marche_forcée_ppe_filtration"
                 level: INFO
 
-      # mode "Palier"
+      # Mode "Palier":
+      # Si T°eau< Seuil Temp1 alors Durée = Tps paliers 1
+      # Sinon
+      # Si T°eau>= Seuil Temp1 et T°eau< Seuil Temp2 alors Durée = Tps paliers 2
+      # Sinon
+      # Si T°eau>= Seuil Temp2 et T°eau< Seuil Temp3 alors Durée = Tps paliers 3
+      # Sinon
+      # Si T°eau>= Seuil Temp3 et T°eau< Seuil Temp4 alors Durée = Tps paliers 4
+      # Sinon
+      # Durée = Tps paliers 5
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Palier";'
@@ -696,7 +719,9 @@ script:
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
                 level: DEBUG
             - script.execute: calcul_hdebut_hfin
-      # mode "Classique"
+      
+      # Mode "Classique":
+      # La durée de filtration en h est égale à la température de l'eau divisée par 2
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Classique";'
@@ -711,7 +736,9 @@ script:
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
                 level: DEBUG
             - script.execute: calcul_hdebut_hfin
+      
       # Mode "Abacus"
+      #
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
@@ -728,6 +755,8 @@ script:
             - script.execute: calcul_hdebut_hfin
 
       # Mode "Horaire"
+      # Débuté à l'heure programmée pour un durée programmée
+      # je m'en sers surtout l'hiver
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Horaire";'
@@ -754,7 +783,8 @@ script:
 
             - script.execute: calcul_ma_at_ppe_filtration
 
-# Calcul l'heure de debut et fin de filtration en fonction  la durée de filtration et l'heure pivot
+# Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et l'heure pivot
+# La variable: g_tps_filtration contient la durée en heure
   - id: calcul_hdebut_hfin
     mode: single
     then:

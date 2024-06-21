@@ -38,7 +38,7 @@ logger:
 api:
 
 ota:
-
+  platform: esphome
 captive_portal:
  
 web_server:
@@ -61,8 +61,9 @@ i2c:
   id: bus_a
 
 # Connection sonde(s) de température DS18b20
-dallas:
-  - pin: GPIO9
+one_wire:
+  - platform: gpio  
+    pin: GPIO9
 # déclaration des variables "globals"
 globals:
     # temps de fonctionnement en début de pompage avant prise en compte de la mesure de température
@@ -419,7 +420,7 @@ datetime:
     restore_value: true
 
 sensor:
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
     id: old_temp_eau

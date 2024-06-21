@@ -31,14 +31,15 @@ logger:
 api:
 
 ota:
-
+  platform: esphome
 web_server:
   port: 80
 
 
-# Configuration Dalas
-dallas:
-  - pin: GPIO0
+# Configuration Dallas
+one_wire:
+  - platform: gpio  
+    pin: GPIO0
 
 #Etat de la connection
 binary_sensor:
@@ -46,6 +47,6 @@ binary_sensor:
     name: "${friendly_name}_Status"
     
 sensor:
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x15006D2B00004B28
     name: "temp_congelo_garage"

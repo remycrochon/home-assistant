@@ -41,7 +41,7 @@ logger:
 api:
 
 ota:
-
+  platform: esphome
 web_server:
   port: 80
 
@@ -101,9 +101,9 @@ globals:
 
 
 # Sonde Temperature Dallas
-dallas:
-  - pin: GPIO27 #
-    update_interval: 60s
+one_wire:
+  - platform: gpio  
+    pin: GPIO27 #
 
 # Informations supplementaires sur le WIFI
 #text_sensor:
@@ -555,10 +555,11 @@ sensor:
     id: hc
 
   # Sonde Temperature radiateur
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xeb012112e461b128
     name: "${friendly_name} Temp triac"
     id: temp_triac
+    update_interval: 60s
     filters:
       - filter_out: NAN
 

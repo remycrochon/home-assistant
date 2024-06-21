@@ -16,7 +16,7 @@ esp32:
 api:
 
 ota:
-
+  platform: esphome
 wifi:
   networks:
     - ssid: !secret wifi

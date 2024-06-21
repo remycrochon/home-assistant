@@ -36,10 +36,10 @@ logger:
 api:
 
 ota:
+  platform: esphome
 
 web_server:
   port: 80
-
 
 # Input Number
 number:
@@ -75,7 +75,6 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
 sensor:
-
   - platform: homeassistant
     entity_id: "sensor.temperature_hotte_zb"
     id: temp_hotte

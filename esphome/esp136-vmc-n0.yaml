@@ -30,40 +30,45 @@ logger:
 api:
 
 ota:
-
+  platform: esphome
 web_server:
   port: 80
 
-dallas:
-  - pin: GPIO2 #D4
-    update_interval: 10s
+one_wire:
+  - platform: gpio  
+    pin: GPIO2 #D4
 
 # DS18B20 15/12/2021
 sensor:
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x5A012111F0026A28
     name: "${friendly_name} T Air Neuf"
     id: out
+    update_interval: 10s
 
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xBE012113327ECD28
     name: "${friendly_name} T Air Vicié"
     id: airv
+    update_interval: 10s
 
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x570121130B1F6B28
     name: "${friendly_name} T insufflation"
     id: insuf
+    update_interval: 10s
 
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xC90121137D4EA028
     name: "${friendly_name} T aspiration"
     id: aspi
+    update_interval: 10s
     
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x28012112F58CF028
     name: "${friendly_name} T Combles"
     id: combles
+    update_interval: 10s
 
   - platform: template
     name: "${friendly_name} Rend"

@@ -39,6 +39,7 @@ logger:
 # Enable Home Assistant API
 api:
 ota:
+  platform: esphome
 web_server:
   port: 80
 
@@ -57,9 +58,10 @@ ethernet:
     dns1: 192.168.0.254
     
 # Connection sonde(s) de température DS18b20
-dallas:
-  pin: 32
-  update_interval: 10s
+one_wire:
+  - platform: gpio    
+    pin: 32
+
   
 uart:
   id: mod_bus
@@ -113,9 +115,10 @@ sensor:
 #          send_first_at: 1 # envoi à la premiere lecture
 
 
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x82012111efe81d28
     name: "${friendly_name}_temperature_air"
+    update_interval: 60s    
     id: temp_air
 #    filters:
 #      - filter_out: 0.0

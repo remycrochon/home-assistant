@@ -29,7 +29,7 @@ logger:
 api:
 
 ota:
-
+  platform: esphome
 web_server:
   port: 80
 
@@ -38,8 +38,9 @@ web_server:
 #  tx_pin: GPIO1 # TX=pin 22
 #  baud_rate: 9600
 # Configuration Dalas
-dallas:
-  - pin: GPIO0
+one_wire:
+  - platform: gpio  
+    pin: GPIO0
 
 #Etat de la connection
 binary_sensor:
@@ -47,7 +48,7 @@ binary_sensor:
     name: "Status"
         
 sensor:
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xCA00AA2D00000328
     name: "${friendly_name} temp_ecs"
     filters:

@@ -39,6 +39,7 @@ logger:
 api:
 
 ota:
+  platform: esphome
   password: "7f5924bc7de9aceb5b6b434afab874c4" # Ne pas supprimer
 
 web_server:
@@ -66,9 +67,9 @@ i2c:
   id: bus_a
 
 # Connection sonde(s) de température DS18b20
-dallas:
-  pin: 32
-  update_interval: 10s
+one_wire:
+  - platform: gpio  
+    pin: 32
 
 # Example configuration entry for the SX1509 device
 sx1509:
@@ -76,9 +77,10 @@ sx1509:
     address: 0x3E
 
 sensor:  
-  - platform: dallas
+  - platform: dallas_temp
     address: 0x82012111efe81d28
     name: "${friendly_name}_temperature_air"
+    update_interval: 10s
     id: temp_air
 #    filters:
 #      - filter_out: 0.0

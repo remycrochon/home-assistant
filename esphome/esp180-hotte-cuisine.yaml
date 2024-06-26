@@ -19,7 +19,8 @@ wifi:
   networks:
     - ssid: !secret wifi
       password: !secret mdpwifi
-  reboot_timeout: 5min
+      
+  reboot_timeout: 1min
 
   manual_ip:
     static_ip: ${adress_ip}

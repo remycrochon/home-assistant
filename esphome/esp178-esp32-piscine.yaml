@@ -803,7 +803,7 @@ script:
 
             - script.execute: calcul_ma_at_ppe_filtration
 
-# Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et l'heure pivot
+# Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
 # La variable: g_tps_filtration contient la durée en heure
   - id: calcul_hdebut_hfin
     mode: single

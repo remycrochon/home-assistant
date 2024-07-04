@@ -379,7 +379,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO5
+      number: GPIO15
       inverted: True
       mode:
         input: true

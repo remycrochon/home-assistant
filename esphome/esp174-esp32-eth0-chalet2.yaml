@@ -116,12 +116,12 @@ sensor:
 
 
   - platform: dallas_temp
-    address: 0x82012111efe81d28
+    address: 0xab0321117f919d28
     name: "${friendly_name}_temperature_air"
     update_interval: 60s    
     id: temp_air
-#    filters:
-#      - filter_out: 0.0
+    filters:
+      - filter_out: 0.0
 
 ############### TEMPLATE  ######################"
 # Calcul volume eau

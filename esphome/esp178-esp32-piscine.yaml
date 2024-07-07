@@ -89,7 +89,7 @@ one_wire:
     pin: GPIO9
 # déclaration des variables "globals"
 globals:
-    # temps de fonctionnement en début de pompage avant prise en compte de la mesure de température
+    # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
     # en secondes
     - id: g_tps_mesure_temp
       type: float
@@ -100,6 +100,12 @@ globals:
     - id: flag_tempo_ppe_filtre
       type: bool
 
+    # flag marche Hors gel activé
+    - id: g_flag_hg
+      type: bool
+      restore_value: yes
+
+    # temps d'injection
     - id: g_tps_injection_ph_moins
       type: float
       restore_value: no
@@ -170,6 +176,7 @@ globals:
     - id: g_ss
       type: int
 
+
 # déclaration des modes de fonctionnement dans des "input select"
 select:
   - platform: template
@@ -228,7 +235,17 @@ select:
             level: INFO        
         - script.stop: _regul_eau
         - delay: 1s            
-        - script.execute: _regul_eau          
+        - script.execute: _regul_eau  
+
+# défini l'activation du mode Hors Gel
+  - platform: template
+    name: "${friendly_name}_Mode_Hors_Gel"
+    optimistic: true
+    restore_value: true
+    options:
+      - Desactivé
+      - Activé
+    id: _Mode_Fonctionnement_hg
 
 # Input Number
 number:
@@ -304,10 +321,41 @@ number:
     step: 1
     icon: mdi:percent
 
+  # Seuil 1 Temp Hors gel
+  - platform: template
+    name: "${friendly_name}_Seuil1_Temp_HG"
+    id: s1_temp_hg
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -5
+    max_value: 0
+    device_class: temperature
+    step: 0.1  
+  # Seuil 1 Temp Hors gel
+  - platform: template
+    name: "${friendly_name}_Seuil2_Temp_HG"
+    id: s2_temp_hg
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -10
+    max_value: 0
+    device_class: temperature
+    step: 0.1
+
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
+
+# entrée Forçage Arret pompe filtration
+  - platform: homeassistant
+    entity_id: input_boolean.piscine_arret_force
+    id: ent_at_force
+    on_state: 
+      then:
+        - script.execute: Fonctionnement_filtration
 
 # calcul des niveaux piscine
 # Si LSL ou LSH recouvert alors True sinon False
@@ -383,7 +431,7 @@ binary_sensor:
       inverted: True
       mode:
         input: true
-        pullup: true
+        pullup: false
     name: "${friendly_name}_ETOR5"
 
   - platform: gpio
@@ -425,6 +473,15 @@ datetime:
     #disabled_by_default: true # Ne pas afficher dans HA
 
   - platform: template
+    id: duree_filtration
+    type: time
+    name: "${friendly_name}_duree_filtration"
+    optimistic: yes
+    initial_value: "00:00:00"
+    restore_value: true
+    #disabled_by_default: true # Ne pas afficher dans HA
+
+  - platform: template
     id: debut_mode_horaire
     type: time
     name: "${friendly_name}_debut_mode_horaire"
@@ -439,6 +496,11 @@ datetime:
     restore_value: true
 
 sensor:
+  - platform: homeassistant
+    name: "${friendly_name}_temperature_exterieure"
+    entity_id: "sensor.vp2_temp_out"
+    id: temp_ext
+    
   - platform: dallas_temp
     address: 0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
@@ -554,8 +616,8 @@ cover:
 text_sensor:
   # Affichage des heures de filtration dans Home Assistant
   - platform: template
-    id: aff_duree
-    name: "${friendly_name} affich_duree"
+    id: aff_heure_filtration
+    name: "${friendly_name} affich_heure_filtration"
     icon: mdi:timer
 
 # Déclaration des switches: cde des relais
@@ -649,7 +711,10 @@ interval:
   - interval: 5s
     then: 
       - script.execute: memorisation_temperature_eau
-    
+  - interval: 900s # Test HG toutes les 15 mn
+    then: 
+      - script.execute: fonction_hors_gel
+
 # Déclaration des "Scripts"
 script:
 
@@ -680,24 +745,74 @@ script:
   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: Fonctionnement_filtration
     then:
+      # Entrée Arret Forcée =true
+      - if:
+          condition:
+            - lambda: 'return id(ent_at_force).state == true;'
+          then:
+            - switch.turn_off: cde_ppe_filtration
+            - logger.log: 
+                format: "entrée_arret_forcé_ppe_filtration"
+                level: INFO
+            - lambda: |-
+                static String mess;
+                mess= "Ent At Forcé";
+                id(aff_heure_filtration).publish_state(mess.c_str());
+            # RAZ de la durée de filtration
+            - datetime.time.set:
+                id: duree_filtration
+                time: !lambda |-
+                  return {second: 0, minute: 0, hour: 0};                
+      # Entrée Marche Forcée HG
+      - if:
+          condition:
+            - lambda: 'return id(g_flag_hg) == true;'
+          then:
+            - switch.turn_on: cde_ppe_filtration
+            - logger.log: 
+                format: "Marche HG Ppe filtration"
+                level: INFO
+            - lambda: |-
+                static String mess;
+                mess= "Ma HG";
+                id(aff_heure_filtration).publish_state(mess.c_str());
+            # RAZ de la durée de filtration
+            - datetime.time.set:
+                id: duree_filtration
+                time: !lambda |-
+                  return {second: 0, minute: 0, hour: 0};
+
       # Mode Arret forcé
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "At_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "At_f";'
+              - lambda: 'return id(ent_at_force).state == false;'
+              - lambda: 'return id(g_flag_hg) == false;'
           then:
             - switch.turn_off: cde_ppe_filtration
             - logger.log: 
                 format: "arret_forcé_ppe_filtration"
                 level: INFO
+            - lambda: |-
+                static String mess;
+                mess="At_force";
+                id(aff_heure_filtration).publish_state(mess.c_str());
+
       # Mode Marche forcée
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Ma_f";'
+            - lambda: 'return id(ent_at_force).state == false;'
+            - lambda: 'return id(g_flag_hg) == false;'
           then:
             - switch.turn_on: cde_ppe_filtration
             - logger.log: 
                 format: "Marche_forcée_ppe_filtration"
                 level: INFO
+            - lambda: |-
+                static String mess;
+                mess="Ma_force";
+                id(aff_heure_filtration).publish_state(mess.c_str());                
 
       # Mode "Palier":
       # Si T°eau< Seuil Temp1 alors Durée = Tps paliers 1
@@ -712,6 +827,8 @@ script:
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Palier";'
+            - lambda: 'return id(ent_at_force).state == false;'
+            - lambda: 'return id(g_flag_hg) == false;'
           then:
             - lambda: |-
                 if (id(g_memoire_temp_eau)<id(g_temp_palier1)){
@@ -745,6 +862,8 @@ script:
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Classique";'
+            - lambda: 'return id(ent_at_force).state == false;'     
+            - lambda: 'return id(g_flag_hg) == false;'       
           then:
             - lambda: |-
                 id(g_tps_filtration)=id(g_memoire_temp_eau)/2;
@@ -762,6 +881,8 @@ script:
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
+            - lambda: 'return id(ent_at_force).state == false;'    
+            - lambda: 'return id(g_flag_hg) == false;'        
           then:
             - lambda: |-
                   id(g_tps_filtration)=id(g_abaque_a)*pow(id(g_memoire_temp_eau),3)+id(g_abaque_b)*pow(id(g_memoire_temp_eau),2)+id(g_abaque_c)*id(g_memoire_temp_eau)+id(g_abaque_d);
@@ -780,6 +901,8 @@ script:
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Horaire";'
+            - lambda: 'return id(ent_at_force).state == false;'
+            - lambda: 'return id(g_flag_hg) == false;'
           then:
             - logger.log:
                 format: "Mode Abaque / Valeur Mem Temp: %.2f"
@@ -795,12 +918,11 @@ script:
                 id: h_fin
                 time: !lambda |-
                   return {second: 0, minute: id(h_debut).minute+id(duree_mode_horaire).minute, hour: id(h_debut).hour+id(duree_mode_horaire).hour};
-
             - lambda: |-
-                static String mes;
-                mes= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
-                id(aff_duree).publish_state(mes.c_str());
-
+                static String mess;
+                mess= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
+                id(aff_heure_filtration).publish_state(mess.c_str());
+                
             - script.execute: calcul_ma_at_ppe_filtration
 
 # Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
@@ -860,10 +982,17 @@ script:
           id: h_fin
           time: !lambda |-
             return {second: 0, minute: id(g_mm), hour: id(g_hh)};
+  
+      # Calcul de la durée de filtration en hh:mm
+      - datetime.time.set:
+          id: duree_filtration
+          time: !lambda |-
+            return {second: 0, minute: id(h_fin).minute-id(h_debut).minute, hour: id(h_fin).hour-id(h_debut).hour};
+      
       - lambda: |-
-          static String mes;
-          mes= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(heure_pivot).hour)+":"+String(id(heure_pivot).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
-          id(aff_duree).publish_state(mes.c_str());
+          static String mess;
+          mess= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(heure_pivot).hour)+":"+String(id(heure_pivot).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
+          id(aff_heure_filtration).publish_state(mess.c_str());          
 
       - script.execute: calcul_ma_at_ppe_filtration
 
@@ -899,7 +1028,8 @@ script:
           then:
             - switch.turn_on: cde_ppe_filtration
           else:
-            - switch.turn_off: cde_ppe_filtration 
+            - switch.turn_off: cde_ppe_filtration
+    
 
 # Regulation du pH
 # Calcul du temps d'injection en fonction:
@@ -1096,7 +1226,6 @@ script:
             and:
               - binary_sensor.is_on: lsh
               - binary_sensor.is_off: lsl
-          
           then:
             - binary_sensor.template.publish:
                 id: niv_defaut
@@ -1104,4 +1233,50 @@ script:
           else:
             - binary_sensor.template.publish:
                 id: niv_defaut
-                state: OFF                                
+                state: OFF
+
+# Fonctionnement Hors Gel
+# Si temp extérieure inferieur à seuil1 et supérieur à seuil2 alors Ma pompe Filtration pendant 15 mn
+# Si temp extérieure inferieur à seuil2 alors Ma pompe Filtration pendant 30 mn
+
+  - id: fonction_hors_gel
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
+              - lambda: 'return id(temp_ext).state < id(s1_temp_hg).state;'
+              - lambda: 'return id(temp_ext).state > id(s2_temp_hg).state;'
+              - lambda: 'return id(g_flag_hg) == false;'
+          then:
+            - lambda: |-
+                id(g_flag_hg) = true;
+            - logger.log: 
+                format: "Activation Ma pompe HG Seuil1"
+                level: INFO
+            - delay: 900s
+            - lambda: |-
+                id(g_flag_hg) = false;
+            - logger.log: 
+                format: "Désactivation Ma pompe HG Seuil1"
+                level: INFO                  
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
+              - lambda: 'return id(temp_ext).state < id(s1_temp_hg).state;'
+              - lambda: 'return id(temp_ext).state > id(s2_temp_hg).state;'
+              - lambda: 'return id(g_flag_hg) == false;'
+          then:
+            - lambda: |-
+                id(g_flag_hg) = true;
+            - logger.log: 
+                format: "Activation Ma pompe HG Seuil2"
+                level: INFO
+            - delay: 1800s
+            - lambda: |-
+                id(g_flag_hg) = false;
+            - logger.log: 
+                format: "Désactivation Ma pompe HG Seuil2"
+                level: INFO                               

@@ -260,10 +260,7 @@
       - condition: trigger
         id: seuil_haut
       sequence:
-      - service: vacuum.return_to_base
-        target:
-          entity_id:
-          - vacuum.am435x_awd
+      - service: lawn_mower.dock
         data: {}
       - service: notify.telegram
         data:
@@ -274,14 +271,9 @@
     - conditions:
       - condition: trigger
         id: seuil_bas
-      - condition: state
-        entity_id: input_boolean.am435x_awd_autorisation_tonte
-        state: 'on'
       sequence:
-      - service: vacuum.start
+      - service: lawn_mower.start_mowing
         data: {}
-        target:
-          entity_id: vacuum.am435x_awd
       - service: notify.telegram
         data:
           message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}

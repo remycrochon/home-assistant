@@ -20,7 +20,6 @@
 #19 IO2 IO2
 #20 GND GND
 
-
 substitutions:
   device_name: "esp178-esp32-piscine"
   friendly_name: esp178
@@ -55,17 +54,19 @@ status_led:
 
 # Enable logging
 logger:
-  level: DEBUG
+  level: INFO
 
 # Enable Home Assistant API
 api:
 
 ota:
   platform: esphome
+
 captive_portal:
  
 web_server:
   port: 80
+  version: 2
 
 time:
   - platform: sntp
@@ -87,6 +88,7 @@ i2c:
 one_wire:
   - platform: gpio  
     pin: GPIO9
+
 # déclaration des variables "globals"
 globals:
     # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
@@ -197,7 +199,7 @@ select:
             format: "Mode Fonct Filtration --> %s"
             args: [ 'id(_Mode_Fonctionnement_filtration).state.c_str()' ]
             level: INFO
-        - script.execute: Fonctionnement_filtration
+        - script.execute: _fonctionnement_filtration
 
   - platform: template
     name: "${friendly_name}_Mode_Fonctionnement_regul_ph"
@@ -249,10 +251,10 @@ select:
 
 # Input Number
 number:
-  # Simulation Temp eau
+  # Simulation Temp eau et Mesure pH
   - platform: template
     name: "${friendly_name}_simule_Temp"
-    id: temp_eau
+    id: simule_temp_eau
     optimistic: true
     restore_value: true
     mode: box
@@ -260,8 +262,20 @@ number:
     max_value: 50
     device_class: temperature
     step: 0.1  
-  # Simulation Temp eau
 
+  # Simulation Niveau pH
+  - platform: template
+    name: "${friendly_name}_simule_pH"
+    id: simule_ph_ezo
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: "pH"
+    step: 0.1  
+
+  # Coefficient de filtration
   - platform: template
     name: "${friendly_name}_coeff_Filtration"
     id: coeff_filtration
@@ -273,18 +287,6 @@ number:
     unit_of_measurement: "%"
     step: 1
     icon: mdi:percent
-
-  # Simulation Niveau pH
-  - platform: template
-    name: "${friendly_name}_simule_pH"
-    id: ph_ezo
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 10
-    unit_of_measurement: "pH"
-    step: 0.1  
 
   # Cible Niveau pH
   - platform: template
@@ -331,8 +333,9 @@ number:
     min_value: -5
     max_value: 0
     device_class: temperature
-    step: 0.1  
-  # Seuil 1 Temp Hors gel
+    step: 0.1
+
+  # Seuil 2 Temp Hors gel
   - platform: template
     name: "${friendly_name}_Seuil2_Temp_HG"
     id: s2_temp_hg
@@ -355,7 +358,7 @@ binary_sensor:
     id: ent_at_force
     on_state: 
       then:
-        - script.execute: Fonctionnement_filtration
+        - script.execute: _fonctionnement_filtration
 
 # calcul des niveaux piscine
 # Si LSL ou LSH recouvert alors True sinon False
@@ -443,7 +446,6 @@ binary_sensor:
         pullup: true
     name: "${friendly_name}_ETOR6"
 
-
 # Définiton de l'heure Pivot   
 datetime:
   - platform: template
@@ -460,17 +462,15 @@ datetime:
     name: "${friendly_name}_h_debut"
     optimistic: yes
     initial_value: "00:00:00"
-    restore_value: true
-    #disabled_by_default: true # Ne pas afficher dans HA #ne fonctionne pas
-
+    restore_value: false
+    
   - platform: template
     id: h_fin
     type: time
     name: "${friendly_name}_h_fin"
     optimistic: yes
     initial_value: "00:00:00"
-    restore_value: true
-    #disabled_by_default: true # Ne pas afficher dans HA
+    restore_value: false
 
   - platform: template
     id: duree_filtration
@@ -478,8 +478,7 @@ datetime:
     name: "${friendly_name}_duree_filtration"
     optimistic: yes
     initial_value: "00:00:00"
-    restore_value: true
-    #disabled_by_default: true # Ne pas afficher dans HA
+    restore_value: false
 
   - platform: template
     id: debut_mode_horaire
@@ -500,11 +499,12 @@ sensor:
     name: "${friendly_name}_temperature_exterieure"
     entity_id: "sensor.vp2_temp_out"
     id: temp_ext
-    
+#    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
+
   - platform: dallas_temp
     address: 0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
-    id: old_temp_eau
+    id: temp_eau
     filters:
       - filter_out: 0.0
 
@@ -523,7 +523,7 @@ sensor:
     # Compiler
   # Fin procédure étalonnage
   - platform: ezo
-    id: old_ph_ezo
+    id: ph_ezo
     name: "${friendly_name}_ph_ezo"
     address: 99
     unit_of_measurement: "pH"
@@ -705,15 +705,15 @@ interval:
       - script.execute: _regul_ph
   - interval: 5s
     then:      
-      - script.execute: Fonctionnement_filtration
-      - script.execute: calcul_niveau_eau
+      - script.execute: _fonctionnement_filtration
+      - script.execute: _calcul_niveau_eau
       - script.execute: _regul_eau
   - interval: 5s
     then: 
-      - script.execute: memorisation_temperature_eau
-  - interval: 900s # Test HG toutes les 15 mn
+      - script.execute: _memorisation_temperature_eau
+  - interval: 30s # Test HG toutes les 15 mn (900s)
     then: 
-      - script.execute: fonction_hors_gel
+      - script.execute: _fonction_hors_gel
 
 # Déclaration des "Scripts"
 script:
@@ -721,7 +721,7 @@ script:
   # Si la pompe tourne depuis au moins 5min on raffraichit la memoire de la temperature eau qui est
   # prise en compte dans les scripts.
   # sinon on travaille avec la témpérature mémorisée avant l'arret précédent
-  - id: memorisation_temperature_eau
+  - id: _memorisation_temperature_eau
     then:
       - if:
           condition:
@@ -729,21 +729,17 @@ script:
           then:
             - lambda: |-
                 id(g_memoire_temp_eau)=id(temp_eau).state;            
-            - logger.log:
-                format: "Flag=1 / Valeur Temp Dallas: %.2f / Valeur Mem Temp: %.2f"
-                args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
-                level: DEBUG
           else:
             - lambda: |-
                 id(g_memoire_temp_eau)=id(g_memoire_temp_eau);
-            - logger.log:
-                format: "Flag=0 / Valeur Temp Dallas: %.2f / Valeur Mem Temp: %.2f"
-                args: [ 'id(temp_eau).state','id(g_memoire_temp_eau)' ]
-                level: DEBUG
+      - logger.log:
+          format: "Flag Temp: %i / Temp Dallas: %.2f / Mem Temp: %.2f"
+          args: [ 'id(flag_tempo_ppe_filtre)','id(temp_eau).state','id(g_memoire_temp_eau)' ]
+          level: DEBUG
 
 
   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
-  - id: Fonctionnement_filtration
+  - id: _fonctionnement_filtration
     then:
       # Entrée Arret Forcée =true
       - if:
@@ -772,6 +768,10 @@ script:
             - logger.log: 
                 format: "Marche HG Ppe filtration"
                 level: INFO
+            - logger.log:
+                format: "Flag HG: %i / Temp Ext: %.2f / S1: %.2f / S2: %.2f"
+                args: [ 'id(g_flag_hg)','id(temp_ext).state','id(s1_temp_hg).state','id(s2_temp_hg).state' ]
+                level: INFO                
             - lambda: |-
                 static String mess;
                 mess= "Ma HG";
@@ -855,7 +855,7 @@ script:
                 format: "Mode: Palier / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
                 level: DEBUG
-            - script.execute: calcul_hdebut_hfin
+            - script.execute: _calcul_hdebut_hfin
       
       # Mode "Classique":
       # La durée de filtration en h est égale à la température de l'eau divisée par 2
@@ -874,7 +874,7 @@ script:
                 format: "Mode Classique / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
                 level: DEBUG
-            - script.execute: calcul_hdebut_hfin
+            - script.execute: _calcul_hdebut_hfin
       
       # Mode "Abacus"
       #
@@ -893,7 +893,7 @@ script:
                 format: "Mode Abaque / Valeur Mem Temp: %.2f / Tps Filtrat: %2f"
                 args: [ 'id(g_memoire_temp_eau)','id(g_tps_filtration)' ]
                 level: DEBUG
-            - script.execute: calcul_hdebut_hfin
+            - script.execute: _calcul_hdebut_hfin
 
       # Mode "Horaire"
       # Débuté à l'heure programmée pour un durée programmée
@@ -923,11 +923,11 @@ script:
                 mess= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
                 id(aff_heure_filtration).publish_state(mess.c_str());
                 
-            - script.execute: calcul_ma_at_ppe_filtration
+            - script.execute: _calcul_ma_at_ppe_filtration
 
 # Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
 # La variable: g_tps_filtration contient la durée en heure
-  - id: calcul_hdebut_hfin
+  - id: _calcul_hdebut_hfin
     mode: single
     then:
       #RAZ des secondes de l'heure pivot
@@ -994,10 +994,10 @@ script:
           mess= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(heure_pivot).hour)+":"+String(id(heure_pivot).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
           id(aff_heure_filtration).publish_state(mess.c_str());          
 
-      - script.execute: calcul_ma_at_ppe_filtration
+      - script.execute: _calcul_ma_at_ppe_filtration
 
 # Calcul la sortie de commande la pompe de filtration en fonction de l'heure actuelle, de l'heure de début et de l'heure de fin
-  - id: calcul_ma_at_ppe_filtration
+  - id: _calcul_ma_at_ppe_filtration
     mode: single
     then:
       - lambda: |-
@@ -1174,7 +1174,7 @@ script:
 
 # Calcul des niveaux d'eau en fonction des sondes de niveaux
 # si niveau haut et niveau bas => niveau haut
-  - id: calcul_niveau_eau
+  - id: _calcul_niveau_eau
     then:
       - if: 
           condition:
@@ -1239,8 +1239,22 @@ script:
 # Si temp extérieure inferieur à seuil1 et supérieur à seuil2 alors Ma pompe Filtration pendant 15 mn
 # Si temp extérieure inferieur à seuil2 alors Ma pompe Filtration pendant 30 mn
 
-  - id: fonction_hors_gel
+  - id: _fonction_hors_gel
     then:
+      # Reset flag HG si temp >S1
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
+              - lambda: 'return id(temp_ext).state > id(s1_temp_hg).state;'
+          then:
+            - lambda: |-
+                id(g_flag_hg) = false;
+            - logger.log: 
+                format: "Reset Flag HG"
+                level: INFO
+       
+      # Activation si S1 >temp >S2
       - if:
           condition:
             and:
@@ -1252,31 +1266,31 @@ script:
             - lambda: |-
                 id(g_flag_hg) = true;
             - logger.log: 
-                format: "Activation Ma pompe HG Seuil1"
+                format: "Set Flag HG Seuil1"
                 level: INFO
-            - delay: 900s
+            - delay: 20s  #900s
             - lambda: |-
                 id(g_flag_hg) = false;
             - logger.log: 
-                format: "Désactivation Ma pompe HG Seuil1"
+                format: "Reset Flag HG Seuil1"
                 level: INFO                  
-
+      # Activation si temp > seuil2
       - if:
           condition:
             and:
               - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
               - lambda: 'return id(temp_ext).state < id(s1_temp_hg).state;'
-              - lambda: 'return id(temp_ext).state > id(s2_temp_hg).state;'
+              - lambda: 'return id(temp_ext).state < id(s2_temp_hg).state;'
               - lambda: 'return id(g_flag_hg) == false;'
           then:
             - lambda: |-
                 id(g_flag_hg) = true;
             - logger.log: 
-                format: "Activation Ma pompe HG Seuil2"
+                format: "Set Flag HG Seuil2"
                 level: INFO
-            - delay: 1800s
+            - delay: 20s  #1800s
             - lambda: |-
                 id(g_flag_hg) = false;
             - logger.log: 
-                format: "Désactivation Ma pompe HG Seuil2"
+                format: "Reset Flag HG Seuil2"
                 level: INFO                               

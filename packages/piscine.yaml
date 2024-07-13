@@ -106,6 +106,7 @@ input_boolean:
   piscine_arret_force:
     name: Piscine Arret Forcé
     icon: mdi:head-snowflake
+    device_class: running
 
   # EV appoint Piscine en mode automatique
   ev_eau_piscine:

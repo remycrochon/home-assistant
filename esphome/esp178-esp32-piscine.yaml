@@ -346,19 +346,45 @@ number:
     max_value: 0
     device_class: temperature
     step: 0.1
+  
+  # Durée de l'arret sur la journée en lien avec "arret_jour"
+  - platform: template
+    name: "${friendly_name}_Durée-Arret_jour"
+    id: duree_at_jour
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 24
+    unit_of_measurement: "h"
+    step: 1
+button:
+# Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
+  - platform: template
+    name: "${friendly_name}_BP_arret_jour"
+    id: _arret_jour
+    on_press: 
+      then:
+      - switch.template.publish:
+          id: ent_at_force
+          state: ON
+      - logger.log:
+          format: "Début arret jour pour : %.0f h"
+          args: [ 'id(duree_at_jour).state' ]
+          level: INFO         
+      - delay: !lambda "return id(duree_at_jour).state*10*1000;"
+      - switch.template.publish:
+          id: ent_at_force
+          state: OFF
+      - logger.log:
+          format: "Fin arret jour de : %.0f h"
+          args: [ 'id(duree_at_jour).state' ]
+          level: info 
 
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
-
-# entrée Forçage Arret pompe filtration
-  - platform: homeassistant
-    entity_id: input_boolean.piscine_arret_force
-    id: ent_at_force
-    on_state: 
-      then:
-        - script.execute: _fonctionnement_filtration
 
 # calcul des niveaux piscine
 # Si LSL ou LSH recouvert alors True sinon False
@@ -686,6 +712,19 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
+  # Switch Forçage Arret pompe filtration
+  #     lambda: return id(ent_at_force).state;
+  - platform: template
+    name: "${friendly_name}_ent_arret_forcé"
+    id: ent_at_force
+    optimistic: True
+    turn_on_action: 
+      then:
+        - script.execute: _fonctionnement_filtration
+    turn_off_action: 
+      then:
+        - script.execute: _fonctionnement_filtration
+
 # Gestion de l'afficheur 
 display:
   - platform: lcd_pcf8574
@@ -741,6 +780,10 @@ script:
   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: _fonctionnement_filtration
     then:
+      - logger.log:
+          format: "Switch at force 2: %i "
+          args: [ 'id(ent_at_force).state' ]
+          level: INFO      
       # Entrée Arret Forcée =true
       - if:
           condition:
@@ -1013,10 +1056,6 @@ script:
       - if:
           condition:
             time.has_time:
-          then:
-            - logger.log:
-                format: "L'heure est initialisée et valide!"
-                level: INFO
           else:
             - logger.log:
                 format: "L'heure n'est pas initialisée et valide!"
@@ -1268,7 +1307,7 @@ script:
             - logger.log: 
                 format: "Set Flag HG Seuil1"
                 level: INFO
-            - delay: 20s  #900s
+            - delay: 900s  #900s
             - lambda: |-
                 id(g_flag_hg) = false;
             - logger.log: 
@@ -1288,7 +1327,7 @@ script:
             - logger.log: 
                 format: "Set Flag HG Seuil2"
                 level: INFO
-            - delay: 20s  #1800s
+            - delay: 1800s  #1800s
             - lambda: |-
                 id(g_flag_hg) = false;
             - logger.log: 

@@ -42,6 +42,13 @@ ota:
 web_server:
   port: 80
 
+# Connection Bus i2c (Afficheur, EZO,...)
+i2c:
+  sda: 17
+  scl: 16
+  scan: true
+  id: bus_a
+
 # Input Number
 number:
   # Seuil humidité v1->v2
@@ -76,16 +83,20 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
 sensor:
-  - platform: homeassistant
-    entity_id: "sensor.temperature_hotte_zb"
-    id: temp_hotte
 
-  - platform: homeassistant
-    entity_id: "sensor.humidite_hotte_zb"
-    id: hum_hotte
-    on_value:
-      then:
-        - script.execute: calcul_vitesse
+  - platform: htu21d
+    model: htu21d
+    update_interval: 10s
+    temperature:
+      name: "${friendly_name}_Temperature_hotte"
+      id: temp_hotte
+      
+    humidity:
+      name: "${friendly_name}_Humidite_hotte"
+      id: hum_hotte
+      on_value:
+        then:
+          - script.execute: calcul_vitesse
 
 switch:
   - platform: template
@@ -161,7 +172,7 @@ switch:
 
   - platform: gpio
     name: "${friendly_name} R3"
-    pin: GPIO26
+    pin: GPIO27
     id: r3
 
   - platform: gpio

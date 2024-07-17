@@ -78,7 +78,7 @@ sx1509:
 
 sensor:  
   - platform: dallas_temp
-    address: 0x82012111efe81d28
+    address: 0x060321117ae89b28 #   0x82012111efe81d28
     name: "${friendly_name}_temperature_air"
     update_interval: 10s
     id: temp_air

@@ -54,7 +54,7 @@ status_led:
 
 # Enable logging
 logger:
-  level: INFO
+  level: DEBUG
 
 # Enable Home Assistant API
 api:
@@ -86,9 +86,9 @@ i2c:
 
 # Connection sonde(s) de température DS18b20
 one_wire:
-  - platform: gpio  
-    pin: GPIO9
-
+  - platform: gpio
+    pin: GPIO09
+#    pin: GPIO05
 # déclaration des variables "globals"
 globals:
     # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
@@ -99,6 +99,7 @@ globals:
     - id: g_memoire_temp_eau
       type: float
       restore_value: yes
+      initial_value: '25'
     - id: flag_tempo_ppe_filtre
       type: bool
 
@@ -528,7 +529,7 @@ sensor:
 #    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
 
   - platform: dallas_temp
-    address: 0x82012111efe81d28
+    address: 0x060321117ae89b28 #  0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
     id: temp_eau
     filters:

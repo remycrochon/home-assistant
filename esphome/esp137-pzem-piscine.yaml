@@ -1,3 +1,9 @@
+substitutions:
+  device_name: esp137-pzem_piscine
+  adress_ip: "192.168.0.137"
+  friendly_name: esp137
+  time_timezone: "Europe/Paris"
+
 esphome:
   name: esp137-pzem-piscine
   platform: ESP8266
@@ -5,18 +11,15 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 1
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 0
   reboot_timeout: 5min
-
+  
   manual_ip:
-    static_ip: 192.168.0.137  
+    static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+    dns1: 192.168.0.254
 
 # Enable logging
 logger:
@@ -35,10 +38,32 @@ uart:
   tx_pin: GPIO1
   baud_rate: 9600
 
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
+
 #Etat de la connection
 binary_sensor:
   - platform: status
-    name: "esp137_Status"
+    name: "${friendly_name}_Status"
+
+# Pompe en fonctionnement
+  - platform: template
+    name: "${friendly_name}_ppe_en_fonctionnement"
+    id: ppe_filt_en_fonctionnement
+    lambda: |-
+      if (id(puissance).state > 100) {
+        // Pompe Fonctionne si puissance>100 W
+        return true;
+      } else {
+        // pompe Arretée.
+        return false;
+      }
 
 sensor:
   - platform: pzemac
@@ -57,5 +82,35 @@ sensor:
     power:
       name: "pzem_pisc_puissance"
       unit_of_measurement: "W"
-      
+      id: puissance
 
+# Energie consommée par jour
+  - platform: total_daily_energy
+    name: '${friendly_name}_energie_jour'
+    power_id: puissance
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+# Calcul du temps de fonctionnement
+  # Pompe piscine
+  - platform: duty_time
+    id: _temps_fonctionnement_ppe_piscine_jour
+    name: '${friendly_name}_temps_ma_ppe_piscine_jour'
+    # Support logical sources (optional): 'binary_sensor'
+    sensor: ppe_filt_en_fonctionnement
+    # ... EOR 'lambda'
+    #lambda: "return id(my_climate).mode != CLIMATE_MODE_OFF;"
+    # Restore (optional, default: False)
+    restore: false
+    # Sensor for last turn-on time (optional)
+    last_time:
+      name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"

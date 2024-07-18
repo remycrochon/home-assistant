@@ -19,6 +19,8 @@
 #18 IO4 IO4
 #19 IO2 IO2
 #20 GND GND
+# PINOUT Mapping https://lastminuteengineers.com/esp32-wroom-32-pinout-reference/
+
 
 substitutions:
   device_name: "esp178-esp32-piscine"
@@ -84,6 +86,12 @@ i2c:
   scan: true
   id: bus_a
 
+# Configuration UART
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
 # Connection sonde(s) de température DS18b20
 one_wire:
   - platform: gpio
@@ -93,13 +101,17 @@ one_wire:
 globals:
     # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
     # en secondes
-    - id: g_tps_mesure_temp
-      type: float
-      initial_value: '60'
+
     - id: g_memoire_temp_eau
       type: float
       restore_value: yes
       initial_value: '25'
+
+    - id: g_memoire_ph
+      type: float
+      restore_value: yes
+      initial_value: '7.2'
+
     - id: flag_tempo_ppe_filtre
       type: bool
 
@@ -112,6 +124,7 @@ globals:
     - id: g_tps_injection_ph_moins
       type: float
       restore_value: no
+
     # mémorise la durée de filtation dans les différents modes de fonctionnement
     - id: g_tps_filtration
       type: float
@@ -276,6 +289,19 @@ number:
     unit_of_measurement: "pH"
     step: 0.1  
 
+  # Temps de recirculation avant prise en compte mesure de température
+  - platform: template
+    name: "${friendly_name}_tempo_recirculation"
+    id: tempo_mesure_temp
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 900
+    unit_of_measurement: "s"
+    step: 1
+    icon: mdi:clock
+
   # Coefficient de filtration
   - platform: template
     name: "${friendly_name}_coeff_Filtration"
@@ -404,6 +430,19 @@ binary_sensor:
   - platform: template
     name: "${friendly_name}_niv_defaut"
     id: niv_defaut
+
+# Pompe en fonctionnement
+  - platform: template
+    name: "${friendly_name}_ppe_en_fonctionnement"
+    id: ppe_filt_en_fonctionnement
+    lambda: |-
+      if (id(puissance).state > 100) {
+        // Pompe Fonctionne si puissance>100 W
+        return true;
+      } else {
+        // pompe Arretée.
+        return false;
+      }
 
   # Entrée logique permettant de lire le BP I00 de la carte
   - platform: gpio
@@ -620,6 +659,55 @@ sensor:
     unit_of_measurement: "s"
     state_class: "measurement"  
 
+# mesure Puissance avec un PZEM-004T-100A
+  - platform: pzemac
+    update_interval: 30s
+    current:
+      name: "${friendly_name}_pzem_pisc_courant"
+      unit_of_measurement: "A"
+      id: intensite      
+    voltage:
+      name: "${friendly_name}_pzem_pisc_tension"
+      unit_of_measurement: "V"
+      id: tension
+    energy:
+      name: "${friendly_name}_pzem_pisc_energy"
+      unit_of_measurement: "kWh"
+      id: energie
+      filters:
+        - multiply: 0.001
+    power:
+      name: "${friendly_name}_pzem_pisc_puissance"
+      unit_of_measurement: "W"
+      id: puissance
+
+# Energie consommée par jour
+  - platform: total_daily_energy
+    name: '${friendly_name}_energie_jour'
+    power_id: puissance
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+# Calcul du temps de fonctionnement
+  # Pompe piscine
+  - platform: duty_time
+    id: _temps_fonctionnement_ppe_piscine_jour
+    name: '${friendly_name}_temps_ma_ppe_piscine_jour'
+    # Support logical sources (optional): 'binary_sensor'
+    sensor: ppe_filt_en_fonctionnement
+    # ... EOR 'lambda'
+    #lambda: "return id(my_climate).mode != CLIMATE_MODE_OFF;"
+    # Restore (optional, default: False)
+    restore: false
+    # Sensor for last turn-on time (optional)
+    last_time:
+      name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
+
 # Déclaration des "Covers" 
 # Volet piscine dans mon cas
 cover:
@@ -655,7 +743,7 @@ switch:
     id: cde_ppe_filtration
     on_turn_on:
       then:
-        - delay: !lambda "return id(g_tps_mesure_temp)*1000;" # Durée de fonctionnement de la pompe avant prise en compte de la température eau
+        - delay: !lambda "return id(tempo_mesure_temp).state*1000;" # Durée de fonctionnement de la pompe avant prise en compte de la température eau
         - logger.log:
             format: "Set tempo cde ppe"
             level: DEBUG
@@ -714,7 +802,7 @@ switch:
     name: "${friendly_name} Restart"
 
   # Switch Forçage Arret pompe filtration
-  #     lambda: return id(ent_at_force).state;
+  #
   - platform: template
     name: "${friendly_name}_ent_arret_forcé"
     id: ent_at_force
@@ -751,6 +839,7 @@ interval:
   - interval: 5s
     then: 
       - script.execute: _memorisation_temperature_eau
+      - script.execute: _memorisation_ph      
   - interval: 30s # Test HG toutes les 15 mn (900s)
     then: 
       - script.execute: _fonction_hors_gel
@@ -777,6 +866,24 @@ script:
           args: [ 'id(flag_tempo_ppe_filtre)','id(temp_eau).state','id(g_memoire_temp_eau)' ]
           level: DEBUG
 
+  # Si la pompe tourne depuis au moins 5min on raffraichit la memoire du Ph qui est
+  # prise en compte dans les scripts.
+  # sinon on travaille avec le pH mémorisé avant l'arret précédent
+  - id: _memorisation_ph
+    then:
+      - if:
+          condition:
+            lambda: 'return id(flag_tempo_ppe_filtre) == true;'
+          then:
+            - lambda: |-
+                id(g_memoire_ph)=id(ph_ezo).state;            
+          else:
+            - lambda: |-
+                id(g_memoire_ph)=id(g_memoire_ph);
+      - logger.log:
+          format: "Flag Temp: %i / Ph EZO: %.2f / Mem Ph: %.2f"
+          args: [ 'id(flag_tempo_ppe_filtre)','id(ph_ezo).state','id(g_memoire_ph)' ]
+          level: DEBUG
 
   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: _fonctionnement_filtration
@@ -1080,7 +1187,7 @@ script:
     mode: single  
     then:
       - lambda: |-
-          id(g_tps_injection_ph_moins)=(((id(ph_ezo).state-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
+          id(g_tps_injection_ph_moins)=(((id(g_memoire_ph)-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
           id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
       
       - logger.log:
@@ -1092,8 +1199,8 @@ script:
           condition:
             and:
               - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
-              - lambda: 'return id(ph_ezo).state > id( _ph_cible).state;'
-              - lambda: 'return id(ph_ezo).state > 0;'
+              - lambda: 'return id(g_memoire_ph) > id( _ph_cible).state;'
+              - lambda: 'return id(g_memoire_ph) > 0;'
               - switch.is_on: cde_ppe_filtration
           then:
             - switch.turn_on: cde_ppe_ph_moins

@@ -120,7 +120,8 @@
   description: 'Valide les automations régulation pH au bout de 1 h de fonctionnement '
   trigger:
   - platform: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
+    entity_id:
+    - binary_sensor.esp137_ppe_en_fonctionnement
     for:
       hours: 0
       minutes: 15
@@ -129,7 +130,8 @@
     from: 'off'
     id: ma_pump
   - platform: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
+    entity_id:
+    - binary_sensor.esp137_ppe_en_fonctionnement
     id: at_pump
     from: 'on'
     to: 'off'
@@ -588,12 +590,14 @@
   description: Notification Debut, Fin filtration et mise à jour du fichier log "conso_piscine.csv"
   trigger:
   - platform: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
+    entity_id:
+    - binary_sensor.esp137_ppe_en_fonctionnement
     from: 'off'
     to: 'on'
     id: ma_ppe
   - platform: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
+    entity_id:
+    - binary_sensor.esp137_ppe_en_fonctionnement
     id: at_ppe
     from: 'on'
     to: 'off'

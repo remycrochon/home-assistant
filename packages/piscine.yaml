@@ -198,17 +198,7 @@ template:
         {% set hc=states('sensor.compteur_energie_piscine_jour_hc')|float(default=0) %}
         {{ hp+hc }}
 
-  - binary_sensor:
-    # Si la puissance electrique est superieure à 500w, on considere que la pompe est en fonctionnement
-    # ou tester le switch de la ppe de filtration si pas de mesure de puissance
-    # {{ is_state('switch.ppe_filtration', 'on') }}
-    - name: "Ppe Piscine en Marche"
-      unique_id: "ppe_piscine_en_marche"
-      state: >-
-        {% set pu_ok = states.sensor.pzem_pisc_puissance.state | float(default=0) > 500 %}
-        {% set esp_ok = states('binary_sensor.esp137_status') %}
-        {% set cde_ppe = states('switch.ppe_filtration') %}
-        {{ (esp_ok=='on' and pu_ok == True) or (esp_ok == 'off' and cde_ppe == 'on') }}
+
 
 # Commande du volet roulant via un Cover
 cover:

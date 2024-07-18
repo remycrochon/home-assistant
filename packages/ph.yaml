@@ -191,7 +191,7 @@ template:
       unique_id: "ph_piscine_ph"
       state: >-
         {% set ph = states('sensor.ph_ezo') | float(default=0) | round(2) %}
-        {% set ppe = states('binary_sensor.ppe_piscine_en_marche') %}
+        {% set ppe = states('binary_sensor.esp137_ppe_en_fonctionnement') %}
         {% if ppe == 'on' %}
           {{ ph | round(2) }}
         {% else %}

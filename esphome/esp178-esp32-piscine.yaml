@@ -20,7 +20,12 @@
 #19 IO2 IO2
 #20 GND GND
 # PINOUT Mapping https://lastminuteengineers.com/esp32-wroom-32-pinout-reference/
-
+# 23 led status
+# 21 sda
+# 22 scl
+# 03 rx
+# 01 tx
+# 09 OneWire
 
 substitutions:
   device_name: "esp178-esp32-piscine"

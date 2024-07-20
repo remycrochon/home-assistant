@@ -83,10 +83,9 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
 sensor:
-
   - platform: htu21d
     model: htu21d
-    update_interval: 10s
+    update_interval: 60s
     temperature:
       name: "${friendly_name}_Temperature_hotte"
       id: temp_hotte
@@ -180,6 +179,11 @@ switch:
     pin: GPIO21
     id: r4
 
+# Déclenchement des scripts à intervalles réguliers
+interval:
+  - interval: 60s
+    then:
+      - script.execute: calcul_vitesse
 
 script:
   # Calcul vitesse aspiration
@@ -191,11 +195,8 @@ script:
       # Si Humidité hotte < seuil v2 depuis 30s alors on enclenche V1
       - if:
           condition:
-            for:
-              time: 30s
-              condition:
-                - switch.is_on: hotte
-                - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
           then:
             - switch.turn_on: v1
             - delay: 500ms
@@ -205,12 +206,9 @@ script:
       # Si (humidité hotte > au seuil V1 et < seuil v2) depuis 30s alors on enclenche V2
       - if:
           condition:
-            for:
-              time: 30s
-              condition:            
-                - switch.is_on: hotte
-                - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
-                - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
+            - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
           then:
             - switch.turn_on: v2
             - delay: 500ms
@@ -220,11 +218,8 @@ script:
       # Si Humidité hotte > au seuil V3 depuis 30s alors on enclenche V3   
       - if:
           condition:
-            for:
-              time: 30s
-              condition:            
-              - switch.is_on: hotte
-              - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
           then:
             - switch.turn_on: v3
             - delay: 500ms            

@@ -28,7 +28,7 @@ ethernet:
   clk_pin: GPIO17
   mosi_pin: GPIO19
   miso_pin: GPIO18
-  cs_pin: GPIO21  #GPIO21
+  cs_pin: GPIO21 
   interrupt_pin: GPIO4
   reset_pin: GPIO5
   clock_speed: 15Mhz
@@ -47,7 +47,7 @@ web_server:
 
 # Configuration Bus i2C
 i2c:
-  sda: 15 #21
+  sda: 15 
   scl: 22
   scan: true
   id: bus_a
@@ -77,8 +77,8 @@ status_led:
 #Etat de la connection
 binary_sensor:
   - platform: status
-    name: ${friendly_name} Status"
-
+    name: "${friendly_name} Status"
+# GPIO sur module extension SX1509
   - platform: gpio
     name: "${friendly_name}_E1"
     pin:

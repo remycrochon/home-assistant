@@ -10,14 +10,3 @@ notify:
     platform: telegram
     chat_id: !secret id_telegram_remy
 
-
-# Notification dans les fichiers
-  - name: log_energy
-    platform: file
-    filename: conso_energy.csv
-    timestamp: True
-
-  - name: log_piscine
-    platform: file
-    filename: conso_piscine.csv
-    timestamp: True

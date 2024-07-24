@@ -148,9 +148,10 @@ sensor:
     update_interval: 10s
 
   - platform: dallas_temp
-    address: 0x82012111efe81d28 
+    address: 0xbc01a14909646128
     name: "${friendly_name}_temperature_eau"
     id: temp_eau
+    update_interval: 10s
     filters:
       - filter_out: 0.0
 

@@ -1,0 +1,32 @@
+esphome:
+  name: esp128-esp32-pesage-ph
+  friendly_name: esp128-esp32-pesage-ph-
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "C+ZfbRuMfviYnESmFiDgeY3yHOWvy3ivxBeohs6vj1I="
+
+ota:
+  - platform: esphome
+    password: "3a733dd4b720f0ed7ab229c2bc657d7b"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp128-Esp32-Pesage-Ph"
+    password: "SwIEKreKV8kf"
+
+captive_portal:
+    

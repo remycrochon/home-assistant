@@ -305,6 +305,7 @@ modbus:
         scale: 0.1
         precision: 1
         data_type: int16
+        unique_id: modbus_temp_piscine
 
       # lecture de la sonde pt100 de la mesure de temperature du local piscine
       # uniquement à titre indicatif

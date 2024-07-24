@@ -111,7 +111,9 @@ switch:
       - switch.turn_off: v1
       - switch.turn_off: v2
       - switch.turn_off: v3  
-      - delay: 500ms
+      - switch.turn_off: r2
+      - switch.turn_off: r3
+      - switch.turn_off: r4  
       - switch.turn_off: r1_lumiere
 
 
@@ -120,41 +122,33 @@ switch:
     id: v1
     optimistic: true
     turn_on_action:
+      - switch.turn_on: r2      
+      - switch.turn_off: r3
+      - switch.turn_off: r4
       - switch.turn_off: v2
       - switch.turn_off: v3
-      - delay: 100 ms
-      - switch.turn_on: r2
-    turn_off_action:
-      - switch.turn_off: r2
 
   - platform: template
     name: "${friendly_name} Hotte V2"    
     id: v2
     optimistic: true
     turn_on_action:
-      - switch.turn_off: v1
-      - switch.turn_off: v3      
-      - delay: 100 ms
       - switch.turn_on: r2            
       - switch.turn_on: r3
-    turn_off_action:
-      - switch.turn_off: r2
-      - switch.turn_off: r3
-               
+      - switch.turn_off: r4
+      - switch.turn_off: v1
+      - switch.turn_off: v3
+
   - platform: template
     name: "${friendly_name} Hotte V3"    
     id: v3
     optimistic: true
     turn_on_action:
-      - switch.turn_off: v1
-      - switch.turn_off: v2
-      - delay: 100 ms      
       - switch.turn_on: r2
+      - switch.turn_off: r3
       - switch.turn_on: r4
-
-    turn_off_action:
-      - switch.turn_off: r2
-      - switch.turn_off: r4
+      - switch.turn_off: v1
+      - switch.turn_off: v2      
 
   - platform: restart
     name: "${friendly_name} Restart"
@@ -192,36 +186,36 @@ script:
     then:
 
       # Si Hotte en marche
-      # Si Humidité hotte < seuil v2 depuis 30s alors on enclenche V1
+      # Si Humidité hotte < seuil v2 alors on enclenche V1
       - if:
           condition:
             - switch.is_on: hotte
             - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
           then:
             - switch.turn_on: v1
-            - delay: 500ms
-            - switch.turn_on: r1_lumiere
+            - switch.turn_off: v2
+            - switch.turn_off: v3
       
       # Si Hotte en marche
-      # Si (humidité hotte > au seuil V1 et < seuil v2) depuis 30s alors on enclenche V2
+      # Si (humidité hotte > au seuil V1 et < seuil v2) alors on enclenche V2
       - if:
           condition:
             - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
+            - lambda: 'return id(hum_hotte).state >= id(seuilv2_hum).state;'
             - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
           then:
+            - switch.turn_off: v1
             - switch.turn_on: v2
-            - delay: 500ms
-            - switch.turn_on: r1_lumiere
+            - switch.turn_off: v3
       
       # Si Hotte en marche
-      # Si Humidité hotte > au seuil V3 depuis 30s alors on enclenche V3   
+      # Si Humidité hotte > au seuil V3 alors on enclenche V3   
       - if:
           condition:
             - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
+            - lambda: 'return id(hum_hotte).state >= id(seuilv3_hum).state;'
           then:
+            - switch.turn_off: v1
+            - switch.turn_off: v2
             - switch.turn_on: v3
-            - delay: 500ms            
-            - switch.turn_on: r1_lumiere
 

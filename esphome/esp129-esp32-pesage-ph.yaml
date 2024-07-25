@@ -42,8 +42,8 @@ sensor:
 
   - platform: hx711
     name: "${friendly_name} poids ph moins"
-    dout_pin: 0 # D0
-    clk_pin: 1 #D1
+    dout_pin: 0 # DT
+    clk_pin: 1 # SCK
     gain: 128
     update_interval: 1s
     accuracy_decimals: 1

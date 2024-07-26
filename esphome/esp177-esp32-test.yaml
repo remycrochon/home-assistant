@@ -68,6 +68,10 @@ sx1509:
   - id: sx1509_hub1
     address: 0x3E
 
+ads1115:
+  - address: 0x48
+
+
 # Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
@@ -171,6 +175,13 @@ sensor:
       - sliding_window_moving_average:
           window_size: 30
           send_every: 1
+
+  - platform: ads1115
+    multiplexer: 'A0_GND'
+    gain: 6.144
+    name: "${friendly_name}_Pression_filtre_ads1115"          
+    update_interval: 10s
+
 switch:
   - platform: restart
     name: "${friendly_name} Restart"

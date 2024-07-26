@@ -1673,8 +1673,8 @@
     entity_id: input_boolean.regul_ph
     state: 'on'
   - condition: state
-    entity_id: binary_sensor.ppe_piscine_en_marche
     state: 'on'
+    entity_id: binary_sensor.esp137_ppe_en_fonctionnement
   action:
   - service: input_number.set_value
     target:

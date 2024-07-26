@@ -45,12 +45,18 @@ sensor:
     dout_pin: 0 # DT
     clk_pin: 1 # SCK
     gain: 128
-    update_interval: 1s
+    update_interval: 10s
     accuracy_decimals: 1
+  #  moyenne sur 15 mn-affichage toutes les 5mn avec un Update_interval à 60s en exploitation
+  #  moyenne sur 15 s-affichage toutes les 5s avec un Update_interval à 1s en mode étalonnage
     filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 5
+          send_first_at: 1      
       - calibrate_linear:
-          - -465800 -> 0
-          - 1800000 -> 81
+          - -468600 -> 0
+          - 1780000 -> 84.4
     unit_of_measurement: kg
 
 switch:

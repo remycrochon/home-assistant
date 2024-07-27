@@ -30,6 +30,11 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO32 # led jaune
+    inverted: true
 
 # Enable logging
 logger:
@@ -595,7 +600,7 @@ output:
   #LEDS --------------------------------------
   - id: led_jaune
     platform: gpio
-    pin: GPIO32
+    pin: GPIO26 #GPIO32
 
   - id: led_rouge
     platform: gpio

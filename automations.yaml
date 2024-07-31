@@ -1763,6 +1763,10 @@
     platform: device
     type: remote_button_short_press
     subtype: button
+  - platform: event
+    event_type: motioneye.motion_detected
+    event_data:
+      name: Cuisine
   condition: []
   action:
   - type: toggle
@@ -2467,6 +2471,10 @@
     device_id: f63a7a8078a6c8ad8bff217525241849
     entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
     domain: binary_sensor
+  - platform: event
+    event_type: motioneye.motion_detected
+    event_data:
+      name: Cuisine
   condition:
   - condition: sun
     before: sunrise
@@ -2499,3 +2507,33 @@
   use_blueprint:
     path: Blackshome/low-battery-notifications-and-actions.yaml
     input: {}
+- id: '1722361142500'
+  alias: Camera-Cuisine-Detection
+  description: ''
+  trigger:
+  - platform: event
+    event_type: motioneye.motion_detected
+    event_data:
+      name: Cuisine
+  condition: []
+  action:
+  - service: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Detection Cam Cuisine
+  mode: single
+- id: '1722361820847'
+  alias: Camera-Garage Ext-Detection
+  description: ''
+  trigger:
+  - platform: event
+    event_type: motioneye.motion_detected
+    event_data:
+      name: Garage Ext
+  condition: []
+  action:
+  - service: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Detection Cam Garage Ext
+  mode: single

@@ -153,7 +153,7 @@ sensor:
   # Affichage du temps de fonctionnement de la pompe ce jour
   - platform: history_stats
     name: Ma Ppe Piscine Jour
-    entity_id: binary_sensor.ppe_piscine_en_marche
+    entity_id: binary_sensor.esp137_ppe_en_fonctionnement
     state: "on"
     type: time
     start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"

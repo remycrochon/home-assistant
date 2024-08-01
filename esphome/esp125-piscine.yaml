@@ -94,6 +94,11 @@ sensor:
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
 
+  - platform: combination
+    type: median
+    name: "${friendly_name}_pH_Median"
+    sources:
+      - source: esp125_ph_ezo
 
 # Mesure de la pression filtre
   - platform: adc

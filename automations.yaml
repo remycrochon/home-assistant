@@ -1766,7 +1766,7 @@
   - platform: event
     event_type: motioneye.motion_detected
     event_data:
-      name: Cuisine
+      device_id: ae78c8213b3a95e1ef3d7ac161697e42
   condition: []
   action:
   - type: toggle
@@ -2514,7 +2514,7 @@
   - platform: event
     event_type: motioneye.motion_detected
     event_data:
-      name: Cuisine
+      device_id: ae78c8213b3a95e1ef3d7ac161697e42
   condition: []
   action:
   - service: notify.persistent_notification
@@ -2529,11 +2529,82 @@
   - platform: event
     event_type: motioneye.motion_detected
     event_data:
-      name: Garage Ext
+      device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
   condition: []
   action:
   - service: notify.persistent_notification
     metadata: {}
     data:
       message: Detection Cam Garage Ext
+  mode: single
+- id: '1722405769981'
+  alias: Camera-Garage Ext-chgt file
+  description: ''
+  trigger:
+  - platform: event
+    event_type: motioneye.file_stored
+    event_data:
+      device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
+  condition: []
+  action:
+  - service: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Chgt file Cam Garage Ext
+  mode: single
+- id: '1722434877942'
+  alias: Camera Activation-Désactivation detection
+  description: Activation detection entre 5:30 et 23:30
+  trigger:
+  - platform: time
+    at: 05:30:00
+    id: fin
+  - platform: time
+    at: '23:30:00'
+    id: debut
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - debut
+      sequence:
+      - type: turn_on
+        device_id: fb0cfaa979e129c446687183d15b09b9
+        entity_id: 0b147f804aca343b6b2aca29f5c63284
+        domain: switch
+      - type: turn_on
+        device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
+        entity_id: eff1ebfaa335fecd3e81380101843e3e
+        domain: switch
+      - type: turn_on
+        device_id: ae78c8213b3a95e1ef3d7ac161697e42
+        entity_id: d8c60deb6042ba9ae285ee73c595365b
+        domain: switch
+      - service: notify.telegram
+        data:
+          message: Activation Détection video surveillance
+          title: Caméra
+    - conditions:
+      - condition: trigger
+        id:
+        - fin
+      sequence:
+      - type: turn_off
+        device_id: fb0cfaa979e129c446687183d15b09b9
+        entity_id: 0b147f804aca343b6b2aca29f5c63284
+        domain: switch
+      - type: turn_off
+        device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
+        entity_id: eff1ebfaa335fecd3e81380101843e3e
+        domain: switch
+      - type: turn_off
+        device_id: ae78c8213b3a95e1ef3d7ac161697e42
+        entity_id: d8c60deb6042ba9ae285ee73c595365b
+        domain: switch
+      - service: notify.telegram
+        data:
+          message: Désactivation Détection video surveillance
+          title: Caméra
   mode: single

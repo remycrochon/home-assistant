@@ -308,95 +308,6 @@
       message: Nouvelle IP {{ states("sensor.myip")}}
       title: Reseau
   mode: single
-- id: '1632989157968'
-  alias: 04-01-01 Volet Automatismes
-  description: 'Ete/Hiver/Absent '
-  trigger:
-  - platform: state
-    entity_id:
-    - input_boolean.nuit_jour
-    from: 'on'
-    to: 'off'
-    id: jour->nuit
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  - platform: time
-    at: input_datetime.horaire_ete_volet_ouv
-    id: heure_ouv
-  - platform: time
-    at: input_datetime.horaire_ete_volet_ferm
-    id: heure_ferm
-  - platform: state
-    entity_id:
-    - input_boolean.nuit_jour
-    id: nuit->jour
-    from: 'off'
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Hiv
-      - condition: trigger
-        id: jour->nuit
-      sequence:
-      - service: script.fermeture_volet
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Hiv
-      - condition: trigger
-        id: heure_ouv
-      sequence:
-      - service: script.ouverture_volet
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Ete
-      - condition: trigger
-        id: heure_ouv
-      sequence:
-      - service: script.ouverture_volet
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Ete
-      - condition: trigger
-        id: heure_ferm
-      sequence:
-      - service: script.fermeture_volet
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Absent
-      - condition: trigger
-        id: jour->nuit
-      sequence:
-      - service: script.fermeture_volet_absent
-        data: {}
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Absent
-      - condition: trigger
-        id: nuit->jour
-      sequence:
-      - service: script.ouverture_volet_absent
-        data: {}
-    default: []
-  mode: single
 - id: '1633075302563'
   alias: 3_1_2 Piscine-Hors-Gel
   description: ''
@@ -1508,24 +1419,6 @@
       position_type: target
       entity_id: cover.porte_garage
   mode: single
-- id: '1653409072754'
-  alias: 04-03-05 volet parents grand position ouvert
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.fdc_volet_parents_grand_ouvert
-    to: 'off'
-    from: 'on'
-  condition: []
-  action:
-  - service: cover_rf_time_based.set_known_position
-    data:
-      confident: true
-      position: 100
-      position_type: target
-      entity_id: cover.volet_parents_grand_p
-  mode: single
 - id: '1653410044804'
   alias: 04-03-06 volet amis sud grand position ouvert
   description: ''
@@ -1895,7 +1788,7 @@
       value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a }}'
   mode: single
 - id: '1698053985865'
-  alias: 10-01-00 Spot Ext Cuisine old
+  alias: 10-01-00 Spot Ext Cuisine detecteur porte
   description: ''
   trigger:
   - type: opened
@@ -2463,7 +2356,7 @@
           entity_id: switch.lumiere_salon
         data: {}
 - id: '1711609776550'
-  alias: 10-01-00 Spot Ext Cuisine
+  alias: 10-01-00 Spot Ext Cuisine detecteur exterieur
   description: ''
   trigger:
   - type: motion
@@ -2475,6 +2368,12 @@
     event_type: motioneye.motion_detected
     event_data:
       name: Cuisine
+    enabled: false
+  - type: opened
+    platform: device
+    device_id: 193f4cea2f12db0ab1a4d044df803df3
+    entity_id: b182f27a8204167b3f3b1893ec2d2196
+    domain: binary_sensor
   condition:
   - condition: sun
     before: sunrise
@@ -2490,7 +2389,7 @@
     domain: switch
   - delay:
       hours: 0
-      minutes: 2
+      minutes: 5
       seconds: 0
       milliseconds: 0
   - type: turn_off

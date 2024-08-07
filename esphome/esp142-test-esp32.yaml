@@ -30,6 +30,7 @@ logger:
 api:
 
 ota:
+  platform: esphome
 
 web_server:
   port: 80
@@ -102,7 +103,7 @@ number:
 switch:
   - platform: gpio
     name: "${friendly_name} Relais"
-    pin: GPIO5
+    pin: GPIO32
     id: relais
 
   - platform: restart

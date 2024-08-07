@@ -41,19 +41,23 @@ esphome:
     name: "rem81.esp178-esp32-piscine"
     version: "0.0.0"
 
-wifi:
-  networks:
-    - ssid: !secret wifi
-      password: !secret mdpwifi
-  reboot_timeout: 5min
 
+ethernet:
+  type: W5500
+  clk_pin: GPIO17
+  mosi_pin: GPIO19
+  miso_pin: GPIO18
+  cs_pin: GPIO21 
+  interrupt_pin: GPIO4
+  reset_pin: GPIO5
+  clock_speed: 15Mhz
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
     dns1: 192.168.0.254
-    
-# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+
+# Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
     number: GPIO23
@@ -62,6 +66,7 @@ status_led:
 # Enable logging
 logger:
   level: DEBUG
+  baud_rate: 0
 
 # Enable Home Assistant API
 api:
@@ -69,8 +74,6 @@ api:
 ota:
   platform: esphome
 
-captive_portal:
- 
 web_server:
   port: 80
   version: 2
@@ -86,7 +89,7 @@ time:
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
-  sda: 21
+  sda: 15
   scl: 22
   scan: true
   id: bus_a
@@ -100,8 +103,16 @@ uart:
 # Connection sonde(s) de température DS18b20
 one_wire:
   - platform: gpio
-    pin: GPIO09
-#    pin: GPIO05
+    pin: GPIO16
+
+# Extension E/S
+sx1509:
+  - id: sx1509_hub1
+    address: 0x3E
+
+ads1115:
+  - address: 0x48
+
 # déclaration des variables "globals"
 globals:
     # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
@@ -273,7 +284,7 @@ number:
   # Simulation Temp eau et Mesure pH
   - platform: template
     name: "${friendly_name}_simule_Temp"
-    id: simule_temp_eau
+    id: temp_eau
     optimistic: true
     restore_value: true
     mode: box
@@ -459,63 +470,65 @@ binary_sensor:
         pullup: true
     name: "${friendly_name}_bp1"
 
-  # Entrées logiques permettant de lire des contacts exterieurs
+# GPIO sur module extension SX1509
   - platform: gpio
-    pin:
-      number: GPIO16
-      inverted: True
-      mode:
-        input: true
-        pullup: true
     name: "${friendly_name}_volet_ferme"
     id: volet_ferme
-
-  - platform: gpio
     pin:
-      number: GPIO17
-      inverted: True
-      mode:
-        input: true
-        pullup: true
-    name: "${friendly_name}_tp_plein_lsh"
-    id: lsh
-
-  - platform: gpio
-    pin:
-      number: GPIO04
-      inverted: True
-      mode:
-        input: true
-        pullup: true
-    name: "${friendly_name}_tp_plein_lsl"
-    id: lsl
-
-  - platform: gpio
-    pin:
-      number: GPIO18
-      inverted: True
-      mode:
-        input: true
-        pullup: true
-    name: "${friendly_name}_ETOR4"
-
-  - platform: gpio
-    pin:
-      number: GPIO15
-      inverted: True
+      sx1509: sx1509_hub1
+      # Use pin number 0 on the SX1509
+      number: 0
       mode:
         input: true
         pullup: false
-    name: "${friendly_name}_ETOR5"
-
+      inverted: false    
   - platform: gpio
+    name: "${friendly_name}_tp_plein_lsh"
+    id: lsh
     pin:
-      number: GPIO19
-      inverted: True
+      sx1509: sx1509_hub1
+      number: 1
       mode:
         input: true
-        pullup: true
-    name: "${friendly_name}_ETOR6"
+        pullup: false
+      inverted: false    
+  - platform: gpio
+    name: "${friendly_name}_tp_plein_lsl"
+    id: lsl
+    pin:
+      sx1509: sx1509_hub1
+      number: 2
+      mode:
+        input: true
+        pullup: false
+      inverted: false   
+  - platform: gpio
+    name: "${friendly_name}_E4"
+    pin:
+      sx1509: sx1509_hub1
+      number: 3
+      mode:
+        input: true
+        pullup: false
+      inverted: false   
+  - platform: gpio
+    name: "${friendly_name}_E5"
+    pin:
+      sx1509: sx1509_hub1
+      number: 4
+      mode:
+        input: true
+        pullup: false
+      inverted: false   
+  - platform: gpio
+    name: "${friendly_name}_E6"
+    pin:
+      sx1509: sx1509_hub1
+      number: 5
+      mode:
+        input: true
+        pullup: false
+      inverted: false   
 
 # Définiton de l'heure Pivot   
 datetime:
@@ -524,7 +537,7 @@ datetime:
     type: time
     name: "${friendly_name}_heure_pivot"
     optimistic: yes
-    #initial_value: "13:30:00"
+    initial_value: "13:30:00"
     restore_value: true
 
   - platform: template
@@ -575,7 +588,7 @@ sensor:
   - platform: dallas_temp
     address: 0x060321117ae89b28 #  0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
-    id: temp_eau
+    id: simul_temp_eau
     filters:
       - filter_out: 0.0
 
@@ -623,13 +636,14 @@ sensor:
   #      - 9.41 -> 9.18
 
 # Mesure de la pression filtre Entrée ANA 1
-  - platform: adc
-    pin: GPIO36
-    id: pression_filtre
-    name: "${friendly_name}_Pression_filtre"
+
+  - platform: ads1115
+    multiplexer: 'A0_GND'
+    gain: 6.144
+    name: "${friendly_name}_Pression_filtre"          
+    update_interval: 10s
     unit_of_measurement: "Bars"
-    update_interval: 60s
-    attenuation: 12db
+    id: pression_filtre
     filters:
       - calibrate_linear:
         - 0.60 -> 0.0
@@ -638,24 +652,6 @@ sensor:
       - sliding_window_moving_average:
           window_size: 30
           send_every: 1
-
-# Entrée ANA2 GPIO34
-  - platform: adc
-    pin: GPIO34
-    id: eana2
-    name: "${friendly_name}_EANA2"
-    unit_of_measurement: "Bars"
-    update_interval: 60s
-    attenuation: 12db
-
-# Entrée ANA3 GPIO39
-  - platform: adc
-    pin: GPIO39
-    id: eana3
-    name: "${friendly_name}_EANA3"
-    unit_of_measurement: "Bars"
-    update_interval: 60s
-    attenuation: 12db
 
 # mémorise le temps d'injection calculé
   - platform: template
@@ -765,13 +761,13 @@ switch:
         - switch.turn_off: cde_ppe_ph_moins
 
   - platform: gpio
-    name: "${friendly_name} cde_ppe_ph-"
+    name: "${friendly_name} cde_ppe_ph_moins"
     pin: GPIO33
     id: cde_ppe_ph_moins
     interlock: [cde_ppe_ph_plus]
 
   - platform: gpio
-    name: "${friendly_name} cde_ppe_ph+"
+    name: "${friendly_name} cde_ppe_ph_plus"
     pin: GPIO25
     id: cde_ppe_ph_plus
     interlock: [cde_ppe_ph_moins]

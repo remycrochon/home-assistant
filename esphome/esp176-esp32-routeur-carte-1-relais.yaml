@@ -6,8 +6,6 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP32
-  board: esp32dev
   project:
     name: "rem81.esp176-esp32-routeur"
     version: "1.0.0"
@@ -19,7 +17,11 @@ esphome:
       - binary_sensor.template.publish:
           id: temperatureok
           state: ON
-
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    
 wifi:
   networks:
     - ssid: !secret wifi

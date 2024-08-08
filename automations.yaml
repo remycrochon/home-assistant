@@ -2364,11 +2364,6 @@
     device_id: f63a7a8078a6c8ad8bff217525241849
     entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
     domain: binary_sensor
-  - platform: event
-    event_type: motioneye.motion_detected
-    event_data:
-      name: Cuisine
-    enabled: false
   - type: opened
     platform: device
     device_id: 193f4cea2f12db0ab1a4d044df803df3
@@ -2378,10 +2373,6 @@
   - condition: sun
     before: sunrise
     after: sunset
-    enabled: false
-  - condition: numeric_state
-    entity_id: sensor.tze200_3towulqd_ts0601_eclairement
-    below: 300
   action:
   - type: turn_on
     device_id: c7b28db8c025b2f0bd975382bc4011f0

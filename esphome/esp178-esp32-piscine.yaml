@@ -35,12 +35,12 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP32
-  board: esp32dev
   project:
     name: "rem81.esp178-esp32-piscine"
     version: "0.0.0"
 
+esp32:
+  board: esp32dev
 
 ethernet:
   type: W5500

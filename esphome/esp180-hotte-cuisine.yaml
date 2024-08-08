@@ -6,9 +6,12 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP32
-#  board: esp32dev
+      
+esp32:
   board: mhetesp32minikit
+  framework:
+    type: esp-idf
+    version: recommended
 
 #  on_boot:
 #    priority: 800

@@ -6,8 +6,12 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP32
+      
+esp32:
   board: esp32dev
+  framework:
+    type: esp-idf
+    version: recommended
 
 wifi:
   networks:
@@ -35,70 +39,25 @@ ota:
 web_server:
   port: 80
 
-
 # Informations supplementaires sur le WIFI
-#text_sensor:
-#  - platform: wifi_info
-#    ip_address:
-#      name: ${friendly_name}_ESP IP Address
-#    ssid:
-#      name: ${friendly_name}_ESP Connected SSID
-#    bssid:
-#      name: ${friendly_name}_ESP Connected BSSID
-#    mac_address:
-#      name: ${friendly_name}_ESP Mac Wifi Address
-#    scan_results:
-#      name: ${friendly_name}_ESP Latest Scan Results
-
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name}_ESP IP Address
+    ssid:
+      name: ${friendly_name}_ESP Connected SSID
+    bssid:
+      name: ${friendly_name}_ESP Connected BSSID
+    mac_address:
+      name: ${friendly_name}_ESP Mac Wifi Address
+    scan_results:
+      name: ${friendly_name}_ESP Latest Scan Results
 
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
  
-
-select:
-  - platform: template
-    name: Mode
-    id: mode
-    options:
-     - "Option1"
-     - "Option2"
-     - "Option3"
-    initial_option: "Option1"
-    optimistic: true
-    set_action:
-      - logger.log:
-          format: "Chosen option: %s"
-          args: ["x.c_str()"]
-
-
-# Input Number
-number:
-  # Seuil Declenchement relais
-  - platform: template
-    name: "${friendly_name} S Relais"
-    id: seuilrelais
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 00
-    max_value: 2000
-    unit_of_measurement: "w"
-    step: 1
-
-# Simule Puissance
-  - platform: template
-    name: "${friendly_name} Simule Pu"
-    id: pureseau1
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -1000
-    max_value: 1000
-    unit_of_measurement: "w"
-    step: 0.1
-
 
 switch:
   - platform: gpio
@@ -109,34 +68,3 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
-
-interval:
-
-  - interval: 15s
-    then:
-      - script.execute: calcul_relais
-
-# ------------------------  Scripts
-script:
-# 
-# ------------------------ Calcul puissance injection 
-  - id: calcul_relais
-    mode: single
-    then:
-     # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
-      - if: 
-          condition:
-            and:
-              - lambda: 'return id(pureseau1).state<id(seuilrelais).state;'              
-
-          then:
-              - delay: 10s
-              - switch.turn_on: relais
-
-      - if: 
-          condition:
-            or:
-              - lambda: 'return id(pureseau1).state>id(seuilrelais).state+100;'         
-          then:
-              - switch.turn_off: relais
-      

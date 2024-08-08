@@ -1,6 +1,6 @@
 substitutions:
   device_name: esp129-pesage-ph-moins
-  adress_ip: "192.168.0.128"
+  adress_ip: "192.168.0.129"
   time_timezone: "Europe/Paris"
   friendly_name: esp129
 
@@ -10,8 +10,8 @@ esphome:
 esp32:
   board: esp32-c3-devkitm-1
   framework:
-    type: arduino
-
+    type: esp-idf
+    
 # Enable Home Assistant API
 api:
 

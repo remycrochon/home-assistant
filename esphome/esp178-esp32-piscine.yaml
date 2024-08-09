@@ -1,31 +1,5 @@
 #Pin Name Description de la carte ESP32 8 relais
-#1 EN1 Enable signal, active high
-#2 CFG IO32, CFG                       ---<
-#3 485_EN Enable pin of IO33, RS485    ---<
-#4 RXD IO5, RXD2                       ---<
-#5 TXD IO17, TXD2                      ---<
-#6 GND GND
-#7 3V3 3V3 power supply
-#8 GND GND
-#9 5V 5V power supply
-#10 LINK Network connection indicator pin
-#11 GND GND
-#12 IO39 IO39, only supports input
-#13 IO36 IO36, only supports input
-#14 IO15 IO15
-#15 I014 IO14
-#16 IO12 IO12
-#17 IO35 IO35, only supports input
-#18 IO4 IO4
-#19 IO2 IO2
-#20 GND GND
-# PINOUT Mapping https://lastminuteengineers.com/esp32-wroom-32-pinout-reference/
-# 23 led status
-# 21 sda
-# 22 scl
-# 03 rx
-# 01 tx
-# 09 OneWire
+
 
 substitutions:
   device_name: "esp178-esp32-piscine"
@@ -65,9 +39,9 @@ status_led:
 
 # Enable logging
 logger:
-  level: DEBUG
+  level: VERBOSE
   baud_rate: 0
-
+  
 # Enable Home Assistant API
 api:
 
@@ -96,9 +70,10 @@ i2c:
 
 # Configuration UART
 uart:
-  rx_pin: GPIO3
-  tx_pin: GPIO1
+  rx_pin: GPIO3 #rx
+  tx_pin: GPIO1 #tx
   baud_rate: 9600
+modbus:
 
 # Connection sonde(s) de température DS18b20
 one_wire:
@@ -662,7 +637,7 @@ sensor:
 
 # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
-    update_interval: 30s
+    update_interval: 5s
     current:
       name: "${friendly_name}_pzem_pisc_courant"
       unit_of_measurement: "A"
@@ -799,6 +774,24 @@ switch:
     pin: GPIO13
     id: relais8
 
+  - platform: gpio
+    name: "${friendly_name} led14"
+    pin:
+      sx1509: sx1509_hub1
+      number: 14
+      mode:
+        output: true
+      inverted: false
+
+  - platform: gpio
+    name: "${friendly_name} led15"
+    pin:
+      sx1509: sx1509_hub1
+      number: 15
+      mode:
+        output: true
+      inverted: false
+
   - platform: restart
     name: "${friendly_name} Restart"
 
@@ -814,7 +807,7 @@ switch:
     turn_off_action: 
       then:
         - script.execute: _fonctionnement_filtration
-
+  
 # Gestion de l'afficheur 
 display:
   - platform: lcd_pcf8574

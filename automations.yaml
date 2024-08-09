@@ -885,7 +885,7 @@
     input:
       condition_entity_state: 'on'
       sensor_entity: input_boolean.com_vp2
-      alert_state: 'off'
+      alert_state: 'Off'
       alert_action:
       - service: notify.telegram
         data:
@@ -903,7 +903,7 @@
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 120
-      max_alerts: 50
+      max_alerts: 25
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634916685737'
@@ -2373,6 +2373,9 @@
   - condition: sun
     before: sunrise
     after: sunset
+  - condition: numeric_state
+    entity_id: sensor.bh1750_illuminance
+    below: 10
   action:
   - type: turn_on
     device_id: c7b28db8c025b2f0bd975382bc4011f0

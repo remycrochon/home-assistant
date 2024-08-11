@@ -3,26 +3,26 @@ substitutions:
   adress_ip: "192.168.0.124"
   friendly_name: esp124
   time_timezone: "Europe/Paris"
-  
+
 esphome:
   name: ${device_name}
-  platform: ESP32
-  board: mhetesp32minikit
   project:
     name: "rem81.esp124-TIC"
     version: "1.0.1"
   platformio_options:
     lib_deps: NeoPixelBus@2.6.0
- 
-
+  #platform: ESP32
+  #board: mhetesp32minikit    
+      
+esp32:
+  board: mhetesp32minikit
+  framework:
+    type: arduino
+    
 wifi:
   networks:
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 1
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 0
   reboot_timeout: 5min
 
   manual_ip:

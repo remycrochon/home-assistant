@@ -39,7 +39,7 @@ status_led:
 
 # Enable logging
 logger:
-  level: VERBOSE
+  level: INFO
   baud_rate: 0
   
 # Enable Home Assistant API
@@ -73,6 +73,8 @@ uart:
   rx_pin: GPIO3 #rx
   tx_pin: GPIO1 #tx
   baud_rate: 9600
+
+# modbus necessaire au PZEM  
 modbus:
 
 # Connection sonde(s) de température DS18b20
@@ -158,7 +160,7 @@ globals:
       initial_value: '8'
     - id: g_tps_palier5
       type: float
-      initial_value: '10'
+      initial_value: '12'
 
 # Constantes utilisées dans le mode "Abaque"  
 
@@ -637,7 +639,7 @@ sensor:
 
 # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
-    update_interval: 5s
+    update_interval: 30s
     current:
       name: "${friendly_name}_pzem_pisc_courant"
       unit_of_measurement: "A"

@@ -13,7 +13,7 @@ from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.const import CONF_NAME, STATE_UNAVAILABLE, STATE_UNKNOWN
-from homeassistant.core import callback
+from homeassistant.core import callback, Context
 from homeassistant.exceptions import TemplateError
 from homeassistant.helpers import device_registry as dr, entity_registry
 import homeassistant.helpers.config_validation as cv
@@ -22,7 +22,7 @@ from homeassistant.helpers.event import TrackTemplate, async_track_template_resu
 from homeassistant.helpers.network import get_url
 from homeassistant.helpers.reload import async_integration_yaml_config
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.service import async_call_from_config
+from homeassistant.helpers.script import Script
 from homeassistant.util import slugify
 import jsonschema
 import voluptuous as vol
@@ -103,7 +103,7 @@ def hasp_object(value):
 
 
 # Configuration YAML schemas
-EVENT_SCHEMA = cv.schema_with_slug_keys([cv.SERVICE_SCHEMA])
+EVENT_SCHEMA = cv.schema_with_slug_keys(cv.SCRIPT_SCHEMA)
 
 PROPERTY_SCHEMA = cv.schema_with_slug_keys(cv.template)
 
@@ -264,11 +264,8 @@ async def async_setup_entry(hass, entry) -> bool:
     await component.async_add_entities([plate_entity])
     hass.data[DOMAIN][CONF_PLATE][plate] = plate_entity
 
-    for domain in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, domain)
-        )
-
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    
     listener = entry.add_update_listener(async_update_options)
     entry.async_on_unload(listener)
 
@@ -344,14 +341,14 @@ class SwitchPlate(RestoreEntity):
 
         self._subscriptions = []
 
-        with open(
-            pathlib.Path(__file__).parent.joinpath("pages_schema.json"), "r"
-        ) as schema_file:
-            self.json_schema = json.load(schema_file)
-
         self._attr_unique_id = entry.data[CONF_HWID]
         self._attr_name = entry.data[CONF_NAME]
         self._attr_icon = "mdi:gesture-tap-box"
+
+    def _read_file(self, path):
+        """Executor helper to read file."""
+        with open(path, "r") as src_file:
+            return src_file.read()
 
     @property
     def state(self):
@@ -376,6 +373,9 @@ class SwitchPlate(RestoreEntity):
     async def async_added_to_hass(self):
         """Run when entity about to be added."""
         await super().async_added_to_hass()
+
+        schema_file_contents = await self.hass.async_add_executor_job(self._read_file, pathlib.Path(__file__).parent.joinpath("pages_schema.json"))
+        self.json_schema = json.loads(schema_file_contents)
 
         state = await self.async_get_last_state()
         if state and state.state not in [STATE_UNAVAILABLE, STATE_UNKNOWN, None]:
@@ -650,17 +650,17 @@ class SwitchPlate(RestoreEntity):
             )
 
         try:
-            with open(path, "r") as pages_file:
-                if path.endswith(".json"):
-                    json_data = json.load(pages_file)
-                    jsonschema.validate(instance=json_data, schema=self.json_schema)
-                    lines = []
-                    for item in json_data:
-                        if isinstance(item, dict):
-                            lines.append(json.dumps(item) + "\n")
-                    await send_lines(lines)
-                else:
-                    await send_lines(pages_file)
+            pages_file = await self.hass.async_add_executor_job(self._read_file, path)
+            if path.endswith(".json"):
+                json_data = json.loads(pages_file)
+                jsonschema.validate(instance=json_data, schema=self.json_schema)
+                lines = []
+                for item in json_data:
+                    if isinstance(item, dict):
+                        lines.append(json.dumps(item) + "\n")
+                await send_lines(lines)
+            else:
+                await send_lines(pages_file.splitlines(keepends=True))
             await self.refresh()
 
         except (IndexError, FileNotFoundError, IsADirectoryError, UnboundLocalError):
@@ -697,7 +697,10 @@ class HASPObject:
         self.cached_properties = {}
 
         self.properties = config.get(CONF_PROPERTIES)
-        self.event_services = config.get(CONF_EVENT)
+        self.event_services = {
+            event: Script(hass, script, plate_topic, DOMAIN)
+            for (event, script) in config[CONF_EVENT].items()
+        }
         self._tracked_property_templates = []
         self._freeze_properties = []
         self._subscriptions = []
@@ -791,7 +794,7 @@ class HASPObject:
                 elif message[HASP_EVENT] in [HASP_EVENT_UP, HASP_EVENT_RELEASE]:
                     self._freeze_properties = []
 
-                for event in self.event_services:
+                for event, script in self.event_services.items():
                     if event in message[HASP_EVENT]:
                         _LOGGER.debug(
                             "Service call for '%s' triggered by '%s' on '%s' with variables %s",
@@ -800,13 +803,10 @@ class HASPObject:
                             msg.topic,
                             message,
                         )
-                        for service in self.event_services[event]:
-                            await async_call_from_config(
-                                self.hass,
-                                service,
-                                validate_config=False,
-                                variables=message,
-                            )
+                        await script.async_run(
+                            run_variables=message,
+                            context=Context(),
+                        )
             except vol.error.Invalid:
                 _LOGGER.debug(
                     "Could not handle openHASP event: '%s' on '%s'",

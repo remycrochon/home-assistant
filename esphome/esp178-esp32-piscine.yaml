@@ -37,6 +37,7 @@ status_led:
     number: GPIO23
     inverted: true
 
+
 # Enable logging
 logger:
   level: INFO
@@ -721,12 +722,14 @@ switch:
     id: cde_ppe_filtration
     on_turn_on:
       then:
+        - switch.turn_on: led14        
         - delay: !lambda "return id(tempo_mesure_temp).state*1000;" # Durée de fonctionnement de la pompe avant prise en compte de la température eau
         - logger.log:
             format: "Set tempo cde ppe"
             level: DEBUG
         - lambda: |-
             id(flag_tempo_ppe_filtre) = true;
+
     on_turn_off: 
       then:
         - logger.log:
@@ -736,6 +739,7 @@ switch:
             id(flag_tempo_ppe_filtre) = false;
         - script.stop: _regul_ph
         - switch.turn_off: cde_ppe_ph_moins
+        - switch.turn_off: led14        
 
   - platform: gpio
     name: "${friendly_name} cde_ppe_ph_moins"
@@ -778,6 +782,7 @@ switch:
 
   - platform: gpio
     name: "${friendly_name} led14"
+    id: led14
     pin:
       sx1509: sx1509_hub1
       number: 14
@@ -787,6 +792,7 @@ switch:
 
   - platform: gpio
     name: "${friendly_name} led15"
+    id: led15
     pin:
       sx1509: sx1509_hub1
       number: 15

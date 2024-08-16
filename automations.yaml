@@ -2110,19 +2110,19 @@
   description: ''
   trigger:
   - platform: time_pattern
-    minutes: /15
+    minutes: /30
   condition: []
   action:
-  - service: mqtt.publish
-    data:
+  - data:
       topic: hasp/ecran01/command
       payload: backlight {"state":"true","brightness":10}
     enabled: false
-  - service: mqtt.publish
-    data:
+    action: mqtt.publish
+  - data:
       topic: hasp/ecran01/config/gui
       payload: '{"idle2":20}'
     enabled: false
+    action: mqtt.publish
   - type: turn_off
     device_id: 31203080ff3e67d781d95be03b42e98e
     entity_id: caf58cffba51ee848ade4eaa4c57a127

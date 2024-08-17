@@ -1,12 +1,19 @@
-#Pin Name Description de la carte ESP32 8 relais
-
+# Mode simulation
+# Sensor simulé:
+  # temperature eau
+  # ph EZO
+  # Seuil binary sensor "Marche ppe"
+  # test si ph_EZO est valide
+  # Cron time pour lancer script regule pH
 
 substitutions:
   device_name: "esp178-esp32-piscine"
   friendly_name: esp178
   adress_ip: "192.168.0.178"
   time_timezone: "Europe/Paris"
-  
+  TELEGRAM_BOT_TOKEN: !secret telegram_token
+  CHAT_ID: "1109811941"
+
 esphome:
   name: ${device_name}
   project:
@@ -37,7 +44,6 @@ status_led:
     number: GPIO23
     inverted: true
 
-
 # Enable logging
 logger:
   level: INFO
@@ -61,6 +67,19 @@ time:
      - 0.pool.ntp.org
      - 1.pool.ntp.org
      - 2.pool.ntp.org
+
+    on_time:
+      # Toutes les 10s pour tests
+      - cron: '/10 * * * * *'
+        then:
+          - script.execute: _regul_ph
+
+      # Tous les jours à 11:30 on execute le sript de regul pH
+      - seconds: 0
+        minutes: 30
+        hours: 11
+        then:
+          - script.execute: _regul_ph
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -90,6 +109,9 @@ sx1509:
 
 ads1115:
   - address: 0x48
+
+http_request:
+  verify_ssl: false
 
 # déclaration des variables "globals"
 globals:
@@ -124,16 +146,16 @@ globals:
       type: float
       restore_value: no
 
-# Limite haute du temps de filtration "en heure"
+    # Limite haute du temps de filtration "en heure"
     - id: g_temps_max_filtration
       type: float
       initial_value: '23'
-# Limite basse du temps de filtration (en heure)
+    # Limite basse du temps de filtration (en heure)
     - id: g_temps_min_filtration
       type: float
       initial_value: '5'
-# Paliers temperature/Temps filtration avec le mode "Palier"
-  # Seuils Température en °C
+    # Paliers temperature/Temps filtration avec le mode "Palier"
+    # Seuils Température en °C
     - id: g_temp_palier1
       type: float
       initial_value: '9'
@@ -163,7 +185,7 @@ globals:
       type: float
       initial_value: '12'
 
-# Constantes utilisées dans le mode "Abaque"  
+    # Constantes utilisées dans le mode "Abaque"  
 
     - id: g_abaque_a
       type: float
@@ -178,14 +200,13 @@ globals:
       type: float
       initial_value: '-10.72859'
 
-# Variables intermediaires utilisées dans le calcul "heure debut et fin"
+    # Variables intermediaires utilisées dans le calcul "heure debut et fin"
     - id: g_hh
       type: int
     - id: g_mm
       type: int
     - id: g_ss
       type: int
-
 
 # déclaration des modes de fonctionnement dans des "input select"
 select:
@@ -247,7 +268,7 @@ select:
         - delay: 1s            
         - script.execute: _regul_eau  
 
-# défini l'activation du mode Hors Gel
+  # défini l'activation du mode Hors Gel
   - platform: template
     name: "${friendly_name}_Mode_Hors_Gel"
     optimistic: true
@@ -257,130 +278,19 @@ select:
       - Activé
     id: _Mode_Fonctionnement_hg
 
-# Input Number
-number:
-  # Simulation Temp eau et Mesure pH
-  - platform: template
-    name: "${friendly_name}_simule_Temp"
-    id: temp_eau
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -10
-    max_value: 50
-    device_class: temperature
-    step: 0.1  
-
-  # Simulation Niveau pH
-  - platform: template
-    name: "${friendly_name}_simule_pH"
-    id: simule_ph_ezo
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 10
-    unit_of_measurement: "pH"
-    step: 0.1  
-
-  # Temps de recirculation avant prise en compte mesure de température
-  - platform: template
-    name: "${friendly_name}_tempo_recirculation"
-    id: tempo_mesure_temp
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 900
-    unit_of_measurement: "s"
-    step: 1
-    icon: mdi:clock
-
-  # Coefficient de filtration
-  - platform: template
-    name: "${friendly_name}_coeff_Filtration"
-    id: coeff_filtration
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 50
-    max_value: 150
-    unit_of_measurement: "%"
-    step: 1
-    icon: mdi:percent
-
-  # Cible Niveau pH
-  - platform: template
-    name: "${friendly_name}_pH_Cible"
-    id: _ph_cible
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 7
-    max_value: 7.6
-    unit_of_measurement: "pH"
-    step: 0.1
-
-  - platform: template
-    name: "${friendly_name}_debit_ppe_ph_moins"
-    id: _debit_ppe_moins
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 7.2
-    unit_of_measurement: "l/h"
-    step: 0.1
-
-  - platform: template
-    name: "${friendly_name}_taux_concentration_ph_moins"
-    id: _taux_concentration_ph_moins
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    unit_of_measurement: "%"
-    step: 1
-    icon: mdi:percent
-
-  # Seuil 1 Temp Hors gel
-  - platform: template
-    name: "${friendly_name}_Seuil1_Temp_HG"
-    id: s1_temp_hg
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -5
-    max_value: 0
-    device_class: temperature
-    step: 0.1
-
-  # Seuil 2 Temp Hors gel
-  - platform: template
-    name: "${friendly_name}_Seuil2_Temp_HG"
-    id: s2_temp_hg
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -10
-    max_value: 0
-    device_class: temperature
-    step: 0.1
-  
-  # Durée de l'arret sur la journée en lien avec "arret_jour"
-  - platform: template
-    name: "${friendly_name}_Durée-Arret_jour"
-    id: duree_at_jour
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 24
-    unit_of_measurement: "h"
-    step: 1
 button:
-# Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
+  - platform: template
+    name: "${friendly_name}_BP_Send Telegram"
+    on_press:
+      - http_request.post:
+          url: "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
+          headers:
+            Content-Type: application/json
+          json:
+            chat_id: ${chat_id}
+            text: Message from ESPHome
+
+  # Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
   - platform: template
     name: "${friendly_name}_BP_arret_jour"
     id: _arret_jour
@@ -403,12 +313,12 @@ button:
           level: info 
 
 binary_sensor:
-#Etat de la connection
+  #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
 
-# calcul des niveaux piscine
-# Si LSL ou LSH recouvert alors True sinon False
+  # calcul des niveaux piscine
+  # Si LSL ou LSH recouvert alors True sinon False
   - platform: template
     name: "${friendly_name}_niv_haut"
     id: niv_haut
@@ -425,12 +335,13 @@ binary_sensor:
     name: "${friendly_name}_niv_defaut"
     id: niv_defaut
 
-# Pompe en fonctionnement
+  # Pompe en fonctionnement
+  # Remplacer le seuil par du négatif pour simuler
   - platform: template
     name: "${friendly_name}_ppe_en_fonctionnement"
     id: ppe_filt_en_fonctionnement
     lambda: |-
-      if (id(puissance).state > 100) {
+      if (id(puissance).state > -100) {
         // Pompe Fonctionne si puissance>100 W
         return true;
       } else {
@@ -448,7 +359,7 @@ binary_sensor:
         pullup: true
     name: "${friendly_name}_bp1"
 
-# GPIO sur module extension SX1509
+  # GPIO sur module extension SX1509
   - platform: gpio
     name: "${friendly_name}_volet_ferme"
     id: volet_ferme
@@ -556,12 +467,135 @@ datetime:
     optimistic: yes
     restore_value: true
 
+# Input Number
+number:
+  # Simulation Temp eau et Mesure pH
+  - platform: template
+    name: "${friendly_name}_simule_Temp"
+    id: temp_eau
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -10
+    max_value: 50
+    device_class: temperature
+    step: 0.01  
+
+  # Simulation Niveau pH
+  - platform: template
+    name: "${friendly_name}_simule_pH"
+    id: ph_ezo
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: "pH"
+    step: 0.01
+
+  # Temps de recirculation avant prise en compte mesure de température
+  - platform: template
+    name: "${friendly_name}_tempo_recirculation"
+    id: tempo_mesure_temp
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 900
+    unit_of_measurement: "s"
+    step: 1
+    icon: mdi:clock
+
+  # Coefficient de filtration
+  - platform: template
+    name: "${friendly_name}_coeff_Filtration"
+    id: coeff_filtration
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 50
+    max_value: 150
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:percent
+
+  # Cible Niveau pH
+  - platform: template
+    name: "${friendly_name}_pH_Cible"
+    id: _ph_cible
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 7
+    max_value: 7.6
+    unit_of_measurement: "pH"
+    step: 0.01
+
+  - platform: template
+    name: "${friendly_name}_debit_ppe_ph_moins"
+    id: _debit_ppe_moins
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 7.2
+    unit_of_measurement: "l/h"
+    step: 0.1
+
+  - platform: template
+    name: "${friendly_name}_taux_concentration_ph_moins"
+    id: _taux_concentration_ph_moins
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:percent
+
+  # Seuil 1 Temp Hors gel
+  - platform: template
+    name: "${friendly_name}_Seuil1_Temp_HG"
+    id: s1_temp_hg
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -5
+    max_value: 0
+    device_class: temperature
+    step: 0.1
+
+  # Seuil 2 Temp Hors gel
+  - platform: template
+    name: "${friendly_name}_Seuil2_Temp_HG"
+    id: s2_temp_hg
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -10
+    max_value: 0
+    device_class: temperature
+    step: 0.1
+  
+  # Durée de l'arret sur la journée en lien avec "arret_jour"
+  - platform: template
+    name: "${friendly_name}_Durée-Arret_jour"
+    id: duree_at_jour
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 24
+    unit_of_measurement: "h"
+    step: 0.01
+
 sensor:
   - platform: homeassistant
     name: "${friendly_name}_temperature_exterieure"
     entity_id: "sensor.vp2_temp_out"
     id: temp_ext
-#    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
+  #    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
 
   - platform: dallas_temp
     address: 0x060321117ae89b28 #  0x82012111efe81d28
@@ -585,7 +619,7 @@ sensor:
     # Compiler
   # Fin procédure étalonnage
   - platform: ezo
-    id: ph_ezo
+    id: simule_ph_ezo
     name: "${friendly_name}_ph_ezo"
     address: 99
     unit_of_measurement: "pH"
@@ -613,7 +647,7 @@ sensor:
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
 
-# Mesure de la pression filtre Entrée ANA 1
+  # Mesure de la pression filtre Entrée ANA 1
 
   - platform: ads1115
     multiplexer: 'A0_GND'
@@ -626,19 +660,19 @@ sensor:
       - calibrate_linear:
         - 0.60 -> 0.0
         - 0.87 -> 0.87
-# moyenne sur 30 mn + affichage toutes les mn
+  # moyenne sur 30 mn + affichage toutes les mn
       - sliding_window_moving_average:
           window_size: 30
           send_every: 1
 
-# mémorise le temps d'injection calculé
+  # mémorise le temps d'injection calculé
   - platform: template
     name: "${friendly_name}_tps_injection_ph_moins"
     id: _tps_injection_ph_moins
     unit_of_measurement: "s"
     state_class: "measurement"  
 
-# mesure Puissance avec un PZEM-004T-100A
+  # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
     update_interval: 30s
     current:
@@ -660,7 +694,7 @@ sensor:
       unit_of_measurement: "W"
       id: puissance
 
-# Energie consommée par jour
+  # Energie consommée par jour
   - platform: total_daily_energy
     name: '${friendly_name}_energie_jour'
     power_id: puissance
@@ -672,7 +706,7 @@ sensor:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
 
-# Calcul du temps de fonctionnement
+  # Calcul du temps de fonctionnement
   # Pompe piscine
   - platform: duty_time
     id: _temps_fonctionnement_ppe_piscine_jour
@@ -682,7 +716,7 @@ sensor:
     # ... EOR 'lambda'
     #lambda: "return id(my_climate).mode != CLIMATE_MODE_OFF;"
     # Restore (optional, default: False)
-    restore: false
+    restore: true
     # Sensor for last turn-on time (optional)
     last_time:
       name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
@@ -830,9 +864,9 @@ display:
 
 # Déclenchement des scripts à intervalles réguliers
 interval:
-  - interval: 90s
-    then:
-      - script.execute: _regul_ph
+#  - interval: 90s
+#    then:
+#      - script.execute: _regul_ph
   - interval: 5s
     then:      
       - script.execute: _fonctionnement_filtration
@@ -882,10 +916,27 @@ script:
           else:
             - lambda: |-
                 id(g_memoire_ph)=id(g_memoire_ph);
+      - if:
+          condition:
+            lambda: 'return isnan(id(ph_ezo).state);' # 'return !isnan(id(ph_ezo).state);' verifie si ph_ezo est valide
+          then:
+            - logger.log:
+                format: "ph_EZO invalide: %.2f"
+                args: [ 'id(ph_ezo).state']
+                level: INFO            
+            - lambda: |-            
+                id(g_memoire_ph)=0;
+          else: 
+            - logger.log:
+                format: "ph_EZO Valide: %.2f"
+                args: [ 'id(ph_ezo).state']
+                level: INFO   
+
+
       - logger.log:
           format: "Flag Temp: %i / Ph EZO: %.2f / Mem Ph: %.2f"
           args: [ 'id(flag_tempo_ppe_filtre)','id(ph_ezo).state','id(g_memoire_ph)' ]
-          level: DEBUG
+          level: INFO
 
   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: _fonctionnement_filtration
@@ -893,7 +944,7 @@ script:
       - logger.log:
           format: "Switch at force 2: %i "
           args: [ 'id(ent_at_force).state' ]
-          level: INFO      
+          level: DEBUG      
       # Entrée Arret Forcée =true
       - if:
           condition:
@@ -924,7 +975,7 @@ script:
             - logger.log:
                 format: "Flag HG: %i / Temp Ext: %.2f / S1: %.2f / S2: %.2f"
                 args: [ 'id(g_flag_hg)','id(temp_ext).state','id(s1_temp_hg).state','id(s2_temp_hg).state' ]
-                level: INFO                
+                level: DEBUG                
             - lambda: |-
                 static String mess;
                 mess= "Ma HG";
@@ -1188,32 +1239,58 @@ script:
   - id: _regul_ph
     mode: single  
     then:
+      - logger.log:
+          format: "Log mem ph: %f / pH Cible: %f"
+          args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
+          level: INFO      
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(g_memoire_ph) > id(_ph_cible).state;'
+              - lambda: 'return id(g_memoire_ph) > 0;'
+              - switch.is_on: cde_ppe_filtration          
+          then:
+            - lambda: |-
+                static float a=id(g_memoire_ph);
+                static float b=id(_ph_cible).state;
+                static float c=id(_taux_concentration_ph_moins).state;                
+                static float d=id(_debit_ppe_moins).state;                
+                id(g_tps_injection_ph_moins)=((a-b)/(c/100)/d)*3600/60;
+#                id(g_tps_injection_ph_moins)=(((id(g_memoire_ph)-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
+          else:
+            - lambda: |-
+                id(g_tps_injection_ph_moins)=0;
+
       - lambda: |-
-          id(g_tps_injection_ph_moins)=(((id(g_memoire_ph)-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
           id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
-      
+
       - logger.log:
           format: "Log tps injection: %f"
           args: [ 'id(g_tps_injection_ph_moins)' ]
           level: INFO
-
       - if:
           condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
-              - lambda: 'return id(g_memoire_ph) > id( _ph_cible).state;'
-              - lambda: 'return id(g_memoire_ph) > 0;'
-              - switch.is_on: cde_ppe_filtration
+            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
           then:
-            - switch.turn_on: cde_ppe_ph_moins
-            - logger.log: 
-                format: "Marche ppe Ph moins"
-                level: INFO        
-            - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
-            - switch.turn_off: cde_ppe_ph_moins
-            - logger.log: 
-                format: "Arret ppe Ph moins"
-                level: INFO
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return id(g_tps_injection_ph_moins) > 0;'
+                then:
+                  - switch.turn_on: cde_ppe_ph_moins
+                  - logger.log: 
+                      format: "Marche ppe Ph moins"
+                      level: INFO        
+                  - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
+                  - switch.turn_off: cde_ppe_ph_moins
+                  - logger.log: 
+                      format: "Arret ppe Ph moins"
+                      level: INFO
+                else:
+                  - switch.turn_off: cde_ppe_ph_moins
+                  - logger.log: 
+                      format: "Arret ppe Ph moins"
+                      level: INFO
 
       - if:
           condition:
@@ -1339,7 +1416,7 @@ script:
             - binary_sensor.template.publish:
                 id: niv_haut
                 state: OFF
-# si pas niveau haut et niveau bas => defaut intermédiaire
+      # si pas niveau haut et niveau bas => defaut intermédiaire
       - if: 
           condition:
             and:
@@ -1354,7 +1431,7 @@ script:
             - binary_sensor.template.publish:
                 id: niv_inter
                 state: OFF     
-# si pas niveau haut et pas niveau bas => niveau bas
+      # si pas niveau haut et pas niveau bas => niveau bas
       - if: 
           condition:
             and:
@@ -1369,7 +1446,7 @@ script:
             - binary_sensor.template.publish:
                 id: niv_bas
                 state: OFF                
-# si niveau haut et pas niveau bas => defaut niveau
+      # si niveau haut et pas niveau bas => defaut niveau
       - if: 
           condition:
             and:

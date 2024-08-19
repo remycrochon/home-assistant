@@ -46,7 +46,7 @@ status_led:
 
 # Enable logging
 logger:
-  level: INFO
+  level: DEBUG
   baud_rate: 0
   
 # Enable Home Assistant API
@@ -156,18 +156,39 @@ globals:
       initial_value: '5'
     # Paliers temperature/Temps filtration avec le mode "Palier"
     # Seuils Température en °C
+    # la durée est calculée manuellement par rapport au volume de la piscine: Vol=9*4*1.4=50.4 m3
+    # et le débit de la pompe: Qppe Théorique=12m3/h -> retenu:12m3/h
+    # donc 1 cycle= 50.4/12=4.2h
+    # il faut filtrer au minimum:
+    # T°eau<10° = 0 cycle
+    # 10°<T°eau<15° = 1 cycle = 4.2h => 4h
+    # 15°<T°eau<20° = 2 cycles = 8.4h => 8h
+    # 20°<T°eau<25° = 3 cycles = 12.6h => 12h
+    # 25°<T°eau = 3 ou 4 cycles = 12.6h => 12h
+    # 
+    # si beaucoup de baigneurs de jour alors augmenter le coeff
+    # Mode "Palier":
+      # Si T°eau< Seuil Temp1 alors Durée = Tps paliers 1
+      # Sinon
+      # Si T°eau>= Seuil Temp1 et T°eau< Seuil Temp2 alors Durée = Tps paliers 2
+      # Sinon
+      # Si T°eau>= Seuil Temp2 et T°eau< Seuil Temp3 alors Durée = Tps paliers 3
+      # Sinon
+      # Si T°eau>= Seuil Temp3 et T°eau< Seuil Temp4 alors Durée = Tps paliers 4
+      # Sinon
+      # Durée = Tps paliers 5
     - id: g_temp_palier1
       type: float
-      initial_value: '9'
+      initial_value: '10'
     - id: g_temp_palier2
       type: float
-      initial_value: '12'
+      initial_value: '15'
     - id: g_temp_palier3
       type: float
-      initial_value: '17'
+      initial_value: '20'
     - id: g_temp_palier4
       type: float
-      initial_value: '24' 
+      initial_value: '25' 
   # nb d'heures de filtration (en h)
     - id: g_tps_palier1
       type: float
@@ -177,13 +198,13 @@ globals:
       initial_value: '4'
     - id: g_tps_palier3
       type: float
-      initial_value: '6'
+      initial_value: '8'
     - id: g_tps_palier4
       type: float
-      initial_value: '8'
+      initial_value: '12'
     - id: g_tps_palier5
       type: float
-      initial_value: '12'
+      initial_value: '16'
 
     # Constantes utilisées dans le mode "Abaque"  
 
@@ -479,7 +500,11 @@ number:
     min_value: -10
     max_value: 50
     device_class: temperature
-    step: 0.01  
+    step: 0.01 
+    on_value: 
+      then:
+        - lambda: |-
+            id(g_memoire_temp_eau)=id(temp_eau).state;     
 
   # Simulation Niveau pH
   - platform: template
@@ -883,7 +908,7 @@ interval:
 # Déclaration des "Scripts"
 script:
 
-  # Si la pompe tourne depuis au moins 5min on raffraichit la memoire de la temperature eau qui est
+  # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire de la temperature eau qui est
   # prise en compte dans les scripts.
   # sinon on travaille avec la témpérature mémorisée avant l'arret précédent
   - id: _memorisation_temperature_eau
@@ -931,7 +956,6 @@ script:
                 format: "ph_EZO Valide: %.2f"
                 args: [ 'id(ph_ezo).state']
                 level: INFO   
-
 
       - logger.log:
           format: "Flag Temp: %i / Ph EZO: %.2f / Mem Ph: %.2f"

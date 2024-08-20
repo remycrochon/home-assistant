@@ -2336,10 +2336,10 @@
     - sensor.mp2_mode_fonctionnement_par_mqtt
   condition: []
   action:
-  - service: notify.telegram
-    data:
+  - data:
       message: MP2-Mode de fonctionnement -> {{states("sensor.mp2_mode_fonctionnement_texte")
         }}{{-"\n"-}}{{states("sensor.date_time") }}
+    action: notify.telegram
   mode: single
 - id: '1711527591458'
   alias: Aqara Magic Cube
@@ -2500,4 +2500,24 @@
         data:
           message: Désactivation Détection video surveillance
           title: Caméra
+  mode: single
+- id: '1724083468200'
+  alias: 3_4_4 Piscine-Notification Niveau Haut
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.tp_plein_lsh
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition: []
+  action:
+  - data:
+      message: Niveau Haut Piscine
+      title: Avertissement
+    action: notify.telegram
   mode: single

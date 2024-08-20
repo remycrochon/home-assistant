@@ -9,8 +9,6 @@ esphome:
   platform: ESP8266
   board: d1_mini
 
-
-
 wifi:
   networks:
     - ssid: !secret wifi_esp

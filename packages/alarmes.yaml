@@ -30,6 +30,7 @@ template:
 # Surveillance discordance PAC entre l'état du thermostat et l'état du switch de commande   
 # normalement sur on  
     - name: "alarme_discord_pac"
+      unique_id: "alarme_discord_pac"
       state: >-
         {% set a=states("sensor.ecocompteur_pac")| float(default=0)>400 %}
         {% set b=states("switch.altherma") %}
@@ -39,6 +40,7 @@ template:
 # Surveillance status PAC
 # normalement sur on
     - name: "alarme_status_pac"
+      unique_id: "alarme_status_pac"
       state: >-
         {% set a=states("sensor.esp_altherma_status") %}
         {{ a=="Online" }}
@@ -47,6 +49,7 @@ template:
 # Surveillance porte garage
 # normalement sur on
     - name: "alarme_porte_garage"
+      unique_id: "alarme_porte_garage"
       state: >-
         {% set a=is_state("sun.sun", "below_horizon") %}
         {% set b=states("binary_sensor.porte_garage_fermee") %}
@@ -56,6 +59,7 @@ template:
 # Surveillance porte sous sol
 # normalement sur on
     - name: "alarme_porte_sous_sol"
+      unique_id: "alarme_porte_sous_sol"
       state: >-
         {% set a=is_state("sun.sun", "below_horizon") %}
         {% set b=states("binary_sensor.porte_ssol_fermee") %}
@@ -65,6 +69,7 @@ template:
 # Surveillance porte cellier
 # Sur off si fermée
     - name: "alarme_porte_cellier"
+      unique_id: "alarme_porte_cellier"
       state: >-
         {% set a=is_state("sun.sun", "below_horizon") %}
         {% set b=states("binary_sensor.porte_cellier") %}
@@ -74,6 +79,7 @@ template:
 # Surveillance porte sous-sol petite
 # Sur off si fermée
     - name: "alarme_petite_porte_sous_sol"
+      unique_id: "alarme_petite_porte_sous_sol"
       state: >-
         {% set a=is_state("sun.sun", "below_horizon") %}
         {% set b=states("binary_sensor.detecteur_petite_porte_sous_sol") %}

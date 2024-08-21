@@ -110,9 +110,6 @@ sx1509:
 ads1115:
   - address: 0x48
 
-http_request:
-  verify_ssl: false
-
 # déclaration des variables "globals"
 globals:
     # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
@@ -301,15 +298,9 @@ select:
 
 button:
   - platform: template
-    name: "${friendly_name}_BP_Send Telegram"
+    name: "${friendly_name}_BP_Cycle_Regul_pH"
     on_press:
-      - http_request.post:
-          url: "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
-          headers:
-            Content-Type: application/json
-          json:
-            chat_id: ${chat_id}
-            text: Message from ESPHome
+      - script.execute: _regul_ph
 
   # Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
   - platform: template
@@ -673,7 +664,6 @@ sensor:
   #      - 9.41 -> 9.18
 
   # Mesure de la pression filtre Entrée ANA 1
-
   - platform: ads1115
     multiplexer: 'A0_GND'
     gain: 6.144
@@ -685,10 +675,11 @@ sensor:
       - calibrate_linear:
         - 0.60 -> 0.0
         - 0.87 -> 0.87
-  # moyenne sur 30 mn + affichage toutes les mn
+  # moyenne sur 30 mn + affichage toutes les 2 mn
       - sliding_window_moving_average:
           window_size: 30
-          send_every: 1
+          send_every: 2
+          send_first_at: 1
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -745,6 +736,24 @@ sensor:
     # Sensor for last turn-on time (optional)
     last_time:
       name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
+  
+  # Mesure compteur d'eau avec un capteur USS-HS43TI
+  # https://fr.aliexpress.com/item/1005004260014462.html
+  - platform: pulse_meter
+    pin: GPIO34
+    name: "${friendly_name} Cpt Eau Piscine"
+    unit_of_measurement: "litre/mn"
+    icon: "mdi:water"
+    filters:
+      - lambda: return (x/(8*60));
+    total:
+      name: "${friendly_name} Cpt Eau Piscine Total"
+      unit_of_measurement: "m³"
+      accuracy_decimals: 3
+      device_class: water
+      state_class: total_increasing
+      filters:
+        - lambda: return (x/(8*60)/1000);
 
 # Déclaration des "Covers" 
 # Volet piscine dans mon cas

@@ -115,7 +115,8 @@ sensor:
 # moyenne sur 30 mn + affichage toutes les mn
       - sliding_window_moving_average:
           window_size: 30
-          send_every: 1
+          send_every: 2
+          send_first_at: 1
 # Avec le 30PSI
 #    filters:
 #      - calibrate_linear:

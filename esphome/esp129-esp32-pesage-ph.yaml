@@ -48,8 +48,8 @@ sensor:
     gain: 128
     update_interval: 10s
     accuracy_decimals: 1
-  #  moyenne sur 15 mn-affichage toutes les 5mn avec un Update_interval à 60s en exploitation
-  #  moyenne sur 15 s-affichage toutes les 5s avec un Update_interval à 1s en mode étalonnage
+  #  moyenne sur 15*10s-Affichage toutes les 5*10s avec un Update_interval à 10s en mode étalonnage
+  # L'offset correspond au poids du bidon vide
     filters:
       - sliding_window_moving_average:
           window_size: 15
@@ -58,6 +58,7 @@ sensor:
       - calibrate_linear:
           - -468600 -> 0
           - 1780000 -> 84.4
+      - offset: -1.4
     unit_of_measurement: kg
 
 switch:

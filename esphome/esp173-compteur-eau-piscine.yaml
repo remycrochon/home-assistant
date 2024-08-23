@@ -45,11 +45,13 @@ sensor:
   # 1L=477Hz,
   # D4
 
-  - platform: pulse_meter
+#  - platform: pulse_meter
+  - platform: pulse_counter
     pin: D4
     name: "${friendly_name} Cpt Eau Piscine"
     unit_of_measurement: "litre/mn"
     icon: "mdi:water"
+
     filters:
       - lambda: return (x/(8*60));
     total:

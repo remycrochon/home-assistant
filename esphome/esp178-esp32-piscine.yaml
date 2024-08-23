@@ -70,9 +70,9 @@ time:
 
     on_time:
       # Toutes les 10s pour tests
-      - cron: '/10 * * * * *'
-        then:
-          - script.execute: _regul_ph
+      #- cron: '/10 * * * * *'
+      #  then:
+      #    - script.execute: _regul_ph
 
       # Tous les jours à 11:30 on execute le sript de regul pH
       - seconds: 0
@@ -547,27 +547,30 @@ number:
     unit_of_measurement: "pH"
     step: 0.01
 
+  # Debit Pompe pH moins
+  # Etalonnage du 22/08/2024: 4.272 l/h
   - platform: template
     name: "${friendly_name}_debit_ppe_ph_moins"
     id: _debit_ppe_moins
     optimistic: true
     restore_value: true
     mode: box
-    min_value: 0
+    min_value: 0.5
     max_value: 7.2
     unit_of_measurement: "l/h"
-    step: 0.1
+    step: 0.001
 
+  # Coefficient regulation
   - platform: template
-    name: "${friendly_name}_taux_concentration_ph_moins"
-    id: _taux_concentration_ph_moins
+    name: "${friendly_name}_coef_regul_ph_moins"
+    id: _coef_regul_ph_moins
     optimistic: true
     restore_value: true
     mode: box
     min_value: 0
-    max_value: 100
+    max_value: 150
     unit_of_measurement: "%"
-    step: 1
+    step: 0.01
     icon: mdi:percent
 
   # Seuil 1 Temp Hors gel
@@ -898,9 +901,9 @@ display:
 
 # Déclenchement des scripts à intervalles réguliers
 interval:
-#  - interval: 90s
-#    then:
-#      - script.execute: _regul_ph
+  - interval: 10s
+    then:
+      - script.execute: _regul_ph
   - interval: 5s
     then:      
       - script.execute: _fonctionnement_filtration
@@ -1266,16 +1269,24 @@ script:
 
 # Regulation du pH
 # Calcul du temps d'injection en fonction:
-#   - de l'écart mesure-consigne
-#   - du debit ppe pH
-#   - de la concentration du pH moins
+# caracteristiques du pH-:
+  # mp= montant du produit =>quantité necessaire pour agir (0.2l)
+  # ve= valeur de l'effet du produit (0.1 à 0.2)
+  # va= volume d'eau affecté par le produit ( 10m3)
+# vb= volume du bassin
+# c= consigne du pH
+# m= mesure du pH
+# de= debit de la pompe (en l/h)
+# q=quantité à injecté = (m-c)/ve*(vb/va)*mp
+# temps injection (s)= (q/3600)*de
+
   - id: _regul_ph
-    mode: single  
+    mode: single
     then:
       - logger.log:
           format: "Log mem ph: %f / pH Cible: %f"
           args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-          level: INFO      
+          level: debug      
       - if:
           condition:
             and:
@@ -1284,12 +1295,21 @@ script:
               - switch.is_on: cde_ppe_filtration          
           then:
             - lambda: |-
-                static float a=id(g_memoire_ph);
-                static float b=id(_ph_cible).state;
-                static float c=id(_taux_concentration_ph_moins).state;                
-                static float d=id(_debit_ppe_moins).state;                
-                id(g_tps_injection_ph_moins)=((a-b)/(c/100)/d)*3600/60;
-#                id(g_tps_injection_ph_moins)=(((id(g_memoire_ph)-id(_ph_cible).state)/(id(_taux_concentration_ph_moins).state/100)/id(_debit_ppe_moins).state))*3600;
+                static float m=0;
+                static float c=0;                
+                static float mp=0.2;
+                static float ve=0.2;
+                static float va=10;
+                static float vb=50;
+                static float de=0;
+                static float q=0;
+                static float coef=0;
+                m=id(g_memoire_ph);
+                c=id(_ph_cible).state;
+                de=id(_debit_ppe_moins).state;
+                q=(m-c)/ve*(vb/va)*mp;
+                coef= id(_coef_regul_ph_moins).state/100;
+                id(g_tps_injection_ph_moins)=q*3600/de*coef;
           else:
             - lambda: |-
                 id(g_tps_injection_ph_moins)=0;
@@ -1300,7 +1320,7 @@ script:
       - logger.log:
           format: "Log tps injection: %f"
           args: [ 'id(g_tps_injection_ph_moins)' ]
-          level: INFO
+          level: DEBUG
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
@@ -1314,7 +1334,8 @@ script:
                   - logger.log: 
                       format: "Marche ppe Ph moins"
                       level: INFO        
-                  - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
+                  #- delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
+                  - delay: !lambda "return 1000;"
                   - switch.turn_off: cde_ppe_ph_moins
                   - logger.log: 
                       format: "Arret ppe Ph moins"

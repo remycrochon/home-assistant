@@ -1278,7 +1278,7 @@ script:
 # m= mesure du pH
 # de= debit de la pompe (en l/h)
 # q=quantité à injecté = (m-c)/ve*(vb/va)*mp
-# temps injection (s)= (q/3600)*de
+# temps injection (s)= (q*3600)/de
 
   - id: _regul_ph
     mode: single

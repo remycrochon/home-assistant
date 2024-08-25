@@ -33,7 +33,7 @@ openhasp:
 
       - obj: "p1b136"
         properties:
-          "text": "{{ states('sensor.ph_piscine_ph')|float(0) |round(1)}} pH" 
+          "text": "{{ states('sensor.ph_piscine_ph')|float(0) |round(2)}} pH" 
 
       - obj: "p1b138"  
         properties:

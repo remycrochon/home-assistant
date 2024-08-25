@@ -23,14 +23,6 @@ input_number:
     unit_of_measurement: pH
     icon: mdi:alpha-h-circle-outline
     mode: box
-# Hysteresis- non utilisé A SUPPRIMER dans les equations
-  ph_hysteresis:
-    name: Ph Hysteresis 
-    min: 0.0
-    max: 2.0
-    step: 0.01
-    unit_of_measurement: pH
-    mode: box
 
 # Débit pompe pH (Etalonnage obligatoire de la pompe)
   ph_debit_ppe:
@@ -42,72 +34,43 @@ input_number:
     icon: mdi:pump
     mode: box
 
-# Durée injection pH
+# Durée injection pH en S
   ph_duree_inject_s:
     name: pH Durée inject effect(s)
     min: 0
     max: 60
-    step: 0.1
+    step: 1
     unit_of_measurement: "s"
     icon: mdi:clock
     mode: box
-# Durée injection pH
+# Durée injection pH en mn
   ph_duree_inject_mn:
     name: pH Durée inject effect (mn)
     min: 0
     max: 60
-    step: 0.1
+    step: 1
     unit_of_measurement: "mn"
     icon: mdi:clock
     mode: box
 
-# Seuil au dessus duquel on déclenche une injection en s NON UTILISE
-  ph_tps_min_inject:
-    name: pH Tps min injection
+# Coefficient
+  ph_coefficient_injection_ph_moins:
+    name: pH Coeff Injection pH moins
     min: 0
-    max: 60
-    step: 0.1
-    unit_of_measurement: "s"
-    icon: mdi:clock
-    mode: box
-
-# Concentration du ph Moins
-  ph_concentration:
-    name: pH Concentration
-    min: 0
-    max: 1000
+    max: 100
     step: 0.1
     unit_of_measurement: "%"
     icon: mdi:percent
     mode: box
 
-# Cumul du pH moins injecté chaque jour"
-  ph_vol_injecte:
-    name: pH Cumul Vol Injecté
-    min: 0
-    max: 25
-    step: 0.1
-    unit_of_measurement: "l"
-    icon: mdi:needle
-    mode: box
-
-# Volume du bidon de pH moins
-  ph_vol_bidon:
-    name: pH Volume Bidon
-    min: 0
-    max: 30
-    step: 0.1
-    unit_of_measurement: "l"
-    icon: mdi:blood-bag
-    mode: box
 
 # Seuil bas du bidon pH moins déclenchant une notification
   ph_seuil_bas_bidon:
-    name: pH Niveau bas Bidon
+    name: pH Seuil bas Bidon
     min: 0
-    max: 5
+    max: 30
     step: 0.5
-    unit_of_measurement: 'l'
+    unit_of_measurement: 'kg'
     icon: mdi:flask-empty-outline
     mode: box
 
@@ -127,22 +90,6 @@ input_boolean:
     name: pH validation Regul
 
 sensor:
-  - platform: history_stats
-    name: pH_derniere_heure
-    entity_id: switch.ppe_ph
-    state: 'on'
-    type: time
-    end: '{{now().replace(minute=0).replace(second=0)}}'
-    duration: 01:00:00
-
-  - platform: history_stats
-    name: pH_derniere__48h
-    entity_id: switch.ppe_ph
-    state: 'on'
-    type: time
-    end: '{{now()}}'
-    duration: 48:00:00
-
 # Statistiques pH
   - platform: statistics
     name: ph_stat_median
@@ -175,16 +122,14 @@ template:
     - name: "ph_niveau_bas_bidon"
       unique_id: "pH Seuil Niveau Bas Bidon"
       state: >-
-          {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
-          {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
-          {% set c=states('input_number.ph_seuil_bas_bidon')|float(default=0) %}
-          {{ (a-b) <= c }}
+          {% set pds=states('sensor.esp129_poids_ph_moins')|float(default=0) %}
+          {% set seuil=states('input_number.ph_seuil_bas_bidon')|float(default=0) %}
+          {{ pds <= seuil }}
 
 ####################################
   - sensor:
 
-# Recopie de la mesure pH si la pompe est en marche et 
-# si dans la plage horaire définie dans une "entrée"
+# Recopie de la mesure pH si la pompe est en marche 
 # sinon on recopie la derniere valeur historisée
 
     - name: "pH_piscine_ph"
@@ -201,13 +146,6 @@ template:
       #device_class: ph
       #state_class: measurement
 
-    - name: "ph_volume_restant_bidon"
-      unique_id: "Volume pH restant bidon"
-      state: >-
-        {% set a=states('input_number.ph_vol_bidon')|float(default=0) %}
-        {% set b=states('input_number.ph_vol_injecte')|float(default=0) %}
-        {{ (a-b)|round(2) }}   
-      icon: mdi:flask-empty-minus-outline
-      unit_of_measurement: "l"
+
 
   

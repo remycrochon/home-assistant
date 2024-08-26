@@ -137,14 +137,17 @@ template:
       state: >-
         {% set ph = states('sensor.ph_ezo') | float(default=0) | round(2) %}
         {% set ppe = states('binary_sensor.esp137_ppe_en_fonctionnement') %}
-        {% if ppe == 'on' %}
-          {{ ph | round(2) }}
-        {% else %}
-          {{ this.state }}
-        {%endif%}
-      unit_of_measurement: "pH"
+        {{ph | float(default=0)| round(2)}}
+
+#        {% if ppe == 'on' %}
+#         {{ ph | round(2) }}
+#        {% else %}
+#          {{ this.state }}
+#        {%endif%}
+#     unit_of_measurement: "pH"
+      #   {{ this.state }}
       #device_class: ph
-      #state_class: measurement
+      state_class: measurement
 
 
 

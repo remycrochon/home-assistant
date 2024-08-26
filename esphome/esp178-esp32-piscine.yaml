@@ -643,7 +643,7 @@ sensor:
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 60s
+    update_interval: 1s
   #  moyenne sur 15 mn-affichage toutes les 5mn
     filters:
       - sliding_window_moving_average:
@@ -665,6 +665,30 @@ sensor:
   #      - 4.44 -> 4.0
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
+
+  # Mesure de l'ORP
+  # Procédure étalonnage:
+    # Mettre 1 s dans "update interval"
+    # ainsi on moyenne sur 15 s avec un affichage toutes les 5s   
+  #- platform: ezo
+  #  id: orp_ezo
+  #  name: "${friendly_name}_orp_ezo"
+  #  address: 98
+  #  unit_of_measurement: "mV"
+  #  accuracy_decimals: 2
+  #  update_interval: 10s
+  #  moyenne sur 15 mn-affichage toutes les 5mn
+  #  filters:
+  #    - sliding_window_moving_average:
+  #        window_size: 15
+  #        send_every: 5
+  #        send_first_at: 1
+  # Etalonné le 15 juin 2024          
+  #    - calibrate_linear:
+  #      - 4.665 -> 4.0
+  #      - 7.482 -> 6.86
+  #      - 9.505 -> 9.18    
+
 
   # Mesure de la pression filtre Entrée ANA 1
   - platform: ads1115
@@ -816,13 +840,11 @@ switch:
     name: "${friendly_name} cde_ppe_ph_moins"
     pin: GPIO33
     id: cde_ppe_ph_moins
-    interlock: [cde_ppe_ph_plus]
 
   - platform: gpio
-    name: "${friendly_name} cde_ppe_ph_plus"
+    name: "${friendly_name} cde_ppe_clhore"
     pin: GPIO25
-    id: cde_ppe_ph_plus
-    interlock: [cde_ppe_ph_moins]
+    id: cde_ppe_clhore
 
   - platform: gpio
     name: "${friendly_name} cde_eclairage"

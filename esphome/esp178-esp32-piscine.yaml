@@ -85,7 +85,7 @@ time:
 i2c:
   sda: 15
   scl: 22
-  scan: true
+  scan: false
   id: bus_a
 
 # Configuration UART
@@ -622,6 +622,11 @@ sensor:
     id: simul_temp_eau
     filters:
       - filter_out: 0.0
+        # Etalonné le 26 Aout 2024  avec une PT100       
+      - calibrate_linear:
+        - 0 -> 0
+        - 26.6 -> 27.7
+    
 
   # Mesure du pH
   # Procédure étalonnage:
@@ -670,13 +675,13 @@ sensor:
   # Procédure étalonnage:
     # Mettre 1 s dans "update interval"
     # ainsi on moyenne sur 15 s avec un affichage toutes les 5s   
-  #- platform: ezo
-  #  id: orp_ezo
-  #  name: "${friendly_name}_orp_ezo"
-  #  address: 98
-  #  unit_of_measurement: "mV"
-  #  accuracy_decimals: 2
-  #  update_interval: 10s
+  - platform: ezo
+    id: orp_ezo
+    name: "${friendly_name}_orp_ezo"
+    address: 98
+    unit_of_measurement: "mV"
+    accuracy_decimals: 2
+    update_interval: 5s
   #  moyenne sur 15 mn-affichage toutes les 5mn
   #  filters:
   #    - sliding_window_moving_average:

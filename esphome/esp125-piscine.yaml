@@ -11,12 +11,8 @@ esphome:
 
 wifi:
   networks:
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 1
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 0
   reboot_timeout: 5min
 
   manual_ip:

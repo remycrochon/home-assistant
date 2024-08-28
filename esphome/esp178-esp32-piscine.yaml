@@ -31,7 +31,7 @@ ethernet:
   cs_pin: GPIO21 
   interrupt_pin: GPIO4
   reset_pin: GPIO5
-  clock_speed: 15Mhz
+  clock_speed: 25Mhz
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -46,7 +46,7 @@ status_led:
 
 # Enable logging
 logger:
-  level: DEBUG
+  level: INFO
   baud_rate: 0
   
 # Enable Home Assistant API
@@ -1282,7 +1282,7 @@ script:
             time.has_time:
           else:
             - logger.log:
-                format: "L'heure n'est pas initialisée et valide!"
+                format: "L'heure n'est ni initialisée, ni validée!"
                 level: INFO
       - if:
           condition:

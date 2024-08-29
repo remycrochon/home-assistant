@@ -11,8 +11,6 @@ substitutions:
   friendly_name: esp178
   adress_ip: "192.168.0.178"
   time_timezone: "Europe/Paris"
-  TELEGRAM_BOT_TOKEN: !secret telegram_token
-  CHAT_ID: "1109811941"
 
 esphome:
   name: ${device_name}
@@ -23,15 +21,22 @@ esphome:
 esp32:
   board: esp32dev
 
-ethernet:
-  type: W5500
-  clk_pin: GPIO17
-  mosi_pin: GPIO19
-  miso_pin: GPIO18
-  cs_pin: GPIO21 
-  interrupt_pin: GPIO4
-  reset_pin: GPIO5
-  clock_speed: 25Mhz
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+
+#ethernet:
+# type: W5500
+#  clk_pin: GPIO17
+#  mosi_pin: GPIO19
+#  miso_pin: GPIO18
+#  cs_pin: GPIO21 
+#  interrupt_pin: GPIO4
+#  reset_pin: GPIO5
+#  clock_speed: 25Mhz
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -201,7 +206,7 @@ globals:
       initial_value: '12'
     - id: g_tps_palier5
       type: float
-      initial_value: '16'
+      initial_value: '14'
 
     # Constantes utilisées dans le mode "Abaque"  
 

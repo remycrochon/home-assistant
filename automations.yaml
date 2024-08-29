@@ -1477,9 +1477,9 @@
   description: Injection pH v2
   trigger:
   - platform: time
-    at: '10:00:00'
+    at: '11:00:00'
   - platform: time
-    at: '14:00:00'
+    at: '15:00:00'
   condition:
   - condition: template
     value_template: '{% set m=states(''sensor.ph_piscine_ph'') | float %}
@@ -1525,11 +1525,11 @@
         }} {% endif %}'
     action: input_number.set_value
   - data:
-      message: pH sonde= {{states('sensor.ph_piscine_ph')}} {{-"\n"-}} Vol à Injecter=
-        {{states('input_number.ph_vol_ph_moins_a_injecter')}}l {{-"\n"-}} Durée injection=
-        {{states('input_number.ph_duree_inject_mn')}}mn|{{states('input_number.ph_duree_inject_s')}}s
-        {{-"\n"-}}     Poids du bidon= {{states('sensor.esp129_poids_ph_moins')}}kg
-        {{-"\n"-}} {{states("sensor.date_time") }}
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} pH sonde= {{states(''sensor.ph_piscine_ph'')}}
+        {{-"\n"-}} Cible pH= {{states(''input_number.ph_cible'')}} {{-"\n"-}} Vol
+        à Injecter={{states(''input_number.ph_vol_ph_moins_a_injecter'')}}l {{-"\n"-}}
+        Durée injection= {{states(''input_number.ph_duree_inject_mn'')}}mn-{{states(''input_number.ph_duree_inject_s'')}}s
+        {{-"\n"-}}     Poids du bidon= {{states(''sensor.esp129_poids_ph_moins'')}}kg'
       title: Piscine Début injection pH !!!
     action: notify.telegram
   - target:
@@ -2453,5 +2453,32 @@
   - data:
       message: Niveau Haut Piscine
       title: Avertissement
+    action: notify.telegram
+  mode: single
+- id: '1724834782718'
+  alias: 3_4_5 Piscine-Notification Status ESP178
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.esp178_status
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  - platform: state
+    entity_id:
+    - binary_sensor.esp178_piscine
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    enabled: false
+  condition: []
+  action:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178= {{states(''binary_sensor.esp178_status'')}}{{-"\n"-}}
+        Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
+      title: Piscine ESP178 !!!
     action: notify.telegram
   mode: single

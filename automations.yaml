@@ -1483,8 +1483,14 @@
     at: '11:00:00'
     id: 11h
   - platform: time
-    at: '15:05:00'
+    at: '15:00:00'
     id: 15h
+  - platform: state
+    entity_id:
+    - binary_sensor.esp137_ppe_en_fonctionnement
+    from: 'on'
+    to: 'off'
+    id: at_filtration
   condition: []
   action:
   - choose:
@@ -1504,6 +1510,10 @@
       - condition: state
         state: 'on'
         entity_id: binary_sensor.esp137_ppe_en_fonctionnement
+        for:
+          hours: 0
+          minutes: 15
+          seconds: 0
       - condition: trigger
         id:
         - 11h
@@ -1544,10 +1554,6 @@
             {{-"\n"-}}     Poids du bidon= {{states(''sensor.esp129_poids_ph_moins'')}}kg'
           title: Piscine Début injection pH !!!
         action: notify.telegram
-      - data_template:
-          entity_id: input_number.ph_vol_injecte
-          value: '{{states(''input_number.ph_vol_ph_moins_a_injecter'')}}'
-        action: input_number.set_value
       - target:
           entity_id:
           - switch.ppe_ph
@@ -1576,9 +1582,14 @@
         data: {}
         action: switch.turn_on
     - conditions:
-      - condition: state
-        entity_id: input_select.mode_fonct_regulation_ph
-        state: At Forcé
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: input_select.mode_fonct_regulation_ph
+          state: At Forcé
+        - condition: trigger
+          id:
+          - at_filtration
       sequence:
       - target:
           entity_id: switch.ppe_ph
@@ -2524,7 +2535,7 @@
     to: 'on'
     for:
       hours: 0
-      minutes: 10
+      minutes: 20
       seconds: 0
   condition:
   - condition: state
@@ -2543,4 +2554,31 @@
       entity_id: switch.ppe_ph
     data: {}
     action: switch.turn_off
+  mode: single
+- id: '1724998401741'
+  alias: 3_4_6 Piscine-Notification Status ESP125
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.esp125_status
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  - platform: state
+    entity_id:
+    - binary_sensor.esp178_piscine
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    enabled: false
+  condition: []
+  action:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP125= {{states(''binary_sensor.esp125_status'')}}{{-"\n"-}}
+        Etat du Ping= {{states(''binary_sensor.192_168_0_125'')}}'
+      title: Piscine ESP125 !!!
+    action: notify.telegram
   mode: single

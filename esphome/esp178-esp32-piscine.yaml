@@ -22,21 +22,21 @@ esp32:
   board: esp32dev
 
 
-wifi:
-  networks:
-    - ssid: !secret wifi
-      password: !secret mdpwifi
-  reboot_timeout: 5min
+#wifi:
+#  networks:
+#   - ssid: !secret wifi
+#     password: !secret mdpwifi
+#  reboot_timeout: 5min
 
-#ethernet:
-# type: W5500
-#  clk_pin: GPIO17
-#  mosi_pin: GPIO19
-#  miso_pin: GPIO18
-#  cs_pin: GPIO21 
-#  interrupt_pin: GPIO4
-#  reset_pin: GPIO5
-#  clock_speed: 25Mhz
+ethernet:
+  type: W5500
+  clk_pin: GPIO17
+  mosi_pin: GPIO19
+  miso_pin: GPIO18
+  cs_pin: GPIO21 
+  interrupt_pin: GPIO4
+  reset_pin: GPIO5
+  clock_speed: 15Mhz
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -653,7 +653,7 @@ sensor:
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 1s
+    update_interval: 60s
   #  moyenne sur 15 mn-affichage toutes les 5mn
     filters:
       - sliding_window_moving_average:
@@ -686,7 +686,7 @@ sensor:
     address: 98
     unit_of_measurement: "mV"
     accuracy_decimals: 2
-    update_interval: 5s
+    update_interval: 60s
   #  moyenne sur 15 mn-affichage toutes les 5mn
   #  filters:
   #    - sliding_window_moving_average:

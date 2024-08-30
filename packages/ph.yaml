@@ -134,6 +134,9 @@ template:
 
     - name: "pH_piscine_ph"
       unique_id: "ph_piscine_ph"
+      state_class: measurement
+      unit_of_measurement: "pH"
+      availability: "{{ is_number(states('sensor.ph_ezo')) }}"
       state: >-
         {% set ph = states('sensor.ph_ezo') | float(default=0) | round(2) %}
         {% set ppe = states('binary_sensor.esp137_ppe_en_fonctionnement') %}
@@ -144,10 +147,9 @@ template:
 #        {% else %}
 #          {{ this.state }}
 #        {%endif%}
-#     unit_of_measurement: "pH"
       #   {{ this.state }}
       #device_class: ph
-      state_class: measurement
+      
 
 
 

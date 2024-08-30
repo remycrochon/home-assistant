@@ -1476,83 +1476,114 @@
   alias: 3_2_2 Piscine-pH Injection V2
   description: Injection pH v2
   trigger:
+  - platform: state
+    entity_id:
+    - input_select.mode_fonct_regulation_ph
   - platform: time
     at: '11:00:00'
+    id: 11h
   - platform: time
-    at: '15:00:00'
-  condition:
-  - condition: template
-    value_template: '{% set m=states(''sensor.ph_piscine_ph'') | float %}
-
-      {% set c=states(''input_number.ph_cible'') | float %}
-
-      {{ m > c }}'
-  - condition: numeric_state
-    entity_id: sensor.ph_piscine_ph
-    above: '0'
-  - condition: state
-    entity_id: input_boolean.regul_ph
-    state: 'on'
-  - condition: state
-    state: 'on'
-    entity_id: binary_sensor.esp137_ppe_en_fonctionnement
+    at: '15:05:00'
+    id: 15h
+  condition: []
   action:
-  - target:
-      entity_id: input_number.ph_vol_ph_moins_a_injecter
-    data_template:
-      value: '{% set m=states(''sensor.ph_piscine_ph'') | float(default=0) %} {% set
-        x=states(''input_number.simul_ph'') | float(default=0) %} {% set c=states(''input_number.ph_cible'')
-        | float(default=0) %} {% set mp=0.2 %} {% set ve=0.2 %} {% set va=10 %} {%
-        set vb=50 %} {% set de=states(''input_number.ph_debit_ppe'') | float(default=0)
-        %} {% set coef=states(''input_number.ph_coefficient_injection_ph_moins'')
-        | float(default=0) %} {% set q=((m-c)/ve*(vb/va)*mp*coef/100)|round(2) %}
-        {% if q < 0 %} {{ 0 }} {% else %} {{ (q) }} {% endif %}'
-    action: input_number.set_value
-  - target:
-      entity_id: input_number.ph_duree_inject_s
-    data_template:
-      value: '{% set q=states(''input_number.ph_vol_ph_moins_a_injecter'') | float(default=0)
-        %} {% set de=states(''input_number.ph_debit_ppe'') | float(default=0) %} {%
-        set tps=(q*3600/de)|round(2) %} {% if tps < 0 %} {{ 0 }} {% else %} {{ (tps%60)|round(0)|int(default=0)
-        }} {% endif %}'
-    action: input_number.set_value
-  - target:
-      entity_id: input_number.ph_duree_inject_mn
-    data_template:
-      value: '{% set q=states(''input_number.ph_vol_ph_moins_a_injecter'') | float(default=0)
-        %} {% set de=states(''input_number.ph_debit_ppe'') | float(default=0) %} {%
-        set tps=(q*3600/de)|round(2) %} {% if tps < 0 %} {{ 0 }} {% else %} {{ (tps//60)|round(0)|int(default=0)
-        }} {% endif %}'
-    action: input_number.set_value
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} pH sonde= {{states(''sensor.ph_piscine_ph'')}}
-        {{-"\n"-}} Cible pH= {{states(''input_number.ph_cible'')}} {{-"\n"-}} Vol
-        à Injecter={{states(''input_number.ph_vol_ph_moins_a_injecter'')}}l {{-"\n"-}}
-        Durée injection= {{states(''input_number.ph_duree_inject_mn'')}}mn-{{states(''input_number.ph_duree_inject_s'')}}s
-        {{-"\n"-}}     Poids du bidon= {{states(''sensor.esp129_poids_ph_moins'')}}kg'
-      title: Piscine Début injection pH !!!
-    action: notify.telegram
-  - target:
-      entity_id:
-      - switch.ppe_ph
-    data: {}
-    action: switch.turn_on
-  - delay: 00:{{ states('input_number.ph_duree_inject_mn')|int}}:{{ states('input_number.ph_duree_inject_s')
-      | int }}
-  - data_template:
-      entity_id: input_number.ph_vol_injecte
-      value: '{{states(''input_number.ph_vol_ph_moins_a_injecter'')}}'
-    action: input_number.set_value
-  - target:
-      entity_id: switch.ppe_ph
-    data: {}
-    action: switch.turn_off
-  - data:
-      message: pH sonde= {{states('sensor.ph_piscine_ph')}} {{-"\n"-}} Poids du bidon=
-        {{states('sensor.esp129_poids_ph_moins')}}kg {{-"\n"-}} {{states("sensor.date_time")
-        }}
-      title: Piscine Fin injection pH !!!
-    action: notify.telegram
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonct_regulation_ph
+        state: Auto
+      - condition: template
+        value_template: '{% set m=states(''sensor.ph_piscine_ph'') | float %}
+
+          {% set c=states(''input_number.ph_cible'') | float %}
+
+          {{ m > c }}'
+      - condition: numeric_state
+        entity_id: sensor.ph_piscine_ph
+        above: '0'
+      - condition: state
+        state: 'on'
+        entity_id: binary_sensor.esp137_ppe_en_fonctionnement
+      - condition: trigger
+        id:
+        - 11h
+        - 15h
+      sequence:
+      - target:
+          entity_id: input_number.ph_vol_ph_moins_a_injecter
+        data_template:
+          value: '{% set m=states(''sensor.ph_piscine_ph'') | float(default=0) %}
+            {% set x=states(''input_number.simul_ph'') | float(default=0) %} {% set
+            c=states(''input_number.ph_cible'') | float(default=0) %} {% set mp=0.2
+            %} {% set ve=0.2 %} {% set va=10 %} {% set vb=50 %} {% set de=states(''input_number.ph_debit_ppe'')
+            | float(default=0) %} {% set coef=states(''input_number.ph_coefficient_injection_ph_moins'')
+            | float(default=0) %} {% set q=((m-c)/ve*(vb/va)*mp*coef/100)|round(2)
+            %} {% if q < 0 %} {{ 0 }} {% else %} {{ (q) }} {% endif %}'
+        action: input_number.set_value
+      - target:
+          entity_id: input_number.ph_duree_inject_s
+        data_template:
+          value: '{% set q=states(''input_number.ph_vol_ph_moins_a_injecter'') | float(default=0)
+            %} {% set de=states(''input_number.ph_debit_ppe'') | float(default=0)
+            %} {% set tps=(q*3600/de)|round(2) %} {% if tps < 0 %} {{ 0 }} {% else
+            %} {{ (tps%60)|round(0)|int(default=0) }} {% endif %}'
+        action: input_number.set_value
+      - target:
+          entity_id: input_number.ph_duree_inject_mn
+        data_template:
+          value: '{% set q=states(''input_number.ph_vol_ph_moins_a_injecter'') | float(default=0)
+            %} {% set de=states(''input_number.ph_debit_ppe'') | float(default=0)
+            %} {% set tps=(q*3600/de)|round(2) %} {% if tps < 0 %} {{ 0 }} {% else
+            %} {{ (tps//60)|round(0)|int(default=0) }} {% endif %}'
+        action: input_number.set_value
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}} pH sonde= {{states(''sensor.ph_piscine_ph'')}}
+            {{-"\n"-}} Cible pH= {{states(''input_number.ph_cible'')}} {{-"\n"-}}
+            Vol à Injecter={{states(''input_number.ph_vol_ph_moins_a_injecter'')}}l
+            {{-"\n"-}} Durée injection= {{states(''input_number.ph_duree_inject_mn'')}}mn-{{states(''input_number.ph_duree_inject_s'')}}s
+            {{-"\n"-}}     Poids du bidon= {{states(''sensor.esp129_poids_ph_moins'')}}kg'
+          title: Piscine Début injection pH !!!
+        action: notify.telegram
+      - data_template:
+          entity_id: input_number.ph_vol_injecte
+          value: '{{states(''input_number.ph_vol_ph_moins_a_injecter'')}}'
+        action: input_number.set_value
+      - target:
+          entity_id:
+          - switch.ppe_ph
+        data: {}
+        action: switch.turn_on
+      - delay: 00:{{ states('input_number.ph_duree_inject_mn')|int}}:{{ states('input_number.ph_duree_inject_s')
+          | int }}
+      - target:
+          entity_id: switch.ppe_ph
+        data: {}
+        action: switch.turn_off
+      - data:
+          message: pH sonde= {{states('sensor.ph_piscine_ph')}} {{-"\n"-}} Poids du
+            bidon= {{states('sensor.esp129_poids_ph_moins')}}kg {{-"\n"-}} {{states("sensor.date_time")
+            }}
+          title: Piscine Fin injection pH !!!
+        action: notify.telegram
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonct_regulation_ph
+        state: Ma Forcée
+      sequence:
+      - target:
+          entity_id:
+          - switch.ppe_ph
+        data: {}
+        action: switch.turn_on
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonct_regulation_ph
+        state: At Forcé
+      sequence:
+      - target:
+          entity_id: switch.ppe_ph
+        data: {}
+        action: switch.turn_off
   mode: single
 - id: '1669919504303'
   alias: 02-01-16 Alarme BP Temp basse Chalet
@@ -2481,4 +2512,35 @@
         Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
       title: Piscine ESP178 !!!
     action: notify.telegram
+  mode: single
+- id: '1724936171395'
+  alias: 3_2_4 Piscine Time out Ppe pH
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.ppe_ph
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: select.esp178_mode_fonctionnement_regul_ph
+    state: Auto
+  action:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} pH sonde= {{states(''sensor.ph_piscine_ph'')}}
+        {{-"\n"-}} Cible pH= {{states(''input_number.ph_cible'')}} {{-"\n"-}} Vol
+        à Injecter={{states(''input_number.ph_vol_ph_moins_a_injecter'')}}l {{-"\n"-}}
+        Durée injection= {{states(''input_number.ph_duree_inject_mn'')}}mn-{{states(''input_number.ph_duree_inject_s'')}}s
+        {{-"\n"-}}     Poids du bidon= {{states(''sensor.esp129_poids_ph_moins'')}}kg'
+      title: Piscine Arret Ppe pH sur time Out injection pH !!!
+    action: notify.telegram
+  - target:
+      entity_id: switch.ppe_ph
+    data: {}
+    action: switch.turn_off
   mode: single

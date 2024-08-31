@@ -454,46 +454,49 @@
       hours: 0
       minutes: 1
       seconds: 0
-  condition: []
+  condition:
+  - condition: state
+    entity_id: switch.ppe_ph
+    state: 'on'
   action:
   - choose:
     - conditions:
       - condition: trigger
         id: ph_bas
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: Ph Bas = {{states('sensor.ph_stat_median') }}{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Piscine Alerte pH !!!
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id: ph_haut
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: Ph Haut = {{states('sensor.ph_stat_median') }}{{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Piscine Alerte pH !!!
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id: ph_mauvais
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: pH Mauvais-sonde à calibrer??{{-"\n"-}} Median = {{states("sensor.ph_stat_median")}}{{-"\n"-}}
             Deviation(S=0.01) = {{states("sensor.ph_stat_standard_deviation")}} {{-"\n"-}}{{states("sensor.date_time")
             }}
           title: Piscine Alerte pH !!!
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id: niv_bas_bidon
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: Volume Restant = {{(states("sensor.ph_volume_restant_bidon"))|round(2)
             }} l{{-"\n"-}}{{states("sensor.date_time") }}
           title: Piscine Alerte niveau Bas Bidon pH !!!
+        action: notify.telegram
     default: []
   mode: single
 - id: '1634222619535'

@@ -583,7 +583,7 @@
       seconds: 20
     id: lsh_off
   - platform: time_pattern
-    minutes: /1
+    minutes: /5
     id: minute
   condition: []
   action:
@@ -601,14 +601,14 @@
           entity_id: switch.ev_eau
           state: 'off'
       sequence:
-      - service: switch.turn_on
-        target:
+      - target:
           entity_id: switch.ev_eau
         data: {}
-      - service: notify.telegram
-        data:
+        action: switch.turn_on
+      - data:
           message: Ouverture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
           title: Piscine Appoint Eau!
+        action: notify.telegram
     - conditions:
       - condition: state
         entity_id: switch.ev_eau
@@ -620,14 +620,14 @@
         - condition: trigger
           id: lsh_off
       sequence:
-      - service: switch.turn_off
-        target:
+      - target:
           entity_id: switch.ev_eau
         data: {}
-      - service: notify.telegram
-        data:
+        action: switch.turn_off
+      - data:
           message: Fermeture EV Eau {{-"\n"-}}{{states("sensor.date_time") }}
           title: Piscine Appoint Eau!
+        action: notify.telegram
     - conditions:
       - condition: and
         conditions:
@@ -638,10 +638,10 @@
           entity_id: switch.ev_eau
           state: 'off'
       sequence:
-      - service: switch.turn_off
-        target:
+      - target:
           entity_id: switch.ev_eau
         data: {}
+        action: switch.turn_off
     default: []
   mode: single
   trace:
@@ -1483,7 +1483,7 @@
     entity_id:
     - input_select.mode_fonct_regulation_ph
   - platform: time
-    at: '11:00:00'
+    at: '10:00:00'
     id: 11h
   - platform: time
     at: '15:00:00'
@@ -1494,6 +1494,10 @@
     from: 'on'
     to: 'off'
     id: at_filtration
+  - platform: state
+    entity_id:
+    - input_button.declenche_regule_ph
+    id: bpregulation
   condition: []
   action:
   - choose:
@@ -1521,6 +1525,7 @@
         id:
         - 11h
         - 15h
+        - bpregulation
       sequence:
       - target:
           entity_id: input_number.ph_vol_ph_moins_a_injecter
@@ -2538,7 +2543,7 @@
     to: 'on'
     for:
       hours: 0
-      minutes: 20
+      minutes: 25
       seconds: 0
   condition:
   - condition: state

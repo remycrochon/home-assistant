@@ -13,6 +13,7 @@ from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 from pyaltherma.comm import DaikinWSConnection
 from pyaltherma.controllers import AlthermaController
@@ -26,7 +27,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def setup_api_instance(hass, host):
-    session = hass.helpers.aiohttp_client.async_get_clientsession()
+    session = async_get_clientsession(hass)
     conn = DaikinWSConnection(session, host)
     device = AlthermaController(conn)
     await device.discover_units()
@@ -35,6 +36,8 @@ async def setup_api_instance(hass, host):
 
     # Uncomment this if you want to store profile info in json files.
     # try:
+    #    import os
+    #    import json
     #    for profile in unit_profiles:
     #        filepath: str = os.path.join(hass.config.config_dir, f'daikin_altherma_{profile["idx"]}.json')
     #        with open(filepath, 'w') as f:

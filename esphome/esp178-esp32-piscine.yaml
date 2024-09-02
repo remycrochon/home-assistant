@@ -79,7 +79,7 @@ time:
       #  then:
       #    - script.execute: _regul_ph
 
-      # Tous les jours à 11:30 on execute le sript de regul pH
+      # Tous les jours à 11:30 on execute le script de regul pH
       - seconds: 0
         minutes: 30
         hours: 11
@@ -119,7 +119,6 @@ ads1115:
 globals:
     # température de fonctionnement en début de pompage avant prise en compte de la mesure de température
     # en secondes
-
     - id: g_memoire_temp_eau
       type: float
       restore_value: yes
@@ -138,8 +137,13 @@ globals:
       type: bool
       restore_value: yes
 
-    # temps d'injection
+    # temps d'injection ph
     - id: g_tps_injection_ph_moins
+      type: float
+      restore_value: no
+
+    # temps d'injection chlore
+    - id: g_tps_injection_chlore
       type: float
       restore_value: no
 
@@ -209,7 +213,6 @@ globals:
       initial_value: '14'
 
     # Constantes utilisées dans le mode "Abaque"  
-
     - id: g_abaque_a
       type: float
       initial_value: '0.00335'
@@ -270,7 +273,26 @@ select:
             level: INFO        
         - script.stop: _regul_ph   
         - delay: 1s            
-        - script.execute: _regul_ph        
+        - script.execute: _regul_ph       
+
+  - platform: template
+    name: "${friendly_name}_Mode_Fonct_regul_chlore"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Ma_f
+      - At_f
+    id: _Mode_Fonctionnement_regul_chlore
+    on_value: 
+      then:
+        - logger.log:
+            format: "Mode Fonct Regul pH --> %s"
+            args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
+            level: INFO        
+        - script.stop: _regul_chlore
+        - delay: 1s            
+        - script.execute: _regul_chlore
 
   - platform: template
     name: "${friendly_name}_Mode_Fonct_appoint_eau"
@@ -306,6 +328,11 @@ button:
     name: "${friendly_name}_BP_Cycle_Regul_pH"
     on_press:
       - script.execute: _regul_ph
+
+  - platform: template
+    name: "${friendly_name}_BP_Cycle_Regul_chlore"
+    on_press:
+      - script.execute: _regul_chlore
 
   # Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
   - platform: template
@@ -578,6 +605,31 @@ number:
     step: 0.01
     icon: mdi:percent
 
+  # Cible Niveau Chlore
+  - platform: template
+    name: "${friendly_name}_chlore_Cible"
+    id: _chlore_cible
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: "ppm"
+    step: 0.01
+
+  # Debit Pompe chlore
+  # Etalonnage du 
+  - platform: template
+    name: "${friendly_name}_debit_ppe_chlore"
+    id: _debit_ppe_chlore
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0.5
+    max_value: 7.2
+    unit_of_measurement: "l/h"
+    step: 0.001
+
   # Seuil 1 Temp Hors gel
   - platform: template
     name: "${friendly_name}_Seuil1_Temp_HG"
@@ -723,7 +775,14 @@ sensor:
     name: "${friendly_name}_tps_injection_ph_moins"
     id: _tps_injection_ph_moins
     unit_of_measurement: "s"
-    state_class: "measurement"  
+    state_class: "measurement" 
+
+  # mémorise le temps d'injection calculé
+  - platform: template
+    name: "${friendly_name}_tps_injection_chlore"
+    id: _tps_injection_chlore
+    unit_of_measurement: "s"
+    state_class: "measurement" 
 
   # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
@@ -852,9 +911,9 @@ switch:
     id: cde_ppe_ph_moins
 
   - platform: gpio
-    name: "${friendly_name} cde_ppe_clhore"
+    name: "${friendly_name} cde_ppe_chlore"
     pin: GPIO25
-    id: cde_ppe_clhore
+    id: cde_ppe_chlore
 
   - platform: gpio
     name: "${friendly_name} cde_eclairage"
@@ -936,6 +995,9 @@ interval:
   - interval: 10s
     then:
       - script.execute: _regul_ph
+  - interval: 10s
+    then:
+      - script.execute: _regul_chlore
   - interval: 5s
     then:      
       - script.execute: _fonctionnement_filtration
@@ -971,7 +1033,7 @@ script:
           args: [ 'id(flag_tempo_ppe_filtre)','id(temp_eau).state','id(g_memoire_temp_eau)' ]
           level: DEBUG
 
-  # Si la pompe tourne depuis au moins 5min on raffraichit la memoire du Ph qui est
+  # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire du Ph qui est
   # prise en compte dans les scripts.
   # sinon on travaille avec le pH mémorisé avant l'arret précédent
   - id: _memorisation_ph
@@ -1397,6 +1459,98 @@ script:
             - switch.turn_off: cde_ppe_ph_moins
             - logger.log: 
                 format: "Arret ppe Ph moins"
+                level: INFO
+
+# Regulation du chlore
+# Calcul du temps d'injection en fonction:
+# caracteristiques du pH-:
+  # mp= montant du produit =>quantité necessaire pour agir (0.2l)
+  # ve= valeur de l'effet du produit (0.1 à 0.2)
+  # va= volume d'eau affecté par le produit ( 10m3)
+# vb= volume du bassin
+# c= consigne du pH
+# m= mesure du pH
+# de= debit de la pompe (en l/h)
+# q=quantité à injecté = (m-c)/ve*(vb/va)*mp
+# temps injection (s)= (q*3600)/de
+
+  - id: _regul_chlore
+    mode: single
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: cde_ppe_filtration          
+          then:
+            - lambda: |-
+                static float m=0;
+                static float c=0;                
+                static float mp=0.1;
+                static float ve=1;
+                static float va=10;
+                static float vb=50;
+                static float de=0;
+                static float q=0;
+                static float coef=0;
+                c=id(_chlore_cible).state;
+                de=id(_debit_ppe_chlore).state;
+                q=(c)/ve*(vb/va)*mp;
+                id(g_tps_injection_chlore)=q*3600/de;
+          else:
+            - lambda: |-
+                id(g_tps_injection_chlore)=0;
+
+      - lambda: |-
+          id(_tps_injection_chlore).publish_state(id(g_tps_injection_chlore));
+
+      - logger.log:
+          format: "Log tps injection: %f"
+          args: [ 'id(g_tps_injection_chlore)' ]
+          level: DEBUG
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'
+          then:
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return id(g_tps_injection_chlore) > 0;'
+                then:
+                  - switch.turn_on: cde_ppe_chlore
+                  - logger.log: 
+                      format: "Marche ppe Ph Chlore"
+                      level: INFO        
+                  #- delay: !lambda "return id(g_tps_injection_chlore)*1000;"
+                  - delay: !lambda "return 1000;"
+                  - switch.turn_off: cde_ppe_chlore
+                  - logger.log: 
+                      format: "Arret ppe chlore"
+                      level: INFO
+                else:
+                  - switch.turn_off: cde_ppe_chlore
+                  - logger.log: 
+                      format: "Arret ppe chlore"
+                      level: INFO
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Ma_f";'
+              - switch.is_on: cde_ppe_filtration
+          then:
+            - switch.turn_on: cde_ppe_chlore
+            - logger.log: 
+                format: "Marche ppe Chlore"
+                level: INFO
+      - if:
+          condition:
+            or:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "At_f";'
+              - switch.is_off: cde_ppe_filtration
+          then:
+            - switch.turn_off: cde_ppe_chlore
+            - logger.log: 
+                format: "Arret ppe Chlore"
                 level: INFO
 
 # Regulation du niveau eau piscine

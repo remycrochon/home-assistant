@@ -141,7 +141,7 @@ openhasp:
 
       - obj: "p2b125"  
         properties:
-          "val": '{{ 1 if states("bswitch.cde_ferm_volet_piscine") == "on" else 0 }}'
+          "val": '{{ 1 if states("switch.cde_ferm_volet_piscine") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.cde_ferm_volet_piscine", "on") else "\uE156" | e }}'
           "text_color": "{{ '#00ff00' if is_state('switch.cde_ferm_volet_piscine', 'on') else '#ff0000' }}"
         event:

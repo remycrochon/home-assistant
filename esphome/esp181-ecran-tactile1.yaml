@@ -11,9 +11,9 @@ esphome:
     version: "0.0.0"
 
 esp32:
-  board: esp32dev
+  board: mhetesp32minikit
   framework:
-    type: arduino
+    type: esp-idf
 
 wifi:
   networks:
@@ -46,14 +46,14 @@ font:
     id: arial
     size: 15
     
-psram:
-  #mode: octal
-  #speed: 80MHz
+#psram:
+#  mode: octal
+#  speed: 80MHz
   
 spi:
-  clk_pin: GPIO18
-  mosi_pin: GPIO23
-  miso_pin: GPIO19
+  clk_pin: GPIO18 # (Pin on display - SCK/T_CLK)
+  mosi_pin: GPIO23 # (Pin on display - SDI(MOSI)/T_DIN)
+  miso_pin: GPIO19 # (Pin on display - SDO(MISO)/T_DO)
     
 
 # Example configuration entry 
@@ -63,25 +63,27 @@ time:
 
 display:
   - platform: ili9xxx  
-    model: ili9341    
+    model: ILI9341
 
-    rotation: 0
     cs_pin: GPIO15  # Broche CS (Chip Select)
     dc_pin: GPIO05  # Broche DC (Data/Command)
-    reset_pin: GPIO04  # Broche de réinitialisation    
+    reset_pin: GPIO04  # Broche de réinitialisation   
     dimensions: 320x240
-    update_interval: 10s
-    color_order: rgb
     auto_clear_enabled: false
+    update_interval: never
     id: my_display    
 
 lvgl:
   displays:
     - my_display
-
   pages:
     - id: main_page
       widgets:
         - label:
-            align: CENTER
+            align: top_left
             text: 'Hello World!'
+        - led:
+            id: led_id
+            align: CENTER
+            color: 0xFF0000
+            brightness: 70%

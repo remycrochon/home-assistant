@@ -36,6 +36,7 @@ from .const import (
     ATTR_FORCE_FITSCREEN,
     ATTR_HEIGHT,
     ATTR_IDLE,
+    ATTR_PROXY,
     ATTR_IMAGE,
     ATTR_OBJECT,
     ATTR_PAGE,
@@ -149,10 +150,11 @@ HASP_LWT_SCHEMA = vol.Schema(vol.Any(*HASP_LWT))
 
 HASP_PAGE_SCHEMA = vol.Schema(vol.All(vol.Coerce(int), vol.Range(min=0, max=12)))
 
-PUSH_IMAGE_SCHEMA = vol.Schema(
+PUSH_IMAGE_SCHEMA =  cv.make_entity_service_schema(
     {
         vol.Required(ATTR_IMAGE): vol.Any(cv.url, cv.isfile),
         vol.Required(ATTR_OBJECT): hasp_object,
+        vol.Optional(ATTR_PROXY): cv.url,
         vol.Optional(ATTR_WIDTH): cv.positive_int,
         vol.Optional(ATTR_HEIGHT): cv.positive_int,
         vol.Optional(ATTR_FORCE_FITSCREEN): cv.boolean,
@@ -554,7 +556,7 @@ class SwitchPlate(RestoreEntity):
         if self._statusupdate:
             num_pages = self._statusupdate[HASP_NUM_PAGES]
 
-            if page <= 0 or page > num_pages:
+            if isinstance(page, int) and (page <= 0 or page > num_pages):
                 _LOGGER.error(
                     "Can't change to %s, available pages are 1 to %s", page, num_pages
                 )
@@ -587,11 +589,11 @@ class SwitchPlate(RestoreEntity):
         )
 
     async def async_push_image(
-        self, image, obj, width=None, height=None, fitscreen=False
+        self, image, obj, http_proxy=None, width=None, height=None, fitscreen=False
     ):
         """Update object image."""
 
-        image_id = hashlib.md5(image.encode("utf-8")).hexdigest()
+        image_id = hashlib.md5(image.encode("utf-8") + self._entry.data[CONF_NAME].encode('utf-8')).hexdigest()
 
         rgb_image = await self.hass.async_add_executor_job(
             image_to_rgb565, image, (width, height), fitscreen
@@ -601,10 +603,15 @@ class SwitchPlate(RestoreEntity):
 
         cmd_topic = f"{self._topic}/command/{obj}.src"
 
-        rgb_image_url = (
-            f"{get_url(self.hass, allow_external=False)}/api/openhasp/serve/{image_id}"
-        )
-
+        if http_proxy:
+            rgb_image_url = (
+                f"{http_proxy}/api/openhasp/serve/{image_id}"
+            )
+        else:
+            rgb_image_url = (
+                f"{get_url(self.hass, allow_external=False)}/api/openhasp/serve/{image_id}"
+            )
+#self._entry.data
         _LOGGER.debug("Push %s with %s", cmd_topic, rgb_image_url)
 
         await async_publish(self.hass, cmd_topic, rgb_image_url, qos=0, retain=False)

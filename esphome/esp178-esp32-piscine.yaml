@@ -1463,15 +1463,14 @@ script:
 
 # Regulation du chlore
 # Calcul du temps d'injection en fonction:
-# caracteristiques du pH-:
-  # mp= montant du produit =>quantité necessaire pour agir (0.2l)
-  # ve= valeur de l'effet du produit (0.1 à 0.2)
+# caracteristiques du Chlore 9.6°:
+  # mp= montant du produit =>quantité necessaire pour agir (0.1l)
+  # ve= valeur de l'effet du produit (1)
   # va= volume d'eau affecté par le produit ( 10m3)
 # vb= volume du bassin
-# c= consigne du pH
-# m= mesure du pH
+# nb= nb de ppm Clhore à ajouter
 # de= debit de la pompe (en l/h)
-# q=quantité à injecté = (m-c)/ve*(vb/va)*mp
+# q=quantité à injecté en litre = (m-c)/ve*(vb/va)*mp
 # temps injection (s)= (q*3600)/de
 
   - id: _regul_chlore
@@ -1483,8 +1482,7 @@ script:
               - switch.is_on: cde_ppe_filtration          
           then:
             - lambda: |-
-                static float m=0;
-                static float c=0;                
+                static float nb=0;                
                 static float mp=0.1;
                 static float ve=1;
                 static float va=10;
@@ -1492,9 +1490,9 @@ script:
                 static float de=0;
                 static float q=0;
                 static float coef=0;
-                c=id(_chlore_cible).state;
+                nb=id(_chlore_cible).state;
                 de=id(_debit_ppe_chlore).state;
-                q=(c)/ve*(vb/va)*mp;
+                q=(nb)/ve*(vb/va)*mp;
                 id(g_tps_injection_chlore)=q*3600/de;
           else:
             - lambda: |-

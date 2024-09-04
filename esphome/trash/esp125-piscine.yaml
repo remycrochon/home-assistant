@@ -65,7 +65,7 @@ sensor:
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
-    update_interval: 60s
+    update_interval: 15s
   #  moyenne sur 15 mn-affichage toutes les 5mn avec un Update_interval à 60s en exploitation
   #  moyenne sur 15 s-affichage toutes les 5s avec un Update_interval à 1s en mode étalonnage
     filters:

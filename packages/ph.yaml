@@ -93,7 +93,7 @@ sensor:
 # Statistiques pH
   - platform: statistics
     name: ph_stat_median
-    entity_id: sensor.ph_piscine_ph
+    entity_id: sensor.esp178_ph_ezo
     unique_id: "ph_median"
     state_characteristic: median
     sampling_size: 30
@@ -101,7 +101,7 @@ sensor:
       # minutes: 30
   - platform: statistics
     name: ph_stat_moyenne
-    entity_id: sensor.ph_piscine_ph
+    entity_id: sensor.esp178_ph_ezo
     unique_id: ph_moyen
     state_characteristic: average_step
     sampling_size: 30
@@ -109,7 +109,7 @@ sensor:
       # minutes: 30
   - platform: statistics
     name: ph_stat_standard_deviation
-    entity_id: sensor.ph_piscine_ph
+    entity_id: sensor.esp178_ph_ezo
     unique_id: ph_std
     state_characteristic: standard_deviation
     sampling_size: 30

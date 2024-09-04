@@ -22,21 +22,21 @@ esp32:
   board: esp32dev
 
 
-#wifi:
-#  networks:
-#   - ssid: !secret wifi
-#     password: !secret mdpwifi
-#  reboot_timeout: 5min
+wifi:
+  networks:
+   - ssid: !secret wifi
+     password: !secret mdpwifi
+  reboot_timeout: 5min
 
-ethernet:
-  type: W5500
-  clk_pin: GPIO17
-  mosi_pin: GPIO19
-  miso_pin: GPIO18
-  cs_pin: GPIO21 
-  interrupt_pin: GPIO4
-  reset_pin: GPIO5
-  clock_speed: 15Mhz
+#ethernet:
+#  type: W5500
+#  clk_pin: GPIO17
+#  mosi_pin: GPIO19
+#  miso_pin: GPIO18
+#  cs_pin: GPIO21 
+#  interrupt_pin: GPIO4
+#  reset_pin: GPIO5
+#  clock_speed: 15Mhz
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -51,7 +51,7 @@ status_led:
 
 # Enable logging
 logger:
-  level: INFO
+  level: DEBUG
   baud_rate: 0
   
 # Enable Home Assistant API
@@ -74,17 +74,23 @@ time:
      - 2.pool.ntp.org
 
     on_time:
-      # Toutes les 10s pour tests
-      #- cron: '/10 * * * * *'
-      #  then:
-      #    - script.execute: _regul_ph
-
-      # Tous les jours à 11:30 on execute le script de regul pH
+      # Tous les jours on execute le script de regul pH
       - seconds: 0
         minutes: 30
-        hours: 11
+        hours: 10
         then:
           - script.execute: _regul_ph
+      - seconds: 0
+        minutes: 30
+        hours: 14
+        then:
+          - script.execute: _regul_ph
+      # reset le compteur de temps à minuit
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        then:
+          - sensor.duty_time.reset: _temps_fonctionnement_ppe_piscine_jour
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -385,8 +391,8 @@ binary_sensor:
     name: "${friendly_name}_ppe_en_fonctionnement"
     id: ppe_filt_en_fonctionnement
     lambda: |-
-      if (id(puissance).state > -100) {
-        // Pompe Fonctionne si puissance>100 W
+      if (id(puissance).state > 200) {
+        // Pompe Fonctionne si puissance>200 W
         return true;
       } else {
         // pompe Arretée.
@@ -404,6 +410,7 @@ binary_sensor:
     name: "${friendly_name}_bp1"
 
   # GPIO sur module extension SX1509
+
   - platform: gpio
     name: "${friendly_name}_volet_ferme"
     id: volet_ferme
@@ -414,7 +421,11 @@ binary_sensor:
       mode:
         input: true
         pullup: false
-      inverted: false    
+      inverted: false
+    filters:
+      - delayed_on_off: 500ms
+
+  # Niveau haut à 1 si decouvert
   - platform: gpio
     name: "${friendly_name}_tp_plein_lsh"
     id: lsh
@@ -424,7 +435,15 @@ binary_sensor:
       mode:
         input: true
         pullup: false
-      inverted: false    
+      inverted: true
+    filters:
+      - delayed_on_off: 1s
+    on_press:
+      then:
+        - script.stop: _regul_eau
+        - switch.turn_off: cde_ev_eau
+
+  # Niveau bas à 1 si decouvert
   - platform: gpio
     name: "${friendly_name}_tp_plein_lsl"
     id: lsl
@@ -434,7 +453,10 @@ binary_sensor:
       mode:
         input: true
         pullup: false
-      inverted: false   
+      inverted: true
+    filters:
+      - delayed_on_off: 1s
+
   - platform: gpio
     name: "${friendly_name}_E4"
     pin:
@@ -516,7 +538,7 @@ number:
   # Simulation Temp eau et Mesure pH
   - platform: template
     name: "${friendly_name}_simule_Temp"
-    id: temp_eau
+    id: simul_temp_eau
     optimistic: true
     restore_value: true
     mode: box
@@ -532,7 +554,7 @@ number:
   # Simulation Niveau pH
   - platform: template
     name: "${friendly_name}_simule_pH"
-    id: ph_ezo
+    id: simul_ph_ezo
     optimistic: true
     restore_value: true
     mode: box
@@ -676,15 +698,14 @@ sensor:
   - platform: dallas_temp
     address: 0x060321117ae89b28 #  0x82012111efe81d28
     name: "${friendly_name}_temperature_eau"
-    id: simul_temp_eau
+    id: temp_eau
     filters:
       - filter_out: 0.0
         # Etalonné le 26 Aout 2024  avec une PT100       
-      - calibrate_linear:
-        - 0 -> 0
-        - 26.6 -> 27.7
+      #- calibrate_linear:
+      #  - 0 -> 0
+      #  - 26.6 -> 27.7
     
-
   # Mesure du pH
   # Procédure étalonnage:
     # Mettre 1 s dans "update interval"
@@ -700,7 +721,7 @@ sensor:
     # Compiler
   # Fin procédure étalonnage
   - platform: ezo
-    id: simule_ph_ezo
+    id: ph_ezo
     name: "${friendly_name}_ph_ezo"
     address: 99
     unit_of_measurement: "pH"
@@ -751,7 +772,6 @@ sensor:
   #      - 7.482 -> 6.86
   #      - 9.505 -> 9.18    
 
-
   # Mesure de la pression filtre Entrée ANA 1
   - platform: ads1115
     multiplexer: 'A0_GND'
@@ -761,14 +781,14 @@ sensor:
     unit_of_measurement: "Bars"
     id: pression_filtre
     filters:
-      - calibrate_linear:
-        - 0.60 -> 0.0
-        - 0.87 -> 0.87
+      #- calibrate_linear:
+      #  - 0.60 -> 0.0
+      #  - 0.87 -> 0.87
   # moyenne sur 30 mn + affichage toutes les 2 mn
-      - sliding_window_moving_average:
-          window_size: 30
-          send_every: 2
-          send_first_at: 1
+      #- sliding_window_moving_average:
+      #    window_size: 30
+      #    send_every: 2
+      #    send_first_at: 1
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -784,25 +804,28 @@ sensor:
     unit_of_measurement: "s"
     state_class: "measurement" 
 
+  # Code notification en lien avec L'automatisme de notification telegram
+  - platform: template
+    name: "${friendly_name}_code_notif_telegram"
+    id: _code_notif_telegram
+    unit_of_measurement: ""
+    
   # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
     update_interval: 30s
     current:
-      name: "${friendly_name}_pzem_pisc_courant"
+      name: "pzem_pisc_courant"
       unit_of_measurement: "A"
-      id: intensite      
     voltage:
-      name: "${friendly_name}_pzem_pisc_tension"
+      name: "pzem_pisc_tension"
       unit_of_measurement: "V"
-      id: tension
     energy:
-      name: "${friendly_name}_pzem_pisc_energy"
+      name: "pzem_pisc_energy"
       unit_of_measurement: "kWh"
-      id: energie
       filters:
         - multiply: 0.001
     power:
-      name: "${friendly_name}_pzem_pisc_puissance"
+      name: "pzem_pisc_puissance"
       unit_of_measurement: "W"
       id: puissance
 
@@ -856,12 +879,12 @@ sensor:
 cover:
   - platform: template
     name: "${friendly_name}_volet_piscine"
-#    lambda: |-
-#      if (id(volet_ferme).state) {
-#        return COVER_OPEN;
-#      } else {
-#        return COVER_CLOSED;
-#      }
+    lambda: |-
+      if (id(volet_ferme).state) {
+        return COVER_CLOSED;
+      } else {
+        return COVER_OPEN;
+      }
     open_action:
       - script.execute: script_ouv_volet
     close_action:
@@ -992,12 +1015,12 @@ display:
 
 # Déclenchement des scripts à intervalles réguliers
 interval:
-  - interval: 10s
-    then:
-      - script.execute: _regul_ph
-  - interval: 10s
-    then:
-      - script.execute: _regul_chlore
+  #- interval: 10s
+  #  then:
+  #    - script.execute: _regul_ph
+  #- interval: 10s
+  #  then:
+  #    - script.execute: _regul_chlore
   - interval: 5s
     then:      
       - script.execute: _fonctionnement_filtration
@@ -1049,7 +1072,7 @@ script:
                 id(g_memoire_ph)=id(g_memoire_ph);
       - if:
           condition:
-            lambda: 'return isnan(id(ph_ezo).state);' # 'return !isnan(id(ph_ezo).state);' verifie si ph_ezo est valide
+            lambda: 'return isnan(id(ph_ezo).state);' # verifie si ph_ezo est valide
           then:
             - logger.log:
                 format: "ph_EZO invalide: %.2f"
@@ -1316,12 +1339,20 @@ script:
           id: h_fin
           time: !lambda |-
             return {second: 0, minute: id(g_mm), hour: id(g_hh)};
-  
-      # Calcul de la durée de filtration en hh:mm
+
+      # Convertion et affichage de la durée de filtration en hh:mm
+      - lambda: |-
+          static double dt=0;
+          static double hp=0;
+
+          dt = id(g_tps_filtration)*60;
+
+          id(g_hh)=int(dt/60);
+          id(g_mm)=dt-id(g_hh)*60;
       - datetime.time.set:
           id: duree_filtration
           time: !lambda |-
-            return {second: 0, minute: id(h_fin).minute-id(h_debut).minute, hour: id(h_fin).hour-id(h_debut).hour};
+            return {second: 0, minute: id(g_mm), hour: id(g_hh)};
       
       - lambda: |-
           static String mess;
@@ -1404,6 +1435,8 @@ script:
                 q=(m-c)/ve*(vb/va)*mp;
                 coef= id(_coef_regul_ph_moins).state/100;
                 id(g_tps_injection_ph_moins)=q*3600/de*coef;
+            - lambda: |-
+                id(_code_notif_telegram).state=1; 
           else:
             - lambda: |-
                 id(g_tps_injection_ph_moins)=0;
@@ -1428,8 +1461,7 @@ script:
                   - logger.log: 
                       format: "Marche ppe Ph moins"
                       level: INFO        
-                  #- delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
-                  - delay: !lambda "return 1000;"
+                  - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
                   - switch.turn_off: cde_ppe_ph_moins
                   - logger.log: 
                       format: "Arret ppe Ph moins"
@@ -1518,8 +1550,7 @@ script:
                   - logger.log: 
                       format: "Marche ppe Ph Chlore"
                       level: INFO        
-                  #- delay: !lambda "return id(g_tps_injection_chlore)*1000;"
-                  - delay: !lambda "return 1000;"
+                  - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
                   - switch.turn_off: cde_ppe_chlore
                   - logger.log: 
                       format: "Arret ppe chlore"

@@ -56,8 +56,8 @@ sensor:
           send_every: 5
           send_first_at: 1      
       - calibrate_linear:
-          - -468600 -> 0
-          - 1780000 -> 84.4
+          - -262000 -> 0
+          - 174400 -> 15.5
       - offset: -1.4
     unit_of_measurement: kg
 

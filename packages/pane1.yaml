@@ -19,21 +19,21 @@ openhasp:
 # Affichage piscine
       - obj: "p1b131"
         properties:
-          "text": "{{ states('input_number.mem_temp_piscine')|float(0) |round(1)}} C°" 
+          "text": "{{ states('sensor.esp178_temperature_eau')|float(0) |round(1)}} C°" 
 
       - obj: "p1b133"  
         properties:
-          "val": '{{ 1 if states("switch.ppe_filtration") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.ppe_filtration", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.ppe_filtration', 'on') else '#ff0000' }}" 
+          "val": '{{ 1 if states("switch.esp178_cde_pompe_filtration") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_pompe_filtration", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_pompe_filtration', 'on') else '#ff0000' }}" 
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.cde_ppe_filtration"
+              entity_id: "switch.esp178_cde_pompe_filtration"
 
       - obj: "p1b136"
         properties:
-          "text": "{{ states('sensor.ph_piscine_ph')|float(0) |round(2)}} pH" 
+          "text": "{{ states('sensor.esp178_ph_ezo')|float(0) |round(2)}} pH" 
 
       - obj: "p1b138"  
         properties:
@@ -47,23 +47,21 @@ openhasp:
 
       - obj: "p1b141"
         properties:
-          "text": "{{ states('input_text.piscine_periode_filtration')}}" 
+          "text": "{{ states('sensor.esp178_affich_heure_filtration')}}" 
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('input_number.affichage_duree_filtration_piscine')}} h" 
+          "text": "{{ states('time.esp178_duree_filtration')}} h" 
 
       - obj: "p1b148"
         properties:
-          "text": "{{ states('input_number.filtration_coeff_abaque')}} %" 
-
-
+          "text": "{{ states('number.esp178_coeff_filtration')}} %" 
 
       - obj: "p1b151"
         properties:
           "val": >
-            {% set st = states('input_select.mode_fonctionnement_piscine')%}
-            {% for text,num in [('Palier',0),('Classique',1),('Abaque',2),('Horaire',3),('At F',4),('Ma F',5) ] %}
+            {% set st = states('input_select.esp178_mode_fonctionnement_filtration')%}
+            {% for text,num in [('Palier',0),('Classique',1),('Abaque',2),('Horaire',3),('Ma_F',4),('AT_F',5) ] %}
             {% if st == text %}
               {{ num }}
             {%endif%}
@@ -72,7 +70,7 @@ openhasp:
           "changed":
             - service: input_select.select_option
               target:
-                entity_id: input_select.mode_fonctionnement_piscine
+                entity_id: input_select.esp178_mode_fonctionnement_filtration
               data:
                 option: >
                   {% if text == "Palier" -%}
@@ -83,14 +81,14 @@ openhasp:
                   Abaque
                   {% elif text == 'Horaire' -%}
                   Horaire
-                  {% elif text == 'At F' -%}
-                  At F
-                  {% elif text == 'Ma F' -%}
+                  {% elif text == 'Ma_F' -%}
                   Ma F
+                  {% elif text == 'At_F' -%}
+                  At F
                   {% endif -%}
       - obj: "p1b223"
         properties:
-          "text": "{{ states('sensor.pression_filtre') }} bars"              
+          "text": "{{ states('sensor.esp178_pression_filtre') }} bars"              
       - obj: "p1b226"
         properties:
           "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
@@ -101,33 +99,33 @@ openhasp:
 
       - obj: "p2b121"  
         properties:
-          "val": '{{ 1 if states("switch.ppe_filtration") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.ppe_filtration", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.ppe_filtration', 'on') else '#ff0000' }}" 
+          "val": '{{ 1 if states("switch.esp178_cde_pompe_filtration") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_pompe_filtration", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_pompe_filtration', 'on') else '#ff0000' }}" 
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.cde_ppe_filtration"
+              entity_id: "switch.esp178_cde_pompe_filtration"
 
       - obj: "p2b122"  
         properties:
-          "val": '{{ 1 if states("switch.ppe_ph") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.ppe_ph", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.ppe_ph', 'on') else '#ff0000' }}"          
+          "val": '{{ 1 if states("switch.esp178_cde_ppe_ph_moins") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_ppe_ph_moins", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_ppe_ph_moins', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.ppe_ph"   
+              entity_id: "switch.esp178_cde_ppe_ph_moins"   
 
       - obj: "p2b123"
         properties:
-          "val": '{{ 1 if states("switch.ppe_chlore") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.ppe_chlore", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.ppe_chlore', 'on') else '#ff0000' }}"
+          "val": '{{ 1 if states("switch.esp178_cde_ppe_chlore") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_ppe_chlore", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_ppe_chlore', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.ppe_chlore"   
+              entity_id: "switch.esp178_cde_ppe_chlore"   
 
       - obj: "p2b124"  
         properties:
@@ -151,41 +149,41 @@ openhasp:
 
       - obj: "p2b126"  
         properties:
-          "val": '{{ 1 if states("switch.cde_ecl_piscine") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.cde_ecl_piscine", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.cde_ecl_piscine', 'on') else '#ff0000' }}"          
+          "val": '{{ 1 if states("switch.esp178_cde_eclairage") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_eclairage", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.cesp178_cde_eclairage', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.cde_ecl_piscine"   
+              entity_id: "switch.esp178_cde_eclairage"   
 
       - obj: "p2b127"  
         properties:
-          "val": '{{ 1 if states("switch.ev_eau") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.ev_eau", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.ev_eau', 'on') else '#ff0000' }}"          
+          "val": '{{ 1 if states("switch.esp178_cde_ev_eau") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_ev_eau", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_ev_eau', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.ev_eau"   
+              entity_id: "switch.esp178_cde_ev_eau"   
 
       - obj: "p2b151"
         event:
           "up":
             - service: input_number.decrement
               target:
-                entity_id: input_number.filtration_coeff_abaque
+                entity_id: number.esp178_coeff_filtration
 
       - obj: "p2b152"
         properties:
-          "text": "{{'%.0f' | format (states('input_number.filtration_coeff_abaque') | round(0)) }}%"
+          "text": "{{'%.0f' | format (states('number.esp178_coeff_filtration') | round(0)) }}%"
 
       - obj: "p2b153"
         event:
           "up":
             - service: input_number.increment
               target:
-                entity_id: input_number.filtration_coeff_abaque
+                entity_id: number.esp178_coeff_filtration
 
                 # Page 3
       - obj: "p3b121"

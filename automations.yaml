@@ -49,45 +49,63 @@
   alias: 3_4_2 Piscine-Notification Alarme Appoint d'eau
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id: sensor.ev_eau_tps_ouverture_jour
-    above: '1.00'
+  - platform: state
+    entity_id:
+    - switch.esp178_cde_ev_eau
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
   condition: []
   action:
-  - service: notify.telegram
-    data:
-      message: Temps ouverture supérieur à {{states('sensor.ev_eau_tps_ouverture_jour')}}
-        h{{-"\n"-}}{{states("sensor.date_time") }}
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}EV eau ouverte depuis plus
+        de 1 heure'
       title: Alarme EV Appoint d'eau Piscine
-  - service: switch.turn_off
+    action: notify.telegram
+  - target:
+      entity_id:
+      - switch.esp178_cde_ev_eau
+    action: switch.turn_off
+    data: {}
+  - action: select.select_option
+    metadata: {}
+    data:
+      option: At_f
     target:
-      entity_id: switch.ev_eau
+      entity_id: select.esp178_mode_fonct_appoint_eau
   mode: single
 - id: '1617199790692'
   alias: 3_4_3 Piscine-Notification alarme niveau bas
   description: ' '
   trigger:
   - platform: state
-    entity_id: binary_sensor.tp_plein_lsl
-    from: 'off'
-    to: 'on'
-    for: 00:00:10
+    entity_id:
+    - binary_sensor.esp178_niv_bas
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
   condition: []
   action:
-  - service: notify.telegram
-    data:
+  - data:
       title: ALARME
       message: Niveau bas Piscine
-  - service: input_select.select_option
+    action: notify.telegram
+  - action: select.select_option
     data:
-      option: 'Off'
+      option: At_f
     target:
-      entity_id: input_select.mode_fonctionnement_piscine_test
-  - service: notify.telegram
-    data:
+      entity_id: select.esp178_mode_fonctionnement_filtration
+  - data:
       message: Niveau bas piscine{{-"\n"-}}{{states("sensor.date_time") }}{{-"\n"-}}{{states("sensor.date_time")
         }}
       title: Piscine Alarme Niveau Bas !!!
+    action: notify.telegram
   mode: single
 - id: '1617968589301'
   alias: '08-01-01 Alarmo  Activation Nuit '
@@ -192,7 +210,8 @@
   description: ''
   trigger:
   - platform: numeric_state
-    entity_id: sensor.pression_filtre
+    entity_id:
+    - sensor.esp178_pression_filtre
     above: '1'
     for:
       hours: 0
@@ -201,11 +220,11 @@
       milliseconds: 0
   condition: []
   action:
-  - service: notify.telegram
-    data:
+  - data:
       message: Pression Haute = {{states("sensor.pression_filtre") }}{{-"\n"-}}{{states("sensor.date_time")
         }}
       title: Piscine Alerte Pression Filtre !!!
+    action: notify.telegram
   mode: single
 - id: '1624864713180'
   alias: 3_3_5 Piscine-Cartouche Chlore
@@ -505,13 +524,13 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.esp137_ppe_en_fonctionnement
+    - binary_sensor.esp178_ppe_en_fonctionnement
     from: 'off'
     to: 'on'
     id: ma_ppe
   - platform: state
     entity_id:
-    - binary_sensor.esp137_ppe_en_fonctionnement
+    - binary_sensor.esp178_ppe_en_fonctionnement
     id: at_ppe
     from: 'on'
     to: 'off'
@@ -525,29 +544,29 @@
       - condition: trigger
         id: ma_ppe
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: '{{states("sensor.date_time") }}'
           title: Piscine Début Filtration
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id: at_ppe
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: '{{states("sensor.date_time") }}'
           title: Piscine Fin de filtration
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id: minuit
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: 'du {{states("sensor.date_time") }} {{-"\n"-}} Temps de filtration:  {{states(''sensor.ma_ppe_piscine_jour'')}}{{-"\n"-}}Conso:
             {{states(''sensor.compteur_energie_piscine_jour_hp_hc'')}} kWh {{-"\n"-}}
             Tps Utilisation cart. Chlore: {{states(''input_number.temps_cartouche_chlore'')}}
             h'
           title: Piscine Rapport Fin de journée
+        action: notify.telegram
     default: []
   mode: single
 - id: '1634389653339'
@@ -2491,9 +2510,9 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.tp_plein_lsh
-    from: 'on'
-    to: 'off'
+    - binary_sensor.esp178_niv_haut
+    from: 'off'
+    to: 'on'
     for:
       hours: 0
       minutes: 0
@@ -2514,8 +2533,11 @@
     - binary_sensor.esp178_status
     for:
       hours: 0
-      minutes: 0
+      minutes: 2
       seconds: 0
+    from: 'on'
+    to: 'off'
+    id: decon
   - platform: state
     entity_id:
     - binary_sensor.esp178_piscine
@@ -2524,13 +2546,53 @@
       minutes: 0
       seconds: 10
     enabled: false
+  - platform: state
+    entity_id:
+    - binary_sensor.esp178_status
+    from: 'off'
+    to: 'on'
+    id: recon
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
   condition: []
   action:
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178= {{states(''binary_sensor.esp178_status'')}}{{-"\n"-}}
-        Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
-      title: Piscine ESP178 !!!
-    action: notify.telegram
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - decon
+      sequence:
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178=
+            {{states(''binary_sensor.esp178_status'')}}{{-"\n"-}} Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
+          title: Piscine ESP178 Deconnecté!!!
+        action: notify.telegram
+      - action: switch.turn_off
+        target:
+          entity_id: switch.pc3_lidl
+        data: {}
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.pc3_lidl
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - recon
+      sequence:
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178=
+            {{states(''binary_sensor.esp178_status'')}}{{-"\n"-}} Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
+          title: Piscine ESP178 Reconnecté!!!
+        action: notify.telegram
   mode: single
 - id: '1724936171395'
   alias: 3_2_4 Piscine Time out Ppe pH

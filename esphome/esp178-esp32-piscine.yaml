@@ -437,7 +437,7 @@ binary_sensor:
         pullup: false
       inverted: true
     filters:
-      - delayed_on_off: 1s
+      - delayed_on_off: 5s
     on_press:
       then:
         - script.stop: _regul_eau
@@ -455,7 +455,7 @@ binary_sensor:
         pullup: false
       inverted: true
     filters:
-      - delayed_on_off: 1s
+      - delayed_on_off: 5s
 
   - platform: gpio
     name: "${friendly_name}_E4"
@@ -532,6 +532,14 @@ datetime:
     name: "${friendly_name}_duree_mode_horaire"
     optimistic: yes
     restore_value: true
+
+  - platform: template
+    id: duree_injection_ph
+    type: time
+    name: "${friendly_name}_duree_injection_pH"
+    optimistic: yes
+    restore_value: true
+
 
 # Input Number
 number:
@@ -797,6 +805,13 @@ sensor:
     unit_of_measurement: "s"
     state_class: "measurement" 
 
+  # Affiche le volume de pH moins à injecter
+  - platform: template
+    name: "${friendly_name}_vol_injection_ph_moins"
+    id: _vol_injection_ph_moins
+    unit_of_measurement: "l"
+    state_class: "measurement" 
+
   # mémorise le temps d'injection calculé
   - platform: template
     name: "${friendly_name}_tps_injection_chlore"
@@ -804,12 +819,7 @@ sensor:
     unit_of_measurement: "s"
     state_class: "measurement" 
 
-  # Code notification en lien avec L'automatisme de notification telegram
-  - platform: template
-    name: "${friendly_name}_code_notif_telegram"
-    id: _code_notif_telegram
-    unit_of_measurement: ""
-    
+   
   # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
     update_interval: 30s
@@ -846,16 +856,13 @@ sensor:
   - platform: duty_time
     id: _temps_fonctionnement_ppe_piscine_jour
     name: '${friendly_name}_temps_ma_ppe_piscine_jour'
-    # Support logical sources (optional): 'binary_sensor'
     sensor: ppe_filt_en_fonctionnement
-    # ... EOR 'lambda'
-    #lambda: "return id(my_climate).mode != CLIMATE_MODE_OFF;"
-    # Restore (optional, default: False)
     restore: true
-    # Sensor for last turn-on time (optional)
     last_time:
       name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
-  
+    filters: 
+      - round: 2
+
   # Mesure compteur d'eau avec un capteur USS-HS43TI
   # https://fr.aliexpress.com/item/1005004260014462.html
   - platform: pulse_meter
@@ -900,6 +907,12 @@ text_sensor:
     id: aff_heure_filtration
     name: "${friendly_name} affich_heure_filtration"
     icon: mdi:timer
+
+  # Message en lien avec L'automatisme de notification telegram
+  - platform: template
+    name: "${friendly_name}_message_notif_telegram"
+    id: _msg_notif_telegram
+
 
 # Déclaration des switches: cde des relais
 switch:
@@ -1111,6 +1124,12 @@ script:
                 static String mess;
                 mess= "Ent At Forcé";
                 id(aff_heure_filtration).publish_state(mess.c_str());
+            - lambda: |-                
+                static String mess;
+                mess= String(id(sntp_time).now());
+                mess= mess + "Ent At Forcé";
+                id(_msg_notif_telegram).publish_state(mess.c_str()); 
+
             # RAZ de la durée de filtration
             - datetime.time.set:
                 id: duree_filtration
@@ -1343,10 +1362,7 @@ script:
       # Convertion et affichage de la durée de filtration en hh:mm
       - lambda: |-
           static double dt=0;
-          static double hp=0;
-
           dt = id(g_tps_filtration)*60;
-
           id(g_hh)=int(dt/60);
           id(g_mm)=dt-id(g_hh)*60;
       - datetime.time.set:
@@ -1392,19 +1408,19 @@ script:
             - switch.turn_off: cde_ppe_filtration
     
 
-# Regulation du pH
-# Calcul du temps d'injection en fonction:
-# caracteristiques du pH-:
-  # mp= montant du produit =>quantité necessaire pour agir (0.2l)
-  # ve= valeur de l'effet du produit (0.1 à 0.2)
-  # va= volume d'eau affecté par le produit ( 10m3)
-# vb= volume du bassin
-# c= consigne du pH
-# m= mesure du pH
-# de= debit de la pompe (en l/h)
-# q=quantité à injecté = (m-c)/ve*(vb/va)*mp
-# temps injection (s)= (q*3600)/de
-
+  # Regulation du pH
+  # Calcul du temps d'injection en fonction:
+  # caracteristiques du pH-:
+    # mp= montant du produit =>quantité necessaire pour agir (0.2l)
+    # ve= valeur de l'effet du produit (0.1 à 0.2)
+    # va= volume d'eau affecté par le produit ( 10m3)
+  # vb= volume du bassin
+  # c= consigne du pH
+  # m= mesure du pH
+  # de= debit de la pompe (en l/h)
+  # q=quantité à injecté = (m-c)/ve*(vb/va)*mp
+  # temps injection (s)= (q*3600)/de
+ 
   - id: _regul_ph
     mode: single
     then:
@@ -1435,14 +1451,25 @@ script:
                 q=(m-c)/ve*(vb/va)*mp;
                 coef= id(_coef_regul_ph_moins).state/100;
                 id(g_tps_injection_ph_moins)=q*3600/de*coef;
-            - lambda: |-
-                id(_code_notif_telegram).state=1; 
+                id(_vol_injection_ph_moins).publish_state(q);
+
           else:
             - lambda: |-
                 id(g_tps_injection_ph_moins)=0;
 
       - lambda: |-
           id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
+
+      # Convertion et affichage de la durée d'injection pH en hh:mm
+      - lambda: |-
+          static double dt=0;
+          dt = id(g_tps_injection_ph_moins)*60;
+          id(g_hh)=int(dt/60);
+          id(g_mm)=dt-id(g_hh)*60;
+      - datetime.time.set:
+          id: duree_injection_ph
+          time: !lambda |-
+            return {second: 0, minute: id(g_mm), hour: id(g_hh)};
 
       - logger.log:
           format: "Log tps injection: %f"

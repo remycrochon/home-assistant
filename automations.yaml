@@ -2576,7 +2576,7 @@
       - delay:
           hours: 0
           minutes: 0
-          seconds: 10
+          seconds: 30
           milliseconds: 0
       - action: switch.turn_on
         target:
@@ -2650,5 +2650,23 @@
       message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP125= {{states(''binary_sensor.esp125_status'')}}{{-"\n"-}}
         Etat du Ping= {{states(''binary_sensor.192_168_0_125'')}}'
       title: Piscine ESP125 !!!
+    action: notify.telegram
+  mode: single
+- id: '1725460687135'
+  alias: Notif Telegram ESP178
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.esp178_message_notif_telegram
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178= {{states(''sensor.esp178_message_notif_telegram'')}}'
+      title: Message Piscine ESP178!!!
     action: notify.telegram
   mode: single

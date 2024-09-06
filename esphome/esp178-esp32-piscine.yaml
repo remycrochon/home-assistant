@@ -21,7 +21,6 @@ esphome:
 esp32:
   board: esp32dev
 
-
 wifi:
   networks:
    - ssid: !secret wifi
@@ -398,6 +397,17 @@ binary_sensor:
         // pompe Arretée.
         return false;
       }
+    on_press:
+      - lambda: |-                
+          static String mess;
+          mess= "ESP178 Debut Filtration";
+          id(_message_telegram)->execute(mess.c_str());           
+
+    on_release: 
+      - lambda: |-                
+          static String mess;
+          mess= "ESP178 Fin Filtration";
+          id(_message_telegram)->execute(mess.c_str());    
 
   # Entrée logique permettant de lire le BP I00 de la carte
   - platform: gpio
@@ -539,7 +549,6 @@ datetime:
     name: "${friendly_name}_duree_injection_pH"
     optimistic: yes
     restore_value: true
-
 
 # Input Number
 number:
@@ -704,7 +713,7 @@ sensor:
   #    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
 
   - platform: dallas_temp
-    address: 0x060321117ae89b28 #  0x82012111efe81d28
+    #address: 0x060321117ae89b28
     name: "${friendly_name}_temperature_eau"
     id: temp_eau
     filters:
@@ -900,6 +909,7 @@ cover:
       - script.execute: script_stop_volet
     optimistic: true
 
+
 # déclaration des "text_sensors"
 text_sensor:
   # Affichage des heures de filtration dans Home Assistant
@@ -911,8 +921,10 @@ text_sensor:
   # Message en lien avec L'automatisme de notification telegram
   - platform: template
     name: "${friendly_name}_message_notif_telegram"
+    lambda: |-
+      return {"ESP178 RAZ Telegram"};
+    update_interval: never
     id: _msg_notif_telegram
-
 
 # Déclaration des switches: cde des relais
 switch:
@@ -1009,11 +1021,35 @@ switch:
     optimistic: True
     turn_on_action: 
       then:
-        - script.execute: _fonctionnement_filtration
+        - script.execute: _fonctionnement_filtration        
+        - switch.turn_off: cde_ppe_filtration
+        - logger.log: 
+            format: "entrée_arret_forcé_ppe_filtration"
+            level: INFO
+        # RAZ de la durée de filtration
+        - datetime.time.set:
+            id: duree_filtration
+            time: !lambda |-
+              return {second: 0, minute: 0, hour: 0};                
+        - lambda: |-
+            static String mess;
+            mess= "Ent At Forcé";
+            id(aff_heure_filtration).publish_state(mess.c_str());
+        # Message Telegram
+        - lambda: |-                
+            static String mess;
+            mess= "ESP178 Debut Arret Forcé Filtration";
+            id(_message_telegram)->execute(mess.c_str());                 
+
     turn_off_action: 
       then:
+        # Message Telegram
+        - lambda: |-                
+            static String mess;
+            mess= "ESP178 Fin arret Forcé Filtration";
+            id(_message_telegram)->execute(mess.c_str());              
         - script.execute: _fonctionnement_filtration
-  
+
 # Gestion de l'afficheur 
 display:
   - platform: lcd_pcf8574
@@ -1111,30 +1147,7 @@ script:
           format: "Switch at force 2: %i "
           args: [ 'id(ent_at_force).state' ]
           level: DEBUG      
-      # Entrée Arret Forcée =true
-      - if:
-          condition:
-            - lambda: 'return id(ent_at_force).state == true;'
-          then:
-            - switch.turn_off: cde_ppe_filtration
-            - logger.log: 
-                format: "entrée_arret_forcé_ppe_filtration"
-                level: INFO
-            - lambda: |-
-                static String mess;
-                mess= "Ent At Forcé";
-                id(aff_heure_filtration).publish_state(mess.c_str());
-            - lambda: |-                
-                static String mess;
-                mess= String(id(sntp_time).now());
-                mess= mess + "Ent At Forcé";
-                id(_msg_notif_telegram).publish_state(mess.c_str()); 
-
-            # RAZ de la durée de filtration
-            - datetime.time.set:
-                id: duree_filtration
-                time: !lambda |-
-                  return {second: 0, minute: 0, hour: 0};                
+             
       # Entrée Marche Forcée HG
       - if:
           condition:
@@ -1152,6 +1165,7 @@ script:
                 static String mess;
                 mess= "Ma HG";
                 id(aff_heure_filtration).publish_state(mess.c_str());
+
             # RAZ de la durée de filtration
             - datetime.time.set:
                 id: duree_filtration
@@ -1272,7 +1286,7 @@ script:
             - script.execute: _calcul_hdebut_hfin
 
       # Mode "Horaire"
-      # Débuté à l'heure programmée pour un durée programmée
+      # Débuté à l'heure programmée pour une durée programmée
       # je m'en sers surtout l'hiver
       - if:
           condition:
@@ -1452,7 +1466,6 @@ script:
                 coef= id(_coef_regul_ph_moins).state/100;
                 id(g_tps_injection_ph_moins)=q*3600/de*coef;
                 id(_vol_injection_ph_moins).publish_state(q);
-
           else:
             - lambda: |-
                 id(g_tps_injection_ph_moins)=0;
@@ -1484,12 +1497,30 @@ script:
                   and:
                     - lambda: 'return id(g_tps_injection_ph_moins) > 0;'
                 then:
+                  - lambda: |-
+                      static String mess;
+                      mess= "ESP178 Debut injection pH";
+                      mess= mess+"\n";
+                      mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
+                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
+                      mess= mess+ "Volume:"+ String(id(_vol_injection_ph_moins).state)+"\n";
+                      mess= mess+ "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
+                      id(_message_telegram)->execute(mess.c_str()); 
                   - switch.turn_on: cde_ppe_ph_moins
                   - logger.log: 
                       format: "Marche ppe Ph moins"
                       level: INFO        
                   - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
                   - switch.turn_off: cde_ppe_ph_moins
+                  - lambda: |-
+                      static String mess;
+                      mess= "ESP178 Fin Injection pH";
+                      mess= mess+"\n";
+                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
+                      mess= mess + "Volume inj:"+ String(id(_vol_injection_ph_moins).state)+"\n";
+                      mess= mess + "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
+                      id(_message_telegram)->execute(mess.c_str()); 
+                  
                   - logger.log: 
                       format: "Arret ppe Ph moins"
                       level: INFO
@@ -1609,7 +1640,7 @@ script:
                 format: "Arret ppe Chlore"
                 level: INFO
 
-# Regulation du niveau eau piscine
+  # Regulation du niveau eau piscine
   - id: _regul_eau
     mode: single  
     then:
@@ -1665,7 +1696,7 @@ script:
                 level: INFO
             - switch.turn_off: cde_ev_eau
 
-# Scripts Commande Volet
+  # Scripts Commande Volet
   - id: script_ouv_volet
     then:
       - switch.turn_off: cde_volet_fermeture
@@ -1790,13 +1821,25 @@ script:
             - logger.log: 
                 format: "Set Flag HG Seuil1"
                 level: INFO
+            - lambda: |-                
+                static String mess;
+                mess= "ESP178 Debut Marche HG Seuil1";
+                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
+                mess= mess+"Seuil1: "+String(id(s1_temp_hg).state)+"\n";
+                id(_message_telegram)->execute(mess.c_str());                      
             - delay: 900s  #900s
             - lambda: |-
                 id(g_flag_hg) = false;
             - logger.log: 
                 format: "Reset Flag HG Seuil1"
-                level: INFO                  
-      # Activation si temp > seuil2
+                level: INFO     
+            - lambda: |-                
+                static String mess;
+                mess= "ESP178 Fin Marche HG Seuil1";
+                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
+                mess= mess+"Seuil1: "+String(id(s1_temp_hg).state)+"\n";
+                id(_message_telegram)->execute(mess.c_str());                               
+      # Activation si temp > S2
       - if:
           condition:
             and:
@@ -1810,9 +1853,34 @@ script:
             - logger.log: 
                 format: "Set Flag HG Seuil2"
                 level: INFO
+            - lambda: |-                
+                static String mess;
+                mess= "ESP178 Debut Marche HG Seuil2";
+                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
+                mess= mess+"Seuil2: "+String(id(s2_temp_hg).state)+"\n";
+                id(_message_telegram)->execute(mess.c_str());                   
             - delay: 1800s  #1800s
             - lambda: |-
                 id(g_flag_hg) = false;
             - logger.log: 
                 format: "Reset Flag HG Seuil2"
-                level: INFO                               
+                level: INFO      
+            - lambda: |-                
+                static String mess;
+                mess= "ESP178 Fin Marche HG Seuil2";
+                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
+                mess= mess+"Seuil2: "+String(id(s2_temp_hg).state)+"\n";
+                id(_message_telegram)->execute(mess.c_str());   
+
+  # Envoi d'un message à l'automatisme de notifycation Telegram
+  # message au format String à construire avant appel du script
+  - id: _message_telegram
+    parameters:
+      mess1: string
+    then:
+      - lambda: |-                
+          static String mess;
+          mess= (id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
+          mess= mess +"\n";
+          mess= mess+ mess1.c_str();
+          id(_msg_notif_telegram).publish_state(mess.c_str()); 

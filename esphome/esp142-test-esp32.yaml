@@ -10,8 +10,7 @@ esphome:
 esp32:
   board: esp32dev
   framework:
-    type: esp-idf
-    version: recommended
+    type: arduino
 
 wifi:
   networks:
@@ -23,13 +22,13 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+    dns1: 192.168.0.254
 
 # Enable logging
 logger:
   baud_rate: 0
-  level: DEBUG
-#  logs:
-#    modbus.component: INFO
+  level: VERBOSE
+
 # Enable Home Assistant API
 api:
 
@@ -38,12 +37,25 @@ ota:
 
 web_server:
   port: 80
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
+# Connection sonde(s) de température DS18b20
+one_wire:
+  - platform: gpio
+    pin: GPIO15
 
 # Informations supplementaires sur le WIFI
 text_sensor:
   - platform: wifi_info
     ip_address:
       name: ${friendly_name}_ESP IP Address
+      id: ad_ip
     ssid:
       name: ${friendly_name}_ESP Connected SSID
     bssid:
@@ -52,12 +64,23 @@ text_sensor:
       name: ${friendly_name}_ESP Mac Wifi Address
     scan_results:
       name: ${friendly_name}_ESP Latest Scan Results
+      
+  # Message en lien avec L'automatisme de notification telegram
+  - platform: template
+    name: "${friendly_name}_message_notif_telegram"
+    id: _msg_notif_telegram
 
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name}_Status"
- 
+
+sensor:
+  - platform: dallas_temp
+    #address: 0x060321117ae89b28 #  0x82012111efe81d28
+    name: "${friendly_name}_temperature"
+    id: temperature
+    update_interval: 10s
 
 switch:
   - platform: gpio
@@ -69,3 +92,27 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
+interval:
+  - interval: 20s
+    then:
+      - lambda: |-
+          static String mess;
+          mess="ESP142";
+          mess=mess+"\n";
+          mess= mess+ "Temperature:"+String(id(temperature).state)+"\n";
+          id(_message_telegram)->execute(mess.c_str()); 
+
+script:
+  # sinon on travaille avec le pH mémorisé avant l'arret précédent
+  #mess= ("Home.date", "%s", id(sntp_time).now().strftime("%A %d %B %Y").c_str());
+  - id: _message_telegram
+    parameters:
+      mess1: string
+
+    then:
+      - lambda: |-                
+          static String mess;
+          mess= (id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
+          mess= mess +"\n";
+          mess= mess+ mess1.c_str();
+          id(_msg_notif_telegram).publish_state(mess.c_str()); 

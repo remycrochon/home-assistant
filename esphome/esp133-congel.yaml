@@ -48,5 +48,5 @@ binary_sensor:
     
 sensor:
   - platform: dallas_temp
-    address: 0x15006D2B00004B28
+    #address: 0x15006D2B00004B28
     name: "temp_congelo_garage"

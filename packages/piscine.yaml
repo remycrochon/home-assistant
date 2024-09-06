@@ -162,7 +162,7 @@ sensor:
   # Affichage du temps de fonctionnement de l'électrovanne appoint d'eau ce jour
   - platform: history_stats
     name: Ev Eau tps ouverture jour
-    entity_id: switch.ev_eau
+    entity_id: switch.esp178_cde_ev_eau
     state: "on"
     type: time
     start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
@@ -171,7 +171,7 @@ sensor:
   # Affichage du temps de fonctionnement de l'électrovanne appoint d'eau sur 7 jours
   - platform: history_stats
     name: Ev eau sur 7j
-    entity_id: switch.ev_eau
+    entity_id: switch.esp178_cde_ev_eau
     state: 'on'
     type: time
     end: "{{ now().replace(hour=0, minute=0, second=0) }}"
@@ -187,15 +187,15 @@ template:
         {{ as_timestamp(state_attr("sun.sun", "next_noon")) | timestamp_custom('%H %M')}}
       icon: mdi:weather-sunset
 # Totalisation des energies HC+HP
-    - name: Compteur Energie Piscine Jour HP_HC
-      unique_id: "compteur_energie_piscine_jour_hp_hc"
-      device_class: "energy"
-      state_class: "total_increasing"    
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set hp=states('sensor.compteur_energie_piscine_jour_hp')|float(default=0) %}
-        {% set hc=states('sensor.compteur_energie_piscine_jour_hc')|float(default=0) %}
-        {{ hp+hc }}
+#    - name: Compteur Energie Piscine Jour HP_HC
+#    unique_id: "compteur_energie_piscine_jour_hp_hc"
+#      device_class: "energy"
+#      state_class: "total_increasing"    
+#      unit_of_measurement: "kWh"
+#      state: >-
+#        {% set hp=states('sensor.compteur_energie_piscine_jour_hp')|float(default=0) %}
+#        {% set hc=states('sensor.compteur_energie_piscine_jour_hc')|float(default=0) %}
+#        {{ hp+hc }}
 
 
 

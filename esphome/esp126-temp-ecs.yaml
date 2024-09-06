@@ -50,7 +50,7 @@ binary_sensor:
         
 sensor:
   - platform: dallas_temp
-    address: 0xCA00AA2D00000328
+    #address: 0xCA00AA2D00000328
     name: "${friendly_name} temp_ecs"
     filters:
       - offset: 2.0

@@ -23,7 +23,7 @@ wifi:
 
 # Enable logging
 logger:
-  level: debug
+  level: INFO
 
 # Enable Home Assistant API
 api:
@@ -45,7 +45,6 @@ sensor:
   # 1L=477Hz,
   # D4
 
-#  - platform: pulse_counter
   - platform: pulse_meter
     pin: D4
     name: "${friendly_name} Cpt Eau Piscine"

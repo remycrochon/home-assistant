@@ -2653,7 +2653,7 @@
     action: notify.telegram
   mode: single
 - id: '1725460687135'
-  alias: Notif Telegram ESP178
+  alias: 3_4_7 Notif Telegram ESP178
   description: ' '
   trigger:
   - platform: state
@@ -2663,10 +2663,38 @@
       hours: 0
       minutes: 0
       seconds: 0
+  condition:
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: sensor.esp178_message_notif_telegram
+        state: unavailable
+      - condition: state
+        entity_id: sensor.esp178_message_notif_telegram
+        state: unknown
+  action:
+  - data:
+      message: '{{states(''sensor.esp178_message_notif_telegram'')}}'
+      title: Message ESP178!!!
+    action: notify.telegram
+  mode: single
+- id: '1725537112371'
+  alias: Message telegram ESP142
+  description: ' '
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.esp142_message_notif_telegram
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
   condition: []
   action:
   - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178= {{states(''sensor.esp178_message_notif_telegram'')}}'
-      title: Message Piscine ESP178!!!
+      message: '{{states(''sensor.esp142_message_notif_telegram'')}}'
+      title: Message ESP142!!!
     action: notify.telegram
   mode: single

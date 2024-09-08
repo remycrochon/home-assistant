@@ -4,90 +4,6 @@
 #                                                  #
 ####################################################
 
-input_number:
-  # utilisé pour simuler la température de l'eau pendant les test
-  simul_ph:
-    name: Ph Simulation
-    min: 6
-    max: 8
-    step: 0.1
-    unit_of_measurement: pH
-    mode: box
-
-# pH Valeur cible
-  ph_cible:
-    name: Ph Cible 
-    min: 7.0
-    max: 7.5
-    step: 0.1
-    unit_of_measurement: pH
-    icon: mdi:alpha-h-circle-outline
-    mode: box
-
-# Débit pompe pH (Etalonnage obligatoire de la pompe)
-  ph_debit_ppe:
-    name: pH Débit Ppe
-    min: 0
-    max: 7.2
-    step: 0.001
-    unit_of_measurement: l/h
-    icon: mdi:pump
-    mode: box
-
-# Durée injection pH en S
-  ph_duree_inject_s:
-    name: pH Durée inject effect(s)
-    min: 0
-    max: 60
-    step: 1
-    unit_of_measurement: "s"
-    icon: mdi:clock
-    mode: box
-# Durée injection pH en mn
-  ph_duree_inject_mn:
-    name: pH Durée inject effect (mn)
-    min: 0
-    max: 60
-    step: 1
-    unit_of_measurement: "mn"
-    icon: mdi:clock
-    mode: box
-
-# Coefficient
-  ph_coefficient_injection_ph_moins:
-    name: pH Coeff Injection pH moins
-    min: 0
-    max: 100
-    step: 0.1
-    unit_of_measurement: "%"
-    icon: mdi:percent
-    mode: box
-
-
-# Seuil bas du bidon pH moins déclenchant une notification
-  ph_seuil_bas_bidon:
-    name: pH Seuil bas Bidon
-    min: 0
-    max: 30
-    step: 0.5
-    unit_of_measurement: 'kg'
-    icon: mdi:flask-empty-outline
-    mode: box
-
-# Temps maximum utilisation cartouche de Chlore en h déclenchant une notification
-  chlore_seuil_max_utilisation:
-    name: Temps maxi utilisation cart Chlore
-    min: 0
-    max: 100
-    step: 0.5
-    unit_of_measurement: 'h'
-    icon: mdi:timer-sand-full
-    mode: box
-  
-input_boolean:
-  # Validation regul Ph
-  regul_ph:
-    name: pH validation Regul
 
 sensor:
 # Statistiques pH
@@ -115,41 +31,6 @@ sensor:
     sampling_size: 30
     #max_age:
       # minutes: 30      
-
-template:
-####################################
-  - binary_sensor:
-    - name: "ph_niveau_bas_bidon"
-      unique_id: "pH Seuil Niveau Bas Bidon"
-      state: >-
-          {% set pds=states('sensor.esp129_poids_ph_moins')|float(default=0) %}
-          {% set seuil=states('input_number.ph_seuil_bas_bidon')|float(default=0) %}
-          {{ pds <= seuil }}
-
-####################################
-  - sensor:
-
-# Recopie de la mesure pH si la pompe est en marche 
-# sinon on recopie la derniere valeur historisée
-
-    - name: "pH_piscine_ph"
-      unique_id: "ph_piscine_ph"
-      state_class: measurement
-      unit_of_measurement: "pH"
-      availability: "{{ is_number(states('sensor.ph_ezo')) }}"
-      state: >-
-        {% set ph = states('sensor.ph_ezo') | float(default=0) | round(2) %}
-        {% set ppe = states('binary_sensor.esp137_ppe_en_fonctionnement') %}
-        {{ph | float(default=0)| round(2)}}
-
-#        {% if ppe == 'on' %}
-#         {{ ph | round(2) }}
-#        {% else %}
-#          {{ this.state }}
-#        {%endif%}
-      #   {{ this.state }}
-      #device_class: ph
-      
 
 
 

@@ -2625,33 +2625,6 @@
     data: {}
     action: switch.turn_off
   mode: single
-- id: '1724998401741'
-  alias: 3_4_6 Piscine-Notification Status ESP125
-  description: ' '
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.esp125_status
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  - platform: state
-    entity_id:
-    - binary_sensor.esp178_piscine
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-    enabled: false
-  condition: []
-  action:
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP125= {{states(''binary_sensor.esp125_status'')}}{{-"\n"-}}
-        Etat du Ping= {{states(''binary_sensor.192_168_0_125'')}}'
-      title: Piscine ESP125 !!!
-    action: notify.telegram
-  mode: single
 - id: '1725460687135'
   alias: 3_4_7 Notif Telegram ESP178
   description: ' '

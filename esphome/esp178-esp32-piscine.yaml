@@ -90,6 +90,22 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_piscine_jour
+          - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
+          - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore     
+          - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
+      - seconds: 00
+        minutes: 59
+        hours: 11
+        then:
+          - lambda: |-
+              static String mess;
+              mess= "ESP178 Rapport Journalier";
+              mess= mess+"\n";
+              mess= mess+"Tps Filtration: "+String(id(_temps_fonctionnement_ppe_piscine_jour).state)+" h"+"\n";
+              mess= mess+ "Conso Ppe:"+ String(id(conso_elec_jour).state)+" kW"+"\n";
+              mess= mess+"Tps Ppe pH: "+String(id(_temps_fonctionnement_ppe_ph).state)+" h"+"\n";
+              mess= mess+"Tps Ppe Chlore: "+String(id(_temps_fonctionnement_ppe_chlore).state)+" h"+"\n";
+              id(_message_telegram)->execute(mess.c_str());       
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -275,10 +291,16 @@ select:
         - logger.log:
             format: "Mode Fonct Regul pH --> %s"
             args: [ 'id(_Mode_Fonctionnement_regul_ph).state.c_str()' ]
-            level: INFO        
-        - script.stop: _regul_ph   
-        - delay: 1s            
-        - script.execute: _regul_ph       
+            level: INFO
+        - if:
+            condition:
+              or:
+                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Ma_f";'
+                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "At_f";'
+            then:                    
+            - script.stop: _regul_ph   
+            - delay: 1s            
+            - script.execute: _regul_ph       
 
   - platform: template
     name: "${friendly_name}_Mode_Fonct_regul_chlore"
@@ -766,10 +788,25 @@ sensor:
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
 
+  # Statistiques pH
+  - platform: combination
+    type: kalman
+    name: "${friendly_name}_ph_stat_standard_deviation"
+    process_std_dev: 0.001
+    sources:
+      - source: ph_ezo
+        error: 1.0
+  - platform: combination
+    type: median
+    name: "${friendly_name}_ph_stat_median"
+    sources:
+      - source: ph_ezo
+
   # Mesure de l'ORP
   # Procédure étalonnage:
     # Mettre 1 s dans "update interval"
-    # ainsi on moyenne sur 15 s avec un affichage toutes les 5s   
+    # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
+
   - platform: ezo
     id: orp_ezo
     name: "${friendly_name}_orp_ezo"
@@ -789,23 +826,23 @@ sensor:
   #      - 7.482 -> 6.86
   #      - 9.505 -> 9.18    
 
-  # Mesure de la pression filtre Entrée ANA 1
+  # Mesure de la pression filtre Entrée ANA 3
   - platform: ads1115
-    multiplexer: 'A0_GND'
+    multiplexer: 'A3_GND'
     gain: 6.144
     name: "${friendly_name}_Pression_filtre"          
     update_interval: 10s
     unit_of_measurement: "Bars"
     id: pression_filtre
     filters:
-      #- calibrate_linear:
-      #  - 0.60 -> 0.0
-      #  - 0.87 -> 0.87
+      - calibrate_linear:
+        - 0.576 -> 0.0
+        - 0.825 -> 0.825
   # moyenne sur 30 mn + affichage toutes les 2 mn
-      #- sliding_window_moving_average:
-      #    window_size: 30
-      #    send_every: 2
-      #    send_first_at: 1
+      - sliding_window_moving_average:
+          window_size: 30
+          send_every: 2
+          send_first_at: 1
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -856,6 +893,7 @@ sensor:
     state_class: total_increasing
     device_class: energy
     accuracy_decimals: 3
+    id: conso_elec_jour
     filters:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
@@ -871,7 +909,40 @@ sensor:
       name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
     filters: 
       - round: 2
+  
+  # Ppe pH
+  - platform: duty_time
+    id: _temps_fonctionnement_ppe_ph
+    name: '${friendly_name}_temps_ma_ppe_ph'
+    lambda: "return id(cde_ppe_ph_moins).state == true;"
+    restore: true
+    last_time:
+      name: '${friendly_name}_temps_ma_ppe_ph_last_time'
+    filters: 
+      - round: 2
 
+  # Ppe Chlore
+  - platform: duty_time
+    id: _temps_fonctionnement_ppe_chlore
+    name: '${friendly_name}_temps_ma_ppe_chlore'
+    lambda: "return id(cde_ppe_chlore).state == true;"
+    restore: true
+    last_time:
+      name: '${friendly_name}_temps_ma_ppe_chlore_last_time'
+    filters: 
+      - round: 2
+
+  # EV Eau
+  - platform: duty_time
+    id: _temps_fonctionnement_ev_eau
+    name: '${friendly_name}_temps_ma_ev_eau'
+    lambda: "return id(cde_ev_eau).state == true;"
+    restore: true
+    last_time:
+      name: '${friendly_name}_temps_ma_ev_eau_jour_last_time'
+    filters: 
+      - round: 2
+    
   # Mesure compteur d'eau avec un capteur USS-HS43TI
   # https://fr.aliexpress.com/item/1005004260014462.html
   - platform: pulse_meter
@@ -889,6 +960,7 @@ sensor:
       state_class: total_increasing
       filters:
         - lambda: return (x/(8*60)/1000);
+
 
 # Déclaration des "Covers" 
 # Volet piscine dans mon cas
@@ -1438,60 +1510,62 @@ script:
   - id: _regul_ph
     mode: single
     then:
-      - logger.log:
-          format: "Log mem ph: %f / pH Cible: %f"
-          args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-          level: debug      
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(g_memoire_ph) > id(_ph_cible).state;'
-              - lambda: 'return id(g_memoire_ph) > 0;'
-              - switch.is_on: cde_ppe_filtration          
-          then:
-            - lambda: |-
-                static float m=0;
-                static float c=0;                
-                static float mp=0.2;
-                static float ve=0.2;
-                static float va=10;
-                static float vb=50;
-                static float de=0;
-                static float q=0;
-                static float coef=0;
-                m=id(g_memoire_ph);
-                c=id(_ph_cible).state;
-                de=id(_debit_ppe_moins).state;
-                q=(m-c)/ve*(vb/va)*mp;
-                coef= id(_coef_regul_ph_moins).state/100;
-                id(g_tps_injection_ph_moins)=q*3600/de*coef;
-                id(_vol_injection_ph_moins).publish_state(q);
-          else:
-            - lambda: |-
-                id(g_tps_injection_ph_moins)=0;
-
-      - lambda: |-
-          id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
-
-      # Convertion et affichage de la durée d'injection pH en hh:mm
-      - lambda: |-
-          static double dt=0;
-          dt = id(g_tps_injection_ph_moins)*60;
-          id(g_hh)=int(dt/60);
-          id(g_mm)=dt-id(g_hh)*60;
-      - datetime.time.set:
-          id: duree_injection_ph
-          time: !lambda |-
-            return {second: 0, minute: id(g_mm), hour: id(g_hh)};
-
-      - logger.log:
-          format: "Log tps injection: %f"
-          args: [ 'id(g_tps_injection_ph_moins)' ]
-          level: DEBUG
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
           then:
+            - logger.log:
+                format: "Log mem ph: %f / pH Cible: %f"
+                args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
+                level: debug      
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return id(g_memoire_ph) > id(_ph_cible).state;'
+                    - lambda: 'return id(g_memoire_ph) > 0;'
+                    - switch.is_on: cde_ppe_filtration          
+                then:
+                  - lambda: |-
+                      static float m=0;
+                      static float c=0;                
+                      static float mp=0.2;
+                      static float ve=0.2;
+                      static float va=10;
+                      static float vb=50;
+                      static float de=0;
+                      static float q=0;
+                      static float coef=0;
+                      m=id(g_memoire_ph);
+                      c=id(_ph_cible).state;
+                      de=id(_debit_ppe_moins).state;
+                      q=(m-c)/ve*(vb/va)*mp;
+                      coef= id(_coef_regul_ph_moins).state/100;
+                      id(g_tps_injection_ph_moins)=q*3600/de*coef;
+                      id(_vol_injection_ph_moins).publish_state(q);
+                else:
+                  - lambda: |-
+                      id(g_tps_injection_ph_moins)=0;
+
+            - lambda: |-
+               id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
+
+            # Convertion et affichage de la durée d'injection pH en hh:mm
+            - lambda: |-
+                static double dt=0;
+                dt = id(g_tps_injection_ph_moins)*60;
+                id(g_hh)=int(dt/60);
+                id(g_mm)=dt-id(g_hh)*60;
+
+            - datetime.time.set:
+                id: duree_injection_ph
+                time: !lambda |-
+                  return {second: 0, minute: id(g_mm), hour: id(g_hh)};
+
+            - logger.log:
+                format: "Log tps injection: %f"
+                args: [ 'id(g_tps_injection_ph_moins)' ]
+                level: DEBUG
+
             - if:
                 condition:
                   and:

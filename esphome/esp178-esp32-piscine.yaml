@@ -95,16 +95,20 @@ time:
           - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
       - seconds: 00
         minutes: 59
-        hours: 11
+        hours: 23
         then:
           - lambda: |-
               static String mess;
+              static double dt=0;
+              dt = (id(_temps_fonctionnement_ppe_piscine_jour).state)*60;
+              id(g_hh)=int(dt/60);
+              id(g_mm)=dt-id(g_hh)*60;
               mess= "ESP178 Rapport Journalier";
               mess= mess+"\n";
-              mess= mess+"Tps Filtration: "+String(id(_temps_fonctionnement_ppe_piscine_jour).state)+" h"+"\n";
+              mess= mess+"Tps Filtration: "+String(id(g_hh))+"h"+String(id(g_mm))+":mn"+"\n";
               mess= mess+ "Conso Ppe:"+ String(id(conso_elec_jour).state)+" kW"+"\n";
-              mess= mess+"Tps Ppe pH: "+String(id(_temps_fonctionnement_ppe_ph).state)+" h"+"\n";
-              mess= mess+"Tps Ppe Chlore: "+String(id(_temps_fonctionnement_ppe_chlore).state)+" h"+"\n";
+              mess= mess+"Tps Ppe pH: "+String(id(_temps_fonctionnement_ppe_ph).state)+" s"+"\n";
+              mess= mess+"Tps Ppe Chlore: "+String(id(_temps_fonctionnement_ppe_chlore).state)+" s"+"\n";
               id(_message_telegram)->execute(mess.c_str());       
 
 # Connection Bus i2c (Afficheur, EZO,...)

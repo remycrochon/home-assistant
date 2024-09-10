@@ -46,7 +46,7 @@ sensor:
   # D4
 
   - platform: pulse_meter
-    pin: D4
+    pin: RX
     name: "${friendly_name} Cpt Eau Piscine"
     unit_of_measurement: "litre/mn"
     icon: "mdi:water"

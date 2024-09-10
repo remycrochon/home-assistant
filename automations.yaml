@@ -2403,51 +2403,6 @@
   use_blueprint:
     path: Blackshome/low-battery-notifications-and-actions.yaml
     input: {}
-- id: '1722361142500'
-  alias: Camera-Cuisine-Detection
-  description: ''
-  trigger:
-  - platform: event
-    event_type: motioneye.motion_detected
-    event_data:
-      device_id: ae78c8213b3a95e1ef3d7ac161697e42
-  condition: []
-  action:
-  - service: notify.persistent_notification
-    metadata: {}
-    data:
-      message: Detection Cam Cuisine
-  mode: single
-- id: '1722361820847'
-  alias: Camera-Garage Ext-Detection
-  description: ''
-  trigger:
-  - platform: event
-    event_type: motioneye.motion_detected
-    event_data:
-      device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
-  condition: []
-  action:
-  - service: notify.persistent_notification
-    metadata: {}
-    data:
-      message: Detection Cam Garage Ext
-  mode: single
-- id: '1722405769981'
-  alias: Camera-Garage Ext-chgt file
-  description: ''
-  trigger:
-  - platform: event
-    event_type: motioneye.file_stored
-    event_data:
-      device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
-  condition: []
-  action:
-  - service: notify.persistent_notification
-    metadata: {}
-    data:
-      message: Chgt file Cam Garage Ext
-  mode: single
 - id: '1722434877942'
   alias: Camera Activation-Désactivation detection
   description: Activation detection entre 5:30 et 23:30
@@ -2467,42 +2422,42 @@
         - debut
       sequence:
       - type: turn_on
-        device_id: fb0cfaa979e129c446687183d15b09b9
-        entity_id: 0b147f804aca343b6b2aca29f5c63284
+        device_id: 5e80fdb89ba796d468d27bfdc39ab7ad
+        entity_id: 1e7371ec372b96817fcac5c4d0910fce
         domain: switch
       - type: turn_on
-        device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
-        entity_id: eff1ebfaa335fecd3e81380101843e3e
+        device_id: 74e64aad217b93270636505e2bb4167b
+        entity_id: 07a23fed1009ccc67eaba32da7d13c54
         domain: switch
       - type: turn_on
-        device_id: ae78c8213b3a95e1ef3d7ac161697e42
-        entity_id: d8c60deb6042ba9ae285ee73c595365b
+        device_id: 117455bc2fb6249b3e4f7ea1cfe3d98f
+        entity_id: 9321f824ee96831888517d7394bf1d17
         domain: switch
-      - service: notify.telegram
-        data:
+      - data:
           message: Activation Détection video surveillance
           title: Caméra
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id:
         - fin
       sequence:
       - type: turn_off
-        device_id: fb0cfaa979e129c446687183d15b09b9
-        entity_id: 0b147f804aca343b6b2aca29f5c63284
+        device_id: 5e80fdb89ba796d468d27bfdc39ab7ad
+        entity_id: 1e7371ec372b96817fcac5c4d0910fce
         domain: switch
       - type: turn_off
-        device_id: 4cb9bd146d39c8f6ba5ffe5d60bd2234
-        entity_id: eff1ebfaa335fecd3e81380101843e3e
+        device_id: 74e64aad217b93270636505e2bb4167b
+        entity_id: 07a23fed1009ccc67eaba32da7d13c54
         domain: switch
       - type: turn_off
-        device_id: ae78c8213b3a95e1ef3d7ac161697e42
-        entity_id: d8c60deb6042ba9ae285ee73c595365b
+        device_id: 117455bc2fb6249b3e4f7ea1cfe3d98f
+        entity_id: 9321f824ee96831888517d7394bf1d17
         domain: switch
-      - service: notify.telegram
-        data:
+      - data:
           message: Désactivation Détection video surveillance
           title: Caméra
+        action: notify.telegram
   mode: single
 - id: '1724083468200'
   alias: 3_4_4 Piscine-Notification Niveau Haut

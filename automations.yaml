@@ -263,7 +263,7 @@
       title: Piscine Alerte Cartouche Chlore à changer!!!
   mode: single
 - id: '1629296468909'
-  alias: 07-01-01 Robot Tondeuse
+  alias: 07-01-01 Robot Tondeuse Pluviometrie
   description: ''
   trigger:
   - platform: numeric_state
@@ -281,26 +281,30 @@
       - condition: trigger
         id: seuil_haut
       sequence:
-      - service: lawn_mower.dock
-        data: {}
-      - service: notify.telegram
-        data:
+      - data: {}
+        action: lawn_mower.dock
+        target:
+          device_id: 7808727539e5cd0a67cbd0484d1835d4
+      - data:
           message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
             mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
             mm {{-"\n"-}}{{states("sensor.date_time") }}
           title: Robot-Début Alerte Meteo Pluie !!!
+        action: notify.telegram
     - conditions:
       - condition: trigger
         id: seuil_bas
       sequence:
-      - service: lawn_mower.start_mowing
-        data: {}
-      - service: notify.telegram
-        data:
+      - data: {}
+        action: lawn_mower.start_mowing
+        target:
+          device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
+      - data:
           message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
             mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
             mm {{-"\n"-}}{{states("sensor.date_time") }}
           title: Robot- Fin Alerte Meteo Pluie !!!
+        action: notify.telegram
   mode: single
   trace:
     stored_traces: 10
@@ -2626,3 +2630,34 @@
       title: Message ESP142!!!
     action: notify.telegram
   mode: single
+- id: '1726147313541'
+  alias: Robot Notif Erreur
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.am435x_awd_error
+    from: no_error
+    id: error
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - error
+      sequence:
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}} Erreur= {{states(''sensor.am435x_awd_error'')}}'
+          title: Robot-En difficulté
+        action: notify.telegram
+      - data:
+          message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
+            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
+            mm {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Robot- Fin Alerte Meteo Pluie !!!
+        action: notify.telegram
+        enabled: false
+  mode: single
+  trace:
+    stored_traces: 10

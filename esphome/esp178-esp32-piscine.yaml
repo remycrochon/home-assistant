@@ -365,6 +365,11 @@ button:
     on_press:
       - script.execute: _regul_chlore
 
+  - platform: template
+    name: "${friendly_name}_BP_RAZ_Tps_Galet_Chlore"
+    on_press:
+      - sensor.duty_time.reset: _temps_galet_chlore
+
   # Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
   - platform: template
     name: "${friendly_name}_BP_arret_jour"
@@ -410,6 +415,12 @@ binary_sensor:
     name: "${friendly_name}_niv_defaut"
     id: niv_defaut
 
+  # Etat galets Chlore
+  # Si Tps > à temps max alors = True
+  - platform: template
+    name: "${friendly_name}_Etat_Galets_Chlore"
+    id: _etat_galets_chlore
+      
   # Pompe en fonctionnement
   # Remplacer le seuil par du négatif pour simuler
   - platform: template
@@ -695,6 +706,18 @@ number:
     unit_of_measurement: "l/h"
     step: 0.001
 
+  # Tps Max Galet Chlore
+  - platform: template
+    name: "${friendly_name}_tps_Max_galet_Chlore"
+    id: _tps_max_galet_chlore
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "h"
+    step: 1
+
   # Seuil 1 Temp Hors gel
   - platform: template
     name: "${friendly_name}_Seuil1_Temp_HG"
@@ -909,19 +932,23 @@ sensor:
     name: '${friendly_name}_temps_ma_ppe_piscine_jour'
     sensor: ppe_filt_en_fonctionnement
     restore: true
-    last_time:
-      name: '${friendly_name}_temps_ma_ppe_piscine_jour_last_time'
     filters: 
       - round: 2
-  
+
+  - platform: duty_time
+    id: _temps_galet_chlore
+    name: '${friendly_name}_temps_galet_chlore'
+    sensor: ppe_filt_en_fonctionnement
+    restore: true
+    filters: 
+      - round: 2
+    
   # Ppe pH
   - platform: duty_time
     id: _temps_fonctionnement_ppe_ph
     name: '${friendly_name}_temps_ma_ppe_ph'
     lambda: "return id(cde_ppe_ph_moins).state == true;"
     restore: true
-    last_time:
-      name: '${friendly_name}_temps_ma_ppe_ph_last_time'
     filters: 
       - round: 2
 
@@ -931,8 +958,6 @@ sensor:
     name: '${friendly_name}_temps_ma_ppe_chlore'
     lambda: "return id(cde_ppe_chlore).state == true;"
     restore: true
-    last_time:
-      name: '${friendly_name}_temps_ma_ppe_chlore_last_time'
     filters: 
       - round: 2
 
@@ -942,8 +967,6 @@ sensor:
     name: '${friendly_name}_temps_ma_ev_eau'
     lambda: "return id(cde_ev_eau).state == true;"
     restore: true
-    last_time:
-      name: '${friendly_name}_temps_ma_ev_eau_jour_last_time'
     filters: 
       - round: 2
     
@@ -1154,10 +1177,16 @@ interval:
   - interval: 5s
     then: 
       - script.execute: _memorisation_temperature_eau
-      - script.execute: _memorisation_ph      
-  - interval: 30s # Test HG toutes les 15 mn (900s)
+      - script.execute: _memorisation_ph
+
+  - interval: 900s # Test HG toutes les 15 mn (900s)
     then: 
       - script.execute: _fonction_hors_gel
+
+  - interval: 1h # Test temps usage Galets Chlore
+    then: 
+      - script.execute: _fonction_galet_chlore
+
 
 # Déclaration des "Scripts"
 script:
@@ -1949,6 +1978,23 @@ script:
                 mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
                 mess= mess+"Seuil2: "+String(id(s2_temp_hg).state)+"\n";
                 id(_message_telegram)->execute(mess.c_str());   
+
+  # Surveille temps utilsation galet Chlore
+  - id: _fonction_galet_chlore
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: 'return (id(_temps_galet_chlore).state/60) >= id(_tps_max_galet_chlore).state;'
+          then:
+            - lambda: 
+                id(_etat_galets_chlore).publish_state(true);
+            - logger.log: 
+                format: "Galet Chlore Dépassé"
+                level: INFO  
+          else:
+            - lambda: 
+                id(_etat_galets_chlore).publish_state(false);
 
   # Envoi d'un message à l'automatisme de notifycation Telegram
   # message au format String à construire avant appel du script

@@ -420,20 +420,19 @@ binary_sensor:
   - platform: template
     name: "${friendly_name}_Etat_Galets_Chlore"
     id: _etat_galets_chlore
+    on_press:
+      - lambda: |-                
+          static String mess;
+          mess= "ESP178 Tps Utilisaton Galets Chlore Atteint";
+          id(_message_telegram)->execute(mess.c_str());      
       
   # Pompe en fonctionnement
-  # Remplacer le seuil par du négatif pour simuler
-  - platform: template
+  # Remplacer le seuil (threshold) par du négatif pour simuler
+  - platform: analog_threshold
     name: "${friendly_name}_ppe_en_fonctionnement"
     id: ppe_filt_en_fonctionnement
-    lambda: |-
-      if (id(puissance).state > 200) {
-        // Pompe Fonctionne si puissance>200 W
-        return true;
-      } else {
-        // pompe Arretée.
-        return false;
-      }
+    sensor_id: puissance
+    threshold: 200 #200W
     on_press:
       - lambda: |-                
           static String mess;

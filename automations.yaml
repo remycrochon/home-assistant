@@ -2637,7 +2637,6 @@
   - platform: state
     entity_id:
     - sensor.am435x_awd_error
-    from: no_error
     id: error
   condition: []
   action:

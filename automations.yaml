@@ -263,7 +263,7 @@
       title: Piscine Alerte Cartouche Chlore à changer!!!
   mode: single
 - id: '1629296468909'
-  alias: 07-01-01 Robot Tondeuse Pluviometrie
+  alias: Robot AMX435 Surveillance Pluviometrie
   description: ''
   trigger:
   - platform: numeric_state
@@ -1462,36 +1462,26 @@
     default: []
   mode: single
 - id: '1656059504847'
-  alias: 02-01-12 Al Bp Notif Tps lames robot AM435 atteint
+  alias: Robot AMX435 Al Bp Notif Tps lames atteint
   description: Surveillance du temps d'utilisation des lame du robot
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: binary_sensor.robot_temps_usage_lames_atteint_2
+      sensor_entity: binary_sensor.amx435x_temps_usage_lames_atteint
       alert_state: 'on'
       alert_action:
-      - service: notify.telegram
-        data:
-          message: Lames robot à remplacer = {{states("sensor.robot_temps_usage_lames")
-            }} {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Etat Robot tonte !!!
-      - service: notify.telegram
-        data:
-          message: Lames robot à remplacer = {{states("sensor.robot_temps_usage_lames")
-            }} {{-"\n"-}}{{states("sensor.date_time") }}
-        enabled: false
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Lames robot à remplacer
+            = {{states("sensor.am435x_awd_duree_d_utilisation_des_lames")}} h'
+          title: Alarme Robot AMX435X!!!
+        action: notify.telegram
       resolved_action:
-      - service: notify.telegram
-        data:
-          message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
-            }}
-          title: Etat robot tonte !!!
-      - service: notify.telegram
-        data:
-          message: Fin notification lames robot à remplacer {{-"\n"-}}{{states("sensor.date_time")
-            }}
-        enabled: false
+      - data:
+          message: '{{states("sensor.date_time") }} {{-"\n"-}}Fin notification lames
+            robot à remplacer'
+          title: Fin Alarme Robot AMX435X!!!
+        action: notify.telegram
       notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 3600
@@ -2425,43 +2415,51 @@
         id:
         - debut
       sequence:
-      - type: turn_on
-        device_id: 5e80fdb89ba796d468d27bfdc39ab7ad
-        entity_id: 1e7371ec372b96817fcac5c4d0910fce
-        domain: switch
-      - type: turn_on
-        device_id: 74e64aad217b93270636505e2bb4167b
-        entity_id: 07a23fed1009ccc67eaba32da7d13c54
-        domain: switch
-      - type: turn_on
-        device_id: 117455bc2fb6249b3e4f7ea1cfe3d98f
-        entity_id: 9321f824ee96831888517d7394bf1d17
-        domain: switch
       - data:
           message: Activation Détection video surveillance
           title: Caméra
         action: notify.telegram
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.cuisine_detect
+          - switch.cuisine_motion
+          - switch.cuisine_recordings
+          - switch.cuisine_snapshots
+          - switch.piscine_detect
+          - switch.piscine_motion
+          - switch.piscine_recordings
+          - switch.piscine_snapshots
+          - switch.garage_ext_detect
+          - switch.garage_ext_motion
+          - switch.garage_ext_recordings
+          - switch.garage_ext_snapshots
+        data: {}
     - conditions:
       - condition: trigger
         id:
         - fin
       sequence:
-      - type: turn_off
-        device_id: 5e80fdb89ba796d468d27bfdc39ab7ad
-        entity_id: 1e7371ec372b96817fcac5c4d0910fce
-        domain: switch
-      - type: turn_off
-        device_id: 74e64aad217b93270636505e2bb4167b
-        entity_id: 07a23fed1009ccc67eaba32da7d13c54
-        domain: switch
-      - type: turn_off
-        device_id: 117455bc2fb6249b3e4f7ea1cfe3d98f
-        entity_id: 9321f824ee96831888517d7394bf1d17
-        domain: switch
       - data:
           message: Désactivation Détection video surveillance
           title: Caméra
         action: notify.telegram
+      - action: switch.turn_off
+        target:
+          entity_id:
+          - switch.cuisine_detect
+          - switch.cuisine_motion
+          - switch.cuisine_recordings
+          - switch.cuisine_snapshots
+          - switch.piscine_detect
+          - switch.piscine_motion
+          - switch.piscine_recordings
+          - switch.piscine_snapshots
+          - switch.garage_ext_detect
+          - switch.garage_ext_motion
+          - switch.garage_ext_recordings
+          - switch.garage_ext_snapshots
+        data: {}
   mode: single
 - id: '1724083468200'
   alias: 3_4_4 Piscine-Notification Niveau Haut
@@ -2631,7 +2629,7 @@
     action: notify.telegram
   mode: single
 - id: '1726147313541'
-  alias: Robot Notif Erreur
+  alias: Robot AMX435 Notif Erreur
   description: ''
   trigger:
   - platform: state
@@ -2648,7 +2646,7 @@
       sequence:
       - data:
           message: '{{states("sensor.date_time") }}{{-"\n"-}} Erreur= {{states(''sensor.am435x_awd_error'')}}'
-          title: Robot-En difficulté
+          title: Robot AMX435X En difficulté
         action: notify.telegram
       - data:
           message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}

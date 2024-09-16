@@ -1721,24 +1721,6 @@
         }}
       title: Temperature Haute Stérilisateur !!!
   mode: single
-- id: '1690353892596'
-  alias: 06-01-06 Surveillance Pu Chalet
-  description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.esp131_pzem_chalet_puissance
-    above: 500
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-  condition: []
-  action:
-  - service: notify.telegram
-    data:
-      message: Pu Chalet superieure à 500W pendant 3mn{{-"\n"-}}{{states("sensor.date_time")
-        }}
-  mode: single
 - id: '1690355630909'
   alias: 00-00-04 Restart Addon UPS si en défaut
   description: ''
@@ -1818,12 +1800,12 @@
     enabled: true
   mode: single
 - id: '1698142750238'
-  alias: 06-01-07 Notification niveau bas puit
+  alias: Notification niveau bas puits
   description: ''
   trigger:
   - platform: numeric_state
     entity_id:
-    - sensor.esp140_niveau_puit
+    - sensor.esp174_niveau_remplissage_puit
     for:
       hours: 0
       minutes: 5
@@ -1831,10 +1813,11 @@
     below: 0.8
   condition: []
   action:
-  - service: notify.telegram
-    data:
-      message: Niveau eau puit inferieur à 0.8 ml{{-"\n"-}}{{states("sensor.date_time")
-        }}
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Niveau Puit {{states(''sensor.esp174_niveau_puit'')}}
+        ml'
+      title: Niveau eau puit inferieur à 0.8 ml depuis 10mn
+    action: notify.telegram
   mode: single
 - id: '1698395745098'
   alias: 00-00-01 Redemarage NODERED
@@ -1872,42 +1855,51 @@
     at: '16:30:00'
   condition: []
   action:
-  - service: homeassistant.update_entity
-    data: {}
+  - data:
+      entity_id:
+      - sensor.meteo_france_alertes_81
     target:
       entity_id:
       - sensor.meteo_france_alertes_81
+    action: homeassistant.update_entity
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: homeassistant.update_entity
-    data: {}
+  - data:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_today
     target:
       entity_id:
       - sensor.meteo_france_alerts_picture_today
+    action: homeassistant.update_entity
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: homeassistant.update_entity
-    data: {}
+  - data:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_tomorrow
     target:
       entity_id:
       - sensor.meteo_france_alerts_picture_tomorrow
+    action: homeassistant.update_entity
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: homeassistant.update_entity
-    data: {}
+  - data:
+      entity_id:
+      - camera.mf_alerte_today
+      - camera.mf_alerte_tomorrow
     target:
       entity_id:
       - camera.mf_alerte_today
       - camera.mf_alerte_tomorrow
+    action: homeassistant.update_entity
   mode: single
 - id: '1699429641790'
   alias: 00-00-02 Backup total HA 1:00 du matin
@@ -1968,34 +1960,38 @@
         id:
         - hprouge
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: '{{states("sensor.date_time") }}'
           title: Consigne PAC= 18 °C car Passage HP ROUGE FORCAGE ARRET PISCINE
-      - service: input_boolean.turn_on
+        action: notify.telegram
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp178_ent_arret_force
         data: {}
-        target:
-          entity_id:
-          - input_boolean.piscine_arret_force
-      - service: input_number.set_value
-        target:
+      - target:
           entity_id: input_number.pac_nr_input_consigne_temperature
         data:
           value: 18
+        action: input_number.set_value
     - conditions:
       - condition: trigger
         id:
         - sortiehprouge
       sequence:
-      - service: notify.telegram
-        data:
+      - data:
           message: '{{states("sensor.date_time") }}'
           title: Consigne PAC=20°C car sortie HP ROUGE
-      - service: input_number.set_value
-        target:
+        action: notify.telegram
+      - target:
           entity_id: input_number.pac_nr_input_consigne_temperature
         data:
           value: 20
+        action: input_number.set_value
+      - action: switch.turn_off
+        target:
+          entity_id:
+          - switch.esp178_ent_arret_force
+        data: {}
   mode: single
   trace:
     stored_traces: 15
@@ -2583,7 +2579,7 @@
     action: switch.turn_off
   mode: single
 - id: '1725460687135'
-  alias: 3_4_7 Notif Telegram ESP178
+  alias: Notif Telegram ESP178
   description: ' '
   trigger:
   - platform: state
@@ -2636,7 +2632,12 @@
     entity_id:
     - sensor.am435x_awd_error
     id: error
-  condition: []
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.am435x_awd_error
+      state: unavailable
   action:
   - choose:
     - conditions:
@@ -2659,18 +2660,30 @@
   trace:
     stored_traces: 10
 - id: '1726422825041'
-  alias: Nouvelle automatisation
-  description: ''
+  alias: Recopie Etat HA vers NR MP2
+  description: Lien entre HA et le nodered du MP2
   trigger:
   - platform: state
     entity_id:
     - input_boolean.mp2_valid_ess_charge_prog_1
     id: validcp
-    enabled: false
+    enabled: true
   - platform: state
     entity_id:
     - input_boolean.forcage_charge_pgm_mp2_100
     id: forcage_cp
+    enabled: true
+  - platform: state
+    entity_id:
+    - input_number.mp2_niveau_forcage_cp1
+    id: niveau_forcage_cp1
+  - platform: state
+    entity_id:
+    - sensor.linky_ptec
+    id: hp-hc
+  - platform: homeassistant
+    event: start
+    id: demarrage_ha
   condition: []
   action:
   - choose:
@@ -2678,6 +2691,7 @@
       - condition: trigger
         id:
         - validcp
+        - demarrage_ha
       sequence:
       - action: mqtt.publish
         metadata: {}
@@ -2691,6 +2705,7 @@
       - condition: trigger
         id:
         - forcage_cp
+        - demarrage_ha
       sequence:
       - action: mqtt.publish
         metadata: {}
@@ -2700,4 +2715,72 @@
           retain: false
           topic: ha/mp2/cp/forcage100
           payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp2_100'') }}"'
+    - conditions:
+      - condition: trigger
+        id:
+        - niveau_forcage_cp1
+        - demarrage_ha
+      sequence:
+      - action: mqtt.publish
+        metadata: {}
+        data:
+          evaluate_payload: false
+          qos: '0'
+          retain: false
+          topic: ha/mp2/cp/niveauforcagecp1
+          payload: '"{{ states(''input_number.mp2_niveau_forcage_cp1'') }}"'
+    - conditions:
+      - condition: trigger
+        id:
+        - hp-hc
+        - demarrage_ha
+      sequence:
+      - action: mqtt.publish
+        metadata: {}
+        data:
+          evaluate_payload: false
+          qos: '0'
+          retain: false
+          topic: ha/mp2/cp/hc
+          payload: '"{{ states(''sensor.linky_ptec'') }}"'
+  mode: single
+- id: '1726480156769'
+  alias: Surveillance Puissance Chalet
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.esp131_pzem_chalet_puissance
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    above: 500
+  condition: []
+  action:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Puissance Chalet > 300w
+        depuis 10mn{{-"\n"-}} P= {{states(''sensor.esp131_pzem_chalet_puissance'')}}
+        W'
+      title: Consommation Chalet
+    action: notify.telegram
+  mode: single
+- id: '1726480725890'
+  alias: Message Journalier Recap Conso
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:59:00'
+  condition: []
+  action:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Conso totale= {{states(''sensor.compteur_energie_total_jour_tous_tarifs'')}}
+        kW{{-"\n"-}} Bleu HC= {{states(''sensor.compteur_energie_hc_bleu_jour'')}}
+        / Bleu HP= {{states(''sensor.compteur_energie_hp_bleu_jour'')}} kW{{-"\n"-}}
+        Blanc HC= {{states(''sensor.compteur_energie_hc_blanc_jour'')}} / Blanc HP=
+        {{states(''sensor.compteur_energie_hp_blanc_jour'')}} kW{{-"\n"-}} Rouge HC=
+        {{states(''sensor.compteur_energie_hc_rouge_jour'')}} / Rouge HP= {{states(''sensor.compteur_energie_hp_rouge_jour'')}}
+        kW{{-"\n"-}}'
+      title: Recap Journalier Consommation Elec
+    action: notify.telegram
   mode: single

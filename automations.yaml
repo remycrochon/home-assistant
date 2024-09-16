@@ -2658,3 +2658,46 @@
   mode: single
   trace:
     stored_traces: 10
+- id: '1726422825041'
+  alias: Nouvelle automatisation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.mp2_valid_ess_charge_prog_1
+    id: validcp
+    enabled: false
+  - platform: state
+    entity_id:
+    - input_boolean.forcage_charge_pgm_mp2_100
+    id: forcage_cp
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - validcp
+      sequence:
+      - action: mqtt.publish
+        metadata: {}
+        data:
+          evaluate_payload: false
+          qos: '0'
+          retain: false
+          topic: ha/mp2/cp/validcp
+          payload: '"{{ states(''input_boolean.mp2_valid_ess_charge_prog_1'') }}"'
+    - conditions:
+      - condition: trigger
+        id:
+        - forcage_cp
+      sequence:
+      - action: mqtt.publish
+        metadata: {}
+        data:
+          evaluate_payload: false
+          qos: '0'
+          retain: false
+          topic: ha/mp2/cp/forcage100
+          payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp2_100'') }}"'
+  mode: single

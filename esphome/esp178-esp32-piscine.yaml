@@ -17,6 +17,16 @@ esphome:
   project:
     name: "rem81.esp178-esp32-piscine"
     version: "0.0.0"
+  on_boot:
+    priority: 600
+    then:
+    # Initialisation des templates
+    - sensor.template.publish:
+        id: _tps_injection_ph_moins
+        state: 0.0
+    - sensor.template.publish:
+        id: _vol_injection_ph_moins
+        state: 0.0
 
 esp32:
   board: esp32dev
@@ -93,23 +103,42 @@ time:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore     
           - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
+      # Notification du rapport journalier sur Telegram
       - seconds: 00
         minutes: 59
         hours: 23
         then:
           - lambda: |-
               static String mess;
-              static double dt=0;
-              dt = (id(_temps_fonctionnement_ppe_piscine_jour).state)*60;
-              id(g_hh)=int(dt/60);
-              id(g_mm)=dt-id(g_hh)*60;
+              static int h,m,r,s=0;
               mess= "ESP178 Rapport Journalier";
               mess= mess+"\n";
-              mess= mess+"Tps Filtration: "+String(id(g_hh))+"h"+String(id(g_mm))+":mn"+"\n";
+              // Affichage du temps de fonctionnement Ppe Filtre
+              s = (id(_temps_fonctionnement_ppe_piscine_jour).state);
+              // Calcul des heures - minutes
+              h = s / 3600;
+              r = s - h * 3600;
+              m = r / 60;
+              r = r - m * 60;
+              mess= mess+"Tps Filtration: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
               mess= mess+ "Conso Ppe:"+ String(id(conso_elec_jour).state)+" kW"+"\n";
-              mess= mess+"Tps Ppe pH: "+String(id(_temps_fonctionnement_ppe_ph).state)+" s"+"\n";
-              mess= mess+"Tps Ppe Chlore: "+String(id(_temps_fonctionnement_ppe_chlore).state)+" s"+"\n";
-              id(_message_telegram)->execute(mess.c_str());       
+              // Affichage du temps de fonctionnement Ppe pH
+              s = (id(_temps_fonctionnement_ppe_ph).state);
+              // Calcul des heures - minutes
+              h = s / 3600;
+              r = s - h * 3600;
+              m = r / 60;
+              r = r - m * 60;          
+              mess= mess+"Tps Ppe pH: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+              // Affichage du temps de fonctionnement Ppe Chlore
+              s = (id(_temps_fonctionnement_ppe_chlore).state);
+              // Calcul des heures - minutes
+              h = s / 3600;
+              r = s - h * 3600;
+              m = r / 60;
+              r = r - m * 60;          
+              mess= mess+"Tps Ppe Chlore: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+              id(_message_telegram)->execute(mess.c_str());      
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -156,6 +185,8 @@ globals:
 
     - id: flag_tempo_ppe_filtre
       type: bool
+      restore_value: no
+      initial_value: 'false'
 
     # flag marche Hors gel activé
     - id: g_flag_hg
@@ -649,7 +680,7 @@ number:
     optimistic: true
     restore_value: true
     mode: box
-    min_value: 7
+    min_value: 6
     max_value: 7.6
     unit_of_measurement: "pH"
     step: 0.01
@@ -890,7 +921,6 @@ sensor:
     id: _tps_injection_chlore
     unit_of_measurement: "s"
     state_class: "measurement" 
-
    
   # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
@@ -968,24 +998,6 @@ sensor:
     restore: true
     filters: 
       - round: 2
-    
-  # Mesure compteur d'eau avec un capteur USS-HS43TI
-  # https://fr.aliexpress.com/item/1005004260014462.html
-  - platform: pulse_meter
-    pin: GPIO34
-    name: "${friendly_name} Cpt Eau Piscine"
-    unit_of_measurement: "litre/mn"
-    icon: "mdi:water"
-    filters:
-      - lambda: return (x/(8*60));
-    total:
-      name: "${friendly_name} Cpt Eau Piscine Total"
-      unit_of_measurement: "m³"
-      accuracy_decimals: 3
-      device_class: water
-      state_class: total_increasing
-      filters:
-        - lambda: return (x/(8*60)/1000);
 
 
 # Déclaration des "Covers" 
@@ -1177,6 +1189,7 @@ interval:
     then: 
       - script.execute: _memorisation_temperature_eau
       - script.execute: _memorisation_ph
+      - script.execute: _securisation_regul_ph
 
   - interval: 900s # Test HG toutes les 15 mn (900s)
     then: 
@@ -1187,8 +1200,46 @@ interval:
       - script.execute: _fonction_galet_chlore
 
 
+  #- interval: 20s # Test
+  #  then: 
+  #    - script.execute: _test
+
 # Déclaration des "Scripts"
 script:
+  # Script utilisé pour tester", peut etre supprimer si inutilse
+  - id: _test
+    then:
+      - lambda: |-
+          static String mess;
+          static int h,m,r,s=0;
+          mess= "ESP178 Rapport Journalier";
+          mess= mess+"\n";
+          // Affichage du temps de fonctionnement Ppe Filtre
+          s = (id(_temps_fonctionnement_ppe_piscine_jour).state);
+          // Calcul des heures - minutes
+          h = s / 3600;
+          r = s - h * 3600;
+          m = r / 60;
+          r = r - m * 60;
+          mess= mess+"Tps Filtration: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+          mess= mess+ "Conso Ppe:"+ String(id(conso_elec_jour).state)+" kW"+"\n";
+          // Affichage du temps de fonctionnement Ppe pH
+          s = (id(_temps_fonctionnement_ppe_ph).state);
+          // Calcul des heures - minutes
+          h = s / 3600;
+          r = s - h * 3600;
+          m = r / 60;
+          r = r - m * 60;          
+          mess= mess+"Tps Ppe pH: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+          // Affichage du temps de fonctionnement Ppe Chlore
+          s = (id(_temps_fonctionnement_ppe_chlore).state);
+          // Calcul des heures - minutes
+          h = s / 3600;
+          r = s - h * 3600;
+          m = r / 60;
+          r = r - m * 60;          
+          mess= mess+"Tps Ppe Chlore: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+          id(_message_telegram)->execute(mess.c_str()); 
 
   # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire de la temperature eau qui est
   # prise en compte dans les scripts.
@@ -1232,7 +1283,7 @@ script:
                 args: [ 'id(ph_ezo).state']
                 level: INFO            
             - lambda: |-            
-                id(g_memoire_ph)=0;
+                id(g_memoire_ph)=id(g_memoire_ph);
           else: 
             - logger.log:
                 format: "ph_EZO Valide: %.2f"
@@ -1584,14 +1635,17 @@ script:
             # Convertion et affichage de la durée d'injection pH en hh:mm
             - lambda: |-
                 static double dt=0;
-                dt = id(g_tps_injection_ph_moins)*60;
-                id(g_hh)=int(dt/60);
-                id(g_mm)=dt-id(g_hh)*60;
-
+                static int r=0;
+                id(g_ss) = id(g_tps_injection_ph_moins);
+                // Calcul des heures - minutes
+                id(g_hh) = id(g_ss) / 3600;
+                r = id(g_ss) - id(g_hh) * 3600;
+                id(g_mm) = r / 60;
+                id(g_ss) = r - id(g_mm) * 60;
             - datetime.time.set:
                 id: duree_injection_ph
                 time: !lambda |-
-                  return {second: 0, minute: id(g_mm), hour: id(g_hh)};
+                  return {second: id(g_ss), minute: id(g_mm), hour: id(g_hh)};
 
             - logger.log:
                 format: "Log tps injection: %f"
@@ -1656,7 +1710,46 @@ script:
             - logger.log: 
                 format: "Arret ppe Ph moins"
                 level: INFO
+  # Stoppe le Script de regule pH quand la mesure devient supérieure à la consigne
+  # Cela évite de trop injecter de pH Moins
+  - id: _securisation_regul_ph
+    mode: single
+    then:
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
+            - lambda: 'return id(g_memoire_ph) < id(_ph_cible).state;'
+            - script.is_running: _regul_ph
 
+          then:
+            - logger.log:
+                format: "Log mem ph: %f / pH Cible: %f"
+                args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
+                level: debug      
+            - script.stop: _regul_ph                
+            - switch.turn_off: cde_ppe_ph_moins
+            - lambda: |-
+                static String mess; 
+                static float Q;
+                Q = id(_temps_fonctionnement_ppe_ph).state*id(_debit_ppe_moins).state/3600;
+                mess= "ESP178 Arret Script Injection pH";
+                mess= mess+"\n";
+                mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
+                mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
+
+                static int h,m,r,s=0;
+                // Affichage du temps de fonctionnement Ppe pH
+                s = (id(_temps_fonctionnement_ppe_ph).state);
+                // Calcul des heures - minutes
+                h = s / 3600;
+                r = s - h * 3600;
+                m = r / 60;
+                r = r - m * 60;          
+                mess= mess+"Tps Ppe pH: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+                mess= mess + "Volume inj:"+ String(Q)+" L"+"\n";
+                id(_message_telegram)->execute(mess.c_str());
+                
+                 
 # Regulation du chlore
 # Calcul du temps d'injection en fonction:
 # caracteristiques du Chlore 9.6°:

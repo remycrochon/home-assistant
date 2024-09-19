@@ -1669,17 +1669,18 @@
   description: ''
   trigger:
   - platform: numeric_state
-    entity_id: sensor.pc_lidl_2023_a_active_power
+    entity_id:
+    - sensor.pc_lidl_2023_c_active_power
     above: 20
   condition:
   - condition: time
     after: '23:00:00'
     before: 07:00:00
   action:
-  - service: notify.telegram
-    data:
+  - data:
       message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
         }}
+    action: notify.telegram
   mode: single
 - id: '1686145474191'
   alias: 02-01-17 Al Bp Def Com FREE
@@ -2639,23 +2640,12 @@
       entity_id: sensor.am435x_awd_error
       state: unavailable
   action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - error
-      sequence:
-      - data:
-          message: '{{states("sensor.date_time") }}{{-"\n"-}} Erreur= {{states(''sensor.am435x_awd_error'')}}'
-          title: Robot AMX435X En difficulté
-        action: notify.telegram
-      - data:
-          message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
-            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
-            mm {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Robot- Fin Alerte Meteo Pluie !!!
-        action: notify.telegram
-        enabled: false
+  - data:
+      message: "{{states(\"sensor.date_time\")}} {% set er=states('sensor.am435x_awd_error')%}
+        {% if er==\"no_error\" %}\n  Pas de Probleme\n{%- else -%}\n  Probleme={{er}}\n{%-
+        endif%}  "
+      title: Robot-Début Alerte Meteo Pluie !!!
+    action: notify.telegram
   mode: single
   trace:
     stored_traces: 10
@@ -2663,86 +2653,49 @@
   alias: Recopie Etat HA vers NR MP2
   description: Lien entre HA et le nodered du MP2
   trigger:
+  - platform: time_pattern
+    minutes: /1
+    id: mn
   - platform: state
     entity_id:
     - input_boolean.mp2_valid_ess_charge_prog_1
-    id: validcp
-    enabled: true
-  - platform: state
-    entity_id:
     - input_boolean.forcage_charge_pgm_mp2_100
-    id: forcage_cp
-    enabled: true
-  - platform: state
-    entity_id:
     - input_number.mp2_niveau_forcage_cp1
-    id: niveau_forcage_cp1
-  - platform: state
-    entity_id:
     - sensor.linky_ptec
-    id: hp-hc
-  - platform: homeassistant
-    event: start
-    id: demarrage_ha
   condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - validcp
-        - demarrage_ha
-      sequence:
-      - action: mqtt.publish
-        metadata: {}
-        data:
-          evaluate_payload: false
-          qos: '0'
-          retain: false
-          topic: ha/mp2/cp/validcp
-          payload: '"{{ states(''input_boolean.mp2_valid_ess_charge_prog_1'') }}"'
-    - conditions:
-      - condition: trigger
-        id:
-        - forcage_cp
-        - demarrage_ha
-      sequence:
-      - action: mqtt.publish
-        metadata: {}
-        data:
-          evaluate_payload: false
-          qos: '0'
-          retain: false
-          topic: ha/mp2/cp/forcage100
-          payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp2_100'') }}"'
-    - conditions:
-      - condition: trigger
-        id:
-        - niveau_forcage_cp1
-        - demarrage_ha
-      sequence:
-      - action: mqtt.publish
-        metadata: {}
-        data:
-          evaluate_payload: false
-          qos: '0'
-          retain: false
-          topic: ha/mp2/cp/niveauforcagecp1
-          payload: '"{{ states(''input_number.mp2_niveau_forcage_cp1'') }}"'
-    - conditions:
-      - condition: trigger
-        id:
-        - hp-hc
-        - demarrage_ha
-      sequence:
-      - action: mqtt.publish
-        metadata: {}
-        data:
-          evaluate_payload: false
-          qos: '0'
-          retain: false
-          topic: ha/mp2/cp/hc
-          payload: '"{{ states(''sensor.linky_ptec'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/validcp
+      payload: '"{{ states(''input_boolean.mp2_valid_ess_charge_prog_1'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/forcage100
+      payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp2_100'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/niveauforcagecp1
+      payload: '"{{ states(''input_number.mp2_niveau_forcage_cp1'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/hc
+      payload: '"{{ states(''sensor.linky_ptec'') }}"'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet

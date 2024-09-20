@@ -2639,6 +2639,7 @@
     - condition: state
       entity_id: sensor.am435x_awd_error
       state: unavailable
+    enabled: false
   action:
   - data:
       message: "{{states(\"sensor.date_time\")}} {% set er=states('sensor.am435x_awd_error')%}

@@ -6,12 +6,10 @@ substitutions:
 
 esphome:
   name: "esp129-esp32-pesage-ph-moins"
+  platform: ESP8266
+  board: d1_mini
 
-esp32:
-  board: esp32-c3-devkitm-1
-  framework:
-    type: arduino
-    
+#  board: esp32-c3-devkitm-1    
     
 # Enable Home Assistant API
 api:
@@ -43,8 +41,8 @@ sensor:
 
   - platform: hx711
     name: "${friendly_name} poids ph moins"
-    dout_pin: 0 # DT
-    clk_pin: 1 # SCK
+    dout_pin: D0 # DT
+    clk_pin: D1 # SCK
     gain: 128
     update_interval: 10s
     accuracy_decimals: 1

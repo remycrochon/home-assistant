@@ -51,7 +51,7 @@ openhasp:
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('time.esp178_duree_filtration')}} h" 
+          "text": "{{ states('time.esp178_duree_filtration')}}" 
 
       - obj: "p1b148"
         properties:
@@ -88,7 +88,7 @@ openhasp:
                   {% endif -%}
       - obj: "p1b223"
         properties:
-          "text": "{{ states('sensor.esp178_pression_filtre') }} bars"              
+          "text": "{{ states('sensor.esp178_pression_filtre') }} b"              
       - obj: "p1b226"
         properties:
           "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
@@ -170,7 +170,7 @@ openhasp:
       - obj: "p2b151"
         event:
           "up":
-            - service: input_number.decrement
+            - service: number.decrement
               target:
                 entity_id: number.esp178_coeff_filtration
 
@@ -181,62 +181,105 @@ openhasp:
       - obj: "p2b153"
         event:
           "up":
-            - service: input_number.increment
+            - service: number.increment
               target:
                 entity_id: number.esp178_coeff_filtration
 
                 # Page 3
-      - obj: "p3b121"
+      - obj: "p3b102"                  
         properties:
-          "val": '{{ 1 if states("automation.piscine_hors_gel_actions") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("automation.piscine_hors_gel_actions", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('automation.piscine_hors_gel_actions', 'on') else '#ff0000' }}"
+          "val": >
+            {% set st = states('select.esp178_mode_fonctionnement_regul_ph')%}
+            {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
+            {% if st == text %}
+              {{ num }}
+            {%endif%}
+            {% endfor %}
         event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "automation.piscine_hors_gel_actions"
+          "changed":
+            - service: select.select_option
+              target:
+                entity_id: select.esp178_mode_fonctionnement_regul_ph
+              data:
+                option: >
+                  {% if text == "Auto" -%}
+                  Auto
+                  {% elif text == 'Ma_f' -%}
+                  Ma_f
+                  {% elif text == 'At_f' -%}
+                  At_f
+                  {% endif -%}
 
-
-      - obj: "p3b122"  
+      - obj: "p3b112"                  
         properties:
-          "val": '{{ 1 if states("automation.piscine_ev_appoint_eau") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("automation.piscine_ev_appoint_eau", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('automation.piscine_ev_appoint_eau', 'on') else '#ff0000' }}"          
+          "val": >
+            {% set st = states('select.esp178_mode_fonct_regul_chlore')%}
+            {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
+            {% if st == text %}
+              {{ num }}
+            {%endif%}
+            {% endfor %}
         event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "automation.piscine_ev_appoint_eau"   
+          "changed":
+            - service: select.select_option
+              target:
+                entity_id: select.esp178_mode_fonct_regul_chlore
+              data:
+                option: >
+                  {% if text == "Auto" -%}
+                  Auto
+                  {% elif text == 'Ma_f' -%}
+                  Ma_f
+                  {% elif text == 'At_f' -%}
+                  At_f
+                  {% endif -%}
 
-      - obj: "p3b123"  
+      - obj: "p3b122"                  
         properties:
-          "val": '{{ 1 if states("automation.piscine_traitement_ph") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("automation.piscine_traitement_ph", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('automation.piscine_traitement_ph', 'on') else '#ff0000' }}" 
+          "val": >
+            {% set st = states('select.esp178_mode_fonct_appoint_eau')%}
+            {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
+            {% if st == text %}
+              {{ num }}
+            {%endif%}
+            {% endfor %}
         event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "automation.piscine_traitement_ph"
+          "changed":
+            - service: select.select_option
+              target:
+                entity_id: select.esp178_mode_fonct_appoint_eau
+              data:
+                option: >
+                  {% if text == "Auto" -%}
+                  Auto
+                  {% elif text == 'Ma_f' -%}
+                  Ma_f
+                  {% elif text == 'At_f' -%}
+                  At_f
+                  {% endif -%}
 
-      - obj: "p3b129"  
+      - obj: "p3b132"                  
         properties:
-          "val": '{{ 1 if states("input_boolean.hors_gel_valid") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("input_boolean.hors_gel_valid", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('input_boolean.hors_gel_valid', 'on') else '#ff0000' }}"          
+          "val": >
+            {% set st = states('select.esp178_mode_hors_gel')%}
+            {% for text,num in [('Desactivé',0),('Activé',1) ] %}
+            {% if st == text %}
+              {{ num }}
+            {%endif%}
+            {% endfor %}
         event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "input_boolean.hors_gel_valid"   
-
-      - obj: "p3b131"  
-        properties:
-          "val": '{{ 1 if states("input_boolean.ev_eau_piscine") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("input_boolean.ev_eau_piscine", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('input_boolean.ev_eau_piscine', 'on') else '#ff0000' }}"
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "input_boolean.ev_eau_piscine"   
-
+          "changed":
+            - service: select.select_option
+              target:
+                entity_id: select.esp178_mode_hors_gel
+              data:
+                option: >
+                  {% if text == "Desactivé" -%}
+                  Auto
+                  {% elif text == 'Activé' -%}
+                  Activé
+                  {% endif -%}
+                  
       - obj: "p3b134"  
         properties:
           "text": "{{'%.0f' | format (states('input_number.temps_cartouche_chlore') | round(0)) }}h"

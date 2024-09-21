@@ -38,7 +38,7 @@ openhasp:
       - obj: "p1b138"  
         properties:
           "val": '{{ 1 if states("cover.esp178_volet_piscine") == "on" else 0 }}'
-          "text": '{{ "\uF11E" if is_state("cover.esp178_volet_piscinee", "open") else "\uF11C" | e }}'
+          "text": '{{ "\uF11E" if is_state("cover.esp178_volet_piscine", "open") else "\uF11C" | e }}'
           "text_color": "{{ '#ff0000' if is_state('cover.esp178_volet_piscine', 'open') else '#00ff00' }}" 
         event:
           "up":
@@ -86,9 +86,12 @@ openhasp:
                   {% elif text == 'At_f' -%}
                   At_f
                   {% endif -%}
-      - obj: "p1b223"
+      - obj: "p1b222"
         properties:
-          "text": "{{ states('sensor.esp178_pression_filtre') }} b"              
+          "text": "{{ states('sensor.esp178_pression_filtre') }} b"       
+      - obj: "p1b224"
+        properties:
+          "text": "{{ states('sensor.esp178_orp_ezo') }} ms"                      
       - obj: "p1b226"
         properties:
           "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
@@ -151,7 +154,7 @@ openhasp:
         properties:
           "val": '{{ 1 if states("switch.esp178_cde_eclairage") == "on" else 0 }}'
           "text": '{{ "\uE12C" if is_state("switch.esp178_cde_eclairage", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.cesp178_cde_eclairage', 'on') else '#ff0000' }}"          
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_eclairage', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
@@ -280,15 +283,13 @@ openhasp:
                   Activé
                   {% endif -%}
                   
-      - obj: "p3b134"  
+      - obj: "p3b151"  
         properties:
-          "text": "{{'%.0f' | format (states('input_number.temps_cartouche_chlore') | round(0)) }}h"
+          "text": "{{'%.0f' | format (states('sensor.esp178_temps_galet_chlore') | round(0)) }}h"
         event:
           "up":
-            - service: input_number.set_value
-              data:
-                value: 0
+            - service: button.press
               target:
-                entity_id: input_number.temps_cartouche_chlore
+                entity_id: button.esp178_bp_raz_tps_galet_chlore
 
 

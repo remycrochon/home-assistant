@@ -46,8 +46,8 @@
       repack: true
   mode: single
 - id: '1617185147880'
-  alias: 3_4_2 Piscine-Notification Alarme Appoint d'eau
-  description: ''
+  alias: Piscine-Surveillance et Alarme Appoint d'eau
+  description: Ferme la vanne d'eau si ouverte depuis 1 heure
   trigger:
   - platform: state
     entity_id:
@@ -2580,8 +2580,8 @@
     action: switch.turn_off
   mode: single
 - id: '1725460687135'
-  alias: Notif Telegram ESP178
-  description: ' '
+  alias: Notification message Telegram de ESP178
+  description: ' Notifie sur Telegram le message mis à jour par l''ESP178 Piscine'
   trigger:
   - platform: state
     entity_id:

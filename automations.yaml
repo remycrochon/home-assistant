@@ -2655,8 +2655,8 @@
   description: Lien entre HA et le nodered du MP2
   trigger:
   - platform: time_pattern
-    minutes: /1
     id: mn
+    hours: /1
   - platform: state
     entity_id:
     - input_boolean.mp2_valid_ess_charge_prog_1

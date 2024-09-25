@@ -2738,3 +2738,37 @@
       title: Recap Journalier Consommation Elec
     action: notify.telegram
   mode: single
+- id: '1727193343831'
+  alias: Nouvelle automatisation
+  description: ''
+  trigger:
+  - platform: mqtt
+    topic: ha/nrpve/
+    payload: 'true'
+    id: ma
+  - platform: mqtt
+    topic: ha/nrpve/
+    payload: 'false'
+    id: at
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - ma
+      sequence:
+      - type: turn_on
+        device_id: 9975bf8e5a4c6ab6d23cb5934c972ecc
+        entity_id: e2ad4dd004c939fbba02a2aa31a7967c
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id:
+        - at
+      sequence:
+      - type: turn_off
+        device_id: 9975bf8e5a4c6ab6d23cb5934c972ecc
+        entity_id: e2ad4dd004c939fbba02a2aa31a7967c
+        domain: switch
+  mode: single

@@ -56,7 +56,7 @@ sensor:
       - calibrate_linear:
           - -262000 -> 0
           - 174400 -> 15.5
-      - offset: -1.4
+      #- offset: -1.4
     unit_of_measurement: kg
 
 switch:

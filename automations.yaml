@@ -1760,25 +1760,36 @@
   trigger:
   - platform: time
     at: '22:05:00'
+    id: '22:05'
+  - platform: time
+    at: 03:48:00
+    id: 3h48
   condition: []
   action:
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} Prévi Prod PV du Jour={{states(''input_number.mp2_memoire_estimation_production_jour'')}}
-        kwh{{-"\n"-}} Prod PV du Jour={{states(''sensor.mp2_total_energie_produite_jour'')}}
-        kwh{{-"\n"-}} Prévi Prod PV Demain={{states(''sensor.mp2_prod_vrm_total_mqtt'')}}
-        kwh{{-"\n"-}} SOC Actuel={{states(''sensor.mp2_soc_mqtt'')}} %{{-"\n"-}} SOC
-        Cible= {{states(''sensor.mp2_cible_soc_par_mqtt'')}} %{{-"\n"-}}'
-      title: Prévision production PV
-    action: notify.telegram
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - data_template:
-      entity_id: input_number.mp2_memoire_estimation_production_jour
-      value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a }}'
-    action: input_number.set_value
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 3h48
+      sequence:
+      - data_template:
+          entity_id: input_number.mp2_memoire_estimation_production_jour
+          value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a
+            }}'
+        action: input_number.set_value
+    - conditions:
+      - condition: trigger
+        id:
+        - '22:05'
+      sequence:
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}} Prévi Prod PV du Jour={{states(''input_number.mp2_memoire_estimation_production_jour'')}}
+            kwh{{-"\n"-}} Prod PV du Jour={{states(''sensor.mp2_total_energie_produite_jour'')}}
+            kwh{{-"\n"-}} Prévi Prod PV Demain={{states(''sensor.mp2_prod_vrm_total_mqtt'')}}
+            kwh{{-"\n"-}} SOC Actuel={{states(''sensor.mp2_soc_mqtt'')}} %{{-"\n"-}}
+            SOC Cible= {{states(''sensor.mp2_cible_soc_par_mqtt'')}} %{{-"\n"-}}'
+          title: Prévision production PV
+        action: notify.telegram
   mode: single
 - id: '1698053985865'
   alias: 10-01-00 Spot Ext Cuisine detecteur porte

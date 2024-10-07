@@ -2796,3 +2796,21 @@
         entity_id: e2ad4dd004c939fbba02a2aa31a7967c
         domain: switch
   mode: single
+- id: '1728311341373'
+  alias: 'Notification: anniversaire à souhaiter'
+  description: Rappel anniversaire
+  trigger:
+  - platform: calendar
+    event: start
+    offset: '7:0:0'
+    entity_id: calendar.anniversaires
+  condition:
+  - condition: state
+    entity_id: calendar.anniversaires
+    state: 'on'
+    attribute: message
+  action:
+  - data:
+      message: Il y a l'anniversaire de {{ states.calendar.anniversaires.attributes.message
+        }} a souhaiter aujourd'hui
+    action: notify.telegram

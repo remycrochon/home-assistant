@@ -1792,7 +1792,7 @@
         action: notify.telegram
   mode: single
 - id: '1698053985865'
-  alias: 10-01-00 Spot Ext Cuisine detecteur porte
+  alias: 10-01-00 Spot Ext Cui old
   description: ''
   trigger:
   - type: opened
@@ -2808,7 +2808,6 @@
   - condition: state
     entity_id: calendar.anniversaires
     state: 'on'
-    attribute: message
   action:
   - data:
       message: Il y a l'anniversaire de {{ states.calendar.anniversaires.attributes.message

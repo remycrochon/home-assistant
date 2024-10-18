@@ -2813,3 +2813,30 @@
       message: Il y a l'anniversaire de {{ states.calendar.anniversaires.attributes.message
         }} a souhaiter aujourd'hui
     action: notify.telegram
+- id: '1729177635873'
+  alias: Defaut Secteur
+  description: Surveille la tension d'entrée du MP2
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.mp2_tension_entree_l1
+    below: 50
+    id: perte_secteur
+  conditions: []
+  actions:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
+        V'
+      title: Defaut Secteur MP2
+    action: notify.telegram
+  - wait_for_trigger:
+    - trigger: numeric_state
+      entity_id:
+      - sensor.mp2_tension_entree_l1
+      above: 200
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
+        V'
+      title: Retour Secteur MP2
+    action: notify.telegram
+  mode: single

@@ -2376,25 +2376,26 @@
 - id: '1711609776550'
   alias: 10-01-00 Spot Ext Cuisine detecteur exterieur
   description: ''
-  trigger:
+  triggers:
   - type: motion
-    platform: device
     device_id: f63a7a8078a6c8ad8bff217525241849
     entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
     domain: binary_sensor
+    trigger: device
   - type: opened
-    platform: device
     device_id: 193f4cea2f12db0ab1a4d044df803df3
     entity_id: b182f27a8204167b3f3b1893ec2d2196
     domain: binary_sensor
-  condition:
+    trigger: device
+    enabled: false
+  conditions:
   - condition: sun
     before: sunrise
     after: sunset
   - condition: numeric_state
     entity_id: sensor.bh1750_illuminance
     below: 10
-  action:
+  actions:
   - type: turn_on
     device_id: c7b28db8c025b2f0bd975382bc4011f0
     entity_id: 6cf8b08e53c983c0c298cedd8a864449

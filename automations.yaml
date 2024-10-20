@@ -2382,12 +2382,13 @@
     entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
     domain: binary_sensor
     trigger: device
+    enabled: false
   - type: opened
     device_id: 193f4cea2f12db0ab1a4d044df803df3
     entity_id: b182f27a8204167b3f3b1893ec2d2196
     domain: binary_sensor
     trigger: device
-    enabled: false
+    enabled: true
   conditions:
   - condition: sun
     before: sunrise

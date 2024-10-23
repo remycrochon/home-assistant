@@ -103,7 +103,18 @@ sensor:
     update_interval: 10s
     automatic_baseline_calibration: false    
      
- 
+  - platform: adc #If you don't have or want Carbon Monoxide, Delete (platform: adc and below that)
+    pin: A0
+    id: carbon_monoxide
+    name: "${friendly_name} Monoxide Carbon"
+    icon: mdi:molecule-co
+    update_interval: 30s
+    unit_of_measurement: "ppm"
+    device_class: "carbon_monoxide"
+    state_class: "measurement"
+    filters:
+        - lambda: return (x * 1024/5);
+
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal Sensor"
     update_interval: 60s

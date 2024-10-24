@@ -18,6 +18,10 @@ if (
   customElements.define("ha-switch", customElements.get("paper-toggle-button"));
 }
 
+if (!customElements.get("ha-entity-picker")) {
+  (customElements.get("hui-entities-card")).getConfigElement();
+}
+
 const LitElement = customElements.get("hui-masonry-view")
   ? Object.getPrototypeOf(customElements.get("hui-masonry-view"))
   : Object.getPrototypeOf(customElements.get("hui-view"));
@@ -27,6 +31,7 @@ const css = LitElement.prototype.css;
 const HELPERS = window.loadCardHelpers();
 
 const DefaultSensors = new Map([
+  ["detailEntity", "_rain_chance"],
   ["cloudCoverEntity", "_cloud_cover"],
   ["rainChanceEntity", "_rain_chance"],
   ["freezeChanceEntity", "_freeze_chance"],
@@ -38,6 +43,12 @@ const DefaultSensors = new Map([
 export class MeteofranceWeatherCardEditor extends LitElement {
   setConfig(config) {
     this._config = { ...config };
+
+    // Set default sub-entities at first Init (when there are only "entity" & "type" in config)
+    if (Object.keys(config).length === 2 && config.entity !== undefined) {
+      this._weatherEntityChanged(config.entity.split(".")[1]);
+      fireEvent(this, "config-changed", { config: this._config });
+    }
   }
 
   static get properties() {
@@ -64,12 +75,20 @@ export class MeteofranceWeatherCardEditor extends LitElement {
     return this._config.details !== false;
   }
 
-  get _forecast() {
-    return this._config.forecast !== false;
+  get _daily_forecast() {
+    return this._config.daily_forecast !== false;
   }
 
-  get _number_of_forecasts() {
-    return this._config.number_of_forecasts || 5;
+  get _number_of_daily_forecasts() {
+    return this._config.number_of_daily_forecasts || 5;
+  }
+
+  get _hourly_forecast() {
+    return this._config.hourly_forecast !== false;
+  }
+
+  get _number_of_hourly_forecasts() {
+    return this._config.number_of_hourly_forecasts || 5;
   }
 
   // Météo France
@@ -86,7 +105,14 @@ export class MeteofranceWeatherCardEditor extends LitElement {
     return this._config.animated_icons !== false;
   }
 
-  // Config value
+  get _wind_forecast_icons() {
+    return this._config.wind_forecast_icons !== false;
+  }
+  
+  get _humidity_forecast() {
+    return this._config.humidity_forecast !== false;
+  }  
+
   get _alertEntity() {
     return this._config.alertEntity || "";
   }
@@ -135,60 +161,57 @@ export class MeteofranceWeatherCardEditor extends LitElement {
     return html`
       <div class="card-config">
         <div>
-          <paper-input
-            label="Name"
-            .value="${this._name}"
-            .configValue="${"name"}"
-            @value-changed="${this._valueChanged}"
-          ></paper-input>
+          <!-- Primary weather entity -->
+          ${this.renderWeatherPicker("Entité", this._entity, "entity")}
+          ${this.renderTextField("Nom", this._name, "name")}
           ${this.renderSensorPicker(
             "Détail",
             this._detailEntity,
             "detailEntity"
           )}
-          <paper-input
-            label="Icons location"
-            .value="${this._icons}"
-            .configValue="${"icons"}"
-            @value-changed="${this._valueChanged}"
-          ></paper-input>
-          <!-- Primary weather entity -->
-          ${this.renderWeatherPicker("Entity", this._entity, "entity")}
           <!-- Switches -->
           <ul class="switches">
-            ${this.renderSwitchOption("Show current", this._current, "current")}
-            ${this.renderSwitchOption("Show details", this._details, "details")}
+            ${this.renderSwitchOption("Météo actuelle", this._current, "current")}
+            ${this.renderSwitchOption("Détails", this._details, "details")}
             ${this.renderSwitchOption(
-              "Show one hour forecast",
-              this._one_hour_forecast,
-              "one_hour_forecast"
-            )}
-            ${this.renderSwitchOption(
-              "Show alert",
+              "Alertes",
               this._alert_forecast,
               "alert_forecast"
             )}
             ${this.renderSwitchOption(
-              "Show forecast",
-              this._forecast,
-              "forecast"
+              "Pluie dans l'heure",
+              this._one_hour_forecast,
+              "one_hour_forecast"
             )}
             ${this.renderSwitchOption(
-              "Use animated icons",
+              "Prévisions par heure",
+              this._hourly_forecast,
+              "hourly_forecast"
+            )}
+            ${this.renderSwitchOption(
+              "Prévisions par jour",
+              this._daily_forecast,
+              "daily_forecast"
+            )}
+            ${this.renderSwitchOption(
+              "Humidité",
+              this._humidity_forecast,
+              "humidity_forecast"
+            )}
+            ${this.renderSwitchOption(
+              "Girouette",
+              this._wind_forecast_icons,
+              "wind_forecast_icons"
+            )}
+            ${this.renderSwitchOption(
+              "Icones animées",
               this._animated_icons,
               "animated_icons"
-            )}
+            )}				
           </ul>
           <!-- -->
-          <paper-input
-            label="Number of future forcasts"
-            type="number"
-            min="1"
-            max="8"
-            value=${this._number_of_forecasts}
-            .configValue="${"number_of_forecasts"}"
-            @value-changed="${this._valueChanged}"
-          ></paper-input>
+          ${this.renderNumberField("Nombres d'heures", this._number_of_hourly_forecasts, "number_of_hourly_forecasts")}
+          ${this.renderNumberField("Nombres de jours", this._number_of_daily_forecasts, "number_of_daily_forecasts")}
           <!-- Meteo France weather entities -->
           ${this.renderSensorPicker(
             "Risque de pluie",
@@ -221,8 +244,29 @@ export class MeteofranceWeatherCardEditor extends LitElement {
             this._rainForecastEntity,
             "rainForecastEntity"
           )}
+          ${this.renderTextField("Répertoire des icones", this._icons, "icons")}
         </div>
       </div>
+    `;
+  }
+
+  renderTextField(label, state, configAttr) {
+    return this.renderField(label, state, configAttr, "text");
+  }
+
+  renderNumberField(label, state, configAttr) {
+    return this.renderField(label, state, configAttr, "number");
+  }
+
+  renderField(label, state, configAttr, type) {
+    return html`
+      <ha-textfield
+        label="${label}"
+        .value="${state}"
+        type="${type}"
+        .configValue=${configAttr}
+        @input=${this._valueChanged}
+      ></ha-textfield>
     `;
   }
 
@@ -262,14 +306,42 @@ export class MeteofranceWeatherCardEditor extends LitElement {
     `;
   }
 
-  _weatherEntityChanged(entityName) {
+  _weatherEntityChanged(weatherEntityName) {
+    const weatherEntityNameFull = "weather." + weatherEntityName;
+    const state = this.hass.states[weatherEntityNameFull];
+    if (state !== undefined) {
+      // Set default Name
+      const friendly_name = state.attributes.friendly_name;
+      this._config = {
+        ...this._config,
+        ["name"]: friendly_name ? friendly_name : "",
+      };
+
+      // Set default Alert sensor
+      // Find Alert Sensor related to its parent device
+      const entity = this.hass.entities[weatherEntityNameFull];
+      const parent_device_id = entity.device_id;
+      Object.keys(this.hass.entities).forEach(entityName => {
+        const entity = this.hass.entities[entityName];
+        if (entity !== undefined && entity.device_id === parent_device_id && entityName.split(".")[1].includes("_weather_alert")) {
+          this._config = {
+            ...this._config,
+            ["alertEntity"]: entityName,
+          };
+          return;
+        }
+      });
+    };
+
+    // Set default Sensors
     DefaultSensors.forEach((sensorSuffix, configAttribute) => {
-      const entity = "sensor." + entityName + sensorSuffix;
-      if (this.hass.states[entity] !== undefined)
+      const entity = "sensor." + weatherEntityName + sensorSuffix;
+      if (this.hass.states[entity] !== undefined) {
         this._config = {
           ...this._config,
           [configAttribute]: entity,
         };
+      };
     });
   }
 

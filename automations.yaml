@@ -1929,15 +1929,15 @@
 - id: '1699429641790'
   alias: 00-00-02 Backup total HA 1:00 du matin
   description: ''
-  trigger:
-  - platform: time
-    at: 02:00:00
-  condition: []
-  action:
-  - service: hassio.backup_full
-    data:
+  triggers:
+  - at: 02:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
       compressed: true
-      location: nas_free
+      location: truenas
+    action: hassio.backup_full
   mode: single
 - id: '1700469604629'
   alias: 06-01-01 Energie Asservissements Tarifs Tempos

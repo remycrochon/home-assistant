@@ -2423,15 +2423,18 @@
 - id: '1722434877942'
   alias: Camera Activation-Désactivation detection
   description: Activation detection entre 5:30 et 23:30
-  trigger:
-  - platform: time
-    at: 05:30:00
+  triggers:
+  - at: 05:30:00
     id: fin
-  - platform: time
-    at: '23:30:00'
+    trigger: time
+  - at: '23:30:00'
     id: debut
-  condition: []
-  action:
+    trigger: time
+  - trigger: homeassistant
+    event: start
+    id: ha
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -2462,6 +2465,7 @@
       - condition: trigger
         id:
         - fin
+        - ha
       sequence:
       - data:
           message: Désactivation Détection video surveillance

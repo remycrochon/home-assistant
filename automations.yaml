@@ -2825,15 +2825,15 @@
   triggers:
   - trigger: numeric_state
     entity_id:
-    - sensor.mp2_tension_entree_l1
+    - sensor.linky_umoy
     below: 50
     id: perte_secteur
   conditions: []
   actions:
   - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
         V'
-      title: Defaut Secteur MP2
+      title: Defaut Secteur U Linky
     action: notify.telegram
   - wait_for_trigger:
     - trigger: numeric_state
@@ -2841,8 +2841,8 @@
       - sensor.mp2_tension_entree_l1
       above: 200
   - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
         V'
-      title: Retour Secteur MP2
+      title: Retour Secteur U Linky
     action: notify.telegram
   mode: single

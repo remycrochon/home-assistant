@@ -1125,7 +1125,7 @@ class TrueNASCoordinator(DataUpdateCoordinator[None]):
 
         self.ds["app"] = parse_api(
             data=self.ds["app"],
-            source=self.api.query("chart/release"),
+            source=self.api.query("app"),
             key="id",
             vals=[
                 {"name": "id", "default": 0},
@@ -1142,4 +1142,4 @@ class TrueNASCoordinator(DataUpdateCoordinator[None]):
         )
 
         for uid, vals in self.ds["app"].items():
-            self.ds["app"][uid]["running"] = vals["status"] == "ACTIVE"
+            self.ds["app"][uid]["running"] = vals["state"] == "RUNNING"

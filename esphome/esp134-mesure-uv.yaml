@@ -23,6 +23,7 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+    dns1: 192.168.0.254
 
 # Enable logging
 logger:

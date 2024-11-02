@@ -75,8 +75,8 @@ DEVICE_ATTRIBUTES_SERVICE = [
 DEVICE_ATTRIBUTES_APP = [
     "name",
     "version",
-    "human_version",
     "update_available",
+    "image_updates_available",
     "container_images_update_available",
     "portal",
 ]

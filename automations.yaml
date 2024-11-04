@@ -2846,3 +2846,81 @@
       title: Retour Secteur U Linky
     action: notify.telegram
   mode: single
+- id: '1730650651996'
+  alias: Comptage Energie maison tempo
+  description: Attribue le comptage d’énergie maison en fonction du tarif Tempo
+  triggers:
+  - entity_id:
+    - sensor.linky_n_tarif
+    trigger: state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.linky_n_tarif
+        state: '1'
+      sequence:
+      - data:
+          option: HC BLEU
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.linky_n_tarif
+        state: '2'
+      sequence:
+      - data:
+          option: HP BLEU
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.linky_n_tarif
+        state: '3'
+      sequence:
+      - data:
+          option: HC BLANC
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.linky_n_tarif
+        state: '4'
+      sequence:
+      - data:
+          option: HP BLANC
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.linky_n_tarif
+        state: '5'
+      sequence:
+      - data:
+          option: HC ROUGE
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.linky_n_tarif
+        state: '6'
+      sequence:
+      - data:
+          option: HP ROUGE
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    default: []
+  mode: single

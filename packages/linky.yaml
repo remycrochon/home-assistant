@@ -120,3 +120,65 @@ template:
       device_class: "monetary"
       state_class: "total"  
       unique_id: "cout_energie_hp_rouge_jour"
+
+# Calcul le cout de l'energie de la maison.
+# Permet de simuler ce que m'aurait couté l'energie si il n'y avait pas de PV+Batteries
+    - name: "Cout Energie HC Bleu Jour Maison"
+      state: >-
+        {% set en = states('sensor.compteur_energie_maison_tempo_hc_bleu') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_bleu_hc') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hc_bleu_jour_maison"
+
+    - name: "Cout Energie HP Bleu Jour Maison"
+      state: >-
+        {% set en = states('sensor.compteur_energie_maison_tempo_hp_bleu') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_bleu_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hp_bleu_jour_maison"
+
+    - name: "Cout Energie HC Blanc Jour Maison"
+      state: >-
+        {% set en = states('sensor.compteur_energie_maison_tempo_hc_blanc') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_blanc_hc') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hc_blanc_jour_maison"
+
+    - name: "Cout Energie HP Blanc Jour Maison"
+      state: >-
+        {% set en = states('sensor.compteur_energie_maison_tempo_hp_blanc') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_blanc_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hp_blanc_jour_maison"
+
+    - name: "Cout Energie HC Rouge Jour Maison"
+      state: >-
+        {% set en = states('sensor.compteur_energie_maison_tempo_hc_rouge') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_rouge_hc') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hc_rouge_jour_maison"
+
+    - name: "Cout Energie HP Rouge Jour Maison"
+      state: >-
+        {% set en = states('sensor.compteur_energie_maison_tempo_hp_rouge') | float(default=0) | round(2) %}
+        {% set ct = states('input_number.tarif_edf_tempo_rouge_hp') | float(default=0) | round(2) %}
+        {{(en*ct) | round(2) }}
+      unit_of_measurement: "€"
+      device_class: "monetary"
+      state_class: "total"  
+      unique_id: "cout_energie_hp_rouge_jour_maison"

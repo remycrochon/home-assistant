@@ -1142,4 +1142,4 @@ class TrueNASCoordinator(DataUpdateCoordinator[None]):
         )
 
         for uid, vals in self.ds["app"].items():
-            self.ds["app"][uid]["running"] = vals["state"] == "RUNNING"
+            self.ds["app"][uid]["running"] = vals["status"] == "RUNNING"

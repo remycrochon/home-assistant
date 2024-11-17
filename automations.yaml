@@ -997,52 +997,51 @@
 - id: '1638433932226'
   alias: 01-02-01 VMC Niv0 Automatismes
   description: ' '
-  trigger:
-  - platform: state
-    entity_id: input_select.vmc_niv0
+  triggers:
+  - entity_id: input_select.vmc_niv0
     id: mode
-  - platform: time
-    at: input_datetime.heure_vmc_niv0_ma
-  - platform: time
-    at: input_datetime.heure_vmc_niv0_at
-  - platform: numeric_state
-    entity_id: sensor.esp145_conc_particules_2_5um
+    trigger: state
+  - at: input_datetime.heure_vmc_niv0_ma
+    trigger: time
+  - at: input_datetime.heure_vmc_niv0_at
+    trigger: time
+  - entity_id: sensor.esp145_conc_particules_2_5um
     id: pm2.5sh
     above: input_number.seuil_haut_pm2_5
     for:
       hours: 0
       minutes: 10
       seconds: 0
-  - platform: numeric_state
-    entity_id: sensor.esp145_mh_z19_co2_value
+    trigger: numeric_state
+  - entity_id: sensor.esp145_mh_z19_co2_value
     id: co2sh
     above: input_number.seuil_haut_co2
     for:
       hours: 0
       minutes: 10
       seconds: 0
-  - platform: numeric_state
-    entity_id: sensor.esp145_conc_particules_2_5um
+    trigger: numeric_state
+  - entity_id: sensor.esp145_conc_particules_2_5um
     id: pm2.5sth
     above: input_number.seuil_tres_haut_pm2_5
     for:
       hours: 0
       minutes: 5
       seconds: 0
-  - platform: numeric_state
-    entity_id: sensor.esp145_mh_z19_co2_value
+    trigger: numeric_state
+  - entity_id: sensor.esp145_mh_z19_co2_value
     id: co2sth
     above: input_number.seuil_tres_haut_co2
     for:
       hours: 0
       minutes: 5
       seconds: 0
-  - platform: sun
-    event: sunrise
+    trigger: numeric_state
+  - event: sunrise
     offset: 0
     id: levee_soleil
-  - platform: template
-    value_template: '{% set temp=states(''sensor.vp2_temp_out'') | float(0) %}
+    trigger: sun
+  - value_template: '{% set temp=states(''sensor.vp2_temp_out'') | float(0) %}
 
       {% set saison=states(''sensor.season'') | default("") %}
 
@@ -1050,13 +1049,14 @@
 
       {% set soleil=states(''sun.sun'') | default("") %}
 
-      {{ (temp< 5) and (saison == "autumn" or saison=="winter") and (mode=="CO2 PM2.5")
+      {{ (temp< 0) and (saison == "autumn" or saison=="winter") and (mode=="CO2 PM2.5")
       and (soleil == ''below_horizon'')}}
 
       '
     id: temp_basse
-  condition: []
-  action:
+    trigger: template
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: state
@@ -1069,17 +1069,17 @@
             after: input_datetime.heure_vmc_niv0_ma
             before: input_datetime.heure_vmc_niv0_at
           sequence:
-          - service: switch.turn_on
-            target:
+          - target:
               entity_id:
               - switch.relais_cde_vmc_niv0_on_off
             data: {}
+            action: switch.turn_on
         default:
-        - service: switch.turn_off
-          target:
+        - target:
             entity_id:
             - switch.relais_cde_vmc_niv0_on_off
           data: {}
+          action: switch.turn_off
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
@@ -1091,15 +1091,15 @@
         - condition: trigger
           id: co2sh
       sequence:
-      - service: switch.turn_on
-        target:
+      - target:
           entity_id:
           - switch.relais_cde_vmc_niv0_on_off
         data: {}
-      - service: switch.turn_on
-        target:
+        action: switch.turn_on
+      - target:
           entity_id: switch.esp136_vit_2
         data: {}
+        action: switch.turn_on
       - delay:
           hours: 0
           minutes: 30
@@ -1116,24 +1116,24 @@
         - condition: trigger
           id: co2sth
       sequence:
-      - service: switch.turn_on
-        target:
+      - target:
           entity_id:
           - switch.relais_cde_vmc_niv0_on_off
         data: {}
-      - service: switch.turn_on
-        target:
+        action: switch.turn_on
+      - target:
           entity_id: switch.esp136_vit_3
         data: {}
+        action: switch.turn_on
       - delay:
           hours: 0
           minutes: 15
           seconds: 0
           milliseconds: 0
-      - service: switch.turn_on
-        target:
+      - target:
           entity_id: switch.esp136_vit_2
         data: {}
+        action: switch.turn_on
       - delay:
           hours: 0
           minutes: 30
@@ -1144,31 +1144,31 @@
         entity_id: input_select.vmc_niv0
         state: Arret
       sequence:
-      - service: switch.turn_off
-        target:
+      - target:
           entity_id:
           - switch.relais_cde_vmc_niv0_on_off
         data: {}
+        action: switch.turn_off
     - conditions:
       - condition: state
         entity_id: input_select.vmc_niv0
         state: Marche
       sequence:
-      - service: switch.turn_on
-        target:
+      - target:
           entity_id:
           - switch.relais_cde_vmc_niv0_on_off
         data: {}
+        action: switch.turn_on
     - conditions:
       - condition: trigger
         id:
         - temp_basse
       sequence:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - switch.relais_cde_vmc_niv0_on_off
+        action: switch.turn_off
     - conditions:
       - condition: trigger
         id:
@@ -1177,10 +1177,10 @@
         entity_id: input_select.vmc_niv0
         state: CO2 PM2.5
       sequence:
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.relais_cde_vmc_niv0_on_off
+        action: switch.turn_on
     default: []
   mode: single
   trace:

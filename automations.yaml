@@ -2924,3 +2924,17 @@
           - select.compteur_energie_maison_tempo
     default: []
   mode: single
+- id: '1731925188807'
+  alias: Nouvelle automatisation
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: /1
+  conditions: []
+  actions:
+  - action: notify.send_message
+    data:
+      message: ',{{ states(''sensor.mp2_pu_batteries_par_mqtt'') }}, {{ states(''sensor.mp2_soc_mqtt'')}}'
+    target:
+      entity_id: notify.file_energie2024
+  mode: single

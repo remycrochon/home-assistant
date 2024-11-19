@@ -23,7 +23,7 @@ logger:
     
 # log level for a custom component
     #custom_components.my_integration: debug
-    custom_components.pool_pump: debug
+    custom_components.poollab: warning
     
 # log level for the `aiohttp` Python package
     aiohttp: error

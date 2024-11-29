@@ -2348,16 +2348,18 @@
 - id: '1710317639852'
   alias: 06-02-01 MP2 Etat Mode de Fonctionnement
   description: Alarme Mode de fonctionnement MP2
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.mp2_mode_fonctionnement_par_mqtt
-  condition: []
-  action:
-  - data:
-      message: MP2-Mode de fonctionnement -> {{states("sensor.mp2_mode_fonctionnement_texte")
-        }}{{-"\n"-}}{{states("sensor.date_time") }}
-    action: notify.telegram
+    trigger: state
+  conditions: []
+  actions:
+  - action: notify.telegram
+    data:
+      message: '
+
+        {{states("sensor.date_time") }}{{-"\n"-}} MP2-Mode de fonctionnement ->{{states("sensor.mp2_mode_fonctionnement_texte")
+        }}'
   mode: single
 - id: '1711527591458'
   alias: Aqara Magic Cube

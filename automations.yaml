@@ -1940,45 +1940,41 @@
     action: hassio.backup_full
   mode: single
 - id: '1700469604629'
-  alias: 06-01-01 Energie Asservissements Tarifs Tempos
-  description: 'Si HP Rouge->Consigne Economique (15°)
-
-    Si HC->Consigne Confort (20°)
-
-    Si HP->Consigne Réduite (19°)'
-  trigger:
-  - platform: state
-    entity_id:
+  alias: 06-01-01 Energie Asservissements Tempos
+  description: ''
+  triggers:
+  - entity_id:
     - sensor.linky_n_tarif
     to: '1'
     id: HC Bleu
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.linky_n_tarif
     to: '2'
     id: HP Bleu
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.linky_n_tarif
     to: '3'
     id: HC Blanc
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.linky_n_tarif
     to: '4'
     id: HP Blanc
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.linky_n_tarif
     to: '6'
     id: hprouge
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.linky_n_tarif
     id: sortiehprouge
     from: '6'
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger

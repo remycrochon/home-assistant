@@ -2923,16 +2923,34 @@
     default: []
   mode: single
 - id: '1731925188807'
-  alias: Nouvelle automatisation
-  description: ''
+  alias: Enregistrement cout reseau maison
+  description: A 23:59
   triggers:
-  - trigger: time_pattern
-    hours: /1
+  - trigger: time
+    at: '23:59:00'
   conditions: []
   actions:
   - action: notify.send_message
     data:
-      message: ',{{ states(''sensor.mp2_pu_batteries_par_mqtt'') }}, {{ states(''sensor.mp2_soc_mqtt'')}}'
+      message: ',{{ states(''sensor.cout_energie_tous_tarifs_maison'') }}, {{ states(''sensor.cout_energie_tous_tarifs_reseau_jour'')}}'
     target:
       entity_id: notify.file_energie2024
+  mode: single
+- id: '1733215941844'
+  alias: Comptage Energie Reseau 6-22-6
+  description: Reset à 6 et 22h, permet de se caler au mode tempo
+  triggers:
+  - trigger: time
+    at: 06:00:00
+    id: '6'
+  - trigger: time
+    at: '22:00:00'
+    id: '22'
+  conditions: []
+  actions:
+  - action: utility_meter.reset
+    data: {}
+    target:
+      entity_id:
+      - sensor.consomation_energie_reseau_6_22_6
   mode: single

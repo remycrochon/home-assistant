@@ -869,7 +869,7 @@
       initial_delay: 60
       max_alerts: 100
 - id: '1634571983587'
-  alias: 02-01-11 Al Bp Notif Temp congelo haute
+  alias: Blueprint Alarme Notif Temp congelo haute
   description: '# Surveillance de la temperature du congelateur  '
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -878,25 +878,25 @@
       sensor_entity: binary_sensor.alarme_temp_congelo_haute
       alert_state: 'on'
       alert_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: T° Haute Congelo = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
-      - service: notify.telegram
-        data:
+        action: notify.telegram
+      - data:
           message: T° Haute Congelo = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
+        action: notify.telegram
       resolved_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Congelo !!!
-      - service: notify.telegram
-        data:
+        action: notify.telegram
+      - data:
           message: T° Congelo normale = {{states("sensor.temp_congelo_garage") }}°C
             {{-"\n"-}}{{states("sensor.date_time") }}
+        action: notify.telegram
       notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
@@ -904,7 +904,7 @@
       initial_delay: 300
       max_alerts: 100
 - id: '1634621594490'
-  alias: 02-01-14 Al Bp Notif Def Com VP2
+  alias: Blueprint Alarme Notification Def Com VP2
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -913,23 +913,19 @@
       sensor_entity: input_boolean.com_vp2
       alert_state: 'Off'
       alert_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: VP2 Off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
-      - service: switch.turn_on
-        data: {}
-        target:
-          entity_id: switch.rebootweeks
+        action: notify.telegram
       resolved_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: VP2 On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
+        action: notify.telegram
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 120
-      max_alerts: 25
+      max_alerts: 10
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634916685737'
@@ -1627,23 +1623,23 @@
       sensor_entity: binary_sensor.alarme_temp_chalet_basse
       alert_state: 'on'
       alert_action:
-      - service: notify.telegram
-        data:
-          message: T° Basse Chalet = {{states("sensor.pt100_0_chalet") }}°C {{-"\n"-}}{{states("sensor.date_time")
-            }}
-          title: Alarme Gel Chalet!!!
+      - data:
+          message: '{{states("sensor.date_time") }} {{-"\n"-}}T° Basse Chalet ={{states("sensor.esp174_temperature_air")
+            }}°C'
+          title: Alarme Temperature Basse Chalet!!!
+        action: notify.telegram
       resolved_action:
-      - service: notify.telegram
-        data:
-          message: T° Basse Chalet = {{states("sensor.pt100_0_chalet") }}°C {{-"\n"-}}{{states("sensor.date_time")
-            }}
-          title: Fin Alarme Gel chalet !!!
+      - data:
+          message: '{{states("sensor.date_time") }} {{-"\n"-}}T° Basse Chalet ={{states("sensor.esp174_temperature_air")
+            }}°C'
+          title: Fin Alarme Temperature Basse chalet !!!
+        action: notify.telegram
       notify_message: Alerte {{ entity_name }}Déclenché
       notify_device: 62cdce054a9d3448484b4df8e44cc499
-      repeat_delay: 300
+      repeat_delay: 1800
       resolved_message: Alerte {{ entity_name }} Résolu
       initial_delay: 300
-      max_alerts: 10
+      max_alerts: 5
 - id: '1671811895133'
   alias: 10-00-00 Spot Terrasse
   description: ''
@@ -2767,19 +2763,19 @@
     action: notify.telegram
   mode: single
 - id: '1727193343831'
-  alias: Nouvelle automatisation
+  alias: Reception MQTT
   description: ''
-  trigger:
-  - platform: mqtt
-    topic: ha/nrpve/
+  triggers:
+  - topic: ha/nrpve/
     payload: 'true'
     id: ma
-  - platform: mqtt
-    topic: ha/nrpve/
+    trigger: mqtt
+  - topic: ha/nrpve/
     payload: 'false'
     id: at
-  condition: []
-  action:
+    trigger: mqtt
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -2953,4 +2949,134 @@
     target:
       entity_id:
       - sensor.consomation_energie_reseau_6_22_6
+  mode: single
+- id: '1733389750506'
+  alias: Reboot Weewx 2024
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.reboot_weewx_2024
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: ha/weewx/reboot
+      payload: 'true'
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: ha/weewx/reboot
+      payload: 'false'
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.reboot_weewx_2024
+  mode: single
+- id: '1733419845821'
+  alias: Surveillance défaut com VP2 2024
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.vp2_datetime
+    enabled: false
+  - trigger: time_pattern
+    seconds: /10
+    enabled: true
+  conditions: []
+  actions:
+  - if:
+    - condition: template
+      value_template: "        {% set vp2 = states('sensor.vp2_datetime') | float(default=0)
+        %}\n        {% set mvp2 = states('input_number.memoire_datetime_vp2') | float(default=0)
+        %}\n        {{ vp2 == mvp2}}"
+    then:
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.com_vp2
+    else:
+    - data:
+        value: '{{states(''sensor.vp2_datetime'')|float}}'
+      target:
+        entity_id: input_number.memoire_datetime_vp2
+      action: input_number.set_value
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.com_vp2
+  mode: single
+- id: '1733420966926'
+  alias: Defaut com vp2 2024
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    seconds: /10
+  conditions:
+  - condition: state
+    entity_id: input_number.memoire_datetime_vp2
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+    state: ''
+  actions:
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}'
+      title: Défaut Com VP2 2024
+    action: notify.telegram
+  mode: restart
+- id: '1733423089503'
+  alias: Surveillance Défaut Com Linky
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.vp2_datetime
+    enabled: false
+  - trigger: time_pattern
+    enabled: true
+    hours: /1
+  conditions: []
+  actions:
+  - if:
+    - condition: template
+      value_template: "        {% set um = states('sensor.linky_umoy') | float(default=0)
+        %}\n        {% set mum = states('input_number.memoire_umoy_linky') | float(default=0)
+        %}\n        {{ um == mum}}"
+    then:
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - input_boolean.com_linky
+    else:
+    - data:
+        value: '{{states(''sensor.linky_umoy'')|float}}'
+      target:
+        entity_id: input_number.memoire_umoy_linky
+      action: input_number.set_value
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+        - input_boolean.com_linky
   mode: single

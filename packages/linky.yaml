@@ -17,11 +17,6 @@
 #      - hp
 #      - hc
 
-## 
-input_boolean:
-  com_linky:
-    name: Comm Linky OK=On
-
 
 
 input_text:
@@ -37,6 +32,7 @@ template:
       unique_id: "display_hp_hc"
       state: >-
         {{ states('sensor.linky_ptec')|int(default=0) == "HC.." }} # =1 si HC =2 si HP
+
 
   - sensor:
 

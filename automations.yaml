@@ -33,17 +33,17 @@
     default: []
   mode: single
 - id: '1610371647929'
-  alias: 01-01-02 Purge base de données
+  alias: 04 Purge base de données
   description: ''
-  trigger:
-  - platform: time
-    at: 00:05:00
-  condition: []
-  action:
-  - service: recorder.purge
-    data:
+  triggers:
+  - at: 00:05:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
       keep_days: 7
       repack: true
+    action: recorder.purge
   mode: single
 - id: '1617185147880'
   alias: Piscine-Surveillance et Alarme Appoint d'eau
@@ -309,27 +309,27 @@
   trace:
     stored_traces: 10
 - id: '1632232387237'
-  alias: 05-01-01 Reseau Notification Nouvelle IP
+  alias: 05 Reseau Notification Nouvelle IP
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.myip
     for:
       hours: 0
       minutes: 10
       seconds: 0
-  condition: []
-  action:
-  - service: notify.telegram
-    data:
+    trigger: state
+  conditions: []
+  actions:
+  - data:
       message: 'Nouvelle IP: {{ states("sensor.myip")}} {{-"\n"-}}{{states("sensor.date_time")
         }}'
       title: Réseau:!!!
-  - service: notify.telegram
-    data:
+    action: notify.telegram
+  - data:
       message: Nouvelle IP {{ states("sensor.myip")}}
       title: Reseau
+    action: notify.telegram
   mode: single
 - id: '1633075302563'
   alias: 3_1_2 Piscine-Hors-Gel
@@ -910,7 +910,7 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: input_boolean.com_vp2
+      sensor_entity: binary_sensor.status_communication_vantage_pro_2
       alert_state: 'Off'
       alert_action:
       - data:
@@ -929,15 +929,15 @@
       resolved_message: Alerte {{ entity_name }} Résolu
       notify_message: Alerte {{ entity_name }}Déclenché
 - id: '1634916685737'
-  alias: 01-01-03 Pusch gitub
+  alias: 03 Pusch gitub
   description: pousse vers githtub
-  trigger:
-  - platform: time
-    at: 02:00
-  condition: []
-  action:
-  - service: shell_command.push_to_github
-    data: {}
+  triggers:
+  - at: 02:00
+    trigger: time
+  conditions: []
+  actions:
+  - data: {}
+    action: shell_command.push_to_github
   mode: single
 - id: '1637073026237'
   alias: 04-02-02 Volet Balise ouverture sous sol
@@ -966,24 +966,24 @@
     data: {}
   mode: single
 - id: '1638119466260'
-  alias: 02-01-13 Al Bp Notif Def Com Linky
+  alias: BluePrint Notification Def Com Linky
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: input_boolean.com_linky
+      sensor_entity: binary_sensor.status_communication_linky
       alert_state: 'off'
       alert_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: Com Linky off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: Etat Reseau !!!
+        action: notify.telegram
       resolved_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: Com Linky On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: Etat RESEAU!!!
+        action: notify.telegram
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       initial_delay: 1
@@ -1182,14 +1182,14 @@
   trace:
     stored_traces: 10
 - id: '1642614758763'
-  alias: 06-01-00 Energie Changement HP<->HC
+  alias: Changement HP<->HC
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.linky_n_tarif
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: or
@@ -1204,8 +1204,7 @@
           entity_id: sensor.linky_n_tarif
           state: '5'
       sequence:
-      - service: select.select_option
-        data:
+      - data:
           option: hc
         target:
           entity_id:
@@ -1218,6 +1217,7 @@
           - select.compteur_energie_wc_jour
           - select.compteur_energie_cuisine_jour
           - select.compteur_energie_mal_jour
+        action: select.select_option
     - conditions:
       - condition: or
         conditions:
@@ -1231,8 +1231,7 @@
           entity_id: sensor.linky_n_tarif
           state: '6'
       sequence:
-      - service: select.select_option
-        data:
+      - data:
           option: hp
         target:
           entity_id:
@@ -1245,6 +1244,7 @@
           - select.compteur_energie_wc_jour
           - select.compteur_energie_cuisine_jour
           - select.compteur_energie_mal_jour
+        action: select.select_option
     default: []
   mode: single
 - id: '1642958036645'
@@ -1283,17 +1283,17 @@
       max_alerts: 100
       initial_delay: 300
 - id: '1644765337710'
-  alias: 00-0-0 Démarrage System
+  alias: 00 Démarrage System
   description: ''
-  trigger:
-  - platform: homeassistant
-    event: start
-  condition: []
-  action:
-  - service: script.create_all_automations_group
-    data: {}
-  - service: script.create_all_scripts_group
-    data: {}
+  triggers:
+  - event: start
+    trigger: homeassistant
+  conditions: []
+  actions:
+  - data: {}
+    action: script.create_all_automations_group
+  - data: {}
+    action: script.create_all_scripts_group
   mode: single
 - id: '1653294353395'
   alias: 04-03-03 sous sol position ouverte
@@ -1661,25 +1661,25 @@
     domain: switch
   mode: single
 - id: '1678531257946'
-  alias: 06-01-02 Surveillance Puissance Onduleur Bureau la nuit
+  alias: Surveillance Puissance Onduleur Bureau la nuit
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.pc_lidl_2023_c_active_power
     above: 20
-  condition:
+    trigger: numeric_state
+  conditions:
   - condition: time
     after: '23:00:00'
     before: 07:00:00
-  action:
+  actions:
   - data:
       message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
         }}
     action: notify.telegram
   mode: single
 - id: '1686145474191'
-  alias: 02-01-17 Al Bp Def Com FREE
+  alias: 06 BleuPrint Def Communication FREE
   description: Blue Print
   use_blueprint:
     path: pavax/nagging_alert_notification.yaml
@@ -1688,15 +1688,15 @@
       sensor_entity: binary_sensor.freebox_server_wan_status
       alert_state: 'off'
       alert_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: Freebox off Line{{-"\n"-}}{{states("sensor.date_time") }}
           title: FREE NOK !!!
+        action: notify.telegram
       resolved_action:
-      - service: notify.telegram
-        data:
+      - data:
           message: Freebox On Line{{-"\n"-}} {{states("sensor.date_time") }}
           title: FREE OK!!!
+        action: notify.telegram
       notify_device: 62cdce054a9d3448484b4df8e44cc499
       repeat_delay: 300
       max_alerts: 10
@@ -1704,51 +1704,51 @@
       notify_message: Alerte {{ entity_name }}Déclenché
       initial_delay: 180
 - id: '1687859491524'
-  alias: 00-00-03 Temperature haute stérilisateur
+  alias: Température haute stérilisateur
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.esp127_temperature
+  triggers:
+  - entity_id: sensor.esp127_temperature
     above: 98
-  condition: []
-  action:
-  - service: notify.telegram
-    data:
+    trigger: numeric_state
+  conditions: []
+  actions:
+  - data:
       message: T° = {{states('sensor.esp127_temperature') }}{{-"\n"-}}{{states("sensor.date_time")
         }}
       title: Temperature Haute Stérilisateur !!!
+    action: notify.telegram
   mode: single
 - id: '1690355630909'
-  alias: 00-00-04 Restart Addon UPS si en défaut
+  alias: 08 Restart Addon UPS si en défaut
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.myups_status
     to: unavailable
     for:
       hours: 0
       minutes: 2
       seconds: 0
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.network_ups_tools_en_cours_d_execution
     from: 'off'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.network_ups_tools_en_cours_d_execution
     to: unavailable
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.network_ups_tools_en_cours_d_execution
     to: unknown
-  - platform: time
-    at: 00:30:00
-  condition: []
-  action:
-  - service: hassio.addon_restart
-    data:
+    trigger: state
+  - at: 00:30:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
       addon: a0d7b954_nut
+    action: hassio.addon_restart
   mode: single
 - id: '1690434314772'
   alias: 06-02-02 MP2 Memorisation Production Jour
@@ -1841,13 +1841,13 @@
     action: notify.telegram
   mode: single
 - id: '1698395745098'
-  alias: 00-00-01 Redemarage NODERED
+  alias: 01 Redemarage NODERED
   description: ''
-  trigger:
-  - platform: time_pattern
-    minutes: /3
-  condition: []
-  action:
+  triggers:
+  - minutes: /3
+    trigger: time_pattern
+  conditions: []
+  actions:
   - if:
     - condition: state
       entity_id: binary_sensor.node_red_en_cours_d_execution
@@ -1858,9 +1858,9 @@
       state: 'on'
     then: []
     else:
-    - service: hassio.addon_restart
-      data:
+    - data:
         addon: a0d7b954_nodered
+      action: hassio.addon_restart
   mode: single
 - id: '1698923695048'
   alias: Alerte Météo actualisation
@@ -1923,7 +1923,7 @@
     action: homeassistant.update_entity
   mode: single
 - id: '1699429641790'
-  alias: 00-00-02 Backup total HA 1:00 du matin
+  alias: 02 Backup total HA 1:00 du matin
   description: ''
   triggers:
   - at: 02:00:00
@@ -1936,8 +1936,8 @@
     action: hassio.backup_full
   mode: single
 - id: '1700469604629'
-  alias: 06-01-01 Energie Asservissements Tempos
-  description: ''
+  alias: Asservissements Modes Tempo
+  description: Actions en fonction du changement de modes de  Tempo
   triggers:
   - entity_id:
     - sensor.linky_n_tarif
@@ -1979,7 +1979,7 @@
       sequence:
       - data:
           message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC= 18 °C car Passage HP ROUGE FORCAGE ARRET PISCINE
+          title: Passage HP ROUGE - Modif Conigne PAC-Forçage Arret ppe Piscine
         action: notify.telegram
       - action: switch.turn_on
         target:
@@ -1997,7 +1997,7 @@
       sequence:
       - data:
           message: '{{states("sensor.date_time") }}'
-          title: Consigne PAC=20°C car sortie HP ROUGE
+          title: Sortie HP ROUGE
         action: notify.telegram
       - target:
           entity_id: input_number.pac_nr_input_consigne_temperature
@@ -2797,18 +2797,18 @@
         domain: switch
   mode: single
 - id: '1728311341373'
-  alias: 'Notification: anniversaire à souhaiter'
+  alias: '07 Notification: anniversaire à souhaiter'
   description: Rappel anniversaire
-  trigger:
-  - platform: calendar
-    event: start
+  triggers:
+  - event: start
     offset: '7:0:0'
     entity_id: calendar.anniversaires
-  condition:
+    trigger: calendar
+  conditions:
   - condition: state
     entity_id: calendar.anniversaires
     state: 'on'
-  action:
+  actions:
   - data:
       message: Il y a l'anniversaire de {{ states.calendar.anniversaires.attributes.message
         }} a souhaiter aujourd'hui
@@ -2985,98 +2985,4 @@
     data: {}
     target:
       entity_id: input_boolean.reboot_weewx_2024
-  mode: single
-- id: '1733419845821'
-  alias: Surveillance défaut com VP2 2024
-  description: ''
-  triggers:
-  - trigger: state
-    entity_id:
-    - sensor.vp2_datetime
-    enabled: false
-  - trigger: time_pattern
-    seconds: /10
-    enabled: true
-  conditions: []
-  actions:
-  - if:
-    - condition: template
-      value_template: "        {% set vp2 = states('sensor.vp2_datetime') | float(default=0)
-        %}\n        {% set mvp2 = states('input_number.memoire_datetime_vp2') | float(default=0)
-        %}\n        {{ vp2 == mvp2}}"
-    then:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.com_vp2
-    else:
-    - data:
-        value: '{{states(''sensor.vp2_datetime'')|float}}'
-      target:
-        entity_id: input_number.memoire_datetime_vp2
-      action: input_number.set_value
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.com_vp2
-  mode: single
-- id: '1733420966926'
-  alias: Defaut com vp2 2024
-  description: ''
-  triggers:
-  - trigger: time_pattern
-    seconds: /10
-  conditions:
-  - condition: state
-    entity_id: input_number.memoire_datetime_vp2
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 5
-    state: ''
-  actions:
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}}'
-      title: Défaut Com VP2 2024
-    action: notify.telegram
-  mode: restart
-- id: '1733423089503'
-  alias: Surveillance Défaut Com Linky
-  description: ''
-  triggers:
-  - trigger: state
-    entity_id:
-    - sensor.vp2_datetime
-    enabled: false
-  - trigger: time_pattern
-    enabled: true
-    hours: /1
-  conditions: []
-  actions:
-  - if:
-    - condition: template
-      value_template: "        {% set um = states('sensor.linky_umoy') | float(default=0)
-        %}\n        {% set mum = states('input_number.memoire_umoy_linky') | float(default=0)
-        %}\n        {{ um == mum}}"
-    then:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id:
-        - input_boolean.com_linky
-    else:
-    - data:
-        value: '{{states(''sensor.linky_umoy'')|float}}'
-      target:
-        entity_id: input_number.memoire_umoy_linky
-      action: input_number.set_value
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id:
-        - input_boolean.com_linky
   mode: single

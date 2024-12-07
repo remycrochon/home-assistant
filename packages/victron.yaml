@@ -645,16 +645,12 @@ template:
     # Affichage "Autonomie restante batteries"
     - name:  MP2 affichage Autonomie Restante Batteries
       unique_id: mp2_affichage_autonomie_restante_batteries
-      device_class: duration
-      state_class: measurement      
       state:  >
         {{ states('sensor.mp2_temps_restant_batteries')|int(default=0)|timestamp_custom('%H:%M:%S', false) }}
 
     # Affichage "Autonomie restante batteries"
     - name:  MP2 affichage Temps Depuis Derniere Charge
       unique_id: mp2_affichage_temps_depuis_derniere_charge
-      device_class: duration
-      state_class: measurement      
       state:  >
         {{ states('sensor.mp2_temps_depuis_derniere_pleine_batteries')|int(default=0)|timestamp_custom('%H:%M:%S', false) }}
     
@@ -672,9 +668,8 @@ template:
     # J'ai dû tout convertir en flottants pour une précision des heures partielles, puis arrondi à 2 décimales
     - name: MP2 Temps Restant Batteries Mini SOC
       unique_id: "mp2_temps restant_batteries_mini_soc"
-      device_class: duration
-      state_class: measurement      
-      unit_of_measurement: "Hours"
+      unit_of_measurement: "h"
+      device_class: "duration"
       icon: mdi:sort-clock-ascending
       state: >-
         {% set battery_current = states('sensor.mp2_intensite_batteries')|float %}

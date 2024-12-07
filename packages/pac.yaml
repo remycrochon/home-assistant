@@ -59,7 +59,7 @@ template:
       unique_id: "espaltherma_pression"
       state: >-
         {{ state_attr('sensor.althermasensors','Capteur de pression') }}
-      unit_of_measurement: 'bars'
+      unit_of_measurement: 'bar'
       state_class: "measurement"
       device_class: "pressure"      
     # L69
@@ -165,7 +165,7 @@ template:
         {{ state_attr('sensor.althermasensors','Capteur de débit (l/min)') }}
       unit_of_measurement: 'l/min'
       state_class: "measurement"
-      device_class: "pressure"
+     
     # L186
     - name: "espaltherma_signal_ppe_eau"
       unique_id: "espaltherma_signal_ppe_eau"
@@ -176,10 +176,9 @@ template:
         {% else %}
           {{precedent}}
         {% endif %}           
-        
       unit_of_measurement: '%'
       state_class: "measurement"
-      device_class: "signal_strength"
+
 
 # Extraction des attributs climate.althermat
     # Consigne Chauffage

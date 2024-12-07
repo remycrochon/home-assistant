@@ -715,3 +715,15 @@ creation_groupe_update:
     enabled: false
   mode: single
   icon: mdi:window-shutter
+ssh_command:
+  alias: ssh_command
+  sequence:
+  - action: python_script.ssh_command
+    metadata: {}
+    data:
+      file: /homeassistant/python_scripts/ssh_command.py
+      host: 192.168.0.84
+      user: remy
+      pass: 56835683
+      command: ls -la
+  description: ''

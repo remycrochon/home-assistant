@@ -3,9 +3,6 @@ input_boolean:
   stop_notif_previ_pluie:
     name: Stop Notif Previ Pluie
 
-  com_vp2:
-    name: Comm VP2 OK=On
-
 # https://forum.hacf.fr/t/alerte-meteo/23930/61
 command_line:
   - sensor:
@@ -402,22 +399,7 @@ sensor:
         friendly_name: Neige-verglas
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Neige-verglas'') }}'        
 
-      meteo_france_temperature_maximale_pour_demain:
-        friendly_name: Prévision température maximale
-        value_template: >-
-          {% set start = (now().replace(hour=0,minute=0,second=0)) %}
-          {% set end = (start + timedelta(days=2)) %}
-          {{ state_attr('weather.albi', 'forecast') | selectattr('datetime', '>', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}     
-        unit_of_measurement: '°C'      
 
-      meteo_france_temperature_minimale_pour_demain:
-        friendly_name: Prévision température minimale
-        value_template: >-
-          {% set start = (now().replace(hour=0,minute=0,second=0)) %}
-          {% set end = (start + timedelta(days=2)) %}
-          {{ state_attr('weather.albi', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='templow') | list | max }} 
-        unit_of_measurement: '°C'      
-          
       weather_icon:
         value_template: >-
           {% set weather_icon = states('weather.albi') 

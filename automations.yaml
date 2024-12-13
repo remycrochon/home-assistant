@@ -2986,3 +2986,43 @@
     target:
       entity_id: input_boolean.reboot_weewx_2024
   mode: single
+- id: '1734008684960'
+  alias: Commande PC1 multi Lidl avec telecommande 3bp
+  description: ''
+  triggers:
+  - device_id: a99b6ceefe58486a2713f82c60f9b7b8
+    domain: rfxtrx
+    type: command
+    subtype: 'On'
+    trigger: device
+    id: 'on'
+  - device_id: a99b6ceefe58486a2713f82c60f9b7b8
+    domain: rfxtrx
+    type: command
+    subtype: 'Off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.multiprise_ldl_2024_12_commutateur
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.multiprise_ldl_2024_12_commutateur
+  mode: single

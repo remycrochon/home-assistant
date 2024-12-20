@@ -2338,20 +2338,43 @@
   trace:
     stored_traces: 15
 - id: '1710317639852'
-  alias: 06-02-01 MP2 Etat Mode de Fonctionnement
-  description: Alarme Mode de fonctionnement MP2
+  alias: MP2 Défaut Status Bus VE
+  description: Alarme Status Bus VE
   triggers:
   - entity_id:
     - sensor.mp2_mode_fonctionnement_par_mqtt
     trigger: state
+    enabled: false
+  - trigger: state
+    entity_id:
+    - sensor.mp2_affichage_status_bus_ve
+    to: unavailable
+  - trigger: state
+    entity_id:
+    - sensor.mp2_affichage_status_bus_ve
+    to: unknown
+  - trigger: state
+    entity_id:
+    - sensor.mp2_affichage_status_bus_ve
+    to: 'Off'
   conditions: []
   actions:
-  - action: notify.telegram
-    data:
-      message: '
-
-        {{states("sensor.date_time") }}{{-"\n"-}} MP2-Mode de fonctionnement ->{{states("sensor.mp2_mode_fonctionnement_texte")
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} MP2-Status Bus VE -> {{states("sensor.mp2_affichage_status_bus_ve")
         }}'
+      title: ALARME!! DISFONCTIONNEMENT BUS VE
+    action: notify.telegram
+  - action: notify.mobile_app_iphone
+    metadata: {}
+    data:
+      message: ' {{states("sensor.date_time") }}{{-"\n"-}} MP2-Status Bus VE     ->{{states("sensor.mp2_affichage_status_bus_ve")
+        }} ALARME!! DISFONCTIONNEMENT BUS VE'
+  - action: persistent_notification.create
+    metadata: {}
+    data:
+      message: ' {{states("sensor.date_time") }}{{-"\n"-}} MP2-Status Bus VE     ->
+        {{states("sensor.mp2_affichage_status_bus_ve") }}'
+      title: ' ALARME!! DISFONCTIONNEMENT BUS VE'
   mode: single
 - id: '1711527591458'
   alias: Aqara Magic Cube

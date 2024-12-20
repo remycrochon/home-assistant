@@ -438,61 +438,77 @@ creation_groupe_update:
 1_1_0_fermeture_volet_chambre_nord_rts:
   alias: 1_1_0 Fermeture Volet Chambre nord RTS
   sequence:
-  - service: cover.stop_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_nord
+    action: cover.stop_cover
+    enabled: false
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+    enabled: false
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_nord
+    action: cover.open_cover
+    enabled: false
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+    enabled: false
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_nord
+    action: cover.close_cover
   mode: single
   icon: mdi:window-shutter
 0_0_1_ouverture_volets_rts:
   alias: 0_0_1 Ouverture Volets RTS
   sequence:
-  - service: cover.open_cover
-    target:
+  - target:
       entity_id:
       - cover.volet_salon_petit
       - cover.volet_cuisine
       - cover.volet_sdb_rts
       - cover.volet_sam_volets_zb
     data: {}
-  - service: script.1_0_2_ouverture_volets_bureau_rts
-    data: {}
+    action: cover.open_cover
+  - data: {}
+    action: script.1_0_2_ouverture_volets_bureau_rts
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: script.1_1_1_ouverture_volet_chambre_nord_rts
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: script.1_3_2_ouverture_volet_chamb_sud_rts
-    data: {}
+    enabled: true
+  - if:
+    - condition: state
+      entity_id: input_boolean.presence_amis_ch_nord
+      state: 'off'
+    then:
+    - action: cover.open_cover
+      metadata: {}
+      data: {}
+      target:
+        entity_id: cover.volet_ch_nord
+  - data: {}
+    action: script.1_1_1_ouverture_volet_chambre_nord_rts
     enabled: false
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - data: {}
+    enabled: false
+    action: script.1_3_2_ouverture_volet_chamb_sud_rts
   mode: single
   icon: mdi:window-shutter-open
 1_0_1_ouverture_volet_bureau_droit_rts:
@@ -606,31 +622,35 @@ creation_groupe_update:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_nord
     state: 'off'
-  - service: cover.stop_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_nord
+    action: cover.stop_cover
+    enabled: false
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+    enabled: false
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_nord
+    action: cover.close_cover
+    enabled: false
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+    enabled: false
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_nord
+    action: cover.open_cover
   mode: single
   icon: mdi:window-shutter-open
 '1706601448211':

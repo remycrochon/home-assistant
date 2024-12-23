@@ -2383,13 +2383,24 @@
     path: brent/zha-aqara-magic-cube-57-actions.yaml
     input:
       remote: d77c1d0ca21349e462286aedbcc553cf
-      one_to_one: []
+      one_to_one:
+      - action: switch.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.multiprise_ldl_2024_12_commutateur
       slide_on_two: []
       slide_on_one:
-      - service: switch.toggle
-        target:
+      - target:
           entity_id: switch.lumiere_salon
         data: {}
+        action: switch.toggle
+      cube_flip_1:
+      - action: switch.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.tc6_bp1
 - id: '1711609776550'
   alias: 10-01-00 Spot Ext Cuisine detecteur exterieur
   description: ''

@@ -2357,6 +2357,10 @@
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
     to: 'Off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
   conditions: []
   actions:
   - data:

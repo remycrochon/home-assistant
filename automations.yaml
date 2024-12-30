@@ -2483,15 +2483,12 @@
           - switch.cuisine_detect
           - switch.cuisine_motion
           - switch.cuisine_recordings
-          - switch.cuisine_snapshots
           - switch.piscine_detect
           - switch.piscine_motion
           - switch.piscine_recordings
-          - switch.piscine_snapshots
           - switch.garage_ext_detect
           - switch.garage_ext_motion
           - switch.garage_ext_recordings
-          - switch.garage_ext_snapshots
         data: {}
     - conditions:
       - condition: trigger
@@ -3063,4 +3060,44 @@
         data: {}
         target:
           entity_id: switch.multiprise_ldl_2024_12_commutateur
+  mode: single
+- id: '1735490750135'
+  alias: Activation Forcage CP1 si tempo Rouge
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.rte_tempo_prochaine_couleur
+    to: Rouge
+    id: vers_rouge
+  - trigger: state
+    entity_id:
+    - sensor.rte_tempo_prochaine_couleur
+    id: sortie_rouge
+    from: Rouge
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - vers_rouge
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.schedule_e7a1a2
+          - switch.schedule_6aebea
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - sortie_rouge
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id:
+          - switch.schedule_e7a1a2
+          - switch.schedule_6aebea
+        data: {}
   mode: single

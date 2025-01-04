@@ -3101,3 +3101,45 @@
           - switch.schedule_6aebea
         data: {}
   mode: single
+- id: '1736001989085'
+  alias: Le tag Porte Garage est scanné
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: dca56861-8baf-4881-a5c8-4b99d90c3716
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id: cover.porte_garage
+  mode: single
+- id: '1736002049783'
+  alias: Le tag Porte sous sol est scanné
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: 6e75d49a-ec3d-4bfc-bd4f-2d1ab41b7cb1
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id: cover.porte_sous_sol
+  mode: single
+- id: '1736002677516'
+  alias: Le tag Porte sous-sol 2 est scanné
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: 297289a4-380e-4137-bbdc-b21e165e76cc
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id: cover.porte_sous_sol
+  mode: single

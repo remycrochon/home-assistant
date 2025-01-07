@@ -343,100 +343,107 @@ creation_groupe_update:
       entities: '{{ states.update | map(attribute=''entity_id'') | join('','') }}     '
   mode: single
 '1706464871250':
-  alias: 0_0_0 Fermeture Volets RTS
+  alias: Volets RTS Fermeture
   sequence:
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
-      - cover.gauche
-      - cover.bureau_droit_2
       - cover.volet_salon_petit
       - cover.volet_sdb_rts
       - cover.volet_ch_nord
       - cover.volets_ch_parents_rts
-  - service: cover.close_cover
+    action: cover.close_cover
+  - action: script.turn_on
+    metadata: {}
     data: {}
+    target:
+      entity_id:
+      - script.volets_bureau_rts_fermeture_2
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_sud
     enabled: false
+    action: cover.close_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
     enabled: false
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_ch_sud
     enabled: false
+    action: cover.close_cover
   mode: single
   icon: mdi:window-shutter
+  description: ''
 '1706465454834':
-  alias: 1_0_0 Fermeture Volet Bureau droit RTS
+  alias: Volet Bureau droit RTS Fermeture
   sequence:
-  - service: cover.stop_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
+    action: cover.stop_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
+    action: cover.open_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
+    action: cover.close_cover
   mode: single
   icon: mdi:window-shutter
+  description: ''
 '1706465520258':
-  alias: 1_2_0 Fermeture Volet salon petit RTS
+  alias: Volet salon petit RTS Fermeture
   sequence:
-  - service: cover.stop_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_salon_petit
+    action: cover.stop_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_salon_petit
+    action: cover.open_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_salon_petit
+    action: cover.close_cover
   mode: single
   icon: mdi:window-shutter
+  description: ''
 1_1_0_fermeture_volet_chambre_nord_rts:
-  alias: 1_1_0 Fermeture Volet Chambre nord RTS
+  alias: Volet Chambre Nord RTS Fermeture
   sequence:
   - data: {}
     target:
@@ -469,8 +476,9 @@ creation_groupe_update:
     action: cover.close_cover
   mode: single
   icon: mdi:window-shutter
+  description: ''
 0_0_1_ouverture_volets_rts:
-  alias: 0_0_1 Ouverture Volets RTS
+  alias: Volets RTS Ouverture
   sequence:
   - target:
       entity_id:
@@ -480,14 +488,19 @@ creation_groupe_update:
       - cover.volet_sam_volets_zb
     data: {}
     action: cover.open_cover
-  - data: {}
-    action: script.1_0_2_ouverture_volets_bureau_rts
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
     enabled: true
+  - if:
+    - condition: state
+      entity_id: input_boolean.presence_amis_bureau
+      state: 'off'
+    then:
+    - data: {}
+      action: script.1_0_2_ouverture_volets_bureau_rts
   - if:
     - condition: state
       entity_id: input_boolean.presence_amis_ch_nord
@@ -498,126 +511,122 @@ creation_groupe_update:
       data: {}
       target:
         entity_id: cover.volet_ch_nord
-  - data: {}
-    action: script.1_1_1_ouverture_volet_chambre_nord_rts
-    enabled: false
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
+    enabled: false
   - data: {}
     enabled: false
     action: script.1_3_2_ouverture_volet_chamb_sud_rts
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 1_0_1_ouverture_volet_bureau_droit_rts:
-  alias: 1_0_1 Ouverture Volet Bureau droit RTS
+  alias: Volet Bureau droit RTS Ouverture
   sequence:
-  - service: cover.stop_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
+    action: cover.stop_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
+    action: cover.close_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
+    action: cover.open_cover
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 1_0_2_ouverture_volets_bureau_rts:
-  alias: 1_0_2 Ouverture Volets Bureau RTS
+  alias: Volets Bureau RTS Ouverture
   sequence:
-  - condition: state
-    entity_id: input_boolean.presence_amis_bureau
-    state: 'off'
-  - service: cover.open_cover
+  - action: script.turn_on
+    metadata: {}
     data: {}
     target:
-      entity_id:
-      - cover.gauche
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: cover.open_cover
-    target:
-      entity_id: cover.bureau_droit_2
+      entity_id: script.volet_bureau_gauche_rts_ouverture
+  - action: script.turn_on
+    metadata: {}
     data: {}
+    target:
+      entity_id: script.1_0_1_ouverture_volet_bureau_droit_rts
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 1_2_1_ouverture_volet_salon_petit_rts:
-  alias: 1_2_1 Ouverture Volet salon petit RTS
+  alias: Volet salon petit RTS Ouverture
   sequence:
-  - service: cover.stop_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_salon_petit
+    action: cover.stop_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 9
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_salon_petit
+    action: cover.close_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 10
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.volet_salon_petit
+    action: cover.open_cover
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 1_3_2_ouverture_volet_chamb_sud_rts:
-  alias: 1_3_2 Ouverture Volet Chamb Sud RTS
+  alias: Volet Chamb Sud RTS Ouverture
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_sud
     state: 'off'
-  - service: cover.open_cover
-    target:
+  - target:
       entity_id:
       - cover.volet_ch_sud
     data: {}
+    action: cover.open_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
-    target:
+  - target:
       entity_id:
       - cover.volet_ch_sud
     data: {}
+    action: cover.open_cover
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 1_1_1_ouverture_volet_chambre_nord_rts:
-  alias: 1_1_1 Ouverture Volet Chambre Nord RTS
+  alias: Volet Chambre Nord RTS Ouverture
   sequence:
   - condition: state
     entity_id: input_boolean.presence_amis_ch_nord
@@ -653,6 +662,7 @@ creation_groupe_update:
     action: cover.open_cover
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 '1706601448211':
   alias: porte_sous_sol_down
   sequence:
@@ -677,10 +687,9 @@ creation_groupe_update:
   mode: single
   icon: mdi:garage-variant
 0_1_1_ouverture_volets_mode_absent_rts:
-  alias: 0_1_1 Ouverture Volets Mode absent RTS
+  alias: Volets Mode absent RTS Ouverture
   sequence:
-  - service: cover.open_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.gauche
@@ -692,24 +701,25 @@ creation_groupe_update:
       - cover.volets_ch_parents_rts
       - cover.volet_parents_grand_p
       - cover.volet_sam_volets_zb
+    action: cover.open_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.open_cover
-    target:
+  - target:
       entity_id:
       - cover.volet_ch_sud
     data: {}
     enabled: false
+    action: cover.open_cover
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 0_1_0_fermeture_volets_mode_absent_rts:
-  alias: 0_1_0 Fermeture Volets Mode absent RTS
+  alias: Volets Mode absent RTS Fermeture
   sequence:
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.bureau_droit_2
@@ -722,19 +732,21 @@ creation_groupe_update:
       - cover.volets_ch_parents_rts
       - cover.volet_parents_grand_p
       - cover.volet_sam_volets_zb
+    action: cover.close_cover
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-  - service: cover.close
-    target:
+  - target:
       entity_id:
       - cover.volet_ch_sud
     data: {}
     enabled: false
+    action: cover.close
   mode: single
   icon: mdi:window-shutter
+  description: ''
 ssh_command:
   alias: ssh_command
   sequence:
@@ -746,4 +758,107 @@ ssh_command:
       user: remy
       pass: 56835683
       command: ls -la
+  description: ''
+2_0_0_fermeture_volet_bureau_gauche_rts:
+  sequence:
+  - data: {}
+    target:
+      entity_id:
+      - cover.gauche
+    action: cover.stop_cover
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - data: {}
+    target:
+      entity_id:
+      - cover.gauche
+    action: cover.open_cover
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - data: {}
+    target:
+      entity_id:
+      - cover.gauche
+    action: cover.close_cover
+  alias: Volet Bureau Gauche RTS Fermeture
+  mode: single
+  icon: mdi:window-shutter
+  description: ''
+volet_bureau_gauche_rts_ouverture:
+  sequence:
+  - data: {}
+    target:
+      entity_id:
+      - cover.gauche
+    action: cover.stop_cover
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - data: {}
+    target:
+      entity_id:
+      - cover.gauche
+    action: cover.close_cover
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - data: {}
+    target:
+      entity_id:
+      - cover.gauche
+    action: cover.open_cover
+  alias: Volet Bureau Gauche RTS Ouverture
+  mode: single
+  icon: mdi:window-shutter-open
+  description: ''
+volets_bureau_rts_fermeture:
+  sequence:
+  - action: script.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.1706465454834
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - action: script.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.2_0_0_fermeture_volet_bureau_gauche_rts
+  alias: Volets Bureau RTS Fermeture
+  mode: single
+  icon: mdi:window-shutter-open
+  description: ''
+volets_bureau_rts_fermeture_2:
+  sequence:
+  - action: script.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.2_0_0_fermeture_volet_bureau_gauche_rts
+  - action: script.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.1706465454834
+  alias: Volets Bureau RTS Fermeture
+  mode: single
+  icon: mdi:window-shutter-open
   description: ''

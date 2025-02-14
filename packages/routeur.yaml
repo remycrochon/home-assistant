@@ -1,9 +1,0 @@
-sensor:
-  - platform: statistics
-    name: mp2_puissance_batteries_moyenne
-    entity_id: sensor.mp2_puissance_batteries
-    state_characteristic: mean
-    sampling_size: 30
-    max_age:
-      minutes: 30
-

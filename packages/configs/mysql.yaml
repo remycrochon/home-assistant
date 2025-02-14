@@ -7,7 +7,7 @@ recorder:
   auto_purge: true
   auto_repack: true
   commit_interval: 15
-  purge_keep_days: 14
+  purge_keep_days: 10
   include:
     domains:
       - binary_sensor
@@ -15,8 +15,11 @@ recorder:
       - input_datetime
       - input_number
       - input_select
+      - input_text
+      - number      
       - sensor
       - switch
+      - button
       - light
       - utility_meter
       - vacuum
@@ -25,8 +28,8 @@ recorder:
       - weather
       - group   
       - person
-      - number
       - climate
+      - lawn_mower
       
   exclude:
     domains:
@@ -35,7 +38,18 @@ recorder:
       - automation
       - cover
       - script
-      - pool_pump
       - alarm_control_panel
       - persistent_notification
-
+      - update
+      - conversation
+      - tag
+      - event
+      - notify
+      - select
+      - remote
+      - media_player
+      - calendar
+      - image
+      - time
+      - text
+      - group

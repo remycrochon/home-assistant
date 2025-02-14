@@ -251,6 +251,8 @@ sensor:
     tag_name: "PCOUP"
     name: "Linky PCOUP"
     unit_of_measurement: "kVA"
+    device_class: "power"
+    state_class: "measurement"      
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
@@ -273,6 +275,8 @@ sensor:
     tag_name: "UMOY1"
     name: "Linky Umoy"
     unit_of_measurement: "V"
+    device_class: "voltage"
+    state_class: "measurement"      
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
@@ -282,6 +286,8 @@ sensor:
     tag_name: "IRMS1"
     name: "Linky I Inst"
     unit_of_measurement: "A"
+    device_class: "current"
+    state_class: "measurement"       
     icon: mdi:flash
     teleinfo_id: myteleinfo
 
@@ -376,7 +382,7 @@ display:
 
 
 interval:
-  - interval: 1s
+  - interval: 1h
     then:
       - script.execute: calcul_led_jour
 

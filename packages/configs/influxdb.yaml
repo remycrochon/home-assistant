@@ -23,25 +23,43 @@ influxdb:
       - input_datetime
       - input_number
       - input_select
+      - input_text
+      - number      
       - sensor
       - switch
+      - button
       - light
       - utility_meter
-      - vacuum
-      - sun
-      - number
-      - climate
+
+      
   exclude:
     domains:
       - camera
       - zone
       - automation
-      - weather
       - cover
-      - group
       - script
-      - pool_pump
-      - device_tracker
       - alarm_control_panel
       - persistent_notification
+      - update
+      - conversation
+      - tag
+      - event
+      - notify
+      - select
+      - remote
+      - media_player
+      - calendar
+      - image
+      - time
+      - text
+      - group
+      - vacuum
+      - sun
+      - device_tracker
+      - weather
+      - group   
       - person
+      - climate
+      - lawn_mower      
+

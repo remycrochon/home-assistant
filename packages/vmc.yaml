@@ -54,6 +54,7 @@ template:
   - binary_sensor:
     # Si la puissance electrique est superieure à 10w, on considere que la VMC est en fonctionnement
     - name: "vmc_marche"
+      unique_id: "vmc_n0_en_marche"
       state: >-
         {{states.sensor.ecocompteur_vmc_niv0.state | float(default=0) > 10}}      
 
@@ -62,6 +63,7 @@ sensor:
   - platform: history_stats
     name: temps de Fonctionnement VMC N0
     entity_id: binary_sensor.vmc_marche
+    unique_id: "temps_de_fonctionnement_vmc_n0"
     state: "on"
     type: time
     start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"

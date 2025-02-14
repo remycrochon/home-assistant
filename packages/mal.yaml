@@ -10,19 +10,9 @@ template:
 #Indique que la machine à laver est en fonctionnement
   - binary_sensor:
       - name: "MaLaver en marche"
+        unique_id: "mal_en_marche"
         delay_off:
           minutes: 5
         state: >
           {{ states('sensor.puissance_pc_mal')|float(default=0) > 15 }}
-  - sensor:
-# Totalisation des energies HC+HP
-    - name: Compteur Energie MAL Jour HP_HC
-      unique_id: "compteur_energie_mal_jour_hp_hc"
-      device_class: "energy"
-      state_class: "total_increasing"    
-      unit_of_measurement: "kWh"
-      state: >-
-        {% set hp=states('sensor.compteur_energie_mal_jour_hp')|float(default=0) %}
-        {% set hc=states('sensor.compteur_energie_mal_jour_hc')|float(default=0) %}
-        {{ hp+hc }}
 

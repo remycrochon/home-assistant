@@ -44,16 +44,6 @@ input_boolean:
   ecs_av_pv:
     name: Ecs PV(=1 avec Routeur PV)
   
-sensor:
-# Affichage du temps de fonctionnement ce jour
-  - platform: history_stats
-    name: ECS Chauffage ce jour
-    entity_id: binary_sensor.ecs_chauffe
-    state: 'on'
-    type: time
-    start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-    end: '{{ now() }}'
-
 
 template:
 ####################################

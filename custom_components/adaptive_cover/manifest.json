@@ -1,0 +1,24 @@
+{
+  "domain": "adaptive_cover",
+  "name": "Adaptive Cover",
+  "codeowners": [
+    "@basbruss"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "sun",
+    "device_tracker",
+    "zone",
+    "climate",
+    "sensor",
+    "weather"
+  ],
+  "documentation": "https://github.com/basbruss/adaptive-cover",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/basbruss/adaptive-cover/issues",
+  "requirements": [
+    "astral",
+    "pandas"
+  ],
+  "version": "1.4.5"
+}

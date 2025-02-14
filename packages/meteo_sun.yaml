@@ -42,7 +42,6 @@ camera:
     name: MF_alerte_tomorrow
     file_path: ./www/images/meteo_france_alerte_tomorrow.png
 
-
 mqtt:
   sensor:
 # Vantage Pro2 -> WEEXWX
@@ -57,6 +56,7 @@ mqtt:
       state_topic: "home/Vp2/loop"
       unit_of_measurement: '°C'
       value_template: "{{ value_json.outTemp_C | round(1) }}"
+      state_class: measurement
       device_class: "temperature"
 
     - name: "VP2_Humidity_Out"
@@ -64,6 +64,7 @@ mqtt:
       state_topic: "home/Vp2/loop"
       unit_of_measurement: '%'
       value_template: "{{ value_json.outHumidity | round(1) }}"
+      state_class: measurement      
       device_class: humidity
           
     - name: "VP2_Barometer"
@@ -71,6 +72,7 @@ mqtt:
       state_topic: "home/Vp2/loop"
       unit_of_measurement: 'mbar'
       value_template: "{{ value_json.barometer_mbar | round(1) }}"
+      state_class: measurement
       device_class: "pressure"
       
   #DAILY RAIN (PRECIPITATION QUOTIDIENNE).
@@ -84,6 +86,8 @@ mqtt:
       value_template: >-
         {% set a=value_json.rain_cm|float(default=0)%}
         {{ (a*10)|round(3) }}     
+      state_class: measurement
+      device_class: precipitation
 
     - name: "VP2_Rain24"
       unique_id: "VP2_Rain24"
@@ -93,6 +97,8 @@ mqtt:
       value_template: >-
         {% set a=value_json.rain24_cm|float(default=0)%}
         {{ (a*10)|round(3) }}
+      state_class: total_increasing
+      device_class: precipitation
 
     - name: "VP2_RainJour"
       unique_id: "VP2_RainJour"
@@ -102,6 +108,8 @@ mqtt:
       value_template: >-
         {% set a=value_json.dayRain_cm|float(default=0)%}
         {{ (a*10)|round(3) }}
+      state_class: total_increasing
+      device_class: precipitation
 
   # La Rain Rate (pluviométrie) sera nulle et l'icône parapluie ne sera pas affichée tant que
   # deux basculements du pluviomètre ne sont pas survenus dans une période de 15 minutes.
@@ -113,6 +121,8 @@ mqtt:
       value_template: >-
         {% set a=value_json.rainRate_cm_per_hour|float(default=0)%}
         {{ (a*10)|round(3) }}
+      state_class: measurement
+      device_class: PRECIPITATION_INTENSITY
 
   #RAIN STORM (AVERSE D'ORAGE).
   #Rain Storm (L'averse d'orage) affiche le cumul de pluie de la dernière averse.
@@ -127,24 +137,32 @@ mqtt:
       value_template: >-
         {% set a=value_json.stormRain_cm|float(default=0)%}
         {{ (a*10)|round(3) }}
+      state_class: measurement
+      device_class: precipitation            
 
     - name: "VP2_Rafale"
       unique_id: "VP2_Rafale"
       state_topic: "home/Vp2/loop"
       unit_of_measurement: 'km/h'
       value_template: "{{ value_json.windGust_kph | round(2) }}"
+      state_class: measurement
+      device_class: WIND_SPEED
 
     - name: "VP2_Win_Speed"
       unique_id: "VP2_Win_Speed"
       state_topic: "home/Vp2/loop"
       unit_of_measurement: 'km/h'
       value_template: "{{ value_json.windSpeed_kph | round(2) }}"
-
+      state_class: measurement
+      device_class: WIND_SPEED
+      
     - name: "VP2_Win_Dir"
       unique_id: "VP2_Win_Dir"
       state_topic: "home/Vp2/loop"
       unit_of_measurement: '°'
       value_template: "{{ value_json.windDir | round(1) }}"
+      state_class: measurement
+            
 
     - name: "VP2_Temp_In"
       unique_id: "VP2_Temp_In"
@@ -152,6 +170,7 @@ mqtt:
       unit_of_measurement: '°C'
       value_template: "{{ value_json.inTemp_C | round(1) }}"
       device_class: "temperature"
+      state_class: measurement
 
     - name: "VP2_Humidté_In"
       unique_id: "VP2_Humidté_In"
@@ -159,6 +178,7 @@ mqtt:
       unit_of_measurement: '%'
       value_template: "{{ value_json.inHumidity | round(1) }}"
       device_class: "humidity"
+      state_class: measurement
 
     - name: "VP2_Ressenti"
       unique_id: "VP2_Ressenti"
@@ -166,6 +186,7 @@ mqtt:
       unit_of_measurement: '°C'
       value_template: "{{ value_json.windchill_C | round(1) }}"
       device_class: "temperature"
+      state_class: measurement
 
     - name: "VP2_HeatIndex"
       unique_id: "VP2_HeatIndex"
@@ -173,18 +194,22 @@ mqtt:
       unit_of_measurement: '°C'
       value_template: "{{ value_json.heatindex_C | round(1) }}"
       device_class: "temperature"
+      state_class: measurement
 
     - name: "VP2_Radiation"
       unique_id: "VP2_Radiation"
       state_topic: "home/Vp2/loop"
       unit_of_measurement: 'W/m²'
       value_template: "{{ value_json.radiation_Wpm2 | round(0) }}"
+      device_class: irradiance
+      state_class: measurement
 
     - name: "VP2_UV"
       unique_id: "VP2_UV"
       state_topic: "home/Vp2/loop"
       unit_of_measurement: 'UV'
       value_template: "{{ value_json.UV | round(1) }}"
+      state_class: measurement
 
 sensor:
 # lune https://www.home-assistant.io/integrations/moon/
@@ -273,6 +298,7 @@ sensor:
 
       grass_pollen_index_mod:
         friendly_name: Pollen Grass Amber
+        unique_id: "grass_pollen_index_mod"
         icon_template: 'mdi:flower'
         value_template: >-
           {% if is_state('sensor.pollen_grass_risk', 'low') %}
@@ -289,6 +315,7 @@ sensor:
 
       tree_pollen_index_mod:
         friendly_name: Pollen Tree Amber
+        unique_id: "tree_pollen_index_mod"
         icon_template: 'mdi:tree'
         value_template: >-
           {% if is_state('sensor.pollen_tree_risk', 'low') %}
@@ -305,6 +332,7 @@ sensor:
 
       weed_pollen_index_mod:
         friendly_name: Pollen Weed Amber
+        unique_id: "weed_pollen_index_mod"
         icon_template: 'mdi:sprout'
         value_template: >-
           {% if is_state('sensor.pollen_weed_risk', 'low') %}
@@ -323,15 +351,18 @@ sensor:
 # Integration Météo France
 
       mf_temperature:
+        unique_id: "mf_temperature"
         value_template: >-
           {{ state_attr('weather.albi','temperature') }}
         unit_of_measurement: °C
 
       mf_humidity:
+        unique_id: "mf_humidity"
         value_template: >-
           {{ state_attr('weather.albi','humidity') }}
 
       mf_pressure:
+        unique_id: "mf_pressure"
         value_template: >-
           {{ state_attr('weather.albi','pressure') }}
         unit_of_measurement: hPa
@@ -341,6 +372,7 @@ sensor:
 #          {{ states.weather.albi.state }}
 
       mf_current_conditions:
+        unique_id: "mf_current_conditions"
         value_template: >-
           {% set weather_state = states('weather.albi') 
             | replace('rainy', 'Pluvieux')
@@ -361,19 +393,23 @@ sensor:
 
   #        feels_like
       mf_visibility:
+        unique_id: "mf_visibility"
         value_template: >-
           {{state_attr('weather.albi','visibility') }}
       
       mf_wind_bearing:
+        unique_id: "mf_wind_bearing"
         value_template: >-
           {{state_attr('weather.albi','wind_bearing') }}
         # {{states('sensor.vp2_win_dir')}}
 
       mf_wind_speed:
+        unique_id: "mf_wind_speed"
         value_template: >-
           {{ state_attr('weather.albi','wind_speed') }}
 
       mf_o3:
+        unique_id: "mf_o3"
         value_template: >-
           {{ state_attr('weather.albi','ozone') }}
 
@@ -381,26 +417,33 @@ sensor:
 # Meteo france
     # Utilisés dans boutton-card de la page /remy-2/home 
       meteo_france_orage:
+        unique_id: "meteo_france_orage"
         friendly_name: Orages
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Orages'') }}'
       meteo_france_inondation:
+        unique_id: "meteo_france_inondation"
         friendly_name: Inondation
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Inondation'') }}'
       meteo_france_pluie_inondation:
+        unique_id: "meteo_france_pluie_inondation"
         friendly_name: Pluie-Inondation
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Pluie-inondation'') }}'       
       meteo_france_grand_froid:
+        unique_id: "meteo_france_grand_froid"
         friendly_name: Grand-froid
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Grand-froid'') }}'         
       meteo_france_vent:
+        unique_id: "meteo_france_vent"
         friendly_name: Vent violent
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Vent violent'') }}'          
       meteo_france_neige:
+        unique_id: "meteo_france_neige"
         friendly_name: Neige-verglas
         value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Neige-verglas'') }}'        
 
 
       weather_icon:
+        unique_id: "weather_icon"
         value_template: >-
           {% set weather_icon = states('weather.albi') 
             | replace('rainy', '☔️')
@@ -429,62 +472,4 @@ sensor:
           {% endif -%}
           
 
-
-  # Statistiques
-  # Pluviometrie - sert à gestion robot tonte
-  - platform: statistics
-    entity_id: sensor.vp2_rain24
-    unique_id: vp2_pluviometrie_min
-    max_age:
-      minutes: 320 # sur 6h
-    name: vp2_pluviometrie_min
-    state_characteristic: value_min
-    sampling_size: 20
-
-  - platform: statistics
-    entity_id: sensor.vp2_rain24
-    unique_id: vp2_pluviometrie_max
-    max_age:
-      minutes: 320 # sur 6h
-    name: vp2_pluviometrie_max
-    state_characteristic: value_max
-    sampling_size: 20
-
-  - platform: statistics
-    entity_id: sensor.vp2_rain24
-    unique_id: vp2_pluviometrie_moyenne
-    max_age:
-      minutes: 320 # sur 6h
-    name: vp2_pluviometrie_moyenne
-    state_characteristic: median
-    sampling_size: 20
-
-  - platform: statistics
-    entity_id: sensor.vp2_rain24
-    unique_id: vp2_pluviometrie_standard_deviation
-    max_age:
-      minutes: 320 # sur 6h
-    name: vp2_pluviometrie_standard_deviation
-    state_characteristic: standard_deviation
-    sampling_size: 20
-
-  # Vents
-  - platform: statistics
-    entity_id: sensor.vp2_rafale
-    unique_id: vp2_rafales_max
-    max_age:
-      minutes: 1660 # sur 24h
-    name: vp2_rafales_max
-    state_characteristic: value_max
-    sampling_size: 20
-    
-  # Ensoleillement
-  - platform: statistics
-    entity_id: sensor.vp2_radiation
-    unique_id: vp2_radiation_moyenne
-    max_age:
-      minutes: 60 # sur 1h
-    name: vp2_radiation_moyenne
-    state_characteristic: median
-    sampling_size: 20
 

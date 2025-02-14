@@ -2,48 +2,50 @@
 # configuration des log
 # 
 # https://www.home-assistant.io/integrations/logger/
-
 logger:
-  default: info
+  default: warning
   logs:
-# log level for HA core
-    homeassistant.core: fatal
+    homeassistant.components: error
+    custom_components: error
+
+    # log level for HA core
+    #homeassistant.core: fatal
 
 # log level for MQTT integration
-    homeassistant.components.mqtt: warning
+   # homeassistant.components.mqtt: warning
 
 # log level for all python scripts
-    homeassistant.components.python_script: warning
+   # homeassistant.components.python_script: warning
 
 # individual log level for this python script
-    homeassistant.components.python_script.my_new_script.py: warning
+   # homeassistant.components.python_script.my_new_script.py: warning
 
 # log level for SmartThings lights
-    homeassistant.components.smartthings.light: warning
+   # homeassistant.components.smartthings.light: warning
     
 # log level for a custom component
     #custom_components.my_integration: debug
-    custom_components.poollab: warning
+   # custom_components.poollab: warning
     
 # log level for the `aiohttp` Python package
-    aiohttp: error
+    #aiohttp: error
 
 # log level for both 'glances_api' and 'glances' integration
-    homeassistant.components.glances: fatal
-    glances_api: fatal
+   # homeassistant.components.glances: fatal
+   # glances_api: fatal
     
 #base de données
-    homeassistant.components.recorder: warning
+   # homeassistant.components.recorder: warning
     
 # RFXCOM
-    rfxtrx: warning
+   # rfxtrx: warning
 
 # Modbus
-    homeassistant.components.modbus: warning
-    pymodbus.client: warning
+    #homeassistant.components.modbus: warning
+    #pymodbus.client: warning
 
 #AutomMower
-    custom_components.husqvarna_automower: warning
-    custom_components.husqvarna_automower.vacuum: warning
-    custom_components.husqvarna_automower.config_flow: warning
-    aioautomower: warning
+    #custom_components.husqvarna_automower: warning
+    #custom_components.husqvarna_automower.vacuum: warning
+    #custom_components.husqvarna_automower.config_flow: warning
+    #aioautomower: warning

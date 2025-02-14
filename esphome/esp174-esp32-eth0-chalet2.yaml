@@ -34,7 +34,7 @@ esphome:
 
 # Enable logging
 logger:
-  level: DEBUG
+  level: info
 
 # Enable Home Assistant API
 api:
@@ -106,7 +106,7 @@ sensor:
     #register_count: 1
     #response_size: 2
     device_class: volume
-    state_class: total
+    state_class: measurement
     filters:
       - multiply: 0.01
 #      - sliding_window_moving_average:
@@ -131,6 +131,7 @@ sensor:
     icon: mdi:flash
     unit_of_measurement: "m³"
     device_class: volume
+    state_class: measurement    
     accuracy_decimals: 2
     lambda: |-
       return (id(_niv_eau).state*0.6*0.6*3.14159);
@@ -140,6 +141,7 @@ sensor:
     id: niveau
     icon: mdi:flash
     unit_of_measurement: "%"
+    state_class: measurement    
     accuracy_decimals: 2
     lambda: |-
       return (id(_niv_eau).state/5.8*100);
@@ -150,6 +152,7 @@ sensor:
     icon: mdi:flash
     unit_of_measurement: "m"
     device_class: distance
+    state_class: measurement    
     accuracy_decimals: 2
     lambda: |-
       return (5.8-id(_niv_eau).state);

@@ -1,12 +1,16 @@
 {
   "domain": "poollab",
   "name": "Pool Lab",
-  "codeowners": ["@dala318"],
-  "documentation": "https://github.com/dala318/python_poollab",
-  "issue_tracker": "https://github.com/dala318/python_poollab/issues",
-  "requirements": ["gql"],
-  "dependencies": [],
-  "iot_class": "cloud_polling",
+  "codeowners": [
+    "@dala318"
+  ],
   "config_flow": true,
-  "version": "1.1.0"
+  "dependencies": [],
+  "documentation": "https://github.com/dala318/python_poollab",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/dala318/python_poollab/issues",
+  "requirements": [
+    "gql"
+  ],
+  "version": "v1.1.1"
 }

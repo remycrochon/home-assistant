@@ -68,7 +68,12 @@ template:
         unit_of_measurement: ms
         state_class: measurement
         state: >-
-          {{ (states('sensor.speedtest_cli_data') | from_json).ping | float(0)|round(2) }}
+          {% set data = states('sensor.speedtest_cli_data') %}
+          {% if data != "unknown" %}
+            {{ ((states('sensor.speedtest_cli_data') | from_json).ping )| float(0) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
 
       - name: "Speedtest Download"
         unique_id: "speedtest_download"
@@ -76,7 +81,12 @@ template:
         unit_of_measurement: Mbit/s
         state_class: measurement
         state: >-
-          {{ ((states('sensor.speedtest_cli_data') | from_json).download * 8 / 1000 /1000 )| float(0) | round(2) }}
+          {% set data = states('sensor.speedtest_cli_data') %}
+          {% if data != "unknown" %}
+            {{ ((states('sensor.speedtest_cli_data') | from_json).download * 8 / 1000 / 1000 )| float(0) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
 
       - name: "SpeedTest Upload"
         unique_id: "speedtest_upload"
@@ -84,5 +94,10 @@ template:
         unit_of_measurement: Mbit/s
         state_class: measurement
         state: >-
-          {{ ((states('sensor.speedtest_cli_data') | from_json).upload * 8 / 1000 / 1000 )| float(0) | round(2) }}
+          {% set data = states('sensor.speedtest_cli_data') %}
+          {% if data != "unknown" %}
+            {{ ((states('sensor.speedtest_cli_data') | from_json).upload * 8 / 1000 / 1000 )| float(0) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
 

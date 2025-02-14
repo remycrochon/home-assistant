@@ -52,6 +52,8 @@ sensor:
   - platform: dallas_temp
     #address: 0xCA00AA2D00000328
     name: "${friendly_name} temp_ecs"
+    device_class: temperature
+    state_class: "measurement"     
     filters:
       - offset: 2.0
 

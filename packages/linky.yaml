@@ -16,9 +16,6 @@
 #    tariffs:
 #      - hp
 #      - hc
-
-
-
 input_text:
   # Permet de simuler des Statuts pour les tests unitaires
   linky_test_status:   
@@ -32,7 +29,6 @@ template:
       unique_id: "display_hp_hc"
       state: >-
         {{ states('sensor.linky_ptec')|int(default=0) == "HC.." }} # =1 si HC =2 si HP
-
 
   - sensor:
 

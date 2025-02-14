@@ -4,36 +4,6 @@
 #                                                  #
 ####################################################
 
-binary_sensor:
-
-
-
-# groupe Ping reseau dans Entrées
-
-  - platform: group
-    name: esp_reseau
-    all: true
-    device_class: "connectivity"
-    entities:
-      - binary_sensor.esp123_status
-      - binary_sensor.esp124_status
-      - binary_sensor.esp125_status
-      - binary_sensor.esp129_status
-      - binary_sensor.esp130_status
-      - binary_sensor.esp132_status
-      - binary_sensor.esp133_status
-      - binary_sensor.esp135_status
-      - binary_sensor.esp137_status
-      - binary_sensor.esp138_status
-      - binary_sensor.esp139_status
-      - binary_sensor.esp140_status
-      - binary_sensor.esp142_status
-      - binary_sensor.esp145_status
-      - binary_sensor.esp147_status
-      - binary_sensor.test_reseau
-
-# Groupe Uptimekuma dans Entrées
-      
 
 
 

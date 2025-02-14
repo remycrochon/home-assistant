@@ -167,23 +167,6 @@ porte_garage_up:
       entity_id: input_text.mvt_porte_garage
   mode: single
   icon: mdi:garage-open-variant
-create_all_automations_group:
-  sequence:
-  - service: group.set
-    data_template:
-      object_id: all_automations
-      entities: '{{ states.automation | map(attribute=''entity_id'') | join('','')
-        }}'
-  mode: single
-  alias: Creation groupe Automation
-create_all_scripts_group:
-  sequence:
-  - service: group.set
-    data_template:
-      object_id: all_scripts
-      entities: '{{ states.script | map(attribute=''entity_id'') | join('','') }}     '
-  mode: single
-  alias: Création Groupe Script
 volet_piscine_stop:
   alias: volet_piscine_stop
   sequence:
@@ -210,64 +193,36 @@ volet_piscine_stop:
   mode: single
   icon: mdi:garage-open
 volet_amis_sud_grand_up:
-  alias: volet amis_sud grand up
+  alias: volet amis sud grand up
   sequence:
-  - service: switch.turn_on
-    data: {}
+  - data: {}
     target:
       entity_id: switch.tc_volet_amis_sud_grand
-  - service: input_text.set_value
+    action: switch.turn_on
+  - action: input_text.set_value
+    metadata: {}
     data:
       value: open
     target:
       entity_id: input_text.volet_amis_sud_grand
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
 volet_amis_sud_grand_down:
   alias: volet amis sud grand down
   sequence:
-  - service: switch.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id: switch.tc_volet_amis_sud_grand
-  - service: input_text.set_value
+    action: switch.turn_off
+  - action: input_text.set_value
+    metadata: {}
     data:
       value: close
     target:
       entity_id: input_text.volet_amis_sud_grand
   mode: single
   icon: mdi:window-shutter
-volet_amis_sud_grand_stop:
-  alias: volet amis sud grand stop
-  sequence:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ is_state(''input_text.volet_amis_sud_grand'', ''open'')
-          }}'
-      sequence:
-      - service: script.volet_amis_sud_grand_up
-        data: {}
-      - service: input_text.set_value
-        data:
-          value: stop_open
-        target:
-          entity_id: input_text.volet_amis_sud_grand
-    - conditions:
-      - condition: template
-        value_template: '{{ is_state(''input_text.volet_amis_sud_grand'', ''close'')
-          }}'
-      sequence:
-      - service: script.volet_amis_sud_grand_down
-        data: {}
-      - service: input_text.set_value
-        data:
-          value: stop_close
-        target:
-          entity_id: input_text.volet_amis_sud_grand
-    default: []
-  mode: single
-  icon: mdi:window-shutter-alert
 porte_garage_stop:
   alias: porte_garage_stop
   sequence:
@@ -334,24 +289,17 @@ ecs_off_off:
     data: {}
   mode: single
   icon: mdi:water-boiler-auto
-creation_groupe_update:
-  alias: Création Groupe Update
-  sequence:
-  - service: group.set
-    data_template:
-      object_id: all_update
-      entities: '{{ states.update | map(attribute=''entity_id'') | join('','') }}     '
-  mode: single
 '1706464871250':
   alias: Volets RTS Fermeture
   sequence:
   - data: {}
     target:
       entity_id:
-      - cover.volet_salon_petit
       - cover.volet_sdb_rts
       - cover.volet_ch_nord
-      - cover.volets_ch_parents_rts
+      - cover.volet_parents_grand_zb_volets
+      - cover.volet_ch_parts_petit
+      - cover.volet_salon_petit
     action: cover.close_cover
   - action: script.turn_on
     metadata: {}
@@ -359,6 +307,7 @@ creation_groupe_update:
     target:
       entity_id:
       - script.volets_bureau_rts_fermeture_2
+    enabled: true
   - data: {}
     target:
       entity_id:
@@ -482,12 +431,17 @@ creation_groupe_update:
   sequence:
   - target:
       entity_id:
-      - cover.volet_salon_petit
       - cover.volet_cuisine
       - cover.volet_sdb_rts
       - cover.volet_sam_volets_zb
     data: {}
     action: cover.open_cover
+  - target:
+      entity_id:
+      - cover.volet_salon_petit
+    data: {}
+    action: cover.open_cover
+    enabled: true
   - delay:
       hours: 0
       minutes: 0
@@ -501,6 +455,7 @@ creation_groupe_update:
     then:
     - data: {}
       action: script.1_0_2_ouverture_volets_bureau_rts
+    enabled: true
   - if:
     - condition: state
       entity_id: input_boolean.presence_amis_ch_nord
@@ -699,8 +654,8 @@ creation_groupe_update:
       - cover.volet_sdb_rts
       - cover.volet_ch_nord
       - cover.volets_ch_parents_rts
-      - cover.volet_parents_grand_p
       - cover.volet_sam_volets_zb
+      - cover.volet_parents_grand_zb_volets
     action: cover.open_cover
   - delay:
       hours: 0
@@ -730,8 +685,8 @@ creation_groupe_update:
       - cover.volet_sdb_rts
       - cover.volet_ch_nord
       - cover.volets_ch_parents_rts
-      - cover.volet_parents_grand_p
       - cover.volet_sam_volets_zb
+      - cover.volet_parents_grand_zb_volets
     action: cover.close_cover
   - delay:
       hours: 0
@@ -861,4 +816,82 @@ volets_bureau_rts_fermeture_2:
   alias: Volets Bureau RTS Fermeture
   mode: single
   icon: mdi:window-shutter-open
+  description: ''
+activation_camera:
+  sequence:
+  - data:
+      message: Désactivation Détection video surveillance
+      title: Caméra
+    action: notify.telegram
+  - action: switch.turn_off
+    target:
+      entity_id:
+      - switch.cuisine_detect
+      - switch.cuisine_motion
+      - switch.cuisine_recordings
+      - switch.cuisine_snapshots
+      - switch.piscine_detect
+      - switch.piscine_motion
+      - switch.piscine_recordings
+      - switch.piscine_snapshots
+      - switch.garage_ext_detect
+      - switch.garage_ext_motion
+      - switch.garage_ext_recordings
+      - switch.garage_ext_snapshots
+    data: {}
+  alias: Desactivation Camera
+  description: ''
+activation_camera_2:
+  sequence:
+  - data:
+      message: Activation Détection video surveillance
+      title: Caméra
+    action: notify.telegram
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.cuisine_detect
+      - switch.cuisine_motion
+      - switch.piscine_detect
+      - switch.piscine_motion
+      - switch.garage_ext_detect
+      - switch.garage_ext_motion
+      - switch.piscine_snapshots
+      - switch.cuisine_snapshots
+      - switch.garage_ext_snapshots
+      - switch.piscine_recordings
+      - switch.cuisine_recordings
+      - switch.garage_ext_recordings
+    data: {}
+  alias: Activation caméra
+  description: ''
+volet_amis_sud_grand_stop_2:
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state("input_text.volet_amis_sud_grand", "open") }}'
+      sequence:
+      - data: {}
+        action: script.volet_amis_sud_grand_up
+      - data:
+          value: stop_open
+        target:
+          entity_id: input_text.volet_amis_sud_grand
+        action: input_text.set_value
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state("input_text.volet_amis_sud_grand", "close") }}'
+      sequence:
+      - data: {}
+        action: script.volet_amis_sud_grand_down
+      - data:
+          value: stop_close
+        target:
+          entity_id: input_text.volet_amis_sud_grand
+        action: input_text.set_value
+    default: []
+  alias: volet amis sud grand stop
+  mode: single
+  icon: mdi:window-shutter-alert
   description: ''

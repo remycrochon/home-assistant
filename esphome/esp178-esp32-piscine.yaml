@@ -826,6 +826,8 @@ sensor:
     #address: 0x060321117ae89b28
     name: "${friendly_name}_temperature_eau"
     id: temp_eau
+    device_class: temperature
+    state_class: "measurement"     
     filters:
       - filter_out: 0.0
         # Etalonné le 26 Aout 2024  avec une PT100       
@@ -854,6 +856,8 @@ sensor:
     unit_of_measurement: "pH"
     accuracy_decimals: 2
     update_interval: 60s
+    device_class: ph
+    state_class: "measurement"     
   #  moyenne sur 15 mn-affichage toutes les 5mn
     filters:
       - sliding_window_moving_average:
@@ -884,9 +888,14 @@ sensor:
     sources:
       - source: ph_ezo
         error: 1.0
+    device_class: ph
+    state_class: "measurement"         
+
   - platform: combination
     type: median
     name: "${friendly_name}_ph_stat_median"
+    device_class: ph
+    state_class: "measurement"        
     sources:
       - source: ph_ezo
 
@@ -920,7 +929,9 @@ sensor:
     gain: 6.144
     name: "${friendly_name}_Pression_filtre"          
     update_interval: 10s
-    unit_of_measurement: "Bars"
+    unit_of_measurement: "bar"
+    device_class: pressure
+    state_class: "measurement"        
     id: pression_filtre
     filters:
       - calibrate_linear:

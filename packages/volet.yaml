@@ -73,12 +73,8 @@ input_number:
 
 # memoire cde volet parents grand
 input_text:
-  volet_parents_grand:
-    initial: ""
-  volet_sam_grand:
-    initial: ""
   volet_amis_sud_grand:
-    initial: ""
+    initial: "open"
   mvt_porte_garage:
     initial: ""
   mvt_porte_sous_sol:
@@ -150,7 +146,7 @@ cover:
         travelling_time_up: 21
         travelling_time_down: 19
         close_script_entity_id: script.volet_amis_sud_down
-        stop_script_entity_id: script.volet_amis_sud_stop
+        stop_script_entity_id: script.volet_amis_sud_grand_stop_2
         open_script_entity_id: script.volet_amis_sud_up
         always_confident: True
 

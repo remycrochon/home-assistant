@@ -24,7 +24,7 @@ template:
         {% set j = states('sensor.ecocompteur_clim') | float(default=0) | round(2) %}
         {% set k = states('sensor.pc_onduleur_eaton_puissance') | float(default=0) | round(2) %}
         {% set l = states('sensor.esp131_pzem_chalet_puissance') | float(default=0) | round(2) %}
-        {% set total=(a-b-c-d-e-f-g-h-i-j-k) | round(2)%}
+        {% set total=(a-b-c-d-e-f-g-h-i-j-k-l) | round(2)%}
         {% if total >= 0 %}
           {{ total }}
         {% else%}

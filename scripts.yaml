@@ -517,6 +517,11 @@ ecs_off_off:
     data: {}
     target:
       entity_id: script.volet_bureau_gauche_rts_ouverture
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
   - action: script.turn_on
     metadata: {}
     data: {}

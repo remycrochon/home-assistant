@@ -9,8 +9,7 @@ esphome:
   
 esp8266:
   board: esp12e
-  framework:
-    version: recommended
+
 
 # Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:

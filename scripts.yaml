@@ -21,60 +21,6 @@ porte_sous_sol_up:
       entity_id: input_text.mvt_porte_sous_sol
   mode: single
   icon: mdi:garage-open-variant
-volet_piscine_ouverture:
-  alias: volet_piscine_ouverture
-  sequence:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ferm_volet_piscine
-  - delay: 00:00:02
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ouv_volet_piscine
-  - delay: 00:00:05
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ouv_volet_piscine
-  mode: single
-  icon: mdi:garage-open
-volet_piscine_fermeture:
-  alias: volet_piscine_fermeture
-  sequence:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ouv_volet_piscine
-  - delay: 00:00:02
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ferm_volet_piscine
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ecl_piscine
-  - delay: 00:01:30
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ferm_volet_piscine
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ecl_piscine
-  mode: single
-  icon: mdi:garage
 '1619887011976':
   alias: Alarm Siren
   sequence:
@@ -167,31 +113,6 @@ porte_garage_up:
       entity_id: input_text.mvt_porte_garage
   mode: single
   icon: mdi:garage-open-variant
-volet_piscine_stop:
-  alias: volet_piscine_stop
-  sequence:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id:
-      - switch.cde_ferm_volet_piscine
-      - switch.cde_ouv_volet_piscine
-  - delay: 00:00:02
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.cde_ferm_volet_piscine
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id: switch.cde_ferm_volet_piscine
-  mode: single
-  icon: mdi:garage-open
 volet_amis_sud_grand_up:
   alias: volet amis sud grand up
   sequence:
@@ -308,18 +229,19 @@ ecs_off_off:
       entity_id:
       - script.volets_bureau_rts_fermeture_2
     enabled: true
-  - data: {}
-    target:
-      entity_id:
-      - cover.volet_ch_sud
-    enabled: false
-    action: cover.close_cover
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 10
       milliseconds: 0
-    enabled: false
+    enabled: true
+  - action: script.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - script.volets_bureau_rts_fermeture_2
+    enabled: true
   - data: {}
     target:
       entity_id:
@@ -455,6 +377,13 @@ ecs_off_off:
     then:
     - data: {}
       action: script.1_0_2_ouverture_volets_bureau_rts
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 10
+        milliseconds: 0
+    - data: {}
+      action: script.1_0_2_ouverture_volets_bureau_rts
     enabled: true
   - if:
     - condition: state
@@ -489,7 +418,7 @@ ecs_off_off:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 2
       milliseconds: 0
   - data: {}
     target:
@@ -499,7 +428,7 @@ ecs_off_off:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 2
       milliseconds: 0
   - data: {}
     target:
@@ -520,8 +449,8 @@ ecs_off_off:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
-      milliseconds: 0
+      seconds: 0
+      milliseconds: 500
   - action: script.turn_on
     metadata: {}
     data: {}
@@ -760,7 +689,7 @@ volet_bureau_gauche_rts_ouverture:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 2
       milliseconds: 0
   - data: {}
     target:
@@ -770,7 +699,7 @@ volet_bureau_gauche_rts_ouverture:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 2
       milliseconds: 0
   - data: {}
     target:
@@ -812,6 +741,11 @@ volets_bureau_rts_fermeture_2:
     target:
       entity_id:
       - script.2_0_0_fermeture_volet_bureau_gauche_rts
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 0
+      milliseconds: 500
   - action: script.turn_on
     metadata: {}
     data: {}

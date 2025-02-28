@@ -20,7 +20,6 @@ sensor:
       - 'time_utc'
 
 
-  # Chekc si Portainer est en run
   # https://forum.hacf.fr/t/scan-interval-dun-sensor-command-line/5182
   #- platform: command_line
   #  name: "Portainer Online"

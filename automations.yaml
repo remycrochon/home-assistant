@@ -110,17 +110,17 @@
 - id: '1629296468909'
   alias: Robot AMX435 Surveillance Pluviometrie
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.vp2_pluviometrie_moyenne
+  triggers:
+  - entity_id: sensor.vp2_pluviometrie_moyenne
     above: input_number.seuil_pluie_stop_robot
     id: seuil_haut
-  - platform: numeric_state
-    entity_id: sensor.vp2_pluviometrie_moyenne
+    trigger: numeric_state
+  - entity_id: sensor.vp2_pluviometrie_moyenne
     id: seuil_bas
     below: input_number.seuil_pluie_stop_robot
-  condition: []
-  action:
+    trigger: numeric_state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -131,9 +131,10 @@
         target:
           device_id: 7808727539e5cd0a67cbd0484d1835d4
       - data:
-          message: Retour Robot à la Base!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
-            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
-            mm {{-"\n"-}}{{states("sensor.date_time") }}
+          message: Le robot tondeuse a été garé à cause de la forte pluie{{-"\n"-}}
+            Pluvio Moyenne 5h = {{states('sensor.vp2_pluviometrie_moyenne')}} mm {{-"\n"-}}
+            Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}} mm
+            {{-"\n"-}}{{states("sensor.date_time") }}
           title: Robot-Début Alerte Meteo Pluie !!!
         action: notify.telegram
     - conditions:

@@ -5,9 +5,11 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP8266
+esp8266:
   board: d1_mini
-  
+  framework:
+    version: recommended  
+
 wifi:
   networks:
     - ssid: !secret wifi_esp

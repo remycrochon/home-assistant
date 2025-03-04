@@ -5,11 +5,11 @@ substitutions:
   time_timezone: "Europe/Paris"
   
 esphome:
-  name: ${device_name}
-  platform: ESP32
-  board: ttgo-t1 
+  name: ${device_name} 
   includes:
     - power_mon.h
+esp32:
+  board: ttgo-t1
 
 wifi:
   networks:

@@ -29,7 +29,8 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  platform: ESP32
+  
+esp32:
   board: wt32-eth01 #esp-wrover-kit
 
 # Enable logging

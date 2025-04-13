@@ -429,6 +429,20 @@
   actions:
   - data: {}
     action: shell_command.push_to_github
+    response_variable: reponse_push
+  - if:
+    - condition: template
+      value_template: '{{ reponse_push[''returncode''] == 0 }}'
+    then:
+    - action: notify.telegram
+      data:
+        title: ToDo
+        message: '{{ reponse_push[''stdout''] }}'
+    else:
+    - action: notify.telegram
+      data:
+        title: ToDo file error
+        message: '{{ reponse_push[''stderr''] }}'
   mode: single
 - id: '1637073026237'
   alias: Balise ouverture Porte sous sol

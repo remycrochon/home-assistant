@@ -13,7 +13,8 @@ esphome:
 esp32:
   board: mhetesp32minikit
   framework:
-    type: esp-idf
+    type: arduino
+    
 
 wifi:
   networks:
@@ -64,14 +65,14 @@ time:
 display:
   - platform: ili9xxx  
     model: ILI9341
-
     cs_pin: GPIO15  # Broche CS (Chip Select)
     dc_pin: GPIO05  # Broche DC (Data/Command)
     reset_pin: GPIO04  # Broche de réinitialisation   
     dimensions: 320x240
     auto_clear_enabled: false
     update_interval: never
-    id: my_display    
+    id: my_display
+    invert_colors: false
 
 lvgl:
   displays:

@@ -1,0 +1,30 @@
+rest:
+  - resource: http://192.168.0.221:8080/api/v1/results/latest/
+    headers:
+      Authorization: !secret speedtest_token
+    method: GET
+    scan_interval: 3600
+    sensor:
+      - name: "Speedtest Download"
+        value_template: "{{ (value_json.data.download_bits / 1000000) | round(2) }}"
+        device_class: data_rate
+        unique_id: "speedtest_download"
+        icon: mdi:speedometer
+        unit_of_measurement: "Mbit/s"
+        state_class: measurement
+
+      - name: "Speedtest Upload"
+        value_template: "{{ (value_json.data.upload_bits / 1000000) | round(2) }}"
+        device_class: data_rate
+        unique_id: "speedtest_upload"
+        icon: mdi:speedometer
+        unit_of_measurement: "Mbit/s"
+        state_class: measurement
+
+      - name: "Speedtest Ping"
+        value_template: "{{ value_json.data.ping | round(2) }}"
+        device_class: duration
+        unique_id: "speedtest_ping"
+        icon: mdi:speedometer
+        unit_of_measurement: "ms"
+        state_class: measurement

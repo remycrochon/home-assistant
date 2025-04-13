@@ -115,26 +115,40 @@
     above: input_number.seuil_pluie_stop_robot
     id: seuil_haut
     trigger: numeric_state
-  - entity_id: sensor.vp2_pluviometrie_moyenne
+  - entity_id:
+    - sensor.vp2_pluviometrie_moyenne
     id: seuil_bas
     below: input_number.seuil_pluie_stop_robot
     trigger: numeric_state
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.vp2_trigger_intensite_pluvieuse
+    from: 'off'
+    to: 'on'
+    id: intensité
   conditions: []
   actions:
   - choose:
     - conditions:
       - condition: trigger
-        id: seuil_haut
+        id:
+        - seuil_haut
+        - intensité
       sequence:
       - data: {}
         action: lawn_mower.dock
         target:
           device_id: 7808727539e5cd0a67cbd0484d1835d4
       - data:
-          message: Le robot tondeuse a été garé à cause de la forte pluie{{-"\n"-}}
-            Pluvio Moyenne 5h = {{states('sensor.vp2_pluviometrie_moyenne')}} mm {{-"\n"-}}
-            Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}} mm
-            {{-"\n"-}}{{states("sensor.date_time") }}
+          message: Le robot tondeuse a été garé à cause de la forte pluie:{{-"\n"-}}
+            Pluvio Moyenne 10mn ({{states('sensor.vp2_pluviometrie_moyenne')}} mm)
+            {{-"\n"-}} > Seuil Stop robot ({{states('input_number.seuil_pluie_stop_robot')}}
+            mm) {{-"\n"-}} ou Intensité pluvieuse ({{states('sensor.vp2_rain_rate')}}
+            mm/h) > 3 mm/h pendant 5mn. {{-"\n"-}} {{states("sensor.date_time") }}
           title: Robot-Début Alerte Meteo Pluie !!!
         action: notify.telegram
     - conditions:
@@ -146,9 +160,9 @@
         target:
           device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
       - data:
-          message: Validation Départ Robot!!{{-"\n"-}} Pluvio Moyenne 12h = {{states('sensor.vp2_pluviometrie_moyenne')}}
-            mm {{-"\n"-}} Seuil Stop robot= {{states('input_number.seuil_pluie_stop_robot')}}
-            mm {{-"\n"-}}{{states("sensor.date_time") }}
+          message: Reprise programme horaire!!{{-"\n"-}} Pluvio Moyenne 10mn ( {{states('sensor.vp2_pluviometrie_moyenne')}}
+            mm) {{-"\n"-}} < Seuil Stop robot ({{states('input_number.seuil_pluie_stop_robot')}}
+            mm) pendant 1h. {{-"\n"-}}{{states("sensor.date_time") }}
           title: Robot- Fin Alerte Meteo Pluie !!!
         action: notify.telegram
   mode: single
@@ -915,14 +929,12 @@
   alias: Surveillance Puissance Onduleur Bureau la nuit
   description: ''
   triggers:
-  - entity_id:
-    - sensor.pc_lidl_2023_c_active_power
-    above: 20
-    trigger: numeric_state
+  - trigger: time
+    at: '23:00:00'
   conditions:
-  - condition: time
-    after: '23:00:00'
-    before: 07:00:00
+  - condition: numeric_state
+    entity_id: sensor.pc_lidl_2023_c_active_power
+    above: 20
   actions:
   - data:
       message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
@@ -1487,10 +1499,18 @@
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
     to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
   - trigger: state
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
     to: unknown
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
   - trigger: state
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
@@ -1610,9 +1630,9 @@
       - 367dba31447009458e03b70e3a29b6b2
       include_time: time_enabled
       time: 08:00:00
-      notify_title: Notification Batterie basse
+      notify_title: Notification Batterie basse <30%
       include_easy_notify: enable_easy_notify
-      include_custom_actions: enable_custom_actions
+      include_custom_actions: disabled_custom_actions
       custom_actions:
       - data:
           message: les appareils suivant ont moins de 30% de batterie:{{-"\n"-}}{{all_sensors|replace(',
@@ -1859,6 +1879,10 @@
     - sensor.am435x_awd_error
     id: error
     trigger: state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
   conditions:
   - condition: not
     conditions:
@@ -2232,7 +2256,7 @@
           entity_id: switch.multiprise_ldl_2024_12_commutateur
   mode: single
 - id: '1735490750135'
-  alias: Activation Forcage CP1 si tempo Rouge
+  alias: Activation Forcage Charge Programmée 1 si tempo Rouge
   description: ''
   triggers:
   - trigger: state
@@ -2446,3 +2470,150 @@
     target:
       entity_id: switch.pc2_lidl
   mode: single
+- id: '1741098557072'
+  alias: Statistiques Robot am435x
+  description: A 23:59
+  triggers:
+  - trigger: time
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - action: notify.send_message
+    data:
+      message: '{% set tf=states(''sensor.am435x_awd_temps_de_fonctionnement_total'')|float(0)%}
+        {% set tr=states(''sensor.am435x_awd_temps_de_recherche_total'')|float(0)%}
+        {% set tt=states(''sensor.am435x_awd_temps_de_tonte_total'')|float(0)%} {{states("sensor.date_time")}},
+        {{ (tf*24)|round(0) }}, {{ (tr/(tf*24)*100)|round(2)}}, {{ (tt/(tf*24)*100)|round(2)}},
+        {{ states(''sensor.am435x_awd_distance_parcourue_totale'')|round(0) }}, {{
+        states(''sensor.am435x_awd_nombre_de_cycles_de_charge'')|round(0)}}, {{ states(''sensor.am435x_awd_temps_de_charge_total'')|round(0)}},
+        {{ states(''sensor.am435x_awd_nombre_de_collisions'')|round(0)}}, {{ states(''sensor.am435x_awd_duree_d_utilisation_des_lames'')|round(0)}}'
+    target:
+      entity_id: notify.statistique_am435x
+  mode: single
+- id: '1741591881874'
+  alias: Energie Changement HP<->HC
+  description: ''
+  triggers:
+  - trigger: time
+    at: input_datetime.debut_heure_creuse
+    id: dhc
+  - trigger: time
+    at: input_datetime.fin_heure_creuse
+    id: fhc
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - dhc
+      sequence:
+      - action: select.select_option
+        data:
+          option: hc
+        target:
+          entity_id: select.compteur_energie_autres_jour
+    - conditions:
+      - condition: trigger
+        id:
+        - fhc
+      sequence:
+      - action: select.select_option
+        data:
+          option: hp
+        target:
+          entity_id: select.compteur_energie_autres_jour
+  mode: single
+- id: '1741796346707'
+  alias: Rechargement Auto Automower Husqvarna
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - lawn_mower.am435x_awd
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  conditions: []
+  actions:
+  - action: homeassistant.reload_config_entry
+    data:
+      entry_id: husqvarna_automower
+  - action: notify.telegram
+    metadata: {}
+    data:
+      message: L'intégration Husqvarna Automower est indisponible. Tentative de rechargement
+        automatique effectuée.
+  mode: single
+- id: solar_shutter_control_salon
+  alias: Contrôle Solaire Volet Salon
+  description: Ajuste le volet du salon en fonction de la position du soleil, de la
+    météo et de l'occupation
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: above_horizon
+  - condition: state
+    entity_id: input_boolean.salon_control_enabled
+    state: 'on'
+  - condition: numeric_state
+    entity_id: weather.albi
+    attribute: cloud_coverage
+    below: 20
+  - condition: template
+    value_template: '{{ state_attr(''weather.albi'', ''temperature'') | float(0) >
+      states(''input_number.salon_temp_seuil'') | float(0) }}'
+  - condition: or
+    conditions:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.salon_occupation
+        state: 'on'
+    - condition: state
+      entity_id: binary_sensor.salon_occupation
+      state: unavailable
+  action:
+  - variables:
+      shutter_entity: cover.volet_salon
+      azimut_debut: '{{ states(''input_number.salon_azimut_debut'') | float(0) }}'
+      azimut_fin: '{{ states(''input_number.salon_azimut_fin'') | float(0) }}'
+      elevation_min: '{{ states(''input_number.salon_elevation_min'') | float(0) }}'
+      pas: '{{ states(''input_number.salon_pas'') | float(1) }}'
+      position_max: '{{ states(''input_number.salon_position_max'') | float(0) }}'
+      current_azimut: '{{ state_attr(''sun.sun'', ''azimuth'') | float(0) }}'
+      current_elevation: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
+      current_position: '{{ state_attr(''cover.volet_salon'', ''current_position'')
+        | float(0) }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ current_azimut > azimut_debut and current_azimut < azimut_fin
+          and current_elevation > elevation_min }}'
+      sequence:
+      - variables:
+          azimut_range: '{{ (azimut_fin - azimut_debut) | float(1) }}'
+          azimut_progress: '{{ (current_azimut - azimut_debut) / azimut_range }}'
+          target_position: '{{ (azimut_progress * position_max) | round(0) }}'
+          adjusted_position: '{{ (target_position / pas) | int * pas }}'
+      - service: cover.set_cover_position
+        target:
+          entity_id: '{{ shutter_entity }}'
+        data:
+          position: '{{ adjusted_position | int }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ current_azimut > azimut_fin }}'
+      sequence:
+      - variables:
+          adjusted_position: '{{ [0, current_position - pas] | max | int }}'
+      - service: cover.set_cover_position
+        target:
+          entity_id: '{{ shutter_entity }}'
+        data:
+          position: '{{ adjusted_position | int }}'

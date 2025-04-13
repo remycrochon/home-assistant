@@ -219,7 +219,7 @@ sensor:
 
   - platform: template
     sensors:
-# Azimuth et elevation soleil sont aussi calculés dans ESP134 mais sujet à coupure
+# Azimuth et elevation soleil
       sun_elevation:
         friendly_name: 'elevation soleil'
         unit_of_measurement: "°"

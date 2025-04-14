@@ -436,12 +436,12 @@
     then:
     - action: notify.telegram
       data:
-        title: ToDo
+        title: Push Github OK
         message: '{{ reponse_push[''stdout''] }}'
     else:
     - action: notify.telegram
       data:
-        title: ToDo file error
+        title: Push Github en erreur
         message: '{{ reponse_push[''stderr''] }}'
   mode: single
 - id: '1637073026237'

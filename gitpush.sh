@@ -15,6 +15,7 @@
 #!/bin/bash
 date >> /config/git-last.txt
 cd /config
+export GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa"
 git config --global user.email "crochonremy@gmail.com"
 git config --global user.name "remycrochon"
 git add .

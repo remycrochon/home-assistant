@@ -11,10 +11,10 @@ esphome:
     version: "0.0.0"
 
 esp32:
-  board: mhetesp32minikit
+  board: lolin32
   framework:
     type: arduino
-    
+    #board: mhetesp32minikit 
 
 wifi:
   networks:
@@ -33,7 +33,7 @@ web_server:
 
 # Enable logging
 logger:
-  level: VERY_VERBOSE
+  level: DEBUG
 
 # Enable Home Assistant API
 api:
@@ -42,49 +42,78 @@ ota:
   platform: esphome
   
 captive_portal:
-font:
-  - file: "fonts/arial.ttf"
-    id: arial
-    size: 15
-    
+
+
 #psram:
 #  mode: octal
 #  speed: 80MHz
+#Broche VCC de l'écran: sortie 3,3 V de l'ESP32
+#Broche GND de l'écran: broche GND de l'ESP32
+#Broche CS de l'écran: broche D15 de l'ESP32
+#Broche Reset de l'écran: broche D4 de l'ESP32
+#Broche DC de l'écran: broche D5 de l'ESP32
+#Broche SDI (MOSI) de l'écran: broche D23 de l'ESP32
+#Broche SCK de l'écran: broche D18 de l'ESP32
+#Broche LED de l'écran: sortie 3,3 V de l'ESP32
+#Broche CDCK (MISO) de l'écran: broche D19 de l'ESP32
+#Broche T_CLK de l'écran: broche D18 de l'ESP32
+#Broche T_CS de l'écran: broche D21 de l'ESP32
+#Broche T_DIN de l'écran: broche D23 de l'ESP32
+#Broche T_DO de l'écran: broche D19 de l'ESP32
+#Broche T_IRQ de l'écran: pas branchée
   
 spi:
-  clk_pin: GPIO18 # (Pin on display - SCK/T_CLK)
-  mosi_pin: GPIO23 # (Pin on display - SDI(MOSI)/T_DIN)
-  miso_pin: GPIO19 # (Pin on display - SDO(MISO)/T_DO)
+  clk_pin: 18 # (Pin on display - SCK/T_CLK)
+  mosi_pin: 23 # (Pin on display - SDI(MOSI)/T_DIN)
+  miso_pin: 19 # (Pin on display - SDO(MISO)/T_DO)
     
-
-# Example configuration entry 
-time:
-  - platform: homeassistant
-    id: homeassistant_time
-
+# Configuration de l'écran
 display:
-  - platform: ili9xxx  
-    model: ILI9341
-    cs_pin: GPIO15  # Broche CS (Chip Select)
-    dc_pin: GPIO05  # Broche DC (Data/Command)
-    reset_pin: GPIO04  # Broche de réinitialisation   
-    dimensions: 320x240
-    auto_clear_enabled: false
-    update_interval: never
-    id: my_display
+  - platform: ili9xxx
+    model: ILI9341  # ou ST7789V selon votre écran
+    cs_pin: 15
+    dc_pin: 5
+    reset_pin: 4 
+    rotation: 90
     invert_colors: false
+    dimensions:
+      width: 320
+      height: 240
+    pages:
+      - id: page1
+        lambda: |-
+          it.rectangle(10, 10, 50, 50, Color::WHITE);  // Dessine un rectangle
+    update_interval: 1s
 
-lvgl:
-  displays:
-    - my_display
-  pages:
-    - id: main_page
-      widgets:
-        - label:
-            align: top_left
-            text: 'Hello World!'
-        - led:
-            id: led_id
-            align: CENTER
-            color: 0xFF0000
-            brightness: 70%
+
+# Police intégrée
+
+# Configuration du tactile (optionnel pour ce test)
+#touchscreen:
+#  platform: xpt2046
+#  id: my_touchscreen
+#  cs_pin: 21
+#  update_interval: 50ms
+#  threshold: 400
+#  transform:
+#    mirror_x: true
+#  calibration:
+#    x_min: 280
+#    x_max: 3860
+#    y_min: 340
+#    y_max: 3860
+#  on_touch:
+#    - lambda: |-
+#          ESP_LOGD("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
+#              touch.x,
+#              touch.y,
+#              touch.x_raw,
+#             touch.y_raw
+#             );
+
+# Police pour l'affichage
+#font:
+#  - file: "fonts/Montserrat-Regular.ttf"
+#    id: my_font
+#    size: 8  # Réduit pour limiter l'usage mémoire
+

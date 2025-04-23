@@ -1,0 +1,34 @@
+---
+# Local relay as light or switch
+# vars:
+  # uid:
+  # ha_name:
+  # entity_id:
+
+light:
+  - id: local_light_${uid}
+    name: ${ha_name}
+    platform: binary
+    output: $entity_id
+    on_turn_on:
+      then:
+        - lvgl.widget.update:
+            id: button_${uid}
+            bg_color: $button_on_color
+        - lvgl.widget.update:
+            id: icon_${uid}
+            text_color: $icon_on_color
+        - lvgl.widget.update:
+            id: label_${uid}
+            text_color: $label_on_color
+    on_turn_off:
+      then:
+        - lvgl.widget.update:
+            id: button_${uid}
+            bg_color: $button_off_color
+        - lvgl.widget.update:
+            id: icon_${uid}
+            text_color: $icon_off_color
+        - lvgl.widget.update:
+            id: label_${uid}
+            text_color: $label_off_color

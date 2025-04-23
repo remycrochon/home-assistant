@@ -1,0 +1,40 @@
+---
+# Light toggle button color
+# vars:
+  # uid:
+  # height:
+  # text:
+  # icon:
+  # entity_id:
+  # color:
+
+# This function requires this helper scrip in Home Assistant
+#script:
+#  set_light_rgb:
+#    alias: 'ESPHome RGB light helper script'
+#    sequence:
+#      - variables:
+#          r: "{{ color[0:2] | int(0,16) }}"
+#          g: "{{ color[2:4] | int(0,16) }}"
+#          b: "{{ color[4:6] | int(0,16) }}"
+#      - service: light.turn_on
+#        data:
+#          entity_id: "{{ light_name }}"
+#          rgb_color: ["{{ r }}", "{{ g }}", "{{ b }}"]
+
+
+
+radius: 5px
+width: 75
+height: 75
+pad_all: 5px
+bg_color: "${color}"
+widgets:
+on_short_click:
+  - homeassistant.action:
+      action: script.set_light_rgb
+      data:
+        light_name: ${entity_id}
+        color: "${color}"
+
+

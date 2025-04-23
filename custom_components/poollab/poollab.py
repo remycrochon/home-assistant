@@ -6,7 +6,7 @@ from typing import Any
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 
-API_ENDPOINT = "https://production.backend.labcom.cloud/graphql"
+API_ENDPOINT = "https://backend.labcom.cloud/graphql"
 
 # Measurement ranges according to https://poollab.org/static/manuals/poollab_manual_gb-fr-e-d-i.pdf
 MEAS_RANGES_BY_SCENARIO = {
@@ -241,10 +241,11 @@ class CloudAccount:
 class PoolLabApi:
     """Public API class for PoolLab."""
 
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: str, url = API_ENDPOINT) -> None:
         """Init the cloud api object."""
         self._token = token
         self._data = None
+        self._url = url
 
     def _build_schema(self) -> str:
         schema = "\n"
@@ -259,7 +260,7 @@ class PoolLabApi:
         if schema is None:
             schema = self._build_schema()
         transport = AIOHTTPTransport(
-            url=API_ENDPOINT, headers={"Authorization": self._token}
+            url=self._url, headers={"Authorization": self._token}
         )
         async with Client(
             transport=transport,

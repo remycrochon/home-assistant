@@ -1,0 +1,34 @@
+---
+# Weather for today from Home Assistant Accuweather plugin
+
+text_sensor:
+  - platform: homeassistant
+    entity_id: weather.home
+    id: weather_condition
+    on_value:
+        then:  !include { file: weather_icons_update.yaml, vars: { size: "${size}", id: weather_condition_icon, input_id: weather_condition  } }
+
+  - platform: homeassistant
+    entity_id: weather.home
+    attribute: temperature
+    id: temperature
+    on_value:
+        then:
+          # Update weather_condition
+          - lvgl.label.update:
+              id: weather_temperature_today
+              text:
+                format: "%s°"
+                args: [ 'id(temperature).state.c_str()' ]
+
+  - platform: homeassistant
+    entity_id: sensor.home_condition_day_0
+    id: condition_today
+    on_value:
+        then:
+          # Update weather_condition
+          - lvgl.label.update:
+              id: weather_condition_today
+              text:
+                format: "%s"
+                args: [ 'id(condition_today).state.c_str()' ]

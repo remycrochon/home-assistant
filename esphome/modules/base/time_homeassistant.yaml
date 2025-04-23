@@ -1,0 +1,17 @@
+---
+time:
+  - platform: homeassistant
+    id: system_time
+    on_time_sync:
+      - if: # Updates the last restart time
+          condition:
+            lambda: 'return id(device_last_restart).state == "";'
+          then:
+            - text_sensor.template.publish:
+                id: device_last_restart
+                state: !lambda 'return id(system_time).now().strftime("%a %d %b %Y - %I:%M:%S %p");'
+    on_time:                
+      - minutes: '*'
+        seconds: 0
+        then:
+          - script.execute: time_update

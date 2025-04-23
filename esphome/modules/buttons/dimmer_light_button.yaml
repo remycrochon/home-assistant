@@ -1,0 +1,52 @@
+---
+# Dimmer light switch button
+# vars:
+  # uid:
+  # height:
+  # text:
+  # icon:
+  # entity_id:
+height: ${height}
+id: button_${uid}
+widgets:
+  - label:
+      text_font: $icon_font
+      align: top_left
+      id: icon_${uid}
+      text: ${icon}
+  - label:
+      align: bottom_left
+      id: label_${uid}
+      text: ${text}
+  - slider:
+      align: top_right
+      id: slider_${uid}
+      x: -5
+      y: 5
+      width: 40
+      height: 165
+      pad_all: 0
+      min_value: 0
+      max_value: 255
+      radius: 10px
+      knob:
+        bg_color: white
+        radius: 2px
+        pad_left: 0
+        pad_right: 0
+        pad_top: 0
+        pad_bottom: 0
+      indicator:
+        radius: 0px
+        bg_color: gray
+      on_release:
+        - homeassistant.action:
+            action: light.turn_on
+            data:
+              entity_id: ${entity_id}
+              brightness: !lambda return int(x);
+on_short_click:
+    - homeassistant.action:
+        action: light.toggle
+        data:
+          entity_id: ${entity_id}

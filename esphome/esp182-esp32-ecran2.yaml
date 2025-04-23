@@ -1,0 +1,309 @@
+substitutions:
+  name: "guition-esp32-s3-4848s040"
+  friendly_name: "esp182-Guition480-basic"
+  adress_ip: "192.168.0.182"
+  device_description: "Guition ESP32-S3-4848S040 480*480 Smart Screen"
+  project_name: "Guition.ESP32_S3_4848S040"
+  project_version: "1.0.1"
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
+  platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      COMPILER_OPTIMIZATION_SIZE: y
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+logger:
+  level: DEBUG
+
+api:
+
+ota:
+  platform: esphome
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+i2c:
+  sda: 19
+  scl: 45
+
+spi:
+  clk_pin: 48
+  mosi_pin: 47
+  miso_pin: 41
+
+output:
+  - platform: ledc
+    pin: 38
+    id: backlight_output
+    frequency: 100Hz
+
+light:
+  - platform: monochromatic
+    output: backlight_output
+    name: "Backlight"
+    id: backlight
+    restore_mode: ALWAYS_ON
+
+sensor:
+  # Solar
+  - platform: homeassistant
+    id: solar_energy_day
+    entity_id: sensor.mp2_total_energie_produite_jour
+    unit_of_measurement: kWh
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "Solar energy day: %.2f kWh"
+            args: ["x"]
+
+  # House
+  - platform: homeassistant
+    id: house_energy_day
+    entity_id: sensor.mp2_energy_conso_ac_l1_jour
+    unit_of_measurement: kWh
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "House energy day: %.2f kWh"
+            args: ["x"]
+
+  # Battery
+  - platform: homeassistant
+    id: battery_charge_day
+    entity_id: sensor.mp2_energy_charge_batteries_jour
+    unit_of_measurement: kWh
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "Battery charge day: %.2f kWh"
+            args: ["x"]
+  - platform: homeassistant
+    id: battery_discharge_day
+    entity_id: sensor.mp2_energy_decharge_batteries_jour
+    unit_of_measurement: kWh
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "Battery discharge day: %.2f kWh"
+            args: ["x"]
+
+  # Grid
+  - platform: homeassistant
+    id: grid_import_day
+    entity_id: sensor.mp2_energie_soutiree_du_reseau_par_jour
+    unit_of_measurement: kWh
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "Grid import day: %.2f kWh"
+            args: ["x"]
+  - platform: homeassistant
+    id: grid_export_day
+    entity_id: sensor.mp2_energie_injectee_ds_reseau_par_jour
+    unit_of_measurement: kWh
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "Grid export day: %.2f kWh"
+            args: ["x"]
+
+font:
+  - file: "gfonts://Roboto"
+    id: roboto18
+    size: 18
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icon_font
+    size: 32
+    glyphs: [ "\U000F0F05", "\U000F02DC", "\U000F0590", "\U000F0E7E", "\U000F0CFC" ] # Sun, House, Battery, Grid, Water
+
+display:
+  - platform: st7701s
+    id: my_display
+    update_interval: never
+    auto_clear_enabled: False
+    spi_mode: MODE3
+    data_rate: 2MHz
+    color_order: RGB
+    invert_colors: True
+    dimensions:
+      width: 480
+      height: 480
+    cs_pin: 39
+    de_pin: 18
+    hsync_pin: 16
+    vsync_pin: 17
+    pclk_pin: 21
+    pclk_frequency: 12MHz
+    pclk_inverted: False
+    hsync_pulse_width: 8
+    hsync_front_porch: 10
+    hsync_back_porch: 20
+    vsync_pulse_width: 8
+    vsync_front_porch: 10
+    vsync_back_porch: 10
+    init_sequence:
+      - 1
+      - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10] # CMD2_BKSEL_BK0
+      - [0xCD, 0x00] # disable MDT flag
+    data_pins:
+      red:
+        - 11 #r1
+        - 12 #r2
+        - 13 #r3
+        - 14 #r4
+        - 0 #r5
+      green:
+        - 8 #g0
+        - 20 #g1
+        - 3 #g2
+        - 46 #g3
+        - 9 #g4
+        - 10 #g5
+      blue:
+        - 4 #b1
+        - 5 #b2
+        - 6 #b3
+        - 7 #b4
+        - 15 #b5
+
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    address: 0x5D
+    transform:
+      mirror_x: false
+      mirror_y: false
+    on_touch:
+      - logger.log:
+          format: Touch at (%d, %d)
+          args: [touch.x, touch.y]
+    on_release:
+      then:
+        - if:
+            condition: lvgl.is_paused
+            then:
+              - light.turn_on: backlight
+              - lvgl.resume:
+              - lvgl.widget.redraw:
+
+lvgl:
+  id: lvgl_comp
+  displays:
+    - my_display
+  touchscreens:
+    - touchscreen_id: my_touchscreen
+  on_idle:
+    - timeout: 600s
+      then:
+        - light.turn_off:
+            id: backlight
+            transition_length: 5s
+        - lvgl.pause:
+            show_snow: true
+  style_definitions:
+    - id: date_style
+      text_font: roboto18
+      align: center
+      text_color: 0x000000
+      bg_opa: cover
+      radius: 4
+      pad_all: 2
+    - id: style_line_green
+      line_color: 0x00FF00
+      line_width: 4
+      line_rounded: true
+    - id: style_line_purple
+      line_color: 0x800080
+      line_width: 4
+      line_rounded: true
+    - id: style_line_blue
+      line_color: 0x0000FF
+      line_width: 4
+      line_rounded: true
+  widgets:
+    # Titre
+    - label:
+        x: 10  # Marge de 10 pixels à gauche
+        y: 10  # Marge de 10 pixels en haut
+        width: 200  # Largeur ajustée pour le texte
+        align: top_LEFT  # Alignement à gauche
+        text: "Distribution d'énergie"
+        text_font: roboto18
+        text_color: 0x000000
+
+    # Solaire (haut centre)
+    - obj:
+        id: solar_box
+        x: 170
+        y: 40
+        width: 140
+        height: 100
+        pad_all: 5
+        border_width: 2
+        border_color: 0x000000
+        bg_color: 0xE0E0E0
+        align: CENTER
+    - label:
+        align: CENTER
+        x: 70  # Relatif au centre de la boîte (140/2)
+        y: 10
+        text: "\U000F0F05" # Sun icon
+        text_font: icon_font
+        text_color: 0x000000
+    - label:
+        align: CENTER
+        x: 70
+        y: 50
+        text: !lambda |-
+          if (std::isnan(id(solar_energy_day).state) || !id(solar_energy_day).has_state()) {
+            return "0 kWh";
+          } else {
+            char buffer[32];
+            snprintf(buffer, sizeof(buffer), "%.1f kWh", id(solar_energy_day).state);
+            return buffer;
+          }
+        text_font: roboto18
+        text_color: 0x000000
+    - label:
+        align: CENTER
+        x: 70
+        y: 80
+        text: "Solaire"
+        text_font: roboto18
+        text_color: 0x000000
+

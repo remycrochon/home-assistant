@@ -1,0 +1,139 @@
+---
+sun:
+  latitude: !secret latitude
+  longitude: !secret longitude
+  on_sunset:
+    - elevation: -3.5°
+      then:
+        - select.set:
+            id: brightness_mode
+            option: "Evening"
+  on_sunrise:
+    - then:
+        - select.set:
+            id: brightness_mode
+            option: "Day"
+
+time:
+  - platform: homeassistant
+    id: system_time
+    on_time_sync:
+      - if: # Updates the last restart time
+          condition:
+            lambda: 'return id(device_last_restart).state == "";'
+          then:
+            - text_sensor.template.publish:
+                id: device_last_restart
+                state: !lambda 'return id(system_time).now().strftime("%a %d %b %Y - %I:%M:%S %p");'
+    on_time:
+      - seconds: 0
+        minutes: $screen_night_minute
+        hours: $screen_night_hour
+        then:
+          - select.set:
+              id: brightness_mode
+              option: "Night"
+      - seconds: 0
+        minutes: $screen_day_minute
+        hours: $screen_day_hour
+        then:
+          - select.set:
+              id: brightness_mode
+              option: "Evening"
+      - minutes: '*'
+        seconds: 0
+        then:
+          - script.execute: time_update
+
+lvgl:
+  on_idle:
+    timeout: $touchscreen_idle_timeout
+    then:
+      - logger.log: "LVGL is idle"
+      - if:
+          condition:
+            - lambda: 'return id(brightness_mode).state == "Day";'
+          then:
+            - light.turn_on:
+                id: display_backlight
+                brightness: ${touchscreen_daytime_brightness}
+      - if:
+          condition:
+            - lambda: 'return id(brightness_mode).state == "Evening";'
+          then:
+            - light.turn_on:
+                id: display_backlight
+                brightness: ${touchscreen_nighttime_brightness}
+      - if:
+          condition:
+            - lambda: 'return id(brightness_mode).state == "Night";'
+          then:
+            - light.turn_off: display_backlight
+            - lvgl.pause:
+                show_snow: true
+
+# Wake on screen touch
+touchscreen:
+    on_touch:
+      then:
+        - logger.log: "LVGL is active"
+        - lvgl.resume
+        - lvgl.widget.redraw
+        - if:
+            condition:
+              - lambda: 'return id(brightness_mode).state == "Day";'
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: ${touchscreen_daytime_brightness}
+        - if:
+            condition:
+              - lambda: 'return id(brightness_mode).state == "Evening";'
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: ${touchscreen_nighttime_brightness}
+        - if:
+            condition:
+              - lambda: 'return id(brightness_mode).state == "Night";'
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: ${touchscreen_nighttime_brightness}
+
+select:
+  - platform: template
+    name: "Brightness mode"
+    id: brightness_mode
+    icon: mdi:television-shimmer
+    optimistic: true
+    options:
+      - Day
+      - Evening
+      - Night
+    initial_option: Day
+    on_value:
+      then:
+        - lvgl.resume
+        - lvgl.widget.redraw
+        - if:
+            condition:
+              - lambda: 'return id(brightness_mode).state == "Day";'
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: ${touchscreen_daytime_brightness}
+        - if:
+            condition:
+              - lambda: 'return id(brightness_mode).state == "Evening";'
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: ${touchscreen_nighttime_brightness}
+        - if:
+            condition:
+              - lambda: 'return id(brightness_mode).state == "Night";'
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: ${touchscreen_nighttime_brightness}

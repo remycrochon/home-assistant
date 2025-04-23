@@ -1,0 +1,53 @@
+# SDL screen for testing
+# Hardware configuration file
+
+esphome:
+  min_version: 2025.4.0
+
+host:
+  mac_address: "62:23:45:AF:B3:06"
+
+display:
+  - platform: sdl
+    id: my_display
+    update_interval: never
+    auto_clear_enabled: false
+    dimensions:
+      width: $sdl_width
+      height: $sdl_height
+
+touchscreen:
+  platform: sdl
+  transform:
+    mirror_x: false
+    mirror_y: false
+  id: my_touchscreen
+  display: my_display
+
+  on_touch:
+    - logger.log:
+          format: Touch at (%d, %d)
+          args: [touch.x, touch.y]
+    - lambda: |-
+          ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
+              touch.x,
+              touch.y,
+              touch.x_raw,
+              touch.y_raw
+              );
+
+light:
+  - platform: monochromatic
+    name: "Display Backlight"
+    output: fake_backlight_output
+    id: display_backlight
+    default_transition_length: 1s
+    gamma_correct: 2.8
+
+output:
+  - platform: template
+    id: fake_backlight_output
+    type: float
+    write_action:
+      - lambda: |-
+          // No operation

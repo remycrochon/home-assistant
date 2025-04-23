@@ -1,0 +1,100 @@
+---
+# Weather icons
+# https://github.com/manifestinteractive/weather-underground-icons.git
+
+image:
+  - file: modules/assets/weather_icons/nt_clear.svg
+    id: clear_night_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/cloudy.svg
+    id: cloudy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/tstorms.svg
+    id: exceptional_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/fog.svg
+    id: fog_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/sleet.svg
+    id: hail_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/chancetstorms.svg
+    id: lightning_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/tstorms.svg
+    id: lightning_rainy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/partlycloudy.svg
+    id: partlycloudy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/rain.svg
+    id: pouring_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/chancerain.svg
+    id: rainy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/snow.svg
+    id: snowy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/chancesleet.svg
+    id: snowy_rainy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/sunny.svg
+    id: sunny_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/windy.svg
+    id: windy_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/unknown.svg
+    id: unknown_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel
+
+  - file: modules/assets/weather_icons/circle-slash.svg
+    id: unavailable_${size}
+    resize: ${size}x${size}
+    type: RGB565
+    transparency: alpha_channel

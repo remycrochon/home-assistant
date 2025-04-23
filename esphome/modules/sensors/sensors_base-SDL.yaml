@@ -1,0 +1,17 @@
+---
+binary_sensor:
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: version
+    id: esphome_version
+    name: "ESPHome Version"
+    hide_timestamp: true
+
+  - platform: template
+    name: 'Last Restart'
+    id: device_last_restart
+    icon: mdi:clock
+    entity_category: diagnostic

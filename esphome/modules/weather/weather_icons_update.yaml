@@ -1,0 +1,130 @@
+---
+# Weather icons update
+# example -  !include { file: modules/lvgl/weather/weather_icons_update.yaml, vars: { size: 200, id: weather_condition_name, input_id: weather_condition  } }
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "clear-night";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'clear_night_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "cloudy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'cloudy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "exceptional";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'exceptional_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "fog";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'fog_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "hail";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'hail_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "lightning";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'lightning_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "lightning-rainy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'lightning_rainy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "partlycloudy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'partlycloudy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "pouring";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'pouring_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "rainy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'rainy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "snowy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'snowy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "snowy-rainy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'snowy_rainy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "sunny";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'sunny_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "windy";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'windy_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "unknown";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'unknown_${size}'
+
+          - if:
+              condition:
+                lambda: 'return id(${input_id}).state == "unavailable";'
+              then:
+                lvgl.image.update:
+                  id: ${id}
+                  src: 'unavailable_${size}'

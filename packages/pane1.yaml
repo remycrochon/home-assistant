@@ -14,8 +14,6 @@ openhasp:
         properties:
           "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
 
-
-
 # Affichage piscine
       - obj: "p1b131"
         properties:
@@ -291,5 +289,4 @@ openhasp:
             - service: button.press
               target:
                 entity_id: button.esp178_bp_raz_tps_galet_chlore
-
 

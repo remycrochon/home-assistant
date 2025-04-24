@@ -142,6 +142,22 @@ sensor:
             format: "Grid export day: %.2f kWh"
             args: ["x"]
 
+  - platform: homeassistant
+    id: values_between_10_and_10
+    entity_id: sensor.mp2_prod_totale_mqtt
+    unit_of_measurement: kWh
+    internal: true    
+    on_value:
+      - lvgl.indicator.update:
+          id: val_needle
+          value: !lambda return x/1000;
+      - lvgl.label.update:
+          id: val_text
+          text:
+            format: "%.3f"
+            args: [ 'x/1000' ]
+
+
 font:
   - file: "gfonts://Roboto"
     id: roboto18
@@ -255,55 +271,71 @@ lvgl:
       line_color: 0x0000FF
       line_width: 4
       line_rounded: true
-  widgets:
-    # Titre
-    - label:
-        x: 10  # Marge de 10 pixels à gauche
-        y: 10  # Marge de 10 pixels en haut
-        width: 200  # Largeur ajustée pour le texte
-        align: top_LEFT  # Alignement à gauche
-        text: "Distribution d'énergie"
-        text_font: roboto18
-        text_color: 0x000000
 
-    # Solaire (haut centre)
-    - obj:
-        id: solar_box
-        x: 170
-        y: 40
-        width: 140
-        height: 100
-        pad_all: 5
-        border_width: 2
-        border_color: 0x000000
-        bg_color: 0xE0E0E0
-        align: CENTER
-    - label:
-        align: CENTER
-        x: 70  # Relatif au centre de la boîte (140/2)
-        y: 10
-        text: "\U000F0F05" # Sun icon
-        text_font: icon_font
-        text_color: 0x000000
-    - label:
-        align: CENTER
-        x: 70
-        y: 50
-        text: !lambda |-
-          if (std::isnan(id(solar_energy_day).state) || !id(solar_energy_day).has_state()) {
-            return "0 kWh";
-          } else {
-            char buffer[32];
-            snprintf(buffer, sizeof(buffer), "%.1f kWh", id(solar_energy_day).state);
-            return buffer;
-          }
-        text_font: roboto18
-        text_color: 0x000000
-    - label:
-        align: CENTER
-        x: 70
-        y: 80
-        text: "Solaire"
-        text_font: roboto18
-        text_color: 0x000000
-
+  pages :
+    - id: gauge_page
+      widgets:
+        - obj:
+            height: 200
+            width: 200
+            align: top_left
+            bg_color: 0xFFFFFF
+            border_width: 0
+            pad_all: 4
+            widgets:
+              - meter:
+                  height: 100%
+                  width: 100%
+                  border_width: 0
+                  bg_opa: TRANSP
+                  align: CENTER
+                  scales:
+                    - range_from: -10
+                      range_to: 10
+                      angle_range: 180 # sets the total angle to 180 = starts mid left and ends mid right
+                      ticks:
+                        count: 0
+                      indicators:
+                        - line:
+                            id: val_needle
+                            width: 8
+                            r_mod: 12 # sets line length by this much difference from the scale default radius
+                            value: -2
+                        - arc: # first half of the scale background
+                            color: 0xFF3000
+                            r_mod: 10 # radius difference from the scale default radius
+                            width: 31
+                            start_value: -10
+                            end_value: 0
+                        - arc: # second half of the scale background
+                            color: 0x00FF00
+                            r_mod: 10
+                            width: 31
+                            start_value: 0
+                            end_value: 10
+              - obj: # to cover the middle part of meter indicator line
+                  height: 146
+                  width: 146
+                  radius: 73
+                  align: CENTER
+                  border_width: 0
+                  bg_color: 0xFFFFFF
+                  pad_all: 0
+              - label: # gauge numeric indicator
+                  id: val_text
+                  text_font: montserrat_24
+                  align: CENTER
+                  y: -5
+                  text: "0"
+              - label: # lower range indicator
+                  text_font: montserrat_10
+                  align: CENTER
+                  y: 8
+                  x: -90
+                  text: "-10"
+              - label: # higher range indicator
+                  text_font: montserrat_10
+                  align: CENTER
+                  y: 8
+                  x: 90
+                  text: "+10"

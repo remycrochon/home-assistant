@@ -727,31 +727,56 @@ script:
       # Si on regule autour du zero grid et d'un seuil puissance batteries
       # 
       # La régule consiste à incrementer ou decrementer la sortie triac 
-      - lambda: |-
-          if (id(etatbus_ve).state == 3){
-            id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
-            id(moderegul).publish_state( "Sur Pu batteries Bulk");
-          } else {
-            if (id(pu_batteries).state >= id(seuil_pubatt).state){
-              id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
-              id(moderegul).publish_state( "Sur Pu reseau");
-            } else { 
-              id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
-              id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
-            } 
-          }  
-          
-          if (!isnan(id(striac))) {
-            id(striac) = id(striac)+id(increment);
-          }else{
-            id(striac)=0;
-            }
+      # regule semi-quadratique
+      # Limiter l'incrément pour éviter des ajustements trop brusques
+      
+      
+      #- lambda: |-
+      #    if (id(etatbus_ve).state == 3){
+      #      id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
+      #      id(moderegul).publish_state( "Sur Pu batteries Bulk");
+      #    } else {
+      #      if (id(pu_batteries).state >= id(seuil_pubatt).state){
+      #        id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
+      #        id(moderegul).publish_state( "Sur Pu reseau");
+      #      } else { 
+      #        id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
+      #        id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
+      #      } 
+      #    } 
+      
+      
 
-          if (id(striac) <= 0){
+      - lambda: |-
+          if (id(etatbus_ve).state == 3) {
+            float error = id(pu_batteries).state - id(cons_pubatt).state;
+            id(increment) = error * (1 + abs(error) / 1000) * id(coeff_rbat).state / 1000;
+            id(moderegul).publish_state("Sur Pu batteries Bulk");
+          } else {
+            if (id(pu_batteries).state >= id(seuil_pubatt).state) {
+              id(increment) = id(pureseau1).state * (1 + abs(id(pureseau1).state) / 1000) * id(coeff_r).state / 1000 * -1;
+              id(moderegul).publish_state("Sur Pu reseau");
+            } else {
+              id(increment) = id(pu_batteries).state * (1 + abs(id(pu_batteries).state) / 1000) * id(coeff_rbat).state / 1000;
+              id(moderegul).publish_state("Sur Pu batteries Non Bulk");
+            }
+          }
+
+          if (id(increment) > 10) id(increment) = 10;
+          if (id(increment) < -10) id(increment) = -10;
+
+          if (!isnan(id(striac))) {
+            id(striac) = id(striac) + id(increment);
+          } else {
             id(striac) = 0;
-          } else if(id(striac)>=id(pmax).state){
+          }
+
+          if (id(striac) <= 0) {
+            id(striac) = 0;
+          } else if (id(striac) >= id(pmax).state) {
             id(striac) = id(pmax).state;
-          }        
+          }
+     
       - logger.log:
           format: "Log S Triac %f - Increment %f"
           args: [ 'id(striac)', 'id(increment)' ]

@@ -86,10 +86,10 @@ openhasp:
                   {% endif -%}
       - obj: "p1b222"
         properties:
-          "text": "{{ states('sensor.esp178_pression_filtre') }} b"       
+          "text": "{{ states('sensor.esp178_pression_filtre') }} b"
       - obj: "p1b224"
         properties:
-          "text": "{{ states('sensor.esp178_orp_ezo') }} ms"                      
+          "text": "{{ states('sensor.esp178_orp_ezo') }} ms"  
       - obj: "p1b226"
         properties:
           "text": "{{ states('sensor.pzem_pisc_puissance') }} W"

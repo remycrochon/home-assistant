@@ -2,10 +2,10 @@ openhasp:
   ecran02:
   ############### Page 0 All ###############
     objects:
-      - obj: "p0b1"
+      - obj: "p0b2"
         properties:
           "text_color": >
-            {% set count = states('openhasp.ecran01','rssi')|int %}
+            {% set count = states('openhasp.ecran02','rssi')|int %}
             {% if count <= -90  %}
             {{ "#FF0000" }}
             {% elif count <= -70  %}
@@ -13,7 +13,7 @@ openhasp:
             {% else %}
             {{ "#228B22" }}
             {% endif %}
-      - obj: "p0b2"
+      - obj: "p0b3"
         properties:
           "text": "{{ states('sensor.time') }}"
       - obj: "p0b6"
@@ -24,7 +24,7 @@ openhasp:
           "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
 
       ############### Page 1 Home ###############
-      # Réseau
+      ############### Réseau
       - obj: "p1b24" # Grid Power
         properties:
           "text": >
@@ -42,8 +42,8 @@ openhasp:
         properties:
           "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int }} kWh"
       
-          # Solaire
-      - obj: "p1b34" # Prod Power
+      ##################### Solaire
+      - obj: "p1b34" # Puissance production
         properties:
           "text": >
             {% set count = states('sensor.mp2_prod_totale_mqtt')|int %}
@@ -60,36 +60,37 @@ openhasp:
         properties:
           "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kW"
 
-          # Batteries
+      ############# Batteries
       - obj: "p1b44" # Charge/Décharge
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
             {% if count >= 0 %}
-              {{"\uE04D"}}
+              {{"\uE04D\uE04D"}}
             {% else %}
-              {{"\uE054"}}
+              {{"\uE054\uE054"}}
             {% endif %}
-
       - obj: "p1b45" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float*-1 %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int*-1 %}
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
             {{ count }} W
             {% endif %}
-
       - obj: "p1b46" # SOC
         properties:
           "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
+      - obj: "p1b47" # Tps restant
+        properties:
+          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc')|float }}"
 
-          # Maison
+      ################## Maison
       - obj: "p1b55" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|float %}
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -98,17 +99,69 @@ openhasp:
       - obj: "p1b56" # Conso
         properties:
           "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int }} kW"
+####### PAGE 2 ############### 
+      - obj: "p2b23" # STOP
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte", "on") else 0 }}'
+          "text": '{{ "STOP" if is_state("switch.esp180_hotte", "on") else "AUTO" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              target:
+                entity_id: "switch.esp180_hotte"
 
-          #################"  OLD"            
+      - obj: "p2b24" # Vitesse 1
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_v1", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_v1', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_v1"
+      - obj: "p2b25" # Vitesse 2
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_v2", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_v2', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_v2"
+      - obj: "p2b26" # Vitesse 3
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_v3", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_v3', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_v3"
+      - obj: "p2b27" # Lumiere
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_lumiere", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_lumiere', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_lumiere"
+
+      - obj: "p2b31"
+        properties:
+          "text": "{{ states('sensor.esp180_temperature_hotte')}} C°" 
+      - obj: "p2b33"
+        properties:
+          "text": "{{ states('sensor.esp180_humidite_hotte')}} %" 
+
+
+###########################  OLD ###################           
       - obj: "p1b36" # Prévision
         properties:
           "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kW"
 
-      - obj: "p2b7" # PV Energy
+      - obj: "p20b7" # PV Energy
         properties:
-          "text": '{{ states("sensor.mp2_total_energie_produite_jour") }}kWh'
+          "text": '{{ states("sensor.mp2_total_energie_produite_jour")|int }}kWh'
 
-      - obj: "p2b24" # Load Power
+      - obj: "p20b24" # Load Power
         properties:
           "text": >
             {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
@@ -118,11 +171,11 @@ openhasp:
             {{ count }}W
             {% endif %}
 
-      - obj: "p2b15" # Load Energy
+      - obj: "p20b15" # Load Energy
         properties:
-          "text": '{{ states("sensor.mp2_energy_conso_ac_l1_jour") }}kWh'
+          "text": '{{ states("sensor.mp2_energy_conso_ac_l1_jour")|int }}kWh'
 
-      - obj: "p2b10" # Grid Power
+      - obj: "p20b10" # Grid Power
         properties:
           "text": >
             {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
@@ -134,16 +187,16 @@ openhasp:
             {{ count }}W
             {% endif %}
 
-      - obj: "p2b27" # Charge Batteries
+      - obj: "p20b27" # Charge Batteries
         properties:
-          "text": 'In:{{ states("sensor.mp2_energy_charge_batteries_jour") }}kWh'
+          "text": 'In:{{ states("sensor.mp2_energy_charge_batteries_jour")|int }}kWh'
 
-      - obj: "p2b28" # Décharge Battery
+      - obj: "p20b28" # Décharge Battery
         properties:
-          "text": 'Out:{{ states("sensor.mp2_energy_decharge_batteries_jour") }}kWh'
+          "text": 'Out:{{ states("sensor.mp2_energy_decharge_batteries_jour")|int }}kWh'
 
 
-      - obj: "p2b19" # Battery Power
+      - obj: "p20b19" # Battery Power
         properties:
           "text": >
             {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
@@ -155,24 +208,24 @@ openhasp:
             {{ count }}W
             {% endif %}
 
-      - obj: "p2b18" # Battery State Of Charge
+      - obj: "p20b18" # Battery State Of Charge
         properties:
           "text": '{{ states("sensor.mp2_soc_mqtt") |round(0) }}%'
 
-      - obj: "p2b30" # Grid Cost
+      - obj: "p20b30" # Grid Cost
         properties:
           "text": 'Cost: £{{ states("sensor.grid_cost") |round(2) }}'
 
-      - obj: "p2b31" # Grid Saving
+      - obj: "p20b31" # Grid Saving
         properties:
           "text": 'Saving: £{{ states("sensor.grid_saving") |round(2) }}'
 
-      - obj: "p2b29" # Work Mode
+      - obj: "p20b29" # Work Mode
         properties:
           "text": 'Work Mode: {{ states("sensor.mp2_affichage_status_bus_ve") }}'
 
  
-      - obj: "p2b38" # Battery Power Line Colour
+      - obj: "p20b38" # Battery Power Line Colour
         properties:
           "line_color": >
             {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
@@ -239,7 +292,7 @@ openhasp:
             {% else %}
             {{ "#00FF00" }}
             {% endif %}
-      - obj: "p2b39" # Grid Power Direction Line
+      - obj: "p20b39" # Grid Power Direction Line
         properties:
           "line_color": >
             {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
@@ -309,7 +362,7 @@ openhasp:
             {{ "#FF0000" }}
             {% endif %}
 
-      - obj: "p2b40" # Load Power Direction Line
+      - obj: "p20b40" # Load Power Direction Line
         properties:
           "line_color": >
             {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
@@ -379,7 +432,7 @@ openhasp:
             {{ "#FF0000" }}
             {% endif %}
 
-      - obj: "p2b37" # PV Power Direction Line
+      - obj: "p20b37" # PV Power Direction Line
         properties:
           "line_color": >
             {% set count = states('sensor.mp2_prod_totale_mqtt')|int %}
@@ -450,11 +503,11 @@ openhasp:
             {% endif %}
       ############### Page 2 Weather ###############
 
-      - obj: "p2b16" # temperature label on all pages
+      - obj: "p20b16" # temperature label on all pages
         properties:
           "text": '{{ states("sensor.vp2_temp_out") }}°C'
 
-      - obj: "p2b18" # Weather Icon change according to weather
+      - obj: "p20b18" # Weather Icon change according to weather
         properties:
           "text": >
             {% set forecast = states('weather.albi') %}

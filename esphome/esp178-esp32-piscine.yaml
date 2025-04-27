@@ -56,6 +56,9 @@ wifi:
     subnet: 255.255.255.0
     dns1: 192.168.0.254
 
+external_components:
+  - source: github://dentra/esphome-components # Gestion du comptage d'énergie
+
 # Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
@@ -996,6 +999,20 @@ sensor:
     filters:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
+
+  - platform: energy_statistics
+    total: puissance
+    energy_today:
+      name: "${friendly_name} Energie Jour"
+    energy_yesterday:
+      name: "${friendly_name} Energie Hier"
+    energy_week:
+      name: "${friendly_name} Energie Semaine"
+    energy_month:
+      name: "${friendly_name} Energie Mois"
+    energy_year:
+      name: "${friendly_name} Energie Annnée"
+
 
   # Calcul du temps de fonctionnement
   # Pompe piscine

@@ -46,7 +46,7 @@ openhasp:
       - obj: "p1b34" # Puissance production
         properties:
           "text": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|int %}
+            {% set count = states('sensor.mp2_prod_totale_mqtt')|float %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -54,11 +54,11 @@ openhasp:
             {% endif %}
       - obj: "p1b35" # Production
         properties:
-          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int }} kW"
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int }} kWh"
             
       - obj: "p1b36" # Prévision
         properties:
-          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kW"
+          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kWh"
 
       ############# Batteries
       - obj: "p1b44" # Charge/Décharge
@@ -73,7 +73,7 @@ openhasp:
       - obj: "p1b45" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int*-1 %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float*-1 %}
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -84,13 +84,13 @@ openhasp:
           "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
       - obj: "p1b47" # Tps restant
         properties:
-          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc')|float }}"
+          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
 
       ################## Maison
       - obj: "p1b55" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|float %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -99,6 +99,16 @@ openhasp:
       - obj: "p1b56" # Conso
         properties:
           "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int }} kW"
+      - obj: "p1b57" # ECS
+        properties:
+          "text": >
+            {% set count = states('sensor.ecocompteur_ecs')|float %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}    
+
 ####### PAGE 2 ############### 
       - obj: "p2b23" # STOP
         properties:
@@ -151,546 +161,40 @@ openhasp:
         properties:
           "text": "{{ states('sensor.esp180_humidite_hotte')}} %" 
 
-
-###########################  OLD ###################           
-      - obj: "p1b36" # Prévision
+####### PAGE 3 VMC ############### 
+      - obj: "p3b10"
         properties:
-          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kW"
-
-      - obj: "p20b7" # PV Energy
+          "text": "{{ states('sensor.esp136_t_air_vicie')}}C°" 
+      - obj: "p3b11"
         properties:
-          "text": '{{ states("sensor.mp2_total_energie_produite_jour")|int }}kWh'
-
-      - obj: "p20b24" # Load Power
+          "text": "{{ states('sensor.esp136_tdeg_air_neuf')}}C°"
+      - obj: "p3b12"
         properties:
-          "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
-            {% if count >= 1000 %}
-            {{ (count/1000) |round(2)  }}kW
-            {% else %}
-            {{ count }}W
-            {% endif %}
-
-      - obj: "p20b15" # Load Energy
+          "text": "{{ states('sensor.esp136_tdeg_insufflation')}}C°" 
+      - obj: "p3b13"
         properties:
-          "text": '{{ states("sensor.mp2_energy_conso_ac_l1_jour")|int }}kWh'
-
-      - obj: "p20b10" # Grid Power
+          "text": "{{ states('sensor.esp136_tdeg_aspiration')}}C°"
+      - obj: "p3b14"
         properties:
-          "text": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
-            {% if count <= -1000 %}
-            {{ (count/1000) |round(2)  }}kW
-            {% elif count >= 1000 %}
-            {{ (count/1000) |round(2)  }}kW
-            {% else %}
-            {{ count }}W
-            {% endif %}
-
-      - obj: "p20b27" # Charge Batteries
+          "text": "{{ states('sensor.esp136_t_combles')}}C°"
+      - obj: "p3b21"
         properties:
-          "text": 'In:{{ states("sensor.mp2_energy_charge_batteries_jour")|int }}kWh'
-
-      - obj: "p20b28" # Décharge Battery
+          "text": "{{ states('sensor.esp136_rend')}} %"
+      - obj: "p3b31"
         properties:
-          "text": 'Out:{{ states("sensor.mp2_energy_decharge_batteries_jour")|int }}kWh'
-
-
-      - obj: "p20b19" # Battery Power
+          "text": "{{ states('sensor.esp145_monoxide_carbon')|round(0)}} ppm"
+      - obj: "p3b41"
         properties:
-          "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
-            {% if count <= -1000 %}
-            {{ (count/1000) |round(2)  }}kW
-            {% elif count >= 1000 %}
-            {{ (count/1000) |round(2)  }}kW
-            {% else %}
-            {{ count }}W
-            {% endif %}
-
-      - obj: "p20b18" # Battery State Of Charge
+          "text": "{{ states('sensor.ecocompteur_vmc_niv0')|round(0)}} W"
+      - obj: "p3b51"
         properties:
-          "text": '{{ states("sensor.mp2_soc_mqtt") |round(0) }}%'
-
-      - obj: "p20b30" # Grid Cost
+          "text": "{{ states('sensor.esp145_mh_z19_co2_value')}} ppm"
+      - obj: "p3b61" # Cde Relais
         properties:
-          "text": 'Cost: £{{ states("sensor.grid_cost") |round(2) }}'
-
-      - obj: "p20b31" # Grid Saving
-        properties:
-          "text": 'Saving: £{{ states("sensor.grid_saving") |round(2) }}'
-
-      - obj: "p20b29" # Work Mode
-        properties:
-          "text": 'Work Mode: {{ states("sensor.mp2_affichage_status_bus_ve") }}'
-
- 
-      - obj: "p20b38" # Battery Power Line Colour
-        properties:
-          "line_color": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
-            {% if count <= -1600  %}
-            {{ "#FF0000" }}
-            {% elif count <= -1500  %}
-            {{ "#FF1100" }}
-            {% elif count <= -1400  %}
-            {{ "#FF2200" }}
-            {% elif count <= -1300  %}
-            {{ "#FF3300" }}
-            {% elif count <= -1200  %}
-            {{ "#FF4400" }}
-            {% elif count <= -1100  %}
-            {{ "#FF5500" }}
-            {% elif count <= -1000  %}
-            {{ "#FF6600" }}
-            {% elif count <= -900  %}
-            {{ "#FF7700" }}
-            {% elif count <= -800  %}
-            {{ "#FF8800" }}
-            {% elif count <= -700  %}
-            {{ "#FF9900" }}
-            {% elif count <= -600  %}
-            {{ "#FFAA00" }}
-            {% elif count <= -500  %}
-            {{ "#FFBB00" }}
-            {% elif count <= -400  %}
-            {{ "#FFCC00" }}
-            {% elif count <= -300  %}
-            {{ "#FFDD00" }}
-            {% elif count <= -200  %}
-            {{ "#FFEE00" }}
-            {% elif count <= -100  %}
-            {{ "#FFFF00" }}
-            {% elif count <= -0  %}
-            {{ "#EEFF00" }}
-            {% elif count <= 100  %}
-            {{ "#DDFF00" }}
-            {% elif count <= 200  %}
-            {{ "#CCFF00" }}
-            {% elif count <= 300  %}
-            {{ "#BBFF00" }}
-            {% elif count <= 400  %}
-            {{ "#AAFF00" }}
-            {% elif count <= 500  %}
-            {{ "#99FF00" }}
-            {% elif count <= 600  %}
-            {{ "#88FF00" }}
-            {% elif count <= 700  %}
-            {{ "#77FF00" }}
-            {% elif count <= 800  %}
-            {{ "#66FF00" }}
-            {% elif count <= 900  %}
-            {{ "#55FF00" }}
-            {% elif count <= 1000  %}
-            {{ "#44FF00" }}
-            {% elif count <= 1100  %}
-            {{ "#33FF00" }}
-            {% elif count <= 1200  %}
-            {{ "#22FF00" }}
-            {% elif count <= 1300  %}
-            {{ "#11FF00" }}
-            {% else %}
-            {{ "#00FF00" }}
-            {% endif %}
-      - obj: "p20b39" # Grid Power Direction Line
-        properties:
-          "line_color": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
-            {% if count <= -1600  %}
-            {{ "#00FF00" }}
-            {% elif count <= -1500  %}
-            {{ "#11FF00" }}
-            {% elif count <= -1400  %}
-            {{ "#22FF00" }}
-            {% elif count <= -1300  %}
-            {{ "#33FF00" }}
-            {% elif count <= -1200  %}
-            {{ "#44FF00" }}
-            {% elif count <= -1100  %}
-            {{ "#55FF00" }}
-            {% elif count <= -1000  %}
-            {{ "#66FF00" }}
-            {% elif count <= -900  %}
-            {{ "#77FF00" }}
-            {% elif count <= -800  %}
-            {{ "#88FF00" }}
-            {% elif count <= -700  %}
-            {{ "#99FF00" }}
-            {% elif count <= -600  %}
-            {{ "#AAFF00" }}
-            {% elif count <= -500  %}
-            {{ "#BBFF00" }}
-            {% elif count <= -400  %}
-            {{ "#CCFF00" }}
-            {% elif count <= -300  %}
-            {{ "#DDFF00" }}
-            {% elif count <= -200  %}
-            {{ "#EEFF00" }}
-            {% elif count <= -100  %}
-            {{ "#FFFF00" }}
-            {% elif count <= -0  %}
-            {{ "#FFFF00" }}
-            {% elif count <= 100  %}
-            {{ "#FFEE00" }}
-            {% elif count <= 200  %}
-            {{ "#FFDD00" }}
-            {% elif count <= 300  %}
-            {{ "#FFCC00" }}
-            {% elif count <= 400  %}
-            {{ "#FFBB00" }}
-            {% elif count <= 500  %}
-            {{ "#FFAA00" }}
-            {% elif count <= 600  %}
-            {{ "#FF9900" }}
-            {% elif count <= 700  %}
-            {{ "#FF8800" }}
-            {% elif count <= 800  %}
-            {{ "#FF7700" }}
-            {% elif count <= 900  %}
-            {{ "#FF6600" }}
-            {% elif count <= 1000  %}
-            {{ "#FF5500" }}
-            {% elif count <= 1100  %}
-            {{ "#FF4400" }}
-            {% elif count <= 1200  %}
-            {{ "#FF3300" }}
-            {% elif count <= 1300  %}
-            {{ "#FF2200" }}
-            {% elif count <= 1400  %}
-            {{ "#FF1100" }}
-            {% else %}
-            {{ "#FF0000" }}
-            {% endif %}
-
-      - obj: "p20b40" # Load Power Direction Line
-        properties:
-          "line_color": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
-            {% if count <= 100  %}
-            {{ "#00FF00" }}
-            {% elif count <= 200  %}
-            {{ "#11FF00" }}
-            {% elif count <= 300  %}
-            {{ "#22FF00" }}
-            {% elif count <= 400  %}
-            {{ "#33FF00" }}
-            {% elif count <= 500  %}
-            {{ "#44FF00" }}
-            {% elif count <= 600  %}
-            {{ "#55FF00" }}
-            {% elif count <= 700  %}
-            {{ "#66FF00" }}
-            {% elif count <= 800  %}
-            {{ "#77FF00" }}
-            {% elif count <= 900  %}
-            {{ "#88FF00" }}
-            {% elif count <= 1000  %}
-            {{ "#99FF00" }}
-            {% elif count <= 1100  %}
-            {{ "#AAFF00" }}
-            {% elif count <= 1200  %}
-            {{ "#BBFF00" }}
-            {% elif count <= 1300  %}
-            {{ "#CCFF00" }}
-            {% elif count <= 1400  %}
-            {{ "#DDFF00" }}
-            {% elif count <= 1500  %}
-            {{ "#EEFF00" }}
-            {% elif count <= 1600  %}
-            {{ "#FFFF00" }}
-            {% elif count <= 1700  %}
-            {{ "#FFFF00" }}
-            {% elif count <= 1800  %}
-            {{ "#FFEE00" }}
-            {% elif count <= 1900  %}
-            {{ "#FFDD00" }}
-            {% elif count <= 2000  %}
-            {{ "#FFCC00" }}
-            {% elif count <= 2100  %}
-            {{ "#FFBB00" }}
-            {% elif count <= 2200  %}
-            {{ "#FFAA00" }}
-            {% elif count <= 2300  %}
-            {{ "#FF9900" }}
-            {% elif count <= 2400  %}
-            {{ "#FF8800" }}
-            {% elif count <= 2500  %}
-            {{ "#FF7700" }}
-            {% elif count <= 2600  %}
-            {{ "#FF6600" }}
-            {% elif count <= 2700  %}
-            {{ "#FF5500" }}
-            {% elif count <= 2800  %}
-            {{ "#FF4400" }}
-            {% elif count <= 2900  %}
-            {{ "#FF3300" }}
-            {% elif count <= 3000  %}
-            {{ "#FF2200" }}
-            {% elif count <= 3100  %}
-            {{ "#FF1100" }}
-            {% else %}
-            {{ "#FF0000" }}
-            {% endif %}
-
-      - obj: "p20b37" # PV Power Direction Line
-        properties:
-          "line_color": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|int %}
-            {% if count <= 100  %}
-            {{ "#FF0000" }}
-            {% elif count <= 200  %}
-            {{ "#FF1100" }}
-            {% elif count <= 300  %}
-            {{ "#FF2200" }}
-            {% elif count <= 400  %}
-            {{ "#FF3300" }}
-            {% elif count <= 500  %}
-            {{ "#FF4400" }}
-            {% elif count <= 600  %}
-            {{ "#FF5500" }}
-            {% elif count <= 700  %}
-            {{ "#FF6600" }}
-            {% elif count <= 800  %}
-            {{ "#FF7700" }}
-            {% elif count <= 900  %}
-            {{ "#FF8800" }}
-            {% elif count <= 1000  %}
-            {{ "#FF9900" }}
-            {% elif count <= 1100  %}
-            {{ "#FFAA00" }}
-            {% elif count <= 1200  %}
-            {{ "#FFBB00" }}
-            {% elif count <= 1300  %}
-            {{ "#FFCC00" }}
-            {% elif count <= 1400  %}
-            {{ "#FFDD00" }}
-            {% elif count <= 1500  %}
-            {{ "#FFEE00" }}
-            {% elif count <= 1600  %}
-            {{ "#FFFF00" }}
-            {% elif count <= 1700  %}
-            {{ "#EEFF00" }}
-            {% elif count <= 1800  %}
-            {{ "#DDFF00" }}
-            {% elif count <= 1900  %}
-            {{ "#CCFF00" }}
-            {% elif count <= 2000  %}
-            {{ "#BBFF00" }}
-            {% elif count <= 2100  %}
-            {{ "#AAFF00" }}
-            {% elif count <= 2200  %}
-            {{ "#99FF00" }}
-            {% elif count <= 2300  %}
-            {{ "#88FF00" }}
-            {% elif count <= 2400  %}
-            {{ "#77FF00" }}
-            {% elif count <= 2500  %}
-            {{ "#66FF00" }}
-            {% elif count <= 2600  %}
-            {{ "#55FF00" }}
-            {% elif count <= 2700  %}
-            {{ "#44FF00" }}
-            {% elif count <= 2800  %}
-            {{ "#33FF00" }}
-            {% elif count <= 2900  %}
-            {{ "#22FF00" }}
-            {% elif count <= 3000  %}
-            {{ "#11FF00" }}
-            {% elif count <= 3100  %}
-            {{ "#00FF00" }}
-            {% else %}
-            {{ "#00FF00" }}
-            {% endif %}
-      ############### Page 2 Weather ###############
-
-      - obj: "p20b16" # temperature label on all pages
-        properties:
-          "text": '{{ states("sensor.vp2_temp_out") }}°C'
-
-      - obj: "p20b18" # Weather Icon change according to weather
-        properties:
-          "text": >
-            {% set forecast = states('weather.albi') %}
-            {% if forecast == "clear-night"  %}
-            {{ "\uE594" }}
-            {% elif forecast == "cloudy"   %}
-            {{ "\uE590" }}
-            {% elif forecast == "fog"   %}
-            {{ "\uE591" }}
-            {% elif forecast == "hail"   %}
-            {{ "\uE592" }}
-            {% elif forecast == "lightning"   %}
-            {{ "\uE593" }}
-            {% elif forecast == "lightning-rainy"   %}
-            {{ "\uE67E" }}
-            {% elif forecast == "partlycloudy"   %}
-            {{ "\uE595" }}
-            {% elif forecast == "pouring"   %}
-            {{ "\uE596" }}
-            {% elif forecast == "rainy"   %}
-            {{ "\uE597" }}
-            {% elif forecast == "snowy"   %}
-            {{ "\uE598" }}
-            {% elif forecast == "snowy-rainy"   %}
-            {{ "\uE67F" }}
-            {% elif forecast == "sunny"   %}
-            {{ "\uE5A8" }}
-            {% elif forecast == "windy"   %}
-            {{ "\uE59D" }}
-            {% elif forecast == "windy-variant"   %}
-            {{ "\uE59E" }}
-            {% elif forecast == "exceptional"   %}
-            {{ "\uE59E" }}
-            {% else   %}
-            {{ "\uE5A8" }}
-            {% endif %}
-
-      - obj: "p2b15" # Day today
-        properties:
-          "text": '{{ (as_timestamp(now()))|timestamp_custom("%A") }}'
-
-      - obj: "p2b61" # Day tomorrow
-        properties:
-          "text": '{{ (as_timestamp(now())+(60*60*24))|timestamp_custom("%A") }}'
-
-      - obj: "p2b71" # Day today + 2
-        properties:
-          "text": '{{ (as_timestamp(now())+(60*60*24*2))|timestamp_custom("%A") }}'
-
-      - obj: "p2b81" # Day today + 3
-        properties:
-          "text": '{{ (as_timestamp(now())+(60*60*24*3))|timestamp_custom("%A") }}'
-
-      - obj: "p2b91" # Day today + 4
-        properties:
-          "text": '{{ (as_timestamp(now())+(60*60*24*4))|timestamp_custom("%A") }}'
-
-      - obj: "p2b101" # Day today + 5
-        properties:
-          "text": '{{ (as_timestamp(now())+(60*60*24*5))|timestamp_custom("%A") }}'
-
-      - obj: "p2b111" # Day today + 6
-        properties:
-          "text": '{{ (as_timestamp(now())+(60*60*24*6))|timestamp_custom("%A") }}'
-
-      ############### Page 3 Lights ###############
-
-      - obj: "p3b2" # Master Bedroom Light
-        properties:
-          "val": '{{ 1 if is_state("light.master_bedroom", "on") else 0 }}'
+          "val": '{{ 1 if is_state("switch.relais_cde_vmc_niv0_on_off", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.relais_cde_vmc_niv0_on_off', 'on') else '#ffffff' }}" 
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "light.master_bedroom"
+              entity_id: "switch.relais_cde_vmc_niv0_on_off"
 
-      - obj: "p3b3" # Alice Bedroom Light
-        properties:
-          "val": '{{ 1 if is_state("light.main", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.main"
-
-      - obj: "p3b4" # Landing Light
-        properties:
-          "val": '{{ 1 if is_state("light.landing_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.landing_light"
-
-      - obj: "p3b5" # Bathroom
-        properties:
-          "val": '{{ 1 if is_state("light.bathroom", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.bathroom"
-
-      - obj: "p3b6" # Master Bedroom AC
-        properties:
-          "val": '{{ 1 if is_state("switch.ac_socket_1", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "switch.ac_socket_1"
-
-      - obj: "p3b7" # Toilet Light
-        properties:
-          "val": '{{ 1 if is_state("light.toilet_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.toilet_light"
-
-      - obj: "p3b8" # Hallway Light
-        properties:
-          "val": '{{ 1 if is_state("light.hallway_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.hallway_light"
-
-      - obj: "p3b9" # Kitchen Light
-        properties:
-          "val": '{{ 1 if is_state("light.kitchen_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.kitchen_light"
-
-      - obj: "p3b10" # Dining Room Light
-        properties:
-          "val": '{{ 1 if is_state("light.dining_room", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.dining_room"
-
-      - obj: "p3b11" # Living Room Light
-        properties:
-          "val": '{{ 1 if is_state("light.living_room", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.living_room"
-
-      - obj: "p3b12" # Patio Light
-        properties:
-          "val": '{{ 1 if is_state("light.patio_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.patio_light"
-
-      - obj: "p3b13" # Living Room Fire
-        properties:
-          "val": '{{ 1 if is_state("switch.living_room_stove", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "switch.living_room_stove"
-
-      - obj: "p3b14" # Living Room Scent Light
-        properties:
-          "val": '{{ 1 if is_state("light.scent_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.scent_light"
-
-      - obj: "p3b15" # Kitchen Cupboard Light
-        properties:
-          "val": '{{ 1 if is_state("light.kitchen_light_switch_kitchen_cupboard_light", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.kitchen_light_switch_kitchen_cupboard_light"
-
-      - obj: "p3b16" # Living Room TV Back Light
-        properties:
-          "val": '{{ 1 if is_state("light.living_room_backlight", "on") else 0 }}'
-        event:
-          "up":
-            - service: homeassistant.toggle
-              entity_id: "light.living_room_backlight"

@@ -20,7 +20,21 @@ wifi:
     static_ip: 192.168.0.132
     gateway: 192.168.0.254
     subnet: 255.255.255.0
-    
+    dns1: 192.168.0.254    
+
+# Calcul énergie
+external_components:
+  - source: github://dentra/esphome-components    
+
+# Necessaire pour le calcul d'énergie
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
 
 # Enable logging
 logger:
@@ -59,10 +73,23 @@ sensor:
       filters:
         - multiply: 0.001
     power:
+      id: puissance
       name: "pzem_cuisine_puissance"
       unit_of_measurement: "W"
     frequency:
       name: "pzem_cuisine_frequence"
       unit_of_measurement: "hz"
     update_interval: 10s
-    
+
+  - platform: energy_statistics
+    total: puissance
+    energy_today:
+      name: "${friendly_name} Energie Jour"
+    energy_yesterday:
+      name: "${friendly_name} Energie Hier"
+    energy_week:
+      name: "${friendly_name} Energie Semaine"
+    energy_month:
+      name: "${friendly_name} Energie Mois"
+    energy_year:
+      name: "${friendly_name} Energie Annnée"    

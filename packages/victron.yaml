@@ -672,13 +672,52 @@ template:
       device_class: "duration"
       icon: mdi:sort-clock-ascending
       state: >-
-        {% set battery_current = states('sensor.mp2_intensite_batteries')|float %}
-        {% set battery_soc = states('sensor.mp2_soc_mqtt')|float %}
-        {% set loads_current = states('sensor.mp2_conso_out1_mqtt')|float/states('sensor.mp2_tension_batteries_par_mqtt')|float %}
-        {% set battery_min_soc = states('sensor.mp2_soc_mini_mqtt')|float %}
+        {% set battery_current = states('sensor.mp2_intensite_batteries')|float(0) %}
+        {% set battery_soc = states('sensor.mp2_soc_mqtt')|float(0) %}
+        {% set loads_power = states('sensor.mp2_conso_out1_mqtt')|float(0) %}
+        {% set battery_voltage = states('sensor.mp2_tension_batteries_par_mqtt')|float(1) %}
+        {% set loads_current = (loads_power / battery_voltage)|float(0) if battery_voltage > 0 else 0 %}
+        {% set battery_min_soc = states('sensor.mp2_soc_mini_mqtt')|float(0) %}
         {% set battery_max_capacity = 300 %}
-        {% if (battery_soc-battery_min_soc) < 0 %}
+        {% if (battery_soc - battery_min_soc) <= 0 %}
+          {{ 0 }}
+        {% elif loads_current|abs < 0.1 %}
           {{ 0 }}
         {% else %}
-          {{ ((((battery_soc-battery_min_soc)*battery_max_capacity)/100)/loads_current | float ) | round(2) }}
+          {{ ((((battery_soc - battery_min_soc) * battery_max_capacity) / 100) / loads_current)|round(2) }}
         {% endif %}
+        
+  - trigger:
+      - platform: time_pattern
+        minutes: "/1" # Toutes les minutes
+      - platform: state
+        entity_id: sensor.mp2_soc_mqtt
+        for: "00:00:05" # Évite les fluctuations rapides
+    sensor:
+      - name: "MP2 Temps Restant Batteries Mini SOC V2"
+        unique_id: "mp2_temps_restant_batteries_mini_soc_v2"
+        unit_of_measurement: "h"
+        device_class: "duration"
+        icon: "mdi:sort-clock-ascending"
+        state: >-
+          {% set battery_current = states('sensor.mp2_intensite_batteries')|float(0) %}
+          {% set battery_soc = states('sensor.mp2_soc_mqtt')|float(0) %}
+          {% set last_soc = state_attr('sensor.mp2_temps_restant_batteries_mini_soc', 'last_soc')|float(0) %}
+          {% set loads_power = states('sensor.mp2_conso_out1_mqtt')|float(0) %}
+          {% set battery_voltage = states('sensor.mp2_tension_batteries_par_mqtt')|float(1) %}
+          {% set loads_current = (loads_power / battery_voltage)|float(0) if battery_voltage > 0 else 0 %}
+          {% set battery_min_soc = states('sensor.mp2_soc_mini_mqtt')|float(0) %}
+          {% set battery_max_capacity = 300 %}
+          {% if trigger.platform == 'state' and (battery_soc - last_soc)|abs <= 1 %}
+            {{ states('sensor.mp2_temps_restant_batteries_mini_soc')|float(0) }}
+          {% else %}
+            {% if (battery_soc - battery_min_soc) <= 0 %}
+              {{ 0 }}
+            {% elif loads_current|abs < 0.1 %}
+              {{ 0 }}
+            {% else %}
+              {{ ((((battery_soc - battery_min_soc) * battery_max_capacity) / 100) / loads_current)|round(2) }}
+            {% endif %}
+          {% endif %}
+        attributes:
+          last_soc: "{{ states('sensor.mp2_soc_mqtt')|float(0) }}"    

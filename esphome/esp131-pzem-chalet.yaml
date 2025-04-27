@@ -22,7 +22,10 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+    dns1: 192.168.0.254    
 
+external_components:
+  - source: github://dentra/esphome-components
 
 # Enable logging
 logger:
@@ -47,6 +50,16 @@ status_led:
     number: GPIO16
     inverted: true
 
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
+
+
 binary_sensor:
 #Etat de la connection
   - platform: status
@@ -64,9 +77,23 @@ sensor:
       filters:
         - multiply: 0.001
     power:
+      id: puissance
       name: "${friendly_name} Puissance"
       unit_of_measurement: "W"
     update_interval: 30s
+
+  - platform: energy_statistics
+    total: puissance
+    energy_today:
+      name: "${friendly_name} Energie Jour"
+    energy_yesterday:
+      name: "${friendly_name} Energie Hier"
+    energy_week:
+      name: "${friendly_name} Energie Semaine"
+    energy_month:
+      name: "${friendly_name} Energie Mois"
+    energy_year:
+      name: "${friendly_name} Energie Annnée"
 
 switch:
   - platform: gpio

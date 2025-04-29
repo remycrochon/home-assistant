@@ -125,14 +125,3 @@ sensor:
   - platform: uptime
     name: "${friendly_name} Uptime Sensor"
     update_interval: 60s
-
-text_sensor:
-  # IP address #
-  - platform: wifi_info
-    ip_address:
-      name: "${friendly_name} IP address"
-      icon: "mdi:network-outline"
-    ssid:
-      name: "${friendly_name} Connected SSID"
-    bssid:
-      name: "${friendly_name} Connected BSSID"

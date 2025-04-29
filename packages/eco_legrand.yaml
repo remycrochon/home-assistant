@@ -36,7 +36,7 @@ command_line:
       name: "EcoCompteur VMC Niv0 brut_0"
       unique_id: "ecocompteur_vmc_niv0_brut_0"
       command: curl -s 'http://192.168.0.26/inst.json' | jq '.data5'
-      scan_interval: 60
+      scan_interval: 10
       unit_of_measurement: W
       
   - sensor:

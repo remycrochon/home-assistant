@@ -745,25 +745,26 @@ script:
       #      } 
       #    } 
       
-      
+#            float error = id(pu_batteries).state - id(cons_pubatt).state;
+#            id(increment) = error * (1 + abs(error) / 1000) * id(coeff_rbat).state / 1000;
+
 
       - lambda: |-
           if (id(etatbus_ve).state == 3) {
-            float error = id(pu_batteries).state - id(cons_pubatt).state;
-            id(increment) = error * (1 + abs(error) / 1000) * id(coeff_rbat).state / 1000;
+            id(increment)=id(pu_batteries).state*abs(id(pu_batteries).state)/(id(coeff_rbat).state*id(coeff_rbat).state*10000);
             id(moderegul).publish_state("Sur Pu batteries Bulk");
           } else {
             if (id(pu_batteries).state >= id(seuil_pubatt).state) {
-              id(increment) = id(pureseau1).state * (1 + abs(id(pureseau1).state) / 1000) * id(coeff_r).state / 1000 * -1;
+              id(increment)=id(pureseau1).state*abs(id(pureseau1).state)/(id(coeff_r).state*id(coeff_r).state*10000)* -1;
               id(moderegul).publish_state("Sur Pu reseau");
             } else {
-              id(increment) = id(pu_batteries).state * (1 + abs(id(pu_batteries).state) / 1000) * id(coeff_rbat).state / 1000;
+              id(increment)=id(pu_batteries).state*abs(id(pu_batteries).state)/(id(coeff_rbat).state*id(coeff_rbat).state*10000);
               id(moderegul).publish_state("Sur Pu batteries Non Bulk");
             }
           }
 
-          if (id(increment) > 10) id(increment) = 10;
-          if (id(increment) < -10) id(increment) = -10;
+          if (id(increment) > 15) id(increment) = 15;
+          if (id(increment) < -15) id(increment) = -15;
 
           if (!isnan(id(striac))) {
             id(striac) = id(striac) + id(increment);

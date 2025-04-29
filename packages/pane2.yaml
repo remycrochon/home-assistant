@@ -18,10 +18,10 @@ openhasp:
           "text": "{{ states('sensor.time') }}"
       - obj: "p0b6"
         properties:
-          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}°C"
+          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}°C"
       - obj: "p0b7"
         properties:
-          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
 
       ############### Page 1 Home ###############
       ############### Réseau
@@ -109,7 +109,7 @@ openhasp:
             {{ count }} W
             {% endif %}    
 
-####### PAGE 2 ############### 
+####### PAGE 2 - HOTTE ############### 
       - obj: "p2b23" # STOP
         properties:
           "val": '{{ 1 if is_state("switch.esp180_hotte", "on") else 0 }}'
@@ -198,3 +198,88 @@ openhasp:
             - service: homeassistant.toggle
               entity_id: "switch.relais_cde_vmc_niv0_on_off"
 
+      ############### Page 4 Home ###############
+      ############### Réseau
+      - obj: "p4b24" # Grid Power
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p4b25" # Grid Conso
+        properties:
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int }} kWh"
+            
+      - obj: "p4b26" # Grid Inject
+        properties:
+          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int }} kWh"
+      
+      ##################### Solaire
+      - obj: "p4b34" # Puissance production
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_prod_totale_mqtt')|float %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p4b35" # Production
+        properties:
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int }} kWh"
+            
+      - obj: "p4b36" # Prévision
+        properties:
+          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kWh"
+
+      ############# Batteries
+      - obj: "p4b44" # Charge/Décharge
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
+            {% if count >= 0 %}
+              {{"\uE04D\uE04D"}}
+            {% else %}
+              {{"\uE054\uE054"}}
+            {% endif %}
+      - obj: "p4b45" # Puissance
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float*-1 %}
+            {% if count|abs >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p4b46" # SOC
+        properties:
+          "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
+      - obj: "p4b47" # Tps restant
+        properties:
+          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
+
+      ################## Maison
+      - obj: "p4b55" # Puissance
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|float %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p4b56" # Conso
+        properties:
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int }} kW"
+      - obj: "p4b57" # ECS
+        properties:
+          "text": >
+            {% set count = states('sensor.ecocompteur_ecs')|float %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}    

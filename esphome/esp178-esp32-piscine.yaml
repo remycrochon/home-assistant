@@ -1272,7 +1272,7 @@ interval:
 
 # Déclaration des "Scripts"
 script:
-  # Script utilisé pour tester", peut etre supprimer si inutilse
+  # Script utilisé pour tester", peut etre supprimer si inutilise
   - id: _test
     then:
       - lambda: |-

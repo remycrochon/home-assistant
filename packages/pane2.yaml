@@ -66,9 +66,9 @@ openhasp:
           "text": >
             {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
             {% if count >= 0 %}
-              {{"\uE04D\uE04D"}}
+              {{"\uE6c1"}}
             {% else %}
-              {{"\uE054\uE054"}}
+              {{"\uE6c2"}}
             {% endif %}
       - obj: "p1b45" # Puissance
         properties:
@@ -177,19 +177,28 @@ openhasp:
       - obj: "p3b14"
         properties:
           "text": "{{ states('sensor.esp136_t_combles')}}C°"
+      - obj: "p3b16"
+        properties:
+          "text": "{{ states('sensor.esp136_rend')|round(0)}} %"
       - obj: "p3b21"
         properties:
-          "text": "{{ states('sensor.esp136_rend')}} %"
+          "text": "{{ states('sensor.esp145_conc_particules_2_5mm')|round(0)}}"      
       - obj: "p3b31"
         properties:
-          "text": "{{ states('sensor.esp145_monoxide_carbon')|round(0)}} ppm"
+          "text": "{{ states('sensor.esp136_cop_vmc')|round(1)}}"   
       - obj: "p3b41"
         properties:
-          "text": "{{ states('sensor.ecocompteur_vmc_niv0')|round(0)}} W"
+          "text": "{{ states('sensor.ecocompteur_vmc_niv0')|round(0)}} W"          
       - obj: "p3b51"
         properties:
-          "text": "{{ states('sensor.esp145_mh_z19_co2_value')}} ppm"
-      - obj: "p3b61" # Cde Relais
+          "text": "{{ states('sensor.esp145_monoxide_carbon')|round(0)}} ppm"             
+      - obj: "p3b61"
+        properties:
+          "text": "{{ states('sensor.esp145_mh_z19_co2_value')|round(0)}} ppm"
+      - obj: "p3b71"
+        properties:
+          "text": "{{ states('sensor.esp136_debit_estime_vmc')|round(1)}} m3/h"          
+      - obj: "p3b91" # Cde Relais
         properties:
           "val": '{{ 1 if is_state("switch.relais_cde_vmc_niv0_on_off", "on") else 0 }}'
           "text_color": "{{ '#00ff00' if is_state('switch.relais_cde_vmc_niv0_on_off', 'on') else '#ffffff' }}" 
@@ -200,6 +209,15 @@ openhasp:
 
       ############### Page 4 Home ###############
       ############### Réseau
+      - obj: "p4b21" # Charge/Décharge
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
+            {% if count < 0 %}
+              {{"#7FFF00 \uE6c1"}}
+            {% else %}
+              {{"#FF0000 \uE6c2"}}
+            {% endif %}      
       - obj: "p4b24" # Grid Power
         properties:
           "text": >
@@ -207,7 +225,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
       - obj: "p4b25" # Grid Conso
         properties:
@@ -225,7 +243,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
       - obj: "p4b35" # Production
         properties:
@@ -241,9 +259,9 @@ openhasp:
           "text": >
             {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
             {% if count >= 0 %}
-              {{"\uE04D\uE04D"}}
+              {{"\uE6c1"}}
             {% else %}
-              {{"\uE054\uE054"}}
+              {{"\uE6c2"}}
             {% endif %}
       - obj: "p4b45" # Puissance
         properties:
@@ -252,12 +270,18 @@ openhasp:
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
-      - obj: "p4b46" # SOC
+      - obj: "p4b46" # U
+        properties:
+          "text": "{{ states('sensor.mp2_tension_batteries_par_mqtt')|float|round(1) }}V"            
+      - obj: "p4b47" # Int
+        properties:
+          "text": "{{ states('sensor.mp2_intensite_batteries')|float|round(1) }}A"
+      - obj: "p4b48" # SOC
         properties:
           "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
-      - obj: "p4b47" # Tps restant
+      - obj: "p4b49" # Tps restant
         properties:
           "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
 
@@ -269,7 +293,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|roud(0) }} W
             {% endif %}
       - obj: "p4b56" # Conso
         properties:
@@ -281,5 +305,23 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
-            {% endif %}    
+            {{ count|round(0) }} W
+            {% endif %} 
+      ############### Page 5 TEST ###############
+      ############### Réseau
+      - obj: "p5b10" #
+        properties:
+          "val": >
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
+            {% if count >= 1000 %}
+              {{ (count/1000) |round(2)}} kW
+            {% else %}
+              {{ count }} W
+            {% endif %}            
+          "max": >
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
+            {% if count >= 1000 %}
+              {{ 10 }}
+            {% else %}
+              {{ 1000 }}
+            {% endif %}

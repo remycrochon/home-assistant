@@ -2,9 +2,10 @@ substitutions:
   device_name: esp136-vmc-n0
   adress_ip: "192.168.0.136"
   friendly_name: esp136
-  
+
 esphome:
   name: ${device_name}
+
 esp8266:
   board: d1_mini_pro
   framework:
@@ -19,18 +20,13 @@ wifi:
       password: !secret mdpwifi
       priority: 0
   reboot_timeout: 5min
-
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
-# Enable logging
 logger:
-
-# Enable Home Assistant API
 api:
-
 ota:
   platform: esphome
 web_server:
@@ -40,59 +36,259 @@ one_wire:
   - platform: gpio  
     pin: GPIO2 #D4
 
-# DS18B20 15/12/2021
+# Sélecteur de mode (Manuel ou Automatique)
+select:
+  - platform: template
+    name: "${friendly_name} Mode VMC"
+    id: vmc_mode
+    options:
+      - "Manuel"
+      - "Automatique"
+    optimistic: true
+    restore_value: true    
+    on_value:
+      then:
+        - logger.log:
+            format: "Mode VMC changé en : %s"
+            args: [ 'id(vmc_mode).state.c_str()' ]
+
+# Input Number pour les seuils
+number:
+  # Seuils pour le CO2
+  - platform: template
+    name: "${friendly_name} Seuil Haut CO2"
+    id: seuil_haut_co2
+    optimistic: true
+    restore_value: true
+    initial_value: 700
+    mode: box
+    min_value: 0
+    max_value: 1500
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_dioxide
+
+  - platform: template
+    name: "${friendly_name} Seuil Très Haut CO2"
+    id: seuil_tres_haut_co2
+    optimistic: true
+    restore_value: true
+    initial_value: 800
+    mode: box
+    min_value: 0
+    max_value: 3000
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_dioxide
+
+  # Seuils pour le PM2.5
+  - platform: template
+    name: "${friendly_name} Seuil Haut PM2.5"
+    id: seuil_haut_pm25
+    optimistic: true
+    restore_value: true
+    initial_value: 35
+    mode: box
+    min_value: 0
+    max_value: 1000
+    step: 1
+    unit_of_measurement: "µg/m³"
+    device_class: pm25
+
+  - platform: template
+    name: "${friendly_name} Seuil Très Haut PM2.5"
+    id: seuil_tres_haut_pm25
+    optimistic: true
+    restore_value: true
+    initial_value: 100
+    mode: box
+    min_value: 0
+    max_value: 2000
+    step: 1
+    unit_of_measurement: "µg/m³"
+    device_class: pm25
+
+  # Seuils pour le CO
+  - platform: template
+    name: "${friendly_name} Seuil Haut CO"
+    id: seuil_haut_co
+    optimistic: true
+    restore_value: true
+    initial_value: 25
+    mode: box
+    min_value: 0
+    max_value: 100
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_monoxide
+
+  - platform: template
+    name: "${friendly_name} Seuil Très Haut CO"
+    id: seuil_tres_haut_co
+    optimistic: true
+    restore_value: true
+    initial_value: 50
+    mode: box
+    min_value: 0
+    max_value: 200
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_monoxide
+
 sensor:
   - platform: dallas_temp
     address: 0x5A012111F0026A28
     name: "${friendly_name} T Air Neuf"
     id: out
     update_interval: 10s
+    device_class: temperature
 
   - platform: dallas_temp
     address: 0xBE012113327ECD28
     name: "${friendly_name} T Air Vicié"
     id: airv
     update_interval: 10s
+    device_class: temperature
 
   - platform: dallas_temp
     address: 0x570121130B1F6B28
     name: "${friendly_name} T insufflation"
     id: insuf
     update_interval: 10s
+    device_class: temperature
 
   - platform: dallas_temp
     address: 0xC90121137D4EA028
     name: "${friendly_name} T aspiration"
     id: aspi
     update_interval: 10s
+    device_class: temperature
     
   - platform: dallas_temp
     address: 0x28012112F58CF028
     name: "${friendly_name} T Combles"
     id: combles
     update_interval: 10s
+    device_class: temperature
+
+  - platform: homeassistant
+    entity_id: sensor.ecocompteur_vmc_niv0
+    id: pu
+    unit_of_measurement: "W"
+    device_class: power
+
+  # Récupérer les valeurs de CO2, PM2.5 et CO depuis Home Assistant
+  - platform: homeassistant
+    entity_id: sensor.esp145_mh_z19_co2_value
+    id: co2_value
+    unit_of_measurement: "ppm"
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.esp145_conc_particules_2_5mm
+    id: pm25_value
+    unit_of_measurement: "µg/m³"
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.esp145_monoxide_carbon
+    id: co_value
+    unit_of_measurement: "ppm"
+    internal: true
 
   - platform: template
     name: "${friendly_name} Rend"
     id: rend
     update_interval: 10s
     unit_of_measurement: "%"
-    device_class: "aqi"
+    icon: "mdi:percent"
     state_class: "measurement"
     accuracy_decimals: 0
     lambda: |-
-      if (((id(insuf).state-id(out).state)/(id(aspi).state-id(out).state)*100) >= 100) {
-        return 100;
-      } else {
-        if (((id(insuf).state-id(out).state)/(id(aspi).state-id(out).state)*100) <0) {
+      if (isnan(id(insuf).state) || isnan(id(out).state) || isnan(id(aspi).state)) {
         return 0;
-        } else {  
-        return ((id(insuf).state-id(out).state)/(id(aspi).state-id(out).state)*100);
-        }
       }
-# Rendement (en %) = (Température d'insufflation - Température extérieure) / (Température d'extraction de l'air vicié - Température extérieure) x 100.     
-  
-#Etat de la connection
+      float denom = (id(aspi).state - id(out).state);
+      if (denom == 0) {
+        return 0;
+      }
+      float rendement = ((id(insuf).state - id(out).state) / denom) * 100;
+      if (rendement >= 100) {
+        return 100;
+      } else if (rendement < 0) {
+        return 0;
+      }
+      return rendement;
+
+  - platform: template
+    name: "${friendly_name} Débit estimé VMC"
+    id: debit
+    unit_of_measurement: "m³/h"
+    icon: "mdi:fan"
+    state_class: "measurement"
+    update_interval: 60s
+    lambda: |-
+      if (isnan(id(pu).state)) {
+        return 0;
+      }
+      float debit = id(pu).state;
+      return debit;
+    filters:
+      - calibrate_polynomial:
+          degree: 2
+          datapoints:
+            - 30.14 -> 90
+            - 34.19 -> 105
+            - 38.87 -> 120
+            - 44.96 -> 135
+            - 52.45 -> 150
+            - 61.35 -> 165
+            - 71.66 -> 180
+            - 83.37 -> 195
+      - lambda: |-
+          if (x < 0) return 0;
+          return x;
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "${friendly_name} Puissance thermique récupérée"
+    unit_of_measurement: "W"
+    update_interval: 60s
+    lambda: |-
+      if (isnan(id(debit).state) || isnan(id(insuf).state) || isnan(id(out).state)) {
+        return 0;
+      }
+      float debit_air = (id(debit).state / 3600.0);
+      float masse_volumique = 1.2;
+      float capacite_thermique = 1000.0;
+      return debit_air * masse_volumique * capacite_thermique * 
+             (id(insuf).state - id(out).state);
+    accuracy_decimals: 1
+    id: puissance_thermique
+    internal: true
+    device_class: power
+
+  - platform: template
+    name: "${friendly_name} COP VMC"
+    device_class: power_factor
+    state_class: "measurement"
+    unit_of_measurement: ""
+    update_interval: 60s
+    lambda: |-
+      if (isnan(id(pu).state) || isnan(id(puissance_thermique).state)) {
+        return 0;
+      }
+      float puissance_electrique = id(pu).state;
+      if (puissance_electrique == 0) {
+        return 0;
+      }
+      float cop = id(puissance_thermique).state / puissance_electrique;
+      if (cop < 0) {
+        return 0;
+      }
+      return cop;
+    accuracy_decimals: 2
+
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
@@ -117,5 +313,267 @@ switch:
     turn_on_action:
       - switch.turn_on: relais
       - delay: 6s
-      - switch.turn_off: relais      
-    
+      - switch.turn_off: relais
+
+# Variables globales pour suivre l'état de l'automatisation
+globals:
+  - id: co2_high_triggered
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: pm25_high_triggered
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: co_high_triggered
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: co2_very_high_triggered
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: pm25_very_high_triggered
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: co_very_high_triggered
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: high_trigger_time
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: very_high_trigger_time
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+# Automatisation pour le mode "Automatique"
+interval:
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(vmc_mode).state == "Automatique";'
+          then:
+            # Vérifier les seuils très hauts individuellement
+            # CO2 très haut
+            - if:
+                condition:
+                  lambda: 'return !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                then:
+                  - globals.set:
+                      id: co2_very_high_triggered
+                      value: 'true'
+                  - globals.set:
+                      id: very_high_trigger_time
+                      value: 'id(very_high_trigger_time) + 60'
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(co2_very_high_triggered) && id(co2_value).state <= id(seuil_tres_haut_co2).state;'
+                      then:
+                        - globals.set:
+                            id: co2_very_high_triggered
+                            value: 'false'
+
+                  # PM2.5 très haut
+            - if:
+                condition:
+                  lambda: 'return !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
+                then:
+                  - globals.set:
+                      id: pm25_very_high_triggered
+                      value: 'true'
+                  - globals.set:
+                      id: very_high_trigger_time
+                      value: 'id(very_high_trigger_time) + 60'
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(pm25_very_high_triggered) && id(pm25_value).state <= id(seuil_tres_haut_pm25).state;'
+                      then:
+                        - globals.set:
+                            id: pm25_very_high_triggered
+                            value: 'false'
+
+            # CO très haut
+            - if:
+                condition:
+                  lambda: 'return !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                then:
+                  - globals.set:
+                      id: co_very_high_triggered
+                      value: 'true'
+                  - globals.set:
+                      id: very_high_trigger_time
+                      value: 'id(very_high_trigger_time) + 60'
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(co_very_high_triggered) && id(co_value).state <= id(seuil_tres_haut_co).state;'
+                      then:
+                        - globals.set:
+                            id: co_very_high_triggered
+                            value: 'false'
+            - logger.log:
+                format: "Triggers très hauts - CO2: %d, PM2.5: %d, CO: %d, Temps: %d"
+                args: [ 'id(co2_very_high_triggered)', 'id(pm25_very_high_triggered)', 'id(co_very_high_triggered)', 'id(very_high_trigger_time)' ]
+                
+       
+            # Vérifier les seuils hauts individuellement
+            # CO2 haut
+            - if:
+                condition:
+                  lambda: 'return !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_haut_co2).state;'
+                then:
+                  - globals.set:
+                      id: co2_high_triggered
+                      value: 'true'
+                  - globals.set:
+                      id: high_trigger_time
+                      value: 'id(high_trigger_time) + 60'
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(co2_high_triggered) && id(co2_value).state <= id(seuil_haut_co2).state;'
+                      then:
+                        - globals.set:
+                            id: co2_high_triggered
+                            value: 'false'
+
+            # PM2.5 haut
+            - if:
+                condition:
+                  lambda: 'return !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_haut_pm25).state;'
+                then:
+                  - globals.set:
+                      id: pm25_high_triggered
+                      value: 'true'
+                  - globals.set:
+                      id: high_trigger_time
+                      value: 'id(high_trigger_time) + 60'
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(pm25_high_triggered) && id(pm25_value).state <= id(seuil_haut_pm25).state;'
+                      then:
+                        - globals.set:
+                            id: pm25_high_triggered
+                            value: 'false'
+
+            # CO haut
+            - if:
+                condition:
+                  lambda: 'return !isnan(id(co_value).state) && id(co_value).state > id(seuil_haut_co).state;'
+                then:
+                  - globals.set:
+                      id: co_high_triggered
+                      value: 'true'
+                  - globals.set:
+                      id: high_trigger_time
+                      value: 'id(high_trigger_time) + 60'
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(co_high_triggered) && id(co_value).state <= id(seuil_haut_co).state;'
+                      then:
+                        - globals.set:
+                            id: co_high_triggered
+                            value: 'false'
+            - logger.log:
+                format: "Triggers hauts - CO2: %d, PM2.5: %d, CO: %d, Temps: %d"
+                args: [ 'id(co2_high_triggered)', 'id(pm25_high_triggered)', 'id(co_high_triggered)', 'id(high_trigger_time)' ]
+
+           # Exécuter l'action pour les seuils très hauts (5 minutes = 300 secondes)
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return (id(co2_very_high_triggered) || id(pm25_very_high_triggered) || id(co_very_high_triggered));'
+                    - lambda: 'return id(very_high_trigger_time) >= 300;'
+                then:
+                  - switch.turn_on: relais  # Allumer la VMC
+                  - switch.turn_on: vit3   # Passer à Vitesse 3
+                  - delay: 15min           # Maintenir 15 minutes
+                  - switch.turn_on: vit2   # Passer à Vitesse 2
+                  - delay: 30min           # Maintenir 30 minutes
+                  - globals.set:
+                      id: very_high_trigger_time
+                      value: '0'
+                  # Réinitialiser les triggers très hauts individuellement
+                  - if:
+                      condition:
+                        lambda: 'return id(co2_very_high_triggered) && id(co2_value).state <= id(seuil_tres_haut_co2).state;'
+                      then:
+                        - globals.set:
+                            id: co2_very_high_triggered
+                            value: 'false'
+                  - if:
+                      condition:
+                        lambda: 'return id(pm25_very_high_triggered) && id(pm25_value).state <= id(seuil_tres_haut_pm25).state;'
+                      then:
+                        - globals.set:
+                            id: pm25_very_high_triggered
+                            value: 'false'
+                  - if:
+                      condition:
+                        lambda: 'return id(co_very_high_triggered) && id(co_value).state <= id(seuil_tres_haut_co).state;'
+                      then:
+                        - globals.set:
+                            id: co_very_high_triggered
+                            value: 'false'
+
+            # Exécuter l'action pour les seuils hauts (10 minutes = 600 secondes)
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return (id(co2_high_triggered) || id(pm25_high_triggered) || id(co_high_triggered));'
+                    - lambda: 'return id(high_trigger_time) >= 600;'
+                    - lambda: 'return !(id(co2_very_high_triggered) || id(pm25_very_high_triggered) || id(co_very_high_triggered));'  # Ne pas exécuter si les seuils très hauts sont actifs
+                then:
+                  - switch.turn_on: relais  # Allumer la VMC
+                  - switch.turn_on: vit2   # Passer à Vitesse 2
+                  - delay: 30min           # Maintenir 30 minutes
+                  - globals.set:
+                      id: high_trigger_time
+                      value: '0'
+                  # Réinitialiser les triggers hauts individuellement
+                  - if:
+                      condition:
+                        lambda: 'return id(co2_high_triggered) && id(co2_value).state <= id(seuil_haut_co2).state;'
+                      then:
+                        - globals.set:
+                            id: co2_high_triggered
+                            value: 'false'
+                  - if:
+                      condition:
+                        lambda: 'return id(pm25_high_triggered) && id(pm25_value).state <= id(seuil_haut_pm25).state;'
+                      then:
+                        - globals.set:
+                            id: pm25_high_triggered
+                            value: 'false'
+                  - if:
+                      condition:
+                        lambda: 'return id(co_high_triggered) && id(co_value).state <= id(seuil_haut_co).state;'
+                      then:
+                        - globals.set:
+                            id: co_high_triggered
+                            value: 'false'
+
+            # Réinitialiser les temporisations si aucun trigger n'est actif
+            - if:
+                condition:
+                  lambda: 'return !(id(co2_very_high_triggered) || id(pm25_very_high_triggered) || id(co_very_high_triggered));'
+                then:
+                  - globals.set:
+                      id: very_high_trigger_time
+                      value: '0'
+            - if:
+                condition:
+                  lambda: 'return !(id(co2_high_triggered) || id(pm25_high_triggered) || id(co_high_triggered));'
+                then:
+                  - globals.set:
+                      id: high_trigger_time
+                      value: '0'

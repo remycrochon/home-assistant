@@ -18,20 +18,11 @@ input_datetime:
     has_time: true
 
 input_select:
-  vmc_ssol:
-    name: Vmc_SSol
-    icon: mdi:fan
-    options:
-      - Auto
-      - Marche
-      - Arret
-
   vmc_niv0:
     name: Vmc_Niv0
     icon: mdi:fan
     options:
       - Hor
-      - CO2 PM2.5
       - Marche
       - Arret
     
@@ -70,6 +61,7 @@ sensor:
     end: "{{ now() }}"
 
 # Statistiques puissance 
+# Entité utilisé dans les automatismes
   - platform: statistics
     name: puissance_vmc_niv0_median
     unique_id: "puissance_vmc_niv0_median" 

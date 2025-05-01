@@ -508,40 +508,6 @@
     trigger: time
   - at: input_datetime.heure_vmc_niv0_at
     trigger: time
-  - entity_id:
-    - sensor.esp145_conc_particules_2_5mm
-    id: pm2.5sh
-    above: input_number.seuil_haut_pm2_5
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-    trigger: numeric_state
-  - entity_id: sensor.esp145_mh_z19_co2_value
-    id: co2sh
-    above: input_number.seuil_haut_co2
-    for:
-      hours: 0
-      minutes: 10
-      seconds: 0
-    trigger: numeric_state
-  - entity_id:
-    - sensor.esp145_conc_particules_2_5mm
-    id: pm2.5sth
-    above: input_number.seuil_tres_haut_pm2_5
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    trigger: numeric_state
-  - entity_id: sensor.esp145_mh_z19_co2_value
-    id: co2sth
-    above: input_number.seuil_tres_haut_co2
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    trigger: numeric_state
   - event: sunrise
     offset: 0
     id: levee_soleil
@@ -1660,7 +1626,7 @@
   alias: Camera Activation-Désactivation detection
   description: Activation detection entre 5:30 et 23:30
   triggers:
-  - at: 05:30:00
+  - at: 06:00:00
     id: fin
     trigger: time
   - at: '23:30:00'

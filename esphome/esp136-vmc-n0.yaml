@@ -8,6 +8,7 @@ esphome:
 
 esp8266:
   board: d1_mini_pro
+  restore_from_flash: true
   framework:
     version: recommended  
 
@@ -26,9 +27,13 @@ wifi:
     subnet: 255.255.255.0
 
 logger:
+  level: INFO
+
 api:
+  
 ota:
   platform: esphome
+
 web_server:
   port: 80
 
@@ -48,9 +53,15 @@ select:
     restore_value: true    
     on_value:
       then:
+        - if:
+            condition:
+              - lambda: 'return id(vmc_mode).state == "Manuel";'
+            then:
+              - script.execute: script_reset_vit
         - logger.log:
             format: "Mode VMC changé en : %s"
             args: [ 'id(vmc_mode).state.c_str()' ]
+            level: INFO
 
 # Input Number pour les seuils
 number:
@@ -227,6 +238,7 @@ sensor:
     icon: "mdi:fan"
     state_class: "measurement"
     update_interval: 60s
+    accuracy_decimals: 1
     lambda: |-
       if (isnan(id(pu).state)) {
         return 0;
@@ -248,25 +260,6 @@ sensor:
       - lambda: |-
           if (x < 0) return 0;
           return x;
-    accuracy_decimals: 1
-
-  - platform: template
-    name: "${friendly_name} Puissance thermique récupérée"
-    unit_of_measurement: "W"
-    update_interval: 60s
-    lambda: |-
-      if (isnan(id(debit).state) || isnan(id(insuf).state) || isnan(id(out).state)) {
-        return 0;
-      }
-      float debit_air = (id(debit).state / 3600.0);
-      float masse_volumique = 1.2;
-      float capacite_thermique = 1000.0;
-      return debit_air * masse_volumique * capacite_thermique * 
-             (id(insuf).state - id(out).state);
-    accuracy_decimals: 1
-    id: puissance_thermique
-    internal: true
-    device_class: power
 
   - platform: template
     name: "${friendly_name} COP VMC"
@@ -274,306 +267,244 @@ sensor:
     state_class: "measurement"
     unit_of_measurement: ""
     update_interval: 60s
+    accuracy_decimals: 2
     lambda: |-
-      if (isnan(id(pu).state) || isnan(id(puissance_thermique).state)) {
+      if (isnan(id(pu).state) || isnan(id(debit).state) || isnan(id(insuf).state) || isnan(id(out).state)) {
         return 0;
-      }
+      }    
+      float debit_air = (id(debit).state / 3600.0);
+      float masse_volumique = 1.2;
+      float capacite_thermique = 1000.0;
+      float pu_thermique = debit_air * masse_volumique * capacite_thermique * 
+             (id(insuf).state - id(out).state);    
       float puissance_electrique = id(pu).state;
       if (puissance_electrique == 0) {
         return 0;
       }
-      float cop = id(puissance_thermique).state / puissance_electrique;
+      float cop = pu_thermique / puissance_electrique;
       if (cop < 0) {
         return 0;
       }
       return cop;
-    accuracy_decimals: 2
 
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
+text_sensor:
+  # Affichage Vitesse en clair
+  - platform: template
+    id: aff_vitesse
+    name: "${friendly_name} affich_vitesse"
+    icon: mdi:timer
+    lambda: |-
+      float puiss = id(pu).state;
+      if (puiss < 2.0) {
+        return std::string("Arret");
+      } else if (puiss <= 35.0) {
+        return std::string("Vit 1");
+      } else if (puiss <= 70.0) {
+        return std::string("Vit 2");
+      } else {
+        return std::string("Vit 3");
+      }
+
 switch:   
   - platform: gpio
-    name: "${friendly_name} Relais"
+    name: "${friendly_name} Vit_1"
     pin: GPIO05 #D1
-    id: relais
+    id: vit1
     
   - platform: template
     name: "${friendly_name} Vit_2"
     id: vit2
     turn_on_action:
-      - switch.turn_on: relais
+      - switch.turn_on: vit1
       - delay: 2s
-      - switch.turn_off: relais
+      - switch.turn_off: vit1
 
   - platform: template
     name: "${friendly_name} Vit_3"
     id: vit3
     turn_on_action:
-      - switch.turn_on: relais
+      - switch.turn_on: vit1
       - delay: 6s
-      - switch.turn_off: relais
+      - switch.turn_off: vit1
 
-# Variables globales pour suivre l'état de l'automatisation
-globals:
-  - id: co2_high_triggered
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: pm25_high_triggered
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: co_high_triggered
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: co2_very_high_triggered
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: pm25_very_high_triggered
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: co_very_high_triggered
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: high_trigger_time
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: very_high_trigger_time
-    type: int
-    restore_value: no
-    initial_value: '0'
+  - platform: template
+    name: "${friendly_name} Valid Co"
+    id: val_co
+    optimistic: True
+    on_turn_on:
+      then:
+        - script.execute: calcul_mode_auto_v1
+    on_turn_off:
+      then:
+        - script.execute: calcul_mode_auto_v1
 
-# Automatisation pour le mode "Automatique"
+  - platform: template
+    name: "${friendly_name} Valid Co2"
+    id: val_co2
+    optimistic: True
+    on_turn_on:
+      then:
+        - script.execute: calcul_mode_auto_v1
+    on_turn_off:
+      then:
+        - script.execute: calcul_mode_auto_v1
+
+  - platform: template
+    name: "${friendly_name} Valid pm25"
+    id: val_pm25
+    optimistic: True
+    on_turn_on:
+      then:
+        - script.execute: calcul_mode_auto_v1
+    on_turn_off:
+      then:
+        - script.execute: calcul_mode_auto_v1
+
 interval:
-  - interval: 10s
+  - interval: 60s
+    then:
+      - script.execute: calcul_mode_auto_v1
+
+# ------------------------  Scripts
+script:
+  # Automatisation pour le mode "Automatique"
+  - id: calcul_mode_auto_v1
+    mode: single
     then:
       - if:
           condition:
             lambda: 'return id(vmc_mode).state == "Automatique";'
           then:
-            # Vérifier les seuils très hauts individuellement
-            # CO2 très haut
+            # Vérifier les seuils très hauts individuellement (priorité sur les seuils hauts)
             - if:
                 condition:
-                  lambda: 'return !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                  or:
+                    - lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                    - lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                    - lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
                 then:
-                  - globals.set:
-                      id: co2_very_high_triggered
-                      value: 'true'
-                  - globals.set:
-                      id: very_high_trigger_time
-                      value: 'id(very_high_trigger_time) + 60'
-                else:
+                  - script.execute: script_vit3
+                  - script.stop: script_vit2
                   - if:
-                      condition:
-                        lambda: 'return id(co2_very_high_triggered) && id(co2_value).state <= id(seuil_tres_haut_co2).state;'
+                      condition: 
+                        lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
                       then:
-                        - globals.set:
-                            id: co2_very_high_triggered
-                            value: 'false'
+                        - logger.log:
+                            format: "CO2 - Val: %f, Seuil Tres Haut: %f"
+                            args: [ 'id(co2_value).state', 'id(seuil_tres_haut_co2).state']  
+                            level: INFO
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                      then:
+                        - logger.log:
+                            format: "CO - Val: %f, Seuil Tres Haut: %f"
+                            args: [ 'id(co_value).state', 'id(seuil_tres_haut_co).state']  
+                            level: INFO
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
+                      then:
+                        - logger.log:
+                            format: "PM2.5 - Val: %f, Seuil Tres Haut: %f"
+                            args: [ 'id(pm25_value).state', 'id(seuil_tres_haut_pm25).state']  
+                            level: INFO
 
-                  # PM2.5 très haut
-            - if:
-                condition:
-                  lambda: 'return !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
-                then:
-                  - globals.set:
-                      id: pm25_very_high_triggered
-                      value: 'true'
-                  - globals.set:
-                      id: very_high_trigger_time
-                      value: 'id(very_high_trigger_time) + 60'
-                else:
-                  - if:
-                      condition:
-                        lambda: 'return id(pm25_very_high_triggered) && id(pm25_value).state <= id(seuil_tres_haut_pm25).state;'
-                      then:
-                        - globals.set:
-                            id: pm25_very_high_triggered
-                            value: 'false'
-
-            # CO très haut
-            - if:
-                condition:
-                  lambda: 'return !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
-                then:
-                  - globals.set:
-                      id: co_very_high_triggered
-                      value: 'true'
-                  - globals.set:
-                      id: very_high_trigger_time
-                      value: 'id(very_high_trigger_time) + 60'
-                else:
-                  - if:
-                      condition:
-                        lambda: 'return id(co_very_high_triggered) && id(co_value).state <= id(seuil_tres_haut_co).state;'
-                      then:
-                        - globals.set:
-                            id: co_very_high_triggered
-                            value: 'false'
-            - logger.log:
-                format: "Triggers très hauts - CO2: %d, PM2.5: %d, CO: %d, Temps: %d"
-                args: [ 'id(co2_very_high_triggered)', 'id(pm25_very_high_triggered)', 'id(co_very_high_triggered)', 'id(very_high_trigger_time)' ]
-                
-       
             # Vérifier les seuils hauts individuellement
-            # CO2 haut
-            - if:
-                condition:
-                  lambda: 'return !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_haut_co2).state;'
-                then:
-                  - globals.set:
-                      id: co2_high_triggered
-                      value: 'true'
-                  - globals.set:
-                      id: high_trigger_time
-                      value: 'id(high_trigger_time) + 60'
-                else:
-                  - if:
-                      condition:
-                        lambda: 'return id(co2_high_triggered) && id(co2_value).state <= id(seuil_haut_co2).state;'
-                      then:
-                        - globals.set:
-                            id: co2_high_triggered
-                            value: 'false'
-
-            # PM2.5 haut
-            - if:
-                condition:
-                  lambda: 'return !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_haut_pm25).state;'
-                then:
-                  - globals.set:
-                      id: pm25_high_triggered
-                      value: 'true'
-                  - globals.set:
-                      id: high_trigger_time
-                      value: 'id(high_trigger_time) + 60'
-                else:
-                  - if:
-                      condition:
-                        lambda: 'return id(pm25_high_triggered) && id(pm25_value).state <= id(seuil_haut_pm25).state;'
-                      then:
-                        - globals.set:
-                            id: pm25_high_triggered
-                            value: 'false'
-
-            # CO haut
-            - if:
-                condition:
-                  lambda: 'return !isnan(id(co_value).state) && id(co_value).state > id(seuil_haut_co).state;'
-                then:
-                  - globals.set:
-                      id: co_high_triggered
-                      value: 'true'
-                  - globals.set:
-                      id: high_trigger_time
-                      value: 'id(high_trigger_time) + 60'
-                else:
-                  - if:
-                      condition:
-                        lambda: 'return id(co_high_triggered) && id(co_value).state <= id(seuil_haut_co).state;'
-                      then:
-                        - globals.set:
-                            id: co_high_triggered
-                            value: 'false'
-            - logger.log:
-                format: "Triggers hauts - CO2: %d, PM2.5: %d, CO: %d, Temps: %d"
-                args: [ 'id(co2_high_triggered)', 'id(pm25_high_triggered)', 'id(co_high_triggered)', 'id(high_trigger_time)' ]
-
-           # Exécuter l'action pour les seuils très hauts (5 minutes = 300 secondes)
             - if:
                 condition:
                   and:
-                    - lambda: 'return (id(co2_very_high_triggered) || id(pm25_very_high_triggered) || id(co_very_high_triggered));'
-                    - lambda: 'return id(very_high_trigger_time) >= 300;'
+                    - or:
+                        - lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_haut_co2).state;'
+                        - lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_haut_pm25).state;'
+                        - lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_haut_co).state;'
+                    - not:
+                        or:
+                          - lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                          - lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                          - lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
                 then:
-                  - switch.turn_on: relais  # Allumer la VMC
-                  - switch.turn_on: vit3   # Passer à Vitesse 3
-                  - delay: 15min           # Maintenir 15 minutes
-                  - switch.turn_on: vit2   # Passer à Vitesse 2
-                  - delay: 30min           # Maintenir 30 minutes
-                  - globals.set:
-                      id: very_high_trigger_time
-                      value: '0'
-                  # Réinitialiser les triggers très hauts individuellement
+                  - script.execute: script_vit2
+                  - script.stop: script_vit3
                   - if:
-                      condition:
-                        lambda: 'return id(co2_very_high_triggered) && id(co2_value).state <= id(seuil_tres_haut_co2).state;'
+                      condition: 
+                        lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_haut_co2).state;'
                       then:
-                        - globals.set:
-                            id: co2_very_high_triggered
-                            value: 'false'
+                        - logger.log:
+                            format: "CO2 - Val: %f, Seuil Haut: %f"
+                            args: [ 'id(co2_value).state', 'id(seuil_haut_co2).state']  
+                            level: INFO
                   - if:
-                      condition:
-                        lambda: 'return id(pm25_very_high_triggered) && id(pm25_value).state <= id(seuil_tres_haut_pm25).state;'
+                      condition: 
+                        lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_haut_co).state;'
                       then:
-                        - globals.set:
-                            id: pm25_very_high_triggered
-                            value: 'false'
+                        - logger.log:
+                            format: "CO - Val: %f, Seuil Haut: %f"
+                            args: [ 'id(co_value).state', 'id(seuil_haut_co).state']  
+                            level: INFO
                   - if:
-                      condition:
-                        lambda: 'return id(co_very_high_triggered) && id(co_value).state <= id(seuil_tres_haut_co).state;'
+                      condition: 
+                        lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_haut_pm25).state;'
                       then:
-                        - globals.set:
-                            id: co_very_high_triggered
-                            value: 'false'
+                        - logger.log:
+                            format: "PM2.5 - Val: %f, Seuil Haut: %f"
+                            args: [ 'id(pm25_value).state', 'id(seuil_haut_pm25).state']  
+                            level: INFO
 
-            # Exécuter l'action pour les seuils hauts (10 minutes = 600 secondes)
-            - if:
-                condition:
-                  and:
-                    - lambda: 'return (id(co2_high_triggered) || id(pm25_high_triggered) || id(co_high_triggered));'
-                    - lambda: 'return id(high_trigger_time) >= 600;'
-                    - lambda: 'return !(id(co2_very_high_triggered) || id(pm25_very_high_triggered) || id(co_very_high_triggered));'  # Ne pas exécuter si les seuils très hauts sont actifs
-                then:
-                  - switch.turn_on: relais  # Allumer la VMC
-                  - switch.turn_on: vit2   # Passer à Vitesse 2
-                  - delay: 30min           # Maintenir 30 minutes
-                  - globals.set:
-                      id: high_trigger_time
-                      value: '0'
-                  # Réinitialiser les triggers hauts individuellement
-                  - if:
-                      condition:
-                        lambda: 'return id(co2_high_triggered) && id(co2_value).state <= id(seuil_haut_co2).state;'
-                      then:
-                        - globals.set:
-                            id: co2_high_triggered
-                            value: 'false'
-                  - if:
-                      condition:
-                        lambda: 'return id(pm25_high_triggered) && id(pm25_value).state <= id(seuil_haut_pm25).state;'
-                      then:
-                        - globals.set:
-                            id: pm25_high_triggered
-                            value: 'false'
-                  - if:
-                      condition:
-                        lambda: 'return id(co_high_triggered) && id(co_value).state <= id(seuil_haut_co).state;'
-                      then:
-                        - globals.set:
-                            id: co_high_triggered
-                            value: 'false'
 
-            # Réinitialiser les temporisations si aucun trigger n'est actif
-            - if:
-                condition:
-                  lambda: 'return !(id(co2_very_high_triggered) || id(pm25_very_high_triggered) || id(co_very_high_triggered));'
-                then:
-                  - globals.set:
-                      id: very_high_trigger_time
-                      value: '0'
-            - if:
-                condition:
-                  lambda: 'return !(id(co2_high_triggered) || id(pm25_high_triggered) || id(co_high_triggered));'
-                then:
-                  - globals.set:
-                      id: high_trigger_time
-                      value: '0'
+
+  # Sélection des vitesses          
+  - id: script_vit1            
+    mode: single
+    then:
+      - logger.log:
+          format: "Passage à Vitesse 1"
+          level: INFO
+      - switch.turn_on: vit1
+      - delay: 5s
+      - switch.turn_off: vit1
+      - logger.log:
+          format: "Fin Vitesse 1"
+          level: INFO
+
+  # Vitesse 2 pendant 30min, puis retour à Vitesse 1
+  - id: script_vit2           
+    mode: single
+    then:
+      - logger.log:
+          format: "Passage à Vitesse 2"
+          level: INFO
+      - switch.turn_on: vit2   # Passer à Vitesse 2
+      - delay: 30min           # Maintenir 30 minutes
+      - script.execute: script_vit1  # Revenir à Vitesse 1
+      - logger.log:
+          format: "Fin Vitesse 2, retour à Vitesse 1"
+          level: INFO
+
+  # Vitesse 3 pendant 15min, puis Vitesse 2 pendant 30min, puis retour à Vitesse 1
+  - id: script_vit3
+    mode: single
+    then:
+      - logger.log:
+          format: "Passage à Vitesse 3"
+          level: INFO
+      - switch.turn_on: vit3   # Passer à Vitesse 3
+      - delay: 15min           # Maintenir 15 minutes
+      - script.execute: script_vit2  # Passer à Vitesse 2 pendant 30 minutes
+      - logger.log:
+          format: "Fin Vitesse 3, passage à Vitesse 2"
+          level: INFO
+
+  - id: script_reset_vit
+    mode: single
+    then:
+      - logger.log:
+          format: "Réinitialisation des vitesses"
+          level: INFO
+      - switch.turn_off: vit1
+      - switch.turn_off: vit2
+      - switch.turn_off: vit3

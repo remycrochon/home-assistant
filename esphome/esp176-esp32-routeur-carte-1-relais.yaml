@@ -652,7 +652,7 @@ display:
 interval:
   - interval: 1s
     then:
-      - script.execute: calcul_injection_mode_hp
+      - script.execute: calcul_injection_mode_hp_v1
 
   - interval: 2s
     then:
@@ -668,7 +668,165 @@ script:
 
   ########################################################################""
   # Calcul puissance injection mode HP
-  - id: calcul_injection_mode_hp
+  - id: calcul_injection_mode_hp_v1
+    mode: single
+    then:
+      # Validation du seuil de production
+      - if:
+          condition:
+            lambda: 'return id(pu_prod).state > id(seuil_prod).state;'
+        # Si Production > au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: seuil_prod_ok
+                state: ON
+        # Sinon
+          else:
+            - binary_sensor.template.publish:
+                id: seuil_prod_ok
+                state: OFF      
+      # validation du seuil soc
+      - if:
+          condition:
+            lambda: 'return id(soc).state >= id(seuil_soc).state;'
+        # Si SOC > au seuil alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: seuil_soc_ok
+                state: ON
+        # Sinon
+          else:
+            if:
+              condition:
+                lambda: 'return id(soc).state < (id(seuil_soc).state-2);'
+              then:
+                - binary_sensor.template.publish:
+                    id: seuil_soc_ok
+                    state: OFF
+      # Validation du seuil de temperature triac
+      - if:
+          condition:
+            lambda: 'return id(temp_triac).state < (id(tmax).state-2);'
+        # Si Temp Triac inferieur au seuil-2° alors OK
+          then:
+            - binary_sensor.template.publish:
+                id: temperatureok
+                state: ON
+        # Dévalidation du seuil de température
+      - if:
+          condition:
+            lambda: 'return id(temp_triac).state >= id(tmax).state;'
+        # Si Temp Triac supérieur ou égale au seuil alors NOK
+          then:
+            - binary_sensor.template.publish:
+                id: temperatureok
+                state: OFF
+                              
+      # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
+      #   Sinon
+      # Si on regule autour du zero grid et d'un seuil puissance batteries
+      # 
+      # La régule consiste à incrementer ou decrementer la sortie triac 
+      # regule semi-quadratique
+      # Limiter l'incrément pour éviter des ajustements trop brusques
+
+      - lambda: |-
+          if (id(etatbus_ve).state == 3){
+            id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
+            id(moderegul).publish_state( "Sur Pu batteries Bulk");
+          } else {
+            if (id(pu_batteries).state >= id(seuil_pubatt).state){
+              id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
+              id(moderegul).publish_state( "Sur Pu reseau");
+            } else { 
+              id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
+              id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
+            } 
+          } 
+
+          if (!isnan(id(striac))) {
+            id(striac) = id(striac) + id(increment);
+          } else {
+            id(striac) = 0;
+          }
+
+          if (id(striac) <= 0) {
+            id(striac) = 0;
+          } else if (id(striac) >= id(pmax).state) {
+            id(striac) = id(pmax).state;
+          }
+     
+      - logger.log:
+          format: "Log S Triac %f - Increment %f"
+          args: [ 'id(striac)', 'id(increment)' ]
+          level: "info"
+
+      
+      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
+      - if: 
+          condition:
+            and:
+              - switch.is_on: validrouteur
+              - switch.is_on: modeauto
+              - binary_sensor.is_on: seuil_prod_ok
+              - binary_sensor.is_on: temperatureok
+              - lambda: 'return id(soc).state >= id(seuil_soc).state;'              
+
+          then:
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return id(striac)/100 ;
+              - logger.log:
+                  format: "Log Auto OK STriac %f - Increment %f"
+                  args: [ 'id(striac)', 'id(increment)' ]
+                  level: "info"         
+
+      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
+      - if: 
+          condition:
+            and:
+              - switch.is_on: modeauto
+              - or:
+                - switch.is_off: validrouteur
+                - binary_sensor.is_off: temperatureok                    
+                - binary_sensor.is_off: seuil_prod_ok
+                - lambda: 'return id(soc).state < id(seuil_soc).state;'                    
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - light.turn_off: gradateur
+            - logger.log:
+                format: "Log Auto NOk STriac %f - Increment %f"
+                args: [ 'id(striac)', 'id(increment)' ]
+                level: "info"                         
+
+
+      # Si mode routeur manu
+      - if: 
+          condition:
+            and:
+              - switch.is_off: modeauto
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(increment) = 0;
+            - logger.log:
+                format: "Log Manu STriac %f - Increment %f"
+                args: [ 'id(striac)', 'id(increment)' ]
+                level: "info"                         
+    # Affichage STriac et Increment
+      - lambda: |-
+            id(afstriac).publish_state( id(striac) );
+            id(afincrement).publish_state( id(increment) );
+
+      - logger.log:
+          format: "Log Fin STriac %f - Increment %f"
+          args: [ 'id(striac)', 'id(increment)' ]
+          level: "info"
+  # Calcul puissance injection mode HP
+  - id: calcul_injection_mode_hp_v2
     mode: single
     then:
       # Validation du seuil de production

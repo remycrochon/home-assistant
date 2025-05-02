@@ -54,6 +54,15 @@ web_server:
   port: 80
   version: 3
 
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org  
+
 # Protocole I2C
 i2c:
   sda: GPIO21 
@@ -160,7 +169,7 @@ number:
     unit_of_measurement: "%"
     step: 1
 
-# Seuil MAX temperature
+  # Seuil MAX temperature
   - platform: template
     name: "${friendly_name} T Max"
     id: tmax
@@ -172,7 +181,7 @@ number:
     unit_of_measurement: "C°"
     step: 0.1
 
-# Coeff Réactivité
+  # Coeff Réactivité
   - platform: template
     name: "${friendly_name} Coeff R"
     id: coeff_r
@@ -183,7 +192,7 @@ number:
     max_value: 1000
     unit_of_measurement: ""
     step: 0.1
-# Coeff Réactivité Puissance Batteries
+  # Coeff Réactivité Puissance Batteries
   - platform: template
     name: "${friendly_name} Coeff R bat"
     id: coeff_rbat
@@ -194,7 +203,7 @@ number:
     max_value: 1000
     unit_of_measurement: ""
     step: 0.1    
-# seuil Puissance batteries 
+  # seuil Puissance batteries 
   - platform: template
     name: "${friendly_name} Seuil Pu Batteries"
     id: seuil_pubatt
@@ -205,7 +214,7 @@ number:
     max_value: 0
     unit_of_measurement: "W"
     step: 1
-# seuil SOC validation routeur
+  # seuil SOC validation routeur
   - platform: template
     name: "${friendly_name} Seuil SOC"
     id: seuil_soc
@@ -217,7 +226,7 @@ number:
     unit_of_measurement: "%"
     step: 1
 
-# Consigne sur Puissance Batteries
+  # Consigne sur Puissance Batteries
   - platform: template
     name: "${friendly_name} Consigne Pu Batteries"
     id: cons_pubatt
@@ -228,7 +237,7 @@ number:
     max_value: 2500
     unit_of_measurement: "W"
     step: 1
-# Consigne sur Puissance Heure Creuses
+    # Consigne sur Puissance Heure Creuses
   - platform: template
     name: "${friendly_name} Consigne Pu Heure Creuse"
     id: cons_puhc
@@ -239,7 +248,7 @@ number:
     max_value: 8000
     unit_of_measurement: "W"
     step: 1
-# seuil Production validation routeur 
+  # seuil Production validation routeur 
   - platform: template
     name: "${friendly_name} Seuil Production Val Routeur"
     id: seuil_prod
@@ -264,7 +273,7 @@ number:
 
 sensor:  
 
-# tension de l'alimentation
+  # tension de l'alimentation
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: Tension
@@ -279,7 +288,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# Intensité traversant le tore
+    # Intensité traversant le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: Itore
@@ -295,7 +304,7 @@ sensor:
     response_size: 4
     state_class: measurement
 
-# Puissance traversant le tore
+  # Puissance traversant le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: puecs
@@ -311,7 +320,7 @@ sensor:
     response_size: 4
     state_class: measurement
 
-# Energie lue dans le tore
+  # Energie lue dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: energietore
@@ -327,7 +336,7 @@ sensor:
     response_size: 4
     state_class: total
 
-# Energie lue dans le tore
+  # Energie lue dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: fptore
@@ -341,7 +350,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# Energie NEG lue dans le tore
+  # Energie NEG lue dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: energietoren
@@ -357,7 +366,7 @@ sensor:
     response_size: 4 
     state_class: total
     
-# Sens du courant dans la pince
+  # Sens du courant dans la pince
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: senspince
@@ -370,7 +379,7 @@ sensor:
       - multiply: 1
     register_count: 1
     response_size: 4
-# Sens du courant dans le tore
+  # Sens du courant dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: senstor
@@ -385,7 +394,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# Fréquence de l'alimentation  
+  # Fréquence de l'alimentation  
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: frequence
@@ -400,7 +409,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# tension de l'alimentation
+  # tension de l'alimentation
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: Tension2
@@ -415,7 +424,7 @@ sensor:
     register_count: 1
     response_size: 4
     
-# Intensité lue dans la pince
+  # Intensité lue dans la pince
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: Ireseau
@@ -430,7 +439,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# puissance lue dans la pince
+  # puissance lue dans la pince
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: pureseau
@@ -453,7 +462,7 @@ sensor:
               id(pureseau1).publish_state( id(pureseau).state );
             }
     
-# Energie lue dans la pince
+  # Energie lue dans la pince
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: energiepince
@@ -468,7 +477,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# Energie lue dans le tore
+  # Energie lue dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: fppince
@@ -482,7 +491,7 @@ sensor:
     register_count: 1
     response_size: 4
 
-# Energie NEG lue dans le tore
+  # Energie NEG lue dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
     id: energienegpince
@@ -577,10 +586,19 @@ sensor:
     filters:
       - filter_out: NAN
 
+# déclaration des "text_sensors"
 text_sensor:
   - platform: template
     name: "${friendly_name} Mode Regulation"
     id: moderegul
+
+  # Message en lien avec L'automatisme de notification telegram
+  - platform: template
+    name: "${friendly_name}_message_notif_telegram"
+    lambda: |-
+      return {"ESP176 RAZ Telegram"};
+    update_interval: never
+    id: _msg_notif_telegram
 
 switch:
   - platform: gpio
@@ -614,6 +632,7 @@ output:
   - id: led_rouge
     platform: gpio
     pin: GPIO25
+
   # Pilotage du Dimmer ------------------------
   - platform: ac_dimmer
     id: ecs
@@ -727,8 +746,6 @@ script:
       # Si on regule autour du zero grid et d'un seuil puissance batteries
       # 
       # La régule consiste à incrementer ou decrementer la sortie triac 
-      # regule semi-quadratique
-      # Limiter l'incrément pour éviter des ajustements trop brusques
 
       - lambda: |-
           if (id(etatbus_ve).state == 3){
@@ -816,7 +833,7 @@ script:
                 format: "Log Manu STriac %f - Increment %f"
                 args: [ 'id(striac)', 'id(increment)' ]
                 level: "info"                         
-    # Affichage STriac et Increment
+      # Affichage STriac et Increment
       - lambda: |-
             id(afstriac).publish_state( id(striac) );
             id(afincrement).publish_state( id(increment) );
@@ -825,6 +842,9 @@ script:
           format: "Log Fin STriac %f - Increment %f"
           args: [ 'id(striac)', 'id(increment)' ]
           level: "info"
+
+
+
   # Calcul puissance injection mode HP
   - id: calcul_injection_mode_hp_v2
     mode: single
@@ -887,22 +907,7 @@ script:
       # La régule consiste à incrementer ou decrementer la sortie triac 
       # regule semi-quadratique
       # Limiter l'incrément pour éviter des ajustements trop brusques
-      
-      
-      #- lambda: |-
-      #    if (id(etatbus_ve).state == 3){
-      #      id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
-      #      id(moderegul).publish_state( "Sur Pu batteries Bulk");
-      #    } else {
-      #      if (id(pu_batteries).state >= id(seuil_pubatt).state){
-      #        id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
-      #        id(moderegul).publish_state( "Sur Pu reseau");
-      #      } else { 
-      #        id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
-      #        id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
-      #      } 
-      #    } 
-      
+
 #            float error = id(pu_batteries).state - id(cons_pubatt).state;
 #            id(increment) = error * (1 + abs(error) / 1000) * id(coeff_rbat).state / 1000;
 
@@ -1043,10 +1048,28 @@ script:
             - delay: 10s
             - switch.turn_on: relais
             - logger.log: "Relais Activé"
+            - lambda: |-
+                static String mess;
+                mess= "ESP176 Relaiis Surplus activé";
+                id(_message_telegram)->execute(mess.c_str());    
       - if: 
           condition:
             - lambda: 'return id(striac) <= 0;'
           then:
             - switch.turn_off: relais
             - logger.log: "Relais Désactivé"
-      
+
+  # je n'ai pas trouvé de solution pour envoyer un message vers Telegram
+  # je passe donc par HA
+  # Envoi d'un message à l'automatisme de notification Telegram dans HA
+  # message à construire au format String avant appel de ce script
+  - id: _message_telegram
+    parameters:
+      mess1: string
+    then:
+      - lambda: |-                
+          static String mess;
+          mess= (id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
+          mess= mess +"\n";
+          mess= mess+ mess1.c_str();
+          id(_msg_notif_telegram).publish_state(mess.c_str());       

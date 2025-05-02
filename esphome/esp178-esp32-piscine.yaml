@@ -1060,8 +1060,7 @@ sensor:
       - round: 2
 
 
-# Déclaration des "Covers" 
-# Volet piscine dans mon cas
+# Déclaration Volet piscine
 cover:
   - platform: template
     name: "${friendly_name}_volet_piscine"

@@ -69,6 +69,7 @@ i2c:
   scl: GPIO22
   scan: True
   id: bus_a
+  frequency: 400kHz
 
 # Protocole du JSK
 uart:
@@ -605,6 +606,12 @@ switch:
     name: "${friendly_name} Relais"
     pin: GPIO5
     id: relais
+    on_turn_on: 
+      then:
+        - lambda: |-
+            static String mess;
+            mess= "ESP176 Relais Surplus activé";
+            id(_message_telegram)->execute(mess.c_str());    
 
   - platform: template
     name: "${friendly_name} Mode Auto"    
@@ -657,7 +664,7 @@ display:
   - platform: lcd_pcf8574
     dimensions: 20x4
     address: 0x27
-    update_interval: 2s
+    update_interval: 10s
     lambda: |-
       it.printf(0,0,"Pr=%0.0fW",id(pureseau1).state);
       it.printf(10,0,"Pe=%0.0fW ",id(puecs).state);
@@ -1048,10 +1055,7 @@ script:
             - delay: 10s
             - switch.turn_on: relais
             - logger.log: "Relais Activé"
-            - lambda: |-
-                static String mess;
-                mess= "ESP176 Relaiis Surplus activé";
-                id(_message_telegram)->execute(mess.c_str());    
+
       - if: 
           condition:
             - lambda: 'return id(striac) <= 0;'

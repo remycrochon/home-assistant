@@ -31,7 +31,9 @@ esphome:
     - sensor.template.publish:
         id: _vol_injection_ph_moins
         state: 0.0
-
+    - sensor.template.publish:
+        id: _tps_injection_chlore
+        state: 0.0
 esp32:
   board: esp32dev
 
@@ -90,7 +92,7 @@ time:
      - 2.pool.ntp.org
 
     on_time:
-      # Tous les jours on execute le script de regul pH
+      # Déclenchement du script de regul pH deux fois par jour
       - seconds: 0
         minutes: 30
         hours: 10
@@ -101,6 +103,13 @@ time:
         hours: 14
         then:
           - script.execute: _regul_ph
+      # Déclenchement du script Injection Clhore liquide une fois par jour
+      - seconds: 0
+        minutes: 00
+        hours: 10
+        then:
+          - script.execute: _regul_chlore
+
       # reset le compteur de temps à minuit
       - seconds: 0
         minutes: 0
@@ -153,6 +162,7 @@ i2c:
   scl: 22
   scan: false
   id: bus_a
+  frequency: 300kHz
 
 # Configuration UART
 uart:
@@ -209,6 +219,7 @@ globals:
     - id: g_tps_injection_chlore
       type: float
       restore_value: no
+      initial_value: '0'
 
     # mémorise la durée de filtation dans les différents modes de fonctionnement
     - id: g_tps_filtration
@@ -341,9 +352,9 @@ select:
                 - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Ma_f";'
                 - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "At_f";'
             then:                    
-            - script.stop: _regul_ph   
-            - delay: 1s            
-            - script.execute: _regul_ph       
+              - script.stop: _regul_ph   
+              - delay: 1s            
+              - script.execute: _regul_ph       
 
   - platform: template
     name: "${friendly_name}_Mode_Fonct_regul_chlore"
@@ -357,12 +368,18 @@ select:
     on_value: 
       then:
         - logger.log:
-            format: "Mode Fonct Regul pH --> %s"
+            format: "Mode Fonct Regul chlore --> %s"
             args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
-            level: INFO        
-        - script.stop: _regul_chlore
-        - delay: 1s            
-        - script.execute: _regul_chlore
+            level: INFO 
+        - if:
+            condition:
+              or:
+                - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Ma_f";'
+                - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "At_f";'   
+            then:                
+              - script.stop: _regul_chlore
+              - delay: 1s            
+              - script.execute: _regul_chlore
 
   - platform: template
     name: "${friendly_name}_Mode_Fonct_appoint_eau"
@@ -461,16 +478,7 @@ binary_sensor:
   - platform: template
     name: "${friendly_name}_Etat_Galets_Chlore"
     id: _etat_galets_chlore
-    on_press:
-      - lambda: |-                
-          static String mess;
-          mess= "ESP178 Tps Utilisaton Galets Chlore Atteint";
-          id(_message_telegram)->execute(mess.c_str());     
-    on_release: 
-      - lambda: |-                
-          static String mess;
-          mess= "ESP178 Tps Utilisaton Galets Chlore OK";
-          id(_message_telegram)->execute(mess.c_str());    
+
 
 
   # Etat pression filtre
@@ -708,7 +716,7 @@ number:
     step: 1
     icon: mdi:percent
 
-  # Cible Niveau pH
+  # Cible Réulation pH
   - platform: template
     name: "${friendly_name}_pH_Cible"
     id: _ph_cible
@@ -732,6 +740,32 @@ number:
     max_value: 7.2
     unit_of_measurement: "l/h"
     step: 0.001
+
+  # Durée marche pompe ph cycle
+  - platform: template
+    name: "${friendly_name}_durée_injection_phmoins"
+    id: duree_inject_phmoins
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 120
+    unit_of_measurement: "s"
+    step: 1
+    icon: mdi:clock
+
+  # Durée entre deux controle pH
+  - platform: template
+    name: "${friendly_name}_durée_cycle_injection_phmoins"
+    id: duree_cycle_inject_phmoins
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 900
+    unit_of_measurement: "s"
+    step: 1
+    icon: mdi:clock
 
   # Coefficient regulation
   - platform: template
@@ -866,7 +900,7 @@ sensor:
     filters:
       - sliding_window_moving_average:
           window_size: 15
-          send_every: 5
+          send_every: 1
           send_first_at: 1
   # Etalonné le 15 juin 2024          
       - calibrate_linear:
@@ -884,24 +918,49 @@ sensor:
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
 
-  # Statistiques pH
+  # Capteur Kalman pour lisser ph_ezo
   - platform: combination
     type: kalman
-    name: "${friendly_name}_ph_stat_standard_deviation"
-    process_std_dev: 0.001
+    id: ph_kalman
+    name: "${friendly_name}_ph_filtered"
+    process_std_dev: 0.01  # Changements lents (0.01 pH/s)
     sources:
       - source: ph_ezo
-        error: 1.0
+        error: 0.1  # Bruit typique du capteur
+    std_dev:
+      id: ph_kalman_std_dev
+      name: "${friendly_name}_ph_kalman_std_dev"
     device_class: ph
-    state_class: "measurement"         
+    state_class: "measurement"
+
+  # Statistiques sur g_memoire_ph
+  - platform: combination
+    type: mean
+    id: ph_mean
+    name: "${friendly_name}_ph_mean"
+    sources:
+      - source: ph_ezo
+    device_class: ph
+    state_class: "measurement"
 
   - platform: combination
-    type: median
-    name: "${friendly_name}_ph_stat_median"
-    device_class: ph
-    state_class: "measurement"        
+    type: min
+    id: ph_min
+    name: "${friendly_name}_ph_min"
     sources:
       - source: ph_ezo
+    device_class: ph
+    state_class: "measurement"
+
+  - platform: combination
+    type: max
+    id: ph_max
+    name: "${friendly_name}_ph_max"
+    sources:
+      - source: ph_ezo
+    device_class: ph
+    state_class: "measurement"
+
 
   # Mesure de l'ORP
   # Procédure étalonnage:
@@ -966,7 +1025,8 @@ sensor:
     name: "${friendly_name}_tps_injection_chlore"
     id: _tps_injection_chlore
     unit_of_measurement: "s"
-    state_class: "measurement" 
+    state_class: "measurement"
+    
    
   # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
@@ -1013,7 +1073,6 @@ sensor:
     energy_year:
       name: "${friendly_name} Energie Annnée"
 
-
   # Calcul du temps de fonctionnement
   # Pompe piscine
   - platform: duty_time
@@ -1059,7 +1118,6 @@ sensor:
     filters: 
       - round: 2
 
-
 # Déclaration Volet piscine
 cover:
   - platform: template
@@ -1077,7 +1135,6 @@ cover:
     stop_action:
       - script.execute: script_stop_volet
     optimistic: true
-
 
 # déclaration des "text_sensors"
 text_sensor:
@@ -1120,7 +1177,9 @@ switch:
             id(flag_tempo_ppe_filtre) = false;
         - script.stop: _regul_ph
         - switch.turn_off: cde_ppe_ph_moins
-        - switch.turn_off: led14        
+        - script.stop: _regul_chlore
+        - switch.turn_off: cde_ppe_chlore
+        - switch.turn_off: led14     
 
   - platform: gpio
     name: "${friendly_name} cde_ppe_ph_moins"
@@ -1200,7 +1259,7 @@ switch:
         - switch.turn_off: cde_ppe_filtration
         - logger.log: 
             format: "entrée_arret_forcé_ppe_filtration"
-            level: INFO
+            level: DEBUG
         # RAZ de la durée de filtration
         - datetime.time.set:
             id: duree_filtration
@@ -1230,18 +1289,19 @@ display:
   - platform: lcd_pcf8574
     dimensions: 16x2
     address: 0x27
-    update_interval: 5s
+    update_interval: 10s
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(ph_ezo).state);
       it.printf(8,0,"P=%.3f",id(pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau));
+
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
 
 # Déclenchement des scripts à intervalles réguliers
 interval:
-  #- interval: 10s
-  #  then:
-  #    - script.execute: _regul_ph
+  - interval: 900s
+    then:
+      - script.execute: _regul_ph
   #- interval: 10s
   #  then:
   #    - script.execute: _regul_chlore
@@ -1254,7 +1314,7 @@ interval:
     then: 
       - script.execute: _memorisation_temperature_eau
       - script.execute: _memorisation_ph
-      - script.execute: _securisation_regul_ph
+#      - script.execute: _securisation_regul_ph
 
   - interval: 900s # Test HG toutes les 15 mn (900s)
     then: 
@@ -1346,19 +1406,19 @@ script:
             - logger.log:
                 format: "ph_EZO invalide: %.2f"
                 args: [ 'id(ph_ezo).state']
-                level: INFO            
+                level: DEBUG           
             - lambda: |-            
                 id(g_memoire_ph)=id(g_memoire_ph);
           else: 
             - logger.log:
                 format: "ph_EZO Valide: %.2f"
                 args: [ 'id(ph_ezo).state']
-                level: INFO   
+                level: DEBUG   
 
       - logger.log:
           format: "Flag Temp: %i / Ph EZO: %.2f / Mem Ph: %.2f"
           args: [ 'id(flag_tempo_ppe_filtre)','id(ph_ezo).state','id(g_memoire_ph)' ]
-          level: INFO
+          level: DEBUG
 
   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: _fonctionnement_filtration
@@ -1409,7 +1469,7 @@ script:
             - switch.turn_off: cde_ppe_filtration
             - logger.log: 
                 format: "arret_forcé_ppe_filtration"
-                level: INFO
+                level: DEBUG
             - lambda: |-
                 static String mess;
                 mess="At_force";
@@ -1425,7 +1485,7 @@ script:
             - switch.turn_on: cde_ppe_filtration
             - logger.log: 
                 format: "Marche_forcée_ppe_filtration"
-                level: INFO
+                level: DEBUG
             - lambda: |-
                 static String mess;
                 mess="Ma_force";
@@ -1513,7 +1573,7 @@ script:
             - script.execute: _calcul_hdebut_hfin
 
       # Mode "Horaire"
-      # Débuté à l'heure programmée pour une durée programmée
+      # Débute à l'heure programmée pour une durée programmée
       # je m'en sers surtout l'hiver
       - if:
           condition:
@@ -1543,8 +1603,8 @@ script:
                 
             - script.execute: _calcul_ma_at_ppe_filtration
 
-# Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
-# La variable: g_tps_filtration contient la durée en heure
+  # Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
+  # La variable: g_tps_filtration contient la durée en heure
   - id: _calcul_hdebut_hfin
     mode: single
     then:
@@ -1619,7 +1679,7 @@ script:
 
       - script.execute: _calcul_ma_at_ppe_filtration
 
-# Calcul la sortie de commande la pompe de filtration en fonction de l'heure actuelle, de l'heure de début et de l'heure de fin
+  # Calcul la sortie de commande la pompe de filtration en fonction de l'heure actuelle, de l'heure de début et de l'heure de fin
   - id: _calcul_ma_at_ppe_filtration
     mode: single
     then:
@@ -1649,6 +1709,123 @@ script:
           else:
             - switch.turn_off: cde_ppe_filtration
     
+  # Script principal pour la régulation du pH
+  - id: _regul_ph
+    mode: single
+    then:
+      - if:
+          condition:
+            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
+          then:
+            - logger.log:
+                format: "Log mem ph: %f / pH Cible: %f"
+                args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
+                level: debug      
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return id(g_memoire_ph) < id(_ph_cible).state;'
+                    - lambda: 'return id(g_memoire_ph) > 0;'
+                    - switch.is_on: cde_ppe_filtration          
+                then:
+                  - lambda: |-
+                      float ecart = abs(id(g_memoire_ph) - id(_ph_cible).state);
+                      float duration = id(duree_inject_phmoins).state; // temps d'activation de la pompe
+                      // Calcul du facteur de pondération
+                      float facteur = 1.0;
+                      if (ecart > 1) {
+                        facteur = 1.5;  // 150% pour écart très important                      
+                      } else if (ecart > 0.5) {
+                        facteur = 1.0;  // 100% pour écart important
+                      } else if (ecart > 0.3) {
+                        facteur = 0.6;  // 60% pour écart moyen
+                      } else if (ecart > 0.1) {
+                        facteur = 0.3;  // 30% pour écart faible
+                      } else {
+                        facteur = 0.1;  // 10% pour écart très faible
+                      }                      
+                      // Pondération linéaire à tester
+                      float ecart_ref = 0.5;
+                      float facteur_lineaire = std::min(1.0f, ecart / ecart_ref);
+                      float duree_lineaire = duration * facteur_lineaire;
+
+                      // Calcul de la durée
+                      float duree = duration * facteur;
+                      // Limites
+                      duree = std::max(1.0f, std::min(duree, 60.0f));  // 1 s min, 60 s max
+                      
+                      // Log pour débogage
+                      ESP_LOGI("regul_ph", "Écart: %.2f, Facteur: %.2f, Durée: %.2f s", ecart, facteur, duree);
+                      ESP_LOGI("regul_ph", "Écart: %.2f, Facteur Linéaire: %.2f, Durée Lineaire: %.2f s", ecart, facteur_lineaire, duree_lineaire);
+
+                      id(g_tps_injection_ph_moins)=duree;
+
+                else:
+                  - lambda: |-
+                      id(g_tps_injection_ph_moins)=0;
+
+            - lambda: |-
+               id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
+
+            # Convertion et affichage de la durée d'injection pH en hh:mm
+            - lambda: |-
+                static double dt=0;
+                static int r=0;
+                id(g_ss) = id(g_tps_injection_ph_moins);
+                // Calcul des heures - minutes
+                id(g_hh) = id(g_ss) / 3600;
+                r = id(g_ss) - id(g_hh) * 3600;
+                id(g_mm) = r / 60;
+                id(g_ss) = r - id(g_mm) * 60;
+            - datetime.time.set:
+                id: duree_injection_ph
+                time: !lambda |-
+                  return {second: static_cast<uint8_t>(id(g_ss)), minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
+
+            - logger.log:
+                format: "Log tps injection: %f"
+                args: [ 'id(g_tps_injection_ph_moins)' ]
+                level: DEBUG
+
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return id(g_tps_injection_ph_moins) > 0;'
+                then:
+                  - lambda: |-
+                      static String mess;
+                      mess= "ESP178 Debut injection pH";
+                      mess= mess+"\n";
+                      mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
+                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
+                      mess= mess+ "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
+                      id(_message_telegram)->execute(mess.c_str());   
+                  - logger.log:
+                      format: "Ph Mesure ph: %f / pH Cible: %f"
+                      args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
+                      level: INFO                      
+                  - switch.turn_on: cde_ppe_ph_moins
+                  - logger.log: 
+                      format: "Marche ppe Ph moins"
+                      level: INFO        
+                  - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
+                  - switch.turn_off: cde_ppe_ph_moins
+                  - lambda: |-
+                      static String mess;
+                      mess= "ESP178 Fin Injection pH";
+                      mess= mess+"\n";
+                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
+                      mess= mess + "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
+                      id(_message_telegram)->execute(mess.c_str()); 
+                  
+                  - logger.log: 
+                      format: "Arret ppe Ph moins"
+                      level: INFO
+                else:
+                  - switch.turn_off: cde_ppe_ph_moins
+                  - logger.log: 
+                      format: "Arret ppe Ph moins"
+                      level: INFO
 
   # Regulation du pH
   # Calcul du temps d'injection en fonction:
@@ -1663,7 +1840,7 @@ script:
   # q=quantité à injecté = (m-c)/ve*(vb/va)*mp
   # temps injection (s)= (q*3600)/de
  
-  - id: _regul_ph
+  - id: _regul_ph_old
     mode: single
     then:
       - if:
@@ -1783,7 +1960,7 @@ script:
             - logger.log: 
                 format: "Arret ppe Ph moins"
                 level: INFO
-  # Stoppe le Script de regule pH quand la mesure devient supérieure à la consigne
+  # Stoppe le Script de regule pH quand la mesure devient inferieure à la consigne
   # Cela évite de trop injecter de pH Moins
   - id: _securisation_regul_ph
     mode: single
@@ -1798,14 +1975,14 @@ script:
             - logger.log:
                 format: "Log mem ph: %f / pH Cible: %f"
                 args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                level: debug      
+                level: DEBUG  
             - script.stop: _regul_ph                
             - switch.turn_off: cde_ppe_ph_moins
             - lambda: |-
                 static String mess; 
                 static float Q;
                 Q = id(_temps_fonctionnement_ppe_ph).state*id(_debit_ppe_moins).state/3600;
-                mess= "ESP178 Arret Script Injection pH";
+                mess= "ESP178 Arret Sécurisé Script Injection pH";
                 mess= mess+"\n";
                 mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
                 mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
@@ -1823,25 +2000,31 @@ script:
                 id(_message_telegram)->execute(mess.c_str());
                 
                  
-# Regulation du chlore
-# Calcul du temps d'injection en fonction:
-# caracteristiques du Chlore 9.6°:
-  # mp= montant du produit =>quantité necessaire pour agir (0.1l)
-  # ve= valeur de l'effet du produit (1)
-  # va= volume d'eau affecté par le produit ( 10m3)
-# vb= volume du bassin
-# nb= nb de ppm Clhore à ajouter
-# de= debit de la pompe (en l/h)
-# q=quantité à injecté en litre = (m-c)/ve*(vb/va)*mp
-# temps injection (s)= (q*3600)/de
-
+  # Injection chlore liquide
+  # Calcul du temps d'injection en fonction:
+    # nb= nb de ppm Clhore à ajouter
+    # Avec comme parametres:
+      # caracteristiques du Chlore 9.6°:
+        # mp= montant du produit =>quantité necessaire pour agir (0.1l)
+        # ve= valeur de l'effet du produit (1)
+        # va= volume d'eau affecté par le produit ( 10m3)
+      # vb= volume du bassin
+      # de= debit de la pompe (en l/h)
+    # on en déduit:
+      # q=quantité à injecté en litre = (m-c)/ve*(vb/va)*mp
+    # et donc le temps d'injection en (s)= (q*3600)/de
+   
   - id: _regul_chlore
     mode: single
     then:
+      - logger.log:
+          format: "Script Injection Chlore"
+          level: INFO      
       - if:
           condition:
             and:
-              - switch.is_on: cde_ppe_filtration          
+              - switch.is_on: cde_ppe_filtration  
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'        
           then:
             - lambda: |-
                 static float nb=0;                
@@ -1856,32 +2039,43 @@ script:
                 de=id(_debit_ppe_chlore).state;
                 q=(nb)/ve*(vb/va)*mp;
                 id(g_tps_injection_chlore)=q*3600/de;
+                id(_tps_injection_chlore).publish_state(id(g_tps_injection_chlore));
           else:
             - lambda: |-
                 id(g_tps_injection_chlore)=0;
-
-      - lambda: |-
-          id(_tps_injection_chlore).publish_state(id(g_tps_injection_chlore));
+                id(_tps_injection_chlore).publish_state(0);
 
       - logger.log:
           format: "Log tps injection: %f"
           args: [ 'id(g_tps_injection_chlore)' ]
-          level: DEBUG
+          level: INFO
       - if:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'
-
           then:
             - if:
                 condition:
                   and:
-                    - lambda: 'return id(g_tps_injection_chlore) > 0;'
+                    - lambda: 'return id(_tps_injection_chlore).state > 0;'
                     - switch.is_on: cde_ppe_filtration
                 then:
                   - switch.turn_on: cde_ppe_chlore
                   - logger.log: 
                       format: "Marche ppe Ph Chlore"
-                      level: INFO        
+                      level: INFO
+                  - lambda: |-
+                      static String mess; 
+                      static int h,m,r,s=0;
+                      // Affichage du temps d'injection Ppe chlore
+                      s = (id(g_tps_injection_chlore));
+                      // Calcul des heures - minutes
+                      h = s / 3600;
+                      r = s - h * 3600;
+                      m = r / 60;
+                      r = r - m * 60;          
+                      mess= mess+"Tps Injection Chlore: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+                      id(_message_telegram)->execute(mess.c_str());
+
                   - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
                   - switch.turn_off: cde_ppe_chlore
                   - logger.log: 
@@ -1889,6 +2083,8 @@ script:
                       level: INFO
                 else:
                   - switch.turn_off: cde_ppe_chlore
+                  - lambda: |-                  
+                      id(_tps_injection_chlore).publish_state(0);
                   - logger.log: 
                       format: "Arret ppe chlore"
                       level: INFO
@@ -1901,7 +2097,7 @@ script:
           then:
             - switch.turn_on: cde_ppe_chlore
             - logger.log: 
-                format: "Marche ppe Chlore"
+                format: "Marche Forcée ppe Chlore"
                 level: INFO
       - if:
           condition:
@@ -1911,7 +2107,7 @@ script:
           then:
             - switch.turn_off: cde_ppe_chlore
             - logger.log: 
-                format: "Arret ppe Chlore"
+                format: "Arret Forcé ppe Chlore"
                 level: INFO
 
   # Regulation du niveau eau piscine
@@ -1957,7 +2153,7 @@ script:
           then: 
             - logger.log: 
                 format: "Ouverture vanne eau Mode Ma Forçé"
-                level: INFO
+                level: DEBUG
             - switch.turn_on: cde_ev_eau
 
       - if:
@@ -1967,7 +2163,7 @@ script:
           then:
             - logger.log: 
                 format: "Fermeture vanne eau Mode At Forçé"
-                level: INFO
+                level: DEBUG
             - switch.turn_off: cde_ev_eau
 
   # Scripts Commande Volet
@@ -1999,8 +2195,8 @@ script:
       - switch.turn_off: cde_volet_fermeture
       - switch.turn_off: cde_eclairage
 
-# Calcul des niveaux d'eau en fonction des sondes de niveaux
-# si niveau haut et niveau bas => niveau haut
+  # Calcul des niveaux d'eau en fonction des sondes de niveaux
+  # si niveau haut et niveau bas => niveau haut
   - id: _calcul_niveau_eau
     then:
       - if: 
@@ -2159,9 +2355,14 @@ script:
             - logger.log: 
                 format: "Galet Chlore Dépassé"
                 level: INFO  
+            - lambda: |-                
+                static String mess;
+                mess= "ESP178 Tps Utilisation Galets Chlore Atteint";
+                id(_message_telegram)->execute(mess.c_str());                    
           else:
             - lambda: 
                 id(_etat_galets_chlore).publish_state(false);
+              
 
   # je n'ai pas trouvé de solution pour envoyer un message vers Telegram
   # je passe donc par HA

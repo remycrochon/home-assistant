@@ -1187,23 +1187,31 @@
   trace:
     stored_traces: 15
 - id: '1706170202385'
-  alias: Ecran01 Eteint ecran toutes x mn
+  alias: Ecran01 Actions toutes les 30 mn
   description: ''
-  trigger:
-  - platform: time_pattern
-    minutes: /30
-  condition: []
-  action:
-  - data:
-      topic: hasp/ecran01/command
-      payload: backlight {"state":"true","brightness":10}
-    enabled: false
-    action: mqtt.publish
-  - data:
-      topic: hasp/ecran01/config/gui
-      payload: '{"idle2":20}'
-    enabled: false
-    action: mqtt.publish
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 31203080ff3e67d781d95be03b42e98e
+    entity_id: d3873f4313e0bcaae08d3a2cfca3300f
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - type: turn_off
+    device_id: 31203080ff3e67d781d95be03b42e98e
+    entity_id: d3873f4313e0bcaae08d3a2cfca3300f
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
   - type: turn_off
     device_id: 31203080ff3e67d781d95be03b42e98e
     entity_id: caf58cffba51ee848ade4eaa4c57a127
@@ -2590,4 +2598,26 @@
       message: '{{states(''sensor.esp176_message_notif_telegram'')}}'
       title: Message ESP176!!!
     action: notify.telegram
+  mode: single
+- id: '1746164692289'
+  alias: Ecran02- Actions toutes les 30 mn
+  description: ''
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: d895e168f56c5b089b39c806fd2ce04b
+    entity_id: 1a2c179a98b26f9d3603fa6f7978b684
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - type: turn_off
+    device_id: d895e168f56c5b089b39c806fd2ce04b
+    entity_id: 1a2c179a98b26f9d3603fa6f7978b684
+    domain: switch
   mode: single

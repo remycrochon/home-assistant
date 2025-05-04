@@ -1314,7 +1314,7 @@ interval:
     then: 
       - script.execute: _memorisation_temperature_eau
       - script.execute: _memorisation_ph
-#      - script.execute: _securisation_regul_ph
+      - script.execute: _securisation_regul_ph
 
   - interval: 900s # Test HG toutes les 15 mn (900s)
     then: 
@@ -1724,7 +1724,7 @@ script:
             - if:
                 condition:
                   and:
-                    - lambda: 'return id(g_memoire_ph) < id(_ph_cible).state;'
+                    - lambda: 'return id(g_memoire_ph) > (id(_ph_cible).state+0.05);'
                     - lambda: 'return id(g_memoire_ph) > 0;'
                     - switch.is_on: cde_ppe_filtration          
                 then:

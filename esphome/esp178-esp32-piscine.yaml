@@ -2027,18 +2027,19 @@ script:
               - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'        
           then:
             - lambda: |-
-                static float nb=0;                
-                static float mp=0.1;
-                static float ve=1;
-                static float va=10;
-                static float vb=50;
-                static float de=0;
-                static float q=0;
-                static float coef=0;
-                nb=id(_chlore_cible).state;
-                de=id(_debit_ppe_chlore).state;
-                q=(nb)/ve*(vb/va)*mp;
-                id(g_tps_injection_chlore)=q*3600/de;
+                static float nb = 0;
+                static float mp = 114.12;  // Concentration de chlore actif en g/L
+                static float vb = 50000;   // Volume de la piscine en L
+                static float de = 0;
+                static float q = 0;
+                nb = id(_chlore_cible).state;  // Concentration cible en mg/L
+                de = id(_debit_ppe_chlore).state;  // Débit en L/h
+                q = (nb * vb) / (mp * 1000);  // Quantité en L (nb est en mg/L, mp en g/L, donc diviser par 1000 pour convertir mg en g)
+                if (de > 0) {
+                  id(g_tps_injection_chlore) = (q / de) * 3600;  // Temps en secondes
+                } else {
+                  id(g_tps_injection_chlore) = 0;
+                }
                 id(_tps_injection_chlore).publish_state(id(g_tps_injection_chlore));
           else:
             - lambda: |-

@@ -130,6 +130,7 @@
     from: 'off'
     to: 'on'
     id: intensité
+    enabled: false
   conditions: []
   actions:
   - choose:
@@ -159,6 +160,7 @@
         action: lawn_mower.start_mowing
         target:
           device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
+        enabled: true
       - data:
           message: Reprise programme horaire!!{{-"\n"-}} Pluvio Moyenne 10mn ( {{states('sensor.vp2_pluviometrie_moyenne')}}
             mm) {{-"\n"-}} < Seuil Stop robot ({{states('input_number.seuil_pluie_stop_robot')}}
@@ -1980,6 +1982,10 @@
     - sensor.linky_umoy
     below: 50
     id: perte_secteur
+  - trigger: numeric_state
+    entity_id:
+    - sensor.mp2_tension_entree_l1
+    below: 20
   conditions: []
   actions:
   - data:
@@ -1996,6 +2002,11 @@
       message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
         V'
       title: Retour Secteur U Linky
+    action: notify.telegram
+  - data:
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
+        V'
+      title: Defaut Secteur U Linky
     action: notify.telegram
   mode: single
 - id: '1730650651996'

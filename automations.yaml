@@ -1637,10 +1637,10 @@
   description: Activation detection entre 5:30 et 23:30
   triggers:
   - at: 06:00:00
-    id: fin
+    id: desactive
     trigger: time
   - at: '23:30:00'
-    id: debut
+    id: active
     trigger: time
   - trigger: homeassistant
     event: start
@@ -1651,7 +1651,7 @@
     - conditions:
       - condition: trigger
         id:
-        - debut
+        - active
       sequence:
       - action: script.activation_camera_2
         metadata: {}
@@ -1659,8 +1659,7 @@
     - conditions:
       - condition: trigger
         id:
-        - fin
-        - ha
+        - desactive
       sequence:
       - action: script.activation_camera
         metadata: {}

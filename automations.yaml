@@ -2631,3 +2631,38 @@
     entity_id: 1a2c179a98b26f9d3603fa6f7978b684
     domain: switch
   mode: single
+- id: '1746555411905'
+  alias: Gestion pompe piscine selon SoC batterie
+  description: Force l'arrêt si SoC < 25% pendant 1 min, retour normal si SoC > 26%
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.mp2_soc_mqtt
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  conditions:
+  - condition: time
+    after: '10:00:00'
+  actions:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.mp2_soc_mqtt
+        below: 25
+      sequence:
+      - target:
+          entity_id: switch.esp178_ent_arret_force
+        action: switch.turn_on
+        data: {}
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.mp2_soc_mqtt
+        above: 26
+      sequence:
+      - target:
+          entity_id: switch.esp178_ent_arret_force
+        action: switch.turn_off
+        data: {}
+  mode: single

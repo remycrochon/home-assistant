@@ -103,10 +103,15 @@ time:
         hours: 14
         then:
           - script.execute: _regul_ph
-      # Déclenchement du script Injection Clhore liquide une fois par jour
+      # Déclenchement du script Injection Clhore liquide 
       - seconds: 0
         minutes: 00
         hours: 10
+        then:
+          - script.execute: _regul_chlore
+      - seconds: 0
+        minutes: 00
+        hours: 15
         then:
           - script.execute: _regul_chlore
 
@@ -657,6 +662,13 @@ datetime:
     id: duree_injection_ph
     type: time
     name: "${friendly_name}_duree_injection_pH"
+    optimistic: yes
+    restore_value: true
+
+  - platform: template
+    id: duree_injection_chlore
+    type: time
+    name: "${friendly_name}_duree_injection_chlore"
     optimistic: yes
     restore_value: true
 
@@ -1892,6 +1904,7 @@ script:
                 r = id(g_ss) - id(g_hh) * 3600;
                 id(g_mm) = r / 60;
                 id(g_ss) = r - id(g_mm) * 60;
+
             - datetime.time.set:
                 id: duree_injection_ph
                 time: !lambda |-
@@ -2045,6 +2058,21 @@ script:
             - lambda: |-
                 id(g_tps_injection_chlore)=0;
                 id(_tps_injection_chlore).publish_state(0);
+            # Convertion et affichage de la durée d'injection pH en hh:mm
+      - lambda: |-
+          static double dt=0;
+          static int r=0;
+          id(g_ss) = id(g_tps_injection_chlore);
+          // Calcul des heures - minutes
+          id(g_hh) = id(g_ss) / 3600;
+          r = id(g_ss) - id(g_hh) * 3600;
+          id(g_mm) = r / 60;
+          id(g_ss) = r - id(g_mm) * 60;
+          
+      - datetime.time.set:
+          id: duree_injection_chlore
+          time: !lambda |-
+            return {second: static_cast<uint8_t>(id(g_ss)), minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
 
       - logger.log:
           format: "Log tps injection: %f"

@@ -1045,20 +1045,20 @@ script:
   - id: calcul_relais_surprod
     mode: single
     then:
-     # Si sortie triac > pmax-5%, ce qui signifie que le triac est au max sans effet, pendant plus de 10s
+     # Si sortie triac > pmax-5%, ce qui signifie que le triac est au max sans effet, pendant plus de 60s
      # alors on active le relais
      # si triac <= 0 alors on desactive le relais
       - if: 
           condition:
-            - lambda: 'return id(striac)>=id(pmax).state-5;'
+            - lambda: 'return (id(striac)>=id(pmax).state-5 && id(puecs).state<100);'
           then:
-            - delay: 10s
+            - delay: 60s
             - switch.turn_on: relais
             - logger.log: "Relais Activé"
 
       - if: 
           condition:
-            - lambda: 'return id(striac) <= 0;'
+            - lambda: 'return id(puecs).state >= 100;'
           then:
             - switch.turn_off: relais
             - logger.log: "Relais Désactivé"

@@ -538,180 +538,6 @@ var $24c52f343453d62d$export$2e2bcd8739ae039 = {
 
 
 /**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/entity/state_active.ts
- */ /**
- * https://github.com/home-assistant/frontend/blob/dev/src/data/entity.ts
- */ /**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/array/literal-includes.ts#L6
- */ /**
- * Creates a type predicate function for determining if an array literal includes a given value
- * @param array - The array to check
- * @returns A type predicate function
- */ const $2dcc326b5e422db7$export$2fff862a498eed4d = (array)=>(searchElement, fromIndex)=>array.includes(searchElement, fromIndex);
-
-
-const $fa460070836bbf6d$export$f2d101b977a134fd = 'unavailable';
-const $fa460070836bbf6d$export$78244dbb77cfa6b6 = 'unknown';
-const $fa460070836bbf6d$export$8a4b4288adcd729e = 'on';
-const $fa460070836bbf6d$export$173de64b5ad0d5b4 = 'off';
-const $fa460070836bbf6d$export$565a86226f245f0b = [
-    $fa460070836bbf6d$export$f2d101b977a134fd,
-    $fa460070836bbf6d$export$78244dbb77cfa6b6
-];
-const $fa460070836bbf6d$export$8ccd97e727a09c65 = [
-    $fa460070836bbf6d$export$f2d101b977a134fd,
-    $fa460070836bbf6d$export$78244dbb77cfa6b6,
-    $fa460070836bbf6d$export$173de64b5ad0d5b4
-];
-const $fa460070836bbf6d$export$dea4173a348a2153 = (0, $2dcc326b5e422db7$export$2fff862a498eed4d)($fa460070836bbf6d$export$565a86226f245f0b);
-const $fa460070836bbf6d$export$3473ff6928139ced = (0, $2dcc326b5e422db7$export$2fff862a498eed4d)($fa460070836bbf6d$export$8ccd97e727a09c65);
-
-
-/**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/entity/compute_domain.ts
- */ const $e7dc90bb09bfe22d$export$2044bdc9670769ab = (entityId)=>entityId.substring(0, entityId.indexOf('.'));
-
-
-function $043ab5348dd51237$export$c0e85c3982a3daa6(stateObj, state) {
-    const domain = (0, $e7dc90bb09bfe22d$export$2044bdc9670769ab)(stateObj.entity_id);
-    const compareState = state ?? stateObj?.state;
-    if ([
-        'button',
-        'event',
-        'input_button',
-        'scene'
-    ].includes(domain)) return compareState !== (0, $fa460070836bbf6d$export$f2d101b977a134fd);
-    if ((0, $fa460070836bbf6d$export$dea4173a348a2153)(compareState)) return false;
-    // The "off" check is relevant for most domains, but there are exceptions
-    // such as "alert" where "off" is still a somewhat active state and
-    // therefore gets a custom color and "idle" is instead the state that
-    // matches what most other domains consider inactive.
-    if (compareState === (0, $fa460070836bbf6d$export$173de64b5ad0d5b4) && domain !== 'alert') return false;
-    // Custom cases
-    switch(domain){
-        case 'alarm_control_panel':
-            return compareState !== 'disarmed';
-        case 'alert':
-            // "on" and "off" are active, as "off" just means alert was acknowledged but is still active
-            return compareState !== 'idle';
-        case 'cover':
-            return compareState !== 'closed';
-        case 'device_tracker':
-        case 'person':
-            return compareState !== 'not_home';
-        case 'lawn_mower':
-            return [
-                'mowing',
-                'error'
-            ].includes(compareState);
-        case 'lock':
-            return compareState !== 'locked';
-        case 'media_player':
-            return compareState !== 'standby';
-        case 'vacuum':
-            return ![
-                'idle',
-                'docked',
-                'paused'
-            ].includes(compareState);
-        case 'valve':
-            return compareState !== 'closed';
-        case 'plant':
-            return compareState === 'problem';
-        case 'group':
-            return [
-                'on',
-                'home',
-                'open',
-                'locked',
-                'problem'
-            ].includes(compareState);
-        case 'timer':
-            return compareState === 'active';
-        case 'camera':
-            return compareState === 'streaming';
-    }
-    return true;
-}
-
-
-/**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/number/format_number.ts
- */ /**
- * https://github.com/home-assistant/frontend/blob/dev/src/data/translation.ts
- */ var $5bb8a72e6271facd$export$27bce688931fdfcc = /*#__PURE__*/ function(NumberFormat) {
-    NumberFormat["language"] = "language";
-    NumberFormat["system"] = "system";
-    NumberFormat["comma_decimal"] = "comma_decimal";
-    NumberFormat["decimal_comma"] = "decimal_comma";
-    NumberFormat["space_comma"] = "space_comma";
-    NumberFormat["none"] = "none";
-    return NumberFormat;
-}({});
-
-
-/**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/number/round.ts
- */ const $4531cfec1f90a7c8$export$2077e0241d6afd3c = (value, precision = 2)=>Math.round(value * 10 ** precision) / 10 ** precision;
-
-
-const $155ab9b902a30933$export$5e25e39d6a8c0c11 = (localeOptions)=>{
-    switch(localeOptions.number_format){
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).comma_decimal:
-            return [
-                'en-US',
-                'en'
-            ]; // Use United States with fallback to English formatting 1,234,567.89
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).decimal_comma:
-            return [
-                'de',
-                'es',
-                'it'
-            ]; // Use German with fallback to Spanish then Italian formatting 1.234.567,89
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).space_comma:
-            return [
-                'fr',
-                'sv',
-                'cs'
-            ]; // Use French with fallback to Swedish and Czech formatting 1 234 567,89
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).system:
-            return undefined;
-        default:
-            return localeOptions.language;
-    }
-};
-const $155ab9b902a30933$export$f5dd818bff069720 = (num, localeOptions, options)=>{
-    const locale = localeOptions ? $155ab9b902a30933$export$5e25e39d6a8c0c11(localeOptions) : undefined;
-    // Polyfill for Number.isNaN, which is more reliable than the global isNaN()
-    Number.isNaN = Number.isNaN || function isNaN(input) {
-        return typeof input === 'number' && isNaN(input);
-    };
-    if (localeOptions?.number_format !== (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none && !Number.isNaN(Number(num))) return new Intl.NumberFormat(locale, $155ab9b902a30933$export$d5b7427e28c21e7b(num, options)).format(Number(num));
-    if (!Number.isNaN(Number(num)) && num !== '' && localeOptions?.number_format === (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none) // If NumberFormat is none, use en-US format without grouping.
-    return new Intl.NumberFormat('en-US', $155ab9b902a30933$export$d5b7427e28c21e7b(num, {
-        ...options,
-        useGrouping: false
-    })).format(Number(num));
-    if (typeof num === 'string') return num;
-    return `${(0, $4531cfec1f90a7c8$export$2077e0241d6afd3c)(num, options?.maximumFractionDigits).toString()}${options?.style === 'currency' ? ` ${options.currency}` : ''}`;
-};
-const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
-    const defaultOptions = {
-        maximumFractionDigits: 2,
-        ...options
-    };
-    if (typeof num !== 'string') return defaultOptions;
-    // Keep decimal trailing zeros if they are present in a string numeric value
-    if (!options || options.minimumFractionDigits === undefined && options.maximumFractionDigits === undefined) {
-        const digits = num.indexOf('.') > -1 ? num.split('.')[1].length : 0;
-        defaultOptions.minimumFractionDigits = digits;
-        defaultOptions.maximumFractionDigits = digits;
-    }
-    return defaultOptions;
-};
-
-
-/**
  * @license
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1327,13 +1153,218 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
 
 
 
-const $7dd708ab02aaeed3$export$7c3e21e9e0c181da = (icon, text)=>{
+const $4227987aac09cd77$export$efbe1467c55dee42 = (entity)=>{
+    // super hacky - but too lazy to hardcode the names
+    const label = entity.attributes.friendly_name.replace(' update', '');
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div class="additional-stat">
-      <ha-icon icon="${icon}"></ha-icon>
-      <span>${text}</span>
+    <div class="version-item">
+      <span class="version-label">${label}</span>
+      <a href="${entity.attributes.release_url}" target="_blank">
+        <span>${entity.attributes.installed_version}</span>
+      </a>
     </div>
   `;
+};
+
+
+/**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/entity/state_active.ts
+ */ /**
+ * https://github.com/home-assistant/frontend/blob/dev/src/data/entity.ts
+ */ /**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/array/literal-includes.ts#L6
+ */ /**
+ * Creates a type predicate function for determining if an array literal includes a given value
+ * @param array - The array to check
+ * @returns A type predicate function
+ */ const $2dcc326b5e422db7$export$2fff862a498eed4d = (array)=>(searchElement, fromIndex)=>array.includes(searchElement, fromIndex);
+
+
+const $fa460070836bbf6d$export$f2d101b977a134fd = 'unavailable';
+const $fa460070836bbf6d$export$78244dbb77cfa6b6 = 'unknown';
+const $fa460070836bbf6d$export$8a4b4288adcd729e = 'on';
+const $fa460070836bbf6d$export$173de64b5ad0d5b4 = 'off';
+const $fa460070836bbf6d$export$565a86226f245f0b = [
+    $fa460070836bbf6d$export$f2d101b977a134fd,
+    $fa460070836bbf6d$export$78244dbb77cfa6b6
+];
+const $fa460070836bbf6d$export$8ccd97e727a09c65 = [
+    $fa460070836bbf6d$export$f2d101b977a134fd,
+    $fa460070836bbf6d$export$78244dbb77cfa6b6,
+    $fa460070836bbf6d$export$173de64b5ad0d5b4
+];
+const $fa460070836bbf6d$export$dea4173a348a2153 = (0, $2dcc326b5e422db7$export$2fff862a498eed4d)($fa460070836bbf6d$export$565a86226f245f0b);
+const $fa460070836bbf6d$export$3473ff6928139ced = (0, $2dcc326b5e422db7$export$2fff862a498eed4d)($fa460070836bbf6d$export$8ccd97e727a09c65);
+
+
+/**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/entity/compute_domain.ts
+ */ const $e7dc90bb09bfe22d$export$2044bdc9670769ab = (entityId)=>entityId.substring(0, entityId.indexOf('.'));
+
+
+function $043ab5348dd51237$export$c0e85c3982a3daa6(stateObj, state) {
+    const domain = (0, $e7dc90bb09bfe22d$export$2044bdc9670769ab)(stateObj.entity_id);
+    const compareState = state ?? stateObj?.state;
+    if ([
+        'button',
+        'event',
+        'input_button',
+        'scene'
+    ].includes(domain)) return compareState !== (0, $fa460070836bbf6d$export$f2d101b977a134fd);
+    if ((0, $fa460070836bbf6d$export$dea4173a348a2153)(compareState)) return false;
+    // The "off" check is relevant for most domains, but there are exceptions
+    // such as "alert" where "off" is still a somewhat active state and
+    // therefore gets a custom color and "idle" is instead the state that
+    // matches what most other domains consider inactive.
+    if (compareState === (0, $fa460070836bbf6d$export$173de64b5ad0d5b4) && domain !== 'alert') return false;
+    // Custom cases
+    switch(domain){
+        case 'alarm_control_panel':
+            return compareState !== 'disarmed';
+        case 'alert':
+            // "on" and "off" are active, as "off" just means alert was acknowledged but is still active
+            return compareState !== 'idle';
+        case 'cover':
+            return compareState !== 'closed';
+        case 'device_tracker':
+        case 'person':
+            return compareState !== 'not_home';
+        case 'lawn_mower':
+            return [
+                'mowing',
+                'error'
+            ].includes(compareState);
+        case 'lock':
+            return compareState !== 'locked';
+        case 'media_player':
+            return compareState !== 'standby';
+        case 'vacuum':
+            return ![
+                'idle',
+                'docked',
+                'paused'
+            ].includes(compareState);
+        case 'valve':
+            return compareState !== 'closed';
+        case 'plant':
+            return compareState === 'problem';
+        case 'group':
+            return [
+                'on',
+                'home',
+                'open',
+                'locked',
+                'problem'
+            ].includes(compareState);
+        case 'timer':
+            return compareState === 'active';
+        case 'camera':
+            return compareState === 'streaming';
+    }
+    return true;
+}
+
+
+
+
+const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display .hass=${hass} .stateObj=${entity}></state-display>`;
+
+
+const $a2b1c365027138cb$export$dfb737c0873de058 = (device, hass, config)=>{
+    const isActive = (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(device.status, device.status?.state);
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div class="card-header">
+      <div class="name">
+        <ha-icon icon="${config.icon ?? 'mdi:pi-hole'}"></ha-icon>
+        ${config.title ?? 'Pi-Hole'}
+      </div>
+      <div
+        class="status"
+        style="color: ${isActive ? 'var(--success-color, green)' : 'var(--error-color, red)'}"
+      >
+        <ha-icon
+          icon="${isActive ? 'mdi:check-circle' : 'mdi:close-circle'}"
+        ></ha-icon>
+        ${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, device.status)}
+      </div>
+    </div>
+  `;
+};
+
+
+/**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/number/format_number.ts
+ */ /**
+ * https://github.com/home-assistant/frontend/blob/dev/src/data/translation.ts
+ */ var $5bb8a72e6271facd$export$27bce688931fdfcc = /*#__PURE__*/ function(NumberFormat) {
+    NumberFormat["language"] = "language";
+    NumberFormat["system"] = "system";
+    NumberFormat["comma_decimal"] = "comma_decimal";
+    NumberFormat["decimal_comma"] = "decimal_comma";
+    NumberFormat["space_comma"] = "space_comma";
+    NumberFormat["none"] = "none";
+    return NumberFormat;
+}({});
+
+
+/**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/number/round.ts
+ */ const $4531cfec1f90a7c8$export$2077e0241d6afd3c = (value, precision = 2)=>Math.round(value * 10 ** precision) / 10 ** precision;
+
+
+const $155ab9b902a30933$export$5e25e39d6a8c0c11 = (localeOptions)=>{
+    switch(localeOptions.number_format){
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).comma_decimal:
+            return [
+                'en-US',
+                'en'
+            ]; // Use United States with fallback to English formatting 1,234,567.89
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).decimal_comma:
+            return [
+                'de',
+                'es',
+                'it'
+            ]; // Use German with fallback to Spanish then Italian formatting 1.234.567,89
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).space_comma:
+            return [
+                'fr',
+                'sv',
+                'cs'
+            ]; // Use French with fallback to Swedish and Czech formatting 1 234 567,89
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).system:
+            return undefined;
+        default:
+            return localeOptions.language;
+    }
+};
+const $155ab9b902a30933$export$f5dd818bff069720 = (num, localeOptions, options)=>{
+    const locale = localeOptions ? $155ab9b902a30933$export$5e25e39d6a8c0c11(localeOptions) : undefined;
+    // Polyfill for Number.isNaN, which is more reliable than the global isNaN()
+    Number.isNaN = Number.isNaN || function isNaN(input) {
+        return typeof input === 'number' && isNaN(input);
+    };
+    if (localeOptions?.number_format !== (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none && !Number.isNaN(Number(num))) return new Intl.NumberFormat(locale, $155ab9b902a30933$export$d5b7427e28c21e7b(num, options)).format(Number(num));
+    if (!Number.isNaN(Number(num)) && num !== '' && localeOptions?.number_format === (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none) // If NumberFormat is none, use en-US format without grouping.
+    return new Intl.NumberFormat('en-US', $155ab9b902a30933$export$d5b7427e28c21e7b(num, {
+        ...options,
+        useGrouping: false
+    })).format(Number(num));
+    if (typeof num === 'string') return num;
+    return `${(0, $4531cfec1f90a7c8$export$2077e0241d6afd3c)(num, options?.maximumFractionDigits).toString()}${options?.style === 'currency' ? ` ${options.currency}` : ''}`;
+};
+const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
+    const defaultOptions = {
+        maximumFractionDigits: 2,
+        ...options
+    };
+    if (typeof num !== 'string') return defaultOptions;
+    // Keep decimal trailing zeros if they are present in a string numeric value
+    if (!options || options.minimumFractionDigits === undefined && options.maximumFractionDigits === undefined) {
+        const digits = num.indexOf('.') > -1 ? num.split('.')[1].length : 0;
+        defaultOptions.minimumFractionDigits = digits;
+        defaultOptions.maximumFractionDigits = digits;
+    }
+    return defaultOptions;
 };
 
 
@@ -1443,13 +1474,14 @@ const $69fb27e443983086$export$8a44987212de21b = (0, $107bb7d062dde330$export$99
 });
 
 
-const $57febad8376708f1$export$8a44987212de21b = ()=>{
+const $57febad8376708f1$export$8a44987212de21b = (config)=>{
+    const isActionEnabled = (actionConfig)=>actionConfig?.action !== 'none' && actionConfig?.action !== undefined;
     return (0, $69fb27e443983086$export$8a44987212de21b)({
-        hasHold: true,
-        hasDoubleClick: true
+        hasDoubleClick: isActionEnabled(config?.double_tap_action),
+        hasHold: isActionEnabled(config?.hold_action)
     });
 };
-const $57febad8376708f1$export$3d3654ce4577c53d = (element, entity)=>{
+const $57febad8376708f1$export$3d3654ce4577c53d = (element, sectionConfig, entity)=>{
     return {
         /**
      * Handles an action event by creating and dispatching a 'hass-action' custom event.
@@ -1463,15 +1495,7 @@ const $57febad8376708f1$export$3d3654ce4577c53d = (element, entity)=>{
             // Create configuration object for the action
             const config = {
                 entity: entity.entity_id,
-                tap_action: {
-                    action: 'toggle'
-                },
-                hold_action: {
-                    action: 'more-info'
-                },
-                double_tap_action: {
-                    action: 'more-info'
-                }
+                ...sectionConfig || {}
             };
             // @ts-ignore
             (0, $9c83ab07519e6203$export$43835e9acf248a15)(element, 'hass-action', {
@@ -1484,13 +1508,87 @@ const $57febad8376708f1$export$3d3654ce4577c53d = (element, entity)=>{
 
 
 
-const $f72adbed169bb149$export$669170fc67fdedb7 = (element, entity, icon, label, buttonClass)=>{
+
+const $1f2c0e8d95d0a59b$export$c26b385db31056a8 = (element, entity, sectionConfig, title, footerText, boxClass, iconName)=>{
     if (!entity) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+    const uom = entity.attributes?.unit_of_measurement === '%' ? '%' : '';
+    const value = (0, $155ab9b902a30933$export$f5dd818bff069720)(entity.state, undefined, {
+        maximumFractionDigits: 1
+    });
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div
+      class="stat-box ${boxClass}"
+      @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, sectionConfig, entity)}
+      .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(sectionConfig)}
+    >
+      <div class="stat-icon">
+        <ha-icon icon="${iconName}"></ha-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-header">${title}</div>
+        <div class="stat-value">${value}${uom}</div>
+      </div>
+      <div class="stat-footer">
+        <span>${footerText}</span>
+        <ha-icon icon="mdi:arrow-right-circle-outline"></ha-icon>
+      </div>
+    </div>
+  `;
+};
+
+
+const $b0d8503ad71f8731$export$ceaadd68dd4c5e98 = (element, device, config)=>{
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div class="dashboard-stats">
+      <!-- First Group: Queries and Blocked -->
+      <div class="stat-group">
+        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.dns_queries_today, config.stats, 'Total queries', `${(0, $155ab9b902a30933$export$f5dd818bff069720)(device.dns_unique_clients?.state || '0')} active clients`, 'queries-box', 'mdi:earth')}
+        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.ads_blocked_today, config.stats, 'Queries Blocked', 'List blocked queries', 'blocked-box', 'mdi:hand-back-right')}
+      </div>
+
+      <!-- Second Group: Percentage and Domains -->
+      <div class="stat-group">
+        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.ads_percentage_blocked_today, config.stats, 'Percentage Blocked', 'List all queries', 'percentage-box', 'mdi:chart-pie')}
+        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.domains_blocked, config.stats, 'Domains on Lists', 'Manage lists', 'domains-box', 'mdi:format-list-bulleted')}
+      </div>
+    </div>
+  `;
+};
+
+
+
+
+
+/**
+ * Provide some default icons for the Pi-hole actions
+ * @param entity
+ * @returns
+ */ const $18c1412eb38d120e$var$actionIcon = (entity)=>{
+    const icon = entity?.attributes.icon;
+    if (icon) return icon;
+    switch(entity.translation_key){
+        case 'action_flush_arp':
+            return 'mdi:broom';
+        case 'action_flush_logs':
+            return 'mdi:file-refresh-outline';
+        case 'action_gravity':
+            return 'mdi:earth';
+        case 'action_restartdns':
+            return 'mdi:restart';
+        case 'action_refresh_data':
+            return 'mdi:refresh';
+        default:
+            return 'mdi:button-pointer';
+    }
+};
+const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, buttonClass)=>{
+    const icon = $18c1412eb38d120e$var$actionIcon(entity);
+    const label = entity?.attributes.friendly_name.replace('Pihole- ', '').replace(' the ', ' ');
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <mwc-button
       class="${buttonClass || ''}"
-      @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, entity)}
-      .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)()}
+      @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, config, entity)}
+      .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(config)}
     >
       <ha-icon icon="${icon}"></ha-icon>
       ${label}
@@ -1499,118 +1597,90 @@ const $f72adbed169bb149$export$669170fc67fdedb7 = (element, entity, icon, label,
 };
 
 
-const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, device)=>{
-    // Get status for toggle button
-    const isActive = device.switch_pi_hole?.state === 'on';
+
+const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-card-content
+    .hass=${hass}
+    .stateObj=${entity}
+  ></state-card-content>`;
+
+
+const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (hass, element, device, config = {
+    tap_action: {
+        action: 'toggle'
+    },
+    hold_action: {
+        action: 'more-info'
+    },
+    double_tap_action: {
+        action: 'more-info'
+    }
+})=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div class="card-actions">
-      ${(0, $f72adbed169bb149$export$669170fc67fdedb7)(element, device.switch_pi_hole, isActive ? 'mdi:pause' : 'mdi:play', isActive ? 'Disable' : 'Enable', isActive ? 'warning' : 'primary')}
-      ${device.action_refresh_data?.entity_id ? (0, $f72adbed169bb149$export$669170fc67fdedb7)(element, device.action_refresh_data, 'mdi:refresh', 'Refresh', '') : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}
-      ${device.action_restartdns?.entity_id ? (0, $f72adbed169bb149$export$669170fc67fdedb7)(element, device.action_restartdns, 'mdi:restart', 'Restart DNS', '') : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}
-      ${device.action_gravity?.entity_id ? (0, $f72adbed169bb149$export$669170fc67fdedb7)(element, device.action_gravity, 'mdi:earth', 'Update Gravity', '') : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}
+    <div>
+      <div class="switches">
+        ${device.switches.map((piSwitch)=>{
+        return (0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch);
+    })}
+      </div>
+      <div class="actions">
+        ${device.controls.map((control)=>{
+        return (0, $18c1412eb38d120e$export$669170fc67fdedb7)(element, config, control, '');
+    })}
+      </div>
     </div>
   `;
 };
 
 
 
-const $6b58b8224e764cb6$export$c26b385db31056a8 = (config, title, value, footerText, boxClass, iconName, path)=>{
-    const piholeUrl = `${config.url?.replace(/\/$/, '')}/${path}`;
+
+
+
+const $0f7838a7e387da95$export$7c3e21e9e0c181da = (hass, element, config, entity)=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div class="stat-box ${boxClass}">
-      <a href="${piholeUrl}" class="stat-link" target="_blank">
-        <div class="stat-icon">
-          <ha-icon icon="${iconName}"></ha-icon>
-        </div>
-        <div class="stat-content">
-          <div class="stat-header">${title}</div>
-          <div class="stat-value">${value}</div>
-        </div>
-        <div class="stat-footer">
-          <span>${footerText}</span>
-          <ha-icon icon="mdi:arrow-right-circle-outline"></ha-icon>
-        </div>
-      </a>
+    <div
+      class="additional-stat"
+      @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, config, entity)}
+      .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(config)}
+    >
+      <ha-state-icon .hass=${hass} .stateObj=${entity}></ha-state-icon>
+      ${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, entity)}
     </div>
   `;
 };
 
 
-
-const $1ed74ce23f0ef067$export$c18c768bbe3223b7 = (hass, entity)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display .hass=${hass} .stateObj=${entity}></state-display>`;
-
-
-
-const $46421979383d1dbf$export$efbe1467c55dee42 = (label, value, project)=>{
+const $f72adbed169bb149$export$f7d6b8c683630484 = (hass, element, device, config = {})=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div class="version-item">
-      <span class="version-label">${label}</span>
-      <a href="https://github.com/${project}/releases/${value}" target="_blank">
-        <span>${value}</span>
-      </a>
+    <div class="additional-stats">
+      ${device.sensors.map((sensor)=>{
+        return (0, $0f7838a7e387da95$export$7c3e21e9e0c181da)(hass, element, config, sensor);
+    })}
     </div>
   `;
 };
 
 
 const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, device, hass, config)=>{
-    const isActive = (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(device.status, device.status?.state);
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <ha-card>
-      <div class="card-header">
-        <div class="name">
-          <ha-icon icon="mdi:pi-hole"></ha-icon>
-          Pi-hole
-        </div>
-        <div
-          class="status"
-          style="color: ${isActive ? 'var(--success-color, green)' : 'var(--error-color, red)'}"
-        >
-          <ha-icon
-            icon="${isActive ? 'mdi:check-circle' : 'mdi:close-circle'}"
-          ></ha-icon>
-          ${(0, $1ed74ce23f0ef067$export$c18c768bbe3223b7)(hass, device.status)}
-        </div>
-      </div>
+      ${(0, $a2b1c365027138cb$export$dfb737c0873de058)(device, hass, config)}
 
       <div class="card-content">
-        <!-- Main dashboard-style stats row -->
-        <div class="dashboard-stats">
-          <!-- First Group: Queries and Blocked -->
-          <div class="stat-group">
-            ${(0, $6b58b8224e764cb6$export$c26b385db31056a8)(config, 'Total queries', (0, $155ab9b902a30933$export$f5dd818bff069720)(device.dns_queries_today?.state || '0'), `${(0, $155ab9b902a30933$export$f5dd818bff069720)(device.dns_unique_clients?.state || '0')} active clients`, 'queries-box', 'mdi:earth', 'admin/network')}
-            ${(0, $6b58b8224e764cb6$export$c26b385db31056a8)(config, 'Queries Blocked', (0, $155ab9b902a30933$export$f5dd818bff069720)(device.ads_blocked_today?.state || '0'), 'List blocked queries', 'blocked-box', 'mdi:hand-back-right', 'admin/queries?upstream=blocklist')}
-          </div>
-
-          <!-- Second Group: Percentage and Domains -->
-          <div class="stat-group">
-            ${(0, $6b58b8224e764cb6$export$c26b385db31056a8)(config, 'Percentage Blocked', `${(0, $155ab9b902a30933$export$f5dd818bff069720)(device.ads_percentage_blocked_today?.state || '0', undefined, {
-        maximumFractionDigits: 1
-    })}%`, 'List all queries', 'percentage-box', 'mdi:chart-pie', 'admin/queries')}
-            ${(0, $6b58b8224e764cb6$export$c26b385db31056a8)(config, 'Domains on Lists', (0, $155ab9b902a30933$export$f5dd818bff069720)(device.domains_blocked?.state || '0'), 'Manage lists', 'domains-box', 'mdi:format-list-bulleted', 'admin/groups-lists')}
-          </div>
-        </div>
+        ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, device, config)}
 
         <!-- Additional Stats Row -->
-        <div class="additional-stats">
-          ${(0, $7dd708ab02aaeed3$export$7c3e21e9e0c181da)('mdi:account-multiple', `${device.seen_clients?.state || '0'} clients`)}
-          ${(0, $7dd708ab02aaeed3$export$7c3e21e9e0c181da)('mdi:web', `${device.dns_unique_domains?.state || '0'} unique domains`)}
-          ${(0, $7dd708ab02aaeed3$export$7c3e21e9e0c181da)('mdi:server-network', `${device.dns_queries_cached?.state || '0'} cached`)}
-          ${(0, $7dd708ab02aaeed3$export$7c3e21e9e0c181da)('mdi:dns', `${device.dns_queries_forwarded?.state || '0'} forwarded`)}
-          ${(0, $7dd708ab02aaeed3$export$7c3e21e9e0c181da)('mdi:account', `${device.dns_unique_clients?.state || '0'} unique clients`)}
-          ${(0, $7dd708ab02aaeed3$export$7c3e21e9e0c181da)('mdi:timer-outline', `${device.remaining_until_blocking_mode?.state || '0'} time remaining`)}
-        </div>
+        ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(hass, element, device, config.info)}
       </div>
 
       <!-- Card Actions -->
-      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(element, device)}
+      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(hass, element, device, config.controls)}
 
       <!-- Version Information Bar -->
       <div class="version-info">
-        ${(0, $46421979383d1dbf$export$efbe1467c55dee42)('Core', device.core_update_available?.attributes?.installed_version, 'pi-hole/pi-hole')}
-        ${(0, $46421979383d1dbf$export$efbe1467c55dee42)('FTL', device.ftl_update_available?.attributes?.installed_version, 'pi-hole/FTL')}
-        ${(0, $46421979383d1dbf$export$efbe1467c55dee42)('Web interface', device.web_update_available?.attributes?.installed_version, 'pi-hole/web')}
-        ${(0, $46421979383d1dbf$export$efbe1467c55dee42)('HA integration', device.integration_update_available?.attributes?.installed_version, 'bastgau/ha-pi-hole-v6')}
+        ${device.updates.map((update)=>{
+        return (0, $4227987aac09cd77$export$efbe1467c55dee42)(update);
+    })}
       </div>
     </ha-card>
   `;
@@ -1649,15 +1719,20 @@ const $e24dedcf9e480b2d$export$50fdfeece43146fd = (hass, entityId, fakeState = f
 };
 
 
-const $093edc2594769ee5$export$c6a2d06cc40e579 = (hass, deviceId)=>{
+const $093edc2594769ee5$export$c6a2d06cc40e579 = (hass, deviceId, deviceName)=>{
     const deviceEntities = Object.values(hass.entities).filter((entity)=>entity.device_id === deviceId || entity.entity_id === 'update.pi_hole_v6_integration_update').map((entity)=>{
         const state = (0, $e24dedcf9e480b2d$export$50fdfeece43146fd)(hass, entity.entity_id);
         if (state === undefined) return;
+        // convenience
+        const name = state.attributes.friendly_name === deviceName ? deviceName : state.attributes.friendly_name.replace(deviceName, '').trim();
         return {
             entity_id: entity.entity_id,
             translation_key: entity.translation_key,
             state: state.state,
-            attributes: state.attributes
+            attributes: {
+                ...state.attributes,
+                friendly_name: name
+            }
         };
     }).filter((e)=>e !== undefined);
     return deviceEntities;
@@ -1666,15 +1741,18 @@ const $093edc2594769ee5$export$c6a2d06cc40e579 = (hass, deviceId)=>{
 
 const $3a8183764d505877$export$b971a190749afcb4 = (hass, config)=>{
     const device = {
-        device_id: config.device_id
+        device_id: config.device_id,
+        controls: [],
+        sensors: [],
+        switches: [],
+        updates: []
     };
     const hassDevice = (0, $5bd3a7e1f19a6de3$export$30c823bc834d6ab4)(hass, config.device_id);
     if (!hassDevice) return undefined;
-    const entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id);
+    const entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id, hassDevice.name);
     // map the entities to the device object
     entities.forEach((entity)=>{
         switch(entity.translation_key){
-            // sensors
             case 'dns_queries_today':
                 device.dns_queries_today = entity;
                 break;
@@ -1687,74 +1765,46 @@ const $3a8183764d505877$export$b971a190749afcb4 = (hass, config)=>{
             case 'ads_blocked_today':
                 device.ads_blocked_today = entity;
                 break;
-            case 'seen_clients':
-                device.seen_clients = entity;
-                break;
-            case 'dns_unique_domains':
-                device.dns_unique_domains = entity;
-                break;
-            case 'dns_queries_cached':
-                device.dns_queries_cached = entity;
-                break;
-            case 'dns_queries_forwarded':
-                device.dns_queries_forwarded = entity;
-                break;
             case 'dns_unique_clients':
                 device.dns_unique_clients = entity;
                 break;
             case 'remaining_until_blocking_mode':
+                // todo
                 device.remaining_until_blocking_mode = entity;
-                break;
-            // buttons
-            case 'action_flush_arp':
-                device.action_flush_arp = entity;
-                break;
-            case 'action_flush_logs':
-                device.action_flush_logs = entity;
-                break;
-            case 'action_gravity':
-                device.action_gravity = entity;
-                break;
-            case 'action_restartdns':
-                device.action_restartdns = entity;
-                break;
-            case 'action_refresh_data':
-                device.action_refresh_data = entity;
-                break;
-            // updates
-            case 'core_update_available':
-                device.core_update_available = entity;
-                break;
-            case 'web_update_available':
-                device.web_update_available = entity;
-                break;
-            case 'ftl_update_available':
-                device.ftl_update_available = entity;
-                break;
-            // switches
-            case 'group':
-                device.group_default = entity;
                 break;
             // binary sensors
             case 'status':
                 device.status = entity;
                 break;
-            // edge cases
             default:
-                if (entity.entity_id === 'update.pi_hole_v6_integration_update') // this is a bit brittle, but it works for now
-                device.integration_update_available = entity;
                 const domain = (0, $e7dc90bb09bfe22d$export$2044bdc9670769ab)(entity.entity_id);
-                if (domain === 'switch') // going to assume the second switch is the main switch..
-                device.switch_pi_hole = entity;
+                switch(domain){
+                    case 'button':
+                        device.controls.push(entity);
+                        break;
+                    case 'sensor':
+                        device.sensors.push(entity);
+                        break;
+                    case 'switch':
+                        device.switches.push(entity);
+                        break;
+                    case 'update':
+                        device.updates.push(entity);
+                        break;
+                }
                 break;
         }
     });
-    // pick entities apart and add to the device...
-    /**
-   * [
-        "binary_sensor.pi_hole_status",
-      ]
-   */ return device;
+    // sort the updates by title - this is a bit of a hack, but it works
+    // we need to sort the updates by title, but the title is not always present
+    // so we need to use a default value of 'z' to sort them to the end
+    // this is not ideal, but it works for now - it matches the behavior of the Pi-hole admin console
+    device.updates.sort((a, b)=>{
+        const aTitle = a.attributes.title || 'z';
+        const bTitle = b.attributes.title || 'z';
+        return aTitle.localeCompare(bTitle);
+    });
+    return device;
 };
 
 
@@ -1999,13 +2049,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     flex: 1;
   }
 
-  /* On smaller screens, groups stack but pairs stay together */
-  @media (min-width: 900px) {
-    .dashboard-stats {
-      flex-direction: row;
-    }
-  }
-
   .stat-box {
     border-radius: 8px;
     display: flex;
@@ -2017,6 +2060,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     flex: 1;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
   }
 
   .stat-box:hover {
@@ -2059,12 +2103,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     flex: 1;
   }
 
-  .stat-link {
-    text-decoration: none;
-    display: block;
-    color: inherit;
-  }
-
   .stat-footer {
     width: 100%;
     display: flex;
@@ -2100,32 +2138,10 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
   /* Additional stats styling - specialized responsive grid */
   .additional-stats {
-    display: grid;
-    gap: 8px;
-    justify-content: center;
-    /* Start with 1 column at small widths */
-    grid-template-columns: minmax(120px, 1fr);
-  }
-
-  /* Switch to 2 columns at slightly wider screens */
-  @media (min-width: 480px) {
-    .additional-stats {
-      grid-template-columns: repeat(2, minmax(120px, 1fr));
-    }
-  }
-
-  /* Medium screens - 3 columns */
-  @media (min-width: 600px) {
-    .additional-stats {
-      grid-template-columns: repeat(3, minmax(120px, 170px));
-    }
-  }
-
-  /* Wide screens - 6 columns */
-  @media (min-width: 1100px) {
-    .additional-stats {
-      grid-template-columns: repeat(6, minmax(120px, 160px));
-    }
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    cursor: pointer;
   }
 
   .additional-stat {
@@ -2142,17 +2158,22 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     overflow: hidden;
   }
 
-  .additional-stat ha-icon {
+  .additional-stat ha-state-icon {
     margin-right: 8px;
     color: var(--secondary-text-color);
   }
 
-  .card-actions {
+  .switches {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     flex-wrap: wrap;
-    padding: 0 8px 8px;
     border-top: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   /* Version information styles */
@@ -2294,19 +2315,136 @@ const $b642db848cc622aa$var$SCHEMA = [
         name: 'device_id',
         selector: {
             device: {
-                integration: 'pi_hole_v6'
+                filter: {
+                    integration: 'pi_hole_v6'
+                }
             }
         },
         required: true,
-        label: `Device`
+        label: `Pi-hole Device`
     },
     {
-        name: 'url',
-        selector: {
-            text: {}
-        },
-        required: false,
-        label: `Instance URL`
+        name: 'content',
+        label: 'Content',
+        type: 'expandable',
+        flatten: true,
+        icon: 'mdi:text-short',
+        schema: [
+            {
+                name: 'title',
+                required: false,
+                label: 'Card Title',
+                selector: {
+                    text: {}
+                }
+            },
+            {
+                name: 'icon',
+                required: false,
+                label: 'Card Icon',
+                selector: {
+                    icon: {
+                        placeholder: 'mdi:pi-hole'
+                    }
+                }
+            }
+        ]
+    },
+    {
+        name: 'interactions',
+        label: 'Interactions',
+        type: 'expandable',
+        flatten: true,
+        icon: 'mdi:gesture-tap',
+        schema: [
+            {
+                name: 'stats',
+                label: 'Statistics',
+                type: 'expandable',
+                icon: 'mdi:counter',
+                schema: [
+                    {
+                        name: 'tap_action',
+                        label: 'Tap Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    },
+                    {
+                        name: 'hold_action',
+                        label: 'Hold Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    },
+                    {
+                        name: 'double_tap_action',
+                        label: 'Double Tap Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'info',
+                label: 'Information',
+                type: 'expandable',
+                icon: 'mdi:information-outline',
+                schema: [
+                    {
+                        name: 'tap_action',
+                        label: 'Tap Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    },
+                    {
+                        name: 'hold_action',
+                        label: 'Hold Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    },
+                    {
+                        name: 'double_tap_action',
+                        label: 'Double Tap Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'controls',
+                label: 'Controls',
+                type: 'expandable',
+                icon: 'mdi:remote',
+                schema: [
+                    {
+                        name: 'tap_action',
+                        label: 'Tap Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    },
+                    {
+                        name: 'hold_action',
+                        label: 'Hold Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    },
+                    {
+                        name: 'double_tap_action',
+                        label: 'Double Tap Action',
+                        selector: {
+                            ui_action: {}
+                        }
+                    }
+                ]
+            }
+        ]
     }
 ];
 class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
@@ -2333,6 +2471,10 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
     }
     _valueChanged(ev) {
         const config = ev.detail.value;
+        const shouldDelete = (obj)=>obj && (Object.keys(obj).length === 0 || Object.values(obj).some((f)=>!f));
+        if (shouldDelete(config.stats)) delete config.stats;
+        if (shouldDelete(config.info)) delete config.info;
+        if (shouldDelete(config.controls)) delete config.controls;
         // @ts-ignore
         (0, $9c83ab07519e6203$export$43835e9acf248a15)(this, 'config-changed', {
             config: config
@@ -2345,7 +2487,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.2.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.14.4\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.1\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.14.4\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.4.1\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.14.4\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.1\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.14.4\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
 
 
 // Register the custom elements with the browser

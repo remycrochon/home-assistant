@@ -1152,19 +1152,7 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
 
 
 
-
-const $4227987aac09cd77$export$efbe1467c55dee42 = (entity)=>{
-    // super hacky - but too lazy to hardcode the names
-    const label = entity.attributes.friendly_name.replace(' update', '');
-    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div class="version-item">
-      <span class="version-label">${label}</span>
-      <a href="${entity.attributes.release_url}" target="_blank">
-        <span>${entity.attributes.installed_version}</span>
-      </a>
-    </div>
-  `;
-};
+const $81267a1185dd4399$export$57bf213be019eeb0 = (config, section)=>!config.exclude_sections?.includes(section);
 
 
 /**
@@ -1267,11 +1255,18 @@ function $043ab5348dd51237$export$c0e85c3982a3daa6(stateObj, state) {
 
 
 
-const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display .hass=${hass} .stateObj=${entity}></state-display>`;
+const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity, className = '')=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display
+    .hass=${hass}
+    .stateObj=${entity}
+    class=${className}
+  ></state-display>`;
 
 
 const $a2b1c365027138cb$export$dfb737c0873de058 = (device, hass, config)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'header')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
     const isActive = (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(device.status, device.status?.state);
+    // Check if we should display the remaining time
+    const hasRemainingTime = device.remaining_until_blocking_mode && device.remaining_until_blocking_mode.state !== '0' && device.remaining_until_blocking_mode.state !== 'unavailable' && device.remaining_until_blocking_mode.state !== 'unknown';
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div class="card-header">
       <div class="name">
@@ -1286,86 +1281,52 @@ const $a2b1c365027138cb$export$dfb737c0873de058 = (device, hass, config)=>{
           icon="${isActive ? 'mdi:check-circle' : 'mdi:close-circle'}"
         ></ha-icon>
         ${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, device.status)}
+        ${!isActive && hasRemainingTime ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, device.remaining_until_blocking_mode, 'remaining-time')}` : ''}
       </div>
     </div>
   `;
 };
 
 
-/**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/number/format_number.ts
- */ /**
- * https://github.com/home-assistant/frontend/blob/dev/src/data/translation.ts
- */ var $5bb8a72e6271facd$export$27bce688931fdfcc = /*#__PURE__*/ function(NumberFormat) {
-    NumberFormat["language"] = "language";
-    NumberFormat["system"] = "system";
-    NumberFormat["comma_decimal"] = "comma_decimal";
-    NumberFormat["decimal_comma"] = "decimal_comma";
-    NumberFormat["space_comma"] = "space_comma";
-    NumberFormat["none"] = "none";
-    return NumberFormat;
-}({});
+const $313ad4784c1ca11f$export$7f14135d73b0f07a = (uniqueClientsCount)=>[
+        [
+            {
+                sensorKey: 'dns_queries_today',
+                title: 'card.stats.total_queries',
+                footer: {
+                    key: 'card.stats.active_clients',
+                    search: '{number}',
+                    replace: uniqueClientsCount
+                },
+                className: 'queries-box',
+                icon: 'mdi:earth'
+            },
+            {
+                sensorKey: 'ads_blocked_today',
+                title: 'card.stats.queries_blocked',
+                footer: 'card.stats.list_blocked_queries',
+                className: 'blocked-box',
+                icon: 'mdi:hand-back-right'
+            }
+        ],
+        [
+            {
+                sensorKey: 'ads_percentage_blocked_today',
+                title: 'card.stats.percentage_blocked',
+                footer: 'card.stats.list_all_queries',
+                className: 'percentage-box',
+                icon: 'mdi:chart-pie'
+            },
+            {
+                sensorKey: 'domains_blocked',
+                title: 'card.stats.domains_on_lists',
+                footer: 'card.stats.manage_lists',
+                className: 'domains-box',
+                icon: 'mdi:format-list-bulleted'
+            }
+        ]
+    ];
 
-
-/**
- * https://github.com/home-assistant/frontend/blob/dev/src/common/number/round.ts
- */ const $4531cfec1f90a7c8$export$2077e0241d6afd3c = (value, precision = 2)=>Math.round(value * 10 ** precision) / 10 ** precision;
-
-
-const $155ab9b902a30933$export$5e25e39d6a8c0c11 = (localeOptions)=>{
-    switch(localeOptions.number_format){
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).comma_decimal:
-            return [
-                'en-US',
-                'en'
-            ]; // Use United States with fallback to English formatting 1,234,567.89
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).decimal_comma:
-            return [
-                'de',
-                'es',
-                'it'
-            ]; // Use German with fallback to Spanish then Italian formatting 1.234.567,89
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).space_comma:
-            return [
-                'fr',
-                'sv',
-                'cs'
-            ]; // Use French with fallback to Swedish and Czech formatting 1 234 567,89
-        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).system:
-            return undefined;
-        default:
-            return localeOptions.language;
-    }
-};
-const $155ab9b902a30933$export$f5dd818bff069720 = (num, localeOptions, options)=>{
-    const locale = localeOptions ? $155ab9b902a30933$export$5e25e39d6a8c0c11(localeOptions) : undefined;
-    // Polyfill for Number.isNaN, which is more reliable than the global isNaN()
-    Number.isNaN = Number.isNaN || function isNaN(input) {
-        return typeof input === 'number' && isNaN(input);
-    };
-    if (localeOptions?.number_format !== (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none && !Number.isNaN(Number(num))) return new Intl.NumberFormat(locale, $155ab9b902a30933$export$d5b7427e28c21e7b(num, options)).format(Number(num));
-    if (!Number.isNaN(Number(num)) && num !== '' && localeOptions?.number_format === (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none) // If NumberFormat is none, use en-US format without grouping.
-    return new Intl.NumberFormat('en-US', $155ab9b902a30933$export$d5b7427e28c21e7b(num, {
-        ...options,
-        useGrouping: false
-    })).format(Number(num));
-    if (typeof num === 'string') return num;
-    return `${(0, $4531cfec1f90a7c8$export$2077e0241d6afd3c)(num, options?.maximumFractionDigits).toString()}${options?.style === 'currency' ? ` ${options.currency}` : ''}`;
-};
-const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
-    const defaultOptions = {
-        maximumFractionDigits: 2,
-        ...options
-    };
-    if (typeof num !== 'string') return defaultOptions;
-    // Keep decimal trailing zeros if they are present in a string numeric value
-    if (!options || options.minimumFractionDigits === undefined && options.maximumFractionDigits === undefined) {
-        const digits = num.indexOf('.') > -1 ? num.split('.')[1].length : 0;
-        defaultOptions.minimumFractionDigits = digits;
-        defaultOptions.maximumFractionDigits = digits;
-    }
-    return defaultOptions;
-};
 
 
 
@@ -1507,29 +1468,134 @@ const $57febad8376708f1$export$3d3654ce4577c53d = (element, sectionConfig, entit
 };
 
 
+/**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/number/format_number.ts
+ */ /**
+ * https://github.com/home-assistant/frontend/blob/dev/src/data/translation.ts
+ */ var $5bb8a72e6271facd$export$27bce688931fdfcc = /*#__PURE__*/ function(NumberFormat) {
+    NumberFormat["language"] = "language";
+    NumberFormat["system"] = "system";
+    NumberFormat["comma_decimal"] = "comma_decimal";
+    NumberFormat["decimal_comma"] = "decimal_comma";
+    NumberFormat["space_comma"] = "space_comma";
+    NumberFormat["none"] = "none";
+    return NumberFormat;
+}({});
 
 
-const $1f2c0e8d95d0a59b$export$c26b385db31056a8 = (element, entity, sectionConfig, title, footerText, boxClass, iconName)=>{
+/**
+ * https://github.com/home-assistant/frontend/blob/dev/src/common/number/round.ts
+ */ const $4531cfec1f90a7c8$export$2077e0241d6afd3c = (value, precision = 2)=>Math.round(value * 10 ** precision) / 10 ** precision;
+
+
+const $155ab9b902a30933$export$5e25e39d6a8c0c11 = (localeOptions)=>{
+    switch(localeOptions.number_format){
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).comma_decimal:
+            return [
+                'en-US',
+                'en'
+            ]; // Use United States with fallback to English formatting 1,234,567.89
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).decimal_comma:
+            return [
+                'de',
+                'es',
+                'it'
+            ]; // Use German with fallback to Spanish then Italian formatting 1.234.567,89
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).space_comma:
+            return [
+                'fr',
+                'sv',
+                'cs'
+            ]; // Use French with fallback to Swedish and Czech formatting 1 234 567,89
+        case (0, $5bb8a72e6271facd$export$27bce688931fdfcc).system:
+            return undefined;
+        default:
+            return localeOptions.language;
+    }
+};
+const $155ab9b902a30933$export$f5dd818bff069720 = (num, localeOptions, options)=>{
+    const locale = localeOptions ? $155ab9b902a30933$export$5e25e39d6a8c0c11(localeOptions) : undefined;
+    // Polyfill for Number.isNaN, which is more reliable than the global isNaN()
+    Number.isNaN = Number.isNaN || function isNaN(input) {
+        return typeof input === 'number' && isNaN(input);
+    };
+    if (localeOptions?.number_format !== (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none && !Number.isNaN(Number(num))) return new Intl.NumberFormat(locale, $155ab9b902a30933$export$d5b7427e28c21e7b(num, options)).format(Number(num));
+    if (!Number.isNaN(Number(num)) && num !== '' && localeOptions?.number_format === (0, $5bb8a72e6271facd$export$27bce688931fdfcc).none) // If NumberFormat is none, use en-US format without grouping.
+    return new Intl.NumberFormat('en-US', $155ab9b902a30933$export$d5b7427e28c21e7b(num, {
+        ...options,
+        useGrouping: false
+    })).format(Number(num));
+    if (typeof num === 'string') return num;
+    return `${(0, $4531cfec1f90a7c8$export$2077e0241d6afd3c)(num, options?.maximumFractionDigits).toString()}${options?.style === 'currency' ? ` ${options.currency}` : ''}`;
+};
+const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
+    const defaultOptions = {
+        maximumFractionDigits: 2,
+        ...options
+    };
+    if (typeof num !== 'string') return defaultOptions;
+    // Keep decimal trailing zeros if they are present in a string numeric value
+    if (!options || options.minimumFractionDigits === undefined && options.maximumFractionDigits === undefined) {
+        const digits = num.indexOf('.') > -1 ? num.split('.')[1].length : 0;
+        defaultOptions.minimumFractionDigits = digits;
+        defaultOptions.maximumFractionDigits = digits;
+    }
+    return defaultOptions;
+};
+
+
+var $9a28a77a5af263d9$exports = {};
+$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"}}}");
+
+
+// Import other languages as needed above this line and in order
+// Define supported languages
+const $623ffaa3e77fea87$var$languages = {
+    en: $9a28a77a5af263d9$exports
+};
+const $623ffaa3e77fea87$export$b3bd0bc58e36cd63 = (hass, key, search = '', replace = '')=>{
+    let translated;
+    translated = $623ffaa3e77fea87$var$getNestedTranslation($623ffaa3e77fea87$var$languages[hass.language], key) ?? $623ffaa3e77fea87$var$getNestedTranslation($623ffaa3e77fea87$var$languages.en, key) ?? key;
+    // Replace placeholders
+    if (search !== '' && replace !== '') translated = translated.replace(search, replace);
+    return translated;
+};
+// Helper function to safely navigate nested objects
+function $623ffaa3e77fea87$var$getNestedTranslation(obj, path) {
+    if (!obj) return undefined;
+    const keys = path.split('.');
+    let result = obj;
+    for (const key of keys){
+        if (result === undefined || result === null || typeof result !== 'object') return undefined;
+        result = result[key];
+    }
+    return typeof result === 'string' ? result : undefined;
+}
+
+
+
+const $1f2c0e8d95d0a59b$export$c26b385db31056a8 = (element, hass, entity, sectionConfig, statBoxConfig)=>{
     if (!entity) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
     const uom = entity.attributes?.unit_of_measurement === '%' ? '%' : '';
     const value = (0, $155ab9b902a30933$export$f5dd818bff069720)(entity.state, undefined, {
         maximumFractionDigits: 1
     });
+    const footer = typeof statBoxConfig.footer === 'string' ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, statBoxConfig.footer) : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, statBoxConfig.footer.key, statBoxConfig.footer.search, statBoxConfig.footer.replace);
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div
-      class="stat-box ${boxClass}"
+      class="stat-box ${statBoxConfig.className}"
       @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, sectionConfig, entity)}
       .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(sectionConfig)}
     >
       <div class="stat-icon">
-        <ha-icon icon="${iconName}"></ha-icon>
+        <ha-icon icon="${statBoxConfig.icon}"></ha-icon>
       </div>
       <div class="stat-content">
-        <div class="stat-header">${title}</div>
+        <div class="stat-header">${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, statBoxConfig.title)}</div>
         <div class="stat-value">${value}${uom}</div>
       </div>
       <div class="stat-footer">
-        <span>${footerText}</span>
+        <span>${footer}</span>
         <ha-icon icon="mdi:arrow-right-circle-outline"></ha-icon>
       </div>
     </div>
@@ -1537,23 +1603,23 @@ const $1f2c0e8d95d0a59b$export$c26b385db31056a8 = (element, entity, sectionConfi
 };
 
 
-const $b0d8503ad71f8731$export$ceaadd68dd4c5e98 = (element, device, config)=>{
+const $b0d8503ad71f8731$export$ceaadd68dd4c5e98 = (element, hass, device, config)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'statistics')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+    // Get the unique clients count for the configuration
+    const uniqueClientsCount = device.dns_unique_clients?.state ?? '0';
+    // Get the stats configuration with the unique clients count
+    const statConfigs = (0, $313ad4784c1ca11f$export$7f14135d73b0f07a)(uniqueClientsCount);
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div class="dashboard-stats">
-      <!-- First Group: Queries and Blocked -->
-      <div class="stat-group">
-        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.dns_queries_today, config.stats, 'Total queries', `${(0, $155ab9b902a30933$export$f5dd818bff069720)(device.dns_unique_clients?.state || '0')} active clients`, 'queries-box', 'mdi:earth')}
-        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.ads_blocked_today, config.stats, 'Queries Blocked', 'List blocked queries', 'blocked-box', 'mdi:hand-back-right')}
-      </div>
-
-      <!-- Second Group: Percentage and Domains -->
-      <div class="stat-group">
-        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.ads_percentage_blocked_today, config.stats, 'Percentage Blocked', 'List all queries', 'percentage-box', 'mdi:chart-pie')}
-        ${(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, device.domains_blocked, config.stats, 'Domains on Lists', 'Manage lists', 'domains-box', 'mdi:format-list-bulleted')}
-      </div>
+      ${statConfigs.map((group)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+          <div class="stat-group">
+            ${group.map((statConfig)=>(0, $1f2c0e8d95d0a59b$export$c26b385db31056a8)(element, hass, device[statConfig.sensorKey], config.stats, statConfig))}
+          </div>
+        `)}
     </div>
   `;
 };
+
 
 
 
@@ -1586,7 +1652,7 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
     const label = entity?.attributes.friendly_name.replace('Pihole- ', '').replace(' the ', ' ');
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <mwc-button
-      class="${buttonClass || ''}"
+      class="${buttonClass}"
       @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, config, entity)}
       .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(config)}
     >
@@ -1604,17 +1670,19 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity)=>(0, $f58f44579
   ></state-card-content>`;
 
 
-const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (hass, element, device, config = {
-    tap_action: {
-        action: 'toggle'
-    },
-    hold_action: {
-        action: 'more-info'
-    },
-    double_tap_action: {
-        action: 'more-info'
-    }
-})=>{
+const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, device, config)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'controls')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+    const sectionConfig = config.controls ?? {
+        tap_action: {
+            action: 'toggle'
+        },
+        hold_action: {
+            action: 'more-info'
+        },
+        double_tap_action: {
+            action: 'more-info'
+        }
+    };
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div>
       <div class="switches">
@@ -1624,12 +1692,63 @@ const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (hass, element, device, config
       </div>
       <div class="actions">
         ${device.controls.map((control)=>{
-        return (0, $18c1412eb38d120e$export$669170fc67fdedb7)(element, config, control, '');
+        return (0, $18c1412eb38d120e$export$669170fc67fdedb7)(element, sectionConfig, control, '');
     })}
       </div>
     </div>
   `;
 };
+
+
+
+
+
+
+
+const $ee4ad1f51fb3efca$export$1eed52aab73fe927 = (element, hass, device)=>{
+    const clickConfig = {
+        tap_action: {
+            action: 'toggle'
+        }
+    };
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="refresh-time">
+    ${device.action_refresh_data ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<ha-icon
+          icon="mdi:refresh"
+          @action=${(0, $57febad8376708f1$export$3d3654ce4577c53d)(element, clickConfig, device.action_refresh_data)}
+          .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(clickConfig)}
+        ></ha-icon>` : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}
+    ${device.latest_data_refresh ? (0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, device.latest_data_refresh) : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}
+  </div>`;
+};
+
+
+
+const $4227987aac09cd77$export$efbe1467c55dee42 = (entity)=>{
+    // super hacky - but too lazy to hardcode the names
+    const label = entity.attributes.friendly_name.replace(' update', '');
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div class="version-item">
+      <span class="version-label">${label}</span>
+      <a href="${entity.attributes.release_url}" target="_blank">
+        <span>${entity.attributes.installed_version}</span>
+      </a>
+    </div>
+  `;
+};
+
+
+const $49bfcbfa0b6e0050$export$7c88f7b87167f6 = (element, hass, config, device)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'footer')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="version-info">
+      ${device.updates.map((update)=>{
+        return (0, $4227987aac09cd77$export$efbe1467c55dee42)(update);
+    })}
+    </div>
+
+    <!-- Refesh Time -->
+    ${(0, $ee4ad1f51fb3efca$export$1eed52aab73fe927)(element, hass, device)}`;
+};
+
 
 
 
@@ -1650,38 +1769,28 @@ const $0f7838a7e387da95$export$7c3e21e9e0c181da = (hass, element, config, entity
 };
 
 
-const $f72adbed169bb149$export$f7d6b8c683630484 = (hass, element, device, config = {})=>{
+const $f72adbed169bb149$export$f7d6b8c683630484 = (element, hass, device, config)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'sensors')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div class="additional-stats">
       ${device.sensors.map((sensor)=>{
-        return (0, $0f7838a7e387da95$export$7c3e21e9e0c181da)(hass, element, config, sensor);
+        return (0, $0f7838a7e387da95$export$7c3e21e9e0c181da)(hass, element, config.info, sensor);
     })}
     </div>
   `;
 };
 
 
-const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, device, hass, config)=>{
+const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, hass, device, config)=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <ha-card>
       ${(0, $a2b1c365027138cb$export$dfb737c0873de058)(device, hass, config)}
-
       <div class="card-content">
-        ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, device, config)}
-
-        <!-- Additional Stats Row -->
-        ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(hass, element, device, config.info)}
+        ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, hass, device, config)}
+        ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(element, hass, device, config)}
       </div>
-
-      <!-- Card Actions -->
-      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(hass, element, device, config.controls)}
-
-      <!-- Version Information Bar -->
-      <div class="version-info">
-        ${device.updates.map((update)=>{
-        return (0, $4227987aac09cd77$export$efbe1467c55dee42)(update);
-    })}
-      </div>
+      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(element, hass, device, config)}
+      ${(0, $49bfcbfa0b6e0050$export$7c88f7b87167f6)(element, hass, config, device)}
     </ha-card>
   `;
 };
@@ -1696,6 +1805,34 @@ const $19442883b2a008d3$export$df7b058ef38e4826 = async (hass)=>{
     if (!registry) return undefined;
     const devices = Object.values(hass.devices).filter((device)=>device.config_entries.includes(registry.entry_id));
     return devices[0];
+};
+
+
+const $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff = (entity, device)=>{
+    const keyToPropertyMap = {
+        dns_queries_today: 'dns_queries_today',
+        domains_blocked: 'domains_blocked',
+        ads_percentage_blocked_today: 'ads_percentage_blocked_today',
+        ads_blocked_today: 'ads_blocked_today',
+        dns_unique_clients: 'dns_unique_clients',
+        remaining_until_blocking_mode: 'remaining_until_blocking_mode',
+        action_refresh_data: 'action_refresh_data',
+        latest_data_refresh: 'latest_data_refresh',
+        status: 'status'
+    };
+    const key = entity.translation_key;
+    if (key && key in keyToPropertyMap) {
+        // @ts-ignore
+        device[keyToPropertyMap[key]] = entity;
+        return true;
+    }
+    return false;
+};
+
+
+const $25a2e2943b63f930$export$2448ebcf2d0e9554 = (entity, config)=>{
+    if (!config.exclude_entities?.length) return false;
+    return config.exclude_entities.some((entityId)=>entity.entity_id === entityId);
 };
 
 
@@ -1750,58 +1887,32 @@ const $3a8183764d505877$export$b971a190749afcb4 = (hass, config)=>{
     const hassDevice = (0, $5bd3a7e1f19a6de3$export$30c823bc834d6ab4)(hass, config.device_id);
     if (!hassDevice) return undefined;
     const entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id, hassDevice.name);
-    // map the entities to the device object
+    // Map entities to the device object
     entities.forEach((entity)=>{
-        switch(entity.translation_key){
-            case 'dns_queries_today':
-                device.dns_queries_today = entity;
+        if ((0, $25a2e2943b63f930$export$2448ebcf2d0e9554)(entity, config)) return;
+        // Skip already handled entities by translation key
+        if ((0, $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff)(entity, device)) return;
+        // Handle other entities by domain
+        const domain = (0, $e7dc90bb09bfe22d$export$2044bdc9670769ab)(entity.entity_id);
+        switch(domain){
+            case 'button':
+                device.controls.push(entity);
                 break;
-            case 'domains_blocked':
-                device.domains_blocked = entity;
+            case 'sensor':
+                device.sensors.push(entity);
                 break;
-            case 'ads_percentage_blocked_today':
-                device.ads_percentage_blocked_today = entity;
+            case 'switch':
+                device.switches.push(entity);
                 break;
-            case 'ads_blocked_today':
-                device.ads_blocked_today = entity;
-                break;
-            case 'dns_unique_clients':
-                device.dns_unique_clients = entity;
-                break;
-            case 'remaining_until_blocking_mode':
-                // todo
-                device.remaining_until_blocking_mode = entity;
-                break;
-            // binary sensors
-            case 'status':
-                device.status = entity;
-                break;
-            default:
-                const domain = (0, $e7dc90bb09bfe22d$export$2044bdc9670769ab)(entity.entity_id);
-                switch(domain){
-                    case 'button':
-                        device.controls.push(entity);
-                        break;
-                    case 'sensor':
-                        device.sensors.push(entity);
-                        break;
-                    case 'switch':
-                        device.switches.push(entity);
-                        break;
-                    case 'update':
-                        device.updates.push(entity);
-                        break;
-                }
+            case 'update':
+                device.updates.push(entity);
                 break;
         }
     });
-    // sort the updates by title - this is a bit of a hack, but it works
-    // we need to sort the updates by title, but the title is not always present
-    // so we need to use a default value of 'z' to sort them to the end
-    // this is not ideal, but it works for now - it matches the behavior of the Pi-hole admin console
+    // Sort updates by title (using nullish coalescing for cleaner code)
     device.updates.sort((a, b)=>{
-        const aTitle = a.attributes.title || 'z';
-        const bTitle = b.attributes.title || 'z';
+        const aTitle = a.attributes.title ?? 'z';
+        const bTitle = b.attributes.title ?? 'z';
         return aTitle.localeCompare(bTitle);
     });
     return device;
@@ -2224,6 +2335,29 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
   mwc-button ha-icon {
     margin-right: 3px;
   }
+
+  .remaining-time {
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+
+  .remaining-time::before {
+    content: '-';
+    margin: 0px 8px;
+  }
+
+  .refresh-time {
+    display: flex;
+    font-size: 0.85rem;
+    color: var(--secondary-text-color);
+    justify-content: center;
+  }
+
+  .refresh-time ha-icon {
+    margin-right: 4px;
+    color: var(--switch-checked-color);
+    cursor: pointer;
+  }
 `;
 
 
@@ -2295,7 +2429,7 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
           <div class="no-devices">Loading...</div>
         </div>
       </ha-card>`;
-        return (0, $f5cecba293939c1a$export$569cbbd0d9d55043)(this, this._device, this._hass, this._config);
+        return (0, $f5cecba293939c1a$export$569cbbd0d9d55043)(this, this._hass, this._device, this._config);
     }
 }
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
@@ -2315,9 +2449,14 @@ const $b642db848cc622aa$var$SCHEMA = [
         name: 'device_id',
         selector: {
             device: {
-                filter: {
-                    integration: 'pi_hole_v6'
-                }
+                filter: [
+                    {
+                        integration: 'pi_hole_v6'
+                    },
+                    {
+                        integration: 'pi_hole'
+                    }
+                ]
             }
         },
         required: true,
@@ -2345,6 +2484,61 @@ const $b642db848cc622aa$var$SCHEMA = [
                 selector: {
                     icon: {
                         placeholder: 'mdi:pi-hole'
+                    }
+                }
+            }
+        ]
+    },
+    {
+        name: 'layout',
+        label: 'Layout',
+        type: 'expandable',
+        flatten: true,
+        icon: 'mdi:view-grid-plus',
+        schema: [
+            {
+                name: 'exclude_sections',
+                label: 'Sections to exclude',
+                required: false,
+                selector: {
+                    select: {
+                        multiple: true,
+                        mode: 'list',
+                        options: [
+                            {
+                                label: 'Header',
+                                value: 'header'
+                            },
+                            {
+                                label: 'Statistics',
+                                value: 'statistics'
+                            },
+                            {
+                                label: 'Sensors',
+                                value: 'sensors'
+                            },
+                            {
+                                label: 'Controls',
+                                value: 'controls'
+                            },
+                            {
+                                label: 'Footer',
+                                value: 'footer'
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name: 'exclude_entities',
+                label: 'Entities to exclude',
+                required: false,
+                selector: {
+                    entity: {
+                        multiple: true,
+                        filter: {
+                            integration: 'pi_hole_v6'
+                        }
                     }
                 }
             }
@@ -2475,6 +2669,8 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
         if (shouldDelete(config.stats)) delete config.stats;
         if (shouldDelete(config.info)) delete config.info;
         if (shouldDelete(config.controls)) delete config.controls;
+        if (!config.exclude_entities?.length) delete config.exclude_entities;
+        if (!config.exclude_sections?.length) delete config.exclude_sections;
         // @ts-ignore
         (0, $9c83ab07519e6203$export$43835e9acf248a15)(this, 'config-changed', {
             config: config
@@ -2487,7 +2683,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.4.1\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.14.4\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.1\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.14.4\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.6.3\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.14.4\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.1\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.14.4\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
 
 
 // Register the custom elements with the browser

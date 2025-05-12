@@ -1011,7 +1011,7 @@ sensor:
     filters:
       - calibrate_linear:
         - 0.576 -> 0.0
-        - 0.825 -> 0.825
+        - 2.313 -> 0.9
   # moyenne sur 30 mn + affichage toutes les 2 mn
       - sliding_window_moving_average:
           window_size: 30
@@ -1038,7 +1038,6 @@ sensor:
     id: _tps_injection_chlore
     unit_of_measurement: "s"
     state_class: "measurement"
-    
    
   # mesure Puissance avec un PZEM-004T-100A
   - platform: pzemac
@@ -1093,7 +1092,7 @@ sensor:
     sensor: ppe_filt_en_fonctionnement
     restore: true
     filters: 
-      - round: 2
+      - round: 0
 
   - platform: duty_time
     id: _temps_galet_chlore
@@ -1101,7 +1100,7 @@ sensor:
     sensor: ppe_filt_en_fonctionnement
     restore: true
     filters: 
-      - round: 2
+      - round: 0
     
   # Ppe pH
   - platform: duty_time
@@ -1110,7 +1109,7 @@ sensor:
     lambda: "return id(cde_ppe_ph_moins).state == true;"
     restore: true
     filters: 
-      - round: 2
+      - round: 0
 
   # Ppe Chlore
   - platform: duty_time
@@ -1119,7 +1118,7 @@ sensor:
     lambda: "return id(cde_ppe_chlore).state == true;"
     restore: true
     filters: 
-      - round: 2
+      - round: 0
 
   # EV Eau
   - platform: duty_time
@@ -1128,7 +1127,7 @@ sensor:
     lambda: "return id(cde_ev_eau).state == true;"
     restore: true
     filters: 
-      - round: 2
+      - round: 0
 
 # Déclaration Volet piscine
 cover:

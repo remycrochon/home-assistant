@@ -221,26 +221,14 @@ ecs_off_off:
       - cover.volet_parents_grand_zb_volets
       - cover.volet_ch_parts_petit
       - cover.volet_salon_petit
+      - cover.gauche
     action: cover.close_cover
   - action: script.turn_on
     metadata: {}
     data: {}
     target:
       entity_id:
-      - script.volets_bureau_rts_fermeture_2
-    enabled: true
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 10
-      milliseconds: 0
-    enabled: true
-  - action: script.turn_on
-    metadata: {}
-    data: {}
-    target:
-      entity_id:
-      - script.volets_bureau_rts_fermeture_2
+      - script.1706465454834
     enabled: true
   - data: {}
     target:
@@ -375,15 +363,12 @@ ecs_off_off:
       entity_id: input_boolean.presence_amis_bureau
       state: 'off'
     then:
-    - data: {}
-      action: script.1_0_2_ouverture_volets_bureau_rts
-    - delay:
-        hours: 0
-        minutes: 0
-        seconds: 10
-        milliseconds: 0
-    - data: {}
-      action: script.1_0_2_ouverture_volets_bureau_rts
+    - action: script.1_0_1_ouverture_volet_bureau_droit_rts
+      data: {}
+    - action: cover.open_cover
+      target:
+        entity_id: cover.bureau_gauche
+      data: {}
     enabled: true
   - if:
     - condition: state
@@ -441,16 +426,6 @@ ecs_off_off:
 1_0_2_ouverture_volets_bureau_rts:
   alias: Volets Bureau RTS Ouverture
   sequence:
-  - action: script.turn_on
-    metadata: {}
-    data: {}
-    target:
-      entity_id: script.volet_bureau_gauche_rts_ouverture
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 0
-      milliseconds: 500
   - action: script.turn_on
     metadata: {}
     data: {}
@@ -647,68 +622,6 @@ ssh_command:
       user: remy
       pass: 56835683
       command: ls -la
-  description: ''
-2_0_0_fermeture_volet_bureau_gauche_rts:
-  sequence:
-  - data: {}
-    target:
-      entity_id:
-      - cover.gauche
-    action: cover.stop_cover
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - data: {}
-    target:
-      entity_id:
-      - cover.gauche
-    action: cover.open_cover
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - data: {}
-    target:
-      entity_id:
-      - cover.gauche
-    action: cover.close_cover
-  alias: Volet Bureau Gauche RTS Fermeture
-  mode: single
-  icon: mdi:window-shutter
-  description: ''
-volet_bureau_gauche_rts_ouverture:
-  sequence:
-  - data: {}
-    target:
-      entity_id:
-      - cover.gauche
-    action: cover.stop_cover
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - data: {}
-    target:
-      entity_id:
-      - cover.gauche
-    action: cover.close_cover
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - data: {}
-    target:
-      entity_id:
-      - cover.gauche
-    action: cover.open_cover
-  alias: Volet Bureau Gauche RTS Ouverture
-  mode: single
-  icon: mdi:window-shutter-open
   description: ''
 volets_bureau_rts_fermeture:
   sequence:

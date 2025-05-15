@@ -1262,26 +1262,34 @@ const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity, className = '')
   ></state-display>`;
 
 
-const $a2b1c365027138cb$export$dfb737c0873de058 = (device, hass, config)=>{
+const $a2b1c365027138cb$export$dfb737c0873de058 = (setup, hass, config)=>{
     if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'header')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
-    const isActive = (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(device.status, device.status?.state);
+    const primary = setup.holes[0];
+    const activeCount = setup.holes.map((h)=>h.status).filter((status)=>status !== undefined && (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(status, status?.state)).length;
+    const mixedStatus = activeCount > 0 && activeCount < setup.holes.length;
     // Check if we should display the remaining time
-    const hasRemainingTime = device.remaining_until_blocking_mode && device.remaining_until_blocking_mode.state !== '0' && device.remaining_until_blocking_mode.state !== 'unavailable' && device.remaining_until_blocking_mode.state !== 'unknown';
+    const hasRemainingTime = primary.remaining_until_blocking_mode && primary.remaining_until_blocking_mode.state !== '0' && primary.remaining_until_blocking_mode.state !== 'unavailable' && primary.remaining_until_blocking_mode.state !== 'unknown';
+    // Get status color based on active count and mixed status
+    const getStatusColor = ()=>{
+        if (mixedStatus) return 'var(--warning-color, orange)';
+        else if (activeCount > 0) return 'var(--success-color, green)';
+        else return 'var(--error-color, red)';
+    };
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div class="card-header">
       <div class="name">
         <ha-icon icon="${config.icon ?? 'mdi:pi-hole'}"></ha-icon>
         ${config.title ?? 'Pi-Hole'}
+        ${setup.holes.length > 1 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<span class="multi-status"
+              >(${activeCount}/${setup.holes.length})</span
+            >` : ''}
       </div>
-      <div
-        class="status"
-        style="color: ${isActive ? 'var(--success-color, green)' : 'var(--error-color, red)'}"
-      >
+      <div style="color: ${getStatusColor()}">
         <ha-icon
-          icon="${isActive ? 'mdi:check-circle' : 'mdi:close-circle'}"
+          icon="${activeCount > 0 ? 'mdi:check-circle' : 'mdi:close-circle'}"
         ></ha-icon>
-        ${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, device.status)}
-        ${!isActive && hasRemainingTime ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, device.remaining_until_blocking_mode, 'remaining-time')}` : ''}
+        ${mixedStatus ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`Partial` : (0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.status)}
+        ${activeCount <= 0 && hasRemainingTime ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.remaining_until_blocking_mode, 'remaining-time')}` : ''}
       </div>
     </div>
   `;
@@ -1548,10 +1556,15 @@ var $9a28a77a5af263d9$exports = {};
 $9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"}}}");
 
 
+var $ac00f57d502abb29$exports = {};
+$ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"}}}");
+
+
 // Import other languages as needed above this line and in order
 // Define supported languages
 const $623ffaa3e77fea87$var$languages = {
-    en: $9a28a77a5af263d9$exports
+    en: $9a28a77a5af263d9$exports,
+    es: $ac00f57d502abb29$exports
 };
 const $623ffaa3e77fea87$export$b3bd0bc58e36cd63 = (hass, key, search = '', replace = '')=>{
     let translated;
@@ -1781,16 +1794,17 @@ const $f72adbed169bb149$export$f7d6b8c683630484 = (element, hass, device, config
 };
 
 
-const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, hass, device, config)=>{
+const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, hass, setup, config)=>{
+    const primary = setup.holes[0];
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <ha-card>
-      ${(0, $a2b1c365027138cb$export$dfb737c0873de058)(device, hass, config)}
+      ${(0, $a2b1c365027138cb$export$dfb737c0873de058)(setup, hass, config)}
       <div class="card-content">
-        ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, hass, device, config)}
-        ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(element, hass, device, config)}
+        ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, hass, primary, config)}
+        ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(element, hass, primary, config)}
       </div>
-      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(element, hass, device, config)}
-      ${(0, $49bfcbfa0b6e0050$export$7c88f7b87167f6)(element, hass, config, device)}
+      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(element, hass, primary, config)}
+      ${(0, $49bfcbfa0b6e0050$export$7c88f7b87167f6)(element, hass, config, primary)}
     </ha-card>
   `;
 };
@@ -1876,15 +1890,15 @@ const $093edc2594769ee5$export$c6a2d06cc40e579 = (hass, deviceId, deviceName)=>{
 };
 
 
-const $3a8183764d505877$export$b971a190749afcb4 = (hass, config)=>{
+const $3a8183764d505877$export$b971a190749afcb4 = (hass, config, deviceId)=>{
     const device = {
-        device_id: config.device_id,
+        device_id: deviceId,
         controls: [],
         sensors: [],
         switches: [],
         updates: []
     };
-    const hassDevice = (0, $5bd3a7e1f19a6de3$export$30c823bc834d6ab4)(hass, config.device_id);
+    const hassDevice = (0, $5bd3a7e1f19a6de3$export$30c823bc834d6ab4)(hass, device.device_id);
     if (!hassDevice) return undefined;
     const entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id, hassDevice.name);
     // Map entities to the device object
@@ -1916,6 +1930,36 @@ const $3a8183764d505877$export$b971a190749afcb4 = (hass, config)=>{
         return aTitle.localeCompare(bTitle);
     });
     return device;
+};
+
+
+const $0544f6a0e4690d02$export$9093f1b96efd0145 = (hass, config)=>{
+    // Handle both string and array device IDs
+    const deviceIds = Array.isArray(config.device_id) ? config.device_id : [
+        config.device_id
+    ];
+    if (deviceIds.length === 0) return undefined;
+    // keep track of switches that are not in the first device
+    const spareSwitches = [];
+    const holes = deviceIds.map((deviceId, i)=>(0, $3a8183764d505877$export$b971a190749afcb4)(hass, config, deviceId)).filter((hole)=>hole !== undefined).map((hole, i)=>{
+        if (i > 0) {
+            spareSwitches.push(...hole.switches);
+            // don't track entites that are not in the first device
+            return {
+                device_id: hole.device_id,
+                status: hole.status,
+                controls: [],
+                sensors: [],
+                switches: [],
+                updates: []
+            };
+        }
+        return hole;
+    });
+    if (holes.length > 1) holes[0].switches.push(...spareSwitches);
+    return {
+        holes: holes
+    };
 };
 
 
@@ -2358,6 +2402,12 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     color: var(--switch-checked-color);
     cursor: pointer;
   }
+
+  .multi-status {
+    font-size: 0.9rem;
+    margin-left: 8px;
+    opacity: 0.8;
+  }
 `;
 
 
@@ -2410,8 +2460,8 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
    * @param {HomeAssistant} hass - The Home Assistant instance
    */ set hass(hass) {
         this._hass = hass;
-        const device = (0, $3a8183764d505877$export$b971a190749afcb4)(hass, this._config);
-        if (device && !$30856da572fd852b$exports(device, this._device)) this._device = device;
+        const setup = (0, $0544f6a0e4690d02$export$9093f1b96efd0145)(hass, this._config);
+        if (setup && !$30856da572fd852b$exports(setup, this._setup)) this._setup = setup;
     }
     // card configuration
     static getConfigElement() {
@@ -2429,7 +2479,7 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
           <div class="no-devices">Loading...</div>
         </div>
       </ha-card>`;
-        return (0, $f5cecba293939c1a$export$569cbbd0d9d55043)(this, this._hass, this._device, this._config);
+        return (0, $f5cecba293939c1a$export$569cbbd0d9d55043)(this, this._hass, this._setup, this._config);
     }
 }
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
@@ -2437,7 +2487,7 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
 ], $e4f1b26747081709$export$54063f5d55a7de84.prototype, "_config", void 0);
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
-], $e4f1b26747081709$export$54063f5d55a7de84.prototype, "_device", void 0);
+], $e4f1b26747081709$export$54063f5d55a7de84.prototype, "_setup", void 0);
 
 
 
@@ -2456,7 +2506,8 @@ const $b642db848cc622aa$var$SCHEMA = [
                     {
                         integration: 'pi_hole'
                     }
-                ]
+                ],
+                multiple: true
             }
         },
         required: true,
@@ -2683,7 +2734,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.6.3\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.14.4\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.1\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.14.4\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.8.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.0\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.0\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
 
 
 // Register the custom elements with the browser

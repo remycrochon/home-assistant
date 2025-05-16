@@ -5,20 +5,6 @@
 ####################################################
 
 
-input_number:
-
-
-# temps utilisation cartouche chlore
-  temps_cartouche_chlore:
-    name: Temps cartouche Chlore
-    min: 0
-    max: 3600
-    unit_of_measurement: h
-    step: 0.1
-    icon: mdi:clock
-    mode: box
-
-
 template:
   - sensor:
 # Heure Pivot du Soleil

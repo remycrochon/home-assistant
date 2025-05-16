@@ -6,6 +6,7 @@ substitutions:
   
 esphome:
   name: ${device_name}
+  
 esp8266:
   board: d1_mini
   framework:
@@ -43,7 +44,7 @@ sensor:
 #ML8511 Mesure UV en mW/Cm²
   - platform: adc
     pin: A0
-    name: "${friendly_name}_uv"
+    name: "UV"
     unit_of_measurement: "UV"
     update_interval: 60s
     accuracy_decimals: 1
@@ -59,4 +60,4 @@ sensor:
 #Etat de la connection
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"

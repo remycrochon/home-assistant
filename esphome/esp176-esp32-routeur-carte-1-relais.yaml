@@ -915,10 +915,6 @@ script:
       # regule semi-quadratique
       # Limiter l'incrément pour éviter des ajustements trop brusques
 
-#            float error = id(pu_batteries).state - id(cons_pubatt).state;
-#            id(increment) = error * (1 + abs(error) / 1000) * id(coeff_rbat).state / 1000;
-
-
       - lambda: |-
           if (id(etatbus_ve).state == 3) {
             id(increment)=id(pu_batteries).state*abs(id(pu_batteries).state)/(id(coeff_rbat).state*id(coeff_rbat).state*10000);

@@ -1,0 +1,69 @@
+substitutions:
+  device_name: esp129-pesage-chlore
+  adress_ip: "192.168.0.129"
+  time_timezone: "Europe/Paris"
+  #friendly_name: esp129
+
+esphome:
+  name: "esp129-pesage-chlore"
+
+esp8266:
+  board: d1_mini
+  framework:
+    version: recommended  
+    
+# Enable Home Assistant API
+api:
+
+web_server:
+  port: 80
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+captive_portal:
+logger:
+  baud_rate: 0  # Disable UART logger if using UART0 (pins 1,3)
+
+sensor:
+  - platform: uptime
+    type: seconds
+    name: "Uptime"
+
+  - platform: hx711
+    name: "poids chlore"
+    dout_pin: D1 # DT
+    clk_pin: D0 # SCK
+    gain: 128
+    update_interval: 10s
+    accuracy_decimals: 1
+  #  moyenne sur 15*10s-Affichage toutes les 5*10s avec un Update_interval à 10s en mode étalonnage
+  # L'offset correspond au poids du bidon vide
+    filters:
+      - sliding_window_moving_average:
+          window_size: 15
+          send_every: 5
+          send_first_at: 1      
+      - calibrate_linear:
+          - -262000 -> 0
+          - 174400 -> 15.5
+      - offset: 1.5
+    unit_of_measurement: kg
+
+switch:
+  - platform: restart
+    name: "Restart"
+
+binary_sensor:
+  - platform: status
+    name: "Status"    

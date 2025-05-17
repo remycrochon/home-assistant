@@ -13,7 +13,7 @@ substitutions:
   time_timezone: "Europe/Paris"
   # Definition des seuils admissibles
   pu_fonctionnement: "200"
-  pression_max: "1.5"
+  pression_max: "15"
 
 esphome:
   name: ${device_name}
@@ -475,6 +475,13 @@ button:
           format: "Fin arret jour de : %.0f h"
           args: [ 'id(duree_at_jour).state' ]
           level: info 
+  # Lance un Appoint d'Eau
+  - platform: template
+    name: "${friendly_name}_BP_Appoint Eau"
+    on_press:
+      - script.execute: _regul_eau
+
+
 
 binary_sensor:
   #Etat de la connection
@@ -695,14 +702,14 @@ datetime:
     type: time
     name: "${friendly_name}_h_ouv_volet"
     optimistic: yes
-    restore_value: false
+    restore_value: true
     
   - platform: template
     id: h_ferm_volet
     type: time
     name: "${friendly_name}_h_ferm_volet"
     optimistic: yes
-    restore_value: false
+    restore_value: true
 
 # Input Number
 number:
@@ -798,31 +805,6 @@ number:
     step: 1
     icon: mdi:clock
 
-  # Durée entre deux controle pH
-  - platform: template
-    name: "${friendly_name}_durée_cycle_injection_phmoins"
-    id: duree_cycle_inject_phmoins
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 900
-    unit_of_measurement: "s"
-    step: 1
-    icon: mdi:clock
-
-  # Coefficient regulation
-  - platform: template
-    name: "${friendly_name}_coef_regul_ph_moins"
-    id: _coef_regul_ph_moins
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 150
-    unit_of_measurement: "%"
-    step: 0.01
-    icon: mdi:percent
 
   # Cible Niveau Chlore
   - platform: template
@@ -1244,6 +1226,10 @@ switch:
     pin: GPIO27
     id: cde_volet_ouverture
     interlock: [cde_volet_fermeture]
+    on_turn_on:
+      then:
+        - delay: 120s
+        - script.execute: _regul_eau
 
   - platform: gpio
     name: "${friendly_name} cde_volet_fermeture"
@@ -1355,7 +1341,7 @@ interval:
     then:      
       - script.execute: _fonctionnement_filtration
       - script.execute: _calcul_niveau_eau
-      - script.execute: _regul_eau
+
   - interval: 5s
     then: 
       - script.execute: _memorisation_temperature_eau
@@ -1793,7 +1779,7 @@ script:
                       } else {
                         facteur = 0.1;  // 10% pour écart très faible
                       }                      
-                      // Pondération linéaire à tester
+                      // Pondération linéaire en affichage Uniquement pour comparaison
                       float ecart_ref = 0.5;
                       float facteur_lineaire = std::min(1.0f, ecart / ecart_ref);
                       float duree_lineaire = duration * facteur_lineaire;
@@ -2031,7 +2017,8 @@ script:
                 format: "Arret Forcé ppe Chlore"
                 level: INFO
 
-  # Regulation du niveau eau piscine
+  # Regulation du niveau d'eau piscine
+  # Declenché par BP Appoin Eau ou 120s apres la cde ouverture volet apres 120s
   - id: _regul_eau
     mode: single  
     then:

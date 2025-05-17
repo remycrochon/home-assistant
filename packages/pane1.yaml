@@ -280,6 +280,31 @@ openhasp:
                   {% elif text == 'Activé' -%}
                   Activé
                   {% endif -%}
+
+      - obj: "p3b142"
+        properties:
+          "val": >
+            {% set st = states('select.esp178_mode_fonctionnement_volet')%}
+            {% for text,num in [('Auto',0),('Horaire',1),('At_f',2) ] %}
+            {% if st == text %}
+              {{ num }}
+            {%endif%}
+            {% endfor %}
+        event:
+          "changed":
+            - service: select.esp178_mode_fonctionnement_volet
+              target:
+                entity_id: select.esp178_mode_fonctionnement_volet
+              data:
+                option: >
+                  {% if text == "Auto" -%}
+                  Auto
+                  {% elif text == 'Horaire' -%}
+                  Ma_f
+                  {% elif text == 'At_f' -%}
+                  At_f
+                  {% endif -%}
+                  
                   
       - obj: "p3b151"  
         properties:

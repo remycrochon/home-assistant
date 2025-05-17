@@ -587,6 +587,26 @@ sensor:
     filters:
       - filter_out: NAN
 
+  # Sensor Intermediare pour affichage PID
+  - platform: template
+    name: "Coeff en Cours"
+    unit_of_measurement: " "
+    id: coeff_cours
+    state_class: "measurement"  
+    accuracy_decimals: 2
+  - platform: template
+    name: "Mes en Cours"
+    id: mes_cours
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 0
+  - platform: template
+    name: "Cons en Cours"
+    id: cons_cours
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 0
+  
 # déclaration des "text_sensors"
 text_sensor:
   - platform: template
@@ -758,13 +778,24 @@ script:
           if (id(etatbus_ve).state == 3){
             id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
             id(moderegul).publish_state( "Sur Pu batteries Bulk");
+            id(coeff_cours).publish_state(id(coeff_rbat).state); // affichage sur PID, peut etre supprimé
+            id(mes_cours).publish_state(id(pu_batteries).state); // affichage sur PID, peut etre supprimé
+            id(cons_cours).publish_state(id(cons_pubatt).state); // affichage sur PID, peut etre supprimé
+
           } else {
             if (id(pu_batteries).state >= id(seuil_pubatt).state){
               id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
               id(moderegul).publish_state( "Sur Pu reseau");
+              id(coeff_cours).publish_state(id(coeff_r).state); // affichage sur PID, peut etre supprimé
+              id(mes_cours).publish_state(id(pureseau1).state); // affichage sur PID, peut etre supprimé
+              id(cons_cours).publish_state(0); // affichage sur PID, peut etre supprimé
+
             } else { 
               id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
               id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
+              id(coeff_cours).publish_state(id(coeff_rbat).state); // affichage sur PID, peut etre supprimé
+              id(mes_cours).publish_state(id(pu_batteries).state); // affichage sur PID, peut etre supprimé
+              id(cons_cours).publish_state(0); // affichage sur PID, peut etre supprimé
             } 
           } 
 

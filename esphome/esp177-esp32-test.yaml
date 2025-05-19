@@ -9,18 +9,14 @@ esphome:
 
       
 esp32:
-  board: esp32dev
+  board: mhetesp32minikit
   framework:
-    type: esp-idf
-    version: recommended
-
+    type: arduino
     
 # Enable logging
 logger:
   level: DEBUG
 
-# Enable Home Assistant API
-api:
 
 ota:
   platform: esphome
@@ -44,23 +40,40 @@ status_led:
     number: GPIO23
     inverted: true
 
-#Etat de la connection
-binary_sensor:
-  - platform: status
-    name: "${friendly_name} Status"
-
-sensor:
-  - platform: uptime
-    name: Uptime Sensor
-    update_interval: 10s
+# Activer l'API Home Assistant
+api:
 
 
-switch:
-  - platform: restart
-    name: "${friendly_name} Restart"
-  - platform: gpio
-    name: "${friendly_name} Relais"
-    pin: GPIO32
-    id: relais
+
+# Configurer SNTP pour l'horodatage
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
+
+# Définir les text_sensors
+text_sensor:
+  - platform: template
+    name: "Message Telegram"
+    id: _msg_notif_telegram
+  - platform: template
+    name: "Temp Message"
+    id: temp_message
+
+# Exemple avec un capteur binaire (bouton)
+button:
+  - platform: template 
+    name: "Bouton"
+    on_press:
+      then:
+        - homeassistant.service:
+            service: notify.telegram
+            data:
+              message: !lambda |-
+                return "🔔 Message déclenché depuis un lambda ESPHome à";
 
  

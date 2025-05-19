@@ -1755,34 +1755,6 @@
           title: Piscine ESP178 Reconnecté!!!
         action: notify.telegram
   mode: single
-- id: '1725460687135'
-  alias: Notification message Telegram de ESP178
-  description: ' Notifie sur Telegram le message mis à jour par l''ESP178 Piscine'
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.esp178_message_notif_telegram
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  condition:
-  - condition: not
-    conditions:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: sensor.esp178_message_notif_telegram
-        state: unavailable
-      - condition: state
-        entity_id: sensor.esp178_message_notif_telegram
-        state: unknown
-  action:
-  - data:
-      message: '{{states(''sensor.esp178_message_notif_telegram'')}}'
-      title: Message ESP178!!!
-    action: notify.telegram
-  mode: single
 - id: '1725537112371'
   alias: Message telegram ESP142
   description: ' '

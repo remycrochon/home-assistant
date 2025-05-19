@@ -19,10 +19,10 @@ esphome:
   name: ${device_name}
   project:
     name: "rem81.esp178-esp32-piscine"
-    version: "0.0.1"
+    version: "1.0.0"
 
   on_boot:
-    priority: 600
+    priority: 200
     then:
     # Initialisation des templates
     - sensor.template.publish:
@@ -34,22 +34,25 @@ esphome:
     - sensor.template.publish:
         id: _tps_injection_chlore
         state: 0.0
-    - lambda: |-                
-        static String mess;
-        mess= "ESP178 Boot de l'ESP";
-        id(_message_telegram)->execute(mess.c_str());              
+    - delay: 5s
     - lambda: |-
-              #define CONVERT_SECONDS(total_seconds, hh, mm, ss) \
-              do { \
-                int total = static_cast<int>(total_seconds); \
-                hh = total / 3600; \
-                int r = total - hh * 3600; \
-                mm = r / 60; \
-                ss = r - mm * 60; \
-                hh = std::min(hh, 23); \
-                mm = std::min(mm, 59); \
-                ss = std::min(ss, 59); \
-              } while (0)              
+        String mess= "Boot ESP178";
+        id(_message_telegram)->execute(mess.c_str()); 
+
+    - lambda: |-
+        #define CONVERT_SECONDS(total_seconds, hh, mm, ss) \
+        do { \
+          int total = static_cast<int>(total_seconds); \
+          hh = total / 3600; \
+          int r = total - hh * 3600; \
+          mm = r / 60; \
+          ss = r - mm * 60; \
+          hh = std::min(hh, 23); \
+          mm = std::min(mm, 59); \
+          ss = std::min(ss, 59); \
+        } while (0)
+
+
 esp32:
   board: esp32dev
 
@@ -90,6 +93,7 @@ logger:
   
 # Enable Home Assistant API
 api:
+
 
 ota:
   platform: esphome
@@ -146,35 +150,22 @@ time:
         hours: 23
         then:
           - lambda: |-
-              static String mess;
-              static int h,m,r,s=0;
-              mess= "ESP178 Rapport Journalier";
-              mess= mess+"\n";
-              // Affichage du temps de fonctionnement Ppe Filtre
-              s = (id(_temps_fonctionnement_ppe_piscine_jour).state);
-              // Calcul des heures - minutes
-              h = s / 3600;
-              r = s - h * 3600;
-              m = r / 60;
-              r = r - m * 60;
-              mess= mess+"Tps Filtration: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
-              // Affichage du temps de fonctionnement Ppe pH
-              s = (id(_temps_fonctionnement_ppe_ph).state);
-              // Calcul des heures - minutes
-              h = s / 3600;
-              r = s - h * 3600;
-              m = r / 60;
-              r = r - m * 60;          
-              mess= mess+"Tps Ppe pH: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
-              // Affichage du temps de fonctionnement Ppe Chlore
-              s = (id(_temps_fonctionnement_ppe_chlore).state);
-              // Calcul des heures - minutes
-              h = s / 3600;
-              r = s - h * 3600;
-              m = r / 60;
-              r = r - m * 60;          
-              mess= mess+"Tps Ppe Chlore: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
-              id(_message_telegram)->execute(mess.c_str());      
+              std::string mess = "ESP178 Rapport Journalier\n";
+
+              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_piscine_jour).state, id(g_hh), id(g_mm), id(g_ss));
+              char buf1[32];
+              snprintf(buf1, sizeof(buf1), "Tps Filtration: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+              mess += buf1;
+
+              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
+              snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+              mess += buf1;
+
+              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_chlore).state, id(g_hh), id(g_mm), id(g_ss));
+              snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+              mess += buf1;
+
+              id(_message_telegram)->execute(mess);
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -328,6 +319,12 @@ globals:
       type: int
     - id: g_ss
       type: int
+    
+    # stocke temporairement le message à evnoyer à telegram
+    - id: telegram_msg_buffer
+      type: std::string
+      restore_value: no
+      initial_value: '""'
 
 # déclaration des modes de fonctionnement dans des "input select"
 select:
@@ -491,12 +488,18 @@ button:
           format: "Fin arret jour de : %.0f h"
           args: [ 'id(duree_at_jour).state' ]
           level: info 
+  
   # Lance un Appoint d'Eau
   - platform: template
     name: "${friendly_name}_BP_Appoint Eau"
     on_press:
       - script.execute: _regul_eau
-
+  
+  # Lance un test
+  - platform: template
+    name: "${friendly_name}_BP_Pour_Test"
+    on_press:
+      - script.execute: _test
 
 binary_sensor:
   #Etat de la connection
@@ -536,13 +539,11 @@ binary_sensor:
     threshold: ${pression_max} # Défini dans Substitution en bar
     on_press:
       - lambda: |-                
-          static String mess;
-          mess= "ESP178 Seuil Pression Filtre Atteint";
+          std::string mess= "ESP178 Seuil Pression Filtre Atteint";
           id(_message_telegram)->execute(mess.c_str());     
     on_release: 
       - lambda: |-                
-          static String mess;
-          mess= "ESP178 Pression filtre OK";
+          std::string mess= "ESP178 Pression filtre OK";
           id(_message_telegram)->execute(mess.c_str());    
 
   # Pompe en fonctionnement
@@ -554,14 +555,12 @@ binary_sensor:
     threshold: ${pu_fonctionnement} # Défini dans Substitution en Watt
     on_press:
       - lambda: |-                
-          static String mess;
-          mess= "ESP178 Debut Filtration";
+          std::string mess= "ESP178 Debut Filtration";
           id(_message_telegram)->execute(mess.c_str());           
 
     on_release: 
       - lambda: |-                
-          static String mess;
-          mess= "ESP178 Fin Filtration";
+          std::string mess= "ESP178 Fin Filtration";
           id(_message_telegram)->execute(mess.c_str());    
 
   # Entrée logique permettant de lire le BP I00 de la carte
@@ -1154,14 +1153,6 @@ text_sensor:
     name: "${friendly_name} affich_heure_filtration"
     icon: mdi:timer
 
-  # Message en lien avec L'automatisme de notification telegram
-  - platform: template
-    name: "${friendly_name}_message_notif_telegram"
-    lambda: |-
-      return {"ESP178 RAZ Telegram"};
-    update_interval: never
-    id: _msg_notif_telegram
-
 # Déclaration des switches: cde des relais
 switch:
   - platform: gpio
@@ -1280,21 +1271,18 @@ switch:
             time: !lambda |-
               return {second: 0, minute: 0, hour: 0};                
         - lambda: |-
-            static String mess;
-            mess= "Ent At Forcé";
+            std::string mess= "Ent At Forcé";
             id(aff_heure_filtration).publish_state(mess.c_str());
         # Message Telegram
         - lambda: |-                
-            static String mess;
-            mess= "ESP178 Debut Arret Forcé Filtration";
+            std::string mess= "ESP178 Debut Arret Forcé Filtration";
             id(_message_telegram)->execute(mess.c_str());                 
 
     on_turn_off: 
       then:
         # Message Telegram
         - lambda: |-                
-            static String mess;
-            mess= "ESP178 Fin arret Forcé Filtration";
+            std::string mess= "ESP178 Fin arret Forcé Filtration";
             id(_message_telegram)->execute(mess.c_str());              
         - script.execute: _fonctionnement_filtration
 
@@ -1355,36 +1343,22 @@ script:
   - id: _test
     then:
       - lambda: |-
-          static String mess;
-          static int h,m,r,s=0;
-          mess= "ESP178 Rapport Journalier";
-          mess= mess+"\n";
-          // Affichage du temps de fonctionnement Ppe Filtre
-          s = (id(_temps_fonctionnement_ppe_piscine_jour).state);
-          // Calcul des heures - minutes
-          h = s / 3600;
-          r = s - h * 3600;
-          m = r / 60;
-          r = r - m * 60;
-          mess= mess+"Tps Filtration: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+          std::string mess = "ESP178 Rapport Journalier\n";
 
-          // Affichage du temps de fonctionnement Ppe pH
-          s = (id(_temps_fonctionnement_ppe_ph).state);
-          // Calcul des heures - minutes
-          h = s / 3600;
-          r = s - h * 3600;
-          m = r / 60;
-          r = r - m * 60;          
-          mess= mess+"Tps Ppe pH: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
-          // Affichage du temps de fonctionnement Ppe Chlore
-          s = (id(_temps_fonctionnement_ppe_chlore).state);
-          // Calcul des heures - minutes
-          h = s / 3600;
-          r = s - h * 3600;
-          m = r / 60;
-          r = r - m * 60;          
-          mess= mess+"Tps Ppe Chlore: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
-          id(_message_telegram)->execute(mess.c_str()); 
+          CONVERT_SECONDS(id(_temps_fonctionnement_ppe_piscine_jour).state, id(g_hh), id(g_mm), id(g_ss));
+          char buf1[32];
+          snprintf(buf1, sizeof(buf1), "Tps Filtration: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+          mess += buf1;
+
+          CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
+          snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+          mess += buf1;
+
+          CONVERT_SECONDS(id(_temps_fonctionnement_ppe_chlore).state, id(g_hh), id(g_mm), id(g_ss));
+          snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+          mess += buf1;
+
+          id(_message_telegram)->execute(mess);
 
   # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire de la temperature eau qui est
   # prise en compte dans les scripts.
@@ -1469,8 +1443,7 @@ script:
                 args: [ 'id(g_flag_hg)','id(temp_ext).state','id(s1_temp_hg).state','id(s2_temp_hg).state' ]
                 level: DEBUG                
             - lambda: |-
-                static String mess;
-                mess= "Ma HG";
+                std::string mess= "Ma HG";
                 id(aff_heure_filtration).publish_state(mess.c_str());
 
             # RAZ de la durée de filtration
@@ -1491,8 +1464,7 @@ script:
                 format: "arret_forcé_ppe_filtration"
                 level: DEBUG
             - lambda: |-
-                static String mess;
-                mess="At_force";
+                std::string mess="At_force";
                 id(aff_heure_filtration).publish_state(mess.c_str());
 
       # Mode Marche forcée Input Select
@@ -1507,8 +1479,7 @@ script:
                 format: "Marche_forcée_ppe_filtration"
                 level: DEBUG
             - lambda: |-
-                static String mess;
-                mess="Ma_force";
+                std::string mess="Ma_force";
                 id(aff_heure_filtration).publish_state(mess.c_str());                
 
       # Mode "Palier":
@@ -1617,8 +1588,7 @@ script:
                   return {second: 0, minute: static_cast<uint8_t>(id(h_debut).minute+id(duree_mode_horaire).minute), hour: static_cast<uint8_t>(id(h_debut).hour+id(duree_mode_horaire).hour)};
                   // return {second: 0, minute: id(h_debut).minute+id(duree_mode_horaire).minute, hour: id(h_debut).hour+id(duree_mode_horaire).hour};
             - lambda: |-
-                static String mess;
-                mess= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
+                std::string mess= std::to_string(id(h_debut).hour)+":"+std::to_string(id(h_debut).minute)+"/"+std::to_string(id(h_fin).hour)+":"+std::to_string(id(h_fin).minute);
                 id(aff_heure_filtration).publish_state(mess.c_str());
                 
             - script.execute: _calcul_ma_at_ppe_filtration
@@ -1683,18 +1653,14 @@ script:
 
       # Convertion et affichage de la durée de filtration en hh:mm
       - lambda: |-
-          static double dt=0;
-          dt = id(g_tps_filtration)*60;
-          id(g_hh)=int(dt/60);
-          id(g_mm)=dt-id(g_hh)*60;
+          CONVERT_SECONDS(id(g_tps_filtration), id(g_hh), id(g_mm), id(g_ss));             
       - datetime.time.set:
           id: duree_filtration
           time: !lambda |-
             return {second: 0, minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
       
       - lambda: |-
-          static String mess;
-          mess= String(id(h_debut).hour)+":"+String(id(h_debut).minute)+"/"+String(id(heure_pivot).hour)+":"+String(id(heure_pivot).minute)+"/"+String(id(h_fin).hour)+":"+String(id(h_fin).minute);
+          std::string mess= std::to_string(id(h_debut).hour)+":"+std::to_string(id(h_debut).minute)+"/"+std::to_string(id(heure_pivot).hour)+":"+std::to_string(id(heure_pivot).minute)+"/"+std::to_string(id(h_fin).hour)+":"+std::to_string(id(h_fin).minute);
           id(aff_heure_filtration).publish_state(mess.c_str());          
 
       - script.execute: _calcul_ma_at_ppe_filtration
@@ -1805,12 +1771,16 @@ script:
                     - lambda: 'return id(g_tps_injection_ph_moins) > 0;'
                 then:
                   - lambda: |-
-                      String mess= "ESP178 Debut injection pH";
-                      mess= mess+"\n";
-                      mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
-                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
-                      mess= mess+ "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
-                      id(_message_telegram)->execute(mess.c_str());   
+                      std::string mess = "ESP178 Debut injection pH\n";
+                      mess += "Cible pH: " + std::to_string(id(_ph_cible).state) + "\n";
+                      mess += "Mesure pH: " + std::to_string(id(g_memoire_ph)) + "\n";
+                      char buf[32];
+                      snprintf(buf, sizeof(buf), "Durée: %02d:%02d:%02d",
+                              id(duree_injection_ph).hour,
+                              id(duree_injection_ph).minute,
+                              id(duree_injection_ph).second);
+                      mess += buf;
+                      id(_message_telegram)->execute(mess);
                   - logger.log:
                       format: "Ph Mesure ph: %f / pH Cible: %f"
                       args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
@@ -1822,12 +1792,15 @@ script:
                   - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
                   - switch.turn_off: cde_ppe_ph_moins
                   - lambda: |-
-                      String mess= "ESP178 Fin Injection pH";
-                      mess= mess+"\n";
-                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
-                      mess= mess + "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
-                      id(_message_telegram)->execute(mess.c_str()); 
-                  
+                      std::string mess = "ESP178 Fin Injection pH\n";
+                      mess += "Mesure pH: " + std::to_string(id(g_memoire_ph)) + "\n";
+                      char buf[32];
+                      snprintf(buf, sizeof(buf), "Durée: %02d:%02d:%02d",
+                              id(duree_injection_ph).hour,
+                              id(duree_injection_ph).minute,
+                              id(duree_injection_ph).second);
+                      mess += buf;
+                      id(_message_telegram)->execute(mess);
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
@@ -1856,153 +1829,6 @@ script:
             - logger.log: 
                 format: "Arret Forcé ppe pH"
                 level: INFO                           
-  # Script principal pour la régulation du pH Old
-  - id: _regul_ph_old
-    mode: single
-    then:
-      - if:
-          condition:
-            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
-          then:
-            - logger.log:
-                format: "Log mem ph: %f / pH Cible: %f"
-                args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                level: debug      
-            - if:
-                condition:
-                  and:
-                    - lambda: 'return id(g_memoire_ph) > (id(_ph_cible).state+id(_ph_hysteresis).state);'
-                    - lambda: 'return id(g_memoire_ph) > 0;'
-                    - switch.is_on: cde_ppe_filtration          
-                then:
-                  - lambda: |-
-                      float ecart = abs(id(g_memoire_ph) - id(_ph_cible).state);
-                      
-                      // Durée de base définie par l'utilisateur via id(duree_inject_phmoins)
-                      float duree_base = id(duree_inject_phmoins).state;
-                      
-                      // Conversion du débit de l/h en ml/s pour le calcul (1 l = 1000 ml, 1 h = 3600 s)
-                      float debit_ml_s = (id(_debit_ppe_moins).state * 1000.0) / 3600.0;  // Exemple : 4,272 l/h = 1,187 ml/s
-                      
-                      // Calcul théorique de la quantité injectée par cycle (en ml)
-                      float quantite_injectee = debit_ml_s * duree_base;
-                      
-                      // Log pour débogage (optionnel)
-                      ESP_LOGI("regul_ph", "Débit: %.3f ml/s, Durée base: %.1f s, Quantité injectée: %.2f ml", debit_ml_s, duree_base, quantite_injectee);
-                      
-                      // Calcul du facteur de pondération
-                      float facteur = 1.0;
-                      if (ecart > 1) {
-                        facteur = 1.5;  // 150% pour écart très important                      
-                      } else if (ecart > 0.5) {
-                        facteur = 1.0;  // 100% pour écart important
-                      } else if (ecart > 0.3) {
-                        facteur = 0.6;  // 60% pour écart moyen
-                      } else if (ecart > 0.1) {
-                        facteur = 0.3;  // 30% pour écart faible
-                      } else {
-                        facteur = 0.1;  // 10% pour écart très faible
-                      }                      
-                      // Pondération linéaire en affichage Uniquement pour comparaison
-                      float ecart_ref = 0.5;
-                      float facteur_lineaire = std::min(1.0f, ecart / ecart_ref);
-                      float duree_lineaire = duree_base * facteur_lineaire;
-
-                      // Calcul de la durée
-                      float duree = duree_base * facteur;
-                      // Limites
-                      duree = std::max(1.0f, std::min(duree, 60.0f));  // 1 s min, 60 s max
-                      
-                      // Log pour débogage
-                      ESP_LOGI("regul_ph", "Écart: %.2f, Facteur: %.2f, Durée: %.2f s", ecart, facteur, duree);
-                      ESP_LOGI("regul_ph", "Écart: %.2f, Facteur Linéaire: %.2f, Durée Lineaire: %.2f s", ecart, facteur_lineaire, duree_lineaire);
-
-                      id(g_tps_injection_ph_moins)=duree;
-
-                else:
-                  - lambda: |-
-                      id(g_tps_injection_ph_moins)=0;
-
-            - lambda: |-
-               id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
-
-            # Convertion et affichage de la durée d'injection pH en hh:mm
-            - lambda: |-
-                static int r=0;
-                id(g_ss) = id(g_tps_injection_ph_moins);
-                // Calcul des heures - minutes
-                id(g_hh) = id(g_ss) / 3600;
-                r = id(g_ss) - id(g_hh) * 3600;
-                id(g_mm) = r / 60;
-                id(g_ss) = r - id(g_mm) * 60;
-            - datetime.time.set:
-                id: duree_injection_ph
-                time: !lambda |-
-                  return {second: static_cast<uint8_t>(id(g_ss)), minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
-
-            - logger.log:
-                format: "Log tps injection: %f"
-                args: [ 'id(g_tps_injection_ph_moins)' ]
-                level: DEBUG
-
-            - if:
-                condition:
-                  and:
-                    - lambda: 'return id(g_tps_injection_ph_moins) > 0;'
-                then:
-                  - lambda: |-
-                      String mess= "ESP178 Debut injection pH";
-                      mess= mess+"\n";
-                      mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
-                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
-                      mess= mess+ "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
-                      id(_message_telegram)->execute(mess.c_str());   
-                  - logger.log:
-                      format: "Ph Mesure ph: %f / pH Cible: %f"
-                      args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                      level: INFO                      
-                  - switch.turn_on: cde_ppe_ph_moins
-                  - logger.log: 
-                      format: "Marche ppe Ph moins"
-                      level: INFO        
-                  - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
-                  - switch.turn_off: cde_ppe_ph_moins
-                  - lambda: |-
-                      String mess= "ESP178 Fin Injection pH";
-                      mess= mess+"\n";
-                      mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
-                      mess= mess + "Durée:"+String(id(duree_injection_ph).hour)+":"+String(id(duree_injection_ph).minute)+":"+String(id(duree_injection_ph).second);
-                      id(_message_telegram)->execute(mess.c_str()); 
-                  
-                  - logger.log: 
-                      format: "Arret ppe Ph moins"
-                      level: INFO
-                else:
-                  - switch.turn_off: cde_ppe_ph_moins
-                  - logger.log: 
-                      format: "Arret ppe Ph moins"
-                      level: INFO
-
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Ma_f";'
-              - switch.is_on: cde_ppe_filtration
-          then:
-            - switch.turn_on: cde_ppe_ph_moins
-            - logger.log: 
-                format: "Marche Forcée ppe pH"
-                level: INFO
-      - if:
-          condition:
-            or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "At_f";'
-              - switch.is_off: cde_ppe_filtration
-          then:
-            - switch.turn_off: cde_ppe_ph_moins
-            - logger.log: 
-                format: "Arret Forcé ppe pH"
-                level: INFO                      
   # Stoppe le Script de regule pH quand la mesure devient inferieure à la consigne
   # Cela évite de trop injecter de pH Moins
   - id: _securisation_regul_ph
@@ -2022,25 +1848,20 @@ script:
             - script.stop: _regul_ph                
             - switch.turn_off: cde_ppe_ph_moins
             - lambda: |-
-                static float Q;
-                Q = id(_temps_fonctionnement_ppe_ph).state*id(_debit_ppe_moins).state/3600;
-                String mess= "ESP178 Arret Sécurisé Script Injection pH";
-                mess= mess+"\n";
-                mess= mess+"Cible pH: "+String(id(_ph_cible).state)+"\n";
-                mess= mess+"Mesure pH: "+String(id(g_memoire_ph))+"\n";
-
-                static int h,m,r,s=0;
-                // Affichage du temps de fonctionnement Ppe pH
-                s = (id(_temps_fonctionnement_ppe_ph).state);
-                // Calcul des heures - minutes
-                h = s / 3600;
-                r = s - h * 3600;
-                m = r / 60;
-                r = r - m * 60;          
-                mess= mess+"Tps Ppe pH: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
-                mess= mess + "Volume inj:"+ String(Q)+" L"+"\n";
-                id(_message_telegram)->execute(mess.c_str());
-                
+                float Q = id(_temps_fonctionnement_ppe_ph).state * id(_debit_ppe_moins).state / 3600;
+                std::string mess = "ESP178 Arret Sécurisé Script Injection pH\n";
+                mess += "Cible pH: " + std::to_string(id(_ph_cible).state) + "\n";
+                mess += "Mesure pH: " + std::to_string(id(g_memoire_ph)) + "\n";
+                CONVERT_SECONDS(id(g_tps_injection_ph_moins), id(g_hh), id(g_mm), id(g_ss));
+                char buf[64];
+                snprintf(buf, sizeof(buf), "Tps Injec pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+                mess += buf;
+                snprintf(buf, sizeof(buf), "Volume inj: %.2f L\n", Q);
+                mess += buf;
+                CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
+                snprintf(buf, sizeof(buf), "Tps Fonct Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+                mess += buf;
+                id(_message_telegram)->execute(mess);               
                  
   # Injection chlore liquide
   # Calcul du temps d'injection
@@ -2099,15 +1920,11 @@ script:
                       format: "Marche ppe Ph Chlore en Auto"
                       level: INFO
                   - lambda: |-
-                      static int h,m,r,s=0;
-                      // Affichage du temps d'injection Ppe chlore
-                      s = (id(g_tps_injection_chlore));
-                      // Calcul des heures - minutes
-                      h = s / 3600;
-                      r = s - h * 3600;
-                      m = r / 60;
-                      r = r - m * 60;          
-                      String mess= "Tps Injection Chlore: "+String(h)+" h:"+String(m)+" mn:"+String(r)+" s""\n";
+                      // Affichage du temps d'injection Ppe Chlore
+                      CONVERT_SECONDS(id(g_tps_injection_chlore), id(g_hh), id(g_mm), id(g_ss));         
+                      char buf1[32];
+                      snprintf(buf1, sizeof(buf1), "Tps Injection Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+                      std::string mess = buf1;                                         
                       id(_message_telegram)->execute(mess.c_str());
 
                   - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
@@ -2145,7 +1962,7 @@ script:
                 level: INFO
 
   # Regulation du niveau d'eau piscine
-  # Declenché par BP Appoin Eau ou 120s apres la cde ouverture volet apres 120s
+  # Declenché par BP Appoint Eau ou 120s apres la cde ouverture volet apres 120s
   - id: _regul_eau
     mode: single  
     then:
@@ -2388,11 +2205,10 @@ script:
                 format: "Set Flag HG Seuil1"
                 level: INFO
             - lambda: |-                
-                static String mess;
-                mess= "ESP178 Debut Marche HG Seuil1";
-                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
-                mess= mess+"Seuil1: "+String(id(s1_temp_hg).state)+"\n";
-                id(_message_telegram)->execute(mess.c_str());                      
+                std::string mess = "ESP178 Debut Marche HG Seuil1\n";
+                mess += "Temp Ext: " + std::to_string(id(temp_ext).state) + "\n";
+                mess += "Seuil1: "   + std::to_string(id(s1_temp_hg).state) + "\n";
+                id(_message_telegram)->execute(mess);                 
             - delay: 900s  #900s
             - lambda: |-
                 id(g_flag_hg) = false;
@@ -2400,10 +2216,9 @@ script:
                 format: "Reset Flag HG Seuil1"
                 level: INFO     
             - lambda: |-                
-                static String mess;
-                mess= "ESP178 Fin Marche HG Seuil1";
-                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
-                mess= mess+"Seuil1: "+String(id(s1_temp_hg).state)+"\n";
+                std::string mess= "ESP178 Fin Marche HG Seuil1";
+                mess += "Temp Ext: "+ std::to_string(id(temp_ext).state)+"\n";
+                mess += "Seuil1: "+ std::to_string(id(s1_temp_hg).state)+"\n";
                 id(_message_telegram)->execute(mess.c_str());                               
       # Activation si temp > S2
       - if:
@@ -2420,10 +2235,9 @@ script:
                 format: "Set Flag HG Seuil2"
                 level: INFO
             - lambda: |-                
-                static String mess;
-                mess= "ESP178 Debut Marche HG Seuil2";
-                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
-                mess= mess+"Seuil2: "+String(id(s2_temp_hg).state)+"\n";
+                std::string mess= "ESP178 Debut Marche HG Seuil2";
+                mess += "Temp Ext: "+ std::to_string(id(temp_ext).state)+"\n";
+                mess += "Seuil2: "+ std::to_string(id(s2_temp_hg).state)+"\n";
                 id(_message_telegram)->execute(mess.c_str());                   
             - delay: 1800s  #1800s
             - lambda: |-
@@ -2432,10 +2246,9 @@ script:
                 format: "Reset Flag HG Seuil2"
                 level: INFO      
             - lambda: |-                
-                static String mess;
-                mess= "ESP178 Fin Marche HG Seuil2";
-                mess= mess+"Temp Ext: "+String(id(temp_ext).state)+"\n";
-                mess= mess+"Seuil2: "+String(id(s2_temp_hg).state)+"\n";
+                std::string mess= "ESP178 Fin Marche HG Seuil2";
+                mess += "Temp Ext: "+ std::to_string(id(temp_ext).state)+"\n";
+                mess += "Seuil2: "+ std::to_string(id(s2_temp_hg).state)+"\n";
                 id(_message_telegram)->execute(mess.c_str());   
 
   # Surveille temps utilisation galets Chlore en heure
@@ -2452,25 +2265,27 @@ script:
                 format: "Galet Chlore Dépassé"
                 level: INFO  
             - lambda: |-                
-                static String mess;
-                mess= "ESP178 Tps Utilisation Galets Chlore Atteint";
-                id(_message_telegram)->execute(mess.c_str());                    
+                std::string mess = "ESP178 Tps Utilisation Galets Chlore Atteint";
+                id(_message_telegram)->execute(mess);
+
           else:
             - lambda: 
                 id(_etat_galets_chlore).publish_state(false);
               
-
-  # je n'ai pas trouvé de solution pour envoyer un message vers Telegram
-  # je passe donc par HA
-  # Envoi d'un message à l'automatisme de notification Telegram dans HA
-  # message à construire au format String avant appel de ce script
+  # Envoi d'un message à Telegram via HA, celui ci doit etre operationnel
+  # Message à construire au format String avant appel de ce script
   - id: _message_telegram
     parameters:
       mess1: string
     then:
-      - lambda: |-                
-          static String mess;
-          mess= (id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
-          mess= mess +"\n";
-          mess= mess+ mess1.c_str();
-          id(_msg_notif_telegram).publish_state(mess.c_str()); 
+      - lambda: |-
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += "\n";
+          mess += mess1;
+
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
+          service: notify.telegram
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
+

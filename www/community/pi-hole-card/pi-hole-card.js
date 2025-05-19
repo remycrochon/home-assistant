@@ -1553,11 +1553,11 @@ const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
 
 
 var $9a28a77a5af263d9$exports = {};
-$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"}}}");
+$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"},\"sections\":{\"pause\":\"Pause Ad-Blocking\",\"switches\":\"Switches\",\"actions\":\"Actions\"},\"units\":{\"seconds\":\"seconds\"}}}");
 
 
 var $ac00f57d502abb29$exports = {};
-$ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"}}}");
+$ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"},\"sections\":{\"pause\":\"Pausar Bloqueo de Anuncios\",\"switches\":\"Interruptores\",\"actions\":\"Acciones\"},\"units\":{\"seconds\":\"segundos\"}}}");
 
 
 // Import other languages as needed above this line and in order
@@ -1634,6 +1634,24 @@ const $b0d8503ad71f8731$export$ceaadd68dd4c5e98 = (element, hass, device, config
 };
 
 
+const $e67ba06cac005a46$export$9c903d35b97d0190 = (config, section)=>!!config.collapsed_sections?.includes(section);
+
+
+
+
+
+/**
+ * Toggles the visibility of a section
+ * @param e - The click event
+ * @param selector - The CSS selector for the section to toggle
+ */ const $993360189f76a862$export$b7c305685fc8cb26 = (e, selector)=>{
+    const icon = e.currentTarget.querySelector('.caret-icon');
+    const section = e.currentTarget.parentElement?.querySelector(selector);
+    if (section) {
+        const isHidden = section.classList.toggle('hidden');
+        if (icon) icon.setAttribute('icon', isHidden ? 'mdi:chevron-right' : 'mdi:chevron-down');
+    }
+};
 
 
 
@@ -1677,13 +1695,93 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
 
 
 
-const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-card-content
+
+
+/**
+ * Converts a number of seconds into a string formatted as "HH:MM:SS".
+ *
+ * @param totalSeconds - The total number of seconds to convert.
+ * @returns A string representing the time in "HH:MM:SS" format, with each unit zero-padded to two digits.
+ *
+ * @example
+ * ```typescript
+ * formatSecondsToHHMMSS(3661); // Returns "01:01:01"
+ * ```
+ */ const $3a2fe8ac0aec50d1$export$7f8cebb87518d95 = (totalSeconds)=>{
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor(totalSeconds % 3600 / 60);
+    const seconds = totalSeconds % 60;
+    const paddedHours = String(hours).padStart(2, '0');
+    const paddedMinutes = String(minutes).padStart(2, '0');
+    const paddedSeconds = String(seconds).padStart(2, '0');
+    return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
+};
+
+
+const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, device, seconds)=>{
+    return ()=>{
+        const domain = 'pi_hole_v6';
+        const service = 'disable';
+        hass.callService(domain, service, {
+            device_id: device.device_id,
+            duration: (0, $3a2fe8ac0aec50d1$export$7f8cebb87518d95)(seconds)
+        });
+    };
+};
+
+
+
+
+const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, device, config)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'pause')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+    const pauseCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'pause');
+    const pauseDuration = config.pause_durations ?? [
+        60,
+        300,
+        900
+    ];
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="collapsible-section">
+    <div
+      class="section-header"
+      @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.pause')}
+    >
+      <span>${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.sections.pause')}</span>
+      <ha-icon
+        class="caret-icon"
+        icon="mdi:chevron-${pauseCollapsed ? 'right' : 'down'}"
+      ></ha-icon>
+    </div>
+    <div class="pause ${pauseCollapsed ? 'hidden' : ''}">
+      ${pauseDuration.map((duration)=>{
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<mwc-button
+          @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, device, duration)}
+          >${duration} ${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds')}</mwc-button
+        >`;
+    })}
+    </div>
+  </div>`;
+};
+
+
+
+const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-card-content
     .hass=${hass}
     .stateObj=${entity}
+    class=${className}
   ></state-card-content>`;
 
 
-const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, device, config)=>{
+/**
+ * Renders the controls section for the Pi-hole card, including collapsible sections
+ * for switches and actions. Each section can be toggled open or closed, and displays
+ * the relevant controls based on the provided configuration and device state.
+ *
+ * @param element - The root HTMLElement for the card.
+ * @param hass - The Home Assistant instance.
+ * @param device - The PiHoleDevice object containing switches and controls.
+ * @param config - The configuration object for the card, including section visibility and entity order.
+ * @returns A lit-html TemplateResult representing the controls UI, or `nothing` if the section is hidden.
+ */ const $9369c7e3c6702a0b$var$controls = (element, hass, device, config)=>{
     if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'controls')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
     const sectionConfig = config.controls ?? {
         tap_action: {
@@ -1696,18 +1794,56 @@ const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, device, config
             action: 'more-info'
         }
     };
-    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div>
-      <div class="switches">
-        ${device.switches.map((piSwitch)=>{
+    const switchCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'switches');
+    const actionsCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'actions');
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="collapsible-section">
+        <div
+          class="section-header"
+          @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.switches')}
+        >
+          <span>${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.sections.switches')}</span>
+          <ha-icon
+            class="caret-icon"
+            icon="mdi:chevron-${switchCollapsed ? 'right' : 'down'}"
+          ></ha-icon>
+        </div>
+        <div class="switches ${switchCollapsed ? 'hidden' : ''}">
+          ${device.switches.map((piSwitch)=>{
+        const orderExists = config.entity_order?.includes(piSwitch.entity_id);
+        if (orderExists) {
+            const orderIndex = config.entity_order.indexOf(piSwitch.entity_id);
+            const nextItem = config.entity_order[orderIndex + 1];
+            if (nextItem === 'divider') return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="divider"></div>
+                  ${(0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch, 'wide')} `;
+        }
         return (0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch);
     })}
+        </div>
       </div>
-      <div class="actions">
-        ${device.controls.map((control)=>{
+
+      <div class="collapsible-section">
+        <div
+          class="section-header"
+          @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.actions')}
+        >
+          <span>${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.sections.actions')}</span>
+          <ha-icon
+            class="caret-icon"
+            icon="mdi:chevron-${actionsCollapsed ? 'right' : 'down'}"
+          ></ha-icon>
+        </div>
+        <div class="actions ${actionsCollapsed ? 'hidden' : ''}">
+          ${device.controls.map((control)=>{
         return (0, $18c1412eb38d120e$export$669170fc67fdedb7)(element, sectionConfig, control, '');
     })}
+        </div>
       </div>
+    </div>`;
+};
+const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, device, config)=>{
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div>
+      ${(0, $7a21f7a279e18689$export$229c72e5fdee233b)(hass, device, config)}${$9369c7e3c6702a0b$var$controls(element, hass, device, config)}
     </div>
   `;
 };
@@ -1900,7 +2036,23 @@ const $3a8183764d505877$export$b971a190749afcb4 = (hass, config, deviceId)=>{
     };
     const hassDevice = (0, $5bd3a7e1f19a6de3$export$30c823bc834d6ab4)(hass, device.device_id);
     if (!hassDevice) return undefined;
-    const entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id, hassDevice.name);
+    // Get all entities for the device
+    let entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id, hassDevice.name);
+    // Order entities according to the entity_order property if it exists
+    if (config.entity_order?.length) {
+        const entityOrderMap = new Map();
+        // Create a map with entity_id as key and its position in entity_order as value
+        config.entity_order.forEach((entityId, index)=>{
+            entityOrderMap.set(entityId, index);
+        });
+        // Sort entities based on their position in entity_order
+        // Entities not in entity_order will have undefined position and will be placed at the end
+        entities = entities.sort((a, b)=>{
+            const aPosition = entityOrderMap.has(a.entity_id) ? entityOrderMap.get(a.entity_id) : Number.MAX_SAFE_INTEGER;
+            const bPosition = entityOrderMap.has(b.entity_id) ? entityOrderMap.get(b.entity_id) : Number.MAX_SAFE_INTEGER;
+            return (aPosition ?? Number.MAX_SAFE_INTEGER) - (bPosition ?? Number.MAX_SAFE_INTEGER);
+        });
+    }
     // Map entities to the device object
     entities.forEach((entity)=>{
         if ((0, $25a2e2943b63f930$export$2448ebcf2d0e9554)(entity, config)) return;
@@ -2186,7 +2338,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
   }
 
   .card-content {
-    padding: 16px;
+    padding: 16px 16px 0px 16px;
   }
 
   /* Dashboard-style layout with grouped stat boxes */
@@ -2304,7 +2456,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     align-items: center;
     font-size: 0.9rem;
     color: var(--secondary-text-color);
-    background-color: var(--card-background-color, #f0f0f0);
     padding: 8px;
     border-radius: 4px;
     min-width: 120px;
@@ -2318,17 +2469,42 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     color: var(--secondary-text-color);
   }
 
-  .switches {
+  /* Collapsible section styles */
+  .section-header {
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
-    border-top: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+    align-items: center;
+    padding: 8px 16px;
+    cursor: pointer;
+    user-select: none;
   }
 
+  .section-header span {
+    font-weight: 500;
+  }
+
+  .caret-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .switches,
   .actions {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    transition:
+      max-height 0.3s ease,
+      opacity 0.3s ease;
+    overflow: hidden;
+    max-height: 500px; /* Adjust as needed */
+    opacity: 1;
+  }
+
+  .hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
   }
 
   /* Version information styles */
@@ -2340,8 +2516,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     font-size: 0.85rem;
     color: var(--secondary-text-color);
     border-top: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
-    background-color: var(--card-background-color);
-    margin-top: 8px;
     gap: 12px;
   }
 
@@ -2380,6 +2554,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     margin-right: 3px;
   }
 
+  /* Switch styles */
   .remaining-time {
     font-size: 1.2rem;
     font-weight: 400;
@@ -2390,6 +2565,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     margin: 0px 8px;
   }
 
+  /* Refresh time styles */
   .refresh-time {
     display: flex;
     font-size: 0.85rem;
@@ -2403,10 +2579,31 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     cursor: pointer;
   }
 
+  /* Status icon styles */
   .multi-status {
     font-size: 0.9rem;
     margin-left: 8px;
     opacity: 0.8;
+  }
+
+  /* Divider styles */
+  .divider {
+    height: 1px;
+    background-color: var(--secondary-text-color);
+    width: 100%;
+    margin: 0px 16px;
+  }
+
+  .wide {
+    width: 100%;
+  }
+
+  /* Pause buttons */
+  .pause {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
   }
 `;
 
@@ -2573,8 +2770,37 @@ const $b642db848cc622aa$var$SCHEMA = [
                                 value: 'controls'
                             },
                             {
+                                label: 'Pause Buttons',
+                                value: 'pause'
+                            },
+                            {
                                 label: 'Footer',
                                 value: 'footer'
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name: 'collapsed_sections',
+                label: 'Sections collapsed by default',
+                required: false,
+                selector: {
+                    select: {
+                        multiple: true,
+                        mode: 'list',
+                        options: [
+                            {
+                                label: 'Pause Buttons',
+                                value: 'pause'
+                            },
+                            {
+                                label: 'Buttons',
+                                value: 'buttons'
+                            },
+                            {
+                                label: 'Actions',
+                                value: 'actions'
                             }
                         ]
                     }
@@ -2587,9 +2813,42 @@ const $b642db848cc622aa$var$SCHEMA = [
                 selector: {
                     entity: {
                         multiple: true,
-                        filter: {
-                            integration: 'pi_hole_v6'
-                        }
+                        filter: [
+                            {
+                                integration: 'pi_hole_v6'
+                            },
+                            {
+                                integration: 'pi_hole'
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                name: 'entity_order',
+                label: 'Entity display order (click in order)',
+                required: false,
+                selector: {
+                    entity: {
+                        multiple: true,
+                        filter: [
+                            {
+                                integration: 'pi_hole_v6',
+                                domain: [
+                                    'button',
+                                    'sensor',
+                                    'switch'
+                                ]
+                            },
+                            {
+                                integration: 'pi_hole',
+                                domain: [
+                                    'button',
+                                    'sensor',
+                                    'switch'
+                                ]
+                            }
+                        ]
                     }
                 }
             }
@@ -2602,6 +2861,32 @@ const $b642db848cc622aa$var$SCHEMA = [
         flatten: true,
         icon: 'mdi:gesture-tap',
         schema: [
+            {
+                name: 'pause_durations',
+                label: 'Pause durations',
+                required: false,
+                selector: {
+                    select: {
+                        multiple: true,
+                        custom_value: true,
+                        mode: 'list',
+                        options: [
+                            {
+                                label: '60 seconds',
+                                value: '60'
+                            },
+                            {
+                                label: '5 minutes',
+                                value: '300'
+                            },
+                            {
+                                label: '15 minutes',
+                                value: '900'
+                            }
+                        ]
+                    }
+                }
+            },
             {
                 name: 'stats',
                 label: 'Statistics',
@@ -2722,6 +3007,8 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
         if (shouldDelete(config.controls)) delete config.controls;
         if (!config.exclude_entities?.length) delete config.exclude_entities;
         if (!config.exclude_sections?.length) delete config.exclude_sections;
+        if (!config.entity_order?.length) delete config.entity_order;
+        if (!config.collapsed_sections?.length) delete config.collapsed_sections;
         // @ts-ignore
         (0, $9c83ab07519e6203$export$43835e9acf248a15)(this, 'config-changed', {
             config: config
@@ -2734,7 +3021,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.8.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.0\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.2.2\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.0\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.10.1\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.1\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.3.0\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.1\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
 
 
 // Register the custom elements with the browser

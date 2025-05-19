@@ -1,0 +1,179 @@
+select:
+  - platform: template
+    name: "${friendly_name}_Mode_Fonctionnement_volet"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Horaire
+      - At_f
+    id: _Mode_Fonctionnement_volet
+    on_value: 
+      then:
+        - logger.log:
+            format: "Mode Fonct Volet --> %s"
+            args: [ 'id(_Mode_Fonctionnement_volet).state.c_str()' ]
+            level: INFO
+
+binary_sensor: 
+  # GPIO sur module extension SX1509
+
+  - platform: gpio
+    name: "${friendly_name}_volet_ferme"
+    id: volet_ferme
+    pin:
+      sx1509: sx1509_hub1
+      # Use pin number 0 on the SX1509
+      number: 0
+      mode:
+        input: true
+        pullup: false
+      inverted: false
+    filters:
+      - delayed_on_off: 500ms
+
+datetime:
+  - platform: template
+    id: h_ouv_volet
+    type: time
+    name: "${friendly_name}_h_ouv_volet"
+    optimistic: yes
+    restore_value: true
+    
+  - platform: template
+    id: h_ferm_volet
+    type: time
+    name: "${friendly_name}_h_ferm_volet"
+    optimistic: yes
+    restore_value: true
+
+# Déclaration Volet piscine
+cover:
+  - platform: template
+    name: "${friendly_name}_volet_piscine"
+    lambda: |-
+      if (id(volet_ferme).state) {
+        return COVER_CLOSED;
+      } else {
+        return COVER_OPEN;
+      }
+    open_action:
+      - script.execute: script_ouv_volet
+    close_action:
+      - script.execute: script_ferm_volet
+    stop_action:
+      - script.execute: script_stop_volet
+    optimistic: true
+
+switch:
+  - platform: gpio
+    name: "${friendly_name} cde_volet_ouverture"
+    pin: GPIO27
+    id: cde_volet_ouverture
+    interlock: [cde_volet_fermeture]
+    on_turn_on:
+      then:
+        - delay: 120s
+        - script.execute: _regul_eau
+
+  - platform: gpio
+    name: "${friendly_name} cde_volet_fermeture"
+    pin: GPIO14
+    id: cde_volet_fermeture
+    interlock: [cde_volet_ouverture]
+
+interval:
+  - interval: 1s
+    then:
+      - script.execute: _calcul_cde_volet
+
+script: 
+  # Scripts Commande Volet
+  # En mode "Horaire" La commande ouverture & fermeture volet est asservie à l'heure d'ouverture et de l'heure de fermeture du volet
+  # En mode "Auto": La commande ouverture volet est asservi à l'heure de debut ma pompe en modes Palier/Classique/Horaire/Abaque
+  #               : La commande fermeture volet est asservi à l'heure de fermeture du volet
+  - id: _calcul_cde_volet
+    mode: single
+    then:
+      - lambda: |-
+          auto time = id(sntp_time).now();
+      - logger.log:
+          format: "H now: %.2d:%2d:%d"
+          args: [ 'id(sntp_time).now().hour', 'id(sntp_time).now().minute', 'id(heure_pivot).second' ]
+          level: DEBUG
+      - logger.log:
+          format: "HT: %.2d - HD:%2d - HF:%d"
+          args: [ 'id(sntp_time).now().hour*60+id(sntp_time).now().minute', 'id(h_ouv_volet).hour*60+id(h_ouv_volet).minute', 'id(h_ferm_volet).hour*60+id(h_ferm_volet).minute' ]
+          level: DEBUG
+      - if:
+          condition:
+            time.has_time:
+          else:
+            - logger.log:
+                format: "L'heure n'est ni initialisée, ni validée!"
+                level: INFO
+      - if:
+          condition:
+            - lambda: 'return (id(sntp_time).now().is_valid());'
+            - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_ouv_volet).hour*60+id(h_ouv_volet).minute);'
+            - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Horaire";'
+          then:
+            - script.execute: script_ouv_volet
+      - if:
+          condition:
+            - lambda: 'return (id(sntp_time).now().is_valid());'
+            - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_ferm_volet).hour*60+id(h_ferm_volet).minute);'
+            - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Horaire";'
+          then:
+            - script.execute: script_ferm_volet
+
+      - if:
+          condition:
+            - lambda: 'return (id(sntp_time).now().is_valid());'
+            - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_debut).hour*60+id(h_debut).minute );'
+            - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Auto";'
+            - or:
+              - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Horaire";'
+              - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Palier";'
+              - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Classique";'
+              - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
+          then:
+            - script.execute: script_ouv_volet
+      - if:
+          condition:
+            - lambda: 'return (id(sntp_time).now().is_valid());'
+            - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_ferm_volet).hour*60+id(h_ferm_volet).minute);'
+            - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Auto";'
+          then:
+            - script.execute: script_ferm_volet
+
+  - id: script_ouv_volet
+    mode: single
+    then:
+      - switch.turn_off: cde_volet_fermeture
+      - delay: 2s
+      - switch.turn_on: cde_volet_ouverture
+      - delay: 5s
+      - switch.turn_off: cde_volet_ouverture
+          
+  - id: script_ferm_volet
+    mode: single
+    then:
+      - switch.turn_off: cde_volet_ouverture
+      - delay: 2s
+      - switch.turn_on: cde_volet_fermeture
+      - switch.turn_on: cde_eclairage
+      - delay: 90s
+      - switch.turn_off: cde_volet_fermeture
+      - switch.turn_off: cde_eclairage
+                    
+  - id: script_stop_volet
+    mode: single
+    then:
+      - switch.turn_off: cde_volet_ouverture
+      - switch.turn_off: cde_volet_fermeture
+      - delay: 2s
+      - switch.turn_on: cde_volet_fermeture
+      - delay: 2s
+      - switch.turn_off: cde_volet_fermeture
+      - switch.turn_off: cde_eclairage

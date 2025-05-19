@@ -49,16 +49,16 @@ openhasp:
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('time.esp178_duree_filtration')}}" 
+          "text": "{{ states('time.esp178_esp32_piscine_esp178_duree_filtration')}}" 
 
       - obj: "p1b148"
         properties:
-          "text": "{{ states('number.esp178_coeff_filtration')}} %" 
+          "text": "{{ states('number.esp178_esp32_piscine_esp178_coeff_filtration')}} %" 
 
       - obj: "p1b151"
         properties:
           "val": >
-            {% set st = states('select.esp178_mode_fonctionnement_filtration')%}
+            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonctionnement_filtration')%}
             {% for text,num in [('Palier',0),('Classique',1),('Abaque',2),('Horaire',3),('Ma_f',4),('At_f',5) ] %}
             {% if st == text %}
               {{ num }}
@@ -68,7 +68,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_mode_fonctionnement_filtration
+                entity_id: select.esp178_esp32_piscine_esp178_mode_fonctionnement_filtration
               data:
                 option: >
                   {% if text == "Palier" -%}
@@ -173,24 +173,24 @@ openhasp:
           "up":
             - service: number.decrement
               target:
-                entity_id: number.esp178_coeff_filtration
+                entity_id: number.esp178_esp32_piscine_esp178_coeff_filtration
 
       - obj: "p2b152"
         properties:
-          "text": "{{'%.0f' | format (states('number.esp178_coeff_filtration') | round(0)) }}%"
+          "text": "{{'%.0f' | format (states('number.esp178_esp32_piscine_esp178_coeff_filtration') | round(0)) }}%"
 
       - obj: "p2b153"
         event:
           "up":
             - service: number.increment
               target:
-                entity_id: number.esp178_coeff_filtration
+                entity_id: number.esp178_esp32_piscine_esp178_coeff_filtration
 
                 # Page 3
       - obj: "p3b102"                  
         properties:
           "val": >
-            {% set st = states('select.esp178_mode_fonctionnement_regul_ph')%}
+            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonctionnement_regul_ph')%}
             {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -200,7 +200,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_mode_fonctionnement_regul_ph
+                entity_id: select.esp178_esp32_piscine_esp178_mode_fonctionnement_regul_ph
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -214,7 +214,7 @@ openhasp:
       - obj: "p3b112"                  
         properties:
           "val": >
-            {% set st = states('select.esp178_mode_fonct_regul_chlore')%}
+            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonct_regul_chlore')%}
             {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -224,7 +224,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_mode_fonct_regul_chlore
+                entity_id: select.esp178_esp32_piscine_esp178_mode_fonct_regul_chlore
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -238,7 +238,7 @@ openhasp:
       - obj: "p3b122"                  
         properties:
           "val": >
-            {% set st = states('select.esp178_mode_fonct_appoint_eau')%}
+            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau')%}
             {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -248,7 +248,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_mode_fonct_appoint_eau
+                entity_id: select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -262,7 +262,7 @@ openhasp:
       - obj: "p3b132"                  
         properties:
           "val": >
-            {% set st = states('select.esp178_mode_hors_gel')%}
+            {% set st = states('select.esp178_esp32_piscine_esp178_mode_hors_gel')%}
             {% for text,num in [('Desactivé',0),('Activé',1) ] %}
             {% if st == text %}
               {{ num }}
@@ -272,7 +272,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_mode_hors_gel
+                entity_id: select.esp178_esp32_piscine_esp178_mode_hors_gel
               data:
                 option: >
                   {% if text == "Desactivé" -%}
@@ -284,7 +284,7 @@ openhasp:
       - obj: "p3b142"
         properties:
           "val": >
-            {% set st = states('select.esp178_mode_fonctionnement_volet')%}
+            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonctionnement_volet')%}
             {% for text,num in [('Auto',0),('Horaire',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -292,9 +292,9 @@ openhasp:
             {% endfor %}
         event:
           "changed":
-            - service: select.esp178_mode_fonctionnement_volet
+            - service: select.esp178_esp32_piscine_esp178_mode_fonctionnement_volet
               target:
-                entity_id: select.esp178_mode_fonctionnement_volet
+                entity_id: select.esp178_esp32_piscine_esp178_mode_fonctionnement_volet
               data:
                 option: >
                   {% if text == "Auto" -%}

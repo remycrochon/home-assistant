@@ -1221,7 +1221,8 @@
   mode: single
 - id: '1706466237260'
   alias: Volet Automatisme Général RTS
-  description: 'Ete/Hiver/Absent '
+  description: Ete->Ouvre et ferme sur Horaire_Hiver->Ouvre sur Horaire et ferme au
+    couché du soleil_Absent->Ouvre et ferme au levée et couchée du soleil
   triggers:
   - entity_id:
     - input_boolean.nuit_jour
@@ -1234,10 +1235,10 @@
       seconds: 0
     trigger: state
   - at: input_datetime.horaire_ete_volet_ouv
-    id: heure_ouv
+    id: heure_ouv_ete
     trigger: time
   - at: input_datetime.horaire_ete_volet_ferm
-    id: heure_ferm
+    id: heure_ferm_ete
     trigger: time
   - entity_id:
     - input_boolean.nuit_jour
@@ -1279,7 +1280,8 @@
         entity_id: input_select.volets
         state: Auto Ete
       - condition: trigger
-        id: heure_ouv
+        id:
+        - heure_ouv_ete
       sequence:
       - data: {}
         action: script.0_0_1_ouverture_volets_rts
@@ -1288,7 +1290,8 @@
         entity_id: input_select.volets
         state: Auto Ete
       - condition: trigger
-        id: heure_ferm
+        id:
+        - heure_ferm_ete
       sequence:
       - data: {}
         action: script.1706464871250
@@ -2553,34 +2556,6 @@
       resolved_message: ' '
       initial_delay: 60
       max_alerts: 5
-- id: '1746118040444'
-  alias: Notifie sur Telegram le message ESP176 Routeur
-  description: ' Notifie sur Telegram le message mis à jour par l''ESP176'
-  triggers:
-  - entity_id:
-    - sensor.esp176_message_notif_telegram
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-    trigger: state
-  conditions:
-  - condition: not
-    conditions:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: sensor.esp178_message_notif_telegram
-        state: unavailable
-      - condition: state
-        entity_id: sensor.esp178_message_notif_telegram
-        state: unknown
-  actions:
-  - data:
-      message: '{{states(''sensor.esp176_message_notif_telegram'')}}'
-      title: Message ESP176!!!
-    action: notify.telegram
-  mode: single
 - id: '1746164692289'
   alias: Ecran02- Actions toutes les 30 mn
   description: ''

@@ -342,33 +342,24 @@ script:
                 then:
                   - lambda: |-
                       float ecart = abs(id(g_memoire_ph) - id(_ph_cible).state);
-                          
                           // Volume de la piscine (fixe à 43,2 m³)
                           float volume_piscine = 43.2;
-                          
                           // Quantité de référence : 0,2 l pour 0,1 unité de pH pour 10 m³
                           float quantite_ref_ph = 0.2;
-                          
                           // Calcul de la quantité nécessaire pour corriger l'écart total (en litres)
                           float quantite_necessaire = (ecart / 0.1) * quantite_ref_ph * (volume_piscine / 10.0);
-                          
                           // Conversion du débit de l/h en ml/s (1 l = 1000 ml, 1 h = 3600 s)
                           float debit_ml_s = (id(_debit_ppe_moins).state * 1000.0) / 3600.0;  // Exemple : 4,272 l/h = 1,187 ml/s
-                          
                           // Calcul de la durée nécessaire pour injecter la quantité (quantité en ml, débit en ml/s)
                           float duree = (quantite_necessaire * 1000.0) / debit_ml_s;
-                          
                           // Ajustement pour éviter des corrections trop brutales : on limite à une fraction par cycle
                           // Utilisation du facteur de correction défini par l'utilisateur
                           float facteur_correction = id(facteur_correction_ph).state;
                           duree = duree * facteur_correction;
-                          
                           // Limites de sécurité : entre 1 et 60 secondes
                           duree = std::max(1.0f, std::min(duree, 60.0f));
-                          
                           // Log pour débogage
                           ESP_LOGI("regul_ph", "Écart: %.2f, Quantité: %.2f ml, Débit: %.3f ml/s, Facteur: %.2f, Durée: %.2f s", ecart, quantite_necessaire * 1000.0, debit_ml_s, facteur_correction, duree);
-                          
                           id(g_tps_injection_ph_moins) = duree;
 
                 else:
@@ -379,7 +370,7 @@ script:
                 id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
 
             # Convertion et affichage de la durée d'injection pH en hh:mm
-            - lambda: |-    
+            - lambda: |-
                 CONVERT_SECONDS(id(g_tps_injection_ph_moins), id(g_hh), id(g_mm), id(g_ss));                        
             - datetime.time.set:
                 id: duree_injection_ph
@@ -399,14 +390,8 @@ script:
                   - lambda: |-
                       std::string mess = "ESP178 Debut injection pH\n";
                       mess += "Cible pH: " + std::to_string(id(_ph_cible).state) + "\n";
-                      mess += "Mesure pH: " + std::to_string(id(g_memoire_ph)) + "\n";
-                      char buf[32];
-                      snprintf(buf, sizeof(buf), "Durée: %02d:%02d:%02d",
-                              id(duree_injection_ph).hour,
-                              id(duree_injection_ph).minute,
-                              id(duree_injection_ph).second);
-                      mess += buf;
-                      id(_message_telegram)->execute(mess);
+                      mess += "Mesure pH: " + std::to_string(id(g_memoire_ph));
+                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_ph_moins));                      
                   - logger.log:
                       format: "Ph Mesure ph: %f / pH Cible: %f"
                       args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
@@ -418,15 +403,8 @@ script:
                   - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
                   - switch.turn_off: cde_ppe_ph_moins
                   - lambda: |-
-                      std::string mess = "ESP178 Fin Injection pH\n";
-                      mess += "Mesure pH: " + std::to_string(id(g_memoire_ph)) + "\n";
-                      char buf[32];
-                      snprintf(buf, sizeof(buf), "Durée: %02d:%02d:%02d",
-                              id(duree_injection_ph).hour,
-                              id(duree_injection_ph).minute,
-                              id(duree_injection_ph).second);
-                      mess += buf;
-                      id(_message_telegram)->execute(mess);
+                      std::string mess = "ESP178 Fin Injection pH";
+                      id(_message_telegram_v2)->execute(mess,id(g_memoire_ph));
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
@@ -435,11 +413,7 @@ script:
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
-                  - lambda: |-
-                      char buf1[32];
-                      snprintf(buf1, sizeof(buf1), "Fin Injection pH en Auto: %02d:%02d:%02d\n");
-                      std::string mess = buf1;                                         
-                      id(_message_telegram)->execute(mess.c_str());                              
+                        
       - if:
           condition:
             and:
@@ -493,4 +467,3 @@ script:
                 snprintf(buf, sizeof(buf), "Tps Fonct Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
                 mess += buf;
                 id(_message_telegram)->execute(mess);               
-                           

@@ -169,7 +169,7 @@ sensor:
     on_value:
       then:
         - lambda: |-
-            // ESP_LOGI("ORP_ezo", "Mesure ORP (étalonnage): %.2f", id(orp_ezo).state);
+            //ESP_LOGI("ORP_ezo", "Mesure ORP (étalonnage): %.2f", id(orp_ezo).state);
 
 
   # mémorise le temps d'injection calculé
@@ -271,11 +271,8 @@ script:
                       level: INFO
                   - lambda: |-
                       // Affichage du temps d'injection Ppe Chlore
-                      CONVERT_SECONDS(id(g_tps_injection_chlore), id(g_hh), id(g_mm), id(g_ss));         
-                      char buf1[32];
-                      snprintf(buf1, sizeof(buf1), "Tps Injection Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
-                      std::string mess = buf1;                                         
-                      id(_message_telegram)->execute(mess.c_str());
+                      std::string mess = "ESP178 Temps inj Chlore";
+                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_chlore));
 
                   - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
                   - switch.turn_off: cde_ppe_chlore
@@ -283,13 +280,11 @@ script:
                       format: "Arret ppe chlore en Auto"
                       level: INFO
                   - lambda: |-
-                      char buf1[32];
-                      snprintf(buf1, sizeof(buf1), "Fin Injection Chlore en Auto: %02d:%02d:%02d\n");
-                      std::string mess = buf1;                                         
+                      std::string mess = "Fin Injection Chlore en Auto";                                         
                       id(_message_telegram)->execute(mess.c_str());                      
                 else:
                   - switch.turn_off: cde_ppe_chlore
-                  - lambda: |-                  
+                  - lambda: |-
                       id(_tps_injection_chlore).publish_state(0);
                   - logger.log: 
                       format: "Arret ppe chlore en Auto"

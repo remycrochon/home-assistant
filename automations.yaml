@@ -2603,6 +2603,11 @@
           entity_id: switch.esp178_ent_arret_force
         action: switch.turn_on
         data: {}
+      - data:
+          message: '{{states("sensor.date_time") }}{{-"\n"-}} SOC= {{states(''sensor.mp2_soc_mqtt'')}}
+            %'
+          title: At Piscine sur SOC<25
+        action: notify.telegram
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_mqtt
@@ -2612,4 +2617,5 @@
           entity_id: switch.esp178_ent_arret_force
         action: switch.turn_off
         data: {}
+        enabled: false
   mode: single

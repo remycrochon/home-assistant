@@ -44,7 +44,7 @@ esphome:
             mm = std::min(mm, 59); \
             ss = std::min(ss, 59); \
           } while (0)
-      - delay: 5s
+      - delay: 20s
       - lambda: |-
           std::string mess = "Boot ESP178";
           id(telegram_msg_buffer) = mess;
@@ -52,6 +52,10 @@ esphome:
           service: notify.telegram
           data:
             message: !lambda 'return id(telegram_msg_buffer).c_str();'
+        # Message Telegram
+      - lambda: |-                
+          std::string mess= "ESP178 Boot";
+          id(_message_telegram)->execute(mess.c_str());                   
 
 esp32:
   board: esp32dev
@@ -121,14 +125,14 @@ time:
         hours: 23
         then:
           - lambda: |-
-              std::string mess = "ESP178 Rapport Journalier Filtration\n";
-
-              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_piscine_jour).state, id(g_hh), id(g_mm), id(g_ss));
-              char buf1[32];
-              snprintf(buf1, sizeof(buf1), "Tps Filtration: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
-              mess += buf1;
-
-              id(_message_telegram)->execute(mess);
+              std::string mess = "ESP178 Temps Fonctionnement filtration";
+              id(_message_telegram_v2)->execute(mess,id(_temps_fonctionnement_ppe_piscine_jour).state);
+          - lambda: |-          
+              std::string mess = "ESP178 Tps Fonct ppe pH";
+              id(_message_telegram_v2)->execute(mess,id(_temps_fonctionnement_ppe_ph).state);
+          - lambda: |-          
+              std::string mess = "ESP178 Tps Fonct ppe Chl";
+              id(_message_telegram_v2)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -259,6 +263,9 @@ globals:
       restore_value: no
       initial_value: '""'
 
+    - id: convert_seconds
+      type: std::function<void(int, int&, int&, int&)>
+
 # déclaration des modes de fonctionnement dans des "input select"
 select:
   - platform: template
@@ -275,11 +282,16 @@ select:
     id: _Mode_Fonctionnement_filtration
     on_value: 
       then:
+        - script.execute: _fonctionnement_filtration        
         - logger.log:
             format: "Mode Fonct Filtration --> %s"
             args: [ 'id(_Mode_Fonctionnement_filtration).state.c_str()' ]
             level: INFO
-        - script.execute: _fonctionnement_filtration
+        - lambda: |-
+            char buf[64];
+            snprintf(buf, sizeof(buf), "Mode Fonct Filtration --> %s", id(_Mode_Fonctionnement_filtration).state.c_str());
+            id(_log_message)->execute(std::string(buf));
+
 
 button:
   # Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
@@ -660,6 +672,7 @@ display:
     update_interval: 10s
     lambda: |-
       it.printf(0,0,"Ph=%.2f",id(ph_ezo).state);
+      it.printf(0,1,"ORP=%.2f",id(orp_ezo).state);
       it.printf(8,0,"P=%.3f",id(pression_filtre).state);
       it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau));
 
@@ -685,6 +698,18 @@ script:
   - id: _test
     then:
       - lambda: |-
+          std::string mess = "ESP178 Temps Fonctionnement filtration";
+          id(_message_telegram_v2)->execute(mess,id(_temps_fonctionnement_ppe_piscine_jour).state);
+      - lambda: |-          
+          std::string mess = "ESP178 Tps Fonct ppe pH";
+          id(_message_telegram_v2)->execute(mess,id(_temps_fonctionnement_ppe_ph).state);
+      - lambda: |-          
+          std::string mess = "ESP178 Tps Fonct ppe Chl";
+          id(_message_telegram_v2)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
+
+  - id: _testold
+    then:
+      - lambda: |-
           std::string mess = "ESP178 Rapport Journalier\n";
 
           CONVERT_SECONDS(id(_temps_fonctionnement_ppe_piscine_jour).state, id(g_hh), id(g_mm), id(g_ss));
@@ -701,7 +726,6 @@ script:
           mess += buf1;
 
           id(_message_telegram)->execute(mess);
-
   # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire de la temperature eau qui est
   # prise en compte dans les scripts.
   # sinon on travaille avec la témpérature mémorisée avant l'arret précédent
@@ -1013,10 +1037,71 @@ script:
           std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
           mess += "\n";
           mess += mess1;
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
+          service: notify.telegram
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
+      - lambda: |-
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += ",";
+          mess += mess1;
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
+          service: script.envoyer_message_log_esp178
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
+
+  - id: _message_telegram_v2
+    parameters:
+      mess1: string
+      duree_sec: float
+    then:
+      - lambda: |-
+          int h, m, s;
+          // id(convert_seconds)(duree_sec, h, m, s);
+          CONVERT_SECONDS(duree_sec, h, m, s);
+          char buf[128];
+          snprintf(buf, sizeof(buf), 
+              "%s\n"
+              "Tps: %02d:%02d:%02d\n", mess1.c_str(), h, m, s);
+
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += "\n";
+          mess += buf;
 
           id(telegram_msg_buffer) = mess;
       - homeassistant.service:
           service: notify.telegram
           data:
             message: !lambda 'return id(telegram_msg_buffer).c_str();'
+      - lambda: |-
+          int h, m, s;
+          CONVERT_SECONDS(duree_sec, h, m, s);
 
+          char buf[128];
+          snprintf(buf, sizeof(buf), "%s,%02d:%02d:%02d", mess1.c_str(), h, m, s);
+
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += ",";
+          mess += buf;
+
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
+          service: script.envoyer_message_log_esp178
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
+
+  - id: _log_message
+    parameters:
+      mess1: string
+    then:
+      - lambda: |-
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += ",";
+          mess += mess1;
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
+          service: script.envoyer_message_log_esp178
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'

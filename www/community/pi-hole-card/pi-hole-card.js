@@ -1782,7 +1782,6 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
  * @param config - The configuration object for the card, including section visibility and entity order.
  * @returns A lit-html TemplateResult representing the controls UI, or `nothing` if the section is hidden.
  */ const $9369c7e3c6702a0b$var$controls = (element, hass, device, config)=>{
-    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'controls')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
     const sectionConfig = config.controls ?? {
         tap_action: {
             action: 'toggle'
@@ -1796,7 +1795,7 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
     };
     const switchCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'switches');
     const actionsCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'actions');
-    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="collapsible-section">
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'switches') ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="collapsible-section">
         <div
           class="section-header"
           @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.switches')}
@@ -1819,9 +1818,8 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
         return (0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch);
     })}
         </div>
-      </div>
-
-      <div class="collapsible-section">
+      </div>` : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}
+  ${(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'actions') ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="collapsible-section">
         <div
           class="section-header"
           @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.actions')}
@@ -1838,7 +1836,7 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
     })}
         </div>
       </div>
-    </div>`;
+    </div>` : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}`;
 };
 const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, device, config)=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
@@ -2754,8 +2752,20 @@ const $b642db848cc622aa$var$SCHEMA = [
                         mode: 'list',
                         options: [
                             {
+                                label: 'Actions',
+                                value: 'actions'
+                            },
+                            {
+                                label: 'Footer',
+                                value: 'footer'
+                            },
+                            {
                                 label: 'Header',
                                 value: 'header'
+                            },
+                            {
+                                label: 'Pause Buttons',
+                                value: 'pause'
                             },
                             {
                                 label: 'Statistics',
@@ -2766,16 +2776,8 @@ const $b642db848cc622aa$var$SCHEMA = [
                                 value: 'sensors'
                             },
                             {
-                                label: 'Controls',
-                                value: 'controls'
-                            },
-                            {
-                                label: 'Pause Buttons',
-                                value: 'pause'
-                            },
-                            {
-                                label: 'Footer',
-                                value: 'footer'
+                                label: 'Switches',
+                                value: 'switches'
                             }
                         ]
                     }
@@ -3021,7 +3023,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.10.1\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.1\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.3.0\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.1\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.11.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.1\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.3.0\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.1\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
 
 
 // Register the custom elements with the browser

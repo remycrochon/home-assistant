@@ -521,7 +521,7 @@ ecs_off_off:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 2
+      seconds: 3
       milliseconds: 0
   - target:
       entity_id:
@@ -622,3 +622,16 @@ volet_amis_sud_grand_stop_2:
   mode: single
   icon: mdi:window-shutter-alert
   description: ''
+envoyer_message_log_esp178:
+  alias: Envoyer un message log depuis ESPHome
+  sequence:
+  - action: notify.send_message
+    target:
+      entity_id: notify.log_esp178
+    data:
+      message: '{{ message }}'
+  mode: single
+  fields:
+    message:
+      description: Le message à loguer
+      example: test depuis ESPHome

@@ -1,11 +1,3 @@
-esphome:
-  on_boot:
-    priority: 200
-    then:
-      # Initialisation des templates
-      - sensor.template.publish:
-          id: _tps_injection_chlore
-          state: 0.0
 time:
   - platform: sntp
     id: sntp_time1  

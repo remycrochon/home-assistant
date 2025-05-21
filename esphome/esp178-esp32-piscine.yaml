@@ -44,6 +44,21 @@ esphome:
             mm = std::min(mm, 59); \
             ss = std::min(ss, 59); \
           } while (0)
+      # Initialisation des templates Ph
+      # A supprimer si pH non utilisé
+      - sensor.template.publish:
+          id: _tps_injection_ph_moins
+          state: 0.0
+      - sensor.template.publish:
+          id: _vol_injection_ph_moins
+          state: 0.0
+      # Initialisation du template Chlore
+      # A supprimer si Chlore non utilisé
+      - sensor.template.publish:
+          id: _tps_injection_chlore
+          state: 0.0
+                    
+      # Messages de Boot
       - delay: 20s
       - lambda: |-
           std::string mess = "Boot ESP178";
@@ -108,9 +123,9 @@ time:
     id: sntp_time
     timezone: Europe/Paris
     servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
     on_time:
       # reset le compteur de temps à minuit
       - seconds: 0

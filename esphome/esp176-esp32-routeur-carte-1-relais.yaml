@@ -823,7 +823,7 @@ script:
             - logger.log:
                 format: "Régulation OFF - Mode: %s - Striac: %.1f"
                 args: ['id(moderegul).state.c_str()', 'id(striac)']
-                level: "info"
+                level: DEBUG
 
       - if:
           condition:
@@ -835,54 +835,55 @@ script:
               - binary_sensor.is_on: temperatureok
               - lambda: 'return id(soc).state >= id(seuil_soc).state;'
           then:
-            - script.execute: calcul_sortie_triac
+            - script.execute: regule_pid
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda |-
                   return id(striac) / 100;
             - logger.log:
-                format: "Régulation ON - Striac: %.1f"
+                format: "Régul ON - S triac (Après Securité): %.2f"
                 args: [ 'id(striac)' ]
-                level: "info"        
+                level: DEBUG
       # Affichage STriac et Increment
       - lambda: |-
             id(afstriac).publish_state( id(striac) );
 
-    # Principe de la régulation:
-    # Si Bus Ve en Bulk, on paratge le surplus entre la batterie et l'ECS avec une consigne de (1200W)
-    #   Consigne= Consigne pu Batteries & Mesure = Pu Batteries
-    # Si Bus Ve non Bulk (float), cela signifie que la batterie est chargée, alors:
-    # Si la PU Batteries est superieure à un seuil (-100), ça veut dire que la batterie se charge un peu
-    #   Consigne= 0 & Mesure = Pu Réseau
-    # Sinon:
-    #   Consigne= 0 & Mesure = Pu Batteries
-    # C'est popur éviter de décharger la batterie dans l'ECS
+  # Principe de la régulation:
+  # Si Bus Ve en Bulk, on paratge le surplus entre la batterie et l'ECS avec une consigne de (1200W)
+  #   Consigne= Consigne pu Batteries & Mesure = Pu Batteries
+  # Si Bus Ve non Bulk (float), cela signifie que la batterie est chargée, alors:
+  # Si la PU Batteries est superieure à un seuil (-100), ça veut dire que la batterie se charge un peu
+  #   Consigne= 0 & Mesure = Pu Réseau
+  # Sinon:
+  #   Consigne= 0 & Mesure = Pu Batteries
+  # C'est popur éviter de décharger la batterie dans l'ECS
 
-    # La régulation est de type PI:
+    # Régulation de type PI:
      
-  - id: calcul_sortie_triac
+  - id: regule_pid
     mode: single
     then:
       - lambda: |-
           float Kp = id(kp_gain).state;
           float Ki = id(ki_gain).state;
           float dt = 1.0;   // Intervalle en secondes (1s ici)
-
           float mesure;
           float consigne;
 
           if (id(etatbus_ve).state == 3) {
-            // Mode batterie en Bulk
+            // Mode Bulk : régule sur la puissance batterie
             mesure = id(pu_batteries).state;
             consigne = id(cons_pubatt).state;
             id(moderegul).publish_state("PID Bulk");
+
           } else if (id(pu_batteries).state >= id(seuil_pubatt).state) {
-            // Injection réseau : essayer de la ramener à 0
+            // Sinon ( batteries en float), si la batterie débite trop, on régule via l'injection réseau (négatif)
             mesure = id(pureseau1).state;
             consigne = 0;
             id(moderegul).publish_state("PID Réseau");
+
           } else {
-            // Charge batterie hors bulk
+            // Sinon, on reste sur la puissance batterie en mode non-bulk
             mesure = id(pu_batteries).state;
             consigne = 0;
             id(moderegul).publish_state("PID Bat non Bulk");
@@ -902,7 +903,7 @@ script:
           if (id(pid_integral) > 500) id(pid_integral) = 500;
           if (id(pid_integral) < -500) id(pid_integral) = -500;
 
-          float output = ((Kp * erreur) + (Ki * id(pid_integral)))/10;
+          float output = ((Kp * erreur) + (Ki * id(pid_integral)))/100;
           // Application TRIAC
           id(striac) += output;
 
@@ -919,69 +920,73 @@ script:
           ESP_LOGI("pid", "Mesure: %.2f, Consigne: %.2f, Erreur: %.2f", mesure, consigne, erreur);
           ESP_LOGI("pid", "Kp: %.2f, Ki: %.2f, Intégrale: %.2f, Output: %.2f", Kp, Ki, id(pid_integral), output);
           ESP_LOGI("pid", "Striac (avant sécurité): %.2f", id(striac));
-
-  ########################################################################""
-  # Calcul puissance injection
-  - id: calcul_injection_20_05_2025
+  
+  # Régule Quadratique
+  - id: regul_quadratique
     mode: single
     then:
-      # Validation du seuil de production
-      - if:
-          condition:
-            lambda: 'return id(pu_prod).state > id(seuil_prod).state;'
-        # Si Production > au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: seuil_prod_ok
-                state: ON
-        # Sinon
-          else:
-            - binary_sensor.template.publish:
-                id: seuil_prod_ok
-                state: OFF      
-      # validation du seuil soc
-      - if:
-          condition:
-            lambda: 'return id(soc).state >= id(seuil_soc).state;'
-        # Si SOC > au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: seuil_soc_ok
-                state: ON
-        # Sinon
-          else:
-            if:
-              condition:
-                lambda: 'return id(soc).state < (id(seuil_soc).state-2);'
-              then:
-                - binary_sensor.template.publish:
-                    id: seuil_soc_ok
-                    state: OFF
-      # Validation du seuil de temperature triac
-      - if:
-          condition:
-            lambda: 'return id(temp_triac).state < (id(tmax).state-2);'
-        # Si Temp Triac inferieur au seuil-2° alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: temperatureok
-                state: ON
-        # Dévalidation du seuil de température
-      - if:
-          condition:
-            lambda: 'return id(temp_triac).state >= id(tmax).state;'
-        # Si Temp Triac supérieur ou égale au seuil alors NOK
-          then:
-            - binary_sensor.template.publish:
-                id: temperatureok
-                state: OFF
-                              
-      # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
-      #   Sinon
-      # Si on regule autour du zero grid et d'un seuil puissance batteries
-      # 
-      # La régule consiste à incrementer ou decrementer la sortie triac 
+      - lambda: |-
+          float inc = 0;
 
+          if (id(etatbus_ve).state == 3) {
+            // Mode Bulk : régule sur la puissance batterie
+            inc = id(pu_batteries).state * abs(id(pu_batteries).state) /
+                  (id(coeff_rbat).state * id(coeff_rbat).state * 10000);
+            id(moderegul).publish_state("Sur Pu batteries Bulk");
+            ESP_LOGI("regul", "Bulk: PuBatt=%.1f -> inc=%.2f", id(pu_batteries).state, inc);
+            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
+            id(coeff_cours).publish_state(id(coeff_rbat).state);
+            id(mes_cours).publish_state(id(pu_batteries).state);
+            id(cons_cours).publish_state(id(pu_batteries).state-id(cons_pubatt).state);
+
+          } else if (id(pu_batteries).state >= id(seuil_pubatt).state) {
+            // Sinon, si la batterie débite trop, on régule via l'injection réseau (négatif)
+            inc = -1 * id(pureseau1).state * abs(id(pureseau1).state) /
+                  (id(coeff_r).state * id(coeff_r).state * 10000);
+            id(moderegul).publish_state("Sur Pu reseau");
+            ESP_LOGI("regul", "Reseau: PuR1=%.1f -> inc=%.2f", id(pureseau1).state, inc);
+            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
+            id(coeff_cours).publish_state(id(coeff_r).state);
+            id(mes_cours).publish_state(id(pureseau1).state);
+            id(cons_cours).publish_state(0);          
+            
+          } else {
+            // Sinon, on reste sur la puissance batterie en mode non-bulk
+            inc = id(pu_batteries).state * abs(id(pu_batteries).state) /
+                  (id(coeff_rbat).state * id(coeff_rbat).state * 10000);
+            id(moderegul).publish_state("Sur Pu batteries Non Bulk");
+            ESP_LOGI("regul", "Non Bulk: PuBatt=%.1f -> inc=%.2f", id(pu_batteries).state, inc);
+            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
+            id(coeff_cours).publish_state(id(coeff_rbat).state);
+            id(mes_cours).publish_state(id(pu_batteries).state);
+            id(cons_cours).publish_state(0);
+          }
+
+          // Limite de l'incrément
+          if (inc > 15) inc = 15;
+          if (inc < -15) inc = -15;
+
+          // Application de l'incrément sur striac
+          if (!isnan(id(striac))) {
+            id(striac) += inc;
+          } else {
+            id(striac) = 0;
+            ESP_LOGW("regul", "striac is NaN, reset to 0");
+          }
+
+          // Clamp final du striac
+          if (id(striac) < 0) id(striac) = 0;
+          if (id(striac) > id(pmax).state) id(striac) = id(pmax).state;
+
+          // Log final
+          ESP_LOGI("regul", "Final: STRIAC=%.2f (inc=%.2f, pmax=%.1f)", id(striac), inc, id(pmax).state);
+
+
+
+  # Régule Proportionnelle
+  - id: regul_Propor
+    mode: single
+    then:  
       - lambda: |-
           if (id(etatbus_ve).state == 3){
             id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
@@ -1024,237 +1029,6 @@ script:
      
       - logger.log:
           format: "Log S Triac %f - Increment %f"
-          args: [ 'id(striac)', 'id(increment)' ]
-          level: "info"
-
-      
-      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
-      - if: 
-          condition:
-            and:
-              - switch.is_on: validrouteur
-              - switch.is_on: modeauto
-              - binary_sensor.is_on: seuil_prod_ok
-              - binary_sensor.is_on: temperatureok
-              - lambda: 'return id(soc).state >= id(seuil_soc).state;'              
-
-          then:
-              - light.turn_on:
-                  id: gradateur
-                  brightness: !lambda |-
-                    return id(striac)/100 ;
-              - logger.log:
-                  format: "Log Auto OK STriac %f - Increment %f"
-                  args: [ 'id(striac)', 'id(increment)' ]
-                  level: "info"
-              - lambda: |-                
-                  std::string mess= "ESP176-Routage Validé";
-                  id(_message_telegram)->execute(mess.c_str());                            
-
-      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
-      - if: 
-          condition:
-            and:
-              - switch.is_on: modeauto
-              - or:
-                - switch.is_off: validrouteur
-                - binary_sensor.is_off: temperatureok                    
-                - binary_sensor.is_off: seuil_prod_ok
-                - lambda: 'return id(soc).state < id(seuil_soc).state;'                    
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - light.turn_off: gradateur
-            - logger.log:
-                format: "Log Auto NOk STriac %f - Increment %f"
-                args: [ 'id(striac)', 'id(increment)' ]
-                level: "info"                         
-
-
-      # Si mode routeur manu
-      - if: 
-          condition:
-            and:
-              - switch.is_off: modeauto
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - logger.log:
-                format: "Log Manu STriac %f - Increment %f"
-                args: [ 'id(striac)', 'id(increment)' ]
-                level: "info"                         
-      # Affichage STriac et Increment
-      - lambda: |-
-            id(afstriac).publish_state( id(striac) );
-            id(afincrement).publish_state( id(increment) );
-
-      - logger.log:
-          format: "Log Fin STriac %f - Increment %f"
-          args: [ 'id(striac)', 'id(increment)' ]
-          level: "info"
-
-
-  # Calcul puissance injection
-  - id: calcul_injection_old
-    mode: single
-    then:
-      # Validation du seuil de production
-      - if:
-          condition:
-            lambda: 'return id(pu_prod).state > id(seuil_prod).state;'
-        # Si Production > au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: seuil_prod_ok
-                state: ON
-        # Sinon
-          else:
-            - binary_sensor.template.publish:
-                id: seuil_prod_ok
-                state: OFF      
-      # validation du seuil soc
-      - if:
-          condition:
-            lambda: 'return id(soc).state >= id(seuil_soc).state;'
-        # Si SOC > au seuil alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: seuil_soc_ok
-                state: ON
-        # Sinon
-          else:
-            if:
-              condition:
-                lambda: 'return id(soc).state < (id(seuil_soc).state-2);'
-              then:
-                - binary_sensor.template.publish:
-                    id: seuil_soc_ok
-                    state: OFF
-      # Validation du seuil de temperature triac
-      - if:
-          condition:
-            lambda: 'return id(temp_triac).state < (id(tmax).state-2);'
-        # Si Temp Triac inferieur au seuil-2° alors OK
-          then:
-            - binary_sensor.template.publish:
-                id: temperatureok
-                state: ON
-        # Dévalidation du seuil de température
-      - if:
-          condition:
-            lambda: 'return id(temp_triac).state >= id(tmax).state;'
-        # Si Temp Triac supérieur ou égale au seuil alors NOK
-          then:
-            - binary_sensor.template.publish:
-                id: temperatureok
-                state: OFF
-                              
-      # Si Bus Ve en Bulk on regule autour d'une consigne de puissance de charge Batteries de maniere à laisser de la puissance à router vers l'ECS
-      #   Sinon
-      # Si on regule autour du zero grid et d'un seuil puissance batteries
-      # 
-      # La régule consiste à incrementer ou decrementer la sortie triac 
-      # regule semi-quadratique
-      # Limiter l'incrément pour éviter des ajustements trop brusques
-
-      - lambda: |-
-          if (id(etatbus_ve).state == 3) {
-            id(increment)=id(pu_batteries).state*abs(id(pu_batteries).state)/(id(coeff_rbat).state*id(coeff_rbat).state*10000);
-            id(moderegul).publish_state("Sur Pu batteries Bulk");
-          } else {
-            if (id(pu_batteries).state >= id(seuil_pubatt).state) {
-              id(increment)=id(pureseau1).state*abs(id(pureseau1).state)/(id(coeff_r).state*id(coeff_r).state*10000)* -1;
-              id(moderegul).publish_state("Sur Pu reseau");
-            } else {
-              id(increment)=id(pu_batteries).state*abs(id(pu_batteries).state)/(id(coeff_rbat).state*id(coeff_rbat).state*10000);
-              id(moderegul).publish_state("Sur Pu batteries Non Bulk");
-            }
-          }
-
-          if (id(increment) > 15) id(increment) = 15;
-          if (id(increment) < -15) id(increment) = -15;
-
-          if (!isnan(id(striac))) {
-            id(striac) = id(striac) + id(increment);
-          } else {
-            id(striac) = 0;
-          }
-
-          if (id(striac) <= 0) {
-            id(striac) = 0;
-          } else if (id(striac) >= id(pmax).state) {
-            id(striac) = id(pmax).state;
-          }
-     
-      - logger.log:
-          format: "Log S Triac %f - Increment %f"
-          args: [ 'id(striac)', 'id(increment)' ]
-          level: "info"
-
-      
-      # Si Prod > seuil et mode auto et temp OK alors on active le triac et Sortie Triac superieur au mini
-      - if: 
-          condition:
-            and:
-              - switch.is_on: validrouteur
-              - switch.is_on: modeauto
-              - binary_sensor.is_on: seuil_prod_ok
-              - binary_sensor.is_on: temperatureok
-              - lambda: 'return id(soc).state >= id(seuil_soc).state;'              
-
-          then:
-              - light.turn_on:
-                  id: gradateur
-                  brightness: !lambda |-
-                    return id(striac)/100 ;
-              - logger.log:
-                  format: "Log Auto OK STriac %f - Increment %f"
-                  args: [ 'id(striac)', 'id(increment)' ]
-                  level: "info"         
-
-      # Si mode routeur devalidé ou temp NOK alors on désactive le triac 
-      - if: 
-          condition:
-            and:
-              - switch.is_on: modeauto
-              - or:
-                - switch.is_off: validrouteur
-                - binary_sensor.is_off: temperatureok                    
-                - binary_sensor.is_off: seuil_prod_ok
-                - lambda: 'return id(soc).state < id(seuil_soc).state;'                    
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - light.turn_off: gradateur
-            - logger.log:
-                format: "Log Auto NOk STriac %f - Increment %f"
-                args: [ 'id(striac)', 'id(increment)' ]
-                level: "info"                         
-
-
-      # Si mode routeur manu
-      - if: 
-          condition:
-            and:
-              - switch.is_off: modeauto
-          then:
-            - lambda: |-
-                id(striac) = 0;
-                id(increment) = 0;
-            - logger.log:
-                format: "Log Manu STriac %f - Increment %f"
-                args: [ 'id(striac)', 'id(increment)' ]
-                level: "info"                         
-    # Affichage STriac et Increment
-      - lambda: |-
-            id(afstriac).publish_state( id(striac) );
-            id(afincrement).publish_state( id(increment) );
-
-      - logger.log:
-          format: "Log Fin STriac %f - Increment %f"
           args: [ 'id(striac)', 'id(increment)' ]
           level: "info"
 

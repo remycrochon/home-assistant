@@ -1,22 +1,10 @@
-esphome:
-  on_boot:
-    priority: 200
-    then:
-      # Initialisation des templates
-      - sensor.template.publish:
-          id: _tps_injection_ph_moins
-          state: 0.0
-      - sensor.template.publish:
-          id: _vol_injection_ph_moins
-          state: 0.0
-
 time:
   - platform: sntp
     timezone: Europe/Paris
     servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
     on_time:
       # Déclenchement du script de regul pH deux fois par jour
       - seconds: 0

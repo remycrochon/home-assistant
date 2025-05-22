@@ -133,14 +133,18 @@ sensor:
   # Mesure de l'ORP
   # Procédure étalonnage:
     # Mettre 1 s dans "update interval"
+    # Mettre accuracy_decimals: 3
     # Decommenter le log
+    # Commenter les 3 lignes calibrate_linear
+    # Décommenter le LOGI du "on_value"  
     # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
     # 1-Faire une mesure avec solution étalon de 256mV
     # 2-Attendre 2 à 3 minutes que ca se stabilise
     # 3-relever la valeur de ORP
-    # Saisir les valeurs relevés dans "Calibrate_linear"
+    # Décommenter les 3 lignes calibrate_linear    
     # Remettre 60 s dans "update interval"
-    # Commenter le LOGI
+    # Mettre accuracy_decimals: 2
+    # Commenter le LOGI du "on_value"  
     # Compiler
   # Fin procédure étalonnage    
   - platform: ezo
@@ -158,6 +162,9 @@ sensor:
           window_size: 15
           send_every: 1
           send_first_at: 1
+      - calibrate_linear:
+          - 0 -> 0
+          - 256 -> 256
     on_value:
       then:
         - lambda: |-

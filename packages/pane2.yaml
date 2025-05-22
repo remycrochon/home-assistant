@@ -293,7 +293,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count|roud(0) }} W
+            {{ count|round(0) }} W
             {% endif %}
       - obj: "p4b56" # Conso
         properties:
@@ -313,7 +313,7 @@ openhasp:
         properties:
           "val": >
             {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
-            {% if count >= 1000 %}
+            {% if count >= 1000 %}Chaussures VTT Northwave Rockit Plus Gore-Tex Noir
               {{ (count/1000) |round(2)}} kW
             {% else %}
               {{ count }} W

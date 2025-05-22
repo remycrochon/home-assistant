@@ -172,30 +172,41 @@ sensor:
   # Mesure du pH
   # Procédure étalonnage:
     # Mettre 1 s dans "update interval"
+    # Mettre accuracy_decimals: 3
     # Decommenter le log
+    # Commenter les 4 lignes calibrate_linear
+    # Décommenter le LOGI du "on_value"  
     # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
     # 1-Faire une mesure avec solution étalon de 4.0
     # 2-Attendre 2 à 3 minutes que ca se stabilise
     # 3-relever la valeur du pH
     # 4-Toujours bien rincer la sonde à l'eau déminéralisée entre deux solutions
-    # Refaire étapes 1 à 3 avec une solution étalon de 6.86
+    # Refaire étapes 1 à 4 avec une solution étalon de 6.86
     # Puis avec une solution étalon de 9.18
     # Saisir les valeurs relevés dans "Calibrate_linear"
+    # Décommenter les 4 lignes calibrate_linear    
     # Remettre 60 s dans "update interval"
-    # Commenter le LOGI    
+    # Mettre accuracy_decimals: 2
+    # Commenter le LOGI du "on_value"  
     # Compiler
   # Fin procédure étalonnage
 
-  # Etalonné le 28 juin 2023          
-  #    - calibrate_linear:
+  # Etalonnage 28 juin 2023          
   #      - 4.547 -> 4.0
   #      - 7.282 -> 6.86
   #      - 9.447 -> 9.18
-  # Etalonné le 6 juillet 2022          
-  #    - calibrate_linear:
+  # Etalonnage 6 juillet 2022          
   #      - 4.44 -> 4.0
   #      - 7.17 -> 6.86
   #      - 9.41 -> 9.18
+  # Etalonnage 20 juin 2024
+  #      - 4.665 -> 4.0
+  #      - 7.482 -> 6.86
+  #      - 9.505 -> 9.18
+  # Etalonnage 21 mai 2025
+  #      - 4.76 -> 4.0
+  #      - 7.50 -> 6.86
+  #      - 9.49 -> 9.18
   - platform: ezo
     id: ph_ezo
     name: "${friendly_name}_ph_ezo"
@@ -210,9 +221,9 @@ sensor:
           send_every: 1
           send_first_at: 1
       - calibrate_linear:
-          - 4.665 -> 4.0
-          - 7.482 -> 6.86
-          - 9.505 -> 9.18
+          - 4.76 -> 4.0
+          - 7.50 -> 6.86
+          - 9.49 -> 9.18
     on_value:
       then:
         - lambda: |-

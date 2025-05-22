@@ -2579,43 +2579,58 @@
     domain: switch
   mode: single
 - id: '1746555411905'
-  alias: Gestion pompe piscine selon SoC batterie
-  description: Force l'arrêt si SoC < 25% pendant 1 min, retour normal si SoC > 26%
+  alias: Gestion de la pompe piscine selon le SoC batterie
+  description: 'Coupe la pompe si SoC < 25 % pendant 1 min, rétablissement si SoC
+    > 26 %
+
+    '
   triggers:
-  - trigger: state
-    entity_id:
+  - entity_id:
     - sensor.mp2_soc_mqtt
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
+    trigger: state
   conditions:
-  - condition: time
-    after: '10:00:00'
+  - condition: sun
+    after: sunrise
   actions:
   - choose:
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_mqtt
         below: 25
+      - condition: state
+        entity_id: input_boolean.flag_arret_piscine_sur_soc
+        state: 'off'
       sequence:
       - target:
           entity_id: switch.esp178_ent_arret_force
         action: switch.turn_on
         data: {}
+      - target:
+          entity_id:
+          - input_boolean.flag_arret_piscine_sur_soc
+        action: input_boolean.turn_on
+        data: {}
       - data:
-          message: '{{states("sensor.date_time") }}{{-"\n"-}} SOC= {{states(''sensor.mp2_soc_mqtt'')}}
-            %'
-          title: At Piscine sur SOC<25
+          title: 'Piscine : SoC < 25 %'
+          message: '{{ now().strftime(''%H:%M:%S'') }} – SOC = {{ states(''sensor.mp2_soc_mqtt'')
+            }} %
+
+            '
         action: notify.telegram
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_mqtt
         above: 26
+      - condition: state
+        entity_id: input_boolean.flag_arret_piscine_sur_soc
+        state: 'on'
       sequence:
       - target:
           entity_id: switch.esp178_ent_arret_force
         action: switch.turn_off
         data: {}
-        enabled: false
+      - action: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.flag_arret_piscine_sur_soc
   mode: single

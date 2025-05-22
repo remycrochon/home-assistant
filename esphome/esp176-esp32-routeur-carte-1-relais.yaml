@@ -140,7 +140,7 @@ globals:
     restore_value: no
     initial_value: '0.0'
 
-  - id: last_error
+  - id: prev_error
     type: float
     restore_value: no
     initial_value: '0.0'
@@ -328,7 +328,19 @@ number:
     step: 0.001
     initial_value: 0.1
     restore_value: true       
+    optimistic: true
+
+  - platform: template
+    name: "PID Kd"
+    id: kd_gain
+    mode: box
+    min_value: 0
+    max_value: 1
+    step: 0.001
+    initial_value: 0.05
+    restore_value: true       
     optimistic: true    
+
 
 sensor:  
   # tension de l'alimentation
@@ -601,6 +613,10 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
         
   - platform: mqtt_subscribe
     name: "${friendly_name} Pu Produite"
@@ -664,7 +680,7 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 0
-    update_interval: 60s
+    update_interval: 10s
     lambda: |-
       return id(valeur_consigne);
   
@@ -759,7 +775,7 @@ display:
 interval:
   - interval: 1s
     then:
-      - script.execute: calcul_injection_pi
+      - script.execute: calcul_injection
 
   - interval: 2s
     then:
@@ -773,7 +789,7 @@ interval:
  ########################################################################""
 script:
   # Calcul puissance de la puissance à injecter dans le triac pilotant l'ECS
-  - id: calcul_injection_pi
+  - id: calcul_injection
     mode: single
     then:
       # Seuil de production
@@ -835,7 +851,9 @@ script:
               - binary_sensor.is_on: temperatureok
               - lambda: 'return id(soc).state >= id(seuil_soc).state;'
           then:
-            - script.execute: regule_pid
+            # Script de régulation
+            - script.execute: regule_p
+            
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda |-
@@ -864,63 +882,76 @@ script:
     mode: single
     then:
       - lambda: |-
+         // Clamp initial de striac
+          if (isnan(id(striac))) id(striac) = 0;
+          id(striac) = constrain(id(striac), 0, id(pmax).state);
+
           float Kp = id(kp_gain).state;
           float Ki = id(ki_gain).state;
-          float dt = 1.0;   // Intervalle en secondes (1s ici)
-          float mesure;
-          float consigne;
+          float Kd = id(kd_gain).state;
+          const float dt = 1.0;
+          float mesure, consigne;
 
+          // Sélection du mode de fonctionnement
           if (id(etatbus_ve).state == 3) {
-            // Mode Bulk : régule sur la puissance batterie
             mesure = id(pu_batteries).state;
             consigne = id(cons_pubatt).state;
-            id(moderegul).publish_state("PID Bulk");
-
           } else if (id(pu_batteries).state >= id(seuil_pubatt).state) {
-            // Sinon ( batteries en float), si la batterie débite trop, on régule via l'injection réseau (négatif)
             mesure = id(pureseau1).state;
             consigne = 0;
-            id(moderegul).publish_state("PID Réseau");
-
           } else {
-            // Sinon, on reste sur la puissance batterie en mode non-bulk
             mesure = id(pu_batteries).state;
             consigne = 0;
-            id(moderegul).publish_state("PID Bat non Bulk");
           }
-          
-          // Calcul PID
-          if (isnan(id(pid_integral))) {
-            id(pid_integral) = 0;
+
+          // Calcul de l'erreur et de la dérivée
+          float erreur = mesure - consigne;
+          if (!isfinite(erreur)) erreur = 0;
+          float derivative = (erreur - id(prev_error)) / dt;
+          id(prev_error) = erreur;
+
+          // Calcul sans terme intégral pour décision
+          float p_term = Kp * erreur;
+          float d_term = Kd * derivative;
+          float i_term = Ki * id(pid_integral);
+          float output_unsat = (p_term + i_term + d_term) / 100;
+          float tentative = id(striac) + output_unsat;
+
+          // Anti-windup : mise à jour conditionnelle de l'intégrale
+          if ((tentative >= 0 && tentative <= id(pmax).state) ||
+              (tentative > id(pmax).state && erreur < 0) ||
+              (tentative < 0 && erreur > 0)) {
+            id(pid_integral) += erreur * dt;
           }
-          float erreur = mesure-consigne;
-          if (isnan(erreur) || isinf(erreur)) {
-            erreur = 0;
+          // Clamp intégrale
+          id(pid_integral) = constrain(id(pid_integral), -5000, 5000);
+
+          // Recalcule la sortie finale sans terme intégral si saturé
+          if (tentative > id(pmax).state) {
+            output_unsat = (p_term + d_term) / 100;  // sans I si saturation haute
+          } else if (tentative < 0) {
+            output_unsat = (p_term + d_term) / 100;  // sans I si saturation basse
           }
-          id(pid_integral) += erreur * dt;
 
-          // Anti-windup
-          if (id(pid_integral) > 500) id(pid_integral) = 500;
-          if (id(pid_integral) < -500) id(pid_integral) = -500;
-
-          float output = ((Kp * erreur) + (Ki * id(pid_integral)))/100;
-          // Application TRIAC
-          id(striac) += output;
-
-          // Sécurité et bornage
-          if (isnan(id(striac))) id(striac) = 0;
-          if (id(striac) < 0) id(striac) = 0;
-          if (id(striac) > id(pmax).state) id(striac) = id(pmax).state;
-
+          float output = output_unsat;
+          id(striac) = constrain(id(striac) + output, 0, id(pmax).state);
+          ESP_LOGI("regul", "Mes: %.2f Cons: %.2f Err: %.2f P: %.2f I: %.2f D: %.2f Out: %.2f Tent: %.2f S: %.2f Int: %.2f",
+            mesure,
+            consigne,
+            erreur,
+            p_term,
+            i_term,
+            d_term,
+            output_unsat,
+            tentative,
+            id(striac),
+            id(pid_integral)
+          );
           // Debug pour affichage
           id(coeff_cours).publish_state(output);
           id(mes_cours).publish_state(mesure);
           id(valeur_consigne) = consigne;
 
-          ESP_LOGI("pid", "Mesure: %.2f, Consigne: %.2f, Erreur: %.2f", mesure, consigne, erreur);
-          ESP_LOGI("pid", "Kp: %.2f, Ki: %.2f, Intégrale: %.2f, Output: %.2f", Kp, Ki, id(pid_integral), output);
-          ESP_LOGI("pid", "Striac (avant sécurité): %.2f", id(striac));
-  
   # Régule Quadratique
   - id: regul_quadratique
     mode: single
@@ -984,7 +1015,7 @@ script:
 
 
   # Régule Proportionnelle
-  - id: regul_Propor
+  - id: regule_p
     mode: single
     then:  
       - lambda: |-

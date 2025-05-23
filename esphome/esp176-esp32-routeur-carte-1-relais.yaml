@@ -17,14 +17,6 @@ esphome:
       - binary_sensor.template.publish:
           id: temperatureok
           state: ON
-      - delay: 5s
-      - lambda: |-
-          std::string mess = "Boot ESP176 Routeur";
-          id(telegram_msg_buffer) = mess;
-      - homeassistant.service:
-          service: notify.telegram
-          data:
-            message: !lambda 'return id(telegram_msg_buffer).c_str();'          
 
 esp32:
   board: esp32dev
@@ -120,19 +112,18 @@ mqtt:
 globals:
   - id: increment
     type: float
-    restore_value: no
+    restore_value: yes
+    initial_value: '0'
+
+  - id: p_dispo
+    type: float
+    restore_value: yes
     initial_value: '0'
 
   - id: striac
     type: float
-    restore_value: no
+    restore_value: yes
     initial_value: '0.0'
-
-    # stocke temporairement le message à envoyer à telegram
-  - id: telegram_msg_buffer
-    type: std::string
-    restore_value: no
-    initial_value: '""'
 
   # Coef de régulation PID 
   - id: pid_integral
@@ -194,7 +185,7 @@ binary_sensor:
   
 # Input Number
 number:
-  # Seuil MMax sortie triac
+  # Seuil Max sortie triac
   - platform: template
     name: "${friendly_name} P Max"
     id: pmax
@@ -229,6 +220,7 @@ number:
     max_value: 1000
     unit_of_measurement: ""
     step: 0.1
+
   # Coeff Réactivité Puissance Batteries
   - platform: template
     name: "${friendly_name} Coeff R bat"
@@ -239,8 +231,9 @@ number:
     min_value: 0
     max_value: 1000
     unit_of_measurement: ""
-    step: 0.1    
-  # seuil Puissance batteries 
+    step: 0.1   
+
+  # Seuil sur Regul Puissance batteries 
   - platform: template
     name: "${friendly_name} Seuil Pu Batteries"
     id: seuil_pubatt
@@ -251,6 +244,19 @@ number:
     max_value: 0
     unit_of_measurement: "W"
     step: 1
+  
+  # Consigne Régul sur Puissance Batteries
+  - platform: template
+    name: "${friendly_name} Consigne Pu Batteries"
+    id: cons_pubatt
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: -2500
+    max_value: 2500
+    unit_of_measurement: "W"
+    step: 1
+
   # seuil SOC validation routeur
   - platform: template
     name: "${friendly_name} Seuil SOC"
@@ -263,28 +269,6 @@ number:
     unit_of_measurement: "%"
     step: 1
 
-  # Consigne sur Puissance Batteries
-  - platform: template
-    name: "${friendly_name} Consigne Pu Batteries"
-    id: cons_pubatt
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -2500
-    max_value: 2500
-    unit_of_measurement: "W"
-    step: 1
-    # Consigne sur Puissance Heure Creuses
-  - platform: template
-    name: "${friendly_name} Consigne Pu Heure Creuse"
-    id: cons_puhc
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 8000
-    unit_of_measurement: "W"
-    step: 1
   # seuil Production validation routeur 
   - platform: template
     name: "${friendly_name} Seuil Production Val Routeur"
@@ -297,17 +281,19 @@ number:
     unit_of_measurement: "W"
     step: 1
 
+  # Limite de l'increment 
   - platform: template
-    name: "${friendly_name} Seuil Surproduction"
-    id: seuilsurprod
-    optimistic: true
-    restore_value: true
+    id: delta_striac_max
+    name: "Delta Max Increment"
     mode: box
-    min_value: -2000
-    max_value: 2000
-    unit_of_measurement: "w"
-    step: 1
+    min_value: 0
+    max_value: 10
+    step: 0.001
+    initial_value: 0.05
+    restore_value: true       
+    optimistic: true 
 
+  # Coeff régulation PID
   - platform: template
     name: "PID Kp"
     id: kp_gain
@@ -339,8 +325,7 @@ number:
     step: 0.001
     initial_value: 0.05
     restore_value: true       
-    optimistic: true    
-
+    optimistic: true 
 
 sensor:  
   # tension de l'alimentation
@@ -605,6 +590,17 @@ sensor:
 
   # Les MQTT sont déclarés dans le Node Red du Cerbo GX
   # https://venus.local:1881/#flow/dbd727f16cbe7b5f
+  - platform: mqtt_subscribe
+    name: "${friendly_name} Conso Maison"
+    id: conso_maison
+    topic: mp2/multiplus2/conso_out1
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
 
   - platform: mqtt_subscribe
     name: "${friendly_name} Pu batterie"
@@ -667,6 +663,7 @@ sensor:
     id: coeff_cours
     state_class: "measurement"  
     accuracy_decimals: 2
+
   - platform: template
     name: "Mes en Cours"
     id: mes_cours
@@ -690,25 +687,11 @@ text_sensor:
     name: "${friendly_name} Mode Regulation"
     id: moderegul
 
-  # Message en lien avec L'automatisme de notification telegram
-  - platform: template
-    name: "${friendly_name}_message_notif_telegram"
-    lambda: |-
-      return {"ESP176 RAZ Telegram"};
-    update_interval: never
-    id: _msg_notif_telegram
-
 switch:
   - platform: gpio
     name: "${friendly_name} Relais"
     pin: GPIO5
     id: relais
-    on_turn_on: 
-      then:
-        - lambda: |-
-            static String mess;
-            mess= "ESP176 Relais Surplus activé";
-            id(_message_telegram)->execute(mess.c_str());    
 
   - platform: template
     name: "${friendly_name} Mode Auto"    
@@ -773,7 +756,7 @@ display:
       it.printf(10,3,"Inc=%0.1f ",id(increment));    
 
 interval:
-  - interval: 1s
+  - interval: 2s
     then:
       - script.execute: calcul_injection
 
@@ -792,21 +775,20 @@ script:
   - id: calcul_injection
     mode: single
     then:
-      # Seuil de production
-      - binary_sensor.template.publish:
-          id: seuil_prod_ok
-          state: !lambda 'return id(pu_prod).state > id(seuil_prod).state;'
-
-      # Seuil de SOC (avec hysteresis de 2 %)
       - lambda: |-
+          //  Prod-conso > Seuil de production
+          id(p_dispo)= id(pu_prod).state - id(conso_maison).state;
+          //id(p_dispo)= id(pu_prod).state;
+          id(seuil_prod_ok).publish_state(id(p_dispo) > id(seuil_prod).state);
+
+          // # Seuil de SOC (avec hysteresis de 2 %)
           if (id(soc).state >= id(seuil_soc).state) {
             id(seuil_soc_ok).publish_state(true);
           } else if (id(soc).state < (id(seuil_soc).state - 2)) {
             id(seuil_soc_ok).publish_state(false);
           }
 
-      # Température Triac
-      - lambda: |-
+          // Surveille température triac
           if (id(temp_triac).state < (id(tmax).state - 2)) {
             id(temperatureok).publish_state(true);
           } else if (id(temp_triac).state >= id(tmax).state) {
@@ -830,7 +812,9 @@ script:
           then:
             - lambda: |-
                 id(striac) = 0;
+                id(increment) = 0;
                 id(moderegul).publish_state("OFF");
+
                 // RAZ de l'affichage du PID A supprimer si inutile
                 id(coeff_cours).publish_state(0);
                 id(mes_cours).publish_state(0);
@@ -852,7 +836,7 @@ script:
               - lambda: 'return id(soc).state >= id(seuil_soc).state;'
           then:
             # Script de régulation
-            - script.execute: regule_p
+            - script.execute: regulation
             
             - light.turn_on:
                 id: gradateur
@@ -862,10 +846,13 @@ script:
                 format: "Régul ON - S triac (Après Securité): %.2f"
                 args: [ 'id(striac)' ]
                 level: DEBUG
+
       # Affichage STriac et Increment
       - lambda: |-
             id(afstriac).publish_state( id(striac) );
-
+            id(afincrement).publish_state( id(increment) );
+  
+  ########################################################################""
   # Principe de la régulation:
   # Si Bus Ve en Bulk, on paratge le surplus entre la batterie et l'ECS avec une consigne de (1200W)
   #   Consigne= Consigne pu Batteries & Mesure = Pu Batteries
@@ -876,194 +863,75 @@ script:
   #   Consigne= 0 & Mesure = Pu Batteries
   # C'est popur éviter de décharger la batterie dans l'ECS
 
-    # Régulation de type PI:
-     
-  - id: regule_pid
+  - id: regulation
     mode: single
     then:
       - lambda: |-
-         // Clamp initial de striac
-          if (isnan(id(striac))) id(striac) = 0;
-          id(striac) = constrain(id(striac), 0, id(pmax).state);
-
-          float Kp = id(kp_gain).state;
-          float Ki = id(ki_gain).state;
-          float Kd = id(kd_gain).state;
-          const float dt = 1.0;
-          float mesure, consigne;
+          float mesure = 0, consigne = 0, coeff = 0, inc = 0;          
+          std::string regul;
 
           // Sélection du mode de fonctionnement
           if (id(etatbus_ve).state == 3) {
+            // Mode Bulk : régule sur la puissance batterie
             mesure = id(pu_batteries).state;
             consigne = id(cons_pubatt).state;
-          } else if (id(pu_batteries).state >= id(seuil_pubatt).state) {
-            mesure = id(pureseau1).state;
-            consigne = 0;
-          } else {
-            mesure = id(pu_batteries).state;
-            consigne = 0;
-          }
-
-          // Calcul de l'erreur et de la dérivée
-          float erreur = mesure - consigne;
-          if (!isfinite(erreur)) erreur = 0;
-          float derivative = (erreur - id(prev_error)) / dt;
-          id(prev_error) = erreur;
-
-          // Calcul sans terme intégral pour décision
-          float p_term = Kp * erreur;
-          float d_term = Kd * derivative;
-          float i_term = Ki * id(pid_integral);
-          float output_unsat = (p_term + i_term + d_term) / 100;
-          float tentative = id(striac) + output_unsat;
-
-          // Anti-windup : mise à jour conditionnelle de l'intégrale
-          if ((tentative >= 0 && tentative <= id(pmax).state) ||
-              (tentative > id(pmax).state && erreur < 0) ||
-              (tentative < 0 && erreur > 0)) {
-            id(pid_integral) += erreur * dt;
-          }
-          // Clamp intégrale
-          id(pid_integral) = constrain(id(pid_integral), -5000, 5000);
-
-          // Recalcule la sortie finale sans terme intégral si saturé
-          if (tentative > id(pmax).state) {
-            output_unsat = (p_term + d_term) / 100;  // sans I si saturation haute
-          } else if (tentative < 0) {
-            output_unsat = (p_term + d_term) / 100;  // sans I si saturation basse
-          }
-
-          float output = output_unsat;
-          id(striac) = constrain(id(striac) + output, 0, id(pmax).state);
-          ESP_LOGI("regul", "Mes: %.2f Cons: %.2f Err: %.2f P: %.2f I: %.2f D: %.2f Out: %.2f Tent: %.2f S: %.2f Int: %.2f",
-            mesure,
-            consigne,
-            erreur,
-            p_term,
-            i_term,
-            d_term,
-            output_unsat,
-            tentative,
-            id(striac),
-            id(pid_integral)
-          );
-          // Debug pour affichage
-          id(coeff_cours).publish_state(output);
-          id(mes_cours).publish_state(mesure);
-          id(valeur_consigne) = consigne;
-
-  # Régule Quadratique
-  - id: regul_quadratique
-    mode: single
-    then:
-      - lambda: |-
-          float inc = 0;
-
-          if (id(etatbus_ve).state == 3) {
-            // Mode Bulk : régule sur la puissance batterie
-            inc = id(pu_batteries).state * abs(id(pu_batteries).state) /
-                  (id(coeff_rbat).state * id(coeff_rbat).state * 10000);
-            id(moderegul).publish_state("Sur Pu batteries Bulk");
-            ESP_LOGI("regul", "Bulk: PuBatt=%.1f -> inc=%.2f", id(pu_batteries).state, inc);
-            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
-            id(coeff_cours).publish_state(id(coeff_rbat).state);
-            id(mes_cours).publish_state(id(pu_batteries).state);
-            id(cons_cours).publish_state(id(pu_batteries).state-id(cons_pubatt).state);
+            coeff= id(coeff_rbat).state;
+            regul= "Sur Pu batteries Bulk";
 
           } else if (id(pu_batteries).state >= id(seuil_pubatt).state) {
             // Sinon, si la batterie débite trop, on régule via l'injection réseau (négatif)
-            inc = -1 * id(pureseau1).state * abs(id(pureseau1).state) /
-                  (id(coeff_r).state * id(coeff_r).state * 10000);
-            id(moderegul).publish_state("Sur Pu reseau");
-            ESP_LOGI("regul", "Reseau: PuR1=%.1f -> inc=%.2f", id(pureseau1).state, inc);
-            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
-            id(coeff_cours).publish_state(id(coeff_r).state);
-            id(mes_cours).publish_state(id(pureseau1).state);
-            id(cons_cours).publish_state(0);          
-            
+            mesure = id(pureseau1).state*-1;
+            consigne = 0;
+            coeff= id(coeff_r).state;
+            regul= "Sur Pu reseau";
+
           } else {
             // Sinon, on reste sur la puissance batterie en mode non-bulk
-            inc = id(pu_batteries).state * abs(id(pu_batteries).state) /
-                  (id(coeff_rbat).state * id(coeff_rbat).state * 10000);
-            id(moderegul).publish_state("Sur Pu batteries Non Bulk");
-            ESP_LOGI("regul", "Non Bulk: PuBatt=%.1f -> inc=%.2f", id(pu_batteries).state, inc);
-            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
-            id(coeff_cours).publish_state(id(coeff_rbat).state);
-            id(mes_cours).publish_state(id(pu_batteries).state);
-            id(cons_cours).publish_state(0);
+            mesure = id(pu_batteries).state;
+            consigne = 0;
+            coeff= id(coeff_rbat).state;
+            regul= "Sur Pu batteries Non Bulk";
           }
 
-          // Limite de l'incrément
-          if (inc > 15) inc = 15;
-          if (inc < -15) inc = -15;
+          // Calcul de l'erreur et de l'incrément quadratique
+          float erreur = mesure - consigne;
 
-          // Application de l'incrément sur striac
-          if (!isnan(id(striac))) {
-            id(striac) += inc;
+          // Zone morte : si l'erreur est trop petite, on ignore
+          if (abs(erreur) < 10.0) {
+            inc = 0;
+          ESP_LOGI("regul", "Zone morte active - Erreur %.2f < 10 W, aucune action sur striac", erreur);            
           } else {
-            id(striac) = 0;
-            ESP_LOGW("regul", "striac is NaN, reset to 0");
+            // Calcul de l'incrément quadratique
+            // inc = (erreur * erreur * coeff) / 1000.0;
+            //if (erreur < 0) inc = -inc;
+            // Calcul de l'increment proportionnel
+            inc = (mesure-consigne)*coeff/1000;
           }
 
-          // Clamp final du striac
+          // Limitation de l'incrément par cycle (delta max)
+          float delta_max = id(delta_striac_max).state;
+          inc = constrain(inc, -delta_max, delta_max);
+
+          // Application sur striac avec sécurité NaN
+          if (isnan(id(striac))) id(striac) = 0;
+          id(striac) = constrain(id(striac) + inc, 0, id(pmax).state);
+
+          // Sortie finale du striac
           if (id(striac) < 0) id(striac) = 0;
           if (id(striac) > id(pmax).state) id(striac) = id(pmax).state;
 
-          // Log final
-          ESP_LOGI("regul", "Final: STRIAC=%.2f (inc=%.2f, pmax=%.1f)", id(striac), inc, id(pmax).state);
+          // Log de débug
+          ESP_LOGI("regulp", "Pdispo; %.0f Mes: %.2f Cons: %.2f Inc: %.2f Striac: %.2f",
+            id(p_dispo),mesure,consigne,inc,id(striac));
 
+          // Publication Home Assistant
+          id(moderegul).publish_state(regul);
+          id(increment) = inc;
+          id(coeff_cours).publish_state(inc);
+          id(mes_cours).publish_state(mesure);
+          id(valeur_consigne) = consigne;
 
-
-  # Régule Proportionnelle
-  - id: regule_p
-    mode: single
-    then:  
-      - lambda: |-
-          if (id(etatbus_ve).state == 3){
-            id(increment) = (id(pu_batteries).state-id(cons_pubatt).state)*id(coeff_rbat).state/1000;
-            id(moderegul).publish_state( "Sur Pu batteries Bulk");
-            // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
-            id(coeff_cours).publish_state(id(coeff_rbat).state);
-            id(mes_cours).publish_state(id(pu_batteries).state);
-            id(cons_cours).publish_state(id(pu_batteries).state-id(cons_pubatt).state);
-
-          } else {
-            if (id(pu_batteries).state >= id(seuil_pubatt).state){
-              id(increment) = id(pureseau1).state*id(coeff_r).state/1000*-1;
-              id(moderegul).publish_state( "Sur Pu reseau");
-              // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
-              id(coeff_cours).publish_state(id(coeff_r).state);
-              id(mes_cours).publish_state(id(pureseau1).state);
-              id(cons_cours).publish_state(0);
-
-            } else { 
-              id(increment) = id(pu_batteries).state*id(coeff_rbat).state/1000;
-              id(moderegul).publish_state( "Sur Pu batteries Non Bulk");
-              // les 3 lignes servent à l'affichage du PID, peuvent etre supprimées
-              id(coeff_cours).publish_state(id(coeff_rbat).state);
-              id(mes_cours).publish_state(id(pu_batteries).state);
-              id(cons_cours).publish_state(0);
-            } 
-          } 
-
-          if (!isnan(id(striac))) {
-            id(striac) = id(striac) + id(increment);
-          } else {
-            id(striac) = 0;
-          }
-
-          if (id(striac) <= 0) {
-            id(striac) = 0;
-          } else if (id(striac) >= id(pmax).state) {
-            id(striac) = id(pmax).state;
-          }
-     
-      - logger.log:
-          format: "Log S Triac %f - Increment %f"
-          args: [ 'id(striac)', 'id(increment)' ]
-          level: "info"
-
- ########################################################################""
+  ########################################################################""
     # ------------  Pilotage led
   - id: etat_production
     mode: single
@@ -1108,18 +976,3 @@ script:
             - switch.turn_off: relais
             - logger.log: "Relais Désactivé"
 
-  # Envoi d'un message à Telegram via HA, celui ci doit etre operationnel
-  # Message à construire au format String avant appel de ce script
-  - id: _message_telegram
-    parameters:
-      mess1: string
-    then:
-      - lambda: |-
-          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
-          mess += "\n";
-          mess += mess1;
-          id(telegram_msg_buffer) = mess;
-      - homeassistant.service:
-          service: notify.telegram
-          data:
-            message: !lambda 'return id(telegram_msg_buffer).c_str();'  

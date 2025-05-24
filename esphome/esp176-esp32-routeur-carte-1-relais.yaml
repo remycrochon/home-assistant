@@ -3,7 +3,10 @@ substitutions:
   friendly_name: esp176
   adress_ip: "192.168.0.176"
   time_timezone: "Europe/Paris"
-  
+
+packages:
+  ph: !include pack_esp176/jsk.yaml
+
 esphome:
   name: ${device_name}
   project:
@@ -71,36 +74,6 @@ i2c:
   scan: True
   id: bus_a
   frequency: 400kHz
-
-# Protocole du JSK
-uart:
-  id: mod_bus
-  tx_pin: 17
-  rx_pin: 16
-  baud_rate: 38400
-  stop_bits: 1
-#  debug:
-#    direction: BOTH
-#    dummy_receiver: false
-#    after:
-#      timeout: 150ms
-#    sequence:
-#      - lambda: |-
-#          UARTDebug::log_string(direction, bytes);
-
-modbus:
-#flow_control_pin: 5
-  #send_wait_time: 200ms
-  id: modbus1
-
-modbus_controller:
-  - id: jsymk
-    ## the Modbus device addr
-    address: 0x1
-    modbus_id: modbus1
-    update_interval: 0.75s
-    command_throttle: 50ms
-    # setup_priority: -10
 
 # Mosquitto Proxmox
 mqtt:
@@ -327,239 +300,7 @@ number:
     restore_value: true       
     optimistic: true 
 
-sensor:  
-  # tension de l'alimentation
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: Tension
-    #name: "${friendly_name} Tension JSYMK"
-    address: 0x0048
-    unit_of_measurement: "V"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-
-    # Intensité traversant le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: Itore
-    name: "${friendly_name} I_ECS JSYMK"
-    address: 0x0049
-    unit_of_measurement: "A"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-    state_class: measurement
-
-  # Puissance traversant le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: puecs
-    name: "${friendly_name} P_ECS JSYMK"
-    address: 0x004A
-    unit_of_measurement: "W"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-    state_class: measurement
-
-  # Energie lue dans le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: energietore
-    name: "${friendly_name} Energie ECS JSYMK"
-    address: 0x004B
-    unit_of_measurement: "kWh"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-    state_class: total
-
-  # Energie lue dans le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: fptore
-    #name: "${friendly_name} FP Tore JSYMK"
-    address: 0x004C
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-
-  # Energie NEG lue dans le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: energietoren
-    name: "${friendly_name} Energie ECS Neg JSYMK"
-    address: 0x004D
-    unit_of_measurement: "kWh"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001     
-    register_count: 1
-    response_size: 4 
-    state_class: total
-    
-  # Sens du courant dans la pince
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: senspince
-    #name: "${friendly_name} Sens_Pince JSYMK"
-    address: 0x004E
-    register_type: holding
-    value_type: U_DWORD
-    bitmask: 0X00010000
-    filters:
-      - multiply: 1
-    register_count: 1
-    response_size: 4
-  # Sens du courant dans le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: senstor
-    #name: "${friendly_name} Sens_Tore JSYMK"
-    address: 0x004E
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 0
-    bitmask: 0X01000000
-    filters:
-      - multiply: 1
-    register_count: 1
-    response_size: 4
-
-  # Fréquence de l'alimentation  
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: frequence
-    #name: "${friendly_name} Frequence JSYMK"
-    address: 0x004F
-    unit_of_measurement: "hz"    
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.01
-    register_count: 1
-    response_size: 4
-
-  # tension de l'alimentation
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: Tension2
-    #name: "${friendly_name} U_Reseau JSYMK"
-    address: 0x0050
-    unit_of_measurement: "V"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-    
-  # Intensité lue dans la pince
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: Ireseau
-    #name: "${friendly_name} I_Reseau JSYMK"
-    address: 0x0051
-    unit_of_measurement: "A"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-
-  # puissance lue dans la pince
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: pureseau
-    #name: "${friendly_name} P_Reseau JSYMK"
-    address: 0x0052
-    unit_of_measurement: "W"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4 
-    on_value:
-      then:
-        - lambda: |-
-            if ( id(senspince).state == 1 ) {
-              id(pureseau1).publish_state( id(pureseau).state *-1);
-            } else {
-              id(pureseau1).publish_state( id(pureseau).state );
-            }
-    
-  # Energie lue dans la pince
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: energiepince
-    #name: "${friendly_name} Energie Reseau JSYMK"
-    address: 0x0053
-    unit_of_measurement: "kWh"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-
-  # Energie lue dans le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: fppince
-    #name: "${friendly_name} FP Pince JSYMK"
-    address: 0x0054
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001
-    register_count: 1
-    response_size: 4
-
-  # Energie NEG lue dans le tore
-  - platform: modbus_controller
-    modbus_controller_id: jsymk
-    id: energienegpince
-    #name: "${friendly_name} Energie ECS Neg JSYMK"
-    address: 0x0055
-    unit_of_measurement: "kWh"
-    register_type: holding
-    value_type: U_DWORD
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.0001     
-    register_count: 1
-    response_size: 4 
+sensor:
     
   # Informations WI_FI
   - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
@@ -587,6 +328,13 @@ sensor:
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
+  
+  - platform: template
+    name: "Pu Disponible"
+    id: afpdispo
+    unit_of_measurement: "W"
+    state_class: "measurement"      
+    accuracy_decimals: 0
 
   # Les MQTT sont déclarés dans le Node Red du Cerbo GX
   # https://venus.local:1881/#flow/dbd727f16cbe7b5f
@@ -780,6 +528,7 @@ script:
           id(p_dispo)= id(pu_prod).state - id(conso_maison).state;
           //id(p_dispo)= id(pu_prod).state;
           id(seuil_prod_ok).publish_state(id(p_dispo) > id(seuil_prod).state);
+          id(afpdispo).publish_state(id(p_dispo));
 
           // # Seuil de SOC (avec hysteresis de 2 %)
           if (id(soc).state >= id(seuil_soc).state) {
@@ -794,7 +543,7 @@ script:
           } else if (id(temp_triac).state >= id(tmax).state) {
             id(temperatureok).publish_state(false);
           }
-      
+      # Si conditions non Ok alors RAZ du Triac
       - if:
           condition:
             or:
@@ -819,12 +568,13 @@ script:
                 id(coeff_cours).publish_state(0);
                 id(mes_cours).publish_state(0);
                 id(valeur_consigne) = 0;
+
             - light.turn_off: gradateur
             - logger.log:
                 format: "Régulation OFF - Mode: %s - Striac: %.1f"
                 args: ['id(moderegul).state.c_str()', 'id(striac)']
                 level: DEBUG
-
+      # Si toutes les conditions OK alors on calcule la S triac
       - if:
           condition:
             and:
@@ -870,7 +620,7 @@ script:
           float mesure = 0, consigne = 0, coeff = 0, inc = 0;          
           std::string regul;
 
-          // Sélection du mode de fonctionnement
+          // Sélection de Consigne et Mesure en fonction de la charge des batteries
           if (id(etatbus_ve).state == 3) {
             // Mode Bulk : régule sur la puissance batterie
             mesure = id(pu_batteries).state;
@@ -901,9 +651,14 @@ script:
             inc = 0;
           ESP_LOGI("regul", "Zone morte active - Erreur %.2f < 10 W, aucune action sur striac", erreur);            
           } else {
+            // Choix de l'algorithme de régulation
+
             // Calcul de l'incrément quadratique
             // inc = (erreur * erreur * coeff) / 1000.0;
-            //if (erreur < 0) inc = -inc;
+            // if (erreur < 0) inc = -inc;
+
+            // ou
+
             // Calcul de l'increment proportionnel
             inc = (mesure-consigne)*coeff/1000;
           }

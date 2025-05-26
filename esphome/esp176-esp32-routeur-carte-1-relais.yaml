@@ -524,11 +524,8 @@ script:
     mode: single
     then:
       - lambda: |-
-          //  Prod-conso > Seuil de production
-          id(p_dispo)= id(pu_prod).state - id(conso_maison).state;
-          //id(p_dispo)= id(pu_prod).state;
-          id(seuil_prod_ok).publish_state(id(p_dispo) > id(seuil_prod).state);
-          id(afpdispo).publish_state(id(p_dispo));
+          //  Pu production > Seuil de production
+          id(seuil_prod_ok).publish_state(id(pu_prod).state > id(seuil_prod).state);
 
           // # Seuil de SOC (avec hysteresis de 2 %)
           if (id(soc).state >= id(seuil_soc).state) {
@@ -620,11 +617,20 @@ script:
           float mesure = 0, consigne = 0, coeff = 0, inc = 0;          
           std::string regul;
 
+          // id(p_dispo)= id(pu_prod).state - id(conso_maison).state;
+          // Calcul de la puissance disponible (pu prod-pu maison) qui doit se situé entre 
+          float p_dispo = id(pu_prod).state - id(conso_maison).state;
+          p_dispo = (p_dispo < 100.0) ? 100.0 : p_dispo;
+          p_dispo = (p_dispo > id(seuil_pubatt).state) ? id(seuil_pubatt).state : p_dispo;
+
+          id(afpdispo).publish_state(p_dispo);
+
           // Sélection de Consigne et Mesure en fonction de la charge des batteries
           if (id(etatbus_ve).state == 3) {
             // Mode Bulk : régule sur la puissance batterie
             mesure = id(pu_batteries).state;
-            consigne = id(cons_pubatt).state;
+            //consigne = id(cons_pubatt).state;
+            consigne = p_dispo;
             coeff= id(coeff_rbat).state;
             regul= "Sur Pu batteries Bulk";
 

@@ -9,7 +9,7 @@ import logging
 from gql.client import TransportQueryError
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.const import CONF_API_KEY, CONF_URL
+from homeassistant.const import CONF_API_KEY, CONF_SSL, CONF_URL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -33,11 +33,12 @@ class PoolLabCoordinator(DataUpdateCoordinator[CloudAccount]):
             _LOGGER,
             name="PoolLab API",
             update_interval=timedelta(seconds=30),
-            update_method=self._async_update_data,
+            update_method=self._async_update_poollab,
         )
         self.api = api
+        self.entities = []
 
-    async def _async_update_data(self):
+    async def _async_update_poollab(self):
         """Fetch data from API endpoint."""
         try:
             async with asyncio.timeout(10):
@@ -48,6 +49,25 @@ class PoolLabCoordinator(DataUpdateCoordinator[CloudAccount]):
             raise ConfigEntryAuthFailed from err
         except Exception as err:
             raise UpdateFailed(f"Unknown error communicating with API: {err}") from err
+
+    def add_entity_ref(self, entity) -> None:
+        """Add an entity reference to the coordinator."""
+        if entity not in self.entities:
+            self.entities.append(entity)
+
+    def get_diag(self) -> dict[str, str]:
+        """Convert the coordinator data to a dictionary."""
+        res = {}
+        for k, v in self.data.as_dict().items():
+            if k.startswith("_") or callable(v):
+                continue
+            if k == "api":
+                res["api"] = v.as_dict()
+            elif isinstance(v, list):
+                res[k] = [vv.as_dict() for vv in v]
+            else:
+                res[k] = v
+        return res
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
@@ -61,7 +81,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         hass.data[DOMAIN][config_entry.entry_id] = poollab = PoolLabCoordinator(
             hass,
             PoolLabApi(
-                token=config_entry.data[CONF_API_KEY], url=config_entry.data[CONF_URL]
+                token=config_entry.data[CONF_API_KEY],
+                url=config_entry.data[CONF_URL],
+                ssl=config_entry.data.get("ssl", True),
             ),
         )
     else:
@@ -108,6 +130,9 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     if CONF_URL not in config_entry.data:
         new_data[CONF_URL] = API_ENDPOINT
 
+    if CONF_SSL not in config_entry.data:
+        new_data[CONF_SSL] = True
+
     hass.config_entries.async_update_entry(
         config_entry,
         data=new_data,
@@ -121,5 +146,3 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         installed_minor_version,
     )
     return True
-
-    return False

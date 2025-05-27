@@ -1255,6 +1255,16 @@ function $043ab5348dd51237$export$c0e85c3982a3daa6(stateObj, state) {
 
 
 
+const $0cafd9360b3c4d75$export$1ca1ec8b29a4ce27 = (config, setup)=>{
+    const infoCount = setup.holes.reduce((acc, h)=>{
+        if (h.info_message_count && !Number.isNaN(Number(h.info_message_count.state))) return acc + Number(h.info_message_count.state);
+        return acc;
+    }, 0);
+    return infoCount === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<ha-icon icon="${config.icon ?? 'mdi:pi-hole'}"></ha-icon>` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="warning-badge">${infoCount}</div>`;
+};
+
+
+
 const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity, className = '')=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display
     .hass=${hass}
     .stateObj=${entity}
@@ -1278,8 +1288,7 @@ const $a2b1c365027138cb$export$dfb737c0873de058 = (setup, hass, config)=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div class="card-header">
       <div class="name">
-        <ha-icon icon="${config.icon ?? 'mdi:pi-hole'}"></ha-icon>
-        ${config.title ?? 'Pi-Hole'}
+        ${(0, $0cafd9360b3c4d75$export$1ca1ec8b29a4ce27)(config, setup)}${config.title ?? 'Pi-hole'}
         ${setup.holes.length > 1 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<span class="multi-status"
               >(${activeCount}/${setup.holes.length})</span
             >` : ''}
@@ -1718,13 +1727,15 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
 };
 
 
-const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, device, seconds)=>{
+const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, setup, seconds)=>{
     return ()=>{
         const domain = 'pi_hole_v6';
         const service = 'disable';
-        hass.callService(domain, service, {
-            device_id: device.device_id,
-            duration: (0, $3a2fe8ac0aec50d1$export$7f8cebb87518d95)(seconds)
+        setup.holes.forEach((hole)=>{
+            hass.callService(domain, service, {
+                device_id: hole.device_id,
+                duration: (0, $3a2fe8ac0aec50d1$export$7f8cebb87518d95)(seconds)
+            });
         });
     };
 };
@@ -1732,7 +1743,7 @@ const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, device, seconds)=>{
 
 
 
-const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, device, config)=>{
+const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, setup, config)=>{
     if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'pause')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
     const pauseCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'pause');
     const pauseDuration = config.pause_durations ?? [
@@ -1754,7 +1765,7 @@ const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, device, config)=>{
     <div class="pause ${pauseCollapsed ? 'hidden' : ''}">
       ${pauseDuration.map((duration)=>{
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<mwc-button
-          @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, device, duration)}
+          @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, setup, duration)}
           >${duration} ${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds')}</mwc-button
         >`;
     })}
@@ -1806,14 +1817,20 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
             icon="mdi:chevron-${switchCollapsed ? 'right' : 'down'}"
           ></ha-icon>
         </div>
-        <div class="switches ${switchCollapsed ? 'hidden' : ''}">
+        <div
+          class="${[
+        'switches',
+        switchCollapsed ? 'hidden' : undefined,
+        config.switch_spacing
+    ].filter((s)=>s).join(' ')}"
+        >
           ${device.switches.map((piSwitch)=>{
         const orderExists = config.entity_order?.includes(piSwitch.entity_id);
         if (orderExists) {
             const orderIndex = config.entity_order.indexOf(piSwitch.entity_id);
             const nextItem = config.entity_order[orderIndex + 1];
-            if (nextItem === 'divider') return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="divider"></div>
-                  ${(0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch, 'wide')} `;
+            if (nextItem === 'divider') return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch)}
+                  <div class="divider"></div>`;
         }
         return (0, $6cbf4e557bc1fbf1$export$535a09426ee2ea59)(hass, piSwitch);
     })}
@@ -1838,10 +1855,10 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
       </div>
     </div>` : (0, $f58f44579a4747ac$export$45b790e32b2810ee)}`;
 };
-const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, device, config)=>{
+const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, setup, device, config)=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div>
-      ${(0, $7a21f7a279e18689$export$229c72e5fdee233b)(hass, device, config)}${$9369c7e3c6702a0b$var$controls(element, hass, device, config)}
+      ${(0, $7a21f7a279e18689$export$229c72e5fdee233b)(hass, setup, config)}${$9369c7e3c6702a0b$var$controls(element, hass, device, config)}
     </div>
   `;
 };
@@ -1937,7 +1954,7 @@ const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, hass, setup, config)
         ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, hass, primary, config)}
         ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(element, hass, primary, config)}
       </div>
-      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(element, hass, primary, config)}
+      ${(0, $9369c7e3c6702a0b$export$85691f7dcbc38c10)(element, hass, setup, primary, config)}
       ${(0, $49bfcbfa0b6e0050$export$7c88f7b87167f6)(element, hass, config, primary)}
     </ha-card>
   `;
@@ -1956,6 +1973,25 @@ const $19442883b2a008d3$export$df7b058ef38e4826 = async (hass)=>{
 };
 
 
+const $28ca676359267166$export$ce4e438906f3b684 = (config, entities)=>{
+    if (config.entity_order?.length) {
+        const entityOrderMap = new Map();
+        // Create a map with entity_id as key and its position in entity_order as value
+        config.entity_order.forEach((entityId, index)=>{
+            entityOrderMap.set(entityId, index);
+        });
+        // Sort entities based on their position in entity_order
+        // Entities not in entity_order will have undefined position and will be placed at the end
+        entities = entities.sort((a, b)=>{
+            const aPosition = entityOrderMap.has(a.entity_id) ? entityOrderMap.get(a.entity_id) : Number.MAX_SAFE_INTEGER;
+            const bPosition = entityOrderMap.has(b.entity_id) ? entityOrderMap.get(b.entity_id) : Number.MAX_SAFE_INTEGER;
+            return (aPosition ?? Number.MAX_SAFE_INTEGER) - (bPosition ?? Number.MAX_SAFE_INTEGER);
+        });
+    }
+    return entities;
+};
+
+
 const $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff = (entity, device)=>{
     const keyToPropertyMap = {
         dns_queries_today: 'dns_queries_today',
@@ -1966,6 +2002,7 @@ const $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff = (entity, device)=>{
         remaining_until_blocking_mode: 'remaining_until_blocking_mode',
         action_refresh_data: 'action_refresh_data',
         latest_data_refresh: 'latest_data_refresh',
+        ftl_info_message_count: 'info_message_count',
         status: 'status'
     };
     const key = entity.translation_key;
@@ -1982,6 +2019,7 @@ const $25a2e2943b63f930$export$2448ebcf2d0e9554 = (entity, config)=>{
     if (!config.exclude_entities?.length) return false;
     return config.exclude_entities.some((entityId)=>entity.entity_id === entityId);
 };
+
 
 
 
@@ -2036,23 +2074,8 @@ const $3a8183764d505877$export$b971a190749afcb4 = (hass, config, deviceId)=>{
     if (!hassDevice) return undefined;
     // Get all entities for the device
     let entities = (0, $093edc2594769ee5$export$c6a2d06cc40e579)(hass, hassDevice.id, hassDevice.name);
-    // Order entities according to the entity_order property if it exists
-    if (config.entity_order?.length) {
-        const entityOrderMap = new Map();
-        // Create a map with entity_id as key and its position in entity_order as value
-        config.entity_order.forEach((entityId, index)=>{
-            entityOrderMap.set(entityId, index);
-        });
-        // Sort entities based on their position in entity_order
-        // Entities not in entity_order will have undefined position and will be placed at the end
-        entities = entities.sort((a, b)=>{
-            const aPosition = entityOrderMap.has(a.entity_id) ? entityOrderMap.get(a.entity_id) : Number.MAX_SAFE_INTEGER;
-            const bPosition = entityOrderMap.has(b.entity_id) ? entityOrderMap.get(b.entity_id) : Number.MAX_SAFE_INTEGER;
-            return (aPosition ?? Number.MAX_SAFE_INTEGER) - (bPosition ?? Number.MAX_SAFE_INTEGER);
-        });
-    }
     // Map entities to the device object
-    entities.forEach((entity)=>{
+    (0, $28ca676359267166$export$ce4e438906f3b684)(config, entities).forEach((entity)=>{
         if ((0, $25a2e2943b63f930$export$2448ebcf2d0e9554)(entity, config)) return;
         // Skip already handled entities by translation key
         if ((0, $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff)(entity, device)) return;
@@ -2106,7 +2129,14 @@ const $0544f6a0e4690d02$export$9093f1b96efd0145 = (hass, config)=>{
         }
         return hole;
     });
-    if (holes.length > 1) holes[0].switches.push(...spareSwitches);
+    if (holes.length > 1) {
+        const primary = holes[0];
+        // resort the combined switches
+        primary.switches = (0, $28ca676359267166$export$ce4e438906f3b684)(config, [
+            ...primary.switches,
+            ...spareSwitches
+        ]);
+    }
     return {
         holes: holes
     };
@@ -2318,6 +2348,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
   .name {
     display: flex;
+    align-items: center;
     font-size: 1.2rem;
     font-weight: 500;
   }
@@ -2563,6 +2594,14 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     margin: 0px 8px;
   }
 
+  .space-around {
+    justify-content: space-around;
+  }
+
+  .space-between > state-card-content {
+    width: 100%;
+  }
+
   /* Refresh time styles */
   .refresh-time {
     display: flex;
@@ -2589,11 +2628,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     height: 1px;
     background-color: var(--secondary-text-color);
     width: 100%;
-    margin: 0px 16px;
-  }
-
-  .wide {
-    width: 100%;
+    margin: 10px 16px;
   }
 
   /* Pause buttons */
@@ -2602,6 +2637,23 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-around;
+  }
+
+  /* Warning badge styles */
+  .warning-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: var(--warning-color, #ff9800);
+    color: var(--secondary-text-color);
+    font-weight: bolder;
+    font-size: 1rem;
+    margin-right: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 25px;
   }
 `;
 
@@ -2809,6 +2861,31 @@ const $b642db848cc622aa$var$SCHEMA = [
                 }
             },
             {
+                name: 'switch_style',
+                label: 'Style for switches',
+                required: false,
+                selector: {
+                    select: {
+                        multiple: false,
+                        mode: 'dropdown',
+                        options: [
+                            {
+                                label: 'Flex (default)',
+                                value: 'flex'
+                            },
+                            {
+                                label: 'Space Around',
+                                value: 'space-around'
+                            },
+                            {
+                                label: 'Space Between',
+                                value: 'space-between'
+                            }
+                        ]
+                    }
+                }
+            },
+            {
                 name: 'exclude_entities',
                 label: 'Entities to exclude',
                 required: false,
@@ -2849,6 +2926,40 @@ const $b642db848cc622aa$var$SCHEMA = [
                                     'sensor',
                                     'switch'
                                 ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    {
+        name: 'styles',
+        label: 'Styles',
+        type: 'expandable',
+        flatten: true,
+        icon: 'mdi:brush-variant',
+        schema: [
+            {
+                name: 'switch_spacing',
+                label: 'Switch Spacing',
+                required: false,
+                selector: {
+                    select: {
+                        multiple: false,
+                        mode: 'dropdown',
+                        options: [
+                            {
+                                label: 'Flex (default)',
+                                value: 'flex'
+                            },
+                            {
+                                label: 'Space Around',
+                                value: 'space-around'
+                            },
+                            {
+                                label: 'Space Between',
+                                value: 'space-between'
                             }
                         ]
                     }
@@ -3023,7 +3134,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.11.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.1\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.3.0\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.1\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.12.1\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.1\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.4.0\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.1\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
 
 
 // Register the custom elements with the browser

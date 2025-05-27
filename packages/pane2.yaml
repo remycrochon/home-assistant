@@ -24,7 +24,15 @@ openhasp:
           "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
 
       ############### Page 1 Home ###############
-      ############### Réseau
+      - obj: "p1b21" # Charge/Décharge
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
+            {% if count < 0 %}
+              {{"#7FFF00 \uE6c1"}}
+            {% else %}
+              {{"#FF0000 \uE6c2"}}
+            {% endif %}      
       - obj: "p1b24" # Grid Power
         properties:
           "text": >
@@ -32,7 +40,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
       - obj: "p1b25" # Grid Conso
         properties:
@@ -50,7 +58,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
       - obj: "p1b35" # Production
         properties:
@@ -77,12 +85,18 @@ openhasp:
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
-      - obj: "p1b46" # SOC
+      - obj: "p1b46" # U
+        properties:
+          "text": "{{ states('sensor.mp2_tension_batteries_par_mqtt')|float|round(1) }}V"            
+      - obj: "p1b47" # Int
+        properties:
+          "text": "{{ states('sensor.mp2_intensite_batteries')|float|round(1) }}A"
+      - obj: "p1b48" # SOC
         properties:
           "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
-      - obj: "p1b47" # Tps restant
+      - obj: "p1b49" # Tps restant
         properties:
           "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
 
@@ -94,7 +108,7 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+            {{ count|round(0) }} W
             {% endif %}
       - obj: "p1b56" # Conso
         properties:
@@ -106,8 +120,8 @@ openhasp:
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
-            {% endif %}    
+            {{ count|round(0) }} W
+            {% endif %} 
 
 ####### PAGE 2 - HOTTE ############### 
       - obj: "p2b23" # STOP
@@ -208,53 +222,73 @@ openhasp:
               entity_id: "switch.relais_cde_vmc_niv0_on_off"
 
       ############### Page 4 Home ###############
-      ############### Réseau
-      - obj: "p4b21" # Charge/Décharge
+      ###############
+      - obj: "p4b10" # Regule
+        properties:
+          "text": "Reg: {{ states('sensor.esp176_esp32_routeur_1r_esp176_mode_regulation') }}"      
+      - obj: "p4b20" # Consigne
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
-            {% if count < 0 %}
-              {{"#7FFF00 \uE6c1"}}
+            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_en_cours')|int %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
             {% else %}
-              {{"#FF0000 \uE6c2"}}
-            {% endif %}      
-      - obj: "p4b24" # Grid Power
+            {{ count }} W
+            {% endif %}
+      - obj: "p4b30" # Increment
+        properties:
+          "text": "{{ states('sensor.esp176_esp32_routeur_1r_coeff_en_cours')|float }}"
+      - obj: "p4b40" # S Triac
+        properties:
+          "text": "{{ states('sensor.esp176_sortie_triac')|float | round(0)}}"
+      - obj: "p4b50" # Mesure
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_esp32_routeur_1r_mes_en_cours')|int %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      ############### Page 5 TEST ###############
+      ############### Réseau
+      - obj: "p5b24" # Grid Power
         properties:
           "text": >
             {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count|round(0) }} W
+            {{ count }} W
             {% endif %}
-      - obj: "p4b25" # Grid Conso
+      - obj: "p5b25" # Grid Conso
         properties:
           "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int }} kWh"
             
-      - obj: "p4b26" # Grid Inject
+      - obj: "p5b26" # Grid Inject
         properties:
           "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int }} kWh"
       
       ##################### Solaire
-      - obj: "p4b34" # Puissance production
+      - obj: "p5b34" # Puissance production
         properties:
           "text": >
             {% set count = states('sensor.mp2_prod_totale_mqtt')|float %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count|round(0) }} W
+            {{ count }} W
             {% endif %}
-      - obj: "p4b35" # Production
+      - obj: "p5b35" # Production
         properties:
           "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int }} kWh"
             
-      - obj: "p4b36" # Prévision
+      - obj: "p5b36" # Prévision
         properties:
           "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kWh"
 
       ############# Batteries
-      - obj: "p4b44" # Charge/Décharge
+      - obj: "p5b44" # Charge/Décharge
         properties:
           "text": >
             {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
@@ -263,65 +297,41 @@ openhasp:
             {% else %}
               {{"\uE6c2"}}
             {% endif %}
-      - obj: "p4b45" # Puissance
+      - obj: "p5b45" # Puissance
         properties:
           "text": >
             {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float*-1 %}
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count|round(0) }} W
+            {{ count }} W
             {% endif %}
-      - obj: "p4b46" # U
-        properties:
-          "text": "{{ states('sensor.mp2_tension_batteries_par_mqtt')|float|round(1) }}V"            
-      - obj: "p4b47" # Int
-        properties:
-          "text": "{{ states('sensor.mp2_intensite_batteries')|float|round(1) }}A"
-      - obj: "p4b48" # SOC
+      - obj: "p5b46" # SOC
         properties:
           "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
-      - obj: "p4b49" # Tps restant
+      - obj: "p5b47" # Tps restant
         properties:
           "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
 
       ################## Maison
-      - obj: "p4b55" # Puissance
+      - obj: "p5b55" # Puissance
         properties:
           "text": >
             {% set count = states('sensor.mp2_conso_out1_mqtt')|float %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count|round(0) }} W
+            {{ count }} W
             {% endif %}
-      - obj: "p4b56" # Conso
+      - obj: "p5b56" # Conso
         properties:
           "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int }} kW"
-      - obj: "p4b57" # ECS
+      - obj: "p5b57" # ECS
         properties:
           "text": >
             {% set count = states('sensor.ecocompteur_ecs')|float %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count|round(0) }} W
-            {% endif %} 
-      ############### Page 5 TEST ###############
-      ############### Réseau
-      - obj: "p5b10" #
-        properties:
-          "val": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
-            {% if count >= 1000 %}Chaussures VTT Northwave Rockit Plus Gore-Tex Noir
-              {{ (count/1000) |round(2)}} kW
-            {% else %}
-              {{ count }} W
-            {% endif %}            
-          "max": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
-            {% if count >= 1000 %}
-              {{ 10 }}
-            {% else %}
-              {{ 1000 }}
-            {% endif %}
+            {{ count }} W
+            {% endif %}    

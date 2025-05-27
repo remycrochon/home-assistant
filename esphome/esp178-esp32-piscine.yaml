@@ -552,8 +552,8 @@ sensor:
     id: pression_filtre
     filters:
       - calibrate_linear:
-        - 0.576 -> 0.0
-        - 2.313 -> 0.9
+        - 0.561 -> 0.0
+        - 2.213 -> 0.81
   # moyenne sur 30 mn + affichage toutes les 2 mn
       - sliding_window_moving_average:
           window_size: 30

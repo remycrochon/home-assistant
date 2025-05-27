@@ -2542,13 +2542,13 @@
       alert_state: 'on'
       alert_action:
       - data:
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}Seuil HAUT CPU Glances
-            HA {{states("sensor.studio_code_server_pourcentage_du_processeur")}}%'
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Seuil HAUT CPU Studio
+            Code Server HA {{states("sensor.studio_code_server_pourcentage_du_processeur")}}%'
         action: notify.telegram
       resolved_action:
       - data:
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}Seuil NORMAL CPU Glances
-            HA {{states("sensor.studio_code_server_pourcentage_du_processeur")}}%'
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Seuil NORMAL CPU Studio
+            Code Server HA{{states("sensor.studio_code_server_pourcentage_du_processeur")}}%'
         action: notify.telegram
       notify_message: ' '
       notify_device: 367dba31447009458e03b70e3a29b6b2

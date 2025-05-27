@@ -88,7 +88,7 @@ globals:
     restore_value: yes
     initial_value: '0'
 
-  - id: p_dispo
+  - id: p_dispo_lisse
     type: float
     restore_value: yes
     initial_value: '0'
@@ -98,21 +98,6 @@ globals:
     restore_value: yes
     initial_value: '0.0'
 
-  # Coef de régulation PID 
-  - id: pid_integral
-    type: float
-    restore_value: no
-    initial_value: '0.0'
-
-  - id: prev_error
-    type: float
-    restore_value: no
-    initial_value: '0.0'
-
-  - id: last_time
-    type: uint32_t
-    restore_value: no
-    initial_value: '0'
   # raffraichit la consigne pour Graphana
   - id: valeur_consigne
     type: float
@@ -249,7 +234,7 @@ number:
     optimistic: true
     restore_value: true
     mode: box
-    min_value: 500
+    min_value: 100
     max_value: 3000
     unit_of_measurement: "W"
     step: 1
@@ -492,30 +477,32 @@ display:
   - platform: lcd_pcf8574
     dimensions: 20x4
     address: 0x27
-    update_interval: 10s
+    update_interval: 20s  # Plus espacé pour alléger la charge CPU
     lambda: |-
-      it.printf(0,0,"Pr=%0.0fW",id(pureseau1).state);
-      it.printf(10,0,"Pe=%0.0fW ",id(puecs).state);
-      it.printf(0,1,"Tr=%0.1f%%",id(striac));
-      it.printf(10,1,"Val:%s", id(validrouteur).state ? "OK" : "NOK");
-      it.printf(0,2,"Tp=%0.1fc", id(temp_triac).state);
-      it.printf(10,2,"Etat=%s", id(temperatureok).state ? "OK" : "NOK");
-      it.printf(0,3,"Mode=%s", id(modeauto).state ? "Auto" : "Manu");
-      it.printf(10,3,"Inc=%0.1f ",id(increment));    
+      char ligne0[21];
+      char ligne1[21];
+      char ligne2[21];
+      char ligne3[21];
+
+      snprintf(ligne0, sizeof(ligne0), "Pr=%0.0fW Pe=%0.0fW", id(pureseau1).state, id(puecs).state);
+      snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
+      snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac), id(temperatureok).state ? "OK" : "NOK");
+      snprintf(ligne3, sizeof(ligne3), "Mode:%s Inc=%0.1f", id(modeauto).state ? "Auto" : "Manu", id(increment));
+
+      it.print(0, 0, ligne0);
+      it.print(0, 1, ligne1);
+      it.print(0, 2, ligne2);
+      it.print(0, 3, ligne3);
 
 interval:
-  - interval: 2s
+  - interval: 1s
     then:
       - script.execute: calcul_injection
-
-  - interval: 2s
-    then:
+      - script.execute: calcul_relais_surprod      
+  - interval: 3s
+    then:      
       - script.execute: etat_production 
 
-# Script activation relais si l'injection est inférieur au seuil surprod pendant xsec
-  - interval: 2s
-    then:
-      - script.execute: calcul_relais_surprod
 
  ########################################################################""
 script:
@@ -540,6 +527,8 @@ script:
           } else if (id(temp_triac).state >= id(tmax).state) {
             id(temperatureok).publish_state(false);
           }
+          // Log de débug
+          // ESP_LOGI("regulp", "P Prod; %.0f Seuil: %.2f",id(pu_prod).state,id(seuil_prod).state);
       # Si conditions non Ok alors RAZ du Triac
       - if:
           condition:
@@ -614,14 +603,33 @@ script:
     mode: single
     then:
       - lambda: |-
-          float mesure = 0, consigne = 0, coeff = 0, inc = 0;          
+          float mesure = 0, consigne = 0, coeff = 0, inc = 0, p_dispo=0;          
           std::string regul;
 
           // id(p_dispo)= id(pu_prod).state - id(conso_maison).state;
           // Calcul de la puissance disponible (pu prod-pu maison) qui doit se situé entre 
-          float p_dispo = id(pu_prod).state - id(conso_maison).state;
-          p_dispo = (p_dispo < 100.0) ? 100.0 : p_dispo;
-          p_dispo = (p_dispo > id(seuil_pubatt).state) ? id(seuil_pubatt).state : p_dispo;
+          //float p_dispo = id(pu_prod).state - id(conso_maison).state;
+          //p_dispo = (p_dispo < 100.0) ? 100.0 : p_dispo;
+          //p_dispo = (p_dispo > id(cons_pubatt).state) ? id(cons_pubatt).state : p_dispo;
+
+          // Evolution progressive de la consigne par pas de 10W
+          float p_dispo_target = id(pu_prod).state - id(conso_maison).state;
+          p_dispo_target = (p_dispo_target < 0.0) ? 0.0 : p_dispo_target;
+          p_dispo_target = (p_dispo_target > id(cons_pubatt).state) ? id(cons_pubatt).state : p_dispo_target;
+
+          // seuil de variation max (W)
+          float max_step = 10.0;
+
+          float delta = p_dispo_target - id(p_dispo_lisse);
+          if (delta > max_step) {
+            id(p_dispo_lisse) += max_step;
+          } else if (delta < -max_step) {
+            id(p_dispo_lisse) -= max_step;
+          } else {
+            id(p_dispo_lisse) = p_dispo_target;
+          }
+
+          p_dispo=id(p_dispo_lisse);
 
           id(afpdispo).publish_state(p_dispo);
 
@@ -683,7 +691,7 @@ script:
 
           // Log de débug
           ESP_LOGI("regulp", "Pdispo; %.0f Mes: %.2f Cons: %.2f Inc: %.2f Striac: %.2f",
-            id(p_dispo),mesure,consigne,inc,id(striac));
+            p_dispo,mesure,consigne,inc,id(striac));
 
           // Publication Home Assistant
           id(moderegul).publish_state(regul);

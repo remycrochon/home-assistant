@@ -272,7 +272,7 @@ globals:
     - id: g_ss
       type: int
     
-    # stocke temporairement le message à evnoyer à telegram
+    # stocke temporairement le message à envoyer à telegram
     - id: telegram_msg_buffer
       type: std::string
       restore_value: no

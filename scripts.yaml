@@ -623,7 +623,7 @@ volet_amis_sud_grand_stop_2:
   icon: mdi:window-shutter-alert
   description: ''
 envoyer_message_log_esp178:
-  alias: Envoyer un message log depuis ESPHome
+  alias: Envoyer un message log depuis ESP178
   sequence:
   - action: notify.send_message
     target:
@@ -635,3 +635,18 @@ envoyer_message_log_esp178:
     message:
       description: Le message à loguer
       example: test depuis ESPHome
+  description: ''
+envoyer_un_message_log_depuis_esp176:
+  alias: Envoyer un message log depuis ESP176
+  sequence:
+  - action: notify.send_message
+    target:
+      entity_id: notify.log_esp176
+    data:
+      message: '{{ message }}'
+  mode: single
+  fields:
+    message:
+      description: Le message à loguer
+      example: test depuis ESPHome
+  description: ''

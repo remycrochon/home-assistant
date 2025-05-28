@@ -72,9 +72,13 @@ sensor:
     accuracy_decimals: 1
     filters:
       - multiply: 0.0001
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
     register_count: 1
     response_size: 4
     state_class: measurement
+
 
   # Energie lue dans le tore
   - platform: modbus_controller

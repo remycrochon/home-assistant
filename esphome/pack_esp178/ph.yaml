@@ -308,7 +308,7 @@ script:
                 format: "ph_EZO invalide: %.2f"
                 args: [ 'id(ph_ezo).state']
                 level: DEBUG
-            - lambda: |-            
+            - lambda: |-
                 id(g_memoire_ph)=id(g_memoire_ph);
           else: 
             - logger.log:

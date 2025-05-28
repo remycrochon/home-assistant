@@ -36,6 +36,8 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+    dns1: 192.168.0.254
+
     
 # Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
@@ -95,7 +97,7 @@ globals:
 
   - id: striac
     type: float
-    restore_value: yes
+    restore_value: no
     initial_value: '0.0'
 
   # raffraichit la consigne pour Graphana
@@ -103,6 +105,12 @@ globals:
     type: float
     restore_value: no
     initial_value: '0.0'
+
+  # stocke temporairement le message à envoyer à telegram
+  - id: telegram_msg_buffer
+    type: std::string
+    restore_value: no
+    initial_value: '""'
 
 # Sonde Temperature Dallas
 one_wire:
@@ -122,6 +130,35 @@ one_wire:
 #      name: ${friendly_name}_ESP Mac Wifi Address
 #    scan_results:
 #      name: ${friendly_name}_ESP Latest Scan Results
+
+# déclaration des modes de fonctionnement dans des "input select"
+select:
+  - platform: template
+    name: "Mode_Fonctionnement_routeur"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Etalonnage
+      - Arret
+    id: _Mode_Fonctionnement_routeur
+    on_value: 
+      then:
+        - if:
+            condition:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Etalonnage";'
+            then:
+              - script.execute: etalonnage_striac
+              
+        - script.execute: calcul_injection        
+        - logger.log:
+            format: "Mode Fonct Routeur --> %s"
+            args: [ 'id(_Mode_Fonctionnement_routeur).state.c_str()' ]
+            level: INFO
+
+button:
+  - platform: template
+    name: "Bouton Declencheur"
 
 
 binary_sensor:
@@ -143,16 +180,16 @@ binary_sensor:
   
 # Input Number
 number:
-  # Seuil Max sortie triac
+  # Max sortie triac
   - platform: template
-    name: "${friendly_name} P Max"
+    name: "Puissance Max Triac"
     id: pmax
     optimistic: true
     restore_value: true
     mode: box
-    min_value: 50
-    max_value: 100
-    unit_of_measurement: "%"
+    min_value: 10
+    max_value: 3000
+    unit_of_measurement: "W"
     step: 1
 
   # Seuil MAX temperature
@@ -166,30 +203,6 @@ number:
     max_value: 75
     unit_of_measurement: "C°"
     step: 0.1
-
-  # Coeff Réactivité
-  - platform: template
-    name: "${friendly_name} Coeff R"
-    id: coeff_r
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 1000
-    unit_of_measurement: ""
-    step: 0.1
-
-  # Coeff Réactivité Puissance Batteries
-  - platform: template
-    name: "${friendly_name} Coeff R bat"
-    id: coeff_rbat
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 1000
-    unit_of_measurement: ""
-    step: 0.1   
 
   # Seuil sur Regul Puissance batteries 
   - platform: template
@@ -238,52 +251,6 @@ number:
     max_value: 3000
     unit_of_measurement: "W"
     step: 1
-
-  # Limite de l'increment 
-  - platform: template
-    id: delta_striac_max
-    name: "Delta Max Increment"
-    mode: box
-    min_value: 0
-    max_value: 10
-    step: 0.001
-    initial_value: 0.05
-    restore_value: true       
-    optimistic: true 
-
-  # Coeff régulation PID
-  - platform: template
-    name: "PID Kp"
-    id: kp_gain
-    mode: box
-    min_value: 0
-    max_value: 5
-    step: 0.01
-    initial_value: 0.5
-    restore_value: true    
-    optimistic: true
-
-  - platform: template
-    name: "PID Ki"
-    id: ki_gain
-    mode: box
-    min_value: 0
-    max_value: 1
-    step: 0.001
-    initial_value: 0.1
-    restore_value: true       
-    optimistic: true
-
-  - platform: template
-    name: "PID Kd"
-    id: kd_gain
-    mode: box
-    min_value: 0
-    max_value: 1
-    step: 0.001
-    initial_value: 0.05
-    restore_value: true       
-    optimistic: true 
 
 sensor:
     
@@ -354,6 +321,10 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"  
     accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
 
   - platform: mqtt_subscribe
     name: "${friendly_name} Soc"
@@ -362,7 +333,11 @@ sensor:
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
-
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+          
   - platform: mqtt_subscribe
     name: "${friendly_name} Etat Bus VE"
     id: etatbus_ve
@@ -495,13 +470,16 @@ display:
       it.print(0, 3, ligne3);
 
 interval:
-  - interval: 1s
+  - interval: 3s
     then:
       - script.execute: calcul_injection
-      - script.execute: calcul_relais_surprod      
-  - interval: 3s
+ 
+  - interval: 5s
     then:      
-      - script.execute: etat_production 
+      - script.execute: etat_production
+      - script.execute: calcul_relais_surprod      
+
+        
 
 
  ########################################################################""
@@ -533,8 +511,8 @@ script:
       - if:
           condition:
             or:
-              # Cas 1 : Mode manuel => OFF
-              - switch.is_off: modeauto
+              # Cas 1 : Mode Arret ==> OFF
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Arret";'
 
               # Cas 2 : Mode auto avec conditions NOK => OFF
               - and:
@@ -565,15 +543,15 @@ script:
           condition:
             and:
               # Cas 3 : Mode auto + toutes les conditions OK => PID actif
-              - switch.is_on: modeauto
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Auto";'
               - switch.is_on: validrouteur
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
               - lambda: 'return id(soc).state >= id(seuil_soc).state;'
           then:
             # Script de régulation
-            - script.execute: regulation
-            
+            #- script.execute: regulation
+            - script.execute: regulation_interpolation
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda |-
@@ -582,10 +560,11 @@ script:
                 format: "Régul ON - S triac (Après Securité): %.2f"
                 args: [ 'id(striac)' ]
                 level: DEBUG
+              
 
       # Affichage STriac et Increment
       - lambda: |-
-            id(afstriac).publish_state( id(striac) );
+            id(afstriac).publish_state( id(striac)) ;
             id(afincrement).publish_state( id(increment) );
   
   ########################################################################""
@@ -598,107 +577,152 @@ script:
   # Sinon:
   #   Consigne= 0 & Mesure = Pu Batteries
   # C'est popur éviter de décharger la batterie dans l'ECS
-
-  - id: regulation
+  - id: regulation_interpolation
     mode: single
     then:
       - lambda: |-
-          float mesure = 0, consigne = 0, coeff = 0, inc = 0, p_dispo=0;          
+          float mesure = 0, consigne = 0, coeff = 0, inc = 0, p_dispo=0 ;          
           std::string regul;
-
-          // id(p_dispo)= id(pu_prod).state - id(conso_maison).state;
-          // Calcul de la puissance disponible (pu prod-pu maison) qui doit se situé entre 
-          //float p_dispo = id(pu_prod).state - id(conso_maison).state;
-          //p_dispo = (p_dispo < 100.0) ? 100.0 : p_dispo;
-          //p_dispo = (p_dispo > id(cons_pubatt).state) ? id(cons_pubatt).state : p_dispo;
-
-          // Evolution progressive de la consigne par pas de 10W
-          float p_dispo_target = id(pu_prod).state - id(conso_maison).state;
-          p_dispo_target = (p_dispo_target < 0.0) ? 0.0 : p_dispo_target;
-          p_dispo_target = (p_dispo_target > id(cons_pubatt).state) ? id(cons_pubatt).state : p_dispo_target;
-
-          // seuil de variation max (W)
-          float max_step = 10.0;
-
-          float delta = p_dispo_target - id(p_dispo_lisse);
-          if (delta > max_step) {
-            id(p_dispo_lisse) += max_step;
-          } else if (delta < -max_step) {
-            id(p_dispo_lisse) -= max_step;
-          } else {
-            id(p_dispo_lisse) = p_dispo_target;
-          }
-
-          p_dispo=id(p_dispo_lisse);
-
-          id(afpdispo).publish_state(p_dispo);
+          // Table de correspondance striac vs p_dispo
+          const float striac_table[] = {
+            0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
+            11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0,
+            21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0,
+            31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0,
+            41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0,
+            51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0,
+            61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0,
+            71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0,
+            81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0,
+            91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0
+          };
+          const float p_dispo_table[] = {
+            5.0, 14.661659, 15.560880, 15.927020, 16.568291, 18.303759, 19.157148, 20.944599, 22.596100, 23.025951, 25.903030,
+            28.434729, 30.524710, 31.625759, 34.235725, 36.901440, 40.163738, 44.019341, 44.768658, 49.555248, 56.278118,
+            59.905346, 64.042496, 69.965248, 77.182022, 81.073914, 89.339218, 96.296753, 100.722771, 108.025780, 115.575485,
+            122.833633, 133.766602, 144.135086, 159.488968, 166.558502, 178.282349, 189.092865, 202.196732, 212.861603, 234.333084,
+            248.347321, 262.094543, 283.565796, 301.493713, 322.728455, 344.373596, 365.494080, 381.928162, 415.564850, 441.482819,
+            468.173431, 501.893982, 521.712341, 550.043701, 586.746399, 627.726074, 661.966309, 703.051208, 730.505554, 761.137329,
+            804.480469, 847.356140, 878.056946, 941.720215, 993.722656, 1061.685303, 1101.080322, 1135.102417, 1196.311035, 1233.961548,
+            1294.063599, 1352.521729, 1392.430054, 1460.270386, 1512.882202, 1609.747437, 1674.149170, 1696.517944, 1770.225342, 1833.700928,
+            1901.670288, 1970.877197, 2023.935547, 2094.105469, 2165.517334, 2248.448242, 2357.001465, 2456.213135, 2539.881348, 2570.754395,
+            2631.065918, 2691.585938, 2750.663086, 2817.201172, 2895.280762, 2941.024902, 3038.455322, 3106.765137, 3144.267822, 3183.569824
+          };
+          const int table_size = sizeof(striac_table) / sizeof(striac_table[0]);
 
           // Sélection de Consigne et Mesure en fonction de la charge des batteries
           if (id(etatbus_ve).state == 3) {
             // Mode Bulk : régule sur la puissance batterie
+            // Calcul de la puissance disponible
+            p_dispo = id(pu_prod).state - id(conso_maison).state-id(cons_pubatt).state;
+            p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
+
             mesure = id(pu_batteries).state;
-            //consigne = id(cons_pubatt).state;
-            consigne = p_dispo;
-            coeff= id(coeff_rbat).state;
+            consigne = id(cons_pubatt).state;
             regul= "Sur Pu batteries Bulk";
 
-          } else if (id(pu_batteries).state >= id(seuil_pubatt).state) {
-            // Sinon, si la batterie débite trop, on régule via l'injection réseau (négatif)
-            mesure = id(pureseau1).state*-1;
-            consigne = 0;
-            coeff= id(coeff_r).state;
-            regul= "Sur Pu reseau";
+          } else if ((id(etatbus_ve).state == 4) || (id(etatbus_ve).state == 5)){
+            // Sinon, on reste sur la puissance batterie en mode Absorsion (4) ou Float (5)
+            p_dispo = id(pu_prod).state - id(conso_maison).state+id(pu_batteries).state;
+            ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_batteries: %.2f",
+             p_dispo, id(pu_prod).state, id(conso_maison).state, id(pu_batteries).state);
+            p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
 
-          } else {
-            // Sinon, on reste sur la puissance batterie en mode non-bulk
             mesure = id(pu_batteries).state;
             consigne = 0;
-            coeff= id(coeff_rbat).state;
-            regul= "Sur Pu batteries Non Bulk";
-          }
-
-          // Calcul de l'erreur et de l'incrément quadratique
-          float erreur = mesure - consigne;
-
-          // Zone morte : si l'erreur est trop petite, on ignore
-          if (abs(erreur) < 10.0) {
-            inc = 0;
-          ESP_LOGI("regul", "Zone morte active - Erreur %.2f < 10 W, aucune action sur striac", erreur);            
+            regul= "Sur P Batt Absord/Float";
           } else {
-            // Choix de l'algorithme de régulation
+            regul= "Pas de régulation";
+            p_dispo = 0;
+          }
+          
+          // limite la P du triac à P Max
+          p_dispo = constrain(p_dispo, 0.0, id(pmax).state); 
 
-            // Calcul de l'incrément quadratique
-            // inc = (erreur * erreur * coeff) / 1000.0;
-            // if (erreur < 0) inc = -inc;
+          // Recherche dans la table avec interpolation linéaire
+          float striac_f = 0.0;
 
-            // ou
-
-            // Calcul de l'increment proportionnel
-            inc = (mesure-consigne)*coeff/1000;
+          if (p_dispo <= p_dispo_table[0]) {
+            striac_f = striac_table[0]; // Valeur minimale
+          } else if (p_dispo >= p_dispo_table[table_size - 1]) {
+            striac_f = striac_table[table_size - 1]; // Valeur maximale
+          } else {
+            // Interpolation linéaire
+            for (int i = 0; i < table_size - 1; i++) {
+              if (p_dispo >= p_dispo_table[i] && p_dispo <= p_dispo_table[i + 1]) {
+                float ratio = (p_dispo - p_dispo_table[i]) / (p_dispo_table[i + 1] - p_dispo_table[i]);
+                striac_f = striac_table[i] + ratio * (striac_table[i + 1] - striac_table[i]);
+                break;
+              }
+            }
           }
 
-          // Limitation de l'incrément par cycle (delta max)
-          float delta_max = id(delta_striac_max).state;
-          inc = constrain(inc, -delta_max, delta_max);
+          // Application de striac avec sécurité
+          if (isnan(id(striac))) striac_f = 0.0;
+          id(striac) = constrain(striac_f, 0.0, 100.0); // Limite striac entre 0 et 100
 
-          // Application sur striac avec sécurité NaN
-          if (isnan(id(striac))) id(striac) = 0;
-          id(striac) = constrain(id(striac) + inc, 0, id(pmax).state);
-
-          // Sortie finale du striac
-          if (id(striac) < 0) id(striac) = 0;
-          if (id(striac) > id(pmax).state) id(striac) = id(pmax).state;
-
-          // Log de débug
-          ESP_LOGI("regulp", "Pdispo; %.0f Mes: %.2f Cons: %.2f Inc: %.2f Striac: %.2f",
-            p_dispo,mesure,consigne,inc,id(striac));
-
-          // Publication Home Assistant
+          // Publication des états
+          id(afpdispo).publish_state(p_dispo);
           id(moderegul).publish_state(regul);
-          id(increment) = inc;
-          id(coeff_cours).publish_state(inc);
+          id(coeff_cours).publish_state(p_dispo);
           id(mes_cours).publish_state(mesure);
           id(valeur_consigne) = consigne;
+
+          // Log de débogage
+          ESP_LOGI("regul", "Pdispo: %.0f, Striac: %.2f", p_dispo, id(striac));
+ 
+  ########################################################################""
+    # Enregistre dans un fichier
+  - id: etalonnage_striac
+    mode: restart  
+    then:
+
+      - lambda: |-
+          id(striac) = 0.0;
+      - while:
+          condition:
+            lambda: 'return id(striac) < 100.0;'  # S'arrête après striac = 100
+          then:
+            - lambda: |-
+                id(striac) += 1.0; // Incrémente striac
+                ESP_LOGI("striac", "Valeur striac: %.2f", id(striac));
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda 'return id(striac) / 100.0;'  # Normalise entre 0.0 et 1.0
+
+            - delay: 10s  # Temporisation
+
+            - lambda: |-
+                ESP_LOGI("striac", "Valeur striac: %.2f Pu ECS %.0f", id(striac), id(puecs).state);            
+            - script.execute: log_striac1
+
+      - lambda: |-
+          ESP_LOGI("striac", "Fin de l'étalonnage, striac = %.2f", id(striac));
+
+  - id: log_striac
+    mode: single
+    then:
+      - lambda: |-   
+          std::string mess = "";
+          mess += std::to_string(id(striac)) + ",";
+          mess += std::to_string(id(puecs).state);
+          ESP_LOGI("fichier", "Message: %s", mess.c_str());
+          if (id(sntp_time).now().is_valid()) {
+            ESP_LOGI("fichier", "Temps valide: %s", id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
+          } else {
+            ESP_LOGI("fichier", "Temps non synchronisé");
+          }
+          id(_log_message).execute(mess); 
+
+  - id: log_striac1
+    mode: single
+    then:
+      - lambda: |-
+          std::string mess = "";
+          mess += std::to_string(id(striac)) + ",";
+          mess += std::to_string(id(puecs).state);
+          ESP_LOGI("fichier", "Message: %s", mess.c_str());
+          id(_log_message).execute(mess);  // Appelle le script _log_message avec le paramètre mess
 
   ########################################################################""
     # ------------  Pilotage led
@@ -732,7 +756,7 @@ script:
      # si triac <= 0 alors on desactive le relais
       - if: 
           condition:
-            - lambda: 'return (id(striac)>=id(pmax).state-5 && id(puecs).state<100);'
+            - lambda: 'return (id(striac)>=90 && id(puecs).state<100);'
           then:
             - delay: 300s
             - switch.turn_on: relais
@@ -745,3 +769,15 @@ script:
             - switch.turn_off: relais
             - logger.log: "Relais Désactivé"
 
+  - id: _log_message
+    parameters:
+      mess1: std::string  # Type explicite pour ESPHome
+    then:
+      - lambda: |-
+          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          id(telegram_msg_buffer) = mess;
+          ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
+      - homeassistant.service:
+          service: script.envoyer_un_message_log_depuis_esp176
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'            

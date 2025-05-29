@@ -1,5 +1,5 @@
 substitutions:
-  device_name: "esp176-esp32-routeur-1r"
+  device_name: "esp176_routeur"
   friendly_name: esp176
   adress_ip: "192.168.0.176"
   time_timezone: "Europe/Paris"
@@ -16,7 +16,6 @@ esphome:
     priority: -100
     # Force mode auto et tempok au demarrage
     then: 
-      - switch.turn_on: modeauto
       - binary_sensor.template.publish:
           id: temperatureok
           state: ON
@@ -85,23 +84,12 @@ mqtt:
   #internal_mqtt_default: internal
 
 globals:
-  - id: increment
-    type: float
-    restore_value: yes
-    initial_value: '0'
-
   - id: p_dispo_lisse
     type: float
     restore_value: yes
     initial_value: '0'
 
   - id: striac
-    type: float
-    restore_value: no
-    initial_value: '0.0'
-
-  # raffraichit la consigne pour Graphana
-  - id: valeur_consigne
     type: float
     restore_value: no
     initial_value: '0.0'
@@ -139,8 +127,9 @@ select:
     restore_value: true
     options:
       - Auto
-      - Etalonnage
+      - Manu
       - Arret
+      - Etalonnage      
     id: _Mode_Fonctionnement_routeur
     on_value: 
       then:
@@ -180,6 +169,19 @@ binary_sensor:
   
 # Input Number
 number:
+  # Consigne Triac en Mode Manuel
+  - platform: template
+    name: "Consigne Triac Manu"
+    id: triac_manu
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:arrow-collapse-vertical 
+
   # Max sortie triac
   - platform: template
     name: "Puissance Max Triac"
@@ -191,10 +193,11 @@ number:
     max_value: 3000
     unit_of_measurement: "W"
     step: 1
+    icon: mdi:arrow-collapse-vertical
 
   # Seuil MAX temperature
   - platform: template
-    name: "${friendly_name} T Max"
+    name: "T Max"
     id: tmax
     optimistic: true
     restore_value: true
@@ -203,34 +206,24 @@ number:
     max_value: 75
     unit_of_measurement: "C°"
     step: 0.1
+    icon: mdi:arrow-collapse-vertical
 
-  # Seuil sur Regul Puissance batteries 
+  # Consigne Régul sur Puissance Batteries en mode Bulk
   - platform: template
-    name: "${friendly_name} Seuil Pu Batteries"
-    id: seuil_pubatt
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: -2500
-    max_value: 0
-    unit_of_measurement: "W"
-    step: 1
-  
-  # Consigne Régul sur Puissance Batteries
-  - platform: template
-    name: "${friendly_name} Consigne Pu Batteries"
+    name: "Consigne Pu Batteries"
     id: cons_pubatt
     optimistic: true
     restore_value: true
     mode: box
-    min_value: -2500
+    min_value: 0
     max_value: 2500
     unit_of_measurement: "W"
     step: 1
+    icon: mdi:arrow-collapse-vertical
 
   # seuil SOC validation routeur
   - platform: template
-    name: "${friendly_name} Seuil SOC"
+    name: "Seuil SOC"
     id: seuil_soc
     optimistic: true
     restore_value: true
@@ -239,10 +232,11 @@ number:
     max_value: 100
     unit_of_measurement: "%"
     step: 1
+    icon: mdi:arrow-collapse-vertical
 
-  # seuil Production validation routeur 
+  # seuil Production Photovoltaique de validation routeur 
   - platform: template
-    name: "${friendly_name} Seuil Production Val Routeur"
+    name: "Seuil Production Val Routeur"
     id: seuil_prod
     optimistic: true
     restore_value: true
@@ -251,6 +245,7 @@ number:
     max_value: 3000
     unit_of_measurement: "W"
     step: 1
+    icon: mdi:arrow-collapse-vertical
 
 sensor:
     
@@ -261,35 +256,39 @@ sensor:
 
   ############### TEMPLATE  ######################"
   # Affichage dans HA et sur l'afficheur
+  # Puissance lue par le JSk- Négative en injection/Positive en soutirage
   - platform: template
     name: "${friendly_name} Pu Reseau"
     id: pureseau1
     unit_of_measurement: "W"
-    state_class: "measurement"  
-
-  - platform: template
-    name: "${friendly_name} Increment"
-    id: afincrement
-    unit_of_measurement: ""
-    accuracy_decimals: 2
     state_class: "measurement"
-
+    accuracy_decimals: 0
+  # Sortie triac de 0à100%
   - platform: template
     name: "${friendly_name} Sortie Triac"
     id: afstriac
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
-  
+  # Pu disponible
   - platform: template
     name: "Pu Disponible"
     id: afpdispo
     unit_of_measurement: "W"
-    state_class: "measurement"      
+    state_class: "measurement"
+    accuracy_decimals: 0
+
+  # Sensor Intermediaire pour synoptique
+  - platform: template
+    name: "Cons batt en Cours"
+    id: cons_batt_cours
+    state_class: "measurement"
+    unit_of_measurement: "W"
     accuracy_decimals: 0
 
   # Les MQTT sont déclarés dans le Node Red du Cerbo GX
   # https://venus.local:1881/#flow/dbd727f16cbe7b5f
+
   - platform: mqtt_subscribe
     name: "${friendly_name} Conso Maison"
     id: conso_maison
@@ -363,60 +362,27 @@ sensor:
     update_interval: 60s
     filters:
       - filter_out: NAN
-
-  # Sensor Intermediaire pour affichage PID
-  - platform: template
-    name: "Coeff en Cours"
-    unit_of_measurement: " "
-    id: coeff_cours
-    state_class: "measurement"  
-    accuracy_decimals: 2
-
-  - platform: template
-    name: "Mes en Cours"
-    id: mes_cours
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 0
-
-  - platform: template
-    name: "Cons en Cours"
-    id: cons_cours
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 0
-    update_interval: 10s
-    lambda: |-
-      return id(valeur_consigne);
-  
+ 
 # déclaration des "text_sensors"
 text_sensor:
   - platform: template
-    name: "${friendly_name} Mode Regulation"
+    name: "Mode Regulation"
     id: moderegul
 
 switch:
   - platform: gpio
-    name: "${friendly_name} Relais"
+    name: "Relais"
     pin: GPIO5
     id: relais
 
   - platform: template
-    name: "${friendly_name} Mode Auto"    
-    id: modeauto
-    optimistic: true
-    restore_mode: always_on
-    on_turn_off:
-      - light.turn_off: gradateur
-
-  - platform: template
-    name: "${friendly_name} Valid Routeur"    
+    name: "Valid Routeur"    
     id: validrouteur
     optimistic: true
     restore_mode: always_on
 
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "Restart"
 
 output:
   #LEDS --------------------------------------
@@ -442,7 +408,7 @@ output:
 
 light:
   - platform: monochromatic
-    name: "${friendly_name} STriac"
+    name: "STriac"
     output: ecs
     id: gradateur
     default_transition_length: 50ms
@@ -462,7 +428,7 @@ display:
       snprintf(ligne0, sizeof(ligne0), "Pr=%0.0fW Pe=%0.0fW", id(pureseau1).state, id(puecs).state);
       snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
       snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac), id(temperatureok).state ? "OK" : "NOK");
-      snprintf(ligne3, sizeof(ligne3), "Mode:%s Inc=%0.1f", id(modeauto).state ? "Auto" : "Manu", id(increment));
+      snprintf(ligne3, sizeof(ligne3), "Mode:%s", id(_Mode_Fonctionnement_routeur).state.c_str());
 
       it.print(0, 0, ligne0);
       it.print(0, 1, ligne1);
@@ -479,12 +445,15 @@ interval:
       - script.execute: etat_production
       - script.execute: calcul_relais_surprod      
 
-        
-
-
  ########################################################################""
 script:
-  # Calcul puissance de la puissance à injecter dans le triac pilotant l'ECS
+  # Calcul du niveau de puissance à injecter dans le triac pilotant l'ECS
+  # En Auto: Conditions Initales de Démarrage:
+                                              # Mode de Fct=Auto
+                                              # Seuil Prod Ok
+                                              # Seuil SOC Ok
+                                              # temp Triac Ok
+                                              # Routeur Validé
   - id: calcul_injection
     mode: single
     then:
@@ -507,6 +476,7 @@ script:
           }
           // Log de débug
           // ESP_LOGI("regulp", "P Prod; %.0f Seuil: %.2f",id(pu_prod).state,id(seuil_prod).state);
+
       # Si conditions non Ok alors RAZ du Triac
       - if:
           condition:
@@ -516,23 +486,19 @@ script:
 
               # Cas 2 : Mode auto avec conditions NOK => OFF
               - and:
-                  - switch.is_on: modeauto
+                  - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Auto";'
                   - or:
                       - switch.is_off: validrouteur
                       - binary_sensor.is_off: temperatureok
                       - binary_sensor.is_off: seuil_prod_ok
-                      - lambda: 'return id(soc).state < id(seuil_soc).state;'
+                      - binary_sensor.is_off: seuil_soc_ok
           then:
             - lambda: |-
                 id(striac) = 0;
-                id(increment) = 0;
                 id(moderegul).publish_state("OFF");
-
-                // RAZ de l'affichage du PID A supprimer si inutile
-                id(coeff_cours).publish_state(0);
-                id(mes_cours).publish_state(0);
-                id(valeur_consigne) = 0;
-
+                id(afpdispo).publish_state(0);
+                id(cons_batt_cours).publish_state(0);
+                
             - light.turn_off: gradateur
             - logger.log:
                 format: "Régulation OFF - Mode: %s - Striac: %.1f"
@@ -547,41 +513,58 @@ script:
               - switch.is_on: validrouteur
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
-              - lambda: 'return id(soc).state >= id(seuil_soc).state;'
+              - binary_sensor.is_on: seuil_soc_ok
           then:
-            # Script de régulation
-            #- script.execute: regulation
+            # Vers script de régulation
             - script.execute: regulation_interpolation
+
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda |-
                   return id(striac) / 100;
-            - logger.log:
-                format: "Régul ON - S triac (Après Securité): %.2f"
-                args: [ 'id(striac)' ]
-                level: DEBUG
-              
 
-      # Affichage STriac et Increment
+       # En Manu on applique directement le number cons_manu sur le triac
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Manu";'             
+          then:
+              - lambda: |-  
+
+                  id(striac)=id(triac_manu).state;
+
+                  // Application de striac avec sécurité
+                  if (isnan(id(striac))) id(striac) = 0.0;
+                  id(striac) = constrain(id(striac), 0.0, 100.0); // Limite striac entre 0 et 100
+
+                  // Publication des états
+                  id(afpdispo).publish_state(0);
+                  id(moderegul).publish_state("Manuel"); 
+                  id(cons_batt_cours).publish_state(0);
+
+              - light.turn_on:
+                  id: gradateur
+                  brightness: !lambda |-
+                    return id(striac) / 100;                          
+
+      # Affichage STriac
       - lambda: |-
             id(afstriac).publish_state( id(striac)) ;
-            id(afincrement).publish_state( id(increment) );
   
   ########################################################################""
   # Principe de la régulation:
-  # Si Bus Ve en Bulk, on paratge le surplus entre la batterie et l'ECS avec une consigne de (1200W)
-  #   Consigne= Consigne pu Batteries & Mesure = Pu Batteries
-  # Si Bus Ve non Bulk (float), cela signifie que la batterie est chargée, alors:
-  # Si la PU Batteries est superieure à un seuil (-100), ça veut dire que la batterie se charge un peu
-  #   Consigne= 0 & Mesure = Pu Réseau
+  # Si Bus Ve en Bulk:, on partage le surplus entre la batterie (cons_batt) et l'ECS
+  #   P Dispo= Prod-Conso Maison-Reserve batteries
+  # Si Bus Ve en Absortion ou Float, cela signifie que la batterie est chargée, alors:
+  #  P Dispo= Prod-Conso Maison-Pu batteries (Negative en décharge)
   # Sinon:
-  #   Consigne= 0 & Mesure = Pu Batteries
-  # C'est popur éviter de décharger la batterie dans l'ECS
+  #   P Dispo = 0
+  # La sortie triac est calculée en fonction de la P_Dispo en recherchant sa valeur dans la table de correspondance établis en mode étalonnage
   - id: regulation_interpolation
     mode: single
     then:
       - lambda: |-
-          float mesure = 0, consigne = 0, coeff = 0, inc = 0, p_dispo=0 ;          
+          float p_dispo=0 ;          
           std::string regul;
           // Table de correspondance striac vs p_dispo
           const float striac_table[] = {
@@ -616,23 +599,24 @@ script:
             // Calcul de la puissance disponible
             p_dispo = id(pu_prod).state - id(conso_maison).state-id(cons_pubatt).state;
             p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
-
-            mesure = id(pu_batteries).state;
-            consigne = id(cons_pubatt).state;
+            
+            // Affichage sur Synoptique
+            id(cons_batt_cours).publish_state(id(cons_pubatt).state);
             regul= "Sur Pu batteries Bulk";
 
           } else if ((id(etatbus_ve).state == 4) || (id(etatbus_ve).state == 5)){
             // Sinon, on reste sur la puissance batterie en mode Absorsion (4) ou Float (5)
             p_dispo = id(pu_prod).state - id(conso_maison).state+id(pu_batteries).state;
-            ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_batteries: %.2f",
-             p_dispo, id(pu_prod).state, id(conso_maison).state, id(pu_batteries).state);
             p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
 
-            mesure = id(pu_batteries).state;
-            consigne = 0;
+            
+            // Affichage sur Synoptique
+            id(cons_batt_cours).publish_state(id(pu_batteries).state*-1);
             regul= "Sur P Batt Absord/Float";
+
           } else {
             regul= "Pas de régulation";
+            id(cons_batt_cours).publish_state(0);
             p_dispo = 0;
           }
           
@@ -664,12 +648,12 @@ script:
           // Publication des états
           id(afpdispo).publish_state(p_dispo);
           id(moderegul).publish_state(regul);
-          id(coeff_cours).publish_state(p_dispo);
-          id(mes_cours).publish_state(mesure);
-          id(valeur_consigne) = consigne;
 
           // Log de débogage
-          ESP_LOGI("regul", "Pdispo: %.0f, Striac: %.2f", p_dispo, id(striac));
+
+          ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_batteries: %.2f,STriac: %.2f",
+            p_dispo, id(pu_prod).state, id(conso_maison).state, id(cons_batt_cours).state,id(striac));
+
  
   ########################################################################""
     # Enregistre dans un fichier

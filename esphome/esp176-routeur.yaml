@@ -1,0 +1,731 @@
+substitutions:
+  device_name: "esp176_routeur"
+  friendly_name: esp176
+  adress_ip: "192.168.0.176"
+  time_timezone: "Europe/Paris"
+
+packages:
+  ph: !include pack_esp176/jsk.yaml
+
+esphome:
+  name: ${device_name}
+  project:
+    name: "rem81.esp176-esp32-routeur"
+    version: "1.0.0"
+  on_boot:
+    priority: -100
+    # Force mode auto et tempok au demarrage
+    then: 
+      - binary_sensor.template.publish:
+          id: temperatureok
+          state: ON
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: 192.168.0.254
+
+    
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO32 # led jaune
+    inverted: true
+
+# Enable logging
+logger:
+  baud_rate: 0
+  level: info
+
+#    modbus.component: INFO
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+web_server:
+  port: 80
+  version: 3
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org  
+
+# Protocole I2C
+i2c:
+  sda: GPIO21 
+  scl: GPIO22
+  scan: True
+  id: bus_a
+  frequency: 400kHz
+
+# Mosquitto Proxmox
+mqtt:
+  broker: 192.168.0.204
+  username: !secret mqtt_pve_name
+  password: !secret mqtt_pve_pw
+  #internal_mqtt_default: internal
+
+globals:
+
+  - id: p_dispo_lisse
+    type: float
+    restore_value: yes
+    initial_value: '0'
+
+  - id: striac
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+
+  # stocke temporairement le message à envoyer à telegram
+  - id: telegram_msg_buffer
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+
+# Sonde Temperature Dallas
+one_wire:
+  - platform: gpio  
+    pin: GPIO27 #
+
+# Informations supplementaires sur le WIFI
+#text_sensor:
+#  - platform: wifi_info
+#    ip_address:
+#      name: IP Address
+#    ssid:
+#      name: Connected SSID
+#    bssid:
+#      name: Connected BSSID
+#    mac_address:
+#      name: Mac Wifi Address
+#    scan_results:
+#      name: Latest Scan Results
+
+# déclaration des modes de fonctionnement dans des "input select"
+select:
+  - platform: template
+    name: "Mode_Fonctionnement_routeur"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Etalonnage
+      - Arret
+    id: _Mode_Fonctionnement_routeur
+    on_value: 
+      then:
+        - if:
+            condition:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Etalonnage";'
+            then:
+              - script.execute: etalonnage_striac
+              
+        - script.execute: calcul_injection        
+        - logger.log:
+            format: "Mode Fonct Routeur --> %s"
+            args: [ 'id(_Mode_Fonctionnement_routeur).state.c_str()' ]
+            level: INFO
+
+button:
+  - platform: template
+    name: "Bouton Declencheur"
+
+
+binary_sensor:
+  #Etat de la connection
+    - platform: status
+      name: "Status"
+  
+    - platform: template
+      name: "Temp Ok"
+      id: temperatureok
+  
+    - platform: template
+      name: "Seuil Prod Ok"
+      id: seuil_prod_ok
+
+    - platform: template
+      name: "Seuil SOC Ok"
+      id: seuil_soc_ok
+  
+# Input Number
+number:
+  # Max sortie triac
+  - platform: template
+    name: "Puissance Max Triac"
+    id: pmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 10
+    max_value: 3000
+    unit_of_measurement: "W"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # Seuil MAX temperature
+  - platform: template
+    name: "T Max"
+    id: tmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 75
+    unit_of_measurement: "C°"
+    step: 0.1
+    icon: mdi:arrow-collapse-vertical
+
+  # Consigne Régul sur Puissance Batteries en mode Bulk
+  - platform: template
+    name: "Reserve Charge Batteries"
+    id: res_pubatt
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 2500
+    unit_of_measurement: "W"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # seuil SOC validation routeur
+  - platform: template
+    name: "Seuil SOC"
+    id: seuil_soc
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # seuil Production Photovoltaique de validation routeur 
+  - platform: template
+    name: "Seuil Production Val Routeur"
+    id: seuil_prod
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 100
+    max_value: 3000
+    unit_of_measurement: "W"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+sensor:
+    
+  # Informations WI_FI
+  - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
+    name: "WiFi Signal dB"
+    update_interval: 60s
+
+  ############### TEMPLATE  ######################"
+  # Affichage dans HA et sur l'afficheur
+  # Puissance lue par le JSk- Négative en injection/Positive en soutirage
+  - platform: template
+    name: "Pu Reseau"
+    id: pureseau1
+    unit_of_measurement: "W"
+    state_class: "measurement"
+    accuracy_decimals: 0
+  # Sortie triac de 0à100%
+  - platform: template
+    name: "Sortie Triac"
+    id: afstriac
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+  # Pu disponible
+  - platform: template
+    name: "Pu Disponible"
+    id: afpdispo
+    unit_of_measurement: "W"
+    state_class: "measurement"
+    accuracy_decimals: 0
+
+  # Sensor Intermediaire pour synoptique
+  - platform: template
+    name: "Cons batt en Cours"
+    id: cons_batt_cours
+    state_class: "measurement"
+    unit_of_measurement: "W"
+    accuracy_decimals: 0
+
+  # Les MQTT sont déclarés dans le Node Red du Cerbo GX
+  # https://venus.local:1881/#flow/dbd727f16cbe7b5f
+
+  - platform: mqtt_subscribe
+    name: "Conso Maison"
+    id: conso_maison
+    topic: mp2/multiplus2/conso_out1
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+
+  - platform: mqtt_subscribe
+    name: "Pu batterie"
+    id: pu_batteries
+    topic: mp2/batteries/puissance
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+        
+  - platform: mqtt_subscribe
+    name: "Pu Produite"
+    id: pu_prod
+    topic: mp2/multiplus2/prod_totale
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+
+  - platform: mqtt_subscribe
+    name: "Soc"
+    id: soc
+    topic: mp2/batteries/soc
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+          
+  - platform: mqtt_subscribe
+    name: "Etat Bus VE"
+    id: etatbus_ve
+    topic: mp2/multiplus2/etatbusve
+    accuracy_decimals: 0
+
+  # lecture sensor Home Assistant
+  - platform: homeassistant
+    name: "Status Bus VE"
+    entity_id: sensor.mp2_status_bus_ve
+    id: statusbusve
+
+  - platform: homeassistant
+    name: "Tarif Num"
+    entity_id: sensor.linky_n_tarif
+    id: hc
+
+  # Sonde Temperature radiateur
+  - platform: dallas_temp
+    address: 0xeb012112e461b128
+    name: "Temp triac"
+    id: temp_triac
+    update_interval: 60s
+    filters:
+      - filter_out: NAN
+ 
+# déclaration des "text_sensors"
+text_sensor:
+  - platform: template
+    name: "Mode Regulation"
+    id: moderegul
+
+switch:
+  - platform: gpio
+    name: "Relais"
+    pin: GPIO5
+    id: relais
+
+  - platform: template
+    name: "Valid Routeur"    
+    id: validrouteur
+    optimistic: true
+    restore_mode: always_on
+
+  - platform: restart
+    name: "Restart"
+
+output:
+  #LEDS --------------------------------------
+  - id: led_jaune
+    platform: gpio
+    pin: GPIO26 #GPIO32
+
+  - id: led_rouge
+    platform: gpio
+    pin: GPIO25
+
+  # Pilotage du Dimmer
+  - platform: ac_dimmer
+    id: ecs
+    gate_pin: GPIO33
+    method: leading
+    zero_cross_pin:
+      number: GPIO34 
+      mode:
+        input: true
+      inverted: yes
+    min_power: 5%
+
+light:
+  - platform: monochromatic
+    name: "STriac"
+    output: ecs
+    id: gradateur
+    default_transition_length: 50ms
+
+  # Affichage
+display:
+  - platform: lcd_pcf8574
+    dimensions: 20x4
+    address: 0x27
+    update_interval: 20s  # Plus espacé pour alléger la charge CPU
+    lambda: |-
+      char ligne0[21];
+      char ligne1[21];
+      char ligne2[21];
+      char ligne3[21];
+
+      snprintf(ligne0, sizeof(ligne0), "Pr=%0.0fW Pe=%0.0fW", id(pureseau1).state, id(puecs).state);
+      snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
+      snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac), id(temperatureok).state ? "OK" : "NOK");
+      snprintf(ligne3, sizeof(ligne3), "Mode:%s", id(_Mode_Fonctionnement_routeur).state.c_str());
+
+      it.print(0, 0, ligne0);
+      it.print(0, 1, ligne1);
+      it.print(0, 2, ligne2);
+      it.print(0, 3, ligne3);
+
+interval:
+  - interval: 3s
+    then:
+      - script.execute: calcul_injection
+ 
+  - interval: 5s
+    then:      
+      - script.execute: etat_production
+      - script.execute: calcul_relais_surprod      
+
+ ########################################################################""
+script:
+  # Calcul du niveau de puissance à injecter dans le triac pilotant l'ECS
+  # En Auto: Conditions Initales de Démarrage:
+                                              # Mode de Fct=Auto
+                                              # Seuil Prod Ok
+                                              # Seuil SOC Ok
+                                              # temp Triac Ok
+                                              # Routeur Validé
+  - id: calcul_injection
+    mode: single
+    then:
+      - lambda: |-
+          //  Pu production > Seuil de production
+          id(seuil_prod_ok).publish_state(id(pu_prod).state > id(seuil_prod).state);
+
+          // # Seuil de SOC (avec hysteresis de 2 %)
+          if (id(soc).state >= id(seuil_soc).state) {
+            id(seuil_soc_ok).publish_state(true);
+          } else if (id(soc).state < (id(seuil_soc).state - 2)) {
+            id(seuil_soc_ok).publish_state(false);
+          }
+
+          // Surveille température triac
+          if (id(temp_triac).state < (id(tmax).state - 2)) {
+            id(temperatureok).publish_state(true);
+          } else if (id(temp_triac).state >= id(tmax).state) {
+            id(temperatureok).publish_state(false);
+          }
+          // Log de débug
+          // ESP_LOGI("regulp", "P Prod; %.0f Seuil: %.2f",id(pu_prod).state,id(seuil_prod).state);
+
+      # Si conditions non Ok alors RAZ du Triac
+      - if:
+          condition:
+            or:
+              # Cas 1 : Mode Arret ==> OFF
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Arret";'
+
+              # Cas 2 : Mode auto avec conditions NOK => OFF
+              - and:
+                  - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Auto";'
+                  - or:
+                      - switch.is_off: validrouteur
+                      - binary_sensor.is_off: temperatureok
+                      - binary_sensor.is_off: seuil_prod_ok
+                      - binary_sensor.is_off: seuil_soc_ok
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(moderegul).publish_state("OFF");
+                id(afpdispo).publish_state(0);
+                id(cons_batt_cours).publish_state(0);
+                
+            - light.turn_off: gradateur
+            - logger.log:
+                format: "Régulation OFF - Mode: %s - Striac: %.1f"
+                args: ['id(moderegul).state.c_str()', 'id(striac)']
+                level: DEBUG
+      # Si toutes les conditions OK alors on calcule la S triac
+      - if:
+          condition:
+            and:
+              # Cas 3 : Mode auto + toutes les conditions OK => PID actif
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Auto";'
+              - switch.is_on: validrouteur
+              - binary_sensor.is_on: seuil_prod_ok
+              - binary_sensor.is_on: temperatureok
+              - binary_sensor.is_on: seuil_soc_ok
+          then:
+            # Vers script de régulation
+            - script.execute: regulation_interpolation
+
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(striac) / 100;
+              
+
+      # Affichage STriac
+      - lambda: |-
+            id(afstriac).publish_state( id(striac)) ;
+  
+  ########################################################################""
+  # Principe de la régulation:
+  # Si Bus Ve en Bulk:, on partage le surplus entre la batterie (cons_batt) et l'ECS
+  #   P Dispo= Prod-Conso Maison-Reserve batteries
+  # Si Bus Ve en Absortion ou Float, cela signifie que la batterie est chargée, alors:
+  #  P Dispo= Prod-Conso Maison-Pu batteries (Negative en décharge)
+  # Sinon:
+  #   P Dispo = 0
+  # La sortie triac est calculée en fonction de la P_Dispo en recherchant sa valeur dans la table de correspondance établis en mode étalonnage
+  - id: regulation_interpolation
+    mode: single
+    then:
+      - lambda: |-
+          float p_dispo=0 ;          
+          std::string regul;
+          // Table de correspondance striac vs p_dispo
+          const float striac_table[] = {
+            0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
+            11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0,
+            21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0,
+            31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0,
+            41.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0,
+            51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0,
+            61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0,
+            71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0,
+            81.0, 82.0, 83.0, 84.0, 85.0, 86.0, 87.0, 88.0, 89.0, 90.0,
+            91.0, 92.0, 93.0, 94.0, 95.0, 96.0, 97.0, 98.0, 99.0, 100.0
+          };
+          const float p_dispo_table[] = {
+            5.0, 14.661659, 15.560880, 15.927020, 16.568291, 18.303759, 19.157148, 20.944599, 22.596100, 23.025951, 25.903030,
+            28.434729, 30.524710, 31.625759, 34.235725, 36.901440, 40.163738, 44.019341, 44.768658, 49.555248, 56.278118,
+            59.905346, 64.042496, 69.965248, 77.182022, 81.073914, 89.339218, 96.296753, 100.722771, 108.025780, 115.575485,
+            122.833633, 133.766602, 144.135086, 159.488968, 166.558502, 178.282349, 189.092865, 202.196732, 212.861603, 234.333084,
+            248.347321, 262.094543, 283.565796, 301.493713, 322.728455, 344.373596, 365.494080, 381.928162, 415.564850, 441.482819,
+            468.173431, 501.893982, 521.712341, 550.043701, 586.746399, 627.726074, 661.966309, 703.051208, 730.505554, 761.137329,
+            804.480469, 847.356140, 878.056946, 941.720215, 993.722656, 1061.685303, 1101.080322, 1135.102417, 1196.311035, 1233.961548,
+            1294.063599, 1352.521729, 1392.430054, 1460.270386, 1512.882202, 1609.747437, 1674.149170, 1696.517944, 1770.225342, 1833.700928,
+            1901.670288, 1970.877197, 2023.935547, 2094.105469, 2165.517334, 2248.448242, 2357.001465, 2456.213135, 2539.881348, 2570.754395,
+            2631.065918, 2691.585938, 2750.663086, 2817.201172, 2895.280762, 2941.024902, 3038.455322, 3106.765137, 3144.267822, 3183.569824
+          };
+          const int table_size = sizeof(striac_table) / sizeof(striac_table[0]);
+
+          // Sélection de Consigne et Mesure en fonction de la charge des batteries
+          if (id(etatbus_ve).state == 3) {
+            // Mode Bulk : régule sur la puissance batterie
+            // Calcul de la puissance disponible
+            p_dispo = id(pu_prod).state - id(conso_maison).state-id(res_pubatt).state;
+            p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
+            
+            // Affichage sur Synoptique
+            id(cons_batt_cours).publish_state(id(res_pubatt).state);
+            regul= "Sur Pu batteries Bulk";
+
+          } else if ((id(etatbus_ve).state == 4) || (id(etatbus_ve).state == 5)){
+            // Sinon, on reste sur la puissance batterie en mode Absorsion (4) ou Float (5)
+            p_dispo = id(pu_prod).state - id(conso_maison).state+id(pu_batteries).state;
+            p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
+
+            
+            // Affichage sur Synoptique
+            id(cons_batt_cours).publish_state(id(pu_batteries).state*-1);
+            regul= "Sur P Batt Absord/Float";
+
+          } else {
+            regul= "Pas de régulation";
+            id(cons_batt_cours).publish_state(0);
+            p_dispo = 0;
+          }
+          
+          // limite la P du triac à P Max
+          p_dispo = constrain(p_dispo, 0.0, id(pmax).state); 
+
+          // Recherche dans la table avec interpolation linéaire
+          float striac_f = 0.0;
+
+          if (p_dispo <= p_dispo_table[0]) {
+            striac_f = striac_table[0]; // Valeur minimale
+          } else if (p_dispo >= p_dispo_table[table_size - 1]) {
+            striac_f = striac_table[table_size - 1]; // Valeur maximale
+          } else {
+            // Interpolation linéaire
+            for (int i = 0; i < table_size - 1; i++) {
+              if (p_dispo >= p_dispo_table[i] && p_dispo <= p_dispo_table[i + 1]) {
+                float ratio = (p_dispo - p_dispo_table[i]) / (p_dispo_table[i + 1] - p_dispo_table[i]);
+                striac_f = striac_table[i] + ratio * (striac_table[i + 1] - striac_table[i]);
+                break;
+              }
+            }
+          }
+
+          // Application de striac avec sécurité
+          if (isnan(id(striac))) striac_f = 0.0;
+          id(striac) = constrain(striac_f, 0.0, 100.0); // Limite striac entre 0 et 100
+
+          // Publication des états
+          id(afpdispo).publish_state(p_dispo);
+          id(moderegul).publish_state(regul);
+
+          // Log de débogage
+
+          ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_batteries: %.2f,STriac: %.2f",
+            p_dispo, id(pu_prod).state, id(conso_maison).state, id(cons_batt_cours).state,id(striac));
+
+ 
+  ########################################################################""
+    # Enregistre dans un fichier
+  - id: etalonnage_striac
+    mode: restart  
+    then:
+
+      - lambda: |-
+          id(striac) = 0.0;
+      - while:
+          condition:
+            lambda: 'return id(striac) < 100.0;'  # S'arrête après striac = 100
+          then:
+            - lambda: |-
+                id(striac) += 1.0; // Incrémente striac
+                ESP_LOGI("striac", "Valeur striac: %.2f", id(striac));
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda 'return id(striac) / 100.0;'  # Normalise entre 0.0 et 1.0
+
+            - delay: 10s  # Temporisation
+
+            - lambda: |-
+                ESP_LOGI("striac", "Valeur striac: %.2f Pu ECS %.0f", id(striac), id(puecs).state);            
+            - script.execute: log_striac1
+
+      - lambda: |-
+          ESP_LOGI("striac", "Fin de l'étalonnage, striac = %.2f", id(striac));
+
+  - id: log_striac
+    mode: single
+    then:
+      - lambda: |-   
+          std::string mess = "";
+          mess += std::to_string(id(striac)) + ",";
+          mess += std::to_string(id(puecs).state);
+          ESP_LOGI("fichier", "Message: %s", mess.c_str());
+          if (id(sntp_time).now().is_valid()) {
+            ESP_LOGI("fichier", "Temps valide: %s", id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
+          } else {
+            ESP_LOGI("fichier", "Temps non synchronisé");
+          }
+          id(_log_message).execute(mess); 
+
+  - id: log_striac1
+    mode: single
+    then:
+      - lambda: |-
+          std::string mess = "";
+          mess += std::to_string(id(striac)) + ",";
+          mess += std::to_string(id(puecs).state);
+          ESP_LOGI("fichier", "Message: %s", mess.c_str());
+          id(_log_message).execute(mess);  // Appelle le script _log_message avec le paramètre mess
+
+  ########################################################################""
+    # ------------  Pilotage led
+  - id: etat_production
+    mode: single
+    then:
+      - if: 
+          condition:
+            sensor.in_range:
+              id: pureseau1
+              below: -50
+          then:
+            - output.turn_on: led_rouge
+          else:
+            - output.turn_off: led_rouge
+            
+      - if: 
+          condition:
+            switch.is_on: validrouteur
+          then:
+            - output.turn_on: led_jaune
+          else:
+            - output.turn_off: led_jaune
+ 
+ ########################################################################""
+  - id: calcul_relais_surprod
+    mode: single
+    then:
+     # Si sortie triac > pmax-5%, ce qui signifie que le triac est au max sans effet, pendant plus de 60s
+     # alors on active le relais
+     # si triac <= 0 alors on desactive le relais
+      - if: 
+          condition:
+            - lambda: 'return (id(striac)>=90 && id(puecs).state<100);'
+          then:
+            - delay: 300s
+            - switch.turn_on: relais
+            - logger.log: "Relais Activé"
+
+      - if: 
+          condition:
+            - lambda: 'return id(puecs).state >= 100;'
+          then:
+            - switch.turn_off: relais
+            - logger.log: "Relais Désactivé"
+
+  - id: _log_message
+    parameters:
+      mess1: std::string  # Type explicite pour ESPHome
+    then:
+      - lambda: |-
+          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          id(telegram_msg_buffer) = mess;
+          ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
+      - homeassistant.service:
+          service: script.envoyer_un_message_log_depuis_esp176
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'            

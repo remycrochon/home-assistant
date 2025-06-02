@@ -225,31 +225,68 @@ openhasp:
       ###############
       - obj: "p4b10" # Regule
         properties:
-          "text": "Reg: {{ states('sensor.esp176_esp32_routeur_1r_esp176_mode_regulation') }}"      
-      - obj: "p4b20" # Consigne
+          "text": "Reg: {{ states('sensor.esp176_esp32_routeur_1r_mode_regulation') }}"      
+      - obj: "p4b20" # Prod
         properties:
           "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_en_cours')|int %}
+            {% set count = states('sensor.mp2_prod_totale_mqtt')|int %}
             {% if count >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
+              P={{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+              P={{ count |round(0)}} W
             {% endif %}
-      - obj: "p4b30" # Increment
+      - obj: "p4b21" # Maison
         properties:
-          "text": "{{ states('sensor.esp176_esp32_routeur_1r_coeff_en_cours')|float }}"
+          "text": >
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
+            {% if count >= 1000 %}
+              M={{ (count/1000) |round(2)}} kW
+            {% else %}
+              M={{ count |round(0)}} W
+            {% endif %}
+      - obj: "p4b22" # Consigne Batteries
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_batt_en_cours')|int %}
+            {% if count >= 1000 %}
+              C={{ (count/1000) |round(2)}} kW
+            {% else %}
+              C={{ count |round(0)}} W
+            {% endif %}
+      - obj: "p4b30" # P Dispo
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_esp32_routeur_1r_pu_disponible')|int %}
+            {% if count >= 1000 %}
+              D={{ (count/1000) |round(2)}} kW
+            {% else %}
+              D={{ count |round(0) }}W
+            {% endif %}
+
       - obj: "p4b40" # S Triac
         properties:
-          "text": "{{ states('sensor.esp176_sortie_triac')|float | round(0)}}"
-      - obj: "p4b50" # Mesure
+          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float | round(0)}}"
+      - obj: "p4b50" # ECS
         properties:
           "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_mes_en_cours')|int %}
+            {% set count = states('sensor.esp176_esp32_routeur_1r_p_ecs_jsymk')|int %}
             {% if count >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
+              P ECS={{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+              P ECS={{ count |round(0)}} W
             {% endif %}
+      - obj: "p4b60" # TEMP Triac
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_routeur_temp_triac')|int %}
+            T Triac={{ count |round(0)}} °C
+
+      - obj: "p4b70" # Temp ECS
+        properties:
+          "text": >
+            {% set count = states('sensor.esp126_temp_ecs')|int %}
+            T ECS={{ count |round(0)}} °C
+      
       ############### Page 5 TEST ###############
       ############### Réseau
       - obj: "p5b24" # Grid Power

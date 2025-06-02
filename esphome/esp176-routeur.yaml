@@ -128,8 +128,9 @@ select:
     restore_value: true
     options:
       - Auto
-      - Etalonnage
+      - Manu
       - Arret
+      - Etalonnage
     id: _Mode_Fonctionnement_routeur
     on_value: 
       then:
@@ -138,7 +139,9 @@ select:
               - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Etalonnage";'
             then:
               - script.execute: etalonnage_striac
-              
+
+        - light.turn_off:
+            id: gradateur
         - script.execute: calcul_injection        
         - logger.log:
             format: "Mode Fonct Routeur --> %s"
@@ -169,6 +172,19 @@ binary_sensor:
   
 # Input Number
 number:
+  # seuil SOC validation routeur
+  - platform: template
+    name: "Consigne Triac en manu"
+    id: ctriac_manu
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
   # Max sortie triac
   - platform: template
     name: "Puissance Max Triac"
@@ -510,6 +526,27 @@ script:
                 brightness: !lambda |-
                   return id(striac) / 100;
               
+      # Mode Manuel
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Manu";'
+              - switch.is_on: validrouteur
+
+          then:
+            - lambda: |-
+                // Application de striac avec sécurité
+                id(striac) = id(ctriac_manu).state;
+
+                // Publication des états
+                id(afpdispo).publish_state(0);
+                id(moderegul).publish_state("Manu");
+                id(cons_batt_cours).publish_state(0);
+
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(striac) / 100;
 
       # Affichage STriac
       - lambda: |-

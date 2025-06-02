@@ -75,7 +75,8 @@
     data:
       option: At_f
     target:
-      entity_id: select.esp178_mode_fonct_appoint_eau
+      entity_id:
+      - select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau
   mode: single
 - id: '1617199790692'
   alias: Notification alarme niveau bas
@@ -100,7 +101,8 @@
     data:
       option: At_f
     target:
-      entity_id: select.esp178_mode_fonctionnement_filtration
+      entity_id:
+      - select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau
   - data:
       message: Niveau bas piscine{{-"\n"-}}{{states("sensor.date_time") }}{{-"\n"-}}{{states("sensor.date_time")
         }}
@@ -1758,24 +1760,6 @@
           title: Piscine ESP178 Reconnecté!!!
         action: notify.telegram
   mode: single
-- id: '1725537112371'
-  alias: Message telegram ESP142
-  description: ' '
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.esp142_message_notif_telegram
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  condition: []
-  action:
-  - data:
-      message: '{{states(''sensor.esp142_message_notif_telegram'')}}'
-      title: Message ESP142!!!
-    action: notify.telegram
-  mode: single
 - id: '1726147313541'
   alias: Robot AMX435 Notif Erreur
   description: ''
@@ -1953,35 +1937,20 @@
   triggers:
   - trigger: numeric_state
     entity_id:
-    - sensor.linky_umoy
-    below: 50
-    id: perte_secteur
-  - trigger: numeric_state
-    entity_id:
     - sensor.mp2_tension_entree_l1
     below: 20
+    id: tensionbasse
   conditions: []
   actions:
   - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
         V'
       title: Defaut Secteur U Linky
     action: notify.telegram
-  - wait_for_trigger:
-    - trigger: numeric_state
-      entity_id:
-      - sensor.mp2_tension_entree_l1
-      above: 200
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
-        V'
-      title: Retour Secteur U Linky
-    action: notify.telegram
-  - data:
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.linky_umoy'')}}
-        V'
-      title: Defaut Secteur U Linky
-    action: notify.telegram
+  - type: turn_on
+    device_id: 989cd1894e1458e4e2afd3c95b7229a6
+    entity_id: e0d6c5dc02fd61249906d2ce3ec512c1
+    domain: switch
   mode: single
 - id: '1730650651996'
   alias: Comptage Energie maison tempo

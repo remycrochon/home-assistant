@@ -79,7 +79,6 @@ sensor:
     response_size: 4
     state_class: measurement
 
-
   # Energie lue dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk
@@ -139,6 +138,7 @@ sensor:
       - multiply: 1
     register_count: 1
     response_size: 4
+
   # Sens du courant dans le tore
   - platform: modbus_controller
     modbus_controller_id: jsymk

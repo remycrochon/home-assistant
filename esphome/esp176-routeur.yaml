@@ -439,7 +439,7 @@ display:
       it.print(0, 3, ligne3);
 
 interval:
-  - interval: 3s
+  - interval: 1s
     then:
       - script.execute: calcul_injection
  

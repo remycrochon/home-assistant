@@ -27,8 +27,8 @@ esp32:
     
 wifi:
   networks:
-    - ssid: !secret wifi
-      password: !secret mdpwifi
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
   reboot_timeout: 5min
 
   manual_ip:
@@ -134,12 +134,22 @@ select:
     id: _Mode_Fonctionnement_routeur
     on_value: 
       then:
+        # Passage en mode étalonnage
         - if:
             condition:
               - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Etalonnage";'
             then:
               - script.execute: etalonnage_striac
-
+        # Passage en mode Manu on remet à Zero le valid Routeur
+        - if:
+            condition:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Manu";'
+            then:
+            - switch.turn_on: validrouteur
+        
+        # Passage dans tous les modes on met à zéro le triac
+        - lambda: |-
+            id(striac) = 0;
         - light.turn_off:
             id: gradateur
         - script.execute: calcul_injection        
@@ -657,7 +667,7 @@ script:
 
  
   ########################################################################""
-    # Enregistre dans un fichier
+    # Mode Etalonnage Increment S Traic toutes les 20 s pour laisser du temps à la puissance pour se stabiliser
   - id: etalonnage_striac
     mode: restart  
     then:
@@ -675,7 +685,7 @@ script:
                 id: gradateur
                 brightness: !lambda 'return id(striac) / 100.0;'  # Normalise entre 0.0 et 1.0
 
-            - delay: 10s  # Temporisation
+            - delay: 20s  # Temporisation
 
             - lambda: |-
                 ESP_LOGI("striac", "Valeur striac: %.2f Pu ECS %.0f", id(striac), id(puecs).state);            
@@ -683,7 +693,8 @@ script:
 
       - lambda: |-
           ESP_LOGI("striac", "Fin de l'étalonnage, striac = %.2f", id(striac));
-
+  ########################################################################""
+    # Enregistre dans un fichier
   - id: log_striac
     mode: single
     then:

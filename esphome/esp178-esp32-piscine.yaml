@@ -77,8 +77,8 @@ esp32:
 
 wifi:
   networks:
-   - ssid: !secret wifi
-     password: !secret mdpwifi
+   - ssid: !secret wifi_esp
+     password: !secret mdpwifi_esp
   reboot_timeout: 5min
 
 #ethernet:

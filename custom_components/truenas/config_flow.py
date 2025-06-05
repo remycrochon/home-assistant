@@ -12,7 +12,6 @@ from homeassistant.const import (
     CONF_API_KEY,
     CONF_HOST,
     CONF_NAME,
-    CONF_SSL,
     CONF_VERIFY_SSL,
 )
 from homeassistant.core import callback
@@ -21,7 +20,6 @@ from homeassistant.data_entry_flow import FlowResult
 from .const import (
     DEFAULT_DEVICE_NAME,
     DEFAULT_HOST,
-    DEFAULT_SSL,
     DEFAULT_SSL_VERIFY,
     DOMAIN,
 )
@@ -69,10 +67,8 @@ class TrueNASConfigFlow(ConfigFlow, domain=DOMAIN):
             # Test connection
             api = await self.hass.async_add_executor_job(
                 TrueNASAPI,
-                self.hass,
                 user_input[CONF_HOST],
                 user_input[CONF_API_KEY],
-                user_input[CONF_SSL],
                 user_input[CONF_VERIFY_SSL],
             )
 
@@ -96,7 +92,6 @@ class TrueNASConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_NAME: DEFAULT_DEVICE_NAME,
                 CONF_HOST: DEFAULT_HOST,
                 CONF_API_KEY: "",
-                CONF_SSL: DEFAULT_SSL,
                 CONF_VERIFY_SSL: DEFAULT_SSL_VERIFY,
             },
             errors=errors,
@@ -113,7 +108,6 @@ class TrueNASConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_NAME, default=user_input[CONF_NAME]): str,
                     vol.Required(CONF_HOST, default=user_input[CONF_HOST]): str,
                     vol.Required(CONF_API_KEY, default=user_input[CONF_API_KEY]): str,
-                    vol.Optional(CONF_SSL, default=user_input[CONF_SSL]): bool,
                     vol.Optional(
                         CONF_VERIFY_SSL, default=user_input[CONF_VERIFY_SSL]
                     ): bool,

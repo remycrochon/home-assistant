@@ -1,3 +1,13 @@
+globals:
+  - id: action_ouv_executee
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: action_ferm_executee
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
 select:
   - platform: template
     name: "${friendly_name}_Mode_Fonctionnement_volet"
@@ -112,26 +122,35 @@ script:
             - logger.log:
                 format: "L'heure n'est ni initialisée, ni validée!"
                 level: INFO
+      # En mode Horaire, l'heure ouverture volet est calée sur le l'heure d(ouverture volet
+      # le drapeau id(action_ouv_executee) est mis à un à la premiere commande d'ouverture et RAZ à minuit
       - if:
           condition:
             - lambda: 'return (id(sntp_time).now().is_valid());'
             - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_ouv_volet).hour*60+id(h_ouv_volet).minute);'
             - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Horaire";'
+            - lambda: 'return !id(action_ouv_executee);'
           then:
             - script.execute: script_ouv_volet
+            - lambda: 'id(action_ouv_executee) = true;'
       - if:
           condition:
             - lambda: 'return (id(sntp_time).now().is_valid());'
             - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_ferm_volet).hour*60+id(h_ferm_volet).minute);'
             - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Horaire";'
+            - lambda: 'return !id(action_ferm_executee);'
           then:
             - script.execute: script_ferm_volet
+            - lambda: 'id(action_ferm_executee) = true;'
 
+      # En mode Auto, l'heure ouverture volet est calée sur le l'heure de debut filtration
+      # le drapeau id(action_ouv_executee) est mis à un à la premiere commande d'ouverture et RAZ à minuit
       - if:
           condition:
             - lambda: 'return (id(sntp_time).now().is_valid());'
             - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_debut).hour*60+id(h_debut).minute );'
             - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Auto";'
+            - lambda: 'return !id(action_ouv_executee);'
             - or:
               - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Horaire";'
               - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Palier";'
@@ -139,13 +158,26 @@ script:
               - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
           then:
             - script.execute: script_ouv_volet
+            - lambda: 'id(action_ouv_executee) = true;'
+
+      # En mode Auto, l'heure fermeturee volet est calée sur le l'heure de fermeture Volet
+      # le drapeau id(action_ferm_executee) est mis à un à la premiere commande de fermeture et RAZ à minuit
       - if:
           condition:
             - lambda: 'return (id(sntp_time).now().is_valid());'
             - lambda: 'return (id(sntp_time).now().hour*60+id(sntp_time).now().minute == id(h_ferm_volet).hour*60+id(h_ferm_volet).minute);'
             - lambda: 'return id(_Mode_Fonctionnement_volet).state == "Auto";'
+            - lambda: 'return !id(action_ferm_executee);'
           then:
             - script.execute: script_ferm_volet
+            - lambda: 'id(action_ferm_executee) = true;'
+
+      # Remise à zéro des drapeaux à minuit
+      - lambda: |-
+          if (id(sntp_time).now().hour == 0 && id(sntp_time).now().minute == 0) {
+            id(action_ouv_executee) = false;
+            id(action_ferm_executee) = false;
+          }                  
 
   - id: script_ouv_volet
     mode: single

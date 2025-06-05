@@ -331,7 +331,7 @@ script:
             - logger.log:
                 format: "Log mem ph: %f / pH Cible: %f"
                 args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                level: debug      
+                level: debug
             - if:
                 condition:
                   and:
@@ -432,7 +432,7 @@ script:
             - switch.turn_off: cde_ppe_ph_moins
             - logger.log: 
                 format: "Arret Forcé ppe pH"
-                level: INFO                           
+                level: INFO
   # Stoppe le Script de regule pH quand la mesure devient inferieure à la consigne
   # Cela évite de trop injecter de pH Moins
   - id: _securisation_regul_ph

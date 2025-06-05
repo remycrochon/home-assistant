@@ -1,0 +1,85 @@
+sensor:
+  - platform: rest
+    name: PC Bureau - Uptime secondes
+    unique_id: pc_bureau_prometheus_uptime
+    resource: "http://192.168.0.205:9090/api/v1/query?query=node_time_seconds - node_boot_time_seconds"
+    value_template: >
+      {% set res = value_json.data.result %}
+      {% if res and res[0].value %}
+        {{ res[0].value[1] | float | round(1) }}
+      {% else %}
+        0.0
+      {% endif %}
+    unit_of_measurement: 's'
+    scan_interval: 300
+
+  - platform: rest
+    name: PC Bureau - RAM utilisée %
+    unique_id: pc_bureau_ram_util
+    resource: "http://192.168.0.205:9090/api/v1/query?query=(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100"
+    value_template: >
+      {% set res = value_json.data.result %}
+      {% if res and res[0].value %}
+        {{ res[0].value[1] | float | round(1) }}
+      {% else %}
+        0.0
+      {% endif %}
+    unit_of_measurement: '%'
+    scan_interval: 60
+
+  - platform: rest
+    name: PC Bureau - Disque Root utilisé %
+    unique_id: pc_bureau_root_disk
+    resource: "http://192.168.0.205:9090/api/v1/query?query=(node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_free_bytes{mountpoint=\"/\"}) / node_filesystem_size_bytes{mountpoint=\"/\"} * 100"
+    value_template: >
+      {% set res = value_json.data.result %}
+      {% if res and res[0].value %}
+        {{ res[0].value[1] | float | round(1) }}
+      {% else %}
+        0.0
+      {% endif %}
+    unit_of_measurement: '%'
+    scan_interval: 600
+
+  - platform: rest
+    name: PC Bureau - Utilisation CPU %
+    unique_id: pc_bureau_cpu_util
+    resource: "http://192.168.0.205:9090/api/v1/query?query=100 - (avg by(instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100)"
+    value_template: >
+      {% set res = value_json.data.result %}
+      {% if res and res[0].value %}
+        {{ res[0].value[1] | float | round(1) }}
+      {% else %}
+        0.0
+      {% endif %}
+    unit_of_measurement: '%'
+    scan_interval: 60
+
+  - platform: rest
+    name: PC Bureau - Charge CPU 1min
+    unique_id: pc_bureau_load1
+    resource: "http://192.168.0.205:9090/api/v1/query?query=node_load1{job=\"pc_bureau\"}"
+    value_template: >
+      {% set res = value_json.data.result %}
+      {% if res and res[0].value %}
+        {{ res[0].value[1] | float | round(1) }}
+      {% else %}
+        0.0
+      {% endif %}
+    unit_of_measurement: load
+    scan_interval: 60
+
+  - platform: rest
+    name: PC Bureau - Swap utilisée %
+    unique_id: pc_bureau_swap_util
+    resource: "http://192.168.0.205:9090/api/v1/query?query=(node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes * 100"
+    value_template: >
+      {% set res = value_json.data.result %}
+      {% if res and res[0].value %}
+        {{ res[0].value[1] | float | round(1) }}
+      {% else %}
+        0.0
+      {% endif %}
+    unit_of_measurement: '%'
+    scan_interval: 60
+

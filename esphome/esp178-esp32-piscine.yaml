@@ -999,7 +999,11 @@ script:
 
       # Convertion et affichage de la durée de filtration en hh:mm
       - lambda: |-
-          CONVERT_SECONDS(id(g_tps_filtration), id(g_hh), id(g_mm), id(g_ss));             
+          CONVERT_SECONDS(id(g_tps_filtration)*3600, id(g_hh), id(g_mm), id(g_ss));     
+      - logger.log:
+          format: "Durée Filtration %2d: %.2d Tps Filtrat: %2f"
+          args: [ 'id(g_hh)', 'id(g_mm)', 'id(g_tps_filtration)'  ]
+          level: INFO     
       - datetime.time.set:
           id: duree_filtration
           time: !lambda |-

@@ -16,7 +16,7 @@ time:
 
 select:
   - platform: template
-    name: "${friendly_name}_Mode_Fonct_appoint_eau"
+    name: "Mode_Fonct_appoint_eau"
     optimistic: true
     restore_value: true
     options:
@@ -37,7 +37,7 @@ select:
 button:
   # Lance un Appoint d'Eau
   - platform: template
-    name: "${friendly_name}_BP_Appoint Eau"
+    name: "BP_Appoint Eau"
     on_press:
       - script.execute: _regul_eau
 
@@ -45,25 +45,25 @@ binary_sensor:
   # calcul des niveaux piscine
   # Si LSL ou LSH recouvert alors True sinon False
   - platform: template
-    name: "${friendly_name}_niv_haut"
+    name: "niv_haut"
     id: niv_haut
       
   - platform: template
-    name: "${friendly_name}_niv_inter"
+    name: "niv_inter"
     id: niv_inter
 
   - platform: template
-    name: "${friendly_name}_niv_bas"
+    name: "niv_bas"
     id: niv_bas
 
   - platform: template
-    name: "${friendly_name}_niv_defaut"
+    name: "niv_defaut"
     id: niv_defaut
 
   # GPIO sur module extension SX1509
   # Niveau haut à 1 si decouvert
   - platform: gpio
-    name: "${friendly_name}_tp_plein_lsh"
+    name: "tp_plein_lsh"
     id: lsh
     pin:
       sx1509: sx1509_hub1
@@ -81,7 +81,7 @@ binary_sensor:
 
   # Niveau bas à 1 si decouvert
   - platform: gpio
-    name: "${friendly_name}_tp_plein_lsl"
+    name: "tp_plein_lsl"
     id: lsl
     pin:
       sx1509: sx1509_hub1
@@ -97,7 +97,7 @@ sensor:
   # EV Eau
   - platform: duty_time
     id: _temps_fonctionnement_ev_eau
-    name: '${friendly_name}_temps_ma_ev_eau'
+    name: 'temps_ma_ev_eau'
     lambda: "return id(cde_ev_eau).state == true;"
     restore: true
     filters: 
@@ -105,7 +105,7 @@ sensor:
 
 switch:
   - platform: gpio
-    name: "${friendly_name} cde_ev_eau"
+    name: "cde_ev_eau"
     pin: GPIO12
     id: cde_ev_eau
 

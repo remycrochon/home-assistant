@@ -17,48 +17,48 @@ openhasp:
 # Affichage piscine
       - obj: "p1b131"
         properties:
-          "text": "{{ states('sensor.esp178_temperature_eau')|float(0) |round(1)}} C°" 
+          "text": "{{ states('sensor.esp178_piscine_temperature_eau')|float(0) |round(1)}} C°" 
 
       - obj: "p1b133"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_pompe_filtration") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_pompe_filtration", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_pompe_filtration', 'on') else '#ff0000' }}" 
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_pompe_filtration") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_pompe_filtration", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_pompe_filtration', 'on') else '#ff0000' }}" 
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_pompe_filtration"
+              entity_id: "switch.esp178_piscine_cde_pompe_filtration"
 
       - obj: "p1b136"
         properties:
-          "text": "{{ states('sensor.esp178_ph_ezo')|float(0) |round(2)}} pH" 
+          "text": "{{ states('sensor.esp178_piscine_ph_ezo')|float(0) |round(2)}} pH" 
 
       - obj: "p1b138"  
         properties:
-          "val": '{{ 1 if states("cover.esp178_volet_piscine") == "on" else 0 }}'
-          "text": '{{ "\uF11E" if is_state("cover.esp178_volet_piscine", "open") else "\uF11C" | e }}'
-          "text_color": "{{ '#ff0000' if is_state('cover.esp178_volet_piscine', 'open') else '#00ff00' }}" 
+          "val": '{{ 1 if states("cover.esp178_piscine_volet_piscine") == "on" else 0 }}'
+          "text": '{{ "\uF11E" if is_state("cover.esp178_piscine_volet_piscine", "open") else "\uF11C" | e }}'
+          "text_color": "{{ '#ff0000' if is_state('cover.esp178_piscine_volet_piscine', 'open') else '#00ff00' }}" 
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "cover.esp178_volet_piscine"
+              entity_id: "cover.esp178_piscine_volet_piscine"
 
       - obj: "p1b141"
         properties:
-          "text": "{{ states('sensor.esp178_affich_heure_filtration')}}" 
+          "text": "{{ states('sensor.esp178_piscine_affich_heure_filtration')}}" 
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('time.esp178_esp32_piscine_esp178_duree_filtration')}}" 
+          "text": "{{ states('time.esp178_piscine_duree_filtration')}}" 
 
       - obj: "p1b148"
         properties:
-          "text": "{{ states('number.esp178_esp32_piscine_esp178_coeff_filtration')}} %" 
+          "text": "{{ states('number.esp178_piscine_coeff_filtration')}} %" 
 
       - obj: "p1b151"
         properties:
           "val": >
-            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonctionnement_filtration')%}
+            {% set st = states('select.esp178_piscine_mode_fonctionnement_filtration')%}
             {% for text,num in [('Palier',0),('Classique',1),('Abaque',2),('Horaire',3),('Ma_f',4),('At_f',5) ] %}
             {% if st == text %}
               {{ num }}
@@ -68,7 +68,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_esp32_piscine_esp178_mode_fonctionnement_filtration
+                entity_id: select.esp178_piscine_mode_fonctionnement_filtration
               data:
                 option: >
                   {% if text == "Palier" -%}
@@ -86,13 +86,13 @@ openhasp:
                   {% endif -%}
       - obj: "p1b222"
         properties:
-          "text": "{{ states('sensor.esp178_pression_filtre') }} b"
+          "text": "{{ states('sensor.esp178_piscine_pression_filtre') }} b"
       - obj: "p1b224"
         properties:
-          "text": "{{ states('sensor.esp178_orp_ezo') }} ms"  
+          "text": "{{ states('sensor.esp178_piscine_orp_ezo') }} ms"  
       - obj: "p1b226"
         properties:
-          "text": "{{ states('sensor.pzem_pisc_puissance') }} W"
+          "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance') }} W"
       - obj: "p1b231"
         properties:
           "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc') }} kWh"
@@ -100,97 +100,97 @@ openhasp:
 
       - obj: "p2b121"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_pompe_filtration") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_pompe_filtration", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_pompe_filtration', 'on') else '#ff0000' }}" 
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_pompe_filtration") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_pompe_filtration", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_pompe_filtration', 'on') else '#ff0000' }}" 
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_pompe_filtration"
+              entity_id: "switch.esp178_piscine_cde_pompe_filtration"
 
       - obj: "p2b122"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_ppe_ph_moins") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_ppe_ph_moins", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_ppe_ph_moins', 'on') else '#ff0000' }}"          
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_ppe_ph_moins") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_ppe_ph_moins", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_ppe_ph_moins', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_ppe_ph_moins"   
+              entity_id: "switch.esp178_piscine_cde_ppe_ph_moins"   
 
       - obj: "p2b123"
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_ppe_chlore") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_ppe_chlore", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_ppe_chlore', 'on') else '#ff0000' }}"
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_ppe_chlore") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_ppe_chlore", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_ppe_chlore', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_ppe_chlore"   
+              entity_id: "switch.esp178_piscine_cde_ppe_chlore"   
 
       - obj: "p2b124"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_volet_ouverture") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_volet_ouverture", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_volet_ouverture', 'on') else '#ff0000' }}"
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_volet_ouverture") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_volet_ouverture", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_volet_ouverture', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_volet_ouverture"
+              entity_id: "switch.esp178_piscine_cde_volet_ouverture"
 
       - obj: "p2b125"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_volet_fermeture") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_volet_fermeture", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_volet_fermeture', 'on') else '#ff0000' }}"
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_volet_fermeture") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_volet_fermeture", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_volet_fermeture', 'on') else '#ff0000' }}"
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_volet_fermeture"
+              entity_id: "switch.esp178_piscine_cde_volet_fermeture"
 
       - obj: "p2b126"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_eclairage") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_eclairage", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_eclairage', 'on') else '#ff0000' }}"          
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_eclairage") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_eclairage", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_eclairage', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_eclairage"   
+              entity_id: "switch.esp178_piscine_cde_eclairage"   
 
       - obj: "p2b127"  
         properties:
-          "val": '{{ 1 if states("switch.esp178_cde_ev_eau") == "on" else 0 }}'
-          "text": '{{ "\uE12C" if is_state("switch.esp178_cde_ev_eau", "on") else "\uE156" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp178_cde_ev_eau', 'on') else '#ff0000' }}"          
+          "val": '{{ 1 if states("switch.esp178_piscine_cde_ev_eau") == "on" else 0 }}'
+          "text": '{{ "\uE12C" if is_state("switch.esp178_piscine_cde_ev_eau", "on") else "\uE156" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp178_piscine_cde_ev_eau', 'on') else '#ff0000' }}"          
         event:
           "up":
             - service: homeassistant.toggle
-              entity_id: "switch.esp178_cde_ev_eau"   
+              entity_id: "switch.esp178_piscine_cde_ev_eau"   
 
       - obj: "p2b151"
         event:
           "up":
             - service: number.decrement
               target:
-                entity_id: number.esp178_esp32_piscine_esp178_coeff_filtration
+                entity_id: number.esp178_piscine_coeff_filtration
 
       - obj: "p2b152"
         properties:
-          "text": "{{'%.0f' | format (states('number.esp178_esp32_piscine_esp178_coeff_filtration') | round(0)) }}%"
+          "text": "{{'%.0f' | format (states('number.esp178_piscine_coeff_filtration') | round(0)) }}%"
 
       - obj: "p2b153"
         event:
           "up":
             - service: number.increment
               target:
-                entity_id: number.esp178_esp32_piscine_esp178_coeff_filtration
+                entity_id: number.esp178_piscine_coeff_filtration
 
                 # Page 3
-      - obj: "p3b102"                  
+      - obj: "p3b102"
         properties:
           "val": >
-            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonctionnement_regul_ph')%}
+            {% set st = states('select.esp178_piscine_mode_fonctionnement_regul_ph')%}
             {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -200,7 +200,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_esp32_piscine_esp178_mode_fonctionnement_regul_ph
+                entity_id: select.esp178_piscine_mode_fonctionnement_regul_ph
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -214,7 +214,7 @@ openhasp:
       - obj: "p3b112"                  
         properties:
           "val": >
-            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonct_regul_chlore')%}
+            {% set st = states('select.esp178_piscine_mode_fonct_regul_chlore')%}
             {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -224,7 +224,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_esp32_piscine_esp178_mode_fonct_regul_chlore
+                entity_id: select.esp178_piscine_mode_fonct_regul_chlore
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -238,7 +238,7 @@ openhasp:
       - obj: "p3b122"                  
         properties:
           "val": >
-            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau')%}
+            {% set st = states('select.esp178_piscine_mode_fonct_appoint_eau')%}
             {% for text,num in [('Auto',0),('Ma_f',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -248,7 +248,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau
+                entity_id: select.esp178_piscine_mode_fonct_appoint_eau
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -259,10 +259,10 @@ openhasp:
                   At_f
                   {% endif -%}
 
-      - obj: "p3b132"                  
+      - obj: "p3b132"
         properties:
           "val": >
-            {% set st = states('select.esp178_esp32_piscine_esp178_mode_hors_gel')%}
+            {% set st = states('select.esp178_piscine8_mode_hors_gel')%}
             {% for text,num in [('Desactivé',0),('Activé',1) ] %}
             {% if st == text %}
               {{ num }}
@@ -272,7 +272,7 @@ openhasp:
           "changed":
             - service: select.select_option
               target:
-                entity_id: select.esp178_esp32_piscine_esp178_mode_hors_gel
+                entity_id: select.esp178_piscine_mode_hors_gel
               data:
                 option: >
                   {% if text == "Desactivé" -%}
@@ -284,7 +284,7 @@ openhasp:
       - obj: "p3b142"
         properties:
           "val": >
-            {% set st = states('select.esp178_esp32_piscine_esp178_mode_fonctionnement_volet')%}
+            {% set st = states('select.esp178_piscine_mode_fonctionnement_volet')%}
             {% for text,num in [('Auto',0),('Horaire',1),('At_f',2) ] %}
             {% if st == text %}
               {{ num }}
@@ -292,9 +292,9 @@ openhasp:
             {% endfor %}
         event:
           "changed":
-            - service: select.esp178_esp32_piscine_esp178_mode_fonctionnement_volet
+            - service: select.esp178_piscine_mode_fonctionnement_volet
               target:
-                entity_id: select.esp178_esp32_piscine_esp178_mode_fonctionnement_volet
+                entity_id: select.esp178_piscine_mode_fonctionnement_volet
               data:
                 option: >
                   {% if text == "Auto" -%}
@@ -308,10 +308,10 @@ openhasp:
                   
       - obj: "p3b151"  
         properties:
-          "text": "{{'%.0f' | format (states('sensor.esp178_temps_galet_chlore') | round(0)) }}h"
+          "text": "{{'%.0f' | format (states('sensor.esp178_piscine_temps_galet_chlore') | round(0)) }}h"
         event:
           "up":
             - service: button.press
               target:
-                entity_id: button.esp178_bp_raz_tps_galet_chlore
+                entity_id: button.esp178_piscine_bp_raz_tps_galet_chlore
 

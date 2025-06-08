@@ -7,7 +7,7 @@
   # Cron time pour lancer script regule pH
 
 substitutions:
-  device_name: "esp178_esp32_piscine"
+  device_name: "esp178_piscine"
   friendly_name: esp178
   adress_ip: "192.168.0.178"
   time_timezone: "Europe/Paris"
@@ -282,7 +282,7 @@ globals:
 # déclaration des modes de fonctionnement dans des "input select"
 select:
   - platform: template
-    name: "${friendly_name}_Mode_Fonctionnement_filtration"
+    name: "Mode_Fonctionnement_filtration"
     optimistic: true
     restore_value: true
     options:
@@ -311,7 +311,7 @@ button:
   # Durée "Arret Jour" en heure on multiplie par 3600 pour avoir des secondes 
   # puis par 1000 pour des millisecondes: unité du delay lambda
   - platform: template
-    name: "${friendly_name}_BP_arret_jour"
+    name: "BP_arret_jour"
     id: _arret_jour
     on_press: 
       then:
@@ -333,19 +333,19 @@ button:
   
   # Lance un test
   - platform: template
-    name: "${friendly_name}_BP_Pour_Test"
+    name: "BP_Pour_Test"
     on_press:
       - script.execute: _test
 
 binary_sensor:
   #Etat de la connection
   - platform: status
-    name: "${friendly_name}_Status"
+    name: "Status"
 
   # Pompe en fonctionnement
   # Remplacer le seuil (threshold) par du négatif pour simuler
   - platform: analog_threshold
-    name: "${friendly_name}_ppe_en_fonctionnement"
+    name: "Ppe_en_fonctionnement"
     id: ppe_filt_en_fonctionnement
     sensor_id: puissance
     threshold: ${pu_fonctionnement} # Défini dans Substitution en Watt
@@ -366,11 +366,11 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-    name: "${friendly_name}_bp1"
+    name: "bp1"
 
   # GPIO sur module extension SX1509
   - platform: gpio
-    name: "${friendly_name}_E4"
+    name: "E4"
     pin:
       sx1509: sx1509_hub1
       number: 3
@@ -379,7 +379,7 @@ binary_sensor:
         pullup: false
       inverted: false   
   - platform: gpio
-    name: "${friendly_name}_E5"
+    name: "E5"
     pin:
       sx1509: sx1509_hub1
       number: 4
@@ -388,7 +388,7 @@ binary_sensor:
         pullup: false
       inverted: false   
   - platform: gpio
-    name: "${friendly_name}_E6"
+    name: "E6"
     pin:
       sx1509: sx1509_hub1
       number: 5
@@ -402,7 +402,7 @@ datetime:
   - platform: template
     id: heure_pivot
     type: time
-    name: "${friendly_name}_heure_pivot"
+    name: "heure_pivot"
     optimistic: yes
     initial_value: "13:30:00"
     restore_value: true
@@ -410,7 +410,7 @@ datetime:
   - platform: template
     id: h_debut
     type: time
-    name: "${friendly_name}_h_debut"
+    name: "h_debut"
     optimistic: yes
     initial_value: "00:00:00"
     restore_value: false
@@ -418,7 +418,7 @@ datetime:
   - platform: template
     id: h_fin
     type: time
-    name: "${friendly_name}_h_fin"
+    name: "h_fin"
     optimistic: yes
     initial_value: "00:00:00"
     restore_value: false
@@ -426,7 +426,7 @@ datetime:
   - platform: template
     id: duree_filtration
     type: time
-    name: "${friendly_name}_duree_filtration"
+    name: "duree_filtration"
     optimistic: yes
     initial_value: "00:00:00"
     restore_value: false
@@ -434,14 +434,14 @@ datetime:
   - platform: template
     id: debut_mode_horaire
     type: time
-    name: "${friendly_name}_debut_mode_horaire"
+    name: "debut_mode_horaire"
     optimistic: yes
     restore_value: true
 
   - platform: template
     id: duree_mode_horaire
     type: time
-    name: "${friendly_name}_duree_mode_horaire"
+    name: "duree_mode_horaire"
     optimistic: yes
     restore_value: true
 
@@ -449,7 +449,7 @@ datetime:
 number:
   # Simulation Temp eau 
   - platform: template
-    name: "${friendly_name}_simule_Temp"
+    name: "simule_Temp"
     id: simul_temp_eau
     optimistic: true
     restore_value: true
@@ -465,7 +465,7 @@ number:
 
   # Temps de recirculation avant prise en compte mesure de température
   - platform: template
-    name: "${friendly_name}_tempo_recirculation"
+    name: "tempo_recirculation"
     id: tempo_mesure_temp
     optimistic: true
     restore_value: true
@@ -478,7 +478,7 @@ number:
 
   # Coefficient de filtration
   - platform: template
-    name: "${friendly_name}_coeff_Filtration"
+    name: "coeff_Filtration"
     id: coeff_filtration
     optimistic: true
     restore_value: true
@@ -491,7 +491,7 @@ number:
 
   # Durée de l'arret sur la journée en lien avec "arret_jour"
   - platform: template
-    name: "${friendly_name}_Durée-Arret_jour"
+    name: "Durée-Arret_jour"
     id: duree_at_jour
     optimistic: true
     restore_value: true
@@ -503,14 +503,14 @@ number:
 
 sensor:
   - platform: homeassistant
-    name: "${friendly_name}_temperature_exterieure"
+    name: "temperature_exterieure"
     entity_id: "sensor.vp2_temp_out"
     id: temp_ext
   #    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
 
   - platform: dallas_temp
     #address: 0x060321117ae89b28
-    name: "${friendly_name}_temperature_eau"
+    name: "temperature_eau"
     id: temp_eau
     device_class: temperature
     state_class: "measurement"     
@@ -525,7 +525,7 @@ sensor:
   # Pompe piscine
   - platform: duty_time
     id: _temps_fonctionnement_ppe_piscine_jour
-    name: '${friendly_name}_temps_ma_ppe_piscine_jour'
+    name: 'temps_ma_ppe_piscine_jour'
     sensor: ppe_filt_en_fonctionnement
     restore: true
     filters: 
@@ -536,13 +536,13 @@ text_sensor:
   # Affichage des heures de filtration dans Home Assistant
   - platform: template
     id: aff_heure_filtration
-    name: "${friendly_name} affich_heure_filtration"
+    name: "affich_heure_filtration"
     icon: mdi:timer
 
 # Déclaration des switches: cde des relais
 switch:
   - platform: gpio
-    name: "${friendly_name} cde_pompe_filtration"
+    name: "cde_pompe_filtration"
     pin: GPIO32
     id: cde_ppe_filtration
     on_turn_on:
@@ -568,17 +568,17 @@ switch:
         - switch.turn_off: led14     
 
   - platform: gpio
-    name: "${friendly_name} cde_eclairage"
+    name: "cde_eclairage"
     pin: GPIO26
     id: cde_eclairage
 
   - platform: gpio
-    name: "${friendly_name} relais8"
+    name: "relais8"
     pin: GPIO13
     id: relais8
 
   - platform: gpio
-    name: "${friendly_name} led14"
+    name: "led14"
     id: led14
     pin:
       sx1509: sx1509_hub1
@@ -588,7 +588,7 @@ switch:
       inverted: false
 
   - platform: gpio
-    name: "${friendly_name} led15"
+    name: "led15"
     id: led15
     pin:
       sx1509: sx1509_hub1
@@ -598,12 +598,12 @@ switch:
       inverted: false
 
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "Restart"
 
   # Switch Forçage Arret pompe filtration en mode Auto
   #
   - platform: template
-    name: "${friendly_name}_ent_arret_forcé"
+    name: "ent_arret_forcé"
     id: ent_at_force
     optimistic: True
     lambda: |-

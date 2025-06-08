@@ -7,7 +7,7 @@ globals:
 select:
   # défini l'activation du mode Hors Gel
   - platform: template
-    name: "${friendly_name}_Mode_Hors_Gel"
+    name: "Mode_Hors_Gel"
     optimistic: true
     restore_value: true
     options:
@@ -23,7 +23,7 @@ select:
 number:
   # Seuil 1 Temp Hors gel
   - platform: template
-    name: "${friendly_name}_Seuil1_Temp_HG"
+    name: "Seuil1_Temp_HG"
     id: s1_temp_hg
     optimistic: true
     restore_value: true
@@ -35,7 +35,7 @@ number:
 
   # Seuil 2 Temp Hors gel
   - platform: template
-    name: "${friendly_name}_Seuil2_Temp_HG"
+    name: "Seuil2_Temp_HG"
     id: s2_temp_hg
     optimistic: true
     restore_value: true

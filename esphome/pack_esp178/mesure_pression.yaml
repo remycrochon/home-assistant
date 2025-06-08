@@ -6,7 +6,7 @@ binary_sensor:
   # Etat pression filtre
   # Si pression superieure à p_Max alors = True
   - platform: analog_threshold
-    name: "${friendly_name}_Etat_pression_Filtre"
+    name: "Etat_pression_Filtre"
     sensor_id: pression_filtre    
     id: _etat_pression_filtre
     threshold: ${pression_max} # Défini dans Substitution en bar
@@ -24,7 +24,7 @@ sensor:
   - platform: ads1115
     multiplexer: 'A3_GND'
     gain: 6.144
-    name: "${friendly_name}_Pression_filtre"          
+    name: "Pression_filtre"          
     update_interval: 10s
     unit_of_measurement: "bar"
     device_class: pressure

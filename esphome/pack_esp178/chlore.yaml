@@ -21,7 +21,7 @@ time:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore
           - number.set:
               id: conso_chlore_jour
-              value: 0          
+              value: 0
       # Notification du rapport journalier sur Telegram
       - seconds: 10
         minutes: 59
@@ -29,12 +29,10 @@ time:
         then:
           - lambda: |-
               std::string mess = "ESP178 Rapport Journalier Chlore\n";
-
               CONVERT_SECONDS(id(_temps_fonctionnement_ppe_chlore).state, id(g_hh), id(g_mm), id(g_ss));
               char buf1[32];
               snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
               mess += buf1;
-
               id(_message_telegram)->execute(mess);
 
 globals:
@@ -46,7 +44,7 @@ globals:
 
 select:
   - platform: template
-    name: "${friendly_name}_Mode_Fonct_regul_chlore"
+    name: "Mode_Fonct_regul_chlore"
     optimistic: true
     restore_value: true
     options:
@@ -71,11 +69,11 @@ select:
               - script.execute: _regul_chlore
 button:
   - platform: template
-    name: "${friendly_name}_BP_Cycle_Regul_chlore"
+    name: "BP_Cycle_Regul_chlore"
     on_press:
       - script.execute: _regul_chlore
   - platform: template
-    name: "${friendly_name}_BP_RAZ_Tps_Galet_Chlore"
+    name: "BP_RAZ_Tps_Galet_Chlore"
     on_press:
       - sensor.duty_time.reset: _temps_galet_chlore
 
@@ -83,7 +81,7 @@ binary_sensor:
   # Etat galets Chlore
   # Si Tps > à temps max alors = True
   - platform: template
-    name: "${friendly_name}_Etat_Galets_Chlore"
+    name: "Etat_Galets_Chlore"
     id: _etat_galets_chlore
     lambda: |-
       return id(_temps_galet_chlore).state/3600 > id(_tps_max_galet_chlore).state;
@@ -92,14 +90,14 @@ datetime:
   - platform: template
     id: duree_injection_chlore
     type: time
-    name: "${friendly_name}_duree_injection_chlore"
+    name: "duree_injection_chlore"
     optimistic: yes
     restore_value: true
 
 number:
   # Cible Niveau Chlore
   - platform: template
-    name: "${friendly_name}_chlore_Cible"
+    name: "chlore_Cible"
     id: _chlore_cible
     optimistic: true
     restore_value: true
@@ -111,7 +109,7 @@ number:
 
   # Tps Max Galet Chlore
   - platform: template
-    name: "${friendly_name}_tps_Max_galet_Chlore"
+    name: "tps_Max_galet_Chlore"
     id: _tps_max_galet_chlore
     optimistic: true
     restore_value: true
@@ -124,10 +122,10 @@ number:
   # Debit Pompe chlore
   # Etalonnage du 17/05/2025: 4.957 l/h
   - platform: template
-    name: "${friendly_name}_debit_ppe_chlore"
+    name: "debit_ppe_chlore"
     id: _debit_ppe_chlore
     optimistic: true
-    restore_value: true
+    initial_value: 4.957
     mode: box
     min_value: 0.5
     max_value: 7.2
@@ -179,22 +177,23 @@ sensor:
   # Fin procédure étalonnage    
   - platform: ezo
     id: orp_ezo
-    name: "${friendly_name}_orp_ezo"
+    name: "orp_ezo"
     address: 98
     unit_of_measurement: "mV"
     accuracy_decimals: 2
     device_class: voltage
     state_class: measurement
-    update_interval: 1s    
+    update_interval: 60s
+    icon: mdi:chemical-weapon 
     # Filtrage en option (décommenter si besoin)
     filters:
       - sliding_window_moving_average:
           window_size: 15
           send_every: 1
           send_first_at: 1
-#      - calibrate_linear:
-#          - 0 -> 0
-#          - 256 -> 256
+      - calibrate_linear:
+          - 150 -> 150
+          - 256 -> 256
     on_value:
       then:
         - lambda: |-
@@ -202,14 +201,14 @@ sensor:
 
   # mémorise le temps d'injection calculé
   - platform: template
-    name: "${friendly_name}_tps_injection_chlore"
+    name: "tps_injection_chlore"
     id: _tps_injection_chlore
     unit_of_measurement: "s"
     state_class: "measurement"
 
   - platform: duty_time
     id: _temps_galet_chlore
-    name: '${friendly_name}_temps_galet_chlore'
+    name: 'temps_galet_chlore'
     sensor: ppe_filt_en_fonctionnement
     restore: true
     filters: 
@@ -218,15 +217,40 @@ sensor:
   # Ppe Chlore
   - platform: duty_time
     id: _temps_fonctionnement_ppe_chlore
-    name: '${friendly_name}_temps_ma_ppe_chlore'
+    name: 'temps_ma_ppe_chlore'
     lambda: "return id(cde_ppe_chlore).state == true;"
     restore: true
     filters: 
       - round: 0
+  # Estimation du taux de chlore
+  - platform: template
+    name: "Chlore estimé (ppm)"
+    unit_of_measurement: "ppm"
+    accuracy_decimals: 2
+    update_interval: 60s
+    icon: mdi:chemical-weapon 
+    lambda: |-
+      const float orp = id(orp_ezo).state;  // en mV
+      const float ph = id(ph_ezo).state;    // pH de 0 à 14
+
+      if (orp <= 0 || ph <= 0) {
+        return NAN;
+      }
+
+      // Formule empirique basée sur un modèle simplifié
+      // Source : adaptation de modèles de traitement d'eau et docs industrielles
+      float ppm = 10 * exp((orp - 650.0) / 100.0) * pow(10, -(ph - 7.0));
+
+      // Optionnel : borne les valeurs
+      if (ppm < 0.0) ppm = 0.0;
+      if (ppm > 5.0) ppm = 5.0;
+
+      return ppm;
+
 
 switch: 
   - platform: gpio
-    name: "${friendly_name} cde_ppe_chlore"
+    name: "cde_ppe_chlore"
     pin: GPIO25
     id: cde_ppe_chlore
 

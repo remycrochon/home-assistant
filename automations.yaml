@@ -50,7 +50,7 @@
   description: Ferme la vanne d'eau si ouverte depuis 1 heure
   triggers:
   - entity_id:
-    - switch.esp178_cde_ev_eau
+    - switch.esp178_piscine_cde_ev_eau
     from: 'off'
     to: 'on'
     for:
@@ -67,7 +67,7 @@
     action: notify.telegram
   - target:
       entity_id:
-      - switch.esp178_cde_ev_eau
+      - switch.esp178_piscine_cde_ev_eau
     action: switch.turn_off
     data: {}
   - action: select.select_option
@@ -76,14 +76,14 @@
       option: At_f
     target:
       entity_id:
-      - select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau
+      - select.esp178_piscine_mode_fonct_appoint_eau
   mode: single
 - id: '1617199790692'
   alias: Notification alarme niveau bas
   description: ' '
   triggers:
   - entity_id:
-    - binary_sensor.esp178_niv_bas
+    - binary_sensor.esp178_piscine_niv_bas
     from: 'on'
     to: 'off'
     for:
@@ -102,10 +102,9 @@
       option: At_f
     target:
       entity_id:
-      - select.esp178_esp32_piscine_esp178_mode_fonct_appoint_eau
+      - select.esp178_piscine_mode_fonct_appoint_eau
   - data:
-      message: Niveau bas piscine{{-"\n"-}}{{states("sensor.date_time") }}{{-"\n"-}}{{states("sensor.date_time")
-        }}
+      message: Niveau bas piscine{{-"\n"-}}{{states("sensor.date_time") }}
       title: Piscine Alarme Niveau Bas !!!
     action: notify.telegram
   mode: single
@@ -854,12 +853,14 @@
   alias: Surveillance Puissance Onduleur Bureau la nuit
   description: ''
   triggers:
-  - trigger: time
-    at: '23:00:00'
+  - trigger: numeric_state
+    entity_id:
+    - sensor.pc_lidl_2023_c_active_power
+    above: 100
   conditions:
-  - condition: numeric_state
-    entity_id: sensor.pc_lidl_2023_c_active_power
-    above: 20
+  - condition: time
+    after: '23:00:00'
+    before: 05:00:00
   actions:
   - data:
       message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
@@ -1167,7 +1168,7 @@
       sequence:
       - action: switch.turn_on
         target:
-          entity_id: switch.esp178_ent_arret_force
+          entity_id: switch.esp178_piscine_ent_arret_forc
         data: {}
       - action: notify.telegram
         data:
@@ -1185,7 +1186,7 @@
       - action: switch.turn_off
         target:
           entity_id:
-          - switch.esp178_ent_arret_force
+          - switch.esp178_piscine_ent_arret_forc
         data: {}
   mode: single
   trace:
@@ -1675,7 +1676,7 @@
   description: ' '
   triggers:
   - entity_id:
-    - binary_sensor.esp178_niv_haut
+    - binary_sensor.esp178_piscine_niv_haut
     from: 'off'
     to: 'on'
     for:
@@ -1695,7 +1696,7 @@
   description: ' '
   triggers:
   - entity_id:
-    - binary_sensor.esp178_status
+    - binary_sensor.esp178_piscine_status
     for:
       hours: 0
       minutes: 2
@@ -1713,7 +1714,7 @@
     enabled: false
     trigger: state
   - entity_id:
-    - binary_sensor.esp178_status
+    - binary_sensor.esp178_piscine_status
     from: 'off'
     to: 'on'
     id: recon
@@ -1732,7 +1733,8 @@
       sequence:
       - data:
           message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178=
-            {{states(''binary_sensor.esp178_status'')}}{{-"\n"-}} Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
+            {{states(''binary_sensor.esp178_piscine_status'')}}{{-"\n"-}} Etat du
+            Ping= {{states(''binary_sensor.esp178_piscine'')}}'
           title: Piscine ESP178 Deconnecté!!!
         action: notify.telegram
       - action: switch.turn_off
@@ -1756,7 +1758,8 @@
       sequence:
       - data:
           message: '{{states("sensor.date_time") }}{{-"\n"-}} Nouveau Status ESP178=
-            {{states(''binary_sensor.esp178_status'')}}{{-"\n"-}} Etat du Ping= {{states(''binary_sensor.esp178_piscine'')}}'
+            {{states(''binary_sensor.esp178_piscine_status'')}}{{-"\n"-}} Etat du
+            Ping= {{states(''binary_sensor.esp178_piscine'')}}'
           title: Piscine ESP178 Reconnecté!!!
         action: notify.telegram
   mode: single
@@ -2565,13 +2568,13 @@
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_mqtt
-        below: 25
+        below: 23
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc
         state: 'off'
       sequence:
       - target:
-          entity_id: switch.esp178_ent_arret_force
+          entity_id: switch.esp178_piscine_ent_arret_forc
         action: switch.turn_on
         data: {}
       - target:
@@ -2589,13 +2592,13 @@
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_mqtt
-        above: 26
+        above: 30
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc
         state: 'on'
       sequence:
       - target:
-          entity_id: switch.esp178_ent_arret_force
+          entity_id: switch.esp178_piscine_ent_arret_forc
         action: switch.turn_off
         data: {}
       - action: input_boolean.turn_off

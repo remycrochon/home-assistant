@@ -25,7 +25,7 @@ time:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
           - number.set:
               id: conso_ph_jour
-              value: 0          
+              value: 0
         # Notification du rapport journalier sur Telegram
       - seconds: 05
         minutes: 59
@@ -55,7 +55,7 @@ globals:
 # déclaration des modes de fonctionnement dans des "input select"
 select:
   - platform: template
-    name: "${friendly_name}_Mode_Fonctionnement_regul_ph"
+    name: "Mode_Fonctionnement_regul_ph"
     optimistic: true
     restore_value: true
     options:
@@ -81,7 +81,7 @@ select:
 
 button:
   - platform: template
-    name: "${friendly_name}_BP_Cycle_Regul_pH"
+    name: "BP_Cycle_Regul_pH"
     on_press:
       - script.execute: _regul_ph
 
@@ -89,7 +89,7 @@ datetime:
   - platform: template
     id: duree_injection_ph
     type: time
-    name: "${friendly_name}_duree_injection_pH"
+    name: "duree_injection_pH"
     optimistic: yes
     restore_value: true
 
@@ -97,7 +97,7 @@ datetime:
 number:
   # Simulation Niveau pH
   - platform: template
-    name: "${friendly_name}_simule_pH"
+    name: "simule_pH"
     id: simul_ph_ezo
     optimistic: true
     restore_value: true
@@ -109,7 +109,7 @@ number:
 
   # Cible Régulation pH
   - platform: template
-    name: "${friendly_name}_pH_Cible"
+    name: "pH_Cible"
     id: _ph_cible
     optimistic: true
     restore_value: true
@@ -121,7 +121,7 @@ number:
 
   # Hysterisis pH: S'additionne à la consigne dans la comparaison avec la cible
   - platform: template
-    name: "${friendly_name}_pH_Hysteris"
+    name: "pH_Hysteris"
     id: _ph_hysteresis
     optimistic: true
     restore_value: true
@@ -133,7 +133,7 @@ number:
 
   # Facteur de correction par cycle (fraction de la correction totale)
   - platform: template
-    name: "${friendly_name}_facteur_correction_ph"
+    name: "facteur_correction_ph"
     id: facteur_correction_ph
     optimistic: true
     restore_value: true
@@ -148,10 +148,10 @@ number:
   # Etalonnage du 18/07/2024: 4.272 l/h
   # Etalonnage du 17/05/2025: 4.269 l/h
   - platform: template
-    name: "${friendly_name}_debit_ppe_ph_moins"
+    name: "debit_ppe_ph_moins"
     id: _debit_ppe_moins
     optimistic: true
-    restore_value: true
+    initial_value: 4.269
     mode: box
     min_value: 0.5
     max_value: 7.2
@@ -160,7 +160,7 @@ number:
 
   # Durée marche pompe ph cycle
   - platform: template
-    name: "${friendly_name}_durée_injection_phmoins"
+    name: "durée_injection_phmoins"
     id: duree_inject_phmoins
     optimistic: true
     restore_value: true
@@ -237,7 +237,7 @@ sensor:
   #      - 9.49 -> 9.18
   - platform: ezo
     id: ph_ezo
-    name: "${friendly_name}_ph_ezo"
+    name: "ph_ezo"
     address: 99
     unit_of_measurement: "pH"
     accuracy_decimals: 2
@@ -259,14 +259,14 @@ sensor:
 
   # mémorise le temps d'injection calculé
   - platform: template
-    name: "${friendly_name}_tps_injection_ph_moins"
+    name: "tps_injection_ph_moins"
     id: _tps_injection_ph_moins
     unit_of_measurement: "s"
     state_class: "measurement" 
 
   # Affiche le volume de pH moins à injecter
   - platform: template
-    name: "${friendly_name}_vol_injection_ph_moins"
+    name: "vol_injection_ph_moins"
     id: _vol_injection_ph_moins
     unit_of_measurement: "l"
     state_class: "measurement" 
@@ -274,7 +274,7 @@ sensor:
   # Ppe pH
   - platform: duty_time
     id: _temps_fonctionnement_ppe_ph
-    name: '${friendly_name}_temps_ma_ppe_ph'
+    name: 'temps_ma_ppe_ph'
     lambda: "return id(cde_ppe_ph_moins).state == true;"
     restore: true
     filters: 
@@ -282,7 +282,7 @@ sensor:
 
 switch:
   - platform: gpio
-    name: "${friendly_name} cde_ppe_ph_moins"
+    name: "cde_ppe_ph_moins"
     pin: GPIO33
     id: cde_ppe_ph_moins
 

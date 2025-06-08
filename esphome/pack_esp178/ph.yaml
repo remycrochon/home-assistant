@@ -23,7 +23,10 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
-      # Notification du rapport journalier sur Telegram
+          - number.set:
+              id: conso_ph_jour
+              value: 0          
+        # Notification du rapport journalier sur Telegram
       - seconds: 05
         minutes: 59
         hours: 23
@@ -103,6 +106,7 @@ number:
     max_value: 10
     unit_of_measurement: "pH"
     step: 0.01
+
   # Cible Régulation pH
   - platform: template
     name: "${friendly_name}_pH_Cible"
@@ -167,6 +171,30 @@ number:
     step: 1
     icon: mdi:clock
 
+  # Comptabilise le volume de pH injecté
+  - platform: template
+    name: "conso_ph_total"
+    id: conso_ph_total
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    step: 0.001
+    unit_of_measurement: "l"
+    icon: mdi:ph
+
+  - platform: template
+    name: "conso_ph_jour"
+    id: conso_ph_jour
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    step: 0.001
+    unit_of_measurement: "l"
+    icon: mdi:ph
 
 sensor:
   # Mesure du pH
@@ -228,21 +256,6 @@ sensor:
       then:
         - lambda: |-
             // ESP_LOGI("ph_ezo", "Mesure pH (étalonnage): %.2f", id(ph_ezo).state);
-  
-  # Capteur Kalman pour lisser ph_ezo
-  - platform: combination
-    type: kalman
-    id: ph_kalman
-    name: "${friendly_name}_ph_filtered"
-    process_std_dev: 0.01  # Changements lents (0.01 pH/s)
-    sources:
-      - source: ph_ezo
-        error: 0.1  # Bruit typique du capteur
-    std_dev:
-      id: ph_kalman_std_dev
-      name: "${friendly_name}_ph_kalman_std_dev"
-    device_class: ph
-    state_class: "measurement"
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -266,12 +279,6 @@ sensor:
     restore: true
     filters: 
       - round: 0
-
-text_sensor:
-  - platform: template
-    name: "${friendly_name}_ph_mode"
-    id: ph_mode
-    update_interval: never
 
 switch:
   - platform: gpio
@@ -407,12 +414,21 @@ script:
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
+                  # Comptabilise le nombre de litres de pH injecté
+                  - lambda: |-
+                      float debit = id(_debit_ppe_moins).state;  // l/h
+                      float duree = id(_tps_injection_ph_moins).state;  // s
+                      float volume = debit * duree / 3600.0;  // conversion en litres
+                      // Mise à jour des compteurs
+                      id(conso_ph_jour).publish_state(id(conso_ph_jour).state + volume);
+                      id(conso_ph_total).publish_state(id(conso_ph_total).state + volume);
+
                 else:
                   - switch.turn_off: cde_ppe_ph_moins
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
-                        
+
       - if:
           condition:
             and:

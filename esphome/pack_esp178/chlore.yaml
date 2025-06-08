@@ -19,6 +19,9 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore
+          - number.set:
+              id: conso_chlore_jour
+              value: 0          
       # Notification du rapport journalier sur Telegram
       - seconds: 10
         minutes: 59
@@ -82,6 +85,8 @@ binary_sensor:
   - platform: template
     name: "${friendly_name}_Etat_Galets_Chlore"
     id: _etat_galets_chlore
+    lambda: |-
+      return id(_temps_galet_chlore).state/3600 > id(_tps_max_galet_chlore).state;
 
 datetime:
   - platform: template
@@ -129,6 +134,31 @@ number:
     unit_of_measurement: "l/h"
     step: 0.001
 
+  # Comptabilise le volume de ch injecté
+  - platform: template
+    name: "conso_chlore_total"
+    id: conso_chlore_total
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    step: 0.001
+    unit_of_measurement: "l"
+    icon: mdi:chemical-weapon
+
+  - platform: template
+    name: "conso_chlore_jour"
+    id: conso_chlore_jour
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    step: 0.001
+    unit_of_measurement: "l"
+    icon: mdi:chemical-weapon 
+
 sensor:
   # Mesure de l'ORP
   # Procédure étalonnage:
@@ -155,21 +185,20 @@ sensor:
     accuracy_decimals: 2
     device_class: voltage
     state_class: measurement
-    update_interval: 60s    
+    update_interval: 1s    
     # Filtrage en option (décommenter si besoin)
     filters:
       - sliding_window_moving_average:
           window_size: 15
           send_every: 1
           send_first_at: 1
-      - calibrate_linear:
-          - 0 -> 0
-          - 256 -> 256
+#      - calibrate_linear:
+#          - 0 -> 0
+#          - 256 -> 256
     on_value:
       then:
         - lambda: |-
             //ESP_LOGI("ORP_ezo", "Mesure ORP (étalonnage): %.2f", id(orp_ezo).state);
-
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -194,11 +223,6 @@ sensor:
     restore: true
     filters: 
       - round: 0
-
-text_sensor:
-  - platform: template
-    name: "${friendly_name}_ORP_mode"
-    id: orp_mode
 
 switch: 
   - platform: gpio
@@ -281,6 +305,15 @@ script:
                   - lambda: |-
                       std::string mess = "Fin Injection Chlore en Auto";                                         
                       id(_message_telegram)->execute(mess.c_str());                      
+                  # Comptabilise le volume de ch injecté
+                  - lambda: |-
+                      float debit = id(_debit_ppe_chlore).state;  // l/h
+                      float duree = id(_tps_injection_chlore).state;  // s
+                      float volume = debit * duree / 3600.0;  // conversion en litres
+                      // Mise à jour des compteurs
+                      id(conso_chlore_jour).publish_state(id(conso_chlore_jour).state + volume);
+                      id(conso_chlore_total).publish_state(id(conso_chlore_total).state + volume);
+    
                 else:
                   - switch.turn_off: cde_ppe_chlore
                   - lambda: |-
@@ -310,20 +343,19 @@ script:
                 format: "Arret Forcé ppe Chlore"
                 level: INFO
 
-  # Surveille temps utilisation galets Chlore en heure
+  # Log état galets Chlore en heure
   - id: _fonction_galet_chlore
     then:
       - if:
           condition:
             and:
-              - lambda: 'return (id(_temps_galet_chlore).state/3600) >= id(_tps_max_galet_chlore).state;'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'
+              - lambda: 'return id(_etat_galets_chlore).state == true;'
           then:
-            - lambda: 
-                id(_etat_galets_chlore).publish_state(true);
             - logger.log: 
-                format: "Galet Chlore Dépassé"
+                format: "Galets Chlore Dépassé"
                 level: INFO  
-            - lambda: |-                
+            - lambda: |-
                 std::string mess = "ESP178 Tps Utilisation Galets Chlore Atteint";
                 id(_message_telegram)->execute(mess);
 

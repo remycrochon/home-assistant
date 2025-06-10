@@ -64,7 +64,7 @@ select:
               or:
                 - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Ma_f";'
                 - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "At_f";'   
-            then:                
+            then:
               - script.stop: _regul_chlore
               - delay: 1s            
               - script.execute: _regul_chlore
@@ -84,6 +84,7 @@ binary_sensor:
   - platform: template
     name: "Etat_Galets_Chlore"
     id: _etat_galets_chlore
+    icon: mdi:biohazard
     lambda: |-
       return id(_temps_galet_chlore).state/3600 > id(_tps_max_galet_chlore).state;
 
@@ -94,6 +95,7 @@ datetime:
     name: "duree_injection_chlore"
     optimistic: yes
     restore_value: true
+    icon: mdi:clock    
 
 number:
   # Cible Niveau Chlore
@@ -107,6 +109,7 @@ number:
     max_value: 10
     unit_of_measurement: "ppm"
     step: 0.01
+    icon: mdi:biohazard
 
   # Consigne ORP
   - platform: template
@@ -120,7 +123,7 @@ number:
     restore_value: true
     mode: box
     unit_of_measurement: "mV"
-    icon: mdi:chemical-weapon
+    icon: mdi:biohazard
 
   # Facteur de correction regulation ORP    
   - platform: template
@@ -134,7 +137,7 @@ number:
     restore_value: true
     mode: box    
     unit_of_measurement: "s/mV"
-    icon: mdi:chemical-weapon
+    icon: mdi:biohazard
 
   # Tps Max Galet Chlore
   - platform: template
@@ -147,6 +150,7 @@ number:
     max_value: 100
     unit_of_measurement: "h"
     step: 1
+    icon: mdi:timer-plus
 
   # Debit Pompe chlore
   # Etalonnage du 17/05/2025: 4.957 l/h
@@ -172,7 +176,7 @@ number:
     max_value: 100
     step: 0.001
     unit_of_measurement: "l"
-    icon: mdi:chemical-weapon
+    icon: mdi:biohazard
 
   - platform: template
     name: "conso_chlore_jour"
@@ -184,7 +188,7 @@ number:
     max_value: 100
     step: 0.001
     unit_of_measurement: "l"
-    icon: mdi:chemical-weapon 
+    icon: mdi:biohazard
 
 sensor:
   # Mesure de l'ORP
@@ -213,7 +217,7 @@ sensor:
     device_class: voltage
     state_class: measurement
     update_interval: 60s
-    icon: mdi:chemical-weapon 
+    icon: mdi:biohazard
     # Filtrage en option (décommenter si besoin)
     filters:
       - sliding_window_moving_average:
@@ -234,12 +238,14 @@ sensor:
     id: _tps_injection_chlore
     unit_of_measurement: "s"
     state_class: "measurement"
+    icon: mdi:clock-start    
 
   - platform: duty_time
     id: _temps_galet_chlore
     name: 'temps_galet_chlore'
     sensor: ppe_filt_en_fonctionnement
     restore: true
+    icon: mdi:clock-start        
     filters: 
       - round: 0
     
@@ -249,15 +255,17 @@ sensor:
     name: 'temps_ma_ppe_chlore'
     lambda: "return id(cde_ppe_chlore).state == true;"
     restore: true
+    icon: mdi:clock-start        
     filters: 
       - round: 0
+
   # Estimation du taux de chlore
   - platform: template
     name: "Chlore estimé (ppm)"
     unit_of_measurement: "ppm"
     accuracy_decimals: 2
     update_interval: 60s
-    icon: mdi:chemical-weapon 
+    icon: mdi:biohazard
     lambda: |-
       const float orp = id(orp_ezo).state;  // en mV
       const float ph = id(ph_ezo).state;    // pH de 0 à 14
@@ -282,6 +290,7 @@ switch:
     name: "cde_ppe_chlore"
     pin: GPIO25
     id: cde_ppe_chlore
+    icon: mdi:pump
 
 interval: 
   - interval: 1h # Test temps usage Galets Chlore

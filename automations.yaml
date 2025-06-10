@@ -2602,3 +2602,27 @@
         target:
           entity_id: input_boolean.flag_arret_piscine_sur_soc
   mode: single
+- id: '1749566472433'
+  alias: Reset Routeur WiFI Kuga
+  description: ''
+  triggers:
+  - trigger: time
+    at: 03:00:00
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: 63fcbc705bd1fabfa2309e2cad1da2bb
+    entity_id: 97ecf54840fa37e687c445f61d77abb4
+    domain: switch
+    metadata:
+      secondary: false
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - type: turn_on
+    device_id: 63fcbc705bd1fabfa2309e2cad1da2bb
+    entity_id: 97ecf54840fa37e687c445f61d77abb4
+    domain: switch
+  mode: single

@@ -92,6 +92,7 @@ datetime:
     name: "duree_injection_pH"
     optimistic: yes
     restore_value: true
+    icon: mdi:clock
 
 # Input Number
 number:
@@ -106,6 +107,7 @@ number:
     max_value: 10
     unit_of_measurement: "pH"
     step: 0.01
+    icon: mdi:ph
 
   # Cible Régulation pH
   - platform: template
@@ -182,7 +184,7 @@ number:
     max_value: 100
     step: 0.001
     unit_of_measurement: "l"
-    icon: mdi:ph
+    icon: mdi:timer-plus
 
   - platform: template
     name: "conso_ph_jour"
@@ -194,7 +196,7 @@ number:
     max_value: 100
     step: 0.001
     unit_of_measurement: "l"
-    icon: mdi:ph
+    icon: mdi:timer-plus
 
 sensor:
   # Mesure du pH
@@ -243,6 +245,7 @@ sensor:
     accuracy_decimals: 2
     state_class: measurement
     update_interval: 60s
+    icon: mdi:ph    
     filters:
       - sliding_window_moving_average:
           window_size: 15
@@ -263,6 +266,7 @@ sensor:
     id: _tps_injection_ph_moins
     unit_of_measurement: "s"
     state_class: "measurement" 
+    icon: mdi:ph
 
   # Affiche le volume de pH moins à injecter
   - platform: template
@@ -270,6 +274,7 @@ sensor:
     id: _vol_injection_ph_moins
     unit_of_measurement: "l"
     state_class: "measurement" 
+    icon: mdi:ph    
     
   # Ppe pH
   - platform: duty_time
@@ -277,6 +282,7 @@ sensor:
     name: 'temps_ma_ppe_ph'
     lambda: "return id(cde_ppe_ph_moins).state == true;"
     restore: true
+    icon: mdi:pump    
     filters: 
       - round: 0
 

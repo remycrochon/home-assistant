@@ -5,13 +5,10 @@ substitutions:
   time_timezone: "Europe/Paris"
 
 packages:
-  ph: !include pack_esp176/jsk.yaml
+  jsk: !include pack_esp176/jsk.yaml
 
 esphome:
   name: ${device_name}
-  project:
-    name: "rem81.esp176-esp32-routeur"
-    version: "1.0.0"
   on_boot:
     priority: -100
     # Force mode auto et tempok au demarrage
@@ -106,19 +103,7 @@ one_wire:
   - platform: gpio  
     pin: GPIO27 #
 
-# Informations supplementaires sur le WIFI
-#text_sensor:
-#  - platform: wifi_info
-#    ip_address:
-#      name: IP Address
-#    ssid:
-#      name: Connected SSID
-#    bssid:
-#      name: Connected BSSID
-#    mac_address:
-#      name: Mac Wifi Address
-#    scan_results:
-#      name: Latest Scan Results
+
 
 # déclaration des modes de fonctionnement dans des "input select"
 select:
@@ -382,7 +367,19 @@ text_sensor:
   - platform: template
     name: "Mode Regulation"
     id: moderegul
-
+  # Informations supplementaires sur le WIFI
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+    ssid:
+      name: Connected SSID
+    bssid:
+      name: Connected BSSID
+    mac_address:
+      name: Mac Wifi Address
+    scan_results:
+      name: Latest Scan Results
+      
 switch:
   - platform: gpio
     name: "Relais"
@@ -668,7 +665,7 @@ script:
 
  
   ########################################################################""
-    # Mode Etalonnage Increment S Traic toutes les 20 s pour laisser du temps à la puissance pour se stabiliser
+    # Mode Etalonnage Increment S Triac toutes les 20 s pour laisser du temps à la puissance pour se stabiliser
   - id: etalonnage_striac
     mode: restart  
     then:
@@ -748,12 +745,13 @@ script:
   - id: calcul_relais_surprod
     mode: single
     then:
-     # Si sortie triac > pmax-5%, ce qui signifie que le triac est au max sans effet, pendant plus de 60s
+     # Si sortie triac > 20 et Pu ECS >10, signifie que le triac est sans effet, pendant plus de 60s et que
+     # la température de l'ECS a atteint son max (Thermostat de l'ECS déclenché)
      # alors on active le relais
-     # si triac <= 0 alors on desactive le relais
+     # si Pu ECS > 10 alors on desactive le relais
       - if: 
           condition:
-            - lambda: 'return (id(striac)>=90 && id(puecs).state<100);'
+            - lambda: 'return (id(striac)>=90 && id(puecs).state<10);'
           then:
             - delay: 300s
             - switch.turn_on: relais
@@ -761,11 +759,12 @@ script:
 
       - if: 
           condition:
-            - lambda: 'return id(puecs).state >= 100;'
+            - lambda: 'return id(puecs).state >= 10;'
           then:
             - switch.turn_off: relais
             - logger.log: "Relais Désactivé"
-
+ 
+ ########################################################################""
   - id: _log_message
     parameters:
       mess1: std::string  # Type explicite pour ESPHome

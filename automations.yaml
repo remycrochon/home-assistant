@@ -1950,10 +1950,6 @@
         V'
       title: Defaut Secteur U Linky
     action: notify.telegram
-  - type: turn_on
-    device_id: 989cd1894e1458e4e2afd3c95b7229a6
-    entity_id: e0d6c5dc02fd61249906d2ce3ec512c1
-    domain: switch
   mode: single
 - id: '1730650651996'
   alias: Comptage Energie maison tempo

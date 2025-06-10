@@ -3,9 +3,9 @@ time:
     id: sntp_time1  
     timezone: Europe/Paris
     servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
     on_time:
       # Déclenchement du script Injection Clhore liquide 
       - seconds: 0
@@ -48,7 +48,8 @@ select:
     optimistic: true
     restore_value: true
     options:
-      - Auto
+      - Auto Ppm
+      - Auto ORP
       - Ma_f
       - At_f
     id: _Mode_Fonctionnement_regul_chlore
@@ -106,6 +107,34 @@ number:
     max_value: 10
     unit_of_measurement: "ppm"
     step: 0.01
+
+  # Consigne ORP
+  - platform: template
+    name: "Consigne ORP"
+    id: consigne_orp
+    optimistic: true
+    min_value: 400
+    max_value: 800
+    step: 5
+    initial_value: 700
+    restore_value: true
+    mode: box
+    unit_of_measurement: "mV"
+    icon: mdi:chemical-weapon
+
+  # Facteur de correction regulation ORP    
+  - platform: template
+    name: "Facteur Correction ORP"
+    id: facteur_correction_orp
+    optimistic: true
+    min_value: 0.0
+    max_value: 5.0
+    step: 0.1
+    initial_value: 0.5
+    restore_value: true
+    mode: box    
+    unit_of_measurement: "s/mV"
+    icon: mdi:chemical-weapon
 
   # Tps Max Galet Chlore
   - platform: template
@@ -267,84 +296,91 @@ script:
     then:
       - logger.log:
           format: "Script Injection Chlore"
-          level: INFO      
+          level: INFO
       - if:
           condition:
             and:
-              - switch.is_on: cde_ppe_filtration  
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'        
+              - switch.is_on: cde_ppe_filtration
+              - or:
+                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm";'
+                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto ORP";'
+
           then:
             - lambda: |-
-                static float nb = 0;
-                static float mp = 96.0f;  // Concentration de chlore actif en g/L (9.6%)
-                static float vb = 50000.0f;  // Volume de la piscine en L
-                static float de = 0;
-                static float q = 0;
-                nb = id(_chlore_cible).state;  // Concentration cible en mg/L
-                de = id(_debit_ppe_chlore).state;  // Débit en L/h
-                q = (nb * vb) / (mp * 1000.0f);  // Quantité en L
-                if (de > 0) {
-                  id(g_tps_injection_chlore) = std::min((q / de) * 3600.0f, 3600.0f);  // Temps en secondes, limité à 1 heure
-                } else {
-                  id(g_tps_injection_chlore) = 0;
+                float temps = 0.0f;
+
+                if (id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm") {
+                  // Boucle ouverte : dosage selon concentration cible
+                  float mp = 96.0f;   // concentration chlore actif en g/L (9.6%)
+                  float vb = 50000.0f;  // volume piscine en L
+                  float nb = id(_chlore_cible).state;  // mg/L
+                  float de = id(_debit_ppe_chlore).state;  // L/h
+                  float q = (nb * vb) / (mp * 1000.0f);  // L
+                  if (de > 0) {
+                    temps = std::min((q / de) * 3600.0f, 3600.0f);  // s, max 1h
+                  }
+                  ESP_LOGI("Dosage Chlore", "Mode Auto Ppm (mg/L) → Quantité: %.2f L, Temps: %.2f s", q, temps);
+
+                } else if (id(_Mode_Fonctionnement_regul_chlore).state == "Auto ORP") {
+                  // Boucle fermée : dosage selon ORP
+                  float consigne = id(consigne_orp).state;
+                  float mesure = id(orp_ezo).state;
+                  float erreur = consigne - mesure;
+                  float k = id(facteur_correction_orp).state;  // s/mV
+                  float temps_max = 600.0f;  // max 10 min
+                  if (erreur > 0) {
+                    temps = std::min(k * erreur, temps_max);
+                  }
+                  ESP_LOGI("Dosage Chlore", "Mode Auto ORP → ORP: %.1f mV, Cible: %.1f mV, Erreur: %.1f, Temps: %.1f s", mesure, consigne, erreur, temps);
                 }
-                id(_tps_injection_chlore).publish_state(id(g_tps_injection_chlore));
-                ESP_LOGI("Dosage Chlore", "Quantité: %.2f L, Temps: %.2f s", q, id(g_tps_injection_chlore));
-          else:
-            - lambda: |-
-                id(g_tps_injection_chlore)=0;
-                id(_tps_injection_chlore).publish_state(0);
-            # Convertion et affichage de la durée d'injection pH en hh:mm
-      - lambda: |-    
-          CONVERT_SECONDS(id(g_tps_injection_chlore), id(g_hh), id(g_mm), id(g_ss));          
-      - datetime.time.set:
-          id: duree_injection_chlore
-          time: !lambda |-
-            return {second: static_cast<uint8_t>(id(g_ss)), minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
-          
+
+                id(g_tps_injection_chlore) = temps;
+                id(_tps_injection_chlore).publish_state(temps);
+
+            - lambda: |-    
+                CONVERT_SECONDS(id(g_tps_injection_chlore), id(g_hh), id(g_mm), id(g_ss));          
+            - datetime.time.set:
+                id: duree_injection_chlore
+                time: !lambda |-
+                  return {second: static_cast<uint8_t>(id(g_ss)), minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
+
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'
+            and:
+              - lambda: 'return id(_tps_injection_chlore).state > 0;'
+              - switch.is_on: cde_ppe_filtration
           then:
-            - if:
-                condition:
-                  and:
-                    - lambda: 'return id(_tps_injection_chlore).state > 0;'
-                    - switch.is_on: cde_ppe_filtration
-                then:
-                  - switch.turn_on: cde_ppe_chlore
-                  - logger.log: 
-                      format: "Marche ppe Ph Chlore en Auto"
-                      level: INFO
-                  - lambda: |-
-                      // Affichage du temps d'injection Ppe Chlore
-                      std::string mess = "ESP178 Temps inj Chlore";
-                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_chlore));
+            - switch.turn_on: cde_ppe_chlore
+            - logger.log:
+                format: "Marche ppe Chlore en %s"
+                args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
+                level: INFO
+            - lambda: |-
+                std::string mess = "ESP178 Temps inj Chlore";
+                id(_message_telegram_v2)->execute(mess, id(g_tps_injection_chlore));
+            - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
+            - switch.turn_off: cde_ppe_chlore
+            - logger.log:
+                format: "Arrêt ppe Chlore en %s"
+                args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
+                level: INFO
+            - lambda: |-
+                std::string mess = "Fin Injection Chlore " + id(_Mode_Fonctionnement_regul_chlore).state;
+                id(_message_telegram)->execute(mess.c_str());
 
-                  - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
-                  - switch.turn_off: cde_ppe_chlore
-                  - logger.log: 
-                      format: "Arret ppe chlore en Auto"
-                      level: INFO
-                  - lambda: |-
-                      std::string mess = "Fin Injection Chlore en Auto";                                         
-                      id(_message_telegram)->execute(mess.c_str());                      
-                  # Comptabilise le volume de ch injecté
-                  - lambda: |-
-                      float debit = id(_debit_ppe_chlore).state;  // l/h
-                      float duree = id(_tps_injection_chlore).state;  // s
-                      float volume = debit * duree / 3600.0;  // conversion en litres
-                      // Mise à jour des compteurs
-                      id(conso_chlore_jour).publish_state(id(conso_chlore_jour).state + volume);
-                      id(conso_chlore_total).publish_state(id(conso_chlore_total).state + volume);
-    
-                else:
-                  - switch.turn_off: cde_ppe_chlore
-                  - lambda: |-
-                      id(_tps_injection_chlore).publish_state(0);
-                  - logger.log: 
-                      format: "Arret ppe chlore en Auto"
-                      level: INFO
+            - lambda: |-
+                float debit = id(_debit_ppe_chlore).state;
+                float duree = id(_tps_injection_chlore).state;
+                float volume = debit * duree / 3600.0f;
+                id(conso_chlore_jour).publish_state(id(conso_chlore_jour).state + volume);
+                id(conso_chlore_total).publish_state(id(conso_chlore_total).state + volume);
+
+          else:
+            - switch.turn_off: cde_ppe_chlore
+            - lambda: 'id(_tps_injection_chlore).publish_state(0);'
+            - logger.log:
+                format: "Pas d'injection chlore (condition non remplie)"
+                level: INFO
 
       - if:
           condition:

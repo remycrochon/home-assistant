@@ -225,7 +225,7 @@ openhasp:
       ###############
       - obj: "p4b10" # Regule
         properties:
-          "text": "Reg: {{ states('sensor.esp176_esp32_routeur_1r_mode_regulation') }}"      
+          "text": "Reg: {{ states('sensor.esp176_routeur_mode_regulation') }}"      
       - obj: "p4b20" # Prod
         properties:
           "text": >

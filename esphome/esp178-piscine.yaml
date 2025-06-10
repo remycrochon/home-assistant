@@ -964,7 +964,7 @@ script:
       - logger.log:
           format: "Durée Filtration %2d: %.2d Tps Filtrat: %2f"
           args: [ 'id(g_hh)', 'id(g_mm)', 'id(g_tps_filtration)'  ]
-          level: INFO     
+          level: DEBUG     
       - datetime.time.set:
           id: duree_filtration
           time: !lambda |-

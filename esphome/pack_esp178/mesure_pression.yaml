@@ -22,20 +22,23 @@ binary_sensor:
 sensor:
     # Mesure de la pression filtre Entrée ANA 3
   - platform: ads1115
-    multiplexer: 'A3_GND'
+    multiplexer: 'A0_GND'
     gain: 6.144
-    name: "Pression_filtre"          
+    name: "Pression_filtre"
     update_interval: 10s
     unit_of_measurement: "bar"
     device_class: pressure
     state_class: "measurement"        
     id: pression_filtre
     filters:
-    - calibrate_linear:
-        - 0.561 -> 0.0
-        - 2.213 -> 0.81
+#    - calibrate_linear:
+#        - 0.561 -> 0.0
+#        - 2.213 -> 0.81
     # moyenne sur 30 mn + affichage toutes les 2 mn
     - sliding_window_moving_average:
         window_size: 30
         send_every: 2
         send_first_at: 1
+    on_value:        
+        - lambda: |-
+            ESP_LOGI("Pression", "Mesure brut: %.2f" " Mesure filtrée: %.2f", id(pression_filtre).raw_state,id(pression_filtre).state );

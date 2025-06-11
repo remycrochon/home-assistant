@@ -2,14 +2,12 @@ substitutions:
   device_name: esp128-clim_ch_sud
   adress_ip: "192.168.0.128"
   time_timezone: "Europe/Paris"
-  friendly_name: esp128-clim_ch_sud
   
 esphome:
   name: "esp128-clim-ch-sud"
 
-
 esp32:
-  board: esp32-c3-devkitm-1
+  board: esp32-s3-devkitc-1  
   framework:
     type: arduino
 
@@ -60,8 +58,8 @@ daikin_s21:
   rx_uart: s21_uart
 
 climate:
-  - name: "${friendly_name} Clim salon" 
-    platform: daikin_s21
+  - platform: daikin_s21
+    id: climate_ch_sud
     visual:
       temperature_step: 1.0
     # Optional HA sensor used to alter setpoint.
@@ -70,28 +68,27 @@ climate:
 sensor:
   - platform: uptime
     type: seconds
-    name: "${friendly_name} Uptime"
+    name: "Uptime"
 #Etat de la connection
 
 # Optional additional sensors.
   - platform: daikin_s21
     inside_temperature:
-      name: "${friendly_name} Temperature Unite interieure"
+      name: "Temperature Unite interieure"
     outside_temperature:
-      name: "${friendly_name} Temperature Echangeur Exterieure"
+      name: "Temperature Echangeur Exterieure"
     coil_temperature:
-      name: "${friendly_name} Temperature Serpentin Unite Int"
+      name: "Temperature Serpentin Unite Int"
     fan_speed:
-      name: "${friendly_name} Vitesse Ventilateur"
+      name: "Vitesse Ventilateur"
   - platform: homeassistant
     id: room_temp
-    entity_id: sensor.temperature_salon_zb
+    entity_id: sensor.chambre_sud_temperature
     unit_of_measurement: °C
-
 switch:
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "Restart"
 
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"    
+    name: "Status"

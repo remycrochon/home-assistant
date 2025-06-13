@@ -1,0 +1,243 @@
+time:
+  - platform: sntp
+    timezone: Europe/Paris
+    servers:
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
+
+    on_time:
+      # reset le compteur de temps à minuit
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        then:
+          - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
+
+select:
+  - platform: template
+    name: "Mode_Fonct_appoint_eau"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Ma_f
+      - At_f
+    id: _Mode_Fonctionnement_regul_eau
+    on_value: 
+      then:
+        - logger.log:
+            format: "Mode Fonct Regul Eau --> %s"
+            args: [ 'id(_Mode_Fonctionnement_regul_eau).state.c_str()' ]
+            level: INFO        
+        - script.stop: _regul_eau
+        - delay: 1s            
+        - script.execute: _regul_eau
+
+button:
+  # Lance un Appoint d'Eau
+  - platform: template
+    name: "BP_Appoint Eau"
+    on_press:
+      - script.execute: _regul_eau
+
+binary_sensor: 
+  # calcul des niveaux piscine
+  # Si LSL ou LSH recouvert alors True sinon False
+  - platform: template
+    name: "niv_haut"
+    id: niv_haut
+      
+  - platform: template
+    name: "niv_inter"
+    id: niv_inter
+
+  - platform: template
+    name: "niv_bas"
+    id: niv_bas
+
+  - platform: template
+    name: "niv_defaut"
+    id: niv_defaut
+
+  # GPIO sur module extension SX1509
+  # Niveau haut à 1 si decouvert
+  - platform: gpio
+    name: "tp_plein_lsh"
+    id: lsh
+    pin:
+      number: GPIO4
+      inverted: true   
+      mode:
+        input: true
+        pullup: false
+    filters:
+      - delayed_on_off: 5s
+    on_press:
+      then:
+        - script.stop: _regul_eau
+        - switch.turn_off: cde_ev_eau
+
+  # Niveau bas à 1 si decouvert
+  - platform: gpio
+    name: "tp_plein_lsl"
+    id: lsl
+    pin:
+      number: GPIO5
+      inverted: true   
+      mode:
+        input: true
+        pullup: false
+
+    filters:
+      - delayed_on_off: 5s
+
+sensor:
+  # EV Eau
+  - platform: duty_time
+    id: _temps_fonctionnement_ev_eau
+    name: 'temps_ma_ev_eau'
+    lambda: "return id(cde_ev_eau).state == true;"
+    restore: true
+    filters: 
+      - round: 0
+
+switch:
+  - platform: gpio
+    name: "cde_ev_eau"
+    pin: GPIO13
+    id: cde_ev_eau
+
+interval:
+  - interval: 5s
+    then:      
+      - script.execute: _calcul_niveau_eau
+  - interval: 60s
+    then:
+      - lambda: |-
+          // Reset le compteur à 00:00:00      
+          auto now = id(sntp_time).now();
+          if (now.hour == 0 && now.minute == 0 && now.second == 0) {
+            id(_temps_fonctionnement_ev_eau).reset();
+          }          
+
+script: 
+  # Regulation du niveau d'eau piscine
+  # Declenché par BP Appoint Eau ou 120s apres la cde ouverture volet apres 120s
+  - id: _regul_eau
+    mode: single  
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+              - binary_sensor.is_off: niv_defaut
+              - binary_sensor.is_off: volet_ferme
+              - or:
+                - binary_sensor.is_on: niv_bas
+                - binary_sensor.is_on: niv_inter
+          then:
+            - logger.log: 
+                format: "Ouverture vanne eau Mode Auto"
+                level: INFO
+            - switch.turn_on: cde_ev_eau
+            - delay: 15min
+            - logger.log: 
+                format: "Fermeture vanne eau sur Timeout 15 min"
+                level: WARN
+            - switch.turn_off: cde_ev_eau
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+              - or:
+                - binary_sensor.is_on: niv_haut
+                - binary_sensor.is_on: niv_defaut
+          then:
+            - logger.log: 
+                format: "Fermeture vanne eau Mode Auto"
+                level: INFO
+            - switch.turn_off: cde_ev_eau
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Ma_f";'
+          then: 
+            - logger.log: 
+                format: "Ouverture vanne eau Mode Ma Forçé"
+                level: DEBUG
+            - switch.turn_on: cde_ev_eau
+
+      - if:
+          condition:
+            or:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "At_f";'
+          then:
+            - logger.log: 
+                format: "Fermeture vanne eau Mode At Forçé"
+                level: DEBUG
+            - switch.turn_off: cde_ev_eau
+
+  # Calcul des niveaux d'eau en fonction des sondes de niveaux
+  # si niveau haut et niveau bas => niveau haut
+  - id: _calcul_niveau_eau
+    then:
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: lsh
+              - binary_sensor.is_on: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_haut
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_haut
+                state: OFF
+      # si pas niveau haut et niveau bas => defaut intermédiaire
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_off: lsh
+              - binary_sensor.is_on: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_inter
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_inter
+                state: OFF     
+      # si pas niveau haut et pas niveau bas => niveau bas
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_off: lsh
+              - binary_sensor.is_off: lsl
+          
+          then:
+            - binary_sensor.template.publish:
+                id: niv_bas
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_bas
+                state: OFF                
+      # si niveau haut et pas niveau bas => defaut niveau
+      - if: 
+          condition:
+            and:
+              - binary_sensor.is_on: lsh
+              - binary_sensor.is_off: lsl
+          then:
+            - binary_sensor.template.publish:
+                id: niv_defaut
+                state: ON
+          else:
+            - binary_sensor.template.publish:
+                id: niv_defaut
+                state: OFF

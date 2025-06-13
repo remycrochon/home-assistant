@@ -1517,7 +1517,7 @@
     entity_id:
     - binary_sensor.zone_cuisine_all_occupancy
     to: 'on'
-    enabled: true
+    enabled: false
     for:
       hours: 0
       minutes: 0

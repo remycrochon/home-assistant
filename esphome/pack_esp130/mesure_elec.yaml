@@ -1,0 +1,29 @@
+  # mesure grandeurs electriques avec un PZEM-004T-100A
+
+# Configuration UART
+uart:
+  rx_pin: GPIO44 #rx
+  tx_pin: GPIO43 #tx
+  baud_rate: 9600
+
+# modbus necessaire au PZEM  
+modbus:
+
+sensor:
+  - platform: pzemac
+    update_interval: 30s
+    current:
+      name: "pzem_pisc_courant"
+      unit_of_measurement: "A"
+    voltage:
+      name: "pzem_pisc_tension"
+      unit_of_measurement: "V"
+    energy:
+      name: "pzem_pisc_energy"
+      unit_of_measurement: "kWh"
+      filters:
+        - multiply: 0.001
+    power:
+      name: "pzem_pisc_puissance"
+      unit_of_measurement: "W"
+      id: puissance

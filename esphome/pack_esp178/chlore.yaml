@@ -10,7 +10,7 @@ time:
       # Déclenchement du script Injection Clhore liquide 
       - seconds: 0
         minutes: 00
-        hours: 10
+        hours: 16
         then:
           - script.execute: _regul_chlore
       # reset le compteur de temps à minuit

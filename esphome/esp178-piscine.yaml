@@ -26,9 +26,6 @@ packages:
 
 esphome:
   name: ${device_name}
-  project:
-    name: "rem81.esp178-esp32-piscine"
-    version: "1.0.0"
 
   on_boot:
     priority: 200

@@ -605,7 +605,7 @@
   description: ''
   triggers:
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_tarif_distributeur
     trigger: state
   conditions: []
   actions:
@@ -614,13 +614,13 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: sensor.linky_n_tarif
+          entity_id: sensor.esp124_tic_linky_n_tarif
           state: '1'
         - condition: state
-          entity_id: sensor.linky_n_tarif
+          entity_id: sensor.esp124_tic_linky_n_tarif
           state: '3'
         - condition: state
-          entity_id: sensor.linky_n_tarif
+          entity_id: sensor.esp124_tic_linky_n_tarif
           state: '5'
       sequence:
       - data:
@@ -641,13 +641,13 @@
       - condition: or
         conditions:
         - condition: state
-          entity_id: sensor.linky_n_tarif
+          entity_id: sensor.esp124_tic_linky_n_tarif
           state: '2'
         - condition: state
-          entity_id: sensor.linky_n_tarif
+          entity_id: sensor.esp124_tic_linky_n_tarif
           state: '4'
         - condition: state
-          entity_id: sensor.linky_n_tarif
+          entity_id: sensor.esp124_tic_linky_n_tarif
           state: '6'
       sequence:
       - data:
@@ -1129,32 +1129,32 @@
   description: Actions en fonction du changement de modes de  Tempo
   triggers:
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     to: '1'
     id: HC Bleu
     trigger: state
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     to: '2'
     id: HP Bleu
     trigger: state
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     to: '3'
     id: HC Blanc
     trigger: state
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     to: '4'
     id: HP Blanc
     trigger: state
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     to: '6'
     id: hprouge
     trigger: state
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     id: sortiehprouge
     from: '6'
     trigger: state
@@ -1795,18 +1795,18 @@
 - id: '1726422825041'
   alias: Recopie Etat HA vers NR MP2
   description: Lien entre HA et le nodered du MP2
-  trigger:
-  - platform: time_pattern
-    id: mn
+  triggers:
+  - id: mn
     hours: /1
-  - platform: state
-    entity_id:
+    trigger: time_pattern
+  - entity_id:
     - input_boolean.mp2_valid_ess_charge_prog_1
     - input_boolean.forcage_charge_pgm_mp2_100
     - input_number.mp2_niveau_forcage_cp1
-    - sensor.linky_ptec
-  condition: []
-  action:
+    - sensor.esp124_tic_linky_ptec
+    trigger: state
+  conditions: []
+  actions:
   - action: mqtt.publish
     metadata: {}
     data:
@@ -1838,7 +1838,7 @@
       qos: '0'
       retain: false
       topic: ha/mp2/cp/hc
-      payload: '"{{ states(''sensor.linky_ptec'') }}"'
+      payload: '"{{ states(''sensor.esp124_tic_linky_ptec'') }}"'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet
@@ -1956,14 +1956,14 @@
   description: Attribue le comptage d’énergie maison en fonction du tarif Tempo
   triggers:
   - entity_id:
-    - sensor.linky_n_tarif
+    - sensor.esp124_tic_linky_n_tarif
     trigger: state
   conditions: []
   actions:
   - choose:
     - conditions:
       - condition: state
-        entity_id: sensor.linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state: '1'
       sequence:
       - data:
@@ -1974,7 +1974,7 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state: '2'
       sequence:
       - data:
@@ -1985,7 +1985,7 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state: '3'
       sequence:
       - data:
@@ -1996,7 +1996,7 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state: '4'
       sequence:
       - data:
@@ -2007,7 +2007,7 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state: '5'
       sequence:
       - data:
@@ -2018,7 +2018,7 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state: '6'
       sequence:
       - data:

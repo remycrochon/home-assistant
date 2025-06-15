@@ -1,0 +1,104 @@
+
+esphome:
+  name: esp121
+  friendly_name: ESP-121
+  on_boot:
+    priority: 600
+    then:
+      - light.turn_on:
+          id: voyant_led
+          effect: 'Pulse led'
+          red: 100%
+          green: 0%
+          blue: 0%
+          
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: arduino
+
+logger:
+
+
+api:
+
+web_server:
+  port: 80
+
+ota:
+  platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  manual_ip:
+    static_ip: 192.168.0.121
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: 192.168.0.254
+
+  ap:
+
+
+  on_connect:
+    - light.turn_on:
+        id: voyant_led
+        red: 0%
+        green: 100%
+        blue: 0%
+        brightness: 50%
+        effect: none
+
+  on_disconnect:
+    - light.turn_on:
+        id: voyant_led
+        effect: 'Pulse led'
+        red: 0%
+        green: 0%
+        blue: 100%
+
+captive_portal:
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    name: "Board Light"
+    pin: GPIO48
+    variant: WS2812
+    id: voyant_led
+    num_leds: 1
+    effects:
+      - pulse:
+      - pulse: 
+          name: 'Pulse led'
+          transition_length: 0.5s
+          update_interval: 0.5s
+          min_brightness: 0%
+          max_brightness: 100%
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: Adresse IP
+    ssid:
+      name: Wifi connecté
+    mac_address:
+      name: Adresse Mac
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal %"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+    

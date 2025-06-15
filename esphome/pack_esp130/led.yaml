@@ -1,0 +1,35 @@
+# Led WS2812 RGB  
+light:
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: rgb_led
+        from: 0
+        to: 0
+
+  - platform: neopixelbus
+    num_leds: 1
+    pin: GPIO48
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
+# Couleur du Jour 
+interval:
+  - interval: 10s
+    then:    
+        - lambda: |-
+            float wifi = id(wifi_signal_pourcent).state;
+            auto call = id(led1).make_call();
+            if (wifi > 75) {
+            call.set_rgb(0.0, 1.0, 0.0);  // Vert
+            } else if (wifi > 40) {
+            call.set_rgb(1.0, 1.0, 0.0);  // Jaune
+            } else {
+            call.set_rgb(1.0, 0.0, 0.0);  // Rouge
+            }
+            call.set_transition_length(500);  // 500 ms
+            call.perform();

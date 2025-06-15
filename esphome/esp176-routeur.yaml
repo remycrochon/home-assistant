@@ -249,10 +249,20 @@ number:
 sensor:
     
   # Informations WI_FI
-  - platform: wifi_signal # Affiche le signal WiFi strength/RSSI en dB
+  - platform: wifi_signal
     name: "WiFi Signal dB"
+    id: wifi_signal_db
     update_interval: 60s
+    entity_category: "diagnostic"
 
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal %"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+    
   ############### TEMPLATE  ######################"
   # Affichage dans HA et sur l'afficheur
   # Puissance lue par le JSk- Négative en injection/Positive en soutirage

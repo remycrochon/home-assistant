@@ -1,3 +1,6 @@
+ads1115:
+  - address: 0x48
+
 binary_sensor:
   # Etat pression filtre
   # Si pression superieure à p_Max alors = True
@@ -17,8 +20,9 @@ binary_sensor:
 
 sensor:
     # Mesure de la pression filtre Entrée ANA 3
-  - platform: adc
-    pin: GPIO1
+  - platform: ads1115
+    multiplexer: 'A0_GND'
+    gain: 6.144
     name: "Pression_filtre"
     update_interval: 10s
     unit_of_measurement: "bar"

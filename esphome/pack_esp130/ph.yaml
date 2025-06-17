@@ -289,7 +289,7 @@ sensor:
 switch:
   - platform: gpio
     name: "cde_ppe_ph_moins"
-    pin: GPIO46
+    pin: GPIO25
     id: cde_ppe_ph_moins
 
 interval:

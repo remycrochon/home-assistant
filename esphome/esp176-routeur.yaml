@@ -247,21 +247,16 @@ number:
     icon: mdi:arrow-collapse-vertical
 
 sensor:
-    
   # Informations WI_FI
   - platform: wifi_signal
-    name: "WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
-
-  - platform: copy
-    source_id: wifi_signal_db
-    name: "WiFi Signal %"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    name: "WiFi Signal Pourcent"
+    id: wifi_signal_pourcent
+    update_interval: 30s
     unit_of_measurement: "%"
+    accuracy_decimals: 0
     entity_category: "diagnostic"
+    filters:
+      - lambda: return (2 * (id(wifi_signal_pourcent).raw_state + 100));  # Convertit RSSI dBm en %  
     
   ############### TEMPLATE  ######################"
   # Affichage dans HA et sur l'afficheur

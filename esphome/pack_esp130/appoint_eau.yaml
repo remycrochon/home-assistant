@@ -60,13 +60,12 @@ binary_sensor:
     name: "niv_defaut"
     id: niv_defaut
 
-  # GPIO sur module extension SX1509
   # Niveau haut à 1 si decouvert
   - platform: gpio
     name: "tp_plein_lsh"
     id: lsh
     pin:
-      number: GPIO4
+      number: GPIO16
       inverted: true   
       mode:
         input: true
@@ -83,7 +82,7 @@ binary_sensor:
     name: "tp_plein_lsl"
     id: lsl
     pin:
-      number: GPIO5
+      number: GPIO4
       inverted: true   
       mode:
         input: true

@@ -92,7 +92,7 @@ ethernet:
   cs_pin: GPIO32
   interrupt_pin: GPIO17
   reset_pin: GPIO33
-  clock_speed: 15Mhz
+  clock_speed: 10Mhz
   manual_ip:
     static_ip: 192.168.0.130
     gateway: 192.168.0.254

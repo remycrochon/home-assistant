@@ -499,6 +499,7 @@ number:
     step: 0.01
 
 sensor:
+
   - platform: homeassistant
     name: "temperature_exterieure"
     entity_id: "sensor.vp2_temp_out"
@@ -637,6 +638,8 @@ switch:
             id(_message_telegram)->execute(mess.c_str());              
         - script.execute: _fonctionnement_filtration
 
+
+
 # Gestion de l'afficheur 
 display:
   - platform: lcd_pcf8574
@@ -650,6 +653,7 @@ display:
       it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau));
 
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
+
 
 # Déclenchement des scripts à intervalles réguliers
 interval:

@@ -26,13 +26,11 @@ select:
             level: INFO
 
 binary_sensor: 
-  # GPIO sur module extension SX1509
-
   - platform: gpio
     name: "volet_ferme"
     id: volet_ferme
     pin:
-      number: GPIO34
+      number: GPIO36
       inverted: true   
       mode:
         input: true

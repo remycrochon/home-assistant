@@ -184,61 +184,18 @@ script:
   # si niveau haut et niveau bas => niveau haut
   - id: _calcul_niveau_eau
     then:
-      - if: 
-          condition:
-            and:
-              - binary_sensor.is_on: lsh
-              - binary_sensor.is_on: lsl
-          
-          then:
-            - binary_sensor.template.publish:
-                id: niv_haut
-                state: ON
-          else:
-            - binary_sensor.template.publish:
-                id: niv_haut
-                state: OFF
-      # si pas niveau haut et niveau bas => defaut intermédiaire
-      - if: 
-          condition:
-            and:
-              - binary_sensor.is_off: lsh
-              - binary_sensor.is_on: lsl
-          
-          then:
-            - binary_sensor.template.publish:
-                id: niv_inter
-                state: ON
-          else:
-            - binary_sensor.template.publish:
-                id: niv_inter
-                state: OFF     
-      # si pas niveau haut et pas niveau bas => niveau bas
-      - if: 
-          condition:
-            and:
-              - binary_sensor.is_off: lsh
-              - binary_sensor.is_off: lsl
-          
-          then:
-            - binary_sensor.template.publish:
-                id: niv_bas
-                state: ON
-          else:
-            - binary_sensor.template.publish:
-                id: niv_bas
-                state: OFF                
-      # si niveau haut et pas niveau bas => defaut niveau
-      - if: 
-          condition:
-            and:
-              - binary_sensor.is_on: lsh
-              - binary_sensor.is_off: lsl
-          then:
-            - binary_sensor.template.publish:
-                id: niv_defaut
-                state: ON
-          else:
-            - binary_sensor.template.publish:
-                id: niv_defaut
-                state: OFF
+      - lambda: |-
+          bool lsh_on = id(lsh).state;
+          bool lsl_on = id(lsl).state;
+
+          // Niveau haut : les deux sondes actives
+          id(niv_haut).publish_state(lsh_on && lsl_on);
+
+          // Niveau intermédiaire : seule la sonde basse active
+          id(niv_inter).publish_state(!lsh_on && lsl_on);
+
+          // Niveau bas : aucune sonde active
+          id(niv_bas).publish_state(!lsh_on && !lsl_on);
+
+          // Défaut : sonde haute active, sonde basse inactive
+          id(niv_defaut).publish_state(lsh_on && !lsl_on);

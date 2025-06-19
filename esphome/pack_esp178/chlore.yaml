@@ -23,7 +23,7 @@ time:
               id: conso_chlore_jour
               value: 0
       # Notification du rapport journalier sur Telegram
-      - seconds: 10
+      - seconds: 40
         minutes: 59
         hours: 23
         then:

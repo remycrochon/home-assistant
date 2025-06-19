@@ -9,12 +9,12 @@ time:
       # Déclenchement du script de regul pH deux fois par jour
       - seconds: 0
         minutes: 00
-        hours: 12
+        hours: 19
         then:
           - script.execute: _regul_ph
       - seconds: 0
         minutes: 00
-        hours: 16
+        hours: 20
         then:
           - script.execute: _regul_ph
       # reset le compteur de temps à minuit

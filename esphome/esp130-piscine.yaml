@@ -86,12 +86,12 @@ ota:
 
 ethernet:
   type: W5500
-  clk_pin: SCK
+  clk_pin: GPIO17
   mosi_pin: GPIO23
   miso_pin: GPIO19
-  cs_pin: GPIO32
-  interrupt_pin: GPIO17
-  reset_pin: GPIO33
+  cs_pin: GPIO15
+  interrupt_pin: GPIO4
+  reset_pin: GPIO18
   clock_speed: 10Mhz
   manual_ip:
     static_ip: 192.168.0.130
@@ -102,8 +102,8 @@ ethernet:
 # Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
-    number: GPIO5
-    inverted: true
+    number: GPIO10
+    inverted: true  
 
 # Enable logging
 logger:
@@ -143,8 +143,8 @@ time:
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
-  sda: 21
-  scl: 22
+  sda: GPIO21
+  scl: GPIO22
   scan: true
   id: bus_a
 
@@ -501,7 +501,7 @@ text_sensor:
 switch:
   - platform: gpio
     name: "cde_pompe_filtration"
-    pin: GPIO15
+    pin: GPIO32
     id: cde_ppe_filtration
     on_turn_on:
       then:
@@ -525,7 +525,7 @@ switch:
 
   - platform: gpio
     name: "cde_eclairage"
-    pin: GPIO12
+    pin: GPIO26
     id: cde_eclairage
 
   - platform: restart

@@ -65,7 +65,7 @@ binary_sensor:
     name: "tp_plein_lsh"
     id: lsh
     pin:
-      number: GPIO16
+      number: GPIO34
       inverted: true   
       mode:
         input: true
@@ -82,7 +82,7 @@ binary_sensor:
     name: "tp_plein_lsl"
     id: lsl
     pin:
-      number: GPIO4
+      number: GPIO39
       inverted: true   
       mode:
         input: true
@@ -104,7 +104,7 @@ sensor:
 switch:
   - platform: gpio
     name: "cde_ev_eau"
-    pin: GPIO13
+    pin: GPIO12
     id: cde_ev_eau
 
 interval:

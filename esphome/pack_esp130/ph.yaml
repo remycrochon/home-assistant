@@ -140,10 +140,11 @@ number:
     optimistic: true
     restore_value: true
     mode: box
-    min_value: 0.01
-    max_value: 1.0
+    min_value: 0.1
+    max_value: 100.0
     unit_of_measurement: ""
-    step: 0.01
+    initial_value: 50
+    step: 0.1
     icon: mdi:percent
 
   # Debit Pompe pH moins
@@ -366,7 +367,7 @@ script:
                           float duree = (quantite_necessaire * 1000.0) / debit_ml_s;
                           // Ajustement pour éviter des corrections trop brutales : on limite à une fraction par cycle
                           // Utilisation du facteur de correction défini par l'utilisateur
-                          float facteur_correction = id(facteur_correction_ph).state;
+                          float facteur_correction = id(facteur_correction_ph).state/100;
                           duree = duree * facteur_correction;
                           // Limites de sécurité : entre 1 et 60 secondes
                           duree = std::max(1.0f, std::min(duree, 60.0f));
@@ -416,7 +417,7 @@ script:
                   - switch.turn_off: cde_ppe_ph_moins
                   - lambda: |-
                       std::string mess = "ESP178 Fin Injection pH";
-                      id(_message_telegram_v2)->execute(mess,id(g_memoire_ph));
+                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_ph_moins));
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO

@@ -22,7 +22,7 @@ packages:
   mesure_pression: !include pack_esp130/mesure_pression.yaml
 
 esphome:
-  name: esp130_piscine  
+  name: esp130-piscine  
 
   on_boot:
     priority: 600
@@ -89,7 +89,7 @@ ethernet:
   clk_pin: GPIO17
   mosi_pin: GPIO23
   miso_pin: GPIO19
-  cs_pin: GPIO15
+  cs_pin: GPIO5
   interrupt_pin: GPIO4
   reset_pin: GPIO18
   clock_speed: 10Mhz

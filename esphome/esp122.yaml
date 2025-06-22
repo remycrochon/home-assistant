@@ -32,7 +32,7 @@ status_led:
     number: GPIO23
     inverted: true
 logger:
-  level: INFO
+  level: debug
 
 api:
   
@@ -42,7 +42,31 @@ ota:
 web_server:
   port: 80
 
+# Capteur de statut distant (ESP178)
 binary_sensor:
+  - platform: homeassistant
+    name: "ESP178 Piscine Status"
+    entity_id: binary_sensor.uptimekuma_esp178_piscine
+    id: etat_esp178
+
+# Déclenchement du reset si le capteur passe à off pendant plus de 30s
+  - platform: template
+    name: "Surveillance ESP178"
+    lambda: |-
+      return id(etat_esp178).state;
+
+    on_release:
+      then:
+        - delay: 30s
+        - if:
+            condition:
+              binary_sensor.is_off: etat_esp178
+            then:
+              - logger.log: "ESP178 Hors ligne, déclenchement du reset"
+              - switch.turn_on: relais_reset_piscine
+              - delay: 2s  # durée du reset (ajuste si nécessaire)
+              - switch.turn_off: relais_reset_piscine
+
   - platform: status
     name: "Status"
 
@@ -50,7 +74,7 @@ switch:
   - platform: gpio
     name: "R1"
     pin: GPIO16
-    id: r1
+    id: relais_reset_piscine
 
   - platform: restart
     name: "Restart"

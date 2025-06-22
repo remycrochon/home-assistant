@@ -58,13 +58,6 @@ esphome:
                     
       # Messages de Boot
       - delay: 20s
-      - lambda: |-
-          std::string mess = "Boot ESP178";
-          id(telegram_msg_buffer) = mess;
-      - homeassistant.service:
-          service: notify.telegram
-          data:
-            message: !lambda 'return id(telegram_msg_buffer).c_str();'
         # Message Telegram
       - lambda: |-                
           std::string mess= "ESP178 Boot";
@@ -104,10 +97,8 @@ status_led:
 logger:
   level: INFO
   baud_rate: 0
-  
 # Enable Home Assistant API
 api:
-
 
 ota:
   platform: esphome
@@ -499,6 +490,21 @@ number:
     step: 0.01
 
 sensor:
+  # Example configuration entry with 2 sensors and filter
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
 
   - platform: homeassistant
     name: "temperature_exterieure"

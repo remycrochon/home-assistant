@@ -81,12 +81,10 @@ mqtt:
   #internal_mqtt_default: internal
 
 globals:
-
   - id: p_dispo_lisse
     type: float
     restore_value: yes
     initial_value: '0'
-
   - id: striac
     type: float
     restore_value: no
@@ -143,11 +141,6 @@ select:
         - light.turn_off:
             id: gradateur
         - script.execute: calcul_injection        
-
-button:
-  - platform: template
-    name: "Bouton Declencheur"
-
 
 binary_sensor:
   #Etat de la connection
@@ -247,16 +240,21 @@ number:
     icon: mdi:arrow-collapse-vertical
 
 sensor:
-  # Informations WI_FI
-  - platform: wifi_signal
-    name: "WiFi Signal Pourcent"
-    id: wifi_signal_pourcent
-    update_interval: 30s
-    unit_of_measurement: "%"
-    accuracy_decimals: 0
+  # Example configuration entry with 2 sensors and filter
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
     entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
     filters:
-      - lambda: return (2 * (id(wifi_signal_pourcent).raw_state + 100));  # Convertit RSSI dBm en %  
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
     
   ############### TEMPLATE  ######################"
   # Affichage dans HA et sur l'afficheur
@@ -357,6 +355,10 @@ sensor:
     name: "Tarif Num"
     entity_id: sensor.linky_n_tarif
     id: hc
+  - platform: homeassistant
+    name: "Pu Clim"
+    entity_id: sensor.ecocompteur_clim
+    id: pu_clim
 
   # Sonde Temperature radiateur
   - platform: dallas_temp
@@ -611,7 +613,7 @@ script:
           if (id(etatbus_ve).state == 3) {
             // Mode Bulk : régule sur la puissance batterie
             // Calcul de la puissance disponible
-            p_dispo = id(pu_prod).state - id(conso_maison).state-id(res_pubatt).state;
+            p_dispo = id(pu_prod).state - id(conso_maison).state-id(pu_clim).state-id(res_pubatt).state;
             p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
             
             // Affichage sur Synoptique
@@ -620,7 +622,7 @@ script:
 
           } else if ((id(etatbus_ve).state == 4) || (id(etatbus_ve).state == 5)){
             // Sinon, on reste sur la puissance batterie en mode Absorsion (4) ou Float (5)
-            p_dispo = id(pu_prod).state - id(conso_maison).state+id(pu_batteries).state;
+            p_dispo = id(pu_prod).state - id(conso_maison).state-id(pu_clim).state+id(pu_batteries).state;
             p_dispo = (p_dispo < 0.0) ? 0.0 : p_dispo;
 
             
@@ -665,8 +667,8 @@ script:
 
           // Log de débogage
 
-          ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_batteries: %.2f,STriac: %.2f",
-            p_dispo, id(pu_prod).state, id(conso_maison).state, id(cons_batt_cours).state,id(striac));
+          ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f,pu_clim: %.2f, pu_batt: %.2f,STriac: %.2f",
+            p_dispo, id(pu_prod).state, id(conso_maison).state, id(pu_clim).state, id(cons_batt_cours).state,id(striac));
 
  
   ########################################################################""

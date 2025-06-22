@@ -88,8 +88,8 @@
     to: 'off'
     for:
       hours: 0
-      minutes: 0
-      seconds: 10
+      minutes: 2
+      seconds: 0
     trigger: state
   conditions: []
   actions:
@@ -2603,11 +2603,11 @@
           entity_id: input_boolean.flag_arret_piscine_sur_soc
   mode: single
 - id: '1749566472433'
-  alias: Reset Routeur WiFI Kuga
+  alias: Reset Routeurs WiFI
   description: ''
   triggers:
   - trigger: time
-    at: 03:00:00
+    at: 07:00:00
   conditions: []
   actions:
   - type: turn_off
@@ -2625,4 +2625,24 @@
     device_id: 63fcbc705bd1fabfa2309e2cad1da2bb
     entity_id: 97ecf54840fa37e687c445f61d77abb4
     domain: switch
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.pc3_lidl
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.pc3_lidl
   mode: single

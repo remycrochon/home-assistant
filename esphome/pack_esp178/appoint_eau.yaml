@@ -13,6 +13,11 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
+globals:
+  - id: ev_eau_on_start_time
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
 
 select:
   - platform: template
@@ -110,7 +115,7 @@ switch:
     id: cde_ev_eau
 
 interval:
-  - interval: 5s
+  - interval: 60s
     then:      
       - script.execute: _calcul_niveau_eau
   - interval: 60s
@@ -119,8 +124,23 @@ interval:
           // Reset le compteur à 00:00:00      
           auto now = id(sntp_time).now();
           if (now.hour == 0 && now.minute == 0 && now.second == 0) {
-            id(_temps_fonctionnement_ev_eau).reset();
-          }          
+            id(_temps_fonctionnement_ev_eau).reset();            
+          }
+  ## Sécurisation de l'ouverture EV EAU si > à 1heure        
+  - interval: 60s
+    then:
+      - lambda: |-
+          if (id(cde_ev_eau).state) {
+            uint32_t now = millis() / 1000;
+            uint32_t duration = now - id(ev_eau_on_start_time);
+            if (duration > 3600) {  // 3600 secondes = 1h
+              ESP_LOGI("SECURITE", "Vanne EV eau ouverte depuis plus de 1h, fermeture forcée.");
+              id(cde_ev_eau).turn_off();
+              id(_regul_eau).stop();
+              std::string mess = "ESP178 Defaut->Vanne Eau ouverte depuis";
+              id(_message_telegram_v2)->execute(mess, duration);              
+            }
+          }
 
 script: 
   # Regulation du niveau d'eau piscine
@@ -142,11 +162,9 @@ script:
                 format: "Ouverture vanne eau Mode Auto"
                 level: INFO
             - switch.turn_on: cde_ev_eau
-            - delay: 15min
-            - logger.log: 
-                format: "Fermeture vanne eau sur Timeout 15 min"
-                level: WARN
-            - switch.turn_off: cde_ev_eau
+            - lambda: |-
+                id(ev_eau_on_start_time) = millis() / 1000;            
+ 
       - if:
           condition:
             and:

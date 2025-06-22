@@ -23,9 +23,10 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
-          - number.set:
-              id: conso_ph_jour
-              value: 0
+          - lambda: |-
+              id(g_conso_ph_jour) = 0.0;
+              id(conso_ph_jour).publish_state(0.0);
+
         # Notification du rapport journalier sur Telegram
       - seconds: 05
         minutes: 59
@@ -51,6 +52,17 @@ globals:
   - id: g_tps_injection_ph_moins
     type: float
     restore_value: no
+
+  # Cumul de la conso pH totale et jour
+  - id: g_conso_ph_totale
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+  - id: g_conso_ph_jour
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+
 
 # déclaration des modes de fonctionnement dans des "input select"
 select:
@@ -174,30 +186,6 @@ number:
     step: 1
     icon: mdi:clock
 
-  # Comptabilise le volume de pH injecté
-  - platform: template
-    name: "conso_ph_total"
-    id: conso_ph_total
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    step: 0.001
-    unit_of_measurement: "l"
-    icon: mdi:timer-plus
-
-  - platform: template
-    name: "conso_ph_jour"
-    id: conso_ph_jour
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    step: 0.001
-    unit_of_measurement: "l"
-    icon: mdi:timer-plus
 
 sensor:
   # Mesure du pH
@@ -286,7 +274,28 @@ sensor:
     icon: mdi:pump    
     filters: 
       - round: 0
+  # Affiche la conso de pH
+  - platform: template
+    name: "Conso_pH_Totale"
+    id: conso_ph_totale
+    lambda: "return id(g_conso_ph_totale);"
+    update_interval: 60s  # ou plus fréquent selon besoin
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    icon: mdi:counter
+    state_class: total_increasing
+    device_class: water
 
+  - platform: template
+    name: "Conso_pH_Jour"
+    id: conso_ph_jour
+    lambda: "return id(g_conso_ph_totale);"
+    update_interval: 60s  # ou plus fréquent selon besoin
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    icon: mdi:counter
+    state_class: total_increasing
+    device_class: water    
 switch:
   - platform: gpio
     name: "cde_ppe_ph_moins"
@@ -427,8 +436,10 @@ script:
                       float duree = id(_tps_injection_ph_moins).state;  // s
                       float volume = debit * duree / 3600.0;  // conversion en litres
                       // Mise à jour des compteurs
-                      id(conso_ph_jour).publish_state(id(conso_ph_jour).state + volume);
-                      id(conso_ph_total).publish_state(id(conso_ph_total).state + volume);
+                      id(g_conso_ph_totale) += volume;
+                      id(g_conso_ph_jour) += volume;
+                      id(conso_ph_totale).publish_state(id(g_conso_ph_totale));
+                      id(conso_ph_jour).publish_state(id(g_conso_ph_jour));
 
                 else:
                   - switch.turn_off: cde_ppe_ph_moins

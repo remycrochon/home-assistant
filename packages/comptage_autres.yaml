@@ -34,7 +34,8 @@ template:
       device_class: "power"
       state_class: "measurement"  
 
-
+    lambda: |-
+      return id(poids_chlore_brut).state + id(offset_poids_chlore).state;
 
 
 

@@ -1,34 +1,76 @@
-# Mode simulation
-# Sensor simulé:
-  # temperature eau
-  # ph EZO
-  # Seuil binary sensor "Marche ppe"
-  # test si ph_EZO est valide
-  # Cron time pour lancer script regule pH
+# https://www.gotronic.fr/pj2-wt32-eth01-datasheet-v1-1-1-2810.pdf
+#Pin Name Description
+#1 EN1 Enable signal, active high
+#2 CFG IO32, CFG                       ---<
+#3 485_EN Enable pin of IO33, RS485    
+#4 RXD IO5, RXD2                       
+#5 TXD IO17, TXD2                      
+#6 GND GND
+#7 3V3 3V3 power supply
+#8 GND GND
+#9 5V 5V power supply
+#10 LINK Network connection indicator pin
+#11 GND GND
+#12 IO39 IO39, only supports input
+#13 IO36 IO36, only supports input
+#14 IO15 IO15
+#15 I014 IO14
+#16 IO12 IO12
+#17 IO35 IO35, only supports input
+#18 IO4 IO4                           ---<
+#19 IO2 IO2                           ---<
+#20 GND GND
 
 substitutions:
-  device_name: "esp178-piscine"
-  friendly_name: esp178
-  adress_ip: "192.168.0.178"
+  device_name: esp140-piscine
+  adress_ip: "192.168.0.140"
   time_timezone: "Europe/Paris"
   # Definition des seuils admissibles
   pu_fonctionnement: "200"
   pression_max: "15"
 
 packages:
-  ph: !include pack_esp178/ph.yaml
-  chlore: !include pack_esp178/chlore.yaml    
-  volet: !include pack_esp178/couverture_flottante.yaml
-  appoint_eau: !include pack_esp178/appoint_eau.yaml
-  hors_gel: !include pack_esp178/hors_gel.yaml
-  mesure_elec: !include pack_esp178/mesure_elec.yaml
-  mesure_pression: !include pack_esp178/mesure_pression.yaml
+  ph: !include pack_esp130/ph.yaml
+  chlore: !include pack_esp130/chlore.yaml    
+  volet: !include pack_esp130/couverture_flottante.yaml
+  appoint_eau: !include pack_esp130/appoint_eau.yaml
+  hors_gel: !include pack_esp130/hors_gel.yaml
+  mesure_elec: !include pack_esp130/mesure_elec.yaml
+  mesure_pression: !include pack_esp130/mesure_pression.yaml
+
+esp32:
+  board: esp-wrover-kit
+
+
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+  password: "7f5924bc7de9aceb5b6b434afab874c4" # Ne pas supprimer
+
+web_server:
+  port: 80
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: 192.168.0.254
 
 esphome:
-  name: ${device_name}
+  name: esp140-piscine  
 
   on_boot:
-    priority: 200
+    priority: 600
     then:
       - lambda: |-
           #define CONVERT_SECONDS(total_seconds, hh, mm, ss) \
@@ -42,6 +84,7 @@ esphome:
             mm = std::min(mm, 59); \
             ss = std::min(ss, 59); \
           } while (0)
+
       # Initialisation des templates Ph
       # A supprimer si pH non utilisé
       - sensor.template.publish:
@@ -58,55 +101,30 @@ esphome:
                     
       # Messages de Boot
       - delay: 20s
+      - lambda: |-
+          std::string mess = "Boot ESP178";
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
+          service: notify.telegram
+          data:
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
         # Message Telegram
       - lambda: |-                
-          std::string mess= "ESP178 Boot";
-          id(_message_telegram)->execute(mess.c_str());                   
+          std::string mess= "ESP140 Boot";
+          id(_message_telegram)->execute(mess.c_str());            
 
-esp32:
-  board: esp32dev
-
-wifi:
-  networks:
-   - ssid: !secret wifi_esp
-     password: !secret mdpwifi_esp
-  reboot_timeout: 5min
-
-#ethernet:
-#  type: W5500
-#  clk_pin: GPIO17
-#  mosi_pin: GPIO19
-#  miso_pin: GPIO18
-#  cs_pin: GPIO21 
-#  interrupt_pin: GPIO4
-#  reset_pin: GPIO5
-#  clock_speed: 15Mhz
-  manual_ip:
-    static_ip: ${adress_ip}
-    gateway: 192.168.0.254
-    subnet: 255.255.255.0
-    dns1: 192.168.0.254
 
 # Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
-status_led:
-  pin:
-    number: GPIO23
-    inverted: true
+#status_led:
+#  pin:
+#    number: GPIO10
+#    inverted: true  
 
 # Enable logging
 logger:
-  level: INFO
+  level: DEBUG
   baud_rate: 0
-# Enable Home Assistant API
-api:
-
-ota:
-  platform: esphome
-
-web_server:
-  port: 80
-  version: 3 # sinon 2
-
+  
 time:
   - platform: sntp
     id: sntp_time
@@ -140,16 +158,15 @@ time:
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
-  sda: 15
-  scl: 22
-  scan: false
+  sda: GPIO17
+  scl: GPIO4
+  scan: true
   id: bus_a
-  frequency: 300kHz
 
 # Connection sonde(s) de température DS18b20
 one_wire:
   - platform: gpio
-    pin: GPIO16
+    pin: GPIO14
 
 # Extension E/S
 sx1509:
@@ -293,7 +310,6 @@ select:
             snprintf(buf, sizeof(buf), "Mode Fonct Filtration --> %s", id(_Mode_Fonctionnement_filtration).state.c_str());
             id(_log_message)->execute(std::string(buf));
 
-
 button:
   # Ce bouton stoppe la filtration pour la journée (cas de mauvais temps par ex)
   # Durée "Arret Jour" en heure on multiplie par 3600 pour avoir des secondes 
@@ -346,44 +362,6 @@ binary_sensor:
           std::string mess= "ESP178 Fin Filtration";
           id(_message_telegram)->execute(mess.c_str());    
 
-  # Entrée logique permettant de lire le BP I00 de la carte
-  #- platform: gpio
-  #  pin:
-  #    number: GPIO00
-  #    inverted: True
-  #    mode:
-  #      input: true
-  #      pullup: true
-  #  name: "bp1"
-
-  # GPIO sur module extension SX1509
-  - platform: gpio
-    name: "E4"
-    pin:
-      sx1509: sx1509_hub1
-      number: 3
-      mode:
-        input: true
-        pullup: false
-      inverted: false   
-  - platform: gpio
-    name: "E5"
-    pin:
-      sx1509: sx1509_hub1
-      number: 4
-      mode:
-        input: true
-        pullup: false
-      inverted: false   
-  - platform: gpio
-    name: "E6"
-    pin:
-      sx1509: sx1509_hub1
-      number: 5
-      mode:
-        input: true
-        pullup: false
-      inverted: false   
 
 # Définiton des "Time"
 datetime:
@@ -490,27 +468,14 @@ number:
     step: 0.01
 
 sensor:
-  # Example configuration entry with 2 sensors and filter
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-    name: "WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
-
-  - platform: copy # Reports the WiFi signal strength in %
-    source_id: wifi_signal_db
-    name: "WiFi Signal Percent"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "Signal %"
-    entity_category: "diagnostic"
-    device_class: ""
-
-  - platform: homeassistant
-    name: "temperature_exterieure"
-    entity_id: "sensor.vp2_temp_out"
-    id: temp_ext
-  #    entity_id: "input_number.simule_temp_exterieur" sert à la simulation
+  # - platform: wifi_signal
+  #    name: "WiFi Signal Pourcent"
+  #    id: wifi_signal_pourcent
+  #    update_interval: 30s
+  #    unit_of_measurement: "%"
+  #    accuracy_decimals: 0
+  #    filters:
+  #      - lambda: return (2 * (id(wifi_signal_pourcent).raw_state + 100));  # Convertit RSSI dBm en %
 
   - platform: dallas_temp
     #address: 0x060321117ae89b28
@@ -547,11 +512,15 @@ text_sensor:
 switch:
   - platform: gpio
     name: "cde_pompe_filtration"
-    pin: GPIO32
+    pin:
+      sx1509: sx1509_hub1
+      number: 4
+      mode:
+        output: true
+      inverted: false      
     id: cde_ppe_filtration
     on_turn_on:
       then:
-        - switch.turn_on: led14        
         - delay: !lambda "return id(tempo_mesure_temp).state*1000;" # Durée de fonctionnement de la pompe avant prise en compte de la température eau
         - logger.log:
             format: "Set tempo cde ppe"
@@ -569,37 +538,13 @@ switch:
         - switch.turn_off: cde_ppe_ph_moins
         - script.stop: _regul_chlore
         - switch.turn_off: cde_ppe_chlore
-        - switch.turn_off: led14     
 
   - platform: gpio
     name: "cde_eclairage"
-    pin: GPIO26
+    pin:
+      sx1509: sx1509_hub1
+      number: 9
     id: cde_eclairage
-
-  - platform: gpio
-    name: "relais8"
-    pin: GPIO13
-    id: relais8
-
-  - platform: gpio
-    name: "led14"
-    id: led14
-    pin:
-      sx1509: sx1509_hub1
-      number: 14
-      mode:
-        output: true
-      inverted: false
-
-  - platform: gpio
-    name: "led15"
-    id: led15
-    pin:
-      sx1509: sx1509_hub1
-      number: 15
-      mode:
-        output: true
-      inverted: false
 
   - platform: restart
     name: "Restart"
@@ -644,8 +589,6 @@ switch:
             id(_message_telegram)->execute(mess.c_str());              
         - script.execute: _fonctionnement_filtration
 
-
-
 # Gestion de l'afficheur 
 display:
   - platform: lcd_pcf8574
@@ -659,7 +602,6 @@ display:
       it.printf(8,1,"T=%.1f",id(g_memoire_temp_eau));
 
 #it.printf(15,1,"T=%.1s",id(mode_f).state);
-
 
 # Déclenchement des scripts à intervalles réguliers
 interval:
@@ -1012,7 +954,6 @@ script:
             - switch.turn_on: cde_ppe_filtration
           else:
             - switch.turn_off: cde_ppe_filtration
-    
              
   # Envoi d'un message à Telegram via HA, celui ci doit etre operationnel
   # Message à construire au format String avant appel de ce script

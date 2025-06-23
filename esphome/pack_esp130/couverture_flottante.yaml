@@ -26,18 +26,21 @@ select:
             level: INFO
 
 binary_sensor: 
+  # GPIO sur module extension SX1509
+  # = on si volet fermé
   - platform: gpio
     name: "volet_ferme"
     id: volet_ferme
     pin:
-      number: GPIO36
-      inverted: true   
+      sx1509: sx1509_hub1
+      number: 2
       mode:
         input: true
         pullup: false
-
+      inverted: false
     filters:
       - delayed_on_off: 500ms
+
 
 text_sensor:
   - platform: template
@@ -90,7 +93,9 @@ cover:
 switch:
   - platform: gpio
     name: "cde_volet_ouverture"
-    pin: GPIO27
+    pin:
+      sx1509: sx1509_hub1
+      number: 7
     id: cde_volet_ouverture
     interlock: [cde_volet_fermeture]
     on_turn_on:
@@ -100,7 +105,9 @@ switch:
 
   - platform: gpio
     name: "cde_volet_fermeture"
-    pin: GPIO14
+    pin:
+      sx1509: sx1509_hub1
+      number: 8
     id: cde_volet_fermeture
     interlock: [cde_volet_ouverture]
 

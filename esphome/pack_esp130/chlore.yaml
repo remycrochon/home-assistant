@@ -287,7 +287,9 @@ sensor:
 switch: 
   - platform: gpio
     name: "cde_ppe_chlore"
-    pin: GPIO25
+    pin:
+      sx1509: sx1509_hub1
+      number: 6
     id: cde_ppe_chlore
     icon: mdi:pump
 

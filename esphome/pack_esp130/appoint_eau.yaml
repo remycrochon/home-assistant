@@ -60,16 +60,18 @@ binary_sensor:
     name: "niv_defaut"
     id: niv_defaut
 
+   # GPIO sur module extension SX1509
   # Niveau haut à 1 si decouvert
   - platform: gpio
     name: "tp_plein_lsh"
     id: lsh
     pin:
-      number: GPIO34
-      inverted: true   
+      sx1509: sx1509_hub1
+      number: 0
       mode:
         input: true
         pullup: false
+      inverted: true
     filters:
       - delayed_on_off: 5s
     on_press:
@@ -82,12 +84,12 @@ binary_sensor:
     name: "tp_plein_lsl"
     id: lsl
     pin:
-      number: GPIO39
-      inverted: true   
+      sx1509: sx1509_hub1
+      number: 1
       mode:
         input: true
         pullup: false
-
+      inverted: true
     filters:
       - delayed_on_off: 5s
 
@@ -104,7 +106,9 @@ sensor:
 switch:
   - platform: gpio
     name: "cde_ev_eau"
-    pin: GPIO12
+    pin:
+      sx1509: sx1509_hub1
+      number: 10
     id: cde_ev_eau
 
 interval:

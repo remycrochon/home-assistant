@@ -284,7 +284,7 @@ sensor:
   - platform: template
     name: "Conso_Chl_Jour"
     id: conso_chl_jour
-    lambda: "return id(g_conso_chl_totale);"
+    lambda: "return id(g_conso_chl_jour);"
     update_interval: 60s  # ou plus fréquent selon besoin
     unit_of_measurement: "l"
     accuracy_decimals: 3

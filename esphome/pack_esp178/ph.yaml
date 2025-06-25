@@ -289,7 +289,7 @@ sensor:
   - platform: template
     name: "Conso_pH_Jour"
     id: conso_ph_jour
-    lambda: "return id(g_conso_ph_totale);"
+    lambda: "return id(g_conso_ph_jour);"
     update_interval: 60s  # ou plus fréquent selon besoin
     unit_of_measurement: "l"
     accuracy_decimals: 3

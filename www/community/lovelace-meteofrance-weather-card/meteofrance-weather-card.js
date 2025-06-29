@@ -604,21 +604,12 @@ class MeteofranceWeatherCard extends LitElement {
   renderDailyForecast(daily, lang, isDaily) {
     return html` <li>
       <ul class="flow-column day">
-        <li>
+	<li>
           ${isDaily
             ? new Date(daily.datetime).toLocaleDateString(lang, {
                 weekday: "short",
-              })
-            : new Date(daily.datetime).toLocaleDateString(lang, {
-                weekday: "short",
-                day: "numeric",
-              })}
-        </li>
-        <li>
-          ${isDaily
-            ? new Date(daily.datetime).toLocaleDateString(lang, {
-                day: "numeric",
-                month: "short",
+		day: "numeric",
+//                month: "short",
               })
             : new Date(daily.datetime).toLocaleTimeString(lang, {
                 hour: "2-digit",
@@ -644,7 +635,8 @@ class MeteofranceWeatherCard extends LitElement {
           : ""}
         ${!this._config.hide_precipitation &&
         daily.precipitation !== undefined &&
-        daily.precipitation !== null
+        daily.precipitation !== null &&
+        this.isSelected(this._config.hourly_forecast_details)
           ? html`
               <li class="precipitation">
                 ${Math.round(daily.precipitation * 10) / 10}
@@ -654,7 +646,8 @@ class MeteofranceWeatherCard extends LitElement {
           : ""}
         ${this.isSelected(this._config.humidity_forecast) &&
         daily.humidity !== undefined &&
-        daily.humidity !== null
+        daily.humidity !== null &&
+        this.isSelected(this._config.hourly_forecast_details)
           ? html`
               <li class="humidity">
                 ${Math.round(daily.humidity)}
@@ -672,7 +665,7 @@ class MeteofranceWeatherCard extends LitElement {
               </li>
             `
           : ""}		  
-        ${daily.wind_speed !== undefined && daily.wind_speed !== null
+        ${daily.wind_speed !== undefined && daily.wind_speed !== null && this.isSelected(this._config.hourly_forecast_details)
           ? html`
               <li class="wind_speed">
                 ${Math.round(daily.wind_speed)} ${this.getUnit("speed")}
@@ -950,7 +943,7 @@ class MeteofranceWeatherCard extends LitElement {
       .ha-icon {
         height: 0.8em;
         margin-right: 5px;
-        color: var(--paper-item-icon-color);
+        color: var(--state-icon-color);
       }
 
       /* Current Forecast */
@@ -995,7 +988,7 @@ class MeteofranceWeatherCard extends LitElement {
       .details ha-icon {
         height: 22px;
         margin-right: 5px;
-        color: var(--paper-item-icon-color);
+        color: var(--state-icon-color);
       }
 
       .details > li {
@@ -1019,7 +1012,7 @@ class MeteofranceWeatherCard extends LitElement {
       }
 
       .oneHour > li {
-        background-color: var(--paper-item-icon-color);
+        background-color: var(--state-icon-color);
         border-right: 1px solid
           var(--lovelace-background, var(--primary-background-color));
       }
@@ -1072,7 +1065,7 @@ class MeteofranceWeatherCard extends LitElement {
 
       .alertForecast > div {
         flex: 1;
-        color: var(--paper-item-icon-color);
+        color: var(--state-icon-color);
         color: grey;
         border: 0;
         border-radius: 5px;

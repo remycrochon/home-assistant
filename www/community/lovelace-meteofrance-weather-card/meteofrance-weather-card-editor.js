@@ -91,6 +91,11 @@ export class MeteofranceWeatherCardEditor extends LitElement {
     return this._config.number_of_hourly_forecasts || 5;
   }
 
+  get _hourly_forecast_details() {
+    return this._config.hourly_forecast_details !== false;
+  }
+
+
   // Météo France
   // Switches state
   get _one_hour_forecast() {
@@ -182,6 +187,11 @@ export class MeteofranceWeatherCardEditor extends LitElement {
               "Pluie dans l'heure",
               this._one_hour_forecast,
               "one_hour_forecast"
+            )}
+            ${this.renderSwitchOption(
+              "Prévisions par heure - Détails",
+              this._hourly_forecast_details,
+              "hourly_forecast_details"
             )}
             ${this.renderSwitchOption(
               "Prévisions par heure",

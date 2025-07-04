@@ -5,13 +5,17 @@ openhasp:
       - obj: "p0b2"
         properties:
           "text_color": >
-            {% set count = states('openhasp.ecran02','rssi')|int %}
-            {% if count <= -90  %}
-            {{ "#FF0000" }}
-            {% elif count <= -70  %}
-            {{ "#FFFF00" }}
+            {% set rssi = state_attr('openhasp.ecran02','rssi') | int %}
+            {% if rssi >= -50 %}
+              #00ff00
+            {% elif rssi >= -60 %}
+              #ccff00
+            {% elif rssi >= -70 %}
+              #ff9100
+            {% elif rssi >= -80 %}
+              #ff5500
             {% else %}
-            {{ "#228B22" }}
+              #ff0000
             {% endif %}
       - obj: "p0b3"
         properties:

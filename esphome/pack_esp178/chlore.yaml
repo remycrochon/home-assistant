@@ -374,16 +374,14 @@ script:
             - lambda: |-
                 std::string mess = "ESP178 Temps inj Chlore";
                 id(_message_telegram_v2)->execute(mess, id(g_tps_injection_chlore));
+
             - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
+
             - switch.turn_off: cde_ppe_chlore
             - logger.log:
                 format: "Arrêt ppe Chlore en %s"
                 args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
                 level: INFO
-            - lambda: |-
-                std::string mess = "Fin Injection Chlore " + id(_Mode_Fonctionnement_regul_chlore).state;
-                id(_message_telegram)->execute(mess.c_str());
-
             - lambda: |-
                 float debit = id(_debit_ppe_chlore).state;
                 float duree = id(_tps_injection_chlore).state;
@@ -393,6 +391,9 @@ script:
                 id(g_conso_chl_jour) += volume;
                 id(conso_chl_totale).publish_state(id(g_conso_chl_totale));
                 id(conso_chl_jour).publish_state(id(g_conso_chl_jour));
+                std::string mess = "Fin Injection Chlore-Volume: " + std::to_string(volume)+ "l";
+                id(_message_telegram)->execute(mess.c_str());
+
           else:
             - switch.turn_off: cde_ppe_chlore
             - lambda: 'id(_tps_injection_chlore).publish_state(0);'

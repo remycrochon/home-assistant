@@ -3,7 +3,19 @@ openhasp:
     objects:
       - obj: "p0b1"
         properties:
-          "text_color": "{% if -30 <= state_attr('openhasp.ecran01','rssi') |int %}#00ff00{% elif -31 > state_attr('openhasp.ecran01','rssi') |int >= -50 %}#ccff00{% elif -51 > state_attr('openhasp.ecran01','rssi') |int >= -80 %}#ff9100{% else %}#ff0000{% endif %}"
+          text_color: >
+            {% set rssi = state_attr('openhasp.ecran01','rssi') | int %}
+            {% if rssi >= -50 %}
+              #00ff00
+            {% elif rssi >= -60 %}
+              #ccff00
+            {% elif rssi >= -70 %}
+              #ff9100
+            {% elif rssi >= -80 %}
+              #ff5500
+            {% else %}
+              #ff0000
+            {% endif %}
       - obj: "p0b2"
         properties:
           "text": "{{ states('sensor.time') }}"
@@ -86,13 +98,13 @@ openhasp:
                   {% endif -%}
       - obj: "p1b222"
         properties:
-          "text": "{{ states('sensor.esp178_piscine_pression_filtre') }} b"
+          "text": "{{ states('sensor.esp129_pesage_chlore_poids_chlore')|float(0) |round(1) }} Kg"
       - obj: "p1b224"
         properties:
-          "text": "{{ states('sensor.esp178_piscine_orp_ezo') }} ms"  
+          "text": "{{ states('sensor.esp178_piscine_orp_ezo')|float(0) |round(1)  }} ms"  
       - obj: "p1b226"
         properties:
-          "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance') }} W"
+          "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance')|float(0) |round(1)  }} W"
       - obj: "p1b231"
         properties:
           "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc') }} kWh"

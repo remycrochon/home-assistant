@@ -6,15 +6,10 @@ time:
       - 1.pool.ntp.org
       - 2.pool.ntp.org
     on_time:
-      # Déclenchement du script de regul pH deux fois par jour
+      # Déclenchement du script de regul pH 1 fois par jour
       - seconds: 0
         minutes: 00
         hours: 10
-        then:
-          - script.execute: _regul_ph
-      - seconds: 0
-        minutes: 00
-        hours: 20
         then:
           - script.execute: _regul_ph
       # reset le compteur de temps à minuit
@@ -378,8 +373,8 @@ script:
                           // Utilisation du facteur de correction défini par l'utilisateur
                           float facteur_correction = id(facteur_correction_ph).state/100;
                           duree = duree * facteur_correction;
-                          // Limites de sécurité : entre 1 et 60 secondes
-                          duree = std::max(1.0f, std::min(duree, 60.0f));
+                          // Limites de sécurité : entre 1 et 180 secondes
+                          duree = std::max(1.0f, std::min(duree, 180.0f));
                           // Log pour débogage
                           ESP_LOGI("regul_ph", "Écart: %.2f, Quantité: %.2f ml, Débit: %.3f ml/s, Facteur: %.2f, Durée: %.2f s", ecart, quantite_necessaire * 1000.0, debit_ml_s, facteur_correction, duree);
                           id(g_tps_injection_ph_moins) = duree;
@@ -424,9 +419,6 @@ script:
                       level: INFO        
                   - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
                   - switch.turn_off: cde_ppe_ph_moins
-                  - lambda: |-
-                      std::string mess = "ESP178 Fin Injection pH";
-                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_ph_moins));
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
@@ -440,7 +432,8 @@ script:
                       id(g_conso_ph_jour) += volume;
                       id(conso_ph_totale).publish_state(id(g_conso_ph_totale));
                       id(conso_ph_jour).publish_state(id(g_conso_ph_jour));
-
+                      std::string mess = "Fin Injection pH-Volume: " + std::to_string(volume)+ "l";
+                      id(_message_telegram)->execute(mess.c_str());
                 else:
                   - switch.turn_off: cde_ppe_ph_moins
                   - logger.log: 

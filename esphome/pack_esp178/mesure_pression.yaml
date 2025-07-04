@@ -28,7 +28,7 @@ sensor:
     update_interval: 10s
     unit_of_measurement: "bar"
     device_class: pressure
-    state_class: "measurement"        
+    state_class: "measurement"
     id: pression_filtre
     filters:
 #    - calibrate_linear:
@@ -41,4 +41,4 @@ sensor:
         send_first_at: 1
     on_value:        
         - lambda: |-
-            ESP_LOGI("Pression", "Mesure brut: %.2f" " Mesure filtrée: %.2f", id(pression_filtre).raw_state,id(pression_filtre).state );
+            ESP_LOGD("Pression", "Mesure brut: %.2f" " Mesure filtrée: %.2f", id(pression_filtre).raw_state,id(pression_filtre).state );

@@ -50,14 +50,14 @@ sensor:
 
   - platform: pulse_meter
     pin: RX
-    name: "${friendly_name} Cpt Eau Piscine"
+    name: "Cpt Eau Piscine"
     unit_of_measurement: "litre/mn"
     icon: "mdi:water"
 
     filters:
       - lambda: return (x/(8*60));
     total:
-      name: "${friendly_name} Cpt Eau Piscine Total"
+      name: "Cpt Eau Piscine Total"
       unit_of_measurement: "m³"
       accuracy_decimals: 3
       device_class: water
@@ -67,7 +67,7 @@ sensor:
 
 # Informations WI_FI
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-    name: "${friendly_name} WiFi Signal dB"
+    name: "WiFi Signal dB"
     update_interval: 60s
 
 ############### TEMPLATE  ######################"
@@ -75,7 +75,7 @@ sensor:
                     
 switch:
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "Restart"
 
 
 

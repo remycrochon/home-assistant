@@ -291,7 +291,8 @@ switch:
   - platform: gpio
     name: "cde_ppe_ph_moins"
     pin:
-      number: ${GPIO_rel_ppe_ph}
+      sx1509: sx1509_hub1
+      number: 5
     id: cde_ppe_ph_moins
 
 interval:

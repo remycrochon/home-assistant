@@ -288,8 +288,7 @@ switch:
   - platform: gpio
     name: "cde_ppe_chlore"
     pin:
-      sx1509: sx1509_hub1
-      number: 6
+      number: ${GPIO_rel_ppe_chlore}
     id: cde_ppe_chlore
     icon: mdi:pump
 

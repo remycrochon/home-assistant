@@ -30,13 +30,13 @@ substitutions:
   pression_max: "15"
 
 packages:
-  ph: !include pack_esp130/ph.yaml
-  chlore: !include pack_esp130/chlore.yaml    
-  volet: !include pack_esp130/couverture_flottante.yaml
-  appoint_eau: !include pack_esp130/appoint_eau.yaml
-  hors_gel: !include pack_esp130/hors_gel.yaml
-  mesure_elec: !include pack_esp130/mesure_elec.yaml
-  mesure_pression: !include pack_esp130/mesure_pression.yaml
+  ph: !include pack_esp140/ph.yaml
+  chlore: !include pack_esp140/chlore.yaml    
+  volet: !include pack_esp140/couverture_flottante.yaml
+  appoint_eau: !include pack_esp140/appoint_eau.yaml
+  hors_gel: !include pack_esp140/hors_gel.yaml
+  mesure_elec: !include pack_esp140/mesure_elec.yaml
+  mesure_pression: !include pack_esp140/mesure_pression.yaml
 
 esp32:
   board: esp-wrover-kit

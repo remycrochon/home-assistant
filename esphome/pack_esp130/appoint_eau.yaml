@@ -66,8 +66,7 @@ binary_sensor:
     name: "tp_plein_lsh"
     id: lsh
     pin:
-      sx1509: sx1509_hub1
-      number: 0
+      number: ${GPIO_Etor_niv_haut}
       mode:
         input: true
         pullup: false
@@ -84,8 +83,7 @@ binary_sensor:
     name: "tp_plein_lsl"
     id: lsl
     pin:
-      sx1509: sx1509_hub1
-      number: 1
+      number: ${GPIO_Etor_niv_bas}
       mode:
         input: true
         pullup: false
@@ -107,8 +105,7 @@ switch:
   - platform: gpio
     name: "cde_ev_eau"
     pin:
-      sx1509: sx1509_hub1
-      number: 10
+      number: ${GPIO_rel_ev_eau}
     id: cde_ev_eau
 
 interval:

@@ -14,6 +14,27 @@ substitutions:
   # Definition des seuils admissibles
   pu_fonctionnement: "200"
   pression_max: "15"
+  # Affectation des GPIO
+  GPIO_onewire: "GPIO16"
+  GPIO_sda: "GPIO15"
+  GPIO_scl: "GPIO22"
+  GPIO_TX: "GPIO1"
+  GPIO_RX: "GPIO3"
+  GPIO_rel_ppe_ph: "GPIO33"
+  GPIO_rel_ppe_chlore: "GPIO25"
+  GPIO_rel_ev_eau: "GPIO12"
+  GPIO_rel_ouv_volet: "GPIO27"
+  GPIO_rel_ferm_volet: "GPIO14"
+  GPIO_rel_eclairage: "GPIO26"
+  GPIO_rel_ppe_filtration: "GPIO32"
+  GPIO_relais_8: "GPIO13"
+  # Ne peut etre utilisé pour un SX1509
+  #GPIO_Etor_niv_bas: 2
+  #GPIO_Etor_niv_haut: 1"
+  #GPIO_Etor_volet_ferme: 0
+  #GPIO_Etor4: 3
+  #GPIO_Etor5: 4  
+  #GPIO_Etor6: 5
 
 packages:
   ph: !include pack_esp178/ph.yaml
@@ -140,8 +161,8 @@ time:
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
-  sda: 15
-  scl: 22
+  sda: ${GPIO_sda}
+  scl: ${GPIO_scl}
   scan: false
   id: bus_a
   frequency: 300kHz
@@ -149,7 +170,7 @@ i2c:
 # Connection sonde(s) de température DS18b20
 one_wire:
   - platform: gpio
-    pin: GPIO16
+    pin: ${GPIO_onewire}
 
 # Extension E/S
 sx1509:
@@ -187,7 +208,7 @@ globals:
     # Seuils Température en °C
     # la durée est calculée manuellement par rapport au volume de la piscine: Vol=9*4*1.4=50.4 m3
     # et le débit de la pompe: Qppe Théorique=12m3/h -> retenu:12m3/h
-    # donc 1 cycle= 50.4/12=4.2h
+    # donc 1 cycl${GPIO_sda}e= 50.4/12=4.2h
     # il faut filtrer au minimum:
     # T°eau<10° = 0 cycle
     # 10°<T°eau<15° = 1 cycle = 4.2h => 4h
@@ -490,7 +511,6 @@ number:
     step: 0.01
 
 sensor:
-  # Example configuration entry with 2 sensors and filter
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "WiFi Signal dB"
     id: wifi_signal_db
@@ -547,7 +567,7 @@ text_sensor:
 switch:
   - platform: gpio
     name: "cde_pompe_filtration"
-    pin: GPIO32
+    pin: ${GPIO_rel_ppe_filtration}
     id: cde_ppe_filtration
     on_turn_on:
       then:
@@ -573,12 +593,12 @@ switch:
 
   - platform: gpio
     name: "cde_eclairage"
-    pin: GPIO26
+    pin: ${GPIO_rel_eclairage}
     id: cde_eclairage
 
   - platform: gpio
     name: "relais8"
-    pin: GPIO13
+    pin: ${GPIO_relais_8}
     id: relais8
 
   - platform: gpio

@@ -32,7 +32,8 @@ binary_sensor:
     name: "volet_ferme"
     id: volet_ferme
     pin:
-      number: ${GPIO_Etor_volet_ferme}
+      sx1509: sx1509_hub1
+      number: 2
       mode:
         input: true
         pullup: false
@@ -93,7 +94,8 @@ switch:
   - platform: gpio
     name: "cde_volet_ouverture"
     pin:
-      number: ${GPIO_rel_ouv_volet}
+      sx1509: sx1509_hub1
+      number: 7
     id: cde_volet_ouverture
     interlock: [cde_volet_fermeture]
     on_turn_on:
@@ -104,7 +106,8 @@ switch:
   - platform: gpio
     name: "cde_volet_fermeture"
     pin:
-      number: ${GPIO_rel_ferm_volet}
+      sx1509: sx1509_hub1
+      number: 8
     id: cde_volet_fermeture
     interlock: [cde_volet_ouverture]
 

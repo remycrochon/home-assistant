@@ -21,7 +21,7 @@ wifi:
   networks:
     - ssid: !secret wifi
       password: !secret mdpwifi
-  reboot_timeout: 5min
+  reboot_timeout: 1min
 
   manual_ip:
     static_ip: ${adress_ip}
@@ -62,7 +62,6 @@ climate:
     # Optional HA sensor used to alter setpoint.
     room_temperature_sensor: room_temp  # See homeassistant sensor below
 
-
 binary_sensor:
 #Etat de la connection
   - platform: status
@@ -70,6 +69,21 @@ binary_sensor:
 
 # Optional additional sensors.
 sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
   - platform: daikin_s21
     inside_temperature:
       name: "Temperature Unite interieure"

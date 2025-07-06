@@ -21,7 +21,6 @@ wifi:
   networks:
     - ssid: !secret wifi
       password: !secret mdpwifi
-      
   reboot_timeout: 1min
 
   manual_ip:
@@ -85,6 +84,21 @@ binary_sensor:
     name: "${friendly_name}_Status"
 
 sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+      
   - platform: htu21d
     model: htu21d
     update_interval: 60s

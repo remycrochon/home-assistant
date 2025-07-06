@@ -17,6 +17,7 @@ substitutions:
   GPIO_scl: "GPIO22"
   GPIO_TX: "GPIO1"
   GPIO_RX: "GPIO3"
+  GPIO_LED_STATUS: "GPIO17"
   GPIO_rel_ppe_ph: "GPIO25"
   GPIO_rel_ppe_chlore: "GPIO26"
   GPIO_rel_ev_eau: "GPIO13"
@@ -105,7 +106,7 @@ wifi:
 # Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
-    number: GPIO5
+    number: ${GPIO_LED_STATUS}
     inverted: true  
 
 # Enable logging

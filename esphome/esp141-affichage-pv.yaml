@@ -25,13 +25,9 @@ esp8266:
 
 wifi:
   networks:
-    - ssid: !secret wifi_esp
-      password: !secret mdpwifi_esp
-      priority: 1
     - ssid: !secret wifi
       password: !secret mdpwifi
-      priority: 0
-  reboot_timeout: 5min
+  reboot_timeout: 1min
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -84,9 +80,24 @@ binary_sensor:
       inverted: True
     name: bp_raz
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"
 
 sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
   - platform: homeassistant
     entity_id: "sensor.mp2_tension_entree_l1"
     id: u_reseau
@@ -103,7 +114,7 @@ text_sensor:
 
 switch:
   - platform: restart
-    name: "${friendly_name} Restart" 
+    name: "Restart" 
 
 interval:
   - interval: 1s

@@ -142,41 +142,36 @@ interval:
             }
           }
 
-script: 
+script:
   # Regulation du niveau d'eau piscine
-  # Declenché par BP Appoint Eau ou 120s apres la cde ouverture volet apres 120s
+  # Déclenché par BP Appoint Eau ou 120s après la cde ouverture volet après 240s
   - id: _regul_eau
-    mode: single  
+    mode: single
     then:
       - if:
           condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
-              - binary_sensor.is_off: niv_defaut
-              - binary_sensor.is_off: volet_ferme
-              - or:
-                - binary_sensor.is_on: niv_bas
-                - binary_sensor.is_on: niv_inter
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
           then:
-            - logger.log: 
-                format: "Ouverture vanne eau Mode Auto"
-                level: INFO
-            - switch.turn_on: cde_ev_eau
-            - lambda: |-
-                id(ev_eau_on_start_time) = millis() / 1000;            
- 
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
-              - or:
-                - binary_sensor.is_on: niv_haut
-                - binary_sensor.is_on: niv_defaut
-          then:
-            - logger.log: 
-                format: "Fermeture vanne eau Mode Auto"
-                level: INFO
-            - switch.turn_off: cde_ev_eau
+            - if:
+                condition:
+                  and:
+                    - binary_sensor.is_off: niv_defaut
+                    - binary_sensor.is_off: volet_ferme
+                    - or:
+                        - binary_sensor.is_on: niv_bas
+                        - binary_sensor.is_on: niv_inter
+                then:
+                  - logger.log:
+                      format: "Ouverture vanne eau Mode Auto"
+                      level: INFO
+                  - switch.turn_on: cde_ev_eau
+                  - lambda: |-
+                      id(ev_eau_on_start_time) = millis() / 1000;
+                else:
+                  - logger.log:
+                      format: "Fermeture vanne eau Mode Auto"
+                      level: INFO
+                  - switch.turn_off: cde_ev_eau
 
       - if:
           condition:

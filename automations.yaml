@@ -2283,49 +2283,68 @@
   mode: single
 - id: '1738429994514'
   alias: Volets Suivi Azimuth Soleil bureau droit été
-  description: Gestion progressive des volets selon le soleil et la météo
+  description: Gestion progressive des volets selon le soleil et la radiation solaire
   triggers:
-  - entity_id: sun.sun
-    trigger: state
-  - entity_id:
-    - input_number.orientation_volet_bureau
-    trigger: state
-  - entity_id:
-    - input_number.angle_exposition_volet_bureau
-    trigger: state
-  - entity_id:
-    - input_number.elevation_mini_volets_bureaux
-    trigger: state
-  - entity_id:
-    - weather.albi
-    trigger: state
+  - minutes: /1
+    trigger: time_pattern
   actions:
+  - condition: state
+    entity_id: input_select.volets
+    state: Auto Pos Soleil
   - variables:
-      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
-      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
       orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
         }}'
       angle_exposition: '{{ states(''input_number.angle_exposition_volet_bureau'')
         | float }}'
-      elevation_min: '{{ states(''input_number.angle_exposition_volet_bureau'') |
+      elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
         float }}'
+      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
+      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
       azimut_min: '{{ orientation_volet - angle_exposition }}'
       azimut_max: '{{ orientation_volet + angle_exposition }}'
-      meteo: '{{ states(''weather.albi'') }}'
-  - condition: template
-    value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil
-      > elevation_min }}'
-  - condition: template
-    value_template: '{{ meteo in [''clear'', ''partlycloudy''] }}'
-  - variables:
-      fermeture: '{{ ((elevation_soleil - elevation_min) / (90 - elevation_min) *
-        100) | int }}'
-      position_volet: '{{ 100 - fermeture if fermeture > 0 else 100 }}'
-  - target:
-      entity_id: cover.bureau_droit_2
-    data:
-      position: '{{ position_volet }}'
-    action: cover.set_cover_position
+      radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
+      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets_bureau'')
+        | float(300) }}'
+      fermeture_brute: '{{ ((elevation_soleil - elevation_min) / (90 - elevation_min))
+        * 100 }}'
+      fermeture_finale: '{% set brut = 100 - fermeture_brute %} {% set pos = [brut,
+        100] | min %} {% set pos = [pos, 0] | max %} {% if pos > 80 %} 80 {% else
+        %} {{ pos }} {% endif %}'
+  - data:
+      message: 'Debug volet bureau: azimut_soleil={{ azimut_soleil }}, azimut_min={{
+        azimut_min }}, azimut_max={{ azimut_max }}, elevation_soleil={{ elevation_soleil
+        }}, elevation_min={{ elevation_min }}, fermeture={{ fermeture_finale }}, radiation_solaire={{
+        radiation_solaire }}, radiation_seuil={{ radiation_seuil }}
+
+        '
+      level: error
+    action: system_log.write
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil
+          > elevation_min }}'
+      - condition: template
+        value_template: '{{ radiation_solaire > radiation_seuil }}'
+      sequence:
+      - data:
+          position: '{{ fermeture_finale }}'
+        action: cover.set_cover_position
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.gauche
+    - conditions:
+      - condition: template
+        value_template: '{{ radiation_solaire <= radiation_seuil }}'
+      sequence:
+      - data:
+          position: 100
+        action: cover.set_cover_position
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.gauche
   mode: single
 - id: '1738578799131'
   alias: Gestion Alim Imprimante Brother
@@ -2429,76 +2448,6 @@
       message: L'intégration Husqvarna Automower est indisponible. Tentative de rechargement
         automatique effectuée.
   mode: single
-- id: solar_shutter_control_salon
-  alias: Contrôle Solaire Volet Salon
-  description: Ajuste le volet du salon en fonction de la position du soleil, de la
-    météo et de l'occupation
-  trigger:
-  - platform: time_pattern
-    minutes: /5
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: above_horizon
-  - condition: state
-    entity_id: input_boolean.salon_control_enabled
-    state: 'on'
-  - condition: numeric_state
-    entity_id: weather.albi
-    attribute: cloud_coverage
-    below: 20
-  - condition: template
-    value_template: '{{ state_attr(''weather.albi'', ''temperature'') | float(0) >
-      states(''input_number.salon_temp_seuil'') | float(0) }}'
-  - condition: or
-    conditions:
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: binary_sensor.salon_occupation
-        state: 'on'
-    - condition: state
-      entity_id: binary_sensor.salon_occupation
-      state: unavailable
-  action:
-  - variables:
-      shutter_entity: cover.volet_salon
-      azimut_debut: '{{ states(''input_number.salon_azimut_debut'') | float(0) }}'
-      azimut_fin: '{{ states(''input_number.salon_azimut_fin'') | float(0) }}'
-      elevation_min: '{{ states(''input_number.salon_elevation_min'') | float(0) }}'
-      pas: '{{ states(''input_number.salon_pas'') | float(1) }}'
-      position_max: '{{ states(''input_number.salon_position_max'') | float(0) }}'
-      current_azimut: '{{ state_attr(''sun.sun'', ''azimuth'') | float(0) }}'
-      current_elevation: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
-      current_position: '{{ state_attr(''cover.volet_salon'', ''current_position'')
-        | float(0) }}'
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ current_azimut > azimut_debut and current_azimut < azimut_fin
-          and current_elevation > elevation_min }}'
-      sequence:
-      - variables:
-          azimut_range: '{{ (azimut_fin - azimut_debut) | float(1) }}'
-          azimut_progress: '{{ (current_azimut - azimut_debut) / azimut_range }}'
-          target_position: '{{ (azimut_progress * position_max) | round(0) }}'
-          adjusted_position: '{{ (target_position / pas) | int * pas }}'
-      - service: cover.set_cover_position
-        target:
-          entity_id: '{{ shutter_entity }}'
-        data:
-          position: '{{ adjusted_position | int }}'
-    - conditions:
-      - condition: template
-        value_template: '{{ current_azimut > azimut_fin }}'
-      sequence:
-      - variables:
-          adjusted_position: '{{ [0, current_position - pas] | max | int }}'
-      - service: cover.set_cover_position
-        target:
-          entity_id: '{{ shutter_entity }}'
-        data:
-          position: '{{ adjusted_position | int }}'
 - id: '1744743077040'
   alias: Alarme Seuil Haut CPU Visual Studio HA
   description: '# Si CPU Studio Code Server s''emballe'

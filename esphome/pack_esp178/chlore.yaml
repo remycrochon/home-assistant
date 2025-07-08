@@ -292,6 +292,12 @@ sensor:
     state_class: total_increasing
     device_class: water    
 
+  - platform: homeassistant
+    name: "poids_bidon_chlore"
+    entity_id: "sensor.esp129_pesage_chlore_poids_chlore"
+    id: _poids_chlore
+
+
 switch: 
   - platform: gpio
     name: "cde_ppe_chlore"
@@ -391,7 +397,8 @@ script:
                 id(g_conso_chl_jour) += volume;
                 id(conso_chl_totale).publish_state(id(g_conso_chl_totale));
                 id(conso_chl_jour).publish_state(id(g_conso_chl_jour));
-                std::string mess = "Fin Injection Chlore-Volume: " + std::to_string(volume)+ "l";
+                std::string mess = "Fin Injection Chlore-Volume: " + std::to_string(volume)+ "l" + "\n";
+                mess += "Poids Bidon Chlore: " + std::to_string(id(_poids_chlore).state)+" kg";
                 id(_message_telegram)->execute(mess.c_str());
 
           else:

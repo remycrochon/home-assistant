@@ -2283,14 +2283,18 @@
   mode: single
 - id: '1738429994514'
   alias: Volets Suivi Azimuth Soleil bureau droit été
-  description: Gestion progressive des volets selon le soleil et la radiation solaire
+  description: Gestion par seuils fixes selon le soleil et la radiation solaire
   triggers:
-  - minutes: /1
+  - minutes: /10
     trigger: time_pattern
-  actions:
+  conditions:
   - condition: state
     entity_id: input_select.volets
     state: Auto Pos Soleil
+  - condition: sun
+    before: sunset
+    after: sunrise
+  actions:
   - variables:
       orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
         }}'
@@ -2298,23 +2302,27 @@
         | float }}'
       elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
         float }}'
+      ouverture_min: 0
+      ouverture_max: 100
       azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
       elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
       azimut_min: '{{ orientation_volet - angle_exposition }}'
       azimut_max: '{{ orientation_volet + angle_exposition }}'
       radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
-      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets_bureau'')
-        | float(300) }}'
-      fermeture_brute: '{{ ((elevation_soleil - elevation_min) / (90 - elevation_min))
-        * 100 }}'
-      fermeture_finale: '{% set brut = 100 - fermeture_brute %} {% set pos = [brut,
-        100] | min %} {% set pos = [pos, 0] | max %} {% if pos > 80 %} 80 {% else
-        %} {{ pos }} {% endif %}'
+      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      position_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% elif elevation_soleil
+        < 40 %}\n  40\n{% elif elevation_soleil < 60 %}\n  30\n{% else %}\n  10\n{%
+        endif %}"
+      fermeture_finale: '{% set pos = position_brute | float %} {% set pos = [pos,
+        ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
+        | round(0) }}'
   - data:
-      message: 'Debug volet bureau: azimut_soleil={{ azimut_soleil }}, azimut_min={{
-        azimut_min }}, azimut_max={{ azimut_max }}, elevation_soleil={{ elevation_soleil
-        }}, elevation_min={{ elevation_min }}, fermeture={{ fermeture_finale }}, radiation_solaire={{
-        radiation_solaire }}, radiation_seuil={{ radiation_seuil }}
+      message: 'Debug volet bureau: Azimut={{ azimut_soleil }} ({{ azimut_min }} →
+        {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
+        }} > Seuil={{ radiation_seuil }}, Position brute={{ position_brute }}, clampée={{
+        fermeture_finale }}, Limites : ouverture_min={{ ouverture_min }} / ouverture_max={{
+        ouverture_max }}
 
         '
       level: error
@@ -2329,22 +2337,22 @@
       sequence:
       - data:
           position: '{{ fermeture_finale }}'
-        action: cover.set_cover_position
         target:
           entity_id:
           - cover.bureau_droit_2
           - cover.gauche
+        action: cover.set_cover_position
     - conditions:
       - condition: template
         value_template: '{{ radiation_solaire <= radiation_seuil }}'
       sequence:
       - data:
           position: 100
-        action: cover.set_cover_position
         target:
           entity_id:
           - cover.bureau_droit_2
           - cover.gauche
+        action: cover.set_cover_position
   mode: single
 - id: '1738578799131'
   alias: Gestion Alim Imprimante Brother

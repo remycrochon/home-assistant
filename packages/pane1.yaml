@@ -4,7 +4,7 @@ openhasp:
       - obj: "p0b1"
         properties:
           text_color: >
-            {% set rssi = state_attr('openhasp.ecran01','rssi') | int %}
+            {% set rssi = state_attr('openhasp.ecran01','rssi') | int(0) %}
             {% if rssi >= -50 %}
               #00ff00
             {% elif rssi >= -60 %}
@@ -21,10 +21,10 @@ openhasp:
           "text": "{{ states('sensor.time') }}"
       - obj: "p0b6"
         properties:
-          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}°C"
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_out')|float(0) | round(1)) }}°C"
       - obj: "p0b7"
         properties:
-          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
+          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_in')|float(0) | round(1)) }}°C"
 
 # Affichage piscine
       - obj: "p1b131"
@@ -61,11 +61,11 @@ openhasp:
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('time.esp178_piscine_duree_filtration')}}" 
+          "text": "{{ states('time.esp178_piscine_duree_filtration')|float(0)}}" 
 
       - obj: "p1b148"
         properties:
-          "text": "{{ states('number.esp178_piscine_coeff_filtration')}} %" 
+          "text": "{{ states('number.esp178_piscine_coeff_filtration')|float(0)}} %" 
 
       - obj: "p1b151"
         properties:
@@ -107,7 +107,7 @@ openhasp:
           "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance')|float(0) |round(1)  }} W"
       - obj: "p1b231"
         properties:
-          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc') }} kWh"
+          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc')|float(0) }} kWh"
 # Page2
 
       - obj: "p2b121"  
@@ -189,7 +189,7 @@ openhasp:
 
       - obj: "p2b152"
         properties:
-          "text": "{{'%.0f' | format (states('number.esp178_piscine_coeff_filtration') | round(0)) }}%"
+          "text": "{{'%.0f' | format (states('number.esp178_piscine_coeff_filtration')|float(0) | round(0)) }}%"
 
       - obj: "p2b153"
         event:
@@ -320,7 +320,7 @@ openhasp:
                   
       - obj: "p3b151"  
         properties:
-          "text": "{{'%.0f' | format (states('sensor.esp178_piscine_temps_galet_chlore') | round(0)) }}h"
+          "text": "{{'%.0f' | format (states('sensor.esp178_piscine_temps_galet_chlore') |float(0)| round(0)) }}h"
         event:
           "up":
             - service: button.press

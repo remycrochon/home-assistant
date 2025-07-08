@@ -62,15 +62,6 @@ input_number:
       unit_of_measurement: "Lux"
       icon: mdi:weather-sunny 
 
-# gestion volet: Niveau Ensoleilement ouv auto volet
-    radiation_seuil_ferm_volet:
-      name: Radiat seuil ferm volets
-      mode: box
-      min: 0
-      max: 1200
-      unit_of_measurement: "w/m2"
-      icon: mdi:weather-sunny
-
 # memoire cde volet parents grand
 input_text:
   volet_amis_sud_grand:

@@ -5,7 +5,7 @@ openhasp:
       - obj: "p0b2"
         properties:
           "text_color": >
-            {% set rssi = state_attr('openhasp.ecran02','rssi') | int %}
+            {% set rssi = state_attr('openhasp.ecran02','rssi') | int(0) %}
             {% if rssi >= -50 %}
               #00ff00
             {% elif rssi >= -60 %}
@@ -22,16 +22,16 @@ openhasp:
           "text": "{{ states('sensor.time') }}"
       - obj: "p0b6"
         properties:
-          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') | round(1)) }}°C"
+          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') |float(0)| round(1)) }}°C"
       - obj: "p0b7"
         properties:
-          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_in') | round(1)) }}°C"
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_in')|float(0) | round(1)) }}°C"
 
       ############### Page 1 Home ###############
       - obj: "p1b21" # Charge/Décharge
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
+            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int(0) %}
             {% if count < 0 %}
               {{"#7FFF00 \uE6c1"}}
             {% else %}
@@ -40,7 +40,7 @@ openhasp:
       - obj: "p1b24" # Grid Power
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
+            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -48,17 +48,17 @@ openhasp:
             {% endif %}
       - obj: "p1b25" # Grid Conso
         properties:
-          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int }} kWh"
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int(0) }} kWh"
             
       - obj: "p1b26" # Grid Inject
         properties:
-          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int }} kWh"
+          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int(0) }} kWh"
       
       ##################### Solaire
       - obj: "p1b34" # Puissance production
         properties:
           "text": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|float %}
+            {% set count = states('sensor.mp2_prod_totale_mqtt')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -66,17 +66,17 @@ openhasp:
             {% endif %}
       - obj: "p1b35" # Production
         properties:
-          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int }} kWh"
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int(0) }} kWh"
             
       - obj: "p1b36" # Prévision
         properties:
-          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kWh"
+          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int(0) }} kWh"
 
       ############# Batteries
       - obj: "p1b44" # Charge/Décharge
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int(0) %}
             {% if count >= 0 %}
               {{"\uE6c1"}}
             {% else %}
@@ -85,7 +85,7 @@ openhasp:
       - obj: "p1b45" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float*-1 %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float(0)*-1 %}
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -93,22 +93,22 @@ openhasp:
             {% endif %}
       - obj: "p1b46" # U
         properties:
-          "text": "{{ states('sensor.mp2_tension_batteries_par_mqtt')|float|round(1) }}V"            
+          "text": "{{ states('sensor.mp2_tension_batteries_par_mqtt')|float(0)|round(1) }}V"            
       - obj: "p1b47" # Int
         properties:
-          "text": "{{ states('sensor.mp2_intensite_batteries')|float|round(1) }}A"
+          "text": "{{ states('sensor.mp2_intensite_batteries')|float(0)|round(1) }}A"
       - obj: "p1b48" # SOC
         properties:
-          "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
+          "text": "{{ states('sensor.mp2_soc_mqtt')|int(0) }} %"
       - obj: "p1b49" # Tps restant
         properties:
-          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
+          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float(0) }}"
 
       ################## Maison
       - obj: "p1b55" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|float %}
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -116,7 +116,7 @@ openhasp:
             {% endif %}
       - obj: "p1b56" # Conso
         properties:
-          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int }} kW"
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kW"
       - obj: "p1b57" # ECS
         properties:
           "text": >
@@ -174,48 +174,48 @@ openhasp:
 
       - obj: "p2b31"
         properties:
-          "text": "{{ states('sensor.esp180_temperature_hotte')}} C°" 
+          "text": "{{ states('sensor.esp180_temperature_hotte')|float(0)}} C°" 
       - obj: "p2b33"
         properties:
-          "text": "{{ states('sensor.esp180_humidite_hotte')}} %" 
+          "text": "{{ states('sensor.esp180_humidite_hotte')|float(0)}} %" 
 
 ####### PAGE 3 VMC ############### 
       - obj: "p3b10"
         properties:
-          "text": "{{ states('sensor.esp136_t_air_vicie')}}C°" 
+          "text": "{{ states('sensor.esp136_t_air_vicie')|float(0)}}C°" 
       - obj: "p3b11"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_air_neuf')}}C°"
+          "text": "{{ states('sensor.esp136_tdeg_air_neuf')|float(0)}}C°"
       - obj: "p3b12"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_insufflation')}}C°" 
+          "text": "{{ states('sensor.esp136_tdeg_insufflation')|float(0)}}C°" 
       - obj: "p3b13"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_aspiration')}}C°"
+          "text": "{{ states('sensor.esp136_tdeg_aspiration')|float(0)}}C°"
       - obj: "p3b14"
         properties:
-          "text": "{{ states('sensor.esp136_t_combles')}}C°"
+          "text": "{{ states('sensor.esp136_t_combles')|float(0)}}C°"
       - obj: "p3b16"
         properties:
-          "text": "{{ states('sensor.esp136_rend')|round(0)}} %"
+          "text": "{{ states('sensor.esp136_rend')|float(0)|round(0)}} %"
       - obj: "p3b21"
         properties:
-          "text": "{{ states('sensor.esp145_conc_particules_2_5mm')|round(0)}}"      
+          "text": "{{ states('sensor.esp145_conc_particules_2_5mm')|float(0)|round(0)}}"      
       - obj: "p3b31"
         properties:
-          "text": "{{ states('sensor.esp136_cop_vmc')|round(1)}}"   
+          "text": "{{ states('sensor.esp136_cop_vmc')|float(0)|round(1)}}"   
       - obj: "p3b41"
         properties:
-          "text": "{{ states('sensor.ecocompteur_vmc_niv0')|round(0)}} W"          
+          "text": "{{ states('sensor.ecocompteur_vmc_niv0')|float(0)|round(0)}} W"          
       - obj: "p3b51"
         properties:
-          "text": "{{ states('sensor.esp145_monoxide_carbon')|round(0)}} ppm"             
+          "text": "{{ states('sensor.esp145_monoxide_carbon')|float(0)|round(0)}} ppm"             
       - obj: "p3b61"
         properties:
-          "text": "{{ states('sensor.esp145_mh_z19_co2_value')|round(0)}} ppm"
+          "text": "{{ states('sensor.esp145_mh_z19_co2_value')|float(0)|round(0)}} ppm"
       - obj: "p3b71"
         properties:
-          "text": "{{ states('sensor.esp136_debit_estime_vmc')|round(1)}} m3/h"          
+          "text": "{{ states('sensor.esp136_debit_estime_vmc')|float(0)|round(1)}} m3/h"          
       - obj: "p3b91" # Cde Relais
         properties:
           "val": '{{ 1 if is_state("switch.relais_cde_vmc_niv0_on_off", "on") else 0 }}'
@@ -233,7 +233,7 @@ openhasp:
       - obj: "p4b20" # Prod
         properties:
           "text": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|int %}
+            {% set count = states('sensor.mp2_prod_totale_mqtt')|int(0) %}
             {% if count >= 1000 %}
               P={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -242,7 +242,7 @@ openhasp:
       - obj: "p4b21" # Maison
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int %}
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|int(0) %}
             {% if count >= 1000 %}
               M={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -251,7 +251,7 @@ openhasp:
       - obj: "p4b22" # Consigne Batteries
         properties:
           "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_batt_en_cours')|int %}
+            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_batt_en_cours')|int(0) %}
             {% if count >= 1000 %}
               C={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -260,7 +260,7 @@ openhasp:
       - obj: "p4b30" # P Dispo
         properties:
           "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_pu_disponible')|int %}
+            {% set count = states('sensor.esp176_esp32_routeur_1r_pu_disponible')|int(0) %}
             {% if count >= 1000 %}
               D={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -269,11 +269,11 @@ openhasp:
 
       - obj: "p4b40" # S Triac
         properties:
-          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float | round(0)}}"
+          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0)}}"
       - obj: "p4b50" # ECS
         properties:
           "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_p_ecs_jsymk')|int %}
+            {% set count = states('sensor.esp176_esp32_routeur_1r_p_ecs_jsymk')|int(0) %}
             {% if count >= 1000 %}
               P ECS={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -282,13 +282,13 @@ openhasp:
       - obj: "p4b60" # TEMP Triac
         properties:
           "text": >
-            {% set count = states('sensor.esp176_routeur_temp_triac')|int %}
+            {% set count = states('sensor.esp176_routeur_temp_triac')|int(0) %}
             T Triac={{ count |round(0)}} °C
 
       - obj: "p4b70" # Temp ECS
         properties:
           "text": >
-            {% set count = states('sensor.esp126_temp_ecs')|int %}
+            {% set count = states('sensor.esp126_temp_ecs')|int(0) %}
             T ECS={{ count |round(0)}} °C
       
       ############### Page 5 TEST ###############
@@ -296,7 +296,7 @@ openhasp:
       - obj: "p5b24" # Grid Power
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int %}
+            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -304,17 +304,17 @@ openhasp:
             {% endif %}
       - obj: "p5b25" # Grid Conso
         properties:
-          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int }} kWh"
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int(0) }} kWh"
             
       - obj: "p5b26" # Grid Inject
         properties:
-          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int }} kWh"
+          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int(0) }} kWh"
       
       ##################### Solaire
       - obj: "p5b34" # Puissance production
         properties:
           "text": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|float %}
+            {% set count = states('sensor.mp2_prod_totale_mqtt')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -322,17 +322,17 @@ openhasp:
             {% endif %}
       - obj: "p5b35" # Production
         properties:
-          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int }} kWh"
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int(0) }} kWh"
             
       - obj: "p5b36" # Prévision
         properties:
-          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int }} kWh"
+          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int(0) }} kWh"
 
       ############# Batteries
       - obj: "p5b44" # Charge/Décharge
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int(0) %}
             {% if count >= 0 %}
               {{"\uE6c1"}}
             {% else %}
@@ -341,7 +341,7 @@ openhasp:
       - obj: "p5b45" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float*-1 %}
+            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float(0)*-1 %}
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -349,16 +349,16 @@ openhasp:
             {% endif %}
       - obj: "p5b46" # SOC
         properties:
-          "text": "{{ states('sensor.mp2_soc_mqtt')|int }} %"
+          "text": "{{ states('sensor.mp2_soc_mqtt')|int(0) }} %"
       - obj: "p5b47" # Tps restant
         properties:
-          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float }}"
+          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float(0) }}"
 
       ################## Maison
       - obj: "p5b55" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|float %}
+            {% set count = states('sensor.mp2_conso_out1_mqtt')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -366,13 +366,13 @@ openhasp:
             {% endif %}
       - obj: "p5b56" # Conso
         properties:
-          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int }} kW"
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kW"
       - obj: "p5b57" # ECS
         properties:
           "text": >
-            {% set count = states('sensor.ecocompteur_ecs')|float %}
+            {% set count = states('sensor.ecocompteur_ecs')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
             {{ count }} W
-            {% endif %}    
+            {% endif %}

@@ -62,15 +62,6 @@ input_number:
       unit_of_measurement: "Lux"
       icon: mdi:weather-sunny 
 
-# memoire cde volet parents grand
-input_text:
-  volet_amis_sud_grand:
-    initial: "open"
-  mvt_porte_garage:
-    initial: ""
-  mvt_porte_sous_sol:
-    initial: ""
-
 binary_sensor:
 #inversion d'état pour l'alarme ALARMO
   - platform: template
@@ -89,7 +80,6 @@ binary_sensor:
           {% else %}
             on
           {% endif %} 
-
 
 input_select:
   volets:

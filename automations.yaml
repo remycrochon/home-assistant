@@ -1662,6 +1662,7 @@
       - action: script.activation_camera_2
         metadata: {}
         data: {}
+        enabled: true
     - conditions:
       - condition: trigger
         id:
@@ -2282,8 +2283,9 @@
         action: notify.notify
   mode: single
 - id: '1738429994514'
-  alias: Volets Suivi Azimuth Soleil bureau droit été
-  description: Gestion par seuils fixes selon le soleil et la radiation solaire
+  alias: Volets Suivi Azimuth Soleil bureau été sur Seuils
+  description: Gestion par seuils fixes selon le soleil, la radiation solaire et la
+    température
   triggers:
   - minutes: /10
     trigger: time_pattern
@@ -2311,47 +2313,85 @@
       radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
       radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
         }}'
+      temperature_ext: '{{ states(''sensor.vp2_temp_out'') | float }}'
+      temperature_seuil: '{{ states(''input_number.temperature_seuil_volets'') | float(30)
+        }}'
       position_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% elif elevation_soleil
         < 40 %}\n  40\n{% elif elevation_soleil < 60 %}\n  30\n{% else %}\n  10\n{%
         endif %}"
       fermeture_finale: '{% set pos = position_brute | float %} {% set pos = [pos,
         ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
         | round(0) }}'
+      position_effective: "{% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext
+        > temperature_seuil %}\n  0\n{% elif azimut_min <= azimut_soleil <= azimut_max
+        and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil
+        %}\n  {{ fermeture_finale }}\n{% elif radiation_solaire <= radiation_seuil
+        and temperature_ext <= temperature_seuil %}\n  100\n{% else %}\n  unknown\n{%
+        endif %}"
   - data:
       message: 'Debug volet bureau: Azimut={{ azimut_soleil }} ({{ azimut_min }} →
         {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
-        }} > Seuil={{ radiation_seuil }}, Position brute={{ position_brute }}, clampée={{
-        fermeture_finale }}, Limites : ouverture_min={{ ouverture_min }} / ouverture_max={{
-        ouverture_max }}
+        }} > Seuil={{ radiation_seuil }}, Temp={{ temperature_ext }} > Seuil={{ temperature_seuil
+        }}, Position brute={{ position_brute }}, clampée={{ fermeture_finale }}, appliquée
+        = {{ position_effective }}, Limites : ouverture_min={{ ouverture_min }} /
+        ouverture_max={{ ouverture_max }}
 
         '
       level: error
     action: system_log.write
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: 'Azimut soleil = {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max
+        }})
+
+        | Élévation = {{ elevation_soleil }}
+
+        | Radiation = {{ radiation_solaire }} (seuil = {{ radiation_seuil }})
+
+        | Température = {{ temperature_ext }} (seuil = {{ temperature_seuil }})
+
+        | Position brute = {{ position_brute }} → clampée = {{ fermeture_finale }}
+        → appliquée = {{ position_effective }}'
+    target:
+      entity_id: input_text.volets_debug_bureau
   - choose:
     - conditions:
       - condition: template
-        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil
-          > elevation_min }}'
+        value_template: "{{ azimut_min <= azimut_soleil <= azimut_max and\n   temperature_ext
+          > temperature_seuil }}"
+      sequence:
+      - data:
+          position: 0
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
       - condition: template
-        value_template: '{{ radiation_solaire > radiation_seuil }}'
+        value_template: "{{ azimut_min <= azimut_soleil <= azimut_max and\n   elevation_soleil
+          > elevation_min and\n   radiation_solaire > radiation_seuil and\n   temperature_ext
+          <= temperature_seuil }}"
       sequence:
       - data:
           position: '{{ fermeture_finale }}'
         target:
           entity_id:
           - cover.bureau_droit_2
-          - cover.gauche
+          - cover.bureau_gauche_rts
         action: cover.set_cover_position
     - conditions:
       - condition: template
-        value_template: '{{ radiation_solaire <= radiation_seuil }}'
+        value_template: "{{ radiation_solaire <= radiation_seuil and\n   temperature_ext
+          <= temperature_seuil }}"
       sequence:
       - data:
           position: 100
         target:
           entity_id:
           - cover.bureau_droit_2
-          - cover.gauche
+          - cover.bureau_gauche_rts
         action: cover.set_cover_position
   mode: single
 - id: '1738578799131'
@@ -2559,47 +2599,179 @@
         target:
           entity_id: input_boolean.flag_arret_piscine_sur_soc
   mode: single
-- id: '1749566472433'
-  alias: Reset Routeurs WiFI
-  description: ''
+- id: '1751955751827'
+  alias: Volets Suivi Azimuth Soleil bureau été (progressif)
+  description: 'Fermeture progressive des volets en fonction de l''élévation du soleil,
+    de la radiation et de la température
+
+    '
   triggers:
-  - trigger: time
-    at: 07:00:00
-  conditions: []
+  - minutes: /10
+    trigger: time_pattern
+  conditions:
+  - condition: state
+    entity_id: input_select.volets
+    state: Auto Pos Soleil
+  - condition: sun
+    before: sunset
+    after: sunrise
   actions:
-  - type: turn_off
-    device_id: 63fcbc705bd1fabfa2309e2cad1da2bb
-    entity_id: 97ecf54840fa37e687c445f61d77abb4
-    domain: switch
-    metadata:
-      secondary: false
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 10
-      milliseconds: 0
-  - type: turn_on
-    device_id: 63fcbc705bd1fabfa2309e2cad1da2bb
-    entity_id: 97ecf54840fa37e687c445f61d77abb4
-    domain: switch
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      entity_id: switch.pc3_lidl
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 10
-      milliseconds: 0
-  - action: switch.turn_on
-    metadata: {}
-    data: {}
-    target:
-      entity_id: switch.pc3_lidl
+  - variables:
+      orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
+        }}'
+      angle_exposition: '{{ states(''input_number.angle_exposition_volet_bureau'')
+        | float }}'
+      elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
+        float }}'
+      ouverture_min: 0
+      ouverture_max: 100
+      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
+      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
+      azimut_min: '{{ orientation_volet - angle_exposition }}'
+      azimut_max: '{{ orientation_volet + angle_exposition }}'
+      radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
+      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      temperature_ext: '{{ states(''sensor.vp2_temp_out'') | float }}'
+      temperature_seuil: '{{ states(''input_number.temperature_seuil_volets'') | float(30)
+        }}'
+      fermeture_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% else
+        %}\n  {{ 100 - (((elevation_soleil - elevation_min) / (90 - elevation_min))
+        * 100) | round(0) }}\n{% endif %}"
+      fermeture_finale: '{% set pos = fermeture_brute | float %} {% set pos = [pos,
+        ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
+        | round(0) }}'
+      position_effective: "{% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext
+        > temperature_seuil %}\n  0\n{% elif azimut_min <= azimut_soleil <= azimut_max
+        and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil
+        %}\n  {{ fermeture_finale }}\n{% elif radiation_solaire <= radiation_seuil
+        and temperature_ext <= temperature_seuil %}\n  100\n{% else %}\n  unknown\n{%
+        endif %}"
+  - data:
+      message: 'Debug volet bureau (progressif) :Azimut={{ azimut_soleil }} ({{ azimut_min
+        }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
+        }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{
+        temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale
+        }}, appliquée={{ position_effective }}
+
+        '
+    action: system_log.write
+  - target:
+      entity_id: input_text.volets_debug_bureau
+    data:
+      value: "Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}) \n|
+        Élévation={{ elevation_soleil }}\n| Radiation={{ radiation_solaire }} (seuil={{
+        radiation_seuil }})\n| Temp={{ temperature_ext }} (seuil={{ temperature_seuil
+        }})\n| fermeture_brute={{ fermeture_brute }} → clampée={{ fermeture_finale
+        }} → appliquée={{ position_effective }}"
+    action: input_text.set_value
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and temperature_ext
+          > temperature_seuil }}'
+      sequence:
+      - data:
+          position: 0
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
+      - condition: template
+        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil
+          > elevation_min and radiation_solaire > radiation_seuil and temperature_ext
+          <= temperature_seuil }}'
+      sequence:
+      - data:
+          position: '{{ fermeture_finale }}'
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
+      - condition: template
+        value_template: '{{ radiation_solaire <= radiation_seuil and temperature_ext
+          <= temperature_seuil }}'
+      sequence:
+      - data:
+          position: 100
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
   mode: single
+- id: '1751962021529'
+  alias: Volets Suivi Azimuth Soleil Bureau Progressif BP
+  description: ''
+  use_blueprint:
+    path: rem81/volets_suivi_solaire_p.yaml
+    input:
+      volets_select: input_select.volets
+      orientation_volet: input_number.orientation_volet_bureau
+      angle_exposition: input_number.angle_exposition_volet_bureau
+      elevation_min: input_number.elevation_mini_volets_bureaux
+      radiation_seuil: input_number.radiation_seuil_volets
+      temperature_sensor: sensor.vp2_temp_out
+      debug_text: input_text.volets_debug_bureau
+      cover_entities:
+        entity_id:
+        - cover.bureau_droit_rts
+        - cover.bureau_gauche_rts
+      radiation_sensor: sensor.vp2_radiation_moyenne
+      temperature_seuil: input_number.seuil_temperature_volets
+- id: '1751962962285'
+  alias: Suivi Azimuth Soleil Petit Volet Salon Progressif BP
+  description: ''
+  use_blueprint:
+    path: rem81/volets_suivi_solaire_p.yaml
+    input:
+      volets_select: input_select.volets
+      orientation_volet: input_number.orientation_petit_volet_salon
+      angle_exposition: input_number.angle_exposition_petit_volet_salon
+      elevation_min: input_number.elevation_mini_petit_volet_salon
+      radiation_seuil: input_number.radiation_seuil_volets
+      temperature_sensor: sensor.vp2_temp_out
+      debug_text: input_text.debug_petit_volet_salon
+      cover_entities:
+        entity_id: cover.volet_salon_petit
+      radiation_sensor: sensor.vp2_radiation_moyenne
+      temperature_seuil: input_number.seuil_temperature_volets
+- id: '1751985782392'
+  alias: Suivi Azimuth Soleil Volet Ch Nord Progressif BP
+  description: ''
+  use_blueprint:
+    path: rem81/volets_suivi_solaire_p.yaml
+    input:
+      volets_select: input_select.volets
+      orientation_volet: input_number.orientation_volet_ch_nord
+      angle_exposition: input_number.angle_exposition_volet_ch_nord
+      elevation_min: input_number.elevation_volet_ch_nord
+      radiation_seuil: input_number.radiation_seuil_volets
+      temperature_sensor: sensor.vp2_temp_out
+      debug_text: input_text.debug_volet_ch_nord
+      cover_entities:
+        entity_id: cover.volet_ch_nord
+      radiation_sensor: sensor.vp2_radiation_moyenne
+      temperature_seuil: input_number.seuil_temperature_volets
+- id: '1751986839652'
+  alias: Volets Suivi Azimuth Soleil Ch Parents Progressif BP
+  description: ''
+  use_blueprint:
+    path: rem81/volets_suivi_solaire_p.yaml
+    input:
+      volets_select: input_select.volets
+      orientation_volet: input_number.orientation_volets_parents
+      angle_exposition: input_number.angle_exposition_volet_parent
+      elevation_min: input_number.elevation_mini_volet_parents
+      radiation_seuil: input_number.radiation_seuil_volets
+      temperature_sensor: sensor.vp2_temp_out
+      debug_text: input_text.debug_volet_parent
+      cover_entities:
+        entity_id:
+        - cover.volet_ch_parts_petit
+      radiation_sensor: sensor.vp2_radiation_moyenne
+      temperature_seuil: input_number.seuil_temperature_volets

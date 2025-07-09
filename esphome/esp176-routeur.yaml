@@ -101,8 +101,6 @@ one_wire:
   - platform: gpio  
     pin: GPIO27 #
 
-
-
 # déclaration des modes de fonctionnement dans des "input select"
 select:
   - platform: template
@@ -240,7 +238,6 @@ number:
     icon: mdi:arrow-collapse-vertical
 
 sensor:
-  # Example configuration entry with 2 sensors and filter
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "WiFi Signal dB"
     id: wifi_signal_db
@@ -374,18 +371,6 @@ text_sensor:
   - platform: template
     name: "Mode Regulation"
     id: moderegul
-  # Informations supplementaires sur le WIFI
-  - platform: wifi_info
-    ip_address:
-      name: IP Address
-    ssid:
-      name: Connected SSID
-    bssid:
-      name: Connected BSSID
-    mac_address:
-      name: Mac Wifi Address
-    scan_results:
-      name: Latest Scan Results
       
 switch:
   - platform: gpio

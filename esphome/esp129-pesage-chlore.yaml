@@ -30,8 +30,6 @@ wifi:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
-
-
 captive_portal:
 logger:
   baud_rate: 0  # Disable UART logger if using UART0 (pins 1,3)

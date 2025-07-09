@@ -1,0 +1,170 @@
+blueprint:
+  name: Volets Suivi Azimuth Soleil Bureau Été (Progressif)
+  description: >
+    Automatisation pour une fermeture progressive des volets en fonction de l'élévation du soleil, de la radiation solaire et de la température extérieure.
+  domain: automation
+  input:
+    volets_select:
+      name: Sélecteur de mode des volets
+      description: Entité input_select pour activer/désactiver le mode automatique
+      selector:
+        entity:
+          domain: input_select
+    orientation_volet:
+      name: Orientation du volet
+      description: Orientation de la fenêtre en degrés (input_number)
+      selector:
+        entity:
+          domain: input_number
+    angle_exposition:
+      name: Angle d'exposition
+      description: Angle d'exposition acceptable pour le suivi du soleil (input_number)
+      selector:
+        entity:
+          domain: input_number
+    elevation_min:
+      name: Élévation minimale
+      description: Élévation minimale du soleil pour activer le contrôle (input_number)
+      selector:
+        entity:
+          domain: input_number
+    radiation_sensor:
+      name: Capteur de radiation solaire
+      description: Capteur mesurant la radiation solaire
+      selector:
+        entity:
+          domain: sensor
+    radiation_seuil:
+      name: Seuil de radiation
+      description: Seuil de radiation solaire pour l'ajustement des volets (input_number)
+      selector:
+        entity:
+          domain: input_number
+    temperature_sensor:
+      name: Capteur de température extérieure
+      description: Capteur mesurant la température extérieure
+      selector:
+        entity:
+          domain: sensor
+    temperature_seuil:
+      name: Seuil de température
+      description: Seuil de température extérieure pour fermer complètement les volets (input_number)
+      default: 30
+      selector:
+        entity:
+          domain: input_number
+    debug_text:
+      name: Entité de débogage
+      description: Entité input_text pour stocker les informations de débogage
+      selector:
+        entity:
+          domain: input_text
+    cover_entities:
+      name: Volets à contrôler
+      description: Liste des entités de volets à ajuster
+      selector:
+        target:
+          entity:
+            domain: cover
+
+trigger:
+  - trigger: time_pattern
+    minutes: /10
+
+condition:
+  - condition: state
+    entity_id: !input volets_select
+    state: Auto Pos Soleil
+  - condition: sun
+    before: sunset
+    after: sunrise
+
+action:
+  - variables:
+      orientation_entity: !input orientation_volet
+      angle_exposition_entity: !input angle_exposition
+      elevation_min_entity: !input elevation_min
+      radiation_sensor_entity: !input radiation_sensor
+      radiation_seuil_entity: !input radiation_seuil
+      temperature_sensor_entity: !input temperature_sensor
+      temperature_seuil_entity: !input temperature_seuil
+      orientation_volet: "{{ states(orientation_entity) | float }}"
+      angle_exposition: "{{ states(angle_exposition_entity) | float }}"
+      elevation_min: "{{ states(elevation_min_entity) | float }}"
+      ouverture_min: 0
+      ouverture_max: 100
+      azimut_soleil: "{{ state_attr('sun.sun', 'azimuth') | float }}"
+      elevation_soleil: "{{ state_attr('sun.sun', 'elevation') | float }}"
+      azimut_min: "{{ orientation_volet - angle_exposition }}"
+      azimut_max: "{{ orientation_volet + angle_exposition }}"
+      radiation_solaire: "{{ states(radiation_sensor_entity) | float }}"
+      radiation_seuil: "{{ states(radiation_seuil_entity) | float(0) }}"
+      temperature_ext: "{{ states(temperature_sensor_entity) | float }}"
+      temperature_seuil: "{{ states(temperature_seuil_entity) | float(30) }}"
+      fermeture_brute: >-
+        {% if elevation_soleil < elevation_min %}
+          100
+        {% else %}
+          {{ 100 - (((elevation_soleil - elevation_min) / (90 - elevation_min)) * 100) | round(0) }}
+        {% endif %}
+      fermeture_finale: >-
+        {% set pos = fermeture_brute | float %}
+        {% set pos = [pos, ouverture_max] | min %}
+        {% set pos = [pos, ouverture_min] | max %}
+        {{ pos | round(0) }}
+      position_effective: >-
+        {% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext > temperature_seuil %}
+          0
+        {% elif azimut_min <= azimut_soleil <= azimut_max and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil %}
+          {{ fermeture_finale }}
+        {% elif radiation_solaire <= radiation_seuil and temperature_ext <= temperature_seuil %}
+          100
+        {% else %}
+          unknown
+        {% endif %}
+  - action: system_log.write
+    enabled: false
+    data:
+      message: >
+        Debug volet bureau (progressif): Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée={{ position_effective }}
+  - action: input_text.set_value
+    target:
+      entity_id: !input debug_text
+    data:
+      value: |
+        Azimut: {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }})
+        Élévation: {{ elevation_soleil }}
+        Radiation Moyenne: {{ radiation_solaire }} (seuil: {{ radiation_seuil }})
+        Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
+        Fermeture brute: {{ fermeture_brute }}
+        Clampée: {{ fermeture_finale }}
+        Appliquée: {{ position_effective }}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ azimut_min <= azimut_soleil <= azimut_max and temperature_ext > temperature_seuil }}
+        sequence:
+          - action: cover.set_cover_position
+            data:
+              position: 0
+            target: !input cover_entities
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil and temperature_ext <= temperature_seuil }}
+        sequence:
+          - action: cover.set_cover_position
+            data:
+              position: "{{ fermeture_finale }}"
+            target: !input cover_entities
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ radiation_solaire <= radiation_seuil and temperature_ext <= temperature_seuil }}
+        sequence:
+          - action: cover.set_cover_position
+            data:
+              position: 100
+            target: !input cover_entities
+mode: single

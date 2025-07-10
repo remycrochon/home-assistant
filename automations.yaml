@@ -2705,10 +2705,10 @@
         action: cover.set_cover_position
   mode: single
 - id: '1751962021529'
-  alias: Volets Suivi Azimuth Soleil Bureau Progressif BP
+  alias: Volets Suivi Azimuth Soleil Bureau-Progressif Azimut
   description: ''
   use_blueprint:
-    path: rem81/volets_suivi_solaire_p.yaml
+    path: rem81/volets_suivi_soleil_progressif_azimut.yaml
     input:
       volets_select: input_select.volets
       orientation_volet: input_number.orientation_volet_bureau
@@ -2724,10 +2724,10 @@
       radiation_sensor: sensor.vp2_radiation_moyenne
       temperature_seuil: input_number.seuil_temperature_volets
 - id: '1751962962285'
-  alias: Suivi Azimuth Soleil Petit Volet Salon Progressif BP
+  alias: Suivi Azimuth Soleil Petit Volet Salon-Progressif Azimut
   description: ''
   use_blueprint:
-    path: rem81/volets_suivi_solaire_p.yaml
+    path: rem81/volets_suivi_soleil_progressif_azimut.yaml
     input:
       volets_select: input_select.volets
       orientation_volet: input_number.orientation_petit_volet_salon
@@ -2741,10 +2741,10 @@
       radiation_sensor: sensor.vp2_radiation_moyenne
       temperature_seuil: input_number.seuil_temperature_volets
 - id: '1751985782392'
-  alias: Suivi Azimuth Soleil Volet Ch Nord Progressif BP
+  alias: Suivi Azimuth Soleil Volet Ch Nord-Progressif Azimuth
   description: ''
   use_blueprint:
-    path: rem81/volets_suivi_solaire_p.yaml
+    path: rem81/volets_suivi_soleil_progressif_azimut.yaml
     input:
       volets_select: input_select.volets
       orientation_volet: input_number.orientation_volet_ch_nord
@@ -2761,7 +2761,7 @@
   alias: Volets Suivi Azimuth Soleil Ch Parents Progressif BP
   description: ''
   use_blueprint:
-    path: rem81/volets_suivi_solaire_p.yaml
+    path: rem81/volets_suivi_soleil_progressif_azimut.yaml
     input:
       volets_select: input_select.volets
       orientation_volet: input_number.orientation_volets_parents
@@ -2775,3 +2775,37 @@
         - cover.volet_ch_parts_petit
       radiation_sensor: sensor.vp2_radiation_moyenne
       temperature_seuil: input_number.seuil_temperature_volets
+- id: '1752092696617'
+  alias: Suivi Azimuth Volets Ch Parents-Progressif Azimut_Inclinaison
+  description: ''
+  use_blueprint:
+    path: rem81/volets_suivi_solaire_p.yaml
+    input:
+      volets_select: input_select.volets
+      orientation_volet: input_number.orientation_volets_parents
+      angle_exposition: input_number.angle_exposition_volet_parent
+      elevation_min: input_number.elevation_mini_volet_parents
+      radiation_sensor: sensor.vp2_radiation_moyenne
+      radiation_seuil: input_number.radiation_seuil_volets
+      temperature_sensor: sensor.vp2_temp_out
+      temperature_seuil: input_number.ecs_seuil_haut_temp
+      debug_text: input_text.debug_volet_parent
+      cover_entities:
+        entity_id: cover.volet_ch_parts_petit
+- id: '1752093155575'
+  alias: Suivi Azimuth Volet Ch Parents -Progressif Azimut
+  description: ''
+  use_blueprint:
+    path: rem81/volets_suivi_soleil_progressif_azimut.yaml
+    input:
+      volets_select: input_select.volets
+      orientation_volet: input_number.orientation_volets_parents
+      angle_exposition: input_number.angle_exposition_volet_parent
+      elevation_min: input_number.elevation_mini_volet_parents
+      radiation_sensor: sensor.vp2_radiation_moyenne
+      radiation_seuil: input_number.radiation_seuil_volets
+      temperature_sensor: sensor.vp2_temp_out
+      temperature_seuil: input_number.seuil_temperature_volets
+      debug_text: input_text.debug_volet_parent
+      cover_entities:
+        entity_id: cover.volet_ch_parts_petit

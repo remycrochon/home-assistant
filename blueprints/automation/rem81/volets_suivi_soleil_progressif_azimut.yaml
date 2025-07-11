@@ -81,6 +81,34 @@ condition:
 
 action:
   - variables:
+      weather_state: "{{ states('weather.albi') }}"
+      weather_state_fr: >-
+        {% set ws = weather_state %}
+        {% if ws == 'sunny' %}
+          Ensoleillé
+        {% elif ws == 'partlycloudy' %}
+          Partiellement nuageux
+        {% elif ws == 'cloudy' %}
+          Couvert
+        {% elif ws == 'fog' %}
+          Brouillard
+        {% elif ws == 'windy' %}
+          Venteux
+        {% elif ws == 'hail' %}
+          Grêle
+        {% elif ws == 'lightning' %}
+          Orages
+        {% elif ws == 'pouring' %}
+          Averses fortes
+        {% elif ws == 'rainy' %}
+          Pluvieux
+        {% elif ws == 'snowy' %}
+          Neige
+        {% elif ws == 'exceptional' %}
+          Conditions exceptionnelles
+        {% else %}
+          Inconnu
+        {% endif %}
       orientation_entity: !input orientation_volet
       angle_exposition_entity: !input angle_exposition
       elevation_min_entity: !input elevation_min
@@ -126,76 +154,49 @@ action:
             data:
               position: 0
             target: !input cover_entities
-          - action: input_text.set_value
-            target:
-              entity_id: !input debug_text
-            data:
-              value: |
-                Fermeture Temperature > Seuil
-                Azimut: {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }})
-                Élévation: {{ elevation_soleil }}
-                Radiation Moyenne: {{ radiation_solaire }} (seuil: {{ radiation_seuil }})
-                Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
-                Fermeture brute: {{ fermeture_brute }}
-                Clampée: {{ fermeture_finale }}
-                Appliquée: 0
-          - action: system_log.write
-            enabled: false
-            data:
-              message: >
-                Debug volet (progressif): Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée=0 }}
+          - variables:
+              actionsurvolet: "Fermeture Temperature > Seuil"
+              fermeture_appliquee: 0
       - conditions:
           - condition: template
             value_template: >-
-              {{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil and temperature_ext <= temperature_seuil }}
+              #{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil and temperature_ext <= temperature_seuil }}
+              {{ azimut_min <= azimut_soleil <= azimut_max and
+              elevation_soleil > elevation_min and
+              radiation_solaire > radiation_seuil and
+              temperature_ext <= temperature_seuil and
+              weather_state in ['sunny', 'partlycloudy'] }}
         sequence:
           - action: cover.set_cover_position
             data:
               position: "{{ fermeture_finale }}"
             target: !input cover_entities
-          - action: input_text.set_value
-            target:
-              entity_id: !input debug_text
-            data:
-              value: |
-                Positionnement Volet Progressif
-                Azimut: {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }})
-                Élévation: {{ elevation_soleil }}
-                Radiation Moyenne: {{ radiation_solaire }} (seuil: {{ radiation_seuil }})
-                Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
-                Fermeture brute: {{ fermeture_brute }}
-                Clampée: {{ fermeture_finale }}
-                Appliquée: {{ fermeture_finale }}
-          - action: system_log.write
-            enabled: false
-            data:
-              message: >
-                Debug volet (Azimut): Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée={{ position_effective }}                
-      - conditions:
-          - condition: template
-            value_template: >-
-              {{ (azimut_soleil < azimut_min or azimut_soleil > azimut_max) }}
-        sequence:
-          - action: cover.set_cover_position
-            data:
-              position: 100
-            target: !input cover_entities
-          - action: input_text.set_value
-            target:
-              entity_id: !input debug_text
-            data:
-              value: |
-                Position Volet hors Azimut
-                Azimut: {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }})
-                Élévation: {{ elevation_soleil }}
-                Radiation Moyenne: {{ radiation_solaire }} (seuil: {{ radiation_seuil }})
-                Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
-                Fermeture brute: {{ fermeture_brute }}
-                Clampée: {{ fermeture_finale }}
-                Appliquée: 100
-          - action: system_log.write
-            enabled: false
-            data:
-              message: >
-                Debug volet (Azimut): Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée=100
+          - variables:
+              actionsurvolet: "Positionnement Progressif"
+              fermeture_appliquee: "{{ fermeture_finale }}"
+
+    default:
+      - variables:
+          actionsurvolet: "Pas de mouvement (conditions non remplies)"
+          fermeture_appliquee: "Aucune"
+
+  - action: input_text.set_value
+    target:
+      entity_id: !input debug_text
+    data:
+      value: |
+        Action Volet: {{actionsurvolet}}
+        Ciel: {{weather_state_fr}}
+        Azimut: {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }})
+        Élévation: {{ elevation_soleil }}
+        Radiation Moyenne: {{ radiation_solaire }} (seuil: {{ radiation_seuil }})
+        Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
+        Fermeture brute: {{ fermeture_brute }}
+        Clampée: {{ fermeture_finale }}
+        Appliquée: {{ fermeture_finale }}
+  - action: system_log.write
+    enabled: false
+    data:
+      message: >
+        Debug volet (progressif): Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée={{ fermeture_finale }}
 mode: single

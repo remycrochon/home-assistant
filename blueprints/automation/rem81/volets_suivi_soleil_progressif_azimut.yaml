@@ -193,7 +193,7 @@ action:
         Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
         Fermeture brute: {{ fermeture_brute }}
         Clampée: {{ fermeture_finale }}
-        Appliquée: {{ fermeture_finale }}
+        Appliquée: {{ fermeture_appliquee }}
   - action: system_log.write
     enabled: false
     data:

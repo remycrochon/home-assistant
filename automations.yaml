@@ -2390,8 +2390,8 @@
           position: 100
         target:
           entity_id:
-          - cover.bureau_droit_2
           - cover.bureau_gauche_rts
+          - cover.bureau_droit_rts
         action: cover.set_cover_position
   mode: single
 - id: '1738578799131'
@@ -2700,8 +2700,8 @@
           position: 100
         target:
           entity_id:
-          - cover.bureau_droit_2
           - cover.bureau_gauche_rts
+          - cover.bureau_droit_rts
         action: cover.set_cover_position
   mode: single
 - id: '1751962021529'

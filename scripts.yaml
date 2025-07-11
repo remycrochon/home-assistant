@@ -221,8 +221,8 @@ ecs_off_off:
       - cover.volet_parents_grand_zb_volets
       - cover.volet_ch_parts_petit
       - cover.volet_salon_petit
-      - cover.gauche
-      - cover.bureau_droit_2
+      - cover.bureau_gauche_rts
+      - cover.bureau_droit_rts
     action: cover.close_cover
   - data: {}
     target:
@@ -329,8 +329,8 @@ ecs_off_off:
     - action: cover.open_cover
       target:
         entity_id:
-        - cover.gauche
-        - cover.bureau_droit_2
+        - cover.bureau_droit_rts
+        - cover.bureau_gauche_rts
       data: {}
     enabled: true
   - if:
@@ -477,8 +477,6 @@ ecs_off_off:
   - data: {}
     target:
       entity_id:
-      - cover.gauche
-      - cover.bureau_droit_2
       - cover.volet_salon_petit
       - cover.volet_cuisine
       - cover.volet_sdb_rts
@@ -486,6 +484,8 @@ ecs_off_off:
       - cover.volets_ch_parents_rts
       - cover.volet_sam_volets_zb
       - cover.volet_parents_grand_zb_volets
+      - cover.bureau_gauche_rts
+      - cover.bureau_droit_rts
     action: cover.open_cover
   - delay:
       hours: 0
@@ -507,9 +507,6 @@ ecs_off_off:
   - data: {}
     target:
       entity_id:
-      - cover.bureau_droit_2
-      - cover.gauche
-      - cover.bureau_droit_2
       - cover.volet_salon_petit
       - cover.volet_cuisine
       - cover.volet_sdb_rts
@@ -517,6 +514,8 @@ ecs_off_off:
       - cover.volets_ch_parents_rts
       - cover.volet_sam_volets_zb
       - cover.volet_parents_grand_zb_volets
+      - cover.bureau_droit_rts
+      - cover.bureau_gauche_rts
     action: cover.close_cover
   - delay:
       hours: 0

@@ -144,6 +144,11 @@ action:
         {% set pos = [pos, ouverture_max] | min %}
         {% set pos = [pos, ouverture_min] | max %}
         {{ pos | round(0) }}
+  - action: system_log.write
+    enabled: true
+    data:
+      message: >
+        Debug volet (progressif):Ciel: {{weather_state}}, Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée={{ fermeture_finale }}         
   - choose:
       - conditions:
           - condition: template
@@ -160,12 +165,9 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-              #{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil and temperature_ext <= temperature_seuil }}
-              {{ azimut_min <= azimut_soleil <= azimut_max and
-              elevation_soleil > elevation_min and
-              radiation_solaire > radiation_seuil and
-              temperature_ext <= temperature_seuil and
-              weather_state in ['sunny', 'partlycloudy'] }}
+                {{ radiation_solaire | float > radiation_seuil | float and
+                temperature_ext | float <= temperature_seuil | float and
+                weather_state in ['sunny', 'partlycloudy'] }}
         sequence:
           - action: cover.set_cover_position
             data:
@@ -194,9 +196,5 @@ action:
         Fermeture brute: {{ fermeture_brute }}
         Clampée: {{ fermeture_finale }}
         Appliquée: {{ fermeture_appliquee }}
-  - action: system_log.write
-    enabled: false
-    data:
-      message: >
-        Debug volet (progressif): Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{ temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale }}, appliquée={{ fermeture_finale }}
+
 mode: single

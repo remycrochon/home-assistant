@@ -129,7 +129,7 @@ action:
       radiation_seuil: "{{ states(radiation_seuil_entity) | float(0) }}"
       temperature_ext: "{{ states(temperature_sensor_entity) | float }}"
       temperature_seuil: "{{ states(temperature_seuil_entity) | float(30) }}"
-      fermeture_brute: >-
+      fermeture_brute_v0: >-
         {% if azimut_soleil < azimut_min or azimut_soleil > azimut_max %}
           100
         {% else %}
@@ -138,6 +138,16 @@ action:
           {% set brut = ratio * 100 %}
           {% set pas = 5 %}
           {{ ((brut / pas) | round(0)) * pas }}
+        {% endif %}
+      fermeture_brute: >-
+        {% set seuil1 = elevation_min %}
+        {% set seuil2 = elevation_min + 3 %}
+        {% if elevation_soleil < seuil1 %}
+          0
+        {% elif elevation_soleil < seuil2 %}
+          50
+        {% else %}
+          100
         {% endif %}
       fermeture_finale: >-
         {% set pos = fermeture_brute | float %}
@@ -193,7 +203,7 @@ action:
         Élévation: {{ elevation_soleil }}
         Radiation Moyenne: {{ radiation_solaire }} (seuil: {{ radiation_seuil }})
         Température: {{ temperature_ext }} (seuil: {{ temperature_seuil }})
-        Fermeture brute: {{ fermeture_brute }}
+        Fermeture brute: {{ fermeture_brute }}        
         Clampée: {{ fermeture_finale }}
         Appliquée: {{ fermeture_appliquee }}
 

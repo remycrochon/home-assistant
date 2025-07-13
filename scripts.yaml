@@ -624,11 +624,11 @@ volet_amis_sud_grand_stop_2:
 envoyer_message_log_esp178:
   alias: Envoyer un message log depuis ESP178
   sequence:
-  - action: notify.send_message
-    target:
-      entity_id: notify.log_esp178
+  - action: telegram_bot.send_message
+    metadata: {}
     data:
-      message: '{{ message }}'
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '"{{ message }}"'
   mode: single
   fields:
     message:
@@ -638,11 +638,11 @@ envoyer_message_log_esp178:
 envoyer_un_message_log_depuis_esp176:
   alias: Envoyer un message log depuis ESP176
   sequence:
-  - action: notify.send_message
-    target:
-      entity_id: notify.log_esp176
+  - action: telegram_bot.send_message
+    metadata: {}
     data:
-      message: '{{ message }}'
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '"{{ message }}"'
   mode: single
   fields:
     message:

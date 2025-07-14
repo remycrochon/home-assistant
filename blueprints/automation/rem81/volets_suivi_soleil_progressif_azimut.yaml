@@ -143,11 +143,11 @@ action:
         {% set seuil1 = elevation_min %}
         {% set seuil2 = elevation_min + 3 %}
         {% if elevation_soleil < seuil1 %}
-          0
+          100
         {% elif elevation_soleil < seuil2 %}
           50
         {% else %}
-          100
+          0
         {% endif %}
       fermeture_finale: >-
         {% set pos = fermeture_brute | float %}
@@ -175,7 +175,7 @@ action:
       - conditions:
           - condition: template
             value_template: >-
-                {{ radiation_solaire | float > radiation_seuil | float and
+                {{ azimut_min <= azimut_soleil <= azimut_max and radiation_solaire | float > radiation_seuil | float and
                 temperature_ext | float <= temperature_seuil | float and
                 weather_state in ['sunny', 'partlycloudy'] }}
         sequence:

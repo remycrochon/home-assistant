@@ -10,3 +10,4 @@ template:
         {% set hp=states('sensor.compteur_energie_wc_jour_hp')|float(default=0) %}
         {% set hc=states('sensor.compteur_energie_wc_jour_hc')|float(default=0) %}
         {{ hp+hc }}
+

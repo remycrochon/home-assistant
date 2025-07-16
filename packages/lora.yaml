@@ -1,0 +1,16 @@
+mqtt:
+  sensor:
+    # Test LoRa MQTT
+    - name: "Loratest temperature Id01"
+      unique_id: lora_test_temperature_id01 
+      state_topic: "LoRaRem81/1/temp"
+      device_class: temperature
+      unit_of_measurement: '°C'
+      state_class: measurement
+
+    - name: "Loratest Humidité Id01"
+      unique_id: lora_test_humidite_id01 
+      state_topic: "LoRaRem81/1/hum "
+      device_class: humidity
+      unit_of_measurement: '%'
+      state_class: measurement

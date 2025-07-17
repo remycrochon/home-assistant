@@ -316,18 +316,19 @@ script:
   - id: _memorisation_ph
     then:
       - lambda: |-
-          if (!isnan(id(ph_ezo).state) && id(flag_tempo_ppe_filtre)) {
+          bool ph_valide = !isnan(id(ph_ezo).state);
+          bool pompe_active = id(flag_tempo_ppe_filtre);
+
+          if (ph_valide && pompe_active) {
             id(g_memoire_ph) = id(ph_ezo).state;
-            ESP_LOGI("pH", "pH actualisé à %.2f (pompe active)", id(g_memoire_ph));
+            ESP_LOGI("pH", "pH actualisé à %.2f (pH_valide=%d, pompe_active=%d)",
+            id(g_memoire_ph), ph_valide, pompe_active);
           } else {
-            ESP_LOGI("pH", "pH non mis à jour (pompe inactive ou mesure invalide)");
+            ESP_LOGI("pH", "PH NON mis à jour (ph_valide=%d, pompe_active=%d)",
+            ph_valide, pompe_active);
           }
           id(ph_ezo_filtre).publish_state(id(g_memoire_ph));
 
-      - logger.log:
-          format: "Flag Temp: %i / Ph EZO: %.2f / Mem Ph: %.2f"
-          args: [ 'id(flag_tempo_ppe_filtre)','id(ph_ezo).state','id(g_memoire_ph)' ]
-          level: DEBUG
   # Script principal pour la régulation du pH
   - id: _regul_ph
     mode: single
@@ -345,7 +346,7 @@ script:
                   and:
                     - lambda: 'return id(g_memoire_ph) > (id(_ph_cible).state+id(_ph_hysteresis).state);'
                     - lambda: 'return id(g_memoire_ph) > 0;'
-                    - switch.is_on: cde_ppe_filtration          
+                    - switch.is_on: cde_ppe_filtration 
                 then:
                   - lambda: |-
                       float ecart = abs(id(g_memoire_ph) - id(_ph_cible).state);

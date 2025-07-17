@@ -315,18 +315,13 @@ script:
   # sinon on travaille avec le pH mémorisé avant l'arret précédent
   - id: _memorisation_ph
     then:
-      - if:
-          condition:
-            - lambda: 'return id(flag_tempo_ppe_filtre) == true;'
-            - lambda: 'return isnan(id(ph_ezo).state);' # verifie si ph_ezo est valide
-          then:
-            - lambda: |-
-                id(g_memoire_ph)=id(ph_ezo).state;
-          else:
-            - lambda: |-
-                id(g_memoire_ph)=id(g_memoire_ph);
-      # Recopie dans un template pour affichage dans HA
       - lambda: |-
+          if (!isnan(id(ph_ezo).state) && id(flag_tempo_ppe_filtre)) {
+            id(g_memoire_ph) = id(ph_ezo).state;
+            ESP_LOGI("pH", "pH actualisé à %.2f (pompe active)", id(g_memoire_ph));
+          } else {
+            ESP_LOGI("pH", "pH non mis à jour (pompe inactive ou mesure invalide)");
+          }
           id(ph_ezo_filtre).publish_state(id(g_memoire_ph));
 
       - logger.log:

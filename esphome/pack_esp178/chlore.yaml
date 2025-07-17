@@ -330,18 +330,13 @@ script:
   # sinon on travaille avec l'ORP mémorisé avant l'arret précédent
   - id: _memorisation_orp
     then:
-      - if:
-          condition:
-            - lambda: 'return isnan(id(orp_ezo).state);' # verifie si orp_ezo est valide
-            - lambda: 'return id(flag_tempo_ppe_filtre) == true;'
-          then:
-            - lambda: |-
-                id(g_memoire_orp)=id(orp_ezo).state;
-          else:
-            - lambda: |-
-                id(g_memoire_orp)=id(g_memoire_orp);
-      # Recopie dans un template pour affichage dans HA
       - lambda: |-
+          if (!isnan(id(orp_ezo).state) && id(flag_tempo_ppe_filtre)) {
+            id(g_memoire_orp) = id(orp_ezo).state;
+            ESP_LOGI("orp", "ORP actualisé à %.2f (pompe active)", id(g_memoire_orp));
+          } else {
+            ESP_LOGI("orp", "ORP non mis à jour (pompe inactive ou mesure invalide)");
+          }
           id(orp_ezo_filtre).publish_state(id(g_memoire_orp));
 
   # Injection chlore liquide

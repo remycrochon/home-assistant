@@ -54,6 +54,7 @@ sensor:
   - platform: ina219
     address: 0x40
     shunt_resistance: 0.1
+    max_current: 0.4
     current:
       name: "Courant DC"
       id: courant_dc
@@ -62,6 +63,11 @@ sensor:
       name: "Tension DC"
       id: tension_dc
       accuracy_decimals: 3
+    shunt_voltage:
+      name: "Tension Shunt"
+      id: tension_shunt
+      accuracy_decimals: 3
+
     power:
       name: "Puissance DC"
       id: puissance_dc
@@ -79,6 +85,15 @@ interval:
     then:
       - lambda: |-
           id(affichage_index) = (id(affichage_index) + 1) % 3;
+
+  - interval: 2s
+    then:
+      - lambda: |-
+          ESP_LOGI("INA226", "Tension_DC=%.3f V | Tension_Shunt=%.3f V | Courant=%.3f A | Puissance=%.3f W",
+            id(tension_dc).state,
+            id(tension_shunt).state,
+            id(courant_dc).state,
+            id(puissance_dc).state);
 
 display:
   - platform: tm1638
@@ -99,6 +114,43 @@ binary_sensor:
   - platform: status
     name: "Status"
 
+  - platform: tm1638
+    name: "TM1638 Button 1"
+    id: TM1638Button1
+    key: 0
+    filters:
+      - delayed_on: 10ms
+    on_press:
+     then:
+        - switch.turn_on: TM1638Led1
+    on_release:
+     then:
+        - switch.turn_off: TM1638Led1
+
+  - platform: tm1638
+    name: "TM1638 Button 2"
+    id: TM1638Button2
+    key: 1
+    filters:
+      - delayed_on: 10ms
+    on_press:
+     then:
+        - output.turn_on: TM1638Led2
+    on_release:
+     then:
+        - output.turn_off: TM1638Led2
+
 switch:
   - platform: restart
     name: "Restart"
+
+  - platform: tm1638
+    name: "Led1"
+    id: TM1638Led1
+    led: 0
+
+output:
+  - platform: tm1638
+    id: TM1638Led2
+    led: 1
+

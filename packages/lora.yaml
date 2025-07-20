@@ -14,3 +14,38 @@ mqtt:
       device_class: humidity
       unit_of_measurement: '%'
       state_class: measurement
+
+  binary_sensor:
+    - name: "LoRaRem81_In1"
+      state_topic: "LoRaRem81/1/in1 "
+      payload_on: "1.00"
+      payload_off: "0.00"
+      value_template: "{{ '1.00' if (value | float >= 1.0) else '0.00' }}"
+      unique_id: "lora_rem81_in1"
+      device:
+        identifiers: ["lora_rem81_id01"]
+        name: "LoRaRem81 Capteur 01"
+        manufacturer: "Remy"
+        model: "LoRa Binary"
+
+    - name: "LoRaRem81_In2"
+      state_topic: "LoRaRem81/1/in2 "
+      payload_on: "1.00"
+      payload_off: "0.00"
+      unique_id: "lora_rem81_in2"
+      device:
+        identifiers: ["lora_rem81_id01"]
+        name: "LoRaRem81 Capteur 02"
+        manufacturer: "Remy"
+        model: "LoRa Binary"
+
+    - name: "LoRaRem81_In3"
+      state_topic: "LoRaRem81/1/in3 "
+      payload_on: "1.00"
+      payload_off: "0.00"
+      unique_id: "lora_rem81_in3"
+      device:
+        identifiers: ["lora_rem81_id01"]
+        name: "LoRaRem81 Capteur 03"
+        manufacturer: "Remy"
+        model: "LoRa Binary"

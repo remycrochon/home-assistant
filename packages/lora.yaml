@@ -7,6 +7,11 @@ mqtt:
       device_class: temperature
       unit_of_measurement: '°C'
       state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id01"]
+        name: "LoRaRem81 ID01"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"      
 
     - name: "Loratest Humidité Id01"
       unique_id: lora_test_humidite_id01 
@@ -20,12 +25,11 @@ mqtt:
       state_topic: "LoRaRem81/1/in1 "
       payload_on: "1.00"
       payload_off: "0.00"
-      value_template: "{{ '1.00' if (value | float >= 1.0) else '0.00' }}"
       unique_id: "lora_rem81_in1"
       device:
         identifiers: ["lora_rem81_id01"]
-        name: "LoRaRem81 Capteur 01"
-        manufacturer: "Remy"
+        name: "LoRaRem81 ID01"
+        manufacturer: "Rem81"
         model: "LoRa Binary"
 
     - name: "LoRaRem81_In2"
@@ -35,8 +39,8 @@ mqtt:
       unique_id: "lora_rem81_in2"
       device:
         identifiers: ["lora_rem81_id01"]
-        name: "LoRaRem81 Capteur 02"
-        manufacturer: "Remy"
+        name: "LoRaRem81 ID01"
+        manufacturer: "Rem81"
         model: "LoRa Binary"
 
     - name: "LoRaRem81_In3"
@@ -46,6 +50,6 @@ mqtt:
       unique_id: "lora_rem81_in3"
       device:
         identifiers: ["lora_rem81_id01"]
-        name: "LoRaRem81 Capteur 03"
-        manufacturer: "Remy"
+        name: "LoRaRem81 ID01"
+        manufacturer: "Rem81"
         model: "LoRa Binary"

@@ -19,6 +19,11 @@ mqtt:
       device_class: humidity
       unit_of_measurement: '%'
       state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id01"]
+        name: "LoRaRem81 ID01"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"      
 
   binary_sensor:
     - name: "LoRaRem81_In1"

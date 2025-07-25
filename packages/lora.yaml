@@ -1,6 +1,6 @@
 mqtt:
   sensor:
-    # Test LoRa MQTT
+    # LoRa MQTT Id 01
     - name: "Loratest temperature Id01"
       unique_id: lora_test_temperature_id01 
       state_topic: "LoRaRem81/1/temp"
@@ -11,11 +11,11 @@ mqtt:
         identifiers: ["lora_rem81_id01"]
         name: "LoRaRem81 ID01"
         manufacturer: "Rem81"
-        model: "LoRa Binary"      
+        model: "LoRa Binary"
 
     - name: "Loratest Humidité Id01"
       unique_id: lora_test_humidite_id01 
-      state_topic: "LoRaRem81/1/hum "
+      state_topic: "LoRaRem81/1/hum"
       device_class: humidity
       unit_of_measurement: '%'
       state_class: measurement
@@ -27,7 +27,7 @@ mqtt:
 
     - name: "Loratest Batterie Id01"
       unique_id: lora_test_batterie_id01
-      state_topic: "LoRaRem81/1/bat "
+      state_topic: "LoRaRem81/1/bat"
       device_class: voltage
       unit_of_measurement: 'V'
       state_class: measurement
@@ -47,7 +47,44 @@ mqtt:
         identifiers: ["lora_rem81_id01"]
         name: "LoRaRem81 ID01"
         manufacturer: "Rem81"
-        model: "LoRa Binary"      
+        model: "LoRa Binary"
+
+    # LoRa MQTT Id02
+    - name: "Loratest temperature Id02"
+      unique_id: lora_test_temperature_id02
+      state_topic: "LoRaRem81/2/temp"
+      device_class: temperature
+      unit_of_measurement: '°C'
+      state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id02"]
+        name: "LoRaRem81 ID02"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"
+
+    - name: "Loratest Batterie Id02"
+      unique_id: lora_test_batterie_id02
+      state_topic: "LoRaRem81/2/bat"
+      device_class: voltage
+      unit_of_measurement: 'V'
+      state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id02"]
+        name: "LoRaRem81 ID02"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"
+
+    - name: "RSSI Id02"
+      unique_id: lora_test_rss1_id02 
+      state_topic: "LoRaRem81/2/rssi"
+      device_class: signal_strength
+      unit_of_measurement: 'dBm'
+      state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id02"]
+        name: "LoRaRem81 ID02"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"
 
   binary_sensor:
     - name: "LoRaRem81_In1"

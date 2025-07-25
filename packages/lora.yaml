@@ -23,7 +23,19 @@ mqtt:
         identifiers: ["lora_rem81_id01"]
         name: "LoRaRem81 ID01"
         manufacturer: "Rem81"
-        model: "LoRa Binary"      
+        model: "LoRa Binary"
+
+    - name: "Loratest Batterie Id01"
+      unique_id: lora_test_batterie_id01
+      state_topic: "LoRaRem81/1/bat "
+      device_class: voltage
+      unit_of_measurement: 'V'
+      state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id01"]
+        name: "LoRaRem81 ID01"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"
 
     - name: "RSSI Id01"
       unique_id: lora_test_rss1_id01 

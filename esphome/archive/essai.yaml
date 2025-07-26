@@ -1,0 +1,28 @@
+esphome:
+  name: essai
+  friendly_name: essai
+
+rp2040:
+  board: rpipicow
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "1czXG0ha+qgGNlitn6P0W0mBSNKEXRqrEc0NmbMAlaE="
+
+ota:
+  - platform: esphome
+    password: "53bec0bfef3e51964299f9ce66fdde39"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot in case wifi connection fails
+  ap:
+    ssid: "Essai Fallback Hotspot"
+    password: "BBwLKXBZ8oyb"
+    

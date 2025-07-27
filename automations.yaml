@@ -2812,3 +2812,34 @@
       debug_text: input_text.debug_volet_parent
       cover_entities:
         entity_id: cover.volet_ch_parts_petit
+- id: '1753556651919'
+  alias: Alarme Com LoRa ID02
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_com_lora_id02
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}LoRa ID02 OFF Ligne'
+          title: LoRa ID02 NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            LoRa ID02 OnLine'
+          title: LoRa ID02 OK!!
+      notify_device: 367dba31447009458e03b70e3a29b6b2
+      repeat_delay: 300
+      max_alerts: 10
+      initial_delay: 180
+      notify_message: ' '
+      resolved_message: ' '

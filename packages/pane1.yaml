@@ -61,7 +61,7 @@ openhasp:
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('time.esp178_piscine_duree_filtration')|float(0)}}" 
+          "text": "{{ states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')|float(0)}}" 
 
       - obj: "p1b148"
         properties:

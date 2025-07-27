@@ -86,6 +86,17 @@ mqtt:
         manufacturer: "Rem81"
         model: "LoRa Binary"
 
+    - name: "Bat Coeur Id02"
+      unique_id: lora_batcoeur_id02
+      state_topic: "LoRaRem81/2/bc"
+      unit_of_measurement: ''
+      state_class: measurement
+      device:
+        identifiers: ["lora_rem81_id02"]
+        name: "LoRaRem81 ID02"
+        manufacturer: "Rem81"
+        model: "LoRa Binary"
+
   binary_sensor:
     - name: "LoRaRem81_In1"
       state_topic: "LoRaRem81/1/in1 "

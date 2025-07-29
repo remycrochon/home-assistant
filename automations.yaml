@@ -459,15 +459,19 @@
     - condition: template
       value_template: '{{ reponse_push[''returncode''] == 0 }}'
     then:
-    - action: notify.telegram
+    - action: telegram_bot.send_message
+      metadata: {}
       data:
-        title: Push Github OK
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
         message: '{{ reponse_push[''stdout''] }}'
+        title: Push Github OK
     else:
-    - action: notify.telegram
+    - action: telegram_bot.send_message
+      metadata: {}
       data:
-        title: Push Github en erreur
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
         message: '{{ reponse_push[''stderr''] }}'
+        title: Push Github en erreur
   mode: single
 - id: '1637073026237'
   alias: Balise ouverture Porte sous sol
@@ -900,10 +904,12 @@
     after: '23:00:00'
     before: 05:00:00
   actions:
-  - data:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
         }}
-    action: notify.telegram
   mode: single
 - id: '1686145474191'
   alias: BleuPrint Defaut Communication FreeBox
@@ -1827,23 +1833,25 @@
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.esp131_pzem_chalet_puissance
     for:
       hours: 0
       minutes: 10
       seconds: 0
     above: 500
-  condition: []
-  action:
-  - data:
+    trigger: numeric_state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       message: '{{states("sensor.date_time") }}{{-"\n"-}} Puissance Chalet > 300w
-        depuis 10mn{{-"\n"-}} P= {{states(''sensor.esp131_pzem_chalet_puissance'')}}
+        depuis 10mn{{-"\n"-}} P= {{states(''sensor.esp131_pzem_chalet_puissance'')|float(0)|round(2)}}
         W'
       title: Consommation Chalet
-    action: notify.telegram
   mode: single
 - id: '1726480725890'
   alias: Message Journalier Recap Conso

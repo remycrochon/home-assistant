@@ -1,0 +1,32 @@
+esphome:
+  name: toto
+  friendly_name: toto
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "FovkRizoFnOfQL0sI5nzBFt6KsF+kvxYNXxSlqO0aew="
+
+ota:
+  - platform: esphome
+    password: "2003b115635142b57ba2027381ee61e3"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Toto Fallback Hotspot"
+    password: "zxBwf5OOqVa6"
+
+captive_portal:
+    

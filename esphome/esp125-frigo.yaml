@@ -38,7 +38,7 @@ web_server:
 
 one_wire:
   - platform: gpio  
-    pin: GPIO4 #D4
+    pin: GPIO4 
 
 sensor:
   - platform: dallas_temp

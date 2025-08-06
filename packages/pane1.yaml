@@ -61,7 +61,7 @@ openhasp:
 
       - obj: "p1b146"
         properties:
-          "text": "{{ states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')|float(0)}}" 
+          "text": "{{ states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')|float(0)|round(1)}}" 
 
       - obj: "p1b148"
         properties:
@@ -104,10 +104,10 @@ openhasp:
           "text": "{{ states('sensor.esp178_piscine_orp_ezo')|float(0) |round(1)  }} ms"  
       - obj: "p1b226"
         properties:
-          "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance')|float(0) |round(1)  }} W"
+          "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance')|float(0)|round(1)}} W"
       - obj: "p1b231"
         properties:
-          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc')|float(0) }} kWh"
+          "text": "{{ states('sensor.compteur_energie_piscine_jour_hp_hc')|float(0)|round(1)}} kWh"
 # Page2
 
       - obj: "p2b121"  

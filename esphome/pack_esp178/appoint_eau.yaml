@@ -18,6 +18,11 @@ globals:
     type: uint32_t
     restore_value: no
     initial_value: '0'
+  - id: volet_ferme_off_time
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
+
 
 select:
   - platform: template
@@ -52,6 +57,19 @@ binary_sensor:
   - platform: template
     name: "niv_haut"
     id: niv_haut
+    on_state:
+      then:
+        - if:
+            condition:
+              and:
+                - binary_sensor.is_on: niv_haut
+                - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+            then:
+              - logger.log:
+                  format: "Fermeture vanne eau : Niveau haut atteint en mode Auto"
+                  level: INFO
+              - switch.turn_off: cde_ev_eau
+              - script.stop: _regul_eau
       
   - platform: template
     name: "niv_inter"
@@ -84,6 +102,7 @@ binary_sensor:
         - script.stop: _regul_eau
         - switch.turn_off: cde_ev_eau
 
+
   # Niveau bas à 1 si decouvert
   - platform: gpio
     name: "tp_plein_lsl"
@@ -113,6 +132,14 @@ switch:
     name: "cde_ev_eau"
     pin: ${GPIO_rel_ev_eau}
     id: cde_ev_eau
+    on_turn_on:
+      - lambda: |-
+          id(ev_eau_on_start_time) = millis() / 1000;
+          ESP_LOGI("EV_EAU", "Vanne ouverte, temps initialisé à %u secondes", id(ev_eau_on_start_time));
+    on_turn_off:
+      - lambda: |-
+          id(ev_eau_on_start_time) = 0;
+          ESP_LOGI("EV_EAU", "Vanne fermée, temps réinitialisé");
 
 interval:
   - interval: 60s
@@ -126,25 +153,33 @@ interval:
           if (now.hour == 0 && now.minute == 0 && now.second == 0) {
             id(_temps_fonctionnement_ev_eau).reset();            
           }
-  ## Sécurisation de l'ouverture EV EAU si > à 1heure        
+  ## Sécurisation de l'ouverture EV EAU si > à 1heure                  
   - interval: 60s
     then:
       - lambda: |-
           if (id(cde_ev_eau).state) {
+            if (id(ev_eau_on_start_time) == 0) {
+              ESP_LOGI("SECURITE", "Temps de démarrage de la vanne non initialisé !");
+              return;
+            }
             uint32_t now = millis() / 1000;
             uint32_t duration = now - id(ev_eau_on_start_time);
             if (duration > 3600) {  // 3600 secondes = 1h
               ESP_LOGI("SECURITE", "Vanne EV eau ouverte depuis plus de 1h, fermeture forcée.");
               id(cde_ev_eau).turn_off();
               id(_regul_eau).stop();
-              std::string mess = "ESP178 Defaut->Vanne Eau ouverte depuis";
-              id(_message_telegram_v2)->execute(mess, duration);              
+              std::string mess = "ESP178 Defaut->Vanne Eau ouverte depuis " +
+                                std::to_string(duration / 3600) + "h " +
+                                std::to_string((duration % 3600) / 60) + "min " +
+                                std::to_string(duration % 60) + "s";
+              id(_message_telegram_v2)->execute(mess, duration);
             }
-          }
+          }          
 
 script:
   # Regulation du niveau d'eau piscine
-  # Déclenché par BP Appoint Eau ou 120s après la cde ouverture volet après 240s
+  # Déclenché par BP Appoint Eau 
+  # ou 240s après ouverture volet
   - id: _regul_eau
     mode: single
     then:
@@ -156,20 +191,22 @@ script:
                 condition:
                   and:
                     - binary_sensor.is_off: niv_defaut
-                    - binary_sensor.is_off: volet_ferme
+                    - binary_sensor.is_on: volet_ouvert
                     - or:
                         - binary_sensor.is_on: niv_bas
                         - binary_sensor.is_on: niv_inter
                 then:
-                  - logger.log:
-                      format: "Ouverture vanne eau Mode Auto"
-                      level: INFO
-                  - switch.turn_on: cde_ev_eau
                   - lambda: |-
-                      id(ev_eau_on_start_time) = millis() / 1000;
+                      uint32_t now = millis() / 1000;
+                      if (id(volet_ferme_off_time) != 0 && (now - id(volet_ferme_off_time)) >= 240) {
+                        if (!id(cde_ev_eau).state) {
+                          ESP_LOGI("EV_EAU", "Ouverture vanne eau Mode Auto après temporisation de 240s");
+                          id(cde_ev_eau).turn_on();
+                        }
+                      }
                 else:
                   - logger.log:
-                      format: "Fermeture vanne eau Mode Auto"
+                      format: "Conditions non remplies pour ouverture vanne eau Mode Auto"
                       level: INFO
                   - switch.turn_off: cde_ev_eau
 

@@ -29,8 +29,8 @@ binary_sensor:
   # GPIO sur module extension SX1509
   # = on si volet fermé
   - platform: gpio
-    name: "volet_ferme"
-    id: volet_ferme
+    name: "volet_ferme_etor"
+    id: volet_ferme_etor
     pin:
       sx1509: sx1509_hub1
       # Use pin number 0 on the SX1509
@@ -41,6 +41,45 @@ binary_sensor:
       inverted: false
     filters:
       - delayed_on_off: 500ms
+
+  # Affiche clairement volet fermé ou ouvert
+  - platform: template
+    name: "Volet Ouvert"
+    id: volet_ouvert
+    lambda: 'return !id(volet_ferme_etor).state && !id(cde_volet_ouverture).state;'
+    on_state:
+      then:
+        - if:
+            condition:
+              - binary_sensor.is_on: volet_ouvert
+
+            then:
+              - lambda: |-
+                  id(volet_ferme_off_time) = millis() / 1000;
+                  ESP_LOGI("VOLET", "Volet ouvert, temporisation démarrée à %u secondes", id(volet_ferme_off_time));
+              - delay: 240s
+              - if:
+                  condition:
+                    and:
+                      - binary_sensor.is_on: volet_ouvert
+                      - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+                  then:
+                    - script.execute: _regul_eau
+
+  - platform: template
+    name: "Volet Ferme"
+    id: volet_ferme
+    lambda: 'return id(volet_ferme_etor).state && !id(cde_volet_fermeture).state;'
+    on_state:
+      then:
+        - if:
+            condition:
+              - binary_sensor.is_on: volet_ferme
+
+            then:
+              - lambda: |-
+                  id(volet_ferme_off_time) = 0;
+                  ESP_LOGI("VOLET", "Volet fermé, temporisation réinitialisée");
 
 text_sensor:
   - platform: template
@@ -96,10 +135,6 @@ switch:
     pin: ${GPIO_rel_ouv_volet}
     id: cde_volet_ouverture
     interlock: [cde_volet_fermeture]
-    on_turn_on:
-      then:
-        - delay: 240s
-        - script.execute: _regul_eau
 
   - platform: gpio
     name: "cde_volet_fermeture"

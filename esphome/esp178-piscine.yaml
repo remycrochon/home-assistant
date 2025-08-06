@@ -39,8 +39,8 @@ substitutions:
 packages:
   ph: !include pack_esp178/ph.yaml
   chlore: !include pack_esp178/chlore.yaml    
+  appoint_eau: !include pack_esp178/appoint_eau.yaml  
   volet: !include pack_esp178/couverture_flottante.yaml
-  appoint_eau: !include pack_esp178/appoint_eau.yaml
   hors_gel: !include pack_esp178/hors_gel.yaml
   mesure_elec: !include pack_esp178/mesure_elec.yaml
   mesure_pression: !include pack_esp178/mesure_pression.yaml

@@ -36,135 +36,57 @@ ota:
 web_server:
   port: 80
 
-time:
-  - platform: sntp
-    id: sntp_time
-    timezone: Europe/Paris
-    servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
+one_wire:
+  - platform: gpio  
+    pin: GPIO4 
 
-i2c:
-  sda: GPIO21
-  scl: GPIO22
-  scan: true
-ads1115:
-  - address: 0x48
 sensor:
-  # INA219 pour courant et tension chargeur DC
-  - platform: ina226
-    address: 0x40
-    shunt_resistance: 0.1
-    max_current: 0.4
-    current:
-      name: "Courant DC"
-      id: courant_dc
-      accuracy_decimals: 3
-      unit_of_measurement: "mA"
-      filters:
-        - multiply: 1000
-    bus_voltage:
-      name: "Tension DC"
-      id: tension_dc
-      accuracy_decimals: 3
-      unit_of_measurement: "V"
-    shunt_voltage:
-      name: "Tension Shunt"
-      id: tension_shunt
-      accuracy_decimals: 3
-    power:
-      name: "Puissance DC"
-      id: puissance_dc
-      accuracy_decimals: 3
-      unit_of_measurement: "mW"
-      filters:
-        - multiply: 1000
-    update_interval: 2s
+  - platform: dallas_temp
+    name: "Température DS18B20"
+    id: temp_ds18b20
+    device_class: temperature
+    state_class: "measurement"
+    update_interval: 10s
 
-  # ADS1115 mesure tension batterie (ex: sur A0)
-  - platform: ads1115
-    multiplexer: 'A0_A1'
-    gain: 6.144
-    name: "Tension Batterie"
-    id: tension_batterie
-    update_interval: 5s
+  - platform: adc
+    pin: GPIO34
+    id: adc_ctn
+    attenuation: 12db
+    update_interval: 10s
 
-  # ADS1115 mesure tension panneau solaire (ex: sur A1)
-  - platform: ads1115
-    multiplexer: 'A2_A3'
-    gain: 6.144
-    name: "Tension Panneau"
-    id: tension_panneau
-    update_interval: 5s
+  - platform: ntc
+    sensor: res_ntc
+    calibration:
+      b_constant: 3950
+      reference_temperature: 25°C
+      reference_resistance: 20kOhm
+    name: "Température CTN"
+    id: temp_ctn
 
-globals:
-  - id: affichage_index
-    type: int
-    initial_value: '0'
+  # === CTN 20kΩ sur ADC ===
+  - platform: resistance
+    id: res_ntc
+    sensor: adc_ctn
+    configuration: DOWNSTREAM
+    resistor: 20kOhm
+    reference_voltage: 3.3
 
-interval:
-  - interval: 3s
-    then:
-      - lambda: |-
-          id(affichage_index) = (id(affichage_index) + 1) % 5;
 
-display:
-  - platform: tm1638
-    id: tm_display
-    dio_pin: GPIO18
-    clk_pin: GPIO17
-    stb_pin: GPIO16
-    update_interval: 3s
-    lambda: |-
-      it.printf("        ");  // efface les 8 caractères
-      if (id(affichage_index) == 0)
-        it.printf("U=%5.3f", id(tension_dc).state);
-      else if (id(affichage_index) == 1)
-        it.printf("I=%5.3f", id(courant_dc).state);
-      else if (id(affichage_index) == 2)
-        it.printf("P=%5.3f", id(puissance_dc).state);
-      else if (id(affichage_index) == 3)
-        it.printf("UB=%5.3f", id(tension_batterie).state);
-      else
-        it.printf("UP=%5.3f", id(tension_panneau).state);
-
-binary_sensor:
-  - platform: status
-    name: "Status"
-
-  - platform: tm1638
-    name: "TM1638 Button 1"
-    id: TM1638Button1
-    key: 0
-    filters:
-      - delayed_on: 10ms
-    on_press:
-      - switch.turn_on: TM1638Led1
-    on_release:
-      - switch.turn_off: TM1638Led1
-
-  - platform: tm1638
-    name: "TM1638 Button 2"
-    id: TM1638Button2
-    key: 1
-    filters:
-      - delayed_on: 10ms
-    on_press:
-      - output.turn_on: TM1638Led2
-    on_release:
-      - output.turn_off: TM1638Led2
-
-switch:
-  - platform: restart
-    name: "Restart"
-
-  - platform: tm1638
-    name: "Led1"
-    id: TM1638Led1
-    led: 0
-
+# Sortie PWM pour le chauffage
 output:
-  - platform: tm1638
-    id: TM1638Led2
-    led: 1
+  - platform: ledc
+    pin: GPIO23
+    frequency: 1000 Hz
+    id: pwm_heater
+
+
+light:
+  - platform: monochromatic
+    output: pwm_heater
+    id: sortie_mofset
+    name: "Sortie Mofset"
+#switch:
+#  - platform: output
+#    name: "MOSFET Switch"
+#    output: pwm_heater
+

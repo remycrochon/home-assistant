@@ -6,10 +6,8 @@ esphome:
   name: ${device_name}
 
 esp32:
-  board: mhetesp32minikit
-  framework:
-    type: arduino
-
+  board: lolin_d32
+  
 # Enable logging
 logger:
 
@@ -71,36 +69,22 @@ sensor:
     resistor: 20kOhm
     reference_voltage: 3.3
 
-# === Sortie PWM pour MOSFET chauffage ===
+
+# Sortie PWM pour le chauffage
 output:
   - platform: ledc
     pin: GPIO23
     frequency: 1000 Hz
     id: pwm_heater
 
-# === Slider Home Assistant pour régler la puissance ===
-number:
-  - platform: template
-    name: "Puissance Chauffage (%)"
-    id: heating_power
-    min_value: 0
-    max_value: 100
-    step: 1
-    optimistic: true
-    set_action:
-      - output.set_level:
-          id: pwm_heater
-          level: !lambda "return x / 100.0;"
 
-# === Switch marche/arrêt chauffage ===
+#light:
+#  - platform: monochromatic
+#    output: pwm_heater
+#    id: sortie_mofset
+#    name: "Sortie Mofset"
 switch:
-  - platform: template
-    name: "Chauffage ON/OFF"
-    turn_on_action:
-      - output.set_level:
-          id: pwm_heater
-          level: !lambda "return id(heating_power).state / 100.0;"
-    turn_off_action:
-      - output.set_level:
-          id: pwm_heater
-          level: 0
+  - platform: output
+    name: "MOSFET Switch"
+    output: pwm_heater
+

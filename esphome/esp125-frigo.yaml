@@ -6,7 +6,7 @@ esphome:
   name: ${device_name}
 
 esp32:
-  board: lolin_d32
+  board: esp32dev
   
 # Enable logging
 logger:
@@ -77,14 +77,28 @@ output:
     frequency: 1000 Hz
     id: pwm_heater
 
-
+# Example configuration entry
+climate:
+  - platform: pid
+    name: "PID Climate Controller"
+    sensor: temp_ds18b20
+    default_target_temperature: 1°C
+   
+    heat_output: pwm_heater
+    control_parameters:
+      kp: 0.49460
+      ki: 0.00487
+      kd: 12.56301
+      output_averaging_samples: 5      # smooth the output over 5 samples
+      derivative_averaging_samples: 5  # smooth the derivative value over 10 samples
+    deadband_parameters:
+      threshold_high: 0.5°C       # deadband within +/-0.5°C of target_temperature
+      threshold_low: -0.5°C
+ 
 #light:
 #  - platform: monochromatic
 #    output: pwm_heater
 #    id: sortie_mofset
 #    name: "Sortie Mofset"
-switch:
-  - platform: output
-    name: "MOSFET Switch"
-    output: pwm_heater
+
 

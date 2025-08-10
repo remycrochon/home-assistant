@@ -3,7 +3,7 @@ esphome:
   friendly_name: toto
 
 esp32:
-  board: esp32-c3-devkitm-1
+  board: esp32dev
   framework:
     type: esp-idf
 
@@ -13,11 +13,11 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "vKcttcrEy1ZDqz4KRVEnVf4q1z0p+3QmpCCNho+i0UE="
+    key: "n/GMsyA6IBVlqs5Vj+scuqdFULjbgS6eo/fwuEVDCSg="
 
 ota:
   - platform: esphome
-    password: "5dc063ea38ed121452c1921c1fb22f09"
+    password: "1caeebe5d1f78954b3d99649ee9a0dbd"
 
 wifi:
   ssid: !secret wifi_ssid
@@ -26,7 +26,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Toto Fallback Hotspot"
-    password: "DtYF3xA6DnWw"
+    password: "SQtyHT8VB53U"
 
 captive_portal:
     

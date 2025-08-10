@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "[%key:common::config_flow::title::oauth2_pick_implementation%]"
+      },
+      "reauth_confirm": {
+        "title": "[%key:common::config_flow::title::reauth%]",
+        "description": "The Daikin Onecta integration needs to re-authenticate your account"
+      }
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_account%]",
+      "already_in_progress": "[%key:common::config_flow::abort::already_in_progress%]",
+      "oauth_error": "[%key:common::config_flow::abort::oauth2_error%]",
+      "oauth_failed": "[%key:common::config_flow::abort::oauth2_failed%]",
+      "oauth_timeout": "[%key:common::config_flow::abort::oauth2_timeout%]",
+      "oauth_unauthorized": "[%key:common::config_flow::abort::oauth2_unauthorized%]",
+      "missing_configuration": "[%key:common::config_flow::abort::oauth2_missing_configuration%]",
+      "authorize_url_timeout": "[%key:common::config_flow::abort::oauth2_authorize_url_timeout%]",
+      "no_url_available": "[%key:common::config_flow::abort::oauth2_no_url_available%]",
+      "user_rejected_authorize": "[%key:common::config_flow::abort::oauth2_user_rejected_authorize%]",
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]",
+      "single_instance_allowed": "[%key:common::config_flow::abort::single_instance_allowed%]"
+    },
+    "create_entry": {
+      "default": "[%key:common::config_flow::create_entry::authenticated%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "high_scan_interval": "High frequency period update interval (minutes)XX",
+          "low_scan_interval": "Low frequency period update interval (minutes)",
+          "high_scan_start": "High frequency period start time",
+          "low_scan_start": "Low frequency period start time",
+          "scan_ignore": "Number of seconds that a data refresh is ignored after a command"
+        },
+        "description": "Configure Daikin Onecta Cloud polling",
+        "title": "Daikin Onecta"
+      }
+    }
+  },
+  "issues": {
+    "day_rate_limit": {
+      "title": "The daily rate limit has been reached",
+      "description": "You have reached your daily rate limit to the Daikin Cloud, check your polling frequency in the Daikin Onecta configuration."
+    },
+    "minute_rate_limit": {
+      "title": "The minute rate limit has been reached",
+      "description": "You have reached your minute rate limit to the Daikin Cloud, don't make so many calls to your Daikin devices in one minute."
+    }
+  }
+}

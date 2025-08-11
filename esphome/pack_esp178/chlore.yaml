@@ -336,10 +336,10 @@ script:
 
         if (orp_valide && pompe_active) {
           id(g_memoire_orp) = id(orp_ezo).state;
-          ESP_LOGI("orp", "ORP actualisé à %.2f (orp_valide=%d, pompe_active=%d)",
+          ESP_LOGD("orp", "ORP actualisé à %.2f (orp_valide=%d, pompe_active=%d)",
           id(g_memoire_orp), orp_valide, pompe_active);
         } else {
-          ESP_LOGI("orp", "ORP NON mis à jour (orp_valide=%d, pompe_active=%d)",
+          ESP_LOGD("orp", "ORP NON mis à jour (orp_valide=%d, pompe_active=%d)",
           orp_valide, pompe_active);
         }
         id(orp_ezo_filtre).publish_state(id(g_memoire_orp));

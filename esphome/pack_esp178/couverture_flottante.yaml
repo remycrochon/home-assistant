@@ -64,7 +64,9 @@ binary_sensor:
                       - binary_sensor.is_on: volet_ouvert
                       - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
                   then:
-                    - script.execute: _regul_eau
+                    # - script.execute: _regul_eau
+                    - lambda: |-
+                        ESP_LOGI("REGUL EAU", "Lancement Bidon Régulation Appoint Eau");                    
 
   - platform: template
     name: "Volet Ferme"

@@ -180,6 +180,7 @@ script:
   # Regulation du niveau d'eau piscine
   # Déclenché par BP Appoint Eau 
   # ou 240s après ouverture volet
+  # Regulation inhibée le temps de réparer le moteur
   - id: _regul_eau
     mode: single
     then:
@@ -204,11 +205,18 @@ script:
                           id(cde_ev_eau).turn_on();
                         }
                       }
+                  # Lignes du dessous à spprimer quand volet réparé    
+                  - logger.log:
+                      format: "Ouverture Forcée vanne eau Mode Auto"
+                      level: INFO
+                  - switch.turn_on: cde_ev_eau
+
                 else:
                   - logger.log:
                       format: "Conditions non remplies pour ouverture vanne eau Mode Auto"
                       level: INFO
                   - switch.turn_off: cde_ev_eau
+
 
       - if:
           condition:

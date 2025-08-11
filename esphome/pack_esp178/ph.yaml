@@ -321,10 +321,10 @@ script:
 
           if (ph_valide && pompe_active) {
             id(g_memoire_ph) = id(ph_ezo).state;
-            ESP_LOGI("pH", "pH actualisé à %.2f (pH_valide=%d, pompe_active=%d)",
+            ESP_LOGD("pH", "pH actualisé à %.2f (pH_valide=%d, pompe_active=%d)",
             id(g_memoire_ph), ph_valide, pompe_active);
           } else {
-            ESP_LOGI("pH", "PH NON mis à jour (ph_valide=%d, pompe_active=%d)",
+            ESP_LOGD("pH", "PH NON mis à jour (ph_valide=%d, pompe_active=%d)",
             ph_valide, pompe_active);
           }
           id(ph_ezo_filtre).publish_state(id(g_memoire_ph));

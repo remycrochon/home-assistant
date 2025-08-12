@@ -36,116 +36,52 @@ web_server:
 
 one_wire:
   - platform: gpio  
-    pin: GPIO4 
-
-########################################################
-# START THE HEATER CONTROLLER SETUP
-########################################################
-number:
-  ## RECEIVE kp,ki and kd parameters from input_text.kx helpers in 
-  # Home Assistant. See the PID controller below
-  # These helper values will get saved to flash thus permanently over-riding 
-  # the initial values set in the PID below.
-
-  # KP
-  - platform: template
-    name: kp
-    icon: mdi:chart-bell-curve
-    restore_value: true
-    min_value: 0
-    max_value: 50
-    step: 0.00001
-    set_action: 
-      lambda: |- 
-        id(pid_climate).set_kp( x );
-  # KI
-  - platform: template
-    name: ki
-    icon: mdi:chart-bell-curve
-    restore_value: true
-    min_value: 0
-    max_value: 50
-    step: 0.00001
-    set_action: 
-      lambda: id(pid_climate).set_ki( x );
-
-  # KD
-  - platform: template
-    name: kd
-    icon: mdi:chart-bell-curve
-    restore_value: true
-    min_value: -50
-    max_value: 50
-    step: 0.00001
-    set_action: 
-      lambda: id(pid_climate).set_kd( x );
-
+    pin: GPIO4
+    id: ow1
 
 sensor:
   - platform: dallas_temp
-    name: "Température DS18B20"
-    id: temp_ds18b20
+    one_wire_id: ow1
+    name: "Temp DS18B20 Resistance"
+    address:  0xf300eca700000328
+    id: temp_ds18b20_r
     device_class: temperature
     state_class: "measurement"
-    update_interval: 10s
+    update_interval: 5s
+    accuracy_decimals: 1
 
-  - platform: adc
-    pin: GPIO34
-    id: adc_ctn
-    attenuation: 12db
-    update_interval: 10s
-
-  - platform: ntc
-    sensor: res_ntc
-    calibration:
-      b_constant: 3950
-      reference_temperature: 25°C
-      reference_resistance: 20kOhm
-    name: "Température CTN"
-    id: temp_ctn
-
-  # === CTN 20kΩ sur ADC ===
-  - platform: resistance
-    id: res_ntc
-    sensor: adc_ctn
-    configuration: DOWNSTREAM
-    resistor: 20kOhm
-    reference_voltage: 3.3
-
-# --- Capteur puissance PID ---
+  - platform: dallas_temp
+    one_wire_id: ow1
+    name: "Temp DS18B20 Degivrage"
+    address: 0x61b6945709646128
+    id: temp_ds18b20_d
+    device_class: temperature
+    state_class: "measurement"
+    update_interval: 5s
+    accuracy_decimals: 1
+ 
+# --- Capteur PID ---
   - platform: pid
     name: "PID Sortie"
     type: HEAT
 
-  - platform: template
-    name: P terme
-    id: p_term
-    unit_of_measurement: "%"
-    accuracy_decimals: 2
+  - platform: pid
+    name: "PID P"
+    type: PROPORTIONAL
 
-  - platform: template
-    name: I terme
-    id: i_term
-    unit_of_measurement: "%"
-    accuracy_decimals: 2
+  - platform: pid
+    name: "PID I"
+    type: INTEGRAL
 
-  - platform: template
-    name: D terme
-    id: d_term
-    unit_of_measurement: "%"
-    accuracy_decimals: 2
+  - platform: pid
+    name: "PID D"
+    type: DERIVATIVE
 
-  - platform: template
-    name: output value
-    unit_of_measurement: "%"
-    id: o_term
-    accuracy_decimals: 2
+  - platform: pid
+    name: "PID Erreur"
+    type: ERROR
 
-  - platform: template
-    name: error value
-    id: e_term
-    accuracy_decimals: 2
-
+# declenche l'Autotune
 button:
   - platform: template
     name: "PID Climate Autotune"
@@ -158,7 +94,6 @@ output:
     pin: GPIO23
     frequency: 1000 Hz
     id: pwm_heater
-
             
 # --- Mode manuel (light dimmable) ---
 light:
@@ -196,37 +131,22 @@ climate:
   - platform: pid
     id: pid_climate   # 
     name: "Regulation PID"
-    sensor: temp_ds18b20
+    sensor: temp_ds18b20_r
     default_target_temperature: 1°C
     heat_output: pwm_heater
     control_parameters:
-      kp: 0.15472
-      ki: 0.00149
-      kd: 4.02369
+      kp: 0.13143
+      ki: 0.00305
+      kd: 1.41370
       output_averaging_samples: 5
       derivative_averaging_samples: 5
     deadband_parameters:
-      threshold_high: 1°C
-      threshold_low: -1°C
+      threshold_high: 0.5°C
+      threshold_low: -0.5°C
     visual:
-      min_temperature: 0°C
-      max_temperature: 70°C
+      min_temperature: -3°C
+      max_temperature: 10°C
       temperature_step:
         target_temperature: 0.1
         current_temperature: 0.1
-    on_state:
-      - sensor.template.publish:
-          id: p_term
-          state: !lambda 'return -id(pid_climate ).get_proportional_term() * 100.0;'
-      - sensor.template.publish:
-          id: i_term
-          state: !lambda 'return -id(pid_climate ).get_integral_term()* 100.0;'
-      - sensor.template.publish:
-          id: d_term
-          state: !lambda 'return -id(pid_climate ).get_derivative_term()* 100.0;'
-      - sensor.template.publish:
-          id: o_term
-          state: !lambda 'return -id(pid_climate).get_output_value()* 100.0;'
-      - sensor.template.publish:
-          id: e_term
-          state: !lambda 'return -id(pid_climate ).get_error_value();'        
+

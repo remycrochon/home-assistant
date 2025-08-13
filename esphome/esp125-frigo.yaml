@@ -38,6 +38,21 @@ one_wire:
   - platform: gpio  
     pin: GPIO4
     id: ow1
+number:
+  - platform: template
+    name: "Puissance chauffage manuel"
+    id: puissance_manuelle
+    min_value: 0
+    max_value: 100
+    step: 1
+    mode: box
+    restore_value: true
+    initial_value: 0  # première mise sous tension
+    unit_of_measurement: "%"
+    set_action:
+      - light.turn_on:
+          id: manual_heater
+          brightness: !lambda 'return x / 100.0;'
 
 sensor:
   - platform: dallas_temp
@@ -53,7 +68,7 @@ sensor:
   - platform: dallas_temp
     one_wire_id: ow1
     name: "Temp DS18B20 Degivrage"
-    address: 0x61b6945709646128
+    address: 0x9900000491efe528
     id: temp_ds18b20_d
     device_class: temperature
     state_class: "measurement"
@@ -94,6 +109,7 @@ output:
     pin: GPIO23
     frequency: 1000 Hz
     id: pwm_heater
+    max_power: 80%
             
 # --- Mode manuel (light dimmable) ---
 light:
@@ -117,7 +133,8 @@ switch:
           mode: "OFF"
       - light.turn_on:
           id: manual_heater
-          brightness: 0%  # au repos à 0
+          brightness: !lambda 'return id(puissance_manuelle).state / 100.0;'
+
     turn_off_action:
       - logger.log: "Mode manuel désactivé : PID activé"
       - light.turn_off:
@@ -135,11 +152,12 @@ climate:
     default_target_temperature: 1°C
     heat_output: pwm_heater
     control_parameters:
-      kp: 0.13143
-      ki: 0.00305
-      kd: 1.41370
+      kp: 0.71901 #0.13143
+      ki: 0.02875 #0.00305
+      kd: 4.49541 #1.41370
       output_averaging_samples: 5
       derivative_averaging_samples: 5
+      
     deadband_parameters:
       threshold_high: 0.5°C
       threshold_low: -0.5°C

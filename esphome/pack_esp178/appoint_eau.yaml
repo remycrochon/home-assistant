@@ -1,3 +1,5 @@
+# Déclenchement du script regul_eau sur BP
+# Arret vanne eau en auto et si niveau Haut pendant 5S
 time:
   - platform: sntp
     timezone: Europe/Paris
@@ -57,7 +59,9 @@ binary_sensor:
   - platform: template
     name: "niv_haut"
     id: niv_haut
-    on_state:
+    filters:
+      - delayed_on: 5s
+    on_press:
       then:
         - if:
             condition:
@@ -68,9 +72,9 @@ binary_sensor:
               - logger.log:
                   format: "Fermeture vanne eau : Niveau haut atteint en mode Auto"
                   level: INFO
-              - switch.turn_off: cde_ev_eau
               - script.stop: _regul_eau
-      
+              - switch.turn_off: cde_ev_eau
+
   - platform: template
     name: "niv_inter"
     id: niv_inter
@@ -95,13 +99,6 @@ binary_sensor:
         input: true
         pullup: false
       inverted: true
-    filters:
-      - delayed_on_off: 5s
-    on_press:
-      then:
-        - script.stop: _regul_eau
-        - switch.turn_off: cde_ev_eau
-
 
   # Niveau bas à 1 si decouvert
   - platform: gpio

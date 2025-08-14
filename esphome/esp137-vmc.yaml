@@ -45,7 +45,7 @@ web_server:
 
 one_wire:
   - platform: gpio  
-    pin: GPIO2 #D4
+    pin: GPIO12 #GPIO2 #D4
 
 # Sélecteur de mode (Manuel ou Automatique)
 select:

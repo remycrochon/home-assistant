@@ -156,11 +156,11 @@ climate:
       ki: 0.02875 #0.00305
       kd: 4.49541 #1.41370
       output_averaging_samples: 5
-      derivative_averaging_samples: 5
+      derivative_averaging_samples: 2
       
     deadband_parameters:
-      threshold_high: 0.5°C
-      threshold_low: -0.5°C
+      threshold_high: 0.2°C
+      threshold_low: -0.2°C
     visual:
       min_temperature: -3°C
       max_temperature: 10°C

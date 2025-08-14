@@ -144,9 +144,21 @@ script:
           condition:
             lambda: 'return id(blink_state);'
           then:
+            - output.turn_on: led_bleu_jour
+            - output.turn_on: led_bleu_jour1
+            - delay: 1s
+            - output.turn_on: led_blanc_jour
+            - output.turn_on: led_blanc_jour1
+            - delay: 1s
             - output.turn_on: led_rouge_jour
             - output.turn_on: led_rouge_jour1
+            - delay: 1s
+                
           else:
+            - output.turn_off: led_bleu_jour
+            - output.turn_off: led_bleu_jour1
+            - output.turn_off: led_blanc_jour
+            - output.turn_off: led_blanc_jour1
             - output.turn_off: led_rouge_jour
             - output.turn_off: led_rouge_jour1
 

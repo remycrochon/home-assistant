@@ -745,7 +745,9 @@ class $19fe8e3abedf4df0$export$c7c07a37856565d extends HTMLElement {
             const t = i.getPropertyOptions(e), h = "function" == typeof t.converter ? {
                 fromAttribute: t.converter
             } : void 0 !== t.converter?.fromAttribute ? t.converter : $19fe8e3abedf4df0$export$7312b35fbf521afb;
-            this._$Em = e, this[e] = h.fromAttribute(s, t.type) ?? this._$Ej?.get(e) ?? null, this._$Em = null;
+            this._$Em = e;
+            const r = h.fromAttribute(s, t.type);
+            this[e] = r ?? this._$Ej?.get(e) ?? r, this._$Em = null;
         }
     }
     requestUpdate(t, s, i) {
@@ -820,7 +822,7 @@ $19fe8e3abedf4df0$export$c7c07a37856565d.elementStyles = [], $19fe8e3abedf4df0$e
     mode: "open"
 }, $19fe8e3abedf4df0$export$c7c07a37856565d[$19fe8e3abedf4df0$var$d("elementProperties")] = new Map, $19fe8e3abedf4df0$export$c7c07a37856565d[$19fe8e3abedf4df0$var$d("finalized")] = new Map, $19fe8e3abedf4df0$var$p?.({
     ReactiveElement: $19fe8e3abedf4df0$export$c7c07a37856565d
-}), ($19fe8e3abedf4df0$var$a.reactiveElementVersions ??= []).push("2.1.0");
+}), ($19fe8e3abedf4df0$var$a.reactiveElementVersions ??= []).push("2.1.1");
 
 
 /**
@@ -994,7 +996,7 @@ class $f58f44579a4747ac$var$R {
         e < i.length && (this._$AR(s && s._$AB.nextSibling, e), i.length = e);
     }
     _$AR(t = this._$AA.nextSibling, i) {
-        for(this._$AP?.(!1, !0, i); t && t !== this._$AB;){
+        for(this._$AP?.(!1, !0, i); t !== this._$AB;){
             const i = t.nextSibling;
             t.remove(), t = i;
         }
@@ -1084,7 +1086,7 @@ const $f58f44579a4747ac$export$8613d1ca9052b22e = {
     B: $f58f44579a4747ac$var$H,
     F: $f58f44579a4747ac$var$z
 }, $f58f44579a4747ac$var$j = $f58f44579a4747ac$var$t.litHtmlPolyfillSupport;
-$f58f44579a4747ac$var$j?.($f58f44579a4747ac$var$N, $f58f44579a4747ac$var$R), ($f58f44579a4747ac$var$t.litHtmlVersions ??= []).push("3.3.0");
+$f58f44579a4747ac$var$j?.($f58f44579a4747ac$var$N, $f58f44579a4747ac$var$R), ($f58f44579a4747ac$var$t.litHtmlVersions ??= []).push("3.3.1");
 const $f58f44579a4747ac$export$b3890eb0ae9dca99 = (t, i, s)=>{
     const e = s?.renderBefore ?? i;
     let h = e._$litPart$;
@@ -1140,7 +1142,7 @@ const $ab210b2da7b39b9d$export$f5c524615a7708d6 = {
     },
     _$AL: (t)=>t._$AL
 };
-($ab210b2da7b39b9d$var$s.litElementVersions ??= []).push("4.2.0");
+($ab210b2da7b39b9d$var$s.litElementVersions ??= []).push("4.2.1");
 
 
 /**
@@ -1251,99 +1253,6 @@ function $043ab5348dd51237$export$c0e85c3982a3daa6(stateObj, state) {
     }
     return true;
 }
-
-
-
-
-const $0cafd9360b3c4d75$export$1ca1ec8b29a4ce27 = (config, setup)=>{
-    const infoCount = setup.holes.reduce((acc, h)=>{
-        if (h.info_message_count && !Number.isNaN(Number(h.info_message_count.state))) return acc + Number(h.info_message_count.state);
-        return acc;
-    }, 0);
-    return infoCount === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<ha-icon icon="${config.icon ?? 'mdi:pi-hole'}"></ha-icon>` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="warning-badge">${infoCount}</div>`;
-};
-
-
-
-const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity, className = '')=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display
-    .hass=${hass}
-    .stateObj=${entity}
-    class=${className}
-  ></state-display>`;
-
-
-const $a2b1c365027138cb$export$dfb737c0873de058 = (setup, hass, config)=>{
-    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'header')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
-    const primary = setup.holes[0];
-    const activeCount = setup.holes.map((h)=>h.status).filter((status)=>status !== undefined && (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(status, status?.state)).length;
-    const mixedStatus = activeCount > 0 && activeCount < setup.holes.length;
-    // Check if we should display the remaining time
-    const hasRemainingTime = primary.remaining_until_blocking_mode && primary.remaining_until_blocking_mode.state !== '0' && primary.remaining_until_blocking_mode.state !== 'unavailable' && primary.remaining_until_blocking_mode.state !== 'unknown';
-    // Get status color based on active count and mixed status
-    const getStatusColor = ()=>{
-        if (mixedStatus) return 'var(--warning-color, orange)';
-        else if (activeCount > 0) return 'var(--success-color, green)';
-        else return 'var(--error-color, red)';
-    };
-    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-    <div class="card-header">
-      <div class="name">
-        ${(0, $0cafd9360b3c4d75$export$1ca1ec8b29a4ce27)(config, setup)}${config.title ?? 'Pi-hole'}
-        ${setup.holes.length > 1 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<span class="multi-status"
-              >(${activeCount}/${setup.holes.length})</span
-            >` : ''}
-      </div>
-      <div style="color: ${getStatusColor()}">
-        <ha-icon
-          icon="${activeCount > 0 ? 'mdi:check-circle' : 'mdi:close-circle'}"
-        ></ha-icon>
-        ${mixedStatus ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`Partial` : (0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.status)}
-        ${activeCount <= 0 && hasRemainingTime ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.remaining_until_blocking_mode, 'remaining-time')}` : ''}
-      </div>
-    </div>
-  `;
-};
-
-
-const $313ad4784c1ca11f$export$7f14135d73b0f07a = (uniqueClientsCount)=>[
-        [
-            {
-                sensorKey: 'dns_queries_today',
-                title: 'card.stats.total_queries',
-                footer: {
-                    key: 'card.stats.active_clients',
-                    search: '{number}',
-                    replace: uniqueClientsCount
-                },
-                className: 'queries-box',
-                icon: 'mdi:earth'
-            },
-            {
-                sensorKey: 'ads_blocked_today',
-                title: 'card.stats.queries_blocked',
-                footer: 'card.stats.list_blocked_queries',
-                className: 'blocked-box',
-                icon: 'mdi:hand-back-right'
-            }
-        ],
-        [
-            {
-                sensorKey: 'ads_percentage_blocked_today',
-                title: 'card.stats.percentage_blocked',
-                footer: 'card.stats.list_all_queries',
-                className: 'percentage-box',
-                icon: 'mdi:chart-pie'
-            },
-            {
-                sensorKey: 'domains_blocked',
-                title: 'card.stats.domains_on_lists',
-                footer: 'card.stats.manage_lists',
-                className: 'domains-box',
-                icon: 'mdi:format-list-bulleted'
-            }
-        ]
-    ];
-
 
 
 
@@ -1483,6 +1392,172 @@ const $57febad8376708f1$export$3d3654ce4577c53d = (element, sectionConfig, entit
         }
     };
 };
+const $57febad8376708f1$export$b6152c9de20cf398 = (element, actionConfigs)=>{
+    return {
+        /**
+     * Handles an action event by creating and dispatching a 'hass-action' custom event.
+     * The event contains the entity configuration and the action type (tap, double_tap, hold).
+     *
+     * @param {ActionHandlerEvent} ev - The action handler event to process
+     */ handleEvent: (ev)=>{
+            // Extract action from event detail
+            const action = ev.detail?.action;
+            if (!action) return;
+            // Process each action configuration
+            actionConfigs.forEach((config)=>{
+                // @ts-ignore
+                (0, $9c83ab07519e6203$export$43835e9acf248a15)(element, 'hass-action', {
+                    config: config,
+                    action: action
+                });
+            });
+        }
+    };
+};
+
+
+
+const $0cafd9360b3c4d75$export$1ca1ec8b29a4ce27 = (element, config, setup)=>{
+    const infoCount = setup.holes.reduce((acc, h)=>{
+        if (h.info_message_count && !Number.isNaN(Number(h.info_message_count.state))) return acc + Number(h.info_message_count.state);
+        return acc;
+    }, 0);
+    // Create ActionConfigParams for each Pi-hole
+    const actionConfigs = setup.holes.map((h)=>{
+        // If user has custom badge config, apply it to all Pi-holes
+        if (config.badge) return {
+            entity: h.info_message_count?.entity_id ?? h.status?.entity_id ?? h.device_id,
+            ...config.badge
+        };
+        // Use config.badge if provided, otherwise create custom actions
+        const baseConfig = {
+            tap_action: {
+                action: 'more-info'
+            },
+            hold_action: {
+                action: 'more-info'
+            },
+            double_tap_action: {
+                action: 'more-info'
+            }
+        };
+        // Only setup default actions if the required entities exist
+        if (h.purge_diagnosis_messages && h.info_message_count) {
+            const purgeEntity = h.purge_diagnosis_messages;
+            const infoEntity = h.info_message_count;
+            return {
+                entity: infoEntity.entity_id,
+                ...baseConfig,
+                // Override tap_action for default behavior when info messages exist
+                tap_action: infoCount > 0 ? {
+                    action: 'call-service',
+                    perform_action: 'button.press',
+                    target: {
+                        entity_id: purgeEntity.entity_id
+                    }
+                } : {
+                    action: 'more-info'
+                }
+            };
+        }
+        // For Pi-holes without required entities, just use the base config
+        return {
+            entity: h.status?.entity_id ?? h.device_id,
+            ...baseConfig
+        };
+    });
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div
+    class="badge"
+    @action=${(0, $57febad8376708f1$export$b6152c9de20cf398)(element, actionConfigs)}
+    .actionHandler=${(0, $57febad8376708f1$export$8a44987212de21b)(actionConfigs[0])}
+  >
+    ${infoCount === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<ha-icon icon="${config.icon ?? 'mdi:pi-hole'}"></ha-icon>` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="warning-badge">${infoCount}</div>`}
+  </div>`;
+};
+
+
+
+const $409574f4dbacb1f1$export$c18c768bbe3223b7 = (hass, entity, className = '')=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-display
+    .hass=${hass}
+    .stateObj=${entity}
+    class=${className}
+  ></state-display>`;
+
+
+const $a2b1c365027138cb$export$dfb737c0873de058 = (element, setup, hass, config)=>{
+    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'header')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+    const primary = setup.holes[0];
+    const activeCount = setup.holes.map((h)=>h.status).filter((status)=>status !== undefined && (0, $043ab5348dd51237$export$c0e85c3982a3daa6)(status, status?.state)).length;
+    const mixedStatus = activeCount > 0 && activeCount < setup.holes.length;
+    // Check if we should display the remaining time
+    const hasRemainingTime = primary.remaining_until_blocking_mode && primary.remaining_until_blocking_mode.state !== '0' && primary.remaining_until_blocking_mode.state !== 'unavailable' && primary.remaining_until_blocking_mode.state !== 'unknown';
+    // Get status color based on active count and mixed status
+    const getStatusColor = ()=>{
+        if (mixedStatus) return 'var(--warning-color, orange)';
+        else if (activeCount > 0) return 'var(--success-color, green)';
+        else return 'var(--error-color, red)';
+    };
+    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+    <div class="card-header">
+      <div class="name">
+        ${(0, $0cafd9360b3c4d75$export$1ca1ec8b29a4ce27)(element, config, setup)}${config.title ?? 'Pi-hole'}
+        ${setup.holes.length > 1 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<span class="multi-status"
+              >(${activeCount}/${setup.holes.length})</span
+            >` : ''}
+      </div>
+      <div style="color: ${getStatusColor()}">
+        <ha-icon
+          icon="${activeCount > 0 ? 'mdi:check-circle' : 'mdi:close-circle'}"
+        ></ha-icon>
+        ${mixedStatus ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`Partial` : (0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.status)}
+        ${activeCount <= 0 && hasRemainingTime ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.remaining_until_blocking_mode, 'remaining-time')}` : ''}
+      </div>
+    </div>
+  `;
+};
+
+
+const $313ad4784c1ca11f$export$7f14135d73b0f07a = (uniqueClientsCount)=>[
+        [
+            {
+                sensorKey: 'dns_queries_today',
+                title: 'card.stats.total_queries',
+                footer: {
+                    key: 'card.stats.active_clients',
+                    search: '{number}',
+                    replace: uniqueClientsCount
+                },
+                className: 'queries-box',
+                icon: 'mdi:earth'
+            },
+            {
+                sensorKey: 'ads_blocked_today',
+                title: 'card.stats.queries_blocked',
+                footer: 'card.stats.list_blocked_queries',
+                className: 'blocked-box',
+                icon: 'mdi:hand-back-right'
+            }
+        ],
+        [
+            {
+                sensorKey: 'ads_percentage_blocked_today',
+                title: 'card.stats.percentage_blocked',
+                footer: 'card.stats.list_all_queries',
+                className: 'percentage-box',
+                icon: 'mdi:chart-pie'
+            },
+            {
+                sensorKey: 'domains_blocked',
+                title: 'card.stats.domains_on_lists',
+                footer: 'card.stats.manage_lists',
+                className: 'domains-box',
+                icon: 'mdi:format-list-bulleted'
+            }
+        ]
+    ];
+
+
+
 
 
 /**
@@ -1704,8 +1779,6 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
 
 
 
-
-
 /**
  * Converts a number of seconds into a string formatted as "HH:MM:SS".
  *
@@ -1725,6 +1798,70 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
     const paddedSeconds = String(seconds).padStart(2, '0');
     return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
 };
+const $3a2fe8ac0aec50d1$export$24f99e1414c21927 = (input)=>{
+    if (typeof input === 'number') return input;
+    const str = input.toString().trim();
+    // Check if it's a plain number string
+    if (/^\d+$/.test(str)) return parseInt(str, 10);
+    // Handle complex format like "4h:20m:69s"
+    if (str.includes(':')) {
+        const parts = str.split(':');
+        let totalSeconds = 0;
+        for (const part of parts){
+            const match = part.match(/^(\d+)([hms]?)$/);
+            if (match && match[1]) {
+                const value = parseInt(match[1], 10);
+                const unit = match[2] || 's'; // default to seconds if no unit
+                switch(unit){
+                    case 'h':
+                        totalSeconds += value * 3600;
+                        break;
+                    case 'm':
+                        totalSeconds += value * 60;
+                        break;
+                    case 's':
+                        totalSeconds += value;
+                        break;
+                }
+            }
+        }
+        return totalSeconds;
+    }
+    // Handle simple format like "10s", "5m", "1h"
+    const match = str.match(/^(\d+)([hms])$/);
+    if (match && match[1] && match[2]) {
+        const value = parseInt(match[1], 10);
+        const unit = match[2];
+        switch(unit){
+            case 'h':
+                return value * 3600;
+            case 'm':
+                return value * 60;
+            case 's':
+                return value;
+        }
+    }
+    // If we get here, the input is invalid
+    return 0;
+};
+const $3a2fe8ac0aec50d1$export$12fa006f8c81adb2 = (seconds)=>{
+    if (seconds === 0) return '0 seconds';
+    // Hours - only if it divides evenly
+    if (seconds >= 3600 && seconds % 3600 === 0) {
+        const hours = seconds / 3600;
+        return hours === 1 ? '1 hour' : `${hours} hours`;
+    }
+    // Minutes - only if it divides evenly AND less than an hour, OR if it divides evenly and is a reasonable number of minutes
+    if (seconds >= 60 && seconds % 60 === 0 && seconds < 3600) {
+        const minutes = seconds / 60;
+        return minutes === 1 ? '1 minute' : `${minutes} minutes`;
+    }
+    // Seconds - for everything else (including times that are many minutes but not whole hours)
+    return seconds === 1 ? '1 second' : `${seconds} seconds`;
+};
+
+
+
 
 
 const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, setup, seconds)=>{
@@ -1764,9 +1901,10 @@ const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, setup, config)=>{
     </div>
     <div class="pause ${pauseCollapsed ? 'hidden' : ''}">
       ${pauseDuration.map((duration)=>{
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<mwc-button
-          @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, setup, duration)}
-          >${duration} ${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds')}</mwc-button
+        const seconds = (0, $3a2fe8ac0aec50d1$export$24f99e1414c21927)(duration);
+        const displayText = (0, $3a2fe8ac0aec50d1$export$12fa006f8c81adb2)(seconds);
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<mwc-button @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, setup, seconds)}
+          >${displayText}</mwc-button
         >`;
     })}
     </div>
@@ -1949,7 +2087,7 @@ const $f5cecba293939c1a$export$569cbbd0d9d55043 = (element, hass, setup, config)
     const primary = setup.holes[0];
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <ha-card>
-      ${(0, $a2b1c365027138cb$export$dfb737c0873de058)(setup, hass, config)}
+      ${(0, $a2b1c365027138cb$export$dfb737c0873de058)(element, setup, hass, config)}
       <div class="card-content">
         ${(0, $b0d8503ad71f8731$export$ceaadd68dd4c5e98)(element, hass, primary, config)}
         ${(0, $f72adbed169bb149$export$f7d6b8c683630484)(element, hass, primary, config)}
@@ -2003,7 +2141,8 @@ const $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff = (entity, device)=>{
         action_refresh_data: 'action_refresh_data',
         latest_data_refresh: 'latest_data_refresh',
         ftl_info_message_count: 'info_message_count',
-        status: 'status'
+        status: 'status',
+        action_ftl_purge_diagnosis_messages: 'purge_diagnosis_messages'
     };
     const key = entity.translation_key;
     if (key && key in keyToPropertyMap) {
@@ -2120,7 +2259,11 @@ const $0544f6a0e4690d02$export$9093f1b96efd0145 = (hass, config)=>{
             // don't track entites that are not in the first device
             return {
                 device_id: hole.device_id,
+                // required for the setup state to work
                 status: hole.status,
+                // required for the badge actions to work
+                info_message_count: hole.info_message_count,
+                purge_diagnosis_messages: hole.purge_diagnosis_messages,
                 controls: [],
                 sensors: [],
                 switches: [],
@@ -2639,6 +2782,26 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     justify-content: space-around;
   }
 
+  .pause mwc-button {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease,
+      box-shadow 0.2s ease;
+    will-change: transform, filter;
+  }
+
+  .pause mwc-button:hover,
+  .pause mwc-button:focus-visible {
+    transform: translateY(-1px) scale(1.03);
+    filter: brightness(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--success-color);
+  }
+
   /* Warning badge styles */
   .warning-badge {
     display: flex;
@@ -2654,6 +2817,24 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     margin-right: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     min-width: 25px;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease,
+      box-shadow 0.2s ease;
+    will-change: transform, filter;
+  }
+
+  .warning-badge:hover,
+  .warning-badge:focus-visible {
+    transform: translateY(-1px) scale(1.06);
+    filter: brightness(1.05);
+    box-shadow:
+      0 6px 12px rgba(0, 0, 0, 0.25),
+      0 0 0 3px var(--warning-color, #ff9800);
+  }
+
+  .badge {
+    cursor: pointer;
   }
 `;
 
@@ -2741,19 +2922,134 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
 
 
 
+// Constants for repeated patterns
+const $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER = [
+    {
+        integration: 'pi_hole_v6'
+    },
+    {
+        integration: 'pi_hole'
+    }
+];
+const $b642db848cc622aa$var$PI_HOLE_ENTITY_FILTER = [
+    {
+        integration: 'pi_hole_v6',
+        domain: [
+            'button',
+            'sensor',
+            'switch'
+        ]
+    },
+    {
+        integration: 'pi_hole',
+        domain: [
+            'button',
+            'sensor',
+            'switch'
+        ]
+    }
+];
+const $b642db848cc622aa$var$SWITCH_SPACING_OPTIONS = [
+    {
+        label: 'Flex (default)',
+        value: 'flex'
+    },
+    {
+        label: 'Space Around',
+        value: 'space-around'
+    },
+    {
+        label: 'Space Between',
+        value: 'space-between'
+    }
+];
+const $b642db848cc622aa$var$SECTION_EXCLUDE_OPTIONS = [
+    {
+        label: 'Actions',
+        value: 'actions'
+    },
+    {
+        label: 'Footer',
+        value: 'footer'
+    },
+    {
+        label: 'Header',
+        value: 'header'
+    },
+    {
+        label: 'Pause Buttons',
+        value: 'pause'
+    },
+    {
+        label: 'Statistics',
+        value: 'statistics'
+    },
+    {
+        label: 'Sensors',
+        value: 'sensors'
+    },
+    {
+        label: 'Switches',
+        value: 'switches'
+    }
+];
+const $b642db848cc622aa$var$COLLAPSED_SECTION_OPTIONS = [
+    {
+        label: 'Pause Buttons',
+        value: 'pause'
+    },
+    {
+        label: 'Switches',
+        value: 'switches'
+    },
+    {
+        label: 'Actions',
+        value: 'actions'
+    }
+];
+const $b642db848cc622aa$var$PAUSE_DURATION_OPTIONS = [
+    {
+        label: '60 seconds',
+        value: '60s'
+    },
+    {
+        label: '5 minutes',
+        value: '5m'
+    },
+    {
+        label: '15 minutes',
+        value: '15m'
+    }
+];
+const $b642db848cc622aa$var$ACTION_SCHEMA = [
+    {
+        name: 'tap_action',
+        label: 'Tap Action',
+        selector: {
+            ui_action: {}
+        }
+    },
+    {
+        name: 'hold_action',
+        label: 'Hold Action',
+        selector: {
+            ui_action: {}
+        }
+    },
+    {
+        name: 'double_tap_action',
+        label: 'Double Tap Action',
+        selector: {
+            ui_action: {}
+        }
+    }
+];
 const $b642db848cc622aa$var$SCHEMA = [
     {
         name: 'device_id',
         selector: {
             device: {
-                filter: [
-                    {
-                        integration: 'pi_hole_v6'
-                    },
-                    {
-                        integration: 'pi_hole'
-                    }
-                ],
+                filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER,
                 multiple: true
             }
         },
@@ -2802,36 +3098,7 @@ const $b642db848cc622aa$var$SCHEMA = [
                     select: {
                         multiple: true,
                         mode: 'list',
-                        options: [
-                            {
-                                label: 'Actions',
-                                value: 'actions'
-                            },
-                            {
-                                label: 'Footer',
-                                value: 'footer'
-                            },
-                            {
-                                label: 'Header',
-                                value: 'header'
-                            },
-                            {
-                                label: 'Pause Buttons',
-                                value: 'pause'
-                            },
-                            {
-                                label: 'Statistics',
-                                value: 'statistics'
-                            },
-                            {
-                                label: 'Sensors',
-                                value: 'sensors'
-                            },
-                            {
-                                label: 'Switches',
-                                value: 'switches'
-                            }
-                        ]
+                        options: $b642db848cc622aa$var$SECTION_EXCLUDE_OPTIONS
                     }
                 }
             },
@@ -2843,20 +3110,7 @@ const $b642db848cc622aa$var$SCHEMA = [
                     select: {
                         multiple: true,
                         mode: 'list',
-                        options: [
-                            {
-                                label: 'Pause Buttons',
-                                value: 'pause'
-                            },
-                            {
-                                label: 'Buttons',
-                                value: 'buttons'
-                            },
-                            {
-                                label: 'Actions',
-                                value: 'actions'
-                            }
-                        ]
+                        options: $b642db848cc622aa$var$COLLAPSED_SECTION_OPTIONS
                     }
                 }
             },
@@ -2868,20 +3122,7 @@ const $b642db848cc622aa$var$SCHEMA = [
                     select: {
                         multiple: false,
                         mode: 'dropdown',
-                        options: [
-                            {
-                                label: 'Flex (default)',
-                                value: 'flex'
-                            },
-                            {
-                                label: 'Space Around',
-                                value: 'space-around'
-                            },
-                            {
-                                label: 'Space Between',
-                                value: 'space-between'
-                            }
-                        ]
+                        options: $b642db848cc622aa$var$SWITCH_SPACING_OPTIONS
                     }
                 }
             },
@@ -2892,14 +3133,7 @@ const $b642db848cc622aa$var$SCHEMA = [
                 selector: {
                     entity: {
                         multiple: true,
-                        filter: [
-                            {
-                                integration: 'pi_hole_v6'
-                            },
-                            {
-                                integration: 'pi_hole'
-                            }
-                        ]
+                        filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER
                     }
                 }
             },
@@ -2910,24 +3144,7 @@ const $b642db848cc622aa$var$SCHEMA = [
                 selector: {
                     entity: {
                         multiple: true,
-                        filter: [
-                            {
-                                integration: 'pi_hole_v6',
-                                domain: [
-                                    'button',
-                                    'sensor',
-                                    'switch'
-                                ]
-                            },
-                            {
-                                integration: 'pi_hole',
-                                domain: [
-                                    'button',
-                                    'sensor',
-                                    'switch'
-                                ]
-                            }
-                        ]
+                        filter: $b642db848cc622aa$var$PI_HOLE_ENTITY_FILTER
                     }
                 }
             }
@@ -2948,20 +3165,7 @@ const $b642db848cc622aa$var$SCHEMA = [
                     select: {
                         multiple: false,
                         mode: 'dropdown',
-                        options: [
-                            {
-                                label: 'Flex (default)',
-                                value: 'flex'
-                            },
-                            {
-                                label: 'Space Around',
-                                value: 'space-around'
-                            },
-                            {
-                                label: 'Space Between',
-                                value: 'space-between'
-                            }
-                        ]
+                        options: $b642db848cc622aa$var$SWITCH_SPACING_OPTIONS
                     }
                 }
             }
@@ -2983,109 +3187,37 @@ const $b642db848cc622aa$var$SCHEMA = [
                         multiple: true,
                         custom_value: true,
                         mode: 'list',
-                        options: [
-                            {
-                                label: '60 seconds',
-                                value: '60'
-                            },
-                            {
-                                label: '5 minutes',
-                                value: '300'
-                            },
-                            {
-                                label: '15 minutes',
-                                value: '900'
-                            }
-                        ]
+                        options: $b642db848cc622aa$var$PAUSE_DURATION_OPTIONS
                     }
                 }
+            },
+            {
+                name: 'badge',
+                label: 'Badge',
+                type: 'expandable',
+                icon: 'mdi:badge-account-horizontal',
+                schema: $b642db848cc622aa$var$ACTION_SCHEMA
             },
             {
                 name: 'stats',
                 label: 'Statistics',
                 type: 'expandable',
                 icon: 'mdi:counter',
-                schema: [
-                    {
-                        name: 'tap_action',
-                        label: 'Tap Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    },
-                    {
-                        name: 'hold_action',
-                        label: 'Hold Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    },
-                    {
-                        name: 'double_tap_action',
-                        label: 'Double Tap Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    }
-                ]
+                schema: $b642db848cc622aa$var$ACTION_SCHEMA
             },
             {
                 name: 'info',
                 label: 'Information',
                 type: 'expandable',
                 icon: 'mdi:information-outline',
-                schema: [
-                    {
-                        name: 'tap_action',
-                        label: 'Tap Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    },
-                    {
-                        name: 'hold_action',
-                        label: 'Hold Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    },
-                    {
-                        name: 'double_tap_action',
-                        label: 'Double Tap Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    }
-                ]
+                schema: $b642db848cc622aa$var$ACTION_SCHEMA
             },
             {
                 name: 'controls',
                 label: 'Controls',
                 type: 'expandable',
                 icon: 'mdi:remote',
-                schema: [
-                    {
-                        name: 'tap_action',
-                        label: 'Tap Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    },
-                    {
-                        name: 'hold_action',
-                        label: 'Hold Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    },
-                    {
-                        name: 'double_tap_action',
-                        label: 'Double Tap Action',
-                        selector: {
-                            ui_action: {}
-                        }
-                    }
-                ]
+                schema: $b642db848cc622aa$var$ACTION_SCHEMA
             }
         ]
     }
@@ -3118,6 +3250,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
         if (shouldDelete(config.stats)) delete config.stats;
         if (shouldDelete(config.info)) delete config.info;
         if (shouldDelete(config.controls)) delete config.controls;
+        if (shouldDelete(config.badge)) delete config.badge;
         if (!config.exclude_entities?.length) delete config.exclude_entities;
         if (!config.exclude_sections?.length) delete config.exclude_sections;
         if (!config.entity_order?.length) delete config.entity_order;
@@ -3134,7 +3267,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.12.1\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && npm i\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.1\",\"@testing-library/dom\":\"^10.4.0\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.0\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.4.0\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.1\",\"prettier\":\"3.5.3\",\"prettier-plugin-organize-imports\":\"^4.1.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^20.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.8.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.2\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.0\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.13.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.4\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.1\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.7.1\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.4\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.2.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.2\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
 
 
 // Register the custom elements with the browser

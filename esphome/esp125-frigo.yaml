@@ -38,6 +38,11 @@ one_wire:
   - platform: gpio  
     pin: GPIO4
     id: ow1
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "Status"
+    
 number:
   - platform: template
     name: "Puissance chauffage manuel"

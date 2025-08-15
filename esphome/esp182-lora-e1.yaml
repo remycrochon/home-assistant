@@ -1,0 +1,180 @@
+substitutions:
+  name_e1: esp182lorae1
+  name_hub: esp181lorahub
+  adress_ip: 192.168.0.182
+
+esphome:
+  name: ${name_e1}
+  on_boot:
+    then:
+      - deep_sleep.prevent: sleep_xmin
+  on_shutdown: 
+    then:
+      - switch.turn_off: led
+          
+      
+esp32:
+  board: esp32-c3-devkitm-1
+  cpu_frequency: 160MHZ
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+  hardware_uart: UART0
+  level: VERBOSE
+
+api:
+
+ota:
+  - platform: esphome
+
+captive_portal:
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+
+web_server:
+  port: 80
+
+spi:
+  clk_pin: GPIO04 #04
+  mosi_pin: GPIO06 #07
+  miso_pin: GPIO01 #02
+
+sx127x:
+  data_rate: 1Mhz
+  dio0_pin: GPIO05 #03
+  cs_pin: GPIO07 #010
+  rst_pin: GPIO03 #08  
+  pa_pin: BOOST
+  pa_power: 8
+  bandwidth: 125_0kHz
+  crc_enable: true
+  frequency: 433920000
+  modulation: LORA
+  rx_start: true
+  sync_value: 0x12
+  spreading_factor: 7
+  preamble_size: 8
+  coding_rate: CR_4_6
+  on_packet:
+    then:
+      - lambda: |-
+          ESP_LOGD("lambda", "packet %s", format_hex(x).c_str());
+          ESP_LOGD("lambda", "rssi %.2f", rssi);
+          ESP_LOGD("lambda", "snr %.2f", snr);
+
+packet_transport:
+  platform: sx127x
+  update_interval: 60s
+  encryption: !secret encryption_key
+  rolling_code_enable: false
+  providers:
+    - name: ${name_e1}
+      encryption: !secret encryption_key
+  sensors: 
+    - id: ${name_e1}_temperature
+    - id: ${name_e1}_compteur
+
+one_wire:
+  - platform: gpio
+    pin: GPIO09
+    id: ow1
+
+globals:
+  - id: compteur
+    type: int
+    restore_value: yes
+    initial_value: '0'
+
+sensor:
+  - platform: dallas_temp
+    name: ${name_e1}_temperature
+    id: ${name_e1}_temperature
+    accuracy_decimals: 2
+    update_interval: 60min
+
+  - platform: template
+    name: ${name_e1}_compteur
+    id: ${name_e1}_compteur
+    unit_of_measurement: "count"
+    update_interval: never
+    lambda: |-
+      return id(compteur);
+
+binary_sensor:
+  - platform: gpio
+    name: Sleep Ent
+    pin: 
+      number: GPIO0
+      mode:
+        input: true
+        pullup: true
+    id: sleep_ent
+    internal: False
+    filters:
+      - invert:  
+        
+deep_sleep:
+  id: sleep_xmin
+  run_duration: 5s
+  sleep_duration: 55s #55s
+
+# Intervalle pour gérer l'envoi des mesures et deep sleep dynamique
+interval:
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_on: sleep_ent
+          then:
+            - lambda: |-
+                id(compteur) += 1;
+                id(${name_e1}_compteur).publish_state(id(compteur));
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led
+            - logger.log: "Mode Deep Sleep: WiFi désactivé, envoi temp puis sleep"
+            - component.update: ${name_e1}_temperature
+            - component.update: ${name_e1}_compteur
+            - wifi.disable                  
+            - delay: 2s
+            - deep_sleep.enter: sleep_xmin
+
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_off: sleep_ent
+          then:
+            - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
+            - wifi.enable
+            - deep_sleep.prevent: sleep_xmin
+            - lambda: |-
+                id(compteur) += 1;
+                id(${name_e1}_compteur).publish_state(id(compteur));;
+            - component.update: ${name_e1}_temperature
+            - component.update: ${name_e1}_compteur
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led 
+
+switch:
+  - platform: gpio
+    id: led
+    name: led
+    pin:
+      number: GPIO20
+      inverted: False
+           

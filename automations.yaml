@@ -2827,15 +2827,15 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: binary_sensor.status_com_lora_id02
+      sensor_entity: binary_sensor.status_com_lora_e1
       alert_state: 'off'
       alert_action:
       - action: telegram_bot.send_message
         metadata: {}
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}LoRa ID02 OFF Ligne'
-          title: LoRa ID02 NOK!!
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}LoRa ID01 OFF Ligne'
+          title: LoRa ID01 NOK!!
       resolved_action:
       - action: telegram_bot.send_message
         metadata: {}
@@ -2843,8 +2843,8 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}{{-"\n"-}}
 
-            LoRa ID02 OnLine'
-          title: LoRa ID02 OK!!
+            LoRa ID01 OnLine'
+          title: LoRa ID01 OK!!
       notify_device: 367dba31447009458e03b70e3a29b6b2
       repeat_delay: 300
       max_alerts: 10

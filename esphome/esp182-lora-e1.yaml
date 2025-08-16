@@ -2,17 +2,21 @@ substitutions:
   name_e1: esp182lorae1
   name_hub: esp181lorahub
   adress_ip: 192.168.0.182
+  int_update: 10
 
 esphome:
   name: ${name_e1}
+  # Excecuter au reveil de l'ESP 
   on_boot:
-    then:
-      - deep_sleep.prevent: sleep_xmin
+    - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
+    
+  # Executer à l'endormissement de l'ESP
   on_shutdown: 
     then:
       - switch.turn_off: led
-          
-      
+
+      - sx127x.set_mode_sleep # On endort LoRa
+        
 esp32:
   board: esp32-c3-devkitm-1
   cpu_frequency: 160MHZ
@@ -22,7 +26,7 @@ esp32:
 # Enable logging
 logger:
   hardware_uart: UART0
-  level: VERBOSE
+  level: DEBUG
 
 api:
 
@@ -48,15 +52,15 @@ web_server:
   port: 80
 
 spi:
-  clk_pin: GPIO04 #04
-  mosi_pin: GPIO06 #07
-  miso_pin: GPIO01 #02
+  clk_pin: GPIO04
+  mosi_pin: GPIO06
+  miso_pin: GPIO01
 
 sx127x:
   data_rate: 1Mhz
-  dio0_pin: GPIO05 #03
-  cs_pin: GPIO07 #010
-  rst_pin: GPIO03 #08  
+  dio0_pin: GPIO05
+  cs_pin: GPIO07 
+  rst_pin: GPIO03 
   pa_pin: BOOST
   pa_power: 8
   bandwidth: 125_0kHz
@@ -77,7 +81,7 @@ sx127x:
 
 packet_transport:
   platform: sx127x
-  update_interval: 60s
+  #update_interval: 60s
   encryption: !secret encryption_key
   rolling_code_enable: false
   providers:
@@ -125,50 +129,6 @@ binary_sensor:
     internal: False
     filters:
       - invert:  
-        
-deep_sleep:
-  id: sleep_xmin
-  run_duration: 5s
-  sleep_duration: 55s #55s
-
-# Intervalle pour gérer l'envoi des mesures et deep sleep dynamique
-interval:
-  - interval: 60s
-    then:
-      - if:
-          condition:
-            binary_sensor.is_on: sleep_ent
-          then:
-            - lambda: |-
-                id(compteur) += 1;
-                id(${name_e1}_compteur).publish_state(id(compteur));
-            - switch.turn_on: led
-            - delay: 200ms
-            - switch.turn_off: led
-            - logger.log: "Mode Deep Sleep: WiFi désactivé, envoi temp puis sleep"
-            - component.update: ${name_e1}_temperature
-            - component.update: ${name_e1}_compteur
-            - wifi.disable                  
-            - delay: 2s
-            - deep_sleep.enter: sleep_xmin
-
-  - interval: 10s
-    then:
-      - if:
-          condition:
-            binary_sensor.is_off: sleep_ent
-          then:
-            - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
-            - wifi.enable
-            - deep_sleep.prevent: sleep_xmin
-            - lambda: |-
-                id(compteur) += 1;
-                id(${name_e1}_compteur).publish_state(id(compteur));;
-            - component.update: ${name_e1}_temperature
-            - component.update: ${name_e1}_compteur
-            - switch.turn_on: led
-            - delay: 200ms
-            - switch.turn_off: led 
 
 switch:
   - platform: gpio
@@ -177,4 +137,62 @@ switch:
     pin:
       number: GPIO20
       inverted: False
-           
+
+# Mode "On endort l'ESP"
+deep_sleep:
+  id: sleep_xmin
+  run_duration: 10s
+  sleep_duration: 25s #55s
+
+# Intervalle pour gérer l'envoi des mesures et deep sleep dynamique
+interval:
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_off: sleep_ent
+          then:
+            - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
+            - wifi.enable # Active le WIFI
+            - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
+            - script.execute: maj_data
+
+  - interval: 25s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_on: sleep_ent # Si Switch "Veille activé" on execute envoi les data puis on execute la mise en veille
+          then:
+            - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
+            - delay: 3s
+            - script.execute: maj_data
+            - wifi.disable                  
+            - deep_sleep.enter: sleep_xmin # Active la mise en veille
+
+
+
+
+script:
+  - id: maj_data
+    then:
+      # Force la lecture du capteur avant de publier
+      - component.update: ${name_e1}_temperature
+      - delay: 1s   # petit délai pour que la lecture se fasse
+
+      - lambda: |-
+          // Incrémente le compteur
+          id(compteur) += 1;
+          if (id(compteur) > 99) {
+            id(compteur) = 0;
+          }
+
+          // Récupère la température fraîche
+          float temp = id(${name_e1}_temperature).state;
+
+          // Publie les deux ensemble
+          id(${name_e1}_compteur).publish_state(id(compteur));
+          id(${name_e1}_temperature).publish_state(temp);
+
+      - switch.turn_on: led
+      - delay: 200ms
+      - switch.turn_off: led

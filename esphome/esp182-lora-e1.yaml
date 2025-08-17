@@ -1,20 +1,25 @@
+# Pour memoire:
+#   - Conso au boot: ~ 105mA
+#   - Conso sans WiFi: ~40 mA
+#   - Cons en veille: 4.1 mA
 substitutions:
   name_e1: esp182lorae1
   name_hub: esp181lorahub
   adress_ip: 192.168.0.182
-  int_update: 10
+  
 
 esphome:
   name: ${name_e1}
-  # Excecuter au reveil de l'ESP 
+  # Executer au reveil de l'ESP 
   on_boot:
-    - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
-    
+    priority: 800
+    then:
+      - script.execute: maj_data
+
   # Executer à l'endormissement de l'ESP
   on_shutdown: 
     then:
       - switch.turn_off: led
-
       - sx127x.set_mode_sleep # On endort LoRa
         
 esp32:
@@ -26,7 +31,7 @@ esp32:
 # Enable logging
 logger:
   hardware_uart: UART0
-  level: DEBUG
+  level: VERBOSE
 
 api:
 
@@ -72,16 +77,17 @@ sx127x:
   spreading_factor: 7
   preamble_size: 8
   coding_rate: CR_4_6
-  on_packet:
-    then:
-      - lambda: |-
-          ESP_LOGD("lambda", "packet %s", format_hex(x).c_str());
-          ESP_LOGD("lambda", "rssi %.2f", rssi);
-          ESP_LOGD("lambda", "snr %.2f", snr);
+  #on_packet:
+  #  then:
+  #    - lambda: |-
+  #        ESP_LOGD("lambda", "packet %s", format_hex(x).c_str());
+  #        ESP_LOGD("lambda", "rssi %.2f", rssi);
+  #        ESP_LOGD("lambda", "snr %.2f", snr);
 
 packet_transport:
   platform: sx127x
-  #update_interval: 60s
+  id: pt
+  #update_interval: 15s
   encryption: !secret encryption_key
   rolling_code_enable: false
   providers:
@@ -137,62 +143,58 @@ switch:
     pin:
       number: GPIO20
       inverted: False
+    restore_mode: ALWAYS_OFF
 
 # Mode "On endort l'ESP"
 deep_sleep:
   id: sleep_xmin
-  run_duration: 10s
-  sleep_duration: 25s #55s
+  run_duration: 10s # Butée Max
+  sleep_duration: 120s 
 
 # Intervalle pour gérer l'envoi des mesures et deep sleep dynamique
 interval:
   - interval: 10s
     then:
-      - if:
+      - script.execute: maj_data
+
+script:
+  # Envoi LoRa en fonction du mode Nomal ou Sleep sélectionné par Jumper sur GPIO0
+  - id: maj_data
+    then:
+     - delay: 1s # Le temps de lire le GPIO
+     - if:
           condition:
             binary_sensor.is_off: sleep_ent
+          # Mode Normal
           then:
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led            
             - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
             - wifi.enable # Active le WIFI
             - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
-            - script.execute: maj_data
+            - script.execute: lecture_capteur
 
-  - interval: 25s
-    then:
-      - if:
-          condition:
-            binary_sensor.is_on: sleep_ent # Si Switch "Veille activé" on execute envoi les data puis on execute la mise en veille
-          then:
-            - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
-            - delay: 3s
-            - script.execute: maj_data
-            - wifi.disable                  
-            - deep_sleep.enter: sleep_xmin # Active la mise en veille
-
-
-
-
-script:
-  - id: maj_data
-    then:
+          # Mode Sleep
+          else: 
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led
+            - logger.log: "Mode sleep: WiFi OFF, envoi LoRa puis sommeil"
+            - wifi.disable
+            - script.execute: lecture_capteur
+            - delay: 2s
+            - deep_sleep.enter: sleep_xmin
+  
+  # Mise à jour des capteurs avant envoi par LoRa
+  - id: lecture_capteur
+    then: 
       # Force la lecture du capteur avant de publier
       - component.update: ${name_e1}_temperature
-      - delay: 1s   # petit délai pour que la lecture se fasse
-
       - lambda: |-
-          // Incrémente le compteur
-          id(compteur) += 1;
-          if (id(compteur) > 99) {
-            id(compteur) = 0;
-          }
-
-          // Récupère la température fraîche
-          float temp = id(${name_e1}_temperature).state;
-
-          // Publie les deux ensemble
+          // Incrémente le compteur et le limite à 99
+          id(compteur) = (id(compteur) + 1) % 100;
           id(${name_e1}_compteur).publish_state(id(compteur));
-          id(${name_e1}_temperature).publish_state(temp);
-
-      - switch.turn_on: led
-      - delay: 200ms
-      - switch.turn_off: led
+      - delay: 1s   # petit délai pour que la lecture se fasse
+      - component.update: pt # Mise à Jour LoRa
+      

@@ -1,7 +1,8 @@
 substitutions:
+  adress_ip: 192.168.0.181
   name_e1: esp182lorae1
   name_hub: esp181lorahub
-  adress_ip: 192.168.0.181
+
 
 esphome:
   name: ${name_hub}
@@ -15,7 +16,7 @@ esp32:
 # Enable logging
 logger:
   hardware_uart: UART0
-  level: VERBOSE
+  level: DEBUG
 
 api:
 

@@ -16,7 +16,7 @@ esp32:
   board: esp32-s3-devkitc-1
   flash_size: 4MB
   framework:
-    type: arduino
+    type: esp-idf
 
 
 logger:
@@ -33,14 +33,15 @@ ota:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  #output_power: 8.5dB
 
-  manual_ip:
-    static_ip: 192.168.0.121
-    gateway: 192.168.0.254
-    subnet: 255.255.255.0
-    dns1: 192.168.0.254
+  #manual_ip:
+  #  static_ip: 192.168.0.121
+  #  gateway: 192.168.0.254
+  #  subnet: 255.255.255.0
+  #  dns1: 192.168.0.254
 
-  ap:
+  #ap:
 
 
   on_connect:
@@ -63,21 +64,13 @@ wifi:
 captive_portal:
 
 light:
-  - platform: neopixelbus
-    type: GRB
-    name: "Board Light"
+  - platform: esp32_rmt_led_strip
+    rgb_order: GRB
     pin: GPIO48
-    variant: WS2812
-    id: voyant_led
     num_leds: 1
-    effects:
-      - pulse:
-      - pulse: 
-          name: 'Pulse led'
-          transition_length: 0.5s
-          update_interval: 0.5s
-          min_brightness: 0%
-          max_brightness: 100%
+    id: voyant_led
+    chipset: ws2812
+    name: "Pulse led"
 
 text_sensor:
   - platform: wifi_info

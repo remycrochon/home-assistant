@@ -34,7 +34,21 @@ binary_sensor:
     pin:
       sx1509: sx1509_hub1
       # Use pin number 0 on the SX1509
-      number: 0
+      number: 5
+      mode:
+        input: true
+        pullup: false
+      inverted: false
+    filters:
+      - delayed_on_off: 500ms
+
+  - platform: gpio
+    name: "volet_ouvert_etor"
+    id: volet_ouvert_etor
+    pin:
+      sx1509: sx1509_hub1
+      # Use pin number 0 on the SX1509
+      number: 4
       mode:
         input: true
         pullup: false
@@ -46,7 +60,7 @@ binary_sensor:
   - platform: template
     name: "Volet Ouvert"
     id: volet_ouvert
-    lambda: 'return !id(volet_ferme_etor).state && !id(cde_volet_ouverture).state;'
+    lambda: 'return id(volet_ouvert_etor).state ;'
     on_state:
       then:
         - if:
@@ -57,7 +71,7 @@ binary_sensor:
               - lambda: |-
                   id(volet_ferme_off_time) = millis() / 1000;
                   ESP_LOGI("VOLET", "Volet ouvert, temporisation démarrée à %u secondes", id(volet_ferme_off_time));
-              - delay: 240s
+              - delay: 60s
               - if:
                   condition:
                     and:
@@ -71,7 +85,7 @@ binary_sensor:
   - platform: template
     name: "Volet Ferme"
     id: volet_ferme
-    lambda: 'return id(volet_ferme_etor).state && !id(cde_volet_fermeture).state;'
+    lambda: 'return id(volet_ferme_etor).state;'
     on_state:
       then:
         - if:

@@ -387,24 +387,7 @@ binary_sensor:
         input: true
         pullup: false
       inverted: false   
-  - platform: gpio
-    name: "E5"
-    pin:
-      sx1509: sx1509_hub1
-      number: 4
-      mode:
-        input: true
-        pullup: false
-      inverted: false   
-  - platform: gpio
-    name: "E6"
-    pin:
-      sx1509: sx1509_hub1
-      number: 5
-      mode:
-        input: true
-        pullup: false
-      inverted: false   
+
 
 # Définiton des "Time"
 datetime:

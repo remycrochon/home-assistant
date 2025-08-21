@@ -1779,134 +1779,6 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
 
 
 
-
-const $3a2fe8ac0aec50d1$export$7f8cebb87518d95 = (totalSeconds)=>{
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor(totalSeconds % 3600 / 60);
-    const seconds = totalSeconds % 60;
-    const paddedHours = String(hours).padStart(2, '0');
-    const paddedMinutes = String(minutes).padStart(2, '0');
-    const paddedSeconds = String(seconds).padStart(2, '0');
-    return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
-};
-const $3a2fe8ac0aec50d1$export$24f99e1414c21927 = (input)=>{
-    if (typeof input === 'number') return input;
-    const str = input.toString().trim();
-    // Check if it's a plain number string
-    if (/^\d+$/.test(str)) return parseInt(str, 10);
-    // Handle complex format like "4h:20m:69s"
-    if (str.includes(':')) {
-        const parts = str.split(':');
-        let totalSeconds = 0;
-        for (const part of parts){
-            const match = part.match(/^(\d+)([hms]?)$/);
-            if (match && match[1]) {
-                const value = parseInt(match[1], 10);
-                const unit = match[2] || 's'; // default to seconds if no unit
-                switch(unit){
-                    case 'h':
-                        totalSeconds += value * 3600;
-                        break;
-                    case 'm':
-                        totalSeconds += value * 60;
-                        break;
-                    case 's':
-                        totalSeconds += value;
-                        break;
-                }
-            }
-        }
-        return totalSeconds;
-    }
-    // Handle simple format like "10s", "5m", "1h"
-    const match = str.match(/^(\d+)([hms])$/);
-    if (match && match[1] && match[2]) {
-        const value = parseInt(match[1], 10);
-        const unit = match[2];
-        switch(unit){
-            case 'h':
-                return value * 3600;
-            case 'm':
-                return value * 60;
-            case 's':
-                return value;
-        }
-    }
-    // If we get here, the input is invalid
-    return 0;
-};
-const $3a2fe8ac0aec50d1$export$12fa006f8c81adb2 = (seconds, hass)=>{
-    if (seconds === 0) return `0 ${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds')}`;
-    // Hours - only if it divides evenly
-    if (seconds >= 3600 && seconds % 3600 === 0) {
-        const hours = seconds / 3600;
-        const unit = hours === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.hour') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.hours');
-        return hours === 1 ? `1 ${unit}` : `${hours} ${unit}`;
-    }
-    // Minutes - only if it divides evenly AND less than an hour, OR if it divides evenly and is a reasonable number of minutes
-    if (seconds >= 60 && seconds % 60 === 0 && seconds < 3600) {
-        const minutes = seconds / 60;
-        const unit = minutes === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.minute') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.minutes');
-        return minutes === 1 ? `1 ${unit}` : `${minutes} ${unit}`;
-    }
-    // Seconds - for everything else (including times that are many minutes but not whole hours)
-    const unit = seconds === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.second') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds');
-    return seconds === 1 ? `1 ${unit}` : `${seconds} ${unit}`;
-};
-
-
-
-
-
-const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, setup, seconds)=>{
-    return ()=>{
-        const domain = 'pi_hole_v6';
-        const service = 'disable';
-        setup.holes.forEach((hole)=>{
-            hass.callService(domain, service, {
-                device_id: hole.device_id,
-                duration: (0, $3a2fe8ac0aec50d1$export$7f8cebb87518d95)(seconds)
-            });
-        });
-    };
-};
-
-
-
-
-const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, setup, config)=>{
-    if (!(0, $81267a1185dd4399$export$57bf213be019eeb0)(config, 'pause')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
-    const pauseCollapsed = (0, $e67ba06cac005a46$export$9c903d35b97d0190)(config, 'pause');
-    const pauseDuration = config.pause_durations ?? [
-        60,
-        300,
-        900
-    ];
-    return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div class="collapsible-section">
-    <div
-      class="section-header"
-      @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.pause')}
-    >
-      <span>${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.sections.pause')}</span>
-      <ha-icon
-        class="caret-icon"
-        icon="mdi:chevron-${pauseCollapsed ? 'right' : 'down'}"
-      ></ha-icon>
-    </div>
-    <div class="pause ${pauseCollapsed ? 'hidden' : ''}">
-      ${pauseDuration.map((duration)=>{
-        const seconds = (0, $3a2fe8ac0aec50d1$export$24f99e1414c21927)(duration);
-        const displayText = (0, $3a2fe8ac0aec50d1$export$12fa006f8c81adb2)(seconds, hass);
-        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<mwc-button @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, setup, seconds)}
-          >${displayText}</mwc-button
-        >`;
-    })}
-    </div>
-  </div>`;
-};
-
-
-
 const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<state-card-content
     .hass=${hass}
     .stateObj=${entity}
@@ -1990,7 +1862,12 @@ const $6cbf4e557bc1fbf1$export$535a09426ee2ea59 = (hass, entity, className)=>(0,
 const $9369c7e3c6702a0b$export$85691f7dcbc38c10 = (element, hass, setup, device, config)=>{
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <div>
-      ${(0, $7a21f7a279e18689$export$229c72e5fdee233b)(hass, setup, config)}${$9369c7e3c6702a0b$var$controls(element, hass, device, config)}
+      <pause-component
+        .hass=${hass}
+        .setup=${setup}
+        .config=${config}
+      ></pause-component>
+      ${$9369c7e3c6702a0b$var$controls(element, hass, device, config)}
     </div>
   `;
 };
@@ -2286,6 +2163,7 @@ const $0544f6a0e4690d02$export$9093f1b96efd0145 = (hass, config)=>{
 
 
 
+
 /**
  * @license
  * Copyright 2017 Google LLC
@@ -2476,7 +2354,38 @@ function $ed34c589b230c255$export$dcd0d083aa86c355(r) {
 
 
 
+const $13632afec4749c69$export$7d546b06e96d63cc = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+  .collapsible-section {
+    margin: 0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .section-header span {
+    font-weight: 500;
+  }
+
+  .caret-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+  }
+`;
 const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+  ${$13632afec4749c69$export$7d546b06e96d63cc}
+
   ha-card {
     overflow: hidden;
   }
@@ -2640,24 +2549,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     color: var(--secondary-text-color);
   }
 
-  /* Collapsible section styles */
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 16px;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .section-header span {
-    font-weight: 500;
-  }
-
-  .caret-icon {
-    transition: transform 0.3s ease;
-  }
-
   .switches,
   .actions {
     display: flex;
@@ -2671,13 +2562,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
   .switches {
     justify-content: space-between;
-  }
-
-  .hidden {
-    max-height: 0;
-    opacity: 0;
-    margin: 0;
-    padding: 0;
   }
 
   /* Version information styles */
@@ -2796,33 +2680,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     margin: 10px 16px;
   }
 
-  /* Pause buttons */
-  .pause {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
-  }
-
-  .pause mwc-button {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid transparent;
-    transition:
-      transform 0.2s ease,
-      filter 0.2s ease,
-      box-shadow 0.2s ease;
-    will-change: transform, filter;
-  }
-
-  .pause mwc-button:hover,
-  .pause mwc-button:focus-visible {
-    transform: translateY(-1px) scale(1.03);
-    filter: brightness(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    border-color: var(--success-color);
-  }
-
   /* Warning badge styles */
   .warning-badge {
     display: flex;
@@ -2911,6 +2768,10 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
         this._hass = hass;
         const setup = (0, $0544f6a0e4690d02$export$9093f1b96efd0145)(hass, this._config);
         if (setup && !$30856da572fd852b$exports(setup, this._setup)) this._setup = setup;
+        else // update children who are subscribed
+        (0, $9c83ab07519e6203$export$43835e9acf248a15)(this, 'hass-update', {
+            hass: hass
+        });
     }
     // card configuration
     static getConfigElement() {
@@ -2937,6 +2798,311 @@ class $e4f1b26747081709$export$54063f5d55a7de84 extends (0, $ab210b2da7b39b9d$ex
 (0, $24c52f343453d62d$export$29e00dfd3077644b)([
     (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
 ], $e4f1b26747081709$export$54063f5d55a7de84.prototype, "_setup", void 0);
+
+
+
+
+
+const $216640a6cb8d8606$export$19efda5681568302 = (superClass)=>{
+    class HassUpdateClass extends superClass {
+        connectedCallback() {
+            super.connectedCallback();
+            window.addEventListener('hass-update', this._boundHassUpdateHandler);
+        }
+        disconnectedCallback() {
+            super.disconnectedCallback();
+            window.removeEventListener('hass-update', this._boundHassUpdateHandler);
+        }
+        _handleHassUpdate(event) {
+            const { detail: { hass: hass } } = event;
+            this.hass = hass;
+        }
+        constructor(...args){
+            super(...args), this._boundHassUpdateHandler = this._handleHassUpdate.bind(this);
+        }
+    }
+    (0, $24c52f343453d62d$export$29e00dfd3077644b)([
+        (0, $9cd908ed2625c047$export$d541bacb2bda4494)({
+            attribute: false
+        })
+    ], HassUpdateClass.prototype, "hass", void 0);
+    return HassUpdateClass;
+};
+
+
+
+
+const $3a2fe8ac0aec50d1$export$7f8cebb87518d95 = (totalSeconds)=>{
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor(totalSeconds % 3600 / 60);
+    const seconds = totalSeconds % 60;
+    const paddedHours = String(hours).padStart(2, '0');
+    const paddedMinutes = String(minutes).padStart(2, '0');
+    const paddedSeconds = String(seconds).padStart(2, '0');
+    return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
+};
+const $3a2fe8ac0aec50d1$export$24f99e1414c21927 = (input)=>{
+    if (typeof input === 'number') return input;
+    const str = input.toString().trim();
+    // Check if it's a plain number string
+    if (/^\d+$/.test(str)) return parseInt(str, 10);
+    // Handle complex format like "4h:20m:69s"
+    if (str.includes(':')) {
+        const parts = str.split(':');
+        let totalSeconds = 0;
+        for (const part of parts){
+            const match = part.match(/^(\d+)([hms]?)$/);
+            if (match && match[1]) {
+                const value = parseInt(match[1], 10);
+                const unit = match[2] || 's'; // default to seconds if no unit
+                switch(unit){
+                    case 'h':
+                        totalSeconds += value * 3600;
+                        break;
+                    case 'm':
+                        totalSeconds += value * 60;
+                        break;
+                    case 's':
+                        totalSeconds += value;
+                        break;
+                }
+            }
+        }
+        return totalSeconds;
+    }
+    // Handle simple format like "10s", "5m", "1h"
+    const match = str.match(/^(\d+)([hms])$/);
+    if (match && match[1] && match[2]) {
+        const value = parseInt(match[1], 10);
+        const unit = match[2];
+        switch(unit){
+            case 'h':
+                return value * 3600;
+            case 'm':
+                return value * 60;
+            case 's':
+                return value;
+        }
+    }
+    // If we get here, the input is invalid
+    return 0;
+};
+const $3a2fe8ac0aec50d1$export$12fa006f8c81adb2 = (seconds, hass)=>{
+    if (seconds === 0) return `0 ${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds')}`;
+    // Hours - only if it divides evenly
+    if (seconds >= 3600 && seconds % 3600 === 0) {
+        const hours = seconds / 3600;
+        const unit = hours === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.hour') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.hours');
+        return hours === 1 ? `1 ${unit}` : `${hours} ${unit}`;
+    }
+    // Minutes - only if it divides evenly AND less than an hour, OR if it divides evenly and is a reasonable number of minutes
+    if (seconds >= 60 && seconds % 60 === 0 && seconds < 3600) {
+        const minutes = seconds / 60;
+        const unit = minutes === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.minute') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.minutes');
+        return minutes === 1 ? `1 ${unit}` : `${minutes} ${unit}`;
+    }
+    // Seconds - for everything else (including times that are many minutes but not whole hours)
+    const unit = seconds === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.second') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds');
+    return seconds === 1 ? `1 ${unit}` : `${seconds} ${unit}`;
+};
+
+
+
+
+const $a64cd1666b27644b$export$805ddaeeece0413e = (config, feature)=>!config || config.features?.includes(feature) || false;
+
+
+
+const $96d0f9845402cf42$export$5635d71bf4c61e2c = (hass, setup, seconds, entityId)=>{
+    const domain = 'pi_hole_v6';
+    const service = 'disable';
+    if (entityId) // Use the new entity-based service call
+    hass.callService(domain, service, {
+        duration: (0, $3a2fe8ac0aec50d1$export$7f8cebb87518d95)(seconds),
+        entity_id: [
+            entityId
+        ]
+    });
+    else // Fall back to device-based service call for backward compatibility
+    setup.holes.forEach((hole)=>{
+        hass.callService(domain, service, {
+            device_id: hole.device_id,
+            duration: (0, $3a2fe8ac0aec50d1$export$7f8cebb87518d95)(seconds)
+        });
+    });
+};
+
+
+
+
+
+
+
+const $ec892128bde259e8$export$5f980015d61e7175 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
+  ${(0, $13632afec4749c69$export$7d546b06e96d63cc)}
+
+  /* Pause section styles */
+  .pause {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .pause-controls {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pause-controls ha-select {
+    width: 95%;
+  }
+
+  .pause-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Button styles */
+  mwc-button {
+    margin: 4px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease,
+      box-shadow 0.2s ease;
+    will-change: transform, filter;
+  }
+
+  mwc-button.primary {
+    --mdc-theme-primary: var(--success-color);
+  }
+
+  mwc-button.warning {
+    --mdc-theme-primary: var(--warning-color);
+  }
+
+  mwc-button ha-icon {
+    margin-right: 3px;
+  }
+
+  /* Pause button hover effects */
+  .pause mwc-button:hover,
+  .pause mwc-button:focus-visible,
+  mwc-button:hover,
+  mwc-button:focus-visible {
+    transform: translateY(-1px) scale(1.03);
+    filter: brightness(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--success-color);
+  }
+`;
+
+
+class $2e202dca4c1e443f$export$6bb1cdd247a38e3e extends (0, $216640a6cb8d8606$export$19efda5681568302)((0, $ab210b2da7b39b9d$export$3f2f9f5909897157)) {
+    static get styles() {
+        return 0, $ec892128bde259e8$export$5f980015d61e7175;
+    }
+    get allSwitches() {
+        return this.setup.holes.flatMap((hole)=>hole.switches);
+    }
+    get pauseDurations() {
+        const durations = this.config.pause_durations ?? [
+            60,
+            300,
+            900
+        ];
+        return durations.map((0, $3a2fe8ac0aec50d1$export$24f99e1414c21927));
+    }
+    get isGroupPausingEnabled() {
+        return !(0, $a64cd1666b27644b$export$805ddaeeece0413e)(this.config, 'disable_group_pausing');
+    }
+    get pauseCollapsed() {
+        return (0, $e67ba06cac005a46$export$9c903d35b97d0190)(this.config, 'pause');
+    }
+    _handleSelectChange(e) {
+        this.selectedEntityId = e.target.value;
+    }
+    _renderPauseButtons() {
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+      <div class="pause-buttons">
+        ${this.pauseDurations.map((seconds)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <mwc-button @click=${()=>this._handlePauseClick(seconds)}>
+              ${(0, $3a2fe8ac0aec50d1$export$12fa006f8c81adb2)(seconds, this.hass)}
+            </mwc-button>
+          `)}
+      </div>
+    `;
+    }
+    _renderSwitchSelector() {
+        if (!this.isGroupPausingEnabled || this.allSwitches.length === 0) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+        // Set default selection if none is selected
+        if (!this.selectedEntityId && this.allSwitches.length > 0) this.selectedEntityId = this.allSwitches[0]?.entity_id || '';
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+      <div class="pause-controls">
+        <ha-select
+          .label=${'Select Pi or Group'}
+          .value=${this.selectedEntityId}
+          @selected=${this._handleSelectChange}
+          fixedMenuPosition
+          naturalMenuWidth
+        >
+          ${this.allSwitches.map((switchEntity)=>(0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+              <ha-list-item .value=${switchEntity.entity_id}>
+                ${switchEntity.attributes.friendly_name || switchEntity.entity_id}
+              </ha-list-item>
+            `)}
+        </ha-select>
+      </div>
+    `;
+    }
+    render() {
+        if (!this.hass || !(0, $81267a1185dd4399$export$57bf213be019eeb0)(this.config, 'pause')) return 0, $f58f44579a4747ac$export$45b790e32b2810ee;
+        return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+      <div class="collapsible-section">
+        <div
+          class="section-header"
+          @click=${(e)=>(0, $993360189f76a862$export$b7c305685fc8cb26)(e, '.pause')}
+        >
+          <span>${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(this.hass, 'card.sections.pause')}</span>
+          <ha-icon
+            class="caret-icon"
+            icon="mdi:chevron-${this.pauseCollapsed ? 'right' : 'down'}"
+          ></ha-icon>
+        </div>
+        <div class="pause ${this.pauseCollapsed ? 'hidden' : ''}">
+          ${this._renderSwitchSelector()} ${this._renderPauseButtons()}
+        </div>
+      </div>
+    `;
+    }
+    constructor(...args){
+        super(...args), this.selectedEntityId = '', this._handlePauseClick = (seconds)=>{
+            const targetEntityId = this.isGroupPausingEnabled ? this.selectedEntityId : undefined;
+            (0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(this.hass, this.setup, seconds, targetEntityId);
+        };
+    }
+}
+(0, $24c52f343453d62d$export$29e00dfd3077644b)([
+    (0, $9cd908ed2625c047$export$d541bacb2bda4494)({
+        attribute: false
+    })
+], $2e202dca4c1e443f$export$6bb1cdd247a38e3e.prototype, "setup", void 0);
+(0, $24c52f343453d62d$export$29e00dfd3077644b)([
+    (0, $9cd908ed2625c047$export$d541bacb2bda4494)({
+        attribute: false
+    })
+], $2e202dca4c1e443f$export$6bb1cdd247a38e3e.prototype, "config", void 0);
+(0, $24c52f343453d62d$export$29e00dfd3077644b)([
+    (0, $04c21ea1ce1f6057$export$ca000e230c0caa3e)()
+], $2e202dca4c1e443f$export$6bb1cdd247a38e3e.prototype, "selectedEntityId", void 0);
 
 
 
@@ -3070,8 +3236,7 @@ const $b642db848cc622aa$var$SCHEMA = [
         name: 'device_id',
         selector: {
             device: {
-                filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER,
-                multiple: true
+                filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER
             }
         },
         required: true,
@@ -3241,6 +3406,32 @@ const $b642db848cc622aa$var$SCHEMA = [
                 schema: $b642db848cc622aa$var$ACTION_SCHEMA
             }
         ]
+    },
+    {
+        name: 'features',
+        label: 'Features',
+        type: 'expandable',
+        flatten: true,
+        icon: 'mdi:list-box',
+        schema: [
+            {
+                name: 'features',
+                label: 'Features',
+                required: false,
+                selector: {
+                    select: {
+                        multiple: true,
+                        mode: 'list',
+                        options: [
+                            {
+                                label: 'Disable group pausing',
+                                value: 'disable_group_pausing'
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
     }
 ];
 class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
@@ -3288,12 +3479,13 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.14.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.4\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.1\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.7.1\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.4\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.2.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.2\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.15.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.4\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.3.1\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.7.1\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.4\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.2.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.2\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
 
 
 // Register the custom elements with the browser
 customElements.define('pi-hole', (0, $e4f1b26747081709$export$54063f5d55a7de84));
 customElements.define('pi-hole-editor', (0, $b642db848cc622aa$export$45a407047dba884a));
+customElements.define('pause-component', (0, $2e202dca4c1e443f$export$6bb1cdd247a38e3e));
 // Ensure the customCards array exists on the window object
 window.customCards = window.customCards || [];
 // Register the cards with Home Assistant's custom card registry

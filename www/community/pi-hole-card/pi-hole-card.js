@@ -1637,11 +1637,11 @@ const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
 
 
 var $9a28a77a5af263d9$exports = {};
-$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"},\"sections\":{\"pause\":\"Pause Ad-Blocking\",\"switches\":\"Switches\",\"actions\":\"Actions\"},\"units\":{\"seconds\":\"seconds\"}}}");
+$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"},\"sections\":{\"pause\":\"Pause Ad-Blocking\",\"switches\":\"Switches\",\"actions\":\"Actions\"},\"units\":{\"seconds\":\"seconds\",\"second\":\"second\",\"minutes\":\"minutes\",\"minute\":\"minute\",\"hours\":\"hours\",\"hour\":\"hour\"}}}");
 
 
 var $ac00f57d502abb29$exports = {};
-$ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"},\"sections\":{\"pause\":\"Pausar Bloqueo de Anuncios\",\"switches\":\"Interruptores\",\"actions\":\"Acciones\"},\"units\":{\"seconds\":\"segundos\"}}}");
+$ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"},\"sections\":{\"pause\":\"Pausar Bloqueo de Anuncios\",\"switches\":\"Interruptores\",\"actions\":\"Acciones\"},\"units\":{\"seconds\":\"segundos\",\"second\":\"segundo\",\"minutes\":\"minutos\",\"minute\":\"minuto\",\"hours\":\"horas\",\"hour\":\"hora\"}}}");
 
 
 // Import other languages as needed above this line and in order
@@ -1764,7 +1764,7 @@ const $e67ba06cac005a46$export$9c903d35b97d0190 = (config, section)=>!!config.co
 };
 const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, buttonClass)=>{
     const icon = $18c1412eb38d120e$var$actionIcon(entity);
-    const label = entity?.attributes.friendly_name.replace('Pihole- ', '').replace(' the ', ' ');
+    const label = entity?.attributes.friendly_name.replace('Pihole- ', '').replace('pihole-', '').replace(' the ', ' ');
     return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
     <mwc-button
       class="${buttonClass}"
@@ -1779,17 +1779,8 @@ const $18c1412eb38d120e$export$669170fc67fdedb7 = (element, config, entity, butt
 
 
 
-/**
- * Converts a number of seconds into a string formatted as "HH:MM:SS".
- *
- * @param totalSeconds - The total number of seconds to convert.
- * @returns A string representing the time in "HH:MM:SS" format, with each unit zero-padded to two digits.
- *
- * @example
- * ```typescript
- * formatSecondsToHHMMSS(3661); // Returns "01:01:01"
- * ```
- */ const $3a2fe8ac0aec50d1$export$7f8cebb87518d95 = (totalSeconds)=>{
+
+const $3a2fe8ac0aec50d1$export$7f8cebb87518d95 = (totalSeconds)=>{
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor(totalSeconds % 3600 / 60);
     const seconds = totalSeconds % 60;
@@ -1844,20 +1835,23 @@ const $3a2fe8ac0aec50d1$export$24f99e1414c21927 = (input)=>{
     // If we get here, the input is invalid
     return 0;
 };
-const $3a2fe8ac0aec50d1$export$12fa006f8c81adb2 = (seconds)=>{
-    if (seconds === 0) return '0 seconds';
+const $3a2fe8ac0aec50d1$export$12fa006f8c81adb2 = (seconds, hass)=>{
+    if (seconds === 0) return `0 ${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds')}`;
     // Hours - only if it divides evenly
     if (seconds >= 3600 && seconds % 3600 === 0) {
         const hours = seconds / 3600;
-        return hours === 1 ? '1 hour' : `${hours} hours`;
+        const unit = hours === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.hour') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.hours');
+        return hours === 1 ? `1 ${unit}` : `${hours} ${unit}`;
     }
     // Minutes - only if it divides evenly AND less than an hour, OR if it divides evenly and is a reasonable number of minutes
     if (seconds >= 60 && seconds % 60 === 0 && seconds < 3600) {
         const minutes = seconds / 60;
-        return minutes === 1 ? '1 minute' : `${minutes} minutes`;
+        const unit = minutes === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.minute') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.minutes');
+        return minutes === 1 ? `1 ${unit}` : `${minutes} ${unit}`;
     }
     // Seconds - for everything else (including times that are many minutes but not whole hours)
-    return seconds === 1 ? '1 second' : `${seconds} seconds`;
+    const unit = seconds === 1 ? (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.second') : (0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.units.seconds');
+    return seconds === 1 ? `1 ${unit}` : `${seconds} ${unit}`;
 };
 
 
@@ -1902,7 +1896,7 @@ const $7a21f7a279e18689$export$229c72e5fdee233b = (hass, setup, config)=>{
     <div class="pause ${pauseCollapsed ? 'hidden' : ''}">
       ${pauseDuration.map((duration)=>{
         const seconds = (0, $3a2fe8ac0aec50d1$export$24f99e1414c21927)(duration);
-        const displayText = (0, $3a2fe8ac0aec50d1$export$12fa006f8c81adb2)(seconds);
+        const displayText = (0, $3a2fe8ac0aec50d1$export$12fa006f8c81adb2)(seconds, hass);
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<mwc-button @click=${(0, $96d0f9845402cf42$export$5635d71bf4c61e2c)(hass, setup, seconds)}
           >${displayText}</mwc-button
         >`;
@@ -2142,7 +2136,12 @@ const $7aa94e0bc82e2c26$export$51bb3e4a8dd2f2ff = (entity, device)=>{
         latest_data_refresh: 'latest_data_refresh',
         ftl_info_message_count: 'info_message_count',
         status: 'status',
-        action_ftl_purge_diagnosis_messages: 'purge_diagnosis_messages'
+        action_ftl_purge_diagnosis_messages: 'purge_diagnosis_messages',
+        // backwards compatibility for HA integration
+        dns_queries: 'dns_queries_today',
+        ads_blocked: 'ads_blocked_today',
+        percent_ads_blocked: 'ads_percentage_blocked_today',
+        domains_being_blocked: 'domains_blocked'
     };
     const key = entity.translation_key;
     if (key && key in keyToPropertyMap) {
@@ -2620,10 +2619,10 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    cursor: pointer;
   }
 
   .additional-stat {
+    cursor: pointer;
     display: flex;
     align-items: center;
     font-size: 0.9rem;
@@ -2662,14 +2661,16 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
   .switches,
   .actions {
     display: flex;
-    justify-content: space-between;
     flex-wrap: wrap;
-    transition:
-      max-height 0.3s ease,
-      opacity 0.3s ease;
     overflow: hidden;
-    max-height: 500px; /* Adjust as needed */
-    opacity: 1;
+  }
+
+  .actions {
+    justify-content: space-around;
+  }
+
+  .switches {
+    justify-content: space-between;
   }
 
   .hidden {
@@ -2712,6 +2713,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
   /* Click action button styles */
   mwc-button {
     margin: 4px;
+    cursor: pointer;
   }
 
   mwc-button.primary {
@@ -2724,6 +2726,26 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
   mwc-button ha-icon {
     margin-right: 3px;
+  }
+
+  /* Actions button hover effects */
+  .actions mwc-button {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease,
+      box-shadow 0.2s ease;
+    will-change: transform, filter;
+  }
+
+  .actions mwc-button:hover,
+  .actions mwc-button:focus-visible {
+    transform: translateY(-1px) scale(1.03);
+    filter: brightness(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--success-color);
   }
 
   /* Switch styles */
@@ -2783,7 +2805,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
   }
 
   .pause mwc-button {
-    cursor: pointer;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid transparent;
@@ -3267,7 +3288,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.13.2\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.4\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.1\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.7.1\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.4\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.2.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.2\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.14.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.4\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.2.1\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.7.1\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.4\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.2.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.2\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
 
 
 // Register the custom elements with the browser

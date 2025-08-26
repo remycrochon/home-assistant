@@ -9,6 +9,14 @@
                     "api_key": "Clave API",
                     "verify_ssl": "Verificar certificado SSL"
                 }
+            },
+            "reconfigure": {
+                "description": "Reconfigure TrueNAS integration.",
+                "data": {
+                    "host": "Host",
+                    "api_key": "API key",
+                    "verify_ssl": "Verify SSL certificate"
+                }
             }
         },
         "error": {
@@ -22,7 +30,15 @@
             "connection_refused": "Conexión fallida, conexión rechazada.",
             "handshake_timeout": "Conexión fallida, se agotó el tiempo de espera para la respuesta.",
             "api_not_found": "Conexión fallida, no se encontró el API.",
-            "malformed_result": "La respuesta de la API está mal formada."
+            "malformed_result": "La respuesta de la API está mal formada.",
+            "certificate_verify_failed": "Certificate verification failed.",
+            "http_used": "The plain HTTP request was sent to HTTPS port. Reverse proxy?",
+            "tlsv1_not_supported": "TLSv1 not supported. Reverse proxy?",
+            "websocket_not_supported": "WebSocket not supported. Reverse proxy?",
+            "unknown_hostname": "Unknown hostname, check DNS."
+        },
+        "abort": {
+            "reconfigure_successful": "Reconfigure successful."
         }
     }
 }

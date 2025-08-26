@@ -47,6 +47,7 @@ packages:
 
 esphome:
   name: ${device_name}
+  
   on_boot:
     priority: 200
     then:
@@ -85,8 +86,9 @@ esphome:
 
 esp32:
   board: esp32dev
-
-    
+  framework: 
+    type: esp-idf
+   
 wifi:
   networks:
    - ssid: !secret wifi_esp

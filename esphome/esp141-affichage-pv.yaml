@@ -55,11 +55,6 @@ globals:
 
 # Etat de la connection
 binary_sensor:
-  - platform: gpio
-    pin:
-      number: GPIO16
-      inverted: True
-    name: bp_raz
   - platform: status
     name: "Status"
 

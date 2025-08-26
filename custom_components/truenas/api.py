@@ -54,12 +54,29 @@ class TrueNASAPI(object):
         self._connected = False
         self._error = ""
         try:
-            self._ws = connect(self._url, ssl=self._ssl_context)
+            self._ws = connect(
+                self._url, ssl=self._ssl_context, max_size=16777216, ping_interval=20
+            )
         except Exception as e:
+            if "CERTIFICATE_VERIFY_FAILED" in str(e.args):
+                self._error = "certificate_verify_failed"
+
+            if "The plain HTTP request was sent to HTTPS port" in str(e.args):
+                self._error = "http_used"
+
+            if "TLSV1_UNRECOGNIZED_NAME" in str(e.args):
+                self._error = "tlsv1_not_supported"
+
+            if "No WebSocket UPGRADE" in str(e.args):
+                self._error = "websocket_not_supported"
+
+            if "No address associated with hostname" in e.args:
+                self._error = "unknown_hostname"
+
             if "Connection refused" in e.args:
                 self._error = "connection_refused"
 
-            if "No route to host" in e.args:
+            if "No route to host" in e.args or "Name or service not known" in str(e):
                 self._error = "invalid_hostname"
 
             if "timed out while waiting for handshake response" in e.args:
@@ -132,7 +149,8 @@ class TrueNASAPI(object):
     def connection_test(self) -> tuple:
         """Test connection."""
         self.connect()
-        self.query("system.info")
+        if self.connected():
+            self.query("system.info")
 
         return self._connected, self._error
 

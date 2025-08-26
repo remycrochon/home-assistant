@@ -2851,3 +2851,34 @@
       initial_delay: 60
       notify_message: ' '
       resolved_message: ' '
+- id: '1756141389021'
+  alias: BP Alarme Volet Piscine Ouvert
+  description: '# Surveillance volet piscine apres le couché du soleil'
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_volet_piscine_ouvert
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Volet Piscine Ouvert'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Volet Piscine Fermé'
+      notify_message: ' '
+      notify_device: 367dba31447009458e03b70e3a29b6b2
+      repeat_delay: 300
+      resolved_message: ' '
+      initial_delay: 300
+      max_alerts: 10

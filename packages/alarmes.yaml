@@ -10,10 +10,6 @@ input_boolean:
   test_alert:
     name: Test Alert
 
-# Permet de d'inhiber l'alarme PAC quand la PAC est arretée, l'été par exemple
-  inhib_alarme_pac:
-    name: Inhib Alarm PAC
-
 template:
   - binary_sensor:
 # Surveillance de la temperature du congelateur     

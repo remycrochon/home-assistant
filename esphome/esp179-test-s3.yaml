@@ -11,6 +11,7 @@ substitutions:
   GPIO_TX: "GPIO43"
   GPIO_RX: "GPIO44"
   GPIO_LED_STATUS: "GPIO48"
+  # Srtie Relais
   GPIO_rel_ppe_ph: "GPIO19"
   GPIO_rel_ppe_chlore: "GPIO20"
   GPIO_rel_ev_eau: "GPIO4"
@@ -18,24 +19,27 @@ substitutions:
   GPIO_rel_ferm_volet: "GPIO6"
   GPIO_rel_eclairage: "GPIO7"
   GPIO_rel_ppe_filtration: "GPIO10"
+  # Entrées Tout Ou Rien
   GPIO_Etor_niv_bas: "GPIO11"
   GPIO_Etor_niv_haut: "GPIO12"
   GPIO_Etor_volet_ferme: "GPIO13"
   GPIO_Etor_volet_ouvert: "GPIO14"
-
+  # Entrées Analogiques
+  GPIO_EANA_0: "GPIO1"
+  GPIO_EANA_1: "GPIO2"
 
 packages:
-  ph: !include pack_esp130/ph.yaml
-  chlore: !include pack_esp130/chlore.yaml    
-  volet: !include pack_esp130/couverture_flottante.yaml
-  appoint_eau: !include pack_esp130/appoint_eau.yaml
-  hors_gel: !include pack_esp130/hors_gel.yaml
-  mesure_elec: !include pack_esp130/mesure_elec.yaml
-  mesure_pression: !include pack_esp130/mesure_pression.yaml
+  ph: !include pack_esp179/ph.yaml
+  chlore: !include pack_esp179/chlore.yaml    
+  volet: !include pack_esp179/couverture_flottante.yaml
+  appoint_eau: !include pack_esp179/appoint_eau.yaml
+  hors_gel: !include pack_esp179/hors_gel.yaml
+  mesure_elec: !include pack_esp179/mesure_elec.yaml
+  mesure_pression: !include pack_esp179/mesure_pression.yaml
 
 esphome:
-  name: esp179-test-s3
-  friendly_name: esp179-test-s3
+  name: esp179-piscine-v2
+  friendly_name: esp179-piscine-v2
   on_boot:
     priority: 600
     then:

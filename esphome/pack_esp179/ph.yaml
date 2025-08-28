@@ -6,15 +6,10 @@ time:
       - 1.pool.ntp.org
       - 2.pool.ntp.org
     on_time:
-      # Déclenchement du script de regul pH deux fois par jour
+      # Déclenchement du script de regul pH 1 fois par jour
       - seconds: 0
         minutes: 00
-        hours: 12
-        then:
-          - script.execute: _regul_ph
-      - seconds: 0
-        minutes: 00
-        hours: 16
+        hours: 10
         then:
           - script.execute: _regul_ph
       # reset le compteur de temps à minuit
@@ -23,9 +18,10 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
-          - number.set:
-              id: conso_ph_jour
-              value: 0
+          - lambda: |-
+              id(g_conso_ph_jour) = 0.0;
+              id(conso_ph_jour).publish_state(0.0);
+
         # Notification du rapport journalier sur Telegram
       - seconds: 05
         minutes: 59
@@ -51,6 +47,16 @@ globals:
   - id: g_tps_injection_ph_moins
     type: float
     restore_value: no
+
+  # Cumul de la conso pH totale et jour
+  - id: g_conso_ph_totale
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+  - id: g_conso_ph_jour
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
 
 # déclaration des modes de fonctionnement dans des "input select"
 select:
@@ -139,11 +145,11 @@ number:
     id: facteur_correction_ph
     optimistic: true
     restore_value: true
+    initial_value: 50    
     mode: box
-    min_value: 0.1
+    min_value: 1
     max_value: 100.0
     unit_of_measurement: ""
-    initial_value: 50
     step: 0.1
     icon: mdi:percent
 
@@ -174,30 +180,6 @@ number:
     step: 1
     icon: mdi:clock
 
-  # Comptabilise le volume de pH injecté
-  - platform: template
-    name: "conso_ph_total"
-    id: conso_ph_total
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    step: 0.001
-    unit_of_measurement: "l"
-    icon: mdi:timer-plus
-
-  - platform: template
-    name: "conso_ph_jour"
-    id: conso_ph_jour
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    step: 0.001
-    unit_of_measurement: "l"
-    icon: mdi:timer-plus
 
 sensor:
   # Mesure du pH
@@ -260,6 +242,13 @@ sensor:
       then:
         - lambda: |-
             // ESP_LOGI("ph_ezo", "Mesure pH (étalonnage): %.2f", id(ph_ezo).state);
+  - platform: template
+    id: ph_ezo_filtre
+    name: "pH EZO Filtré"
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    state_class: measurement
+    icon: mdi:ph
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -286,13 +275,32 @@ sensor:
     icon: mdi:pump    
     filters: 
       - round: 0
+  # Affiche la conso de pH
+  - platform: template
+    name: "Conso_pH_Totale"
+    id: conso_ph_totale
+    lambda: "return id(g_conso_ph_totale);"
+    update_interval: 60s  # ou plus fréquent selon besoin
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    icon: mdi:counter
+    state_class: total_increasing
+    device_class: water
 
+  - platform: template
+    name: "Conso_pH_Jour"
+    id: conso_ph_jour
+    lambda: "return id(g_conso_ph_jour);"
+    update_interval: 60s  # ou plus fréquent selon besoin
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    icon: mdi:counter
+    state_class: total_increasing
+    device_class: water    
 switch:
   - platform: gpio
     name: "cde_ppe_ph_moins"
-    pin:
-      sx1509: sx1509_hub1
-      number: 5
+    pin: ${GPIO_rel_ppe_ph}
     id: cde_ppe_ph_moins
 
 interval:
@@ -307,35 +315,20 @@ script:
   # sinon on travaille avec le pH mémorisé avant l'arret précédent
   - id: _memorisation_ph
     then:
-      - if:
-          condition:
-            lambda: 'return id(flag_tempo_ppe_filtre) == true;'
-          then:
-            - lambda: |-
-                id(g_memoire_ph)=id(ph_ezo).state;            
-          else:
-            - lambda: |-
-                id(g_memoire_ph)=id(g_memoire_ph);
-      - if:
-          condition:
-            lambda: 'return isnan(id(ph_ezo).state);' # verifie si ph_ezo est valide
-          then:
-            - logger.log:
-                format: "ph_EZO invalide: %.2f"
-                args: [ 'id(ph_ezo).state']
-                level: DEBUG
-            - lambda: |-
-                id(g_memoire_ph)=id(g_memoire_ph);
-          else: 
-            - logger.log:
-                format: "ph_EZO Valide: %.2f"
-                args: [ 'id(ph_ezo).state']
-                level: DEBUG   
+      - lambda: |-
+          bool ph_valide = !isnan(id(ph_ezo).state);
+          bool pompe_active = id(flag_tempo_ppe_filtre);
 
-      - logger.log:
-          format: "Flag Temp: %i / Ph EZO: %.2f / Mem Ph: %.2f"
-          args: [ 'id(flag_tempo_ppe_filtre)','id(ph_ezo).state','id(g_memoire_ph)' ]
-          level: DEBUG
+          if (ph_valide && pompe_active) {
+            id(g_memoire_ph) = id(ph_ezo).state;
+            ESP_LOGD("pH", "pH actualisé à %.2f (pH_valide=%d, pompe_active=%d)",
+            id(g_memoire_ph), ph_valide, pompe_active);
+          } else {
+            ESP_LOGD("pH", "PH NON mis à jour (ph_valide=%d, pompe_active=%d)",
+            ph_valide, pompe_active);
+          }
+          id(ph_ezo_filtre).publish_state(id(g_memoire_ph));
+
   # Script principal pour la régulation du pH
   - id: _regul_ph
     mode: single
@@ -353,7 +346,7 @@ script:
                   and:
                     - lambda: 'return id(g_memoire_ph) > (id(_ph_cible).state+id(_ph_hysteresis).state);'
                     - lambda: 'return id(g_memoire_ph) > 0;'
-                    - switch.is_on: cde_ppe_filtration          
+                    - switch.is_on: cde_ppe_filtration 
                 then:
                   - lambda: |-
                       float ecart = abs(id(g_memoire_ph) - id(_ph_cible).state);
@@ -371,8 +364,8 @@ script:
                           // Utilisation du facteur de correction défini par l'utilisateur
                           float facteur_correction = id(facteur_correction_ph).state/100;
                           duree = duree * facteur_correction;
-                          // Limites de sécurité : entre 1 et 60 secondes
-                          duree = std::max(1.0f, std::min(duree, 60.0f));
+                          // Limites de sécurité : entre 1 et 180 secondes
+                          duree = std::max(1.0f, std::min(duree, 180.0f));
                           // Log pour débogage
                           ESP_LOGI("regul_ph", "Écart: %.2f, Quantité: %.2f ml, Débit: %.3f ml/s, Facteur: %.2f, Durée: %.2f s", ecart, quantite_necessaire * 1000.0, debit_ml_s, facteur_correction, duree);
                           id(g_tps_injection_ph_moins) = duree;
@@ -417,9 +410,6 @@ script:
                       level: INFO        
                   - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
                   - switch.turn_off: cde_ppe_ph_moins
-                  - lambda: |-
-                      std::string mess = "ESP178 Fin Injection pH";
-                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_ph_moins));
                   - logger.log: 
                       format: "Arret ppe Ph moins en Auto"
                       level: INFO
@@ -429,9 +419,12 @@ script:
                       float duree = id(_tps_injection_ph_moins).state;  // s
                       float volume = debit * duree / 3600.0;  // conversion en litres
                       // Mise à jour des compteurs
-                      id(conso_ph_jour).publish_state(id(conso_ph_jour).state + volume);
-                      id(conso_ph_total).publish_state(id(conso_ph_total).state + volume);
-
+                      id(g_conso_ph_totale) += volume;
+                      id(g_conso_ph_jour) += volume;
+                      id(conso_ph_totale).publish_state(id(g_conso_ph_totale));
+                      id(conso_ph_jour).publish_state(id(g_conso_ph_jour));
+                      std::string mess = "Fin Injection pH-Volume: " + std::to_string(volume)+ "l";
+                      id(_message_telegram)->execute(mess.c_str());
                 else:
                   - switch.turn_off: cde_ppe_ph_moins
                   - logger.log: 

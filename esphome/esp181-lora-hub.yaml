@@ -9,7 +9,6 @@ esphome:
   
 esp32:
   board: esp32-c3-devkitm-1
-  cpu_frequency: 160MHZ
   framework:
     type: esp-idf
 
@@ -22,8 +21,6 @@ api:
 
 ota:
   - platform: esphome
-
-captive_portal:
 
 wifi:
   networks:

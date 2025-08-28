@@ -10,7 +10,7 @@ time:
       # Déclenchement du script Injection Clhore liquide 
       - seconds: 0
         minutes: 00
-        hours: 10
+        hours: 16
         then:
           - script.execute: _regul_chlore
       # reset le compteur de temps à minuit
@@ -19,11 +19,12 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore
-          - number.set:
-              id: conso_chlore_jour
-              value: 0
+          - lambda: |-
+              id(g_conso_chl_jour) = 0.0;
+              id(conso_chl_jour).publish_state(0.0);
+
       # Notification du rapport journalier sur Telegram
-      - seconds: 10
+      - seconds: 40
         minutes: 59
         hours: 23
         then:
@@ -36,11 +37,26 @@ time:
               id(_message_telegram)->execute(mess);
 
 globals:
-    # temps d'injection chlore
-    - id: g_tps_injection_chlore
-      type: float
-      restore_value: no
-      initial_value: '0'
+  - id: g_memoire_orp
+    type: float
+    restore_value: yes
+    initial_value: '600'
+
+  # temps d'injection chlore
+  - id: g_tps_injection_chlore
+    type: float
+    restore_value: no
+
+  # Cumul de la conso Chlore totale et jour
+  - id: g_conso_chl_totale
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
+
+  - id: g_conso_chl_jour
+    type: float
+    restore_value: yes
+    initial_value: '0.0'
 
 select:
   - platform: template
@@ -131,7 +147,7 @@ number:
     id: facteur_correction_orp
     optimistic: true
     min_value: 0.1
-    max_value: 100
+    max_value: 100.0
     step: 0.1
     initial_value: 50
     restore_value: true
@@ -150,9 +166,6 @@ number:
     max_value: 100
     unit_of_measurement: "h"
     step: 1
-    icon: mdi:timer-plus
-
-  # Debit Pompe chlore
   # Etalonnage du 17/05/2025: 4.957 l/h
   - platform: template
     name: "debit_ppe_chlore"
@@ -164,31 +177,6 @@ number:
     max_value: 7.2
     unit_of_measurement: "l/h"
     step: 0.001
-
-  # Comptabilise le volume de ch injecté
-  - platform: template
-    name: "conso_chlore_total"
-    id: conso_chlore_total
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    step: 0.01
-    unit_of_measurement: "l"
-    icon: mdi:biohazard
-
-  - platform: template
-    name: "conso_chlore_jour"
-    id: conso_chlore_jour
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 100
-    step: 0.01
-    unit_of_measurement: "l"
-    icon: mdi:biohazard
 
 sensor:
   # Mesure de l'ORP
@@ -207,7 +195,8 @@ sensor:
     # Mettre accuracy_decimals: 2
     # Commenter le LOGI du "on_value"  
     # Compiler
-  # Fin procédure étalonnage    
+  # Fin procédure étalonnage
+  # Etalonnage du 20/06/2025: 282 pour 222
   - platform: ezo
     id: orp_ezo
     name: "orp_ezo"
@@ -225,12 +214,20 @@ sensor:
           send_every: 1
           send_first_at: 1
       - calibrate_linear:
-          - 150 -> 150
-          - 256 -> 256
+          - 0 -> 0
+          - 282 -> 222
     on_value:
       then:
         - lambda: |-
             //ESP_LOGI("ORP_ezo", "Mesure ORP (étalonnage): %.2f", id(orp_ezo).state);
+  - platform: template
+    id: orp_ezo_filtre
+    name: "ORP EZO Filtré"
+    unit_of_measurement: "mV"
+    accuracy_decimals: 2
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:biohazard
 
   # mémorise le temps d'injection calculé
   - platform: template
@@ -284,21 +281,69 @@ sensor:
 
       return ppm;
 
+  # Affiche la conso de chl
+  - platform: template
+    name: "Conso_Chl_Totale"
+    id: conso_chl_totale
+    lambda: "return id(g_conso_chl_totale);"
+    update_interval: 60s  # ou plus fréquent selon besoin
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    icon: mdi:counter
+    state_class: total_increasing
+    device_class: water
+
+  - platform: template
+    name: "Conso_Chl_Jour"
+    id: conso_chl_jour
+    lambda: "return id(g_conso_chl_jour);"
+    update_interval: 60s  # ou plus fréquent selon besoin
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    icon: mdi:counter
+    state_class: total_increasing
+    device_class: water    
+
+  - platform: homeassistant
+    name: "poids_bidon_chlore"
+    entity_id: "sensor.esp129_pesage_chlore_poids_chlore"
+    id: _poids_chlore
+
 switch: 
   - platform: gpio
     name: "cde_ppe_chlore"
-    pin:
-      sx1509: sx1509_hub1
-      number: 6
+    pin: ${GPIO_rel_ppe_chlore}
     id: cde_ppe_chlore
     icon: mdi:pump
 
-interval: 
+interval:
+  - interval: 5s
+    then: 
+      - script.execute: _memorisation_orp
   - interval: 1h # Test temps usage Galets Chlore
     then: 
       - script.execute: _fonction_galet_chlore
 
-script: 
+script:
+  # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire de ORP qui est
+  # prise en compte dans les scripts.
+  # sinon on travaille avec l'ORP mémorisé avant l'arret précédent
+  - id: _memorisation_orp
+    then:
+    - lambda: |-
+        bool orp_valide = !isnan(id(orp_ezo).state);
+        bool pompe_active = id(flag_tempo_ppe_filtre);
+
+        if (orp_valide && pompe_active) {
+          id(g_memoire_orp) = id(orp_ezo).state;
+          ESP_LOGD("orp", "ORP actualisé à %.2f (orp_valide=%d, pompe_active=%d)",
+          id(g_memoire_orp), orp_valide, pompe_active);
+        } else {
+          ESP_LOGD("orp", "ORP NON mis à jour (orp_valide=%d, pompe_active=%d)",
+          orp_valide, pompe_active);
+        }
+        id(orp_ezo_filtre).publish_state(id(g_memoire_orp));
+
   # Injection chlore liquide
   # Calcul du temps d'injection
   - id: _regul_chlore
@@ -368,22 +413,26 @@ script:
             - lambda: |-
                 std::string mess = "ESP178 Temps inj Chlore";
                 id(_message_telegram_v2)->execute(mess, id(g_tps_injection_chlore));
+
             - delay: !lambda "return id(g_tps_injection_chlore)*1000;"
+
             - switch.turn_off: cde_ppe_chlore
             - logger.log:
                 format: "Arrêt ppe Chlore en %s"
                 args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
                 level: INFO
             - lambda: |-
-                std::string mess = "Fin Injection Chlore " + id(_Mode_Fonctionnement_regul_chlore).state;
-                id(_message_telegram)->execute(mess.c_str());
-
-            - lambda: |-
                 float debit = id(_debit_ppe_chlore).state;
                 float duree = id(_tps_injection_chlore).state;
                 float volume = debit * duree / 3600.0f;
-                id(conso_chlore_jour).publish_state(id(conso_chlore_jour).state + volume);
-                id(conso_chlore_total).publish_state(id(conso_chlore_total).state + volume);
+                // Mise à jour des compteurs
+                id(g_conso_chl_totale) += volume;
+                id(g_conso_chl_jour) += volume;
+                id(conso_chl_totale).publish_state(id(g_conso_chl_totale));
+                id(conso_chl_jour).publish_state(id(g_conso_chl_jour));
+                std::string mess = "Fin Injection Chlore-Volume: " + std::to_string(volume)+ "l" + "\n";
+                mess += "Poids Bidon Chlore: " + std::to_string(id(_poids_chlore).state)+" kg";
+                id(_message_telegram)->execute(mess.c_str());
 
           else:
             - switch.turn_off: cde_ppe_chlore

@@ -7,7 +7,11 @@ globals:
     type: bool
     restore_value: false
     initial_value: 'false'
-
+  - id: volet_ferme_off_time
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
+    
 select:
   - platform: template
     name: "Mode_Fonctionnement_volet"
@@ -80,7 +84,7 @@ binary_sensor:
                   then:
                     - script.execute: _regul_eau
                     - lambda: |-
-                        ESP_LOGI("REGUL EAU", "Lancement Régulation Appoint Eau");                    
+                        ESP_LOGI("REGUL EAU", "Lancement Régulation Appoint Eau");
 
   - platform: template
     name: "Volet Ferme"

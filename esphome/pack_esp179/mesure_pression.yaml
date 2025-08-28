@@ -1,6 +1,3 @@
-ads1115:
-  - address: 0x48
-
 binary_sensor:
   # Etat pression filtre
   # Si pression superieure à p_Max alors = True
@@ -19,15 +16,15 @@ binary_sensor:
             id(_message_telegram)->execute(mess.c_str());   
 
 sensor:
-    # Mesure de la pression filtre Entrée ANA 3
-  - platform: ads1115
-    multiplexer: 'A0_GND'
-    gain: 6.144
+  # Mesure de la pression filtre Entrée ADC1_0
+  - platform: adc
+    pin: ${GPIO_EANA_0}
+    attenuation: 12db
     name: "Pression_filtre"
     update_interval: 10s
     unit_of_measurement: "bar"
     device_class: pressure
-    state_class: "measurement"        
+    state_class: "measurement"
     id: pression_filtre
     filters:
 #    - calibrate_linear:

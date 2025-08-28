@@ -28,8 +28,6 @@ wifi:
     subnet: 255.255.255.0
     dns1: !secret dns1
     dns2: !secret dns2
-    
-#captive_portal:
 
 # Enable logging
 logger:

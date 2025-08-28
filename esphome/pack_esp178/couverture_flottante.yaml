@@ -276,7 +276,7 @@ script:
             or:
               - binary_sensor.is_on: niv_haut
               - binary_sensor.is_on: niv_inter
-              - binary_sensor.is_off: niv_defaut              
+              - binary_sensor.is_off: niv_defaut
           then:
             - switch.turn_off: cde_volet_fermeture
             - delay: 1s
@@ -330,10 +330,8 @@ script:
             - switch.turn_off: cde_volet_ouverture
             - delay: 1s
             - switch.turn_on: cde_volet_fermeture
-            - switch.turn_on: cde_eclairage
             - delay: 1s
             - switch.turn_off: cde_volet_fermeture
-            - switch.turn_off: cde_eclairage
             - lambda: |-
                 std::string mess = "Fermeture Volet Piscine AUTORISEE\n";
                 bool haut = id(niv_haut).state;
@@ -344,11 +342,15 @@ script:
                 else if (inter)   mess += "Intermediaire\n";
                 mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
                 id(_message_telegram)->execute(mess);
+            - switch.turn_on: cde_eclairage
+            - delay: 20s
+            - switch.turn_off: cde_eclairage
+
           else:
             - lambda: |-
                 bool def = id(niv_defaut).state;
                 std::string mess = "Fermeture Volet Piscine BLOQUEE\n";
-                if (def) mess += "Niveau en defaut";
+                if (def) mess += "Raison: Niveau en defaut";
                 else mess += "Raison: aucun niveau actif (Bas)\n";
                 mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
                 id(_message_telegram)->execute(mess);

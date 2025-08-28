@@ -35,14 +35,12 @@ wifi:
   password: !secret wifi_password
   #output_power: 8.5dB
 
-  #manual_ip:
-  #  static_ip: 192.168.0.121
-  #  gateway: 192.168.0.254
-  #  subnet: 255.255.255.0
-  #  dns1: 192.168.0.254
-
-  #ap:
-
+  manual_ip:
+    static_ip: 192.168.0.121
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
 
   on_connect:
     - light.turn_on:

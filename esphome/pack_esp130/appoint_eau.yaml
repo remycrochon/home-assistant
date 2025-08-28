@@ -132,7 +132,7 @@ script:
             and:
               - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
               - binary_sensor.is_off: niv_defaut
-              - binary_sensor.is_off: volet_ferme
+              - binary_sensor.is_off: volet_ferme_etor
               - or:
                 - binary_sensor.is_on: niv_bas
                 - binary_sensor.is_on: niv_inter

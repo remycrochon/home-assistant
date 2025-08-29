@@ -20,13 +20,13 @@ esp32:
     
 
 logger:
-  level: VERBOSE
-
+  level: DEBUG
 api:
 
 web_server:
   port: 80
-
+  version: 1
+  
 ota:
   platform: esphome
 

@@ -1,0 +1,1 @@
+https://oi.esphome.io/v2/www.js

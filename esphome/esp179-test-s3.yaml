@@ -86,6 +86,7 @@ esphome:
           
 esp32:
   board: esp32-s3-devkitc-1
+  flash_size: 16MB
   framework:
     type: esp-idf
 
@@ -114,7 +115,7 @@ wifi:
         red: 0%
         green: 100%
         blue: 0%
-        brightness: 50%
+        brightness: 25%
         effect: none
 
   on_disconnect:
@@ -123,7 +124,7 @@ wifi:
         effect: 'Pulse led'
         red: 0%
         green: 0%
-        blue: 100%
+        blue: 50%
 
 light:
   - platform: esp32_rmt_led_strip
@@ -136,6 +137,14 @@ light:
 
 web_server:
   port: 80
+  version: 3
+  sorting_groups:
+    - id: groupe_filtration
+      name: "Filtration"
+      sorting_weight: 10
+    - id: groupe_ph
+      name: "pH"
+      sorting_weight: 20
 
 # Enable logging
 logger:
@@ -310,6 +319,8 @@ select:
       - Ma_f
       - At_f
     id: _Mode_Fonctionnement_filtration
+    web_server:
+      sorting_group_id: groupe_filtration
     on_value: 
       then:
         - script.execute: _fonctionnement_filtration        
@@ -394,6 +405,8 @@ datetime:
     optimistic: yes
     initial_value: "13:30:00"
     restore_value: true
+    web_server:
+      sorting_group_id: groupe_filtration
 
   - platform: template
     id: h_debut
@@ -402,7 +415,9 @@ datetime:
     optimistic: yes
     initial_value: "00:00:00"
     restore_value: false
-    
+    web_server:
+      sorting_group_id: groupe_filtration
+
   - platform: template
     id: h_fin
     type: time
@@ -410,6 +425,8 @@ datetime:
     optimistic: yes
     initial_value: "00:00:00"
     restore_value: false
+    web_server:
+      sorting_group_id: groupe_filtration
 
   - platform: template
     id: duree_filtration
@@ -418,6 +435,8 @@ datetime:
     optimistic: yes
     initial_value: "00:00:00"
     restore_value: false
+    web_server:
+      sorting_group_id: groupe_filtration
 
   - platform: template
     id: debut_mode_horaire
@@ -425,6 +444,8 @@ datetime:
     name: "debut_mode_horaire"
     optimistic: yes
     restore_value: true
+    web_server:
+      sorting_group_id: groupe_filtration
 
   - platform: template
     id: duree_mode_horaire
@@ -432,6 +453,8 @@ datetime:
     name: "duree_mode_horaire"
     optimistic: yes
     restore_value: true
+    web_server:
+      sorting_group_id: groupe_filtration
 
 # Input Number
 number:
@@ -463,6 +486,8 @@ number:
     unit_of_measurement: "s"
     step: 1
     icon: mdi:clock
+    web_server:
+      sorting_group_id: groupe_filtration
 
   # Coefficient de filtration
   - platform: template
@@ -476,6 +501,8 @@ number:
     unit_of_measurement: "%"
     step: 1
     icon: mdi:percent
+    web_server:
+      sorting_group_id: groupe_filtration
 
   # Durée de l'arret sur la journée en lien avec "arret_jour"
   - platform: template
@@ -488,7 +515,9 @@ number:
     max_value: 24
     unit_of_measurement: "h"
     step: 0.01
-
+    web_server:
+      sorting_group_id: groupe_filtration
+      
 sensor:
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "WiFi Signal dB"

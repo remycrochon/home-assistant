@@ -69,6 +69,8 @@ select:
       - Ma_f
       - At_f
     id: _Mode_Fonctionnement_regul_ph
+    web_server:
+      sorting_group_id: groupe_ph
     on_value: 
       then:
         - logger.log:
@@ -126,6 +128,8 @@ number:
     max_value: 7.6
     unit_of_measurement: "pH"
     step: 0.01
+    web_server:
+      sorting_group_id: groupe_ph
 
   # Hysterisis pH: S'additionne à la consigne dans la comparaison avec la cible
   - platform: template
@@ -152,7 +156,9 @@ number:
     unit_of_measurement: ""
     step: 0.1
     icon: mdi:percent
-
+    web_server:
+      sorting_group_id: groupe_ph
+      
   # Debit Pompe pH moins
   # Etalonnage du 18/07/2024: 4.272 l/h
   # Etalonnage du 17/05/2025: 4.269 l/h

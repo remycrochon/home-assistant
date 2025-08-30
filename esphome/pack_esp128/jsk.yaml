@@ -1,8 +1,8 @@
 # Protocole du JSK
 uart:
   id: mod_bus
-  tx_pin: ${GPIO_tx} #17
-  rx_pin: ${GPIO_rx} #16
+  tx_pin: ${GPIO_tx}
+  rx_pin: ${GPIO_rx}
   baud_rate: 38400
   stop_bits: 1
 #  debug:

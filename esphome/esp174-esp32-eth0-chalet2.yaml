@@ -29,9 +29,11 @@ substitutions:
   
 esphome:
   name: ${device_name}
-  
+    
 esp32:
   board: wt32-eth01 #esp-wrover-kit
+  framework:
+    type: esp-idf
 
 # Enable logging
 logger:

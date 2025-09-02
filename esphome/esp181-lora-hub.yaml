@@ -1,6 +1,7 @@
 substitutions:
   adress_ip: 192.168.0.181
   name_e1: esp182lorae1
+  name_e2: esp183lorae2
   name_hub: esp181lorahub
 
 
@@ -77,11 +78,16 @@ packet_transport:
   providers:
     - name: ${name_e1}
       encryption: !secret encryption_key
+    - name: ${name_e2}
+      encryption: !secret encryption_key      
   sensors: 
     - id: temperature_${name_e1}
     - id: compteur_${name_e1}
+    - id: contact_${name_e2}
+    - id: compteur_${name_e2}
 
 sensor:
+  # Capteurs venant de lorae1
   - platform: packet_transport
     provider: ${name_e1}
     name: temperature_${name_e1}
@@ -98,7 +104,24 @@ sensor:
     id: compteur_${name_e1}
     remote_id: ${name_e1}_compteur
     device_class: frequency
-    
+
+  # Capteurs venant de lorae2
+  - platform: packet_transport
+    provider: ${name_e2}
+    name: contact_${name_e2}
+    internal: false
+    id: contact_${name_e2}
+    remote_id: ${name_e2}_contact
+    #device_class: opening
+
+  - platform: packet_transport
+    provider: ${name_e2}
+    name: compteur_${name_e2}
+    internal: false    
+    id: compteur_${name_e2}
+    remote_id: ${name_e2}_compteur
+    device_class: frequency    
+
   # Capteur pour RSSI
   - platform: template
     name: "LoRa RSSI"
@@ -112,3 +135,7 @@ sensor:
 binary_sensor:
   - platform: status
     name: "Status"    
+
+switch:
+  - platform: restart
+    name: Restart"

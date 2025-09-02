@@ -1,0 +1,191 @@
+substitutions:
+  name_e2: esp183lorae2
+  adress_ip: 192.168.0.183
+
+esphome:
+  name: ${name_e2}
+  on_boot:
+    priority: 800
+    then:
+      # - script.execute: maj_data
+      - logger.log: "Boot"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+logger:
+  level: VERBOSE
+  
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      channel: 6      
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: 192.168.0.254
+    dns2: 8.8.8.8
+    #dns1: !secret dns1
+    #dns2: !secret dns2
+  fast_connect: true
+
+
+web_server:
+  port: 80
+
+# LoRa
+spi:
+  clk_pin: GPIO04
+  mosi_pin: GPIO06
+  miso_pin: GPIO01
+
+sx127x:
+  data_rate: 1Mhz
+  dio0_pin: GPIO05
+  cs_pin: GPIO07 
+  rst_pin: GPIO03 
+  pa_pin: BOOST
+  pa_power: 8
+  bandwidth: 125_0kHz
+  crc_enable: true
+  frequency: 433920000
+  modulation: LORA
+  sync_value: 0x12
+  spreading_factor: 7
+  preamble_size: 8
+  coding_rate: CR_4_6
+
+packet_transport:
+  platform: sx127x
+  id: pt
+  encryption: !secret encryption_key
+  rolling_code_enable: false
+  providers:
+    - name: ${name_e2}
+      encryption: !secret encryption_key
+  sensors: 
+    - id: ${name_e2}_contact
+    - id: ${name_e2}_compteur
+
+globals:
+  - id: compteur
+    type: int
+    restore_value: yes
+    initial_value: '0'
+
+# Contact NC surveillé
+binary_sensor:
+  - platform: gpio
+    id: contact_nc
+    name: "Contact NC"
+    pin:
+      number: GPIO10
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+
+       # NC -> fermé=1, ouvert=0
+
+  # Jumper sélection mode
+  - platform: gpio
+    name: "Sleep Ent"
+    pin: 
+      number: GPIO0
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    id: sleep_ent
+
+
+sensor:
+  - platform: template
+    name: Etat contact
+    id: ${name_e2}_contact
+    update_interval: never
+    lambda: |-
+      return (id(contact_nc).state ? 1 : 0);
+
+  - platform: template
+    name: Compteur
+    id: ${name_e2}_compteur
+    unit_of_measurement: "count"
+    update_interval: never
+    lambda: |-
+      return id(compteur);
+
+switch:
+  - platform: gpio
+    id: led
+    name: led
+    pin:
+      number: GPIO20
+      inverted: False
+    restore_mode: ALWAYS_OFF
+
+#deep_sleep:
+#  id: sleep_xmin
+#  run_duration: 10s
+#  sleep_duration: 120s
+  #wakeup_pin: GPIO2
+  #wakeup_pin_mode: INVERT_WAKEUP  # Réveil sur passage ON→OFF
+
+# Intervalle (mode test uniquement)
+interval:
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            binary_sensor.is_off: sleep_ent
+          then:
+            - script.execute: maj_data
+
+
+script:
+  - id: maj_data
+    then:
+      - if:
+          condition:
+            binary_sensor.is_off: sleep_ent
+          then:
+            # MODE TEST (WiFi + trame toutes les 10s)
+            - logger.log: "Mode TEST: WiFi actif, envoi périodique"
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led
+            #- wifi.enable
+          #  - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
+            - script.execute: lecture_contact
+
+          else:
+            # MODE SLEEP (réveil GPIO10 uniquement)
+            - logger.log: "Mode SLEEP: envoi si changement ON→OFF puis dodo"
+            #- wifi.disable
+            - script.execute: lecture_contact
+            - delay: 2s
+           # - deep_sleep.enter: sleep_xmin
+
+  - id: lecture_contact
+    then:
+      - lambda: |-
+          // Incrémente le compteur
+          id(compteur) = (id(compteur) + 1) % 100;
+          // Publie l'état du contact
+          id(${name_e2}_contact).publish_state(id(contact_nc).state ? 1 : 0);
+          // Publie le compteur
+          id(${name_e2}_compteur).publish_state(id(compteur));
+      - component.update: pt
+
+    

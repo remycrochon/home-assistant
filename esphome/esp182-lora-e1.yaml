@@ -145,6 +145,10 @@ switch:
       inverted: False
     restore_mode: ALWAYS_OFF
 
+  - platform: restart
+    name: "Restart"
+
+
 # Mode "On endort l'ESP"
 deep_sleep:
   id: sleep_xmin

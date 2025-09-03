@@ -10,6 +10,8 @@ esphome:
   
 esp32:
   board: esp32-c3-devkitm-1
+  cpu_frequency: 160MHZ
+  flash_size: 4MB
   framework:
     type: esp-idf
 
@@ -27,17 +29,22 @@ wifi:
   networks:
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
-  reboot_timeout: 5min
-
+  fast_connect: true
+  reboot_timeout: 2min
+  output_power: 20dB
+  power_save_mode: none
+  enable_btm: true
+  enable_rrm: true
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
-    dns1: !secret dns1
+    dns1: 192.168.0.254
+    #dns1: !secret dns1
     dns2: !secret dns2
 
-web_server:
-  port: 80
+#web_server:
+#  port: 80
 
 spi:
   clk_pin: GPIO04 #04
@@ -138,4 +145,4 @@ binary_sensor:
 
 switch:
   - platform: restart
-    name: Restart"
+    name: "Restart"

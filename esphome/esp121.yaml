@@ -1,6 +1,11 @@
+# ESP32 S3 mini
+substitutions:
+  name_e1: "esp121-test-esp32s3"
+  adress_ip: 192.168.0.121
+  
 esphome:
-  name: esp121
-  friendly_name: ESP-121
+  name: ${name_e1}
+  friendly_name: ${name_e1}
   on_boot:
     priority: 600
     then:
@@ -13,8 +18,8 @@ esphome:
           
 esp32:
   board: esp32-s3-devkitc-1
-  flash_size: 16MB
-  cpu_frequency: 240MHZ
+  flash_size: 4MB
+  cpu_frequency: 160MHZ
   framework:
     type: esp-idf
     
@@ -30,7 +35,6 @@ web_server:
   
 ota:
   platform: esphome
-
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password

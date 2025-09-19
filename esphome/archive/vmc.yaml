@@ -1,0 +1,79 @@
+####################################################
+#                                                  #
+#               VMC NIV0 & SOUS SOL                #
+#                                                  #
+####################################################
+
+
+input_datetime:
+
+  # Horaire VMC Niv0
+  heure_vmc_niv0_ma:
+    name: Heure Ma Ete VMC_N0
+    has_date: false
+    has_time: true
+  heure_vmc_niv0_at:
+    name: Heure At Ete VMC_N0
+    has_date: false
+    has_time: true
+
+input_select:
+  vmc_ssol:
+    name: Vmc_SSol
+    icon: mdi:fan
+    options:
+      - Auto
+      - Marche
+      - Arret
+
+  vmc_niv0:
+    name: Vmc_Niv0
+    icon: mdi:fan
+    options:
+      - Hor
+      - CO2 PM2.5
+      - Marche
+      - Arret
+    
+template:
+  - sensor:
+# Limite les valeurs aberantes de la puissance de la VMC
+    - name: "EcoCompteur VMC Niv0"
+      unique_id: "ecocompteur_vmc_niv0"
+      device_class: "power"
+      state_class: "measurement"
+      unit_of_measurement: "W"
+      state: >-
+        {% set p = states('sensor.puissance_vmc_niv0_median') | float(default=0) | round(1) %}
+        {% if p>100 %}
+          100
+        {%- else -%}
+          {{ p }}
+        {%- endif %}
+
+  - binary_sensor:
+    # Si la puissance electrique est superieure à 10w, on considere que la VMC est en fonctionnement
+    - name: "vmc_marche"
+      unique_id: "vmc_n0_en_marche"
+      state: >-
+        {{states.sensor.ecocompteur_vmc_niv0.state | float(default=0) > 10}}      
+
+sensor:
+    # Affichage du temps de fonctionnement de la VMC du jour
+  - platform: history_stats
+    name: temps de Fonctionnement VMC N0
+    entity_id: binary_sensor.vmc_marche
+    unique_id: "temps_de_fonctionnement_vmc_n0"
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
+    end: "{{ now() }}"
+
+# Statistiques puissance 
+  - platform: statistics
+    name: puissance_vmc_niv0_median
+    unique_id: "puissance_vmc_niv0_median" 
+    entity_id: sensor.ecocompteur_vmc_niv0_brut
+    state_characteristic: median
+    sampling_size: 10
+

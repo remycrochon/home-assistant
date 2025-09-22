@@ -115,7 +115,7 @@ output:
     pin: GPIO23
     frequency: 1000 Hz
     id: pwm_heater
-    max_power: 90%
+    max_power: 100%
             
 # --- Mode manuel (light dimmable) ---
 light:
@@ -158,9 +158,9 @@ climate:
     default_target_temperature: 1°C
     heat_output: pwm_heater
     control_parameters:
-      kp: 0.71901 #0.13143
-      ki: 0.02875 #0.00305
-      kd: 4.49541 #1.41370
+      kp: 0.37040 #0.71901 #0.13143
+      ki: 0.02178 #0.02875 #0.00305
+      kd: 1.5750  #4.49541 #1.41370
       output_averaging_samples: 5
       derivative_averaging_samples: 2
       

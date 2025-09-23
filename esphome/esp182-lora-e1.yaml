@@ -6,7 +6,8 @@ substitutions:
   name_e1: esp182lorae1
   name_hub: esp181lorahub
   adress_ip: 192.168.0.182
-  
+  duree_sommeil: "120s"
+  duree_reveil: "10s"  
 
 esphome:
   name: ${name_e1}
@@ -128,13 +129,12 @@ binary_sensor:
     name: Sleep Ent
     pin: 
       number: GPIO0
+      inverted: true
       mode:
         input: true
         pullup: true
     id: sleep_ent
     internal: False
-    filters:
-      - invert:  
 
 switch:
   - platform: gpio
@@ -152,8 +152,8 @@ switch:
 # Mode "On endort l'ESP"
 deep_sleep:
   id: sleep_xmin
-  run_duration: 10s # Butée Max
-  sleep_duration: 120s 
+  run_duration: ${duree_reveil} # Butée Max
+  sleep_duration: ${duree_sommeil} 
 
 # Intervalle pour gérer l'envoi des mesures et deep sleep dynamique
 interval:
@@ -162,25 +162,15 @@ interval:
       - script.execute: maj_data
 
 script:
-  # Envoi LoRa en fonction du mode Nomal ou Sleep sélectionné par Jumper sur GPIO0
+  # Envoi LoRa en fonction du mode Nomal ou Sleep sélectionné par Input_number.mode_test_esp182 dans home Assistant
   - id: maj_data
     then:
      - delay: 1s # Le temps de lire le GPIO
      - if:
           condition:
-            binary_sensor.is_off: sleep_ent
-          # Mode Normal
-          then:
-            - switch.turn_on: led
-            - delay: 200ms
-            - switch.turn_off: led            
-            - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
-            - wifi.enable # Active le WIFI
-            - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
-            - script.execute: lecture_capteur
-
+            binary_sensor.is_on: sleep_ent
           # Mode Sleep
-          else: 
+          then: 
             - switch.turn_on: led
             - delay: 200ms
             - switch.turn_off: led
@@ -189,7 +179,16 @@ script:
             - script.execute: lecture_capteur
             - delay: 2s
             - deep_sleep.enter: sleep_xmin
-  
+          # Mode Normal
+          else:
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led            
+            - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
+            - wifi.enable # Active le WIFI
+            - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
+            - script.execute: lecture_capteur
+
   # Mise à jour des capteurs avant envoi par LoRa
   - id: lecture_capteur
     then: 

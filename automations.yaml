@@ -854,17 +854,21 @@
       sensor_entity: binary_sensor.alarme_temp_chalet_basse
       alert_state: 'on'
       alert_action:
-      - data:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }} {{-"\n"-}}T° Basse Chalet ={{states("sensor.esp174_temperature_air")
             }}°C'
           title: Alarme Temperature Basse Chalet!!!
-        action: notify.telegram
       resolved_action:
-      - data:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }} {{-"\n"-}}T° Basse Chalet ={{states("sensor.esp174_temperature_air")
             }}°C'
-          title: Fin Alarme Temperature Basse chalet !!!
-        action: notify.telegram
+          title: Fin Alarme Temperature Basse Chalet!!!
       notify_message: ' '
       notify_device: 367dba31447009458e03b70e3a29b6b2
       repeat_delay: 1800
@@ -1774,7 +1778,7 @@
   - action: telegram_bot.send_message
     metadata: {}
     data:
-      message: '    {{states("sensor.date_time")}} {% set er=states(''sensor.am435x_awd_error'')%}     {%
+      message: '{{states("sensor.date_time")}} {% set er=states(''sensor.am435x_awd_error'')%}     {%
         if er=="no_error" %}       Pas de Probleme     {%- else -%}       Probleme={{er}}     {%-
         endif%}  '
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
@@ -2245,21 +2249,23 @@
         id:
         - detecte
       sequence:
-      - action: notify.telegram
+      - action: telegram_bot.send_message
         metadata: {}
         data:
-          message: Detection Zone Cuisine
-          title: CAMERA CUISINE
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Cuisine'
+          title: Caméra Cuisine
     - conditions:
       - condition: trigger
         id:
         - garage
       sequence:
-      - action: notify.telegram
+      - action: telegram_bot.send_message
         metadata: {}
         data:
-          message: Detection Zone GARAGE
-          title: CAMERA GARAGE
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Garage'
+          title: Caméra Garage
 - id: '1737980607664'
   alias: Debbug
   description: ''
@@ -2398,8 +2404,12 @@
   triggers:
   - trigger: state
     entity_id:
-    - binary_sensor.uptimekuma_imp_brother
-    to: 'off'
+    - sensor.imp_brother_statut
+    to: unavailable
+  - trigger: state
+    entity_id:
+    - sensor.imp_brother_statut
+    to: down
   conditions: []
   actions:
   - action: switch.turn_off

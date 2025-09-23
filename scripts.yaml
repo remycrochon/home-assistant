@@ -545,10 +545,13 @@ ssh_command:
   description: ''
 activation_camera:
   sequence:
-  - data:
-      message: Désactivation Détection video surveillance
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Désactivation Détection video
+        surveillance'
       title: Caméra
-    action: notify.telegram
   - action: switch.turn_off
     target:
       entity_id:
@@ -569,10 +572,13 @@ activation_camera:
   description: ''
 activation_camera_2:
   sequence:
-  - data:
-      message: Activation Détection video surveillance
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Activation Détection video
+        surveillance'
       title: Caméra
-    action: notify.telegram
   - action: switch.turn_on
     target:
       entity_id:

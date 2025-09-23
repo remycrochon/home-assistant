@@ -70,6 +70,10 @@ sensor:
     state_class: "measurement"
     update_interval: 5s
     accuracy_decimals: 1
+    filters:
+      - lambda: |-
+          if (isnan(x)) return {};  // ignore valeur NaN
+          return x;
 
   - platform: dallas_temp
     one_wire_id: ow1
@@ -80,7 +84,10 @@ sensor:
     state_class: "measurement"
     update_interval: 5s
     accuracy_decimals: 1
- 
+    filters:
+      - lambda: |-
+          if (isnan(x)) return {};  // ignore valeur NaN
+          return x; 
 # --- Capteur PID ---
   - platform: pid
     name: "PID Sortie"

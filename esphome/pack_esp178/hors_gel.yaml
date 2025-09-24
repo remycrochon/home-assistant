@@ -87,7 +87,8 @@ script:
                 std::string mess = "ESP178 Debut Marche HG Seuil1\n";
                 mess += "Temp Ext: " + std::to_string(id(temp_ext).state) + "\n";
                 mess += "Seuil1: "   + std::to_string(id(s1_temp_hg).state) + "\n";
-                id(_message_telegram)->execute(mess);                 
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);
             - delay: 900s  #900s
             - lambda: |-
                 id(g_flag_hg) = false;
@@ -98,7 +99,9 @@ script:
                 std::string mess= "ESP178 Fin Marche HG Seuil1";
                 mess += "Temp Ext: "+ std::to_string(id(temp_ext).state)+"\n";
                 mess += "Seuil1: "+ std::to_string(id(s1_temp_hg).state)+"\n";
-                id(_message_telegram)->execute(mess.c_str());                               
+                id(_message_telegram)->execute(mess.c_str(),0);
+                id(_log_fichier)->execute(mess.c_str(), 0);
+
       # Activation si temp > S2
       - if:
           condition:
@@ -117,7 +120,8 @@ script:
                 std::string mess= "ESP178 Debut Marche HG Seuil2";
                 mess += "Temp Ext: "+ std::to_string(id(temp_ext).state)+"\n";
                 mess += "Seuil2: "+ std::to_string(id(s2_temp_hg).state)+"\n";
-                id(_message_telegram)->execute(mess.c_str());                   
+                id(_message_telegram)->execute(mess.c_str(),0);
+                id(_log_fichier)->execute(mess.c_str(), 0);
             - delay: 1800s  #1800s
             - lambda: |-
                 id(g_flag_hg) = false;
@@ -128,5 +132,5 @@ script:
                 std::string mess= "ESP178 Fin Marche HG Seuil2";
                 mess += "Temp Ext: "+ std::to_string(id(temp_ext).state)+"\n";
                 mess += "Seuil2: "+ std::to_string(id(s2_temp_hg).state)+"\n";
-                id(_message_telegram)->execute(mess.c_str());   
-
+                id(_message_telegram)->execute(mess.c_str(),0);
+                id(_log_fichier)->execute(mess.c_str(), 0);

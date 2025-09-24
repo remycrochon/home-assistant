@@ -270,7 +270,8 @@ script:
       - lambda: |-
           std::string mess = "Ouverture Volet Piscine\n";
           mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-          id(_message_telegram)->execute(mess);  
+          id(_message_telegram)->execute(mess,0);
+          id(_log_fichier)->execute(mess, 0);
 
   - id: script_ouv_volet
     mode: single
@@ -296,7 +297,8 @@ script:
                 else if (haut)    mess += "Haut\n";
                 else if (inter)   mess += "Intermediaire\n";
                 mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-                id(_message_telegram)->execute(mess);
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);
           else:
             - lambda: |-
                 bool def = id(niv_defaut).state;
@@ -304,7 +306,8 @@ script:
                 if (def) mess += "Niveau en defaut";
                 else mess += "Raison: aucun niveau actif (Bas)\n";
                 mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-                id(_message_telegram)->execute(mess);
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);                
 
   - id: script_ferm_volet_old
     mode: single
@@ -319,7 +322,8 @@ script:
       - lambda: |-
           std::string mess = "Fermeture Volet Piscine\n";
           mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-          id(_message_telegram)->execute(mess);        
+          id(_message_telegram)->execute(mess,0);
+          id(_log_fichier)->execute(mess, 0);          
 
   - id: script_ferm_volet
     mode: single
@@ -345,7 +349,9 @@ script:
                 else if (haut)    mess += "Haut\n";
                 else if (inter)   mess += "Intermediaire\n";
                 mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-                id(_message_telegram)->execute(mess);
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);
+
             - switch.turn_on: cde_eclairage
             - delay: 20s
             - switch.turn_off: cde_eclairage
@@ -357,7 +363,8 @@ script:
                 if (def) mess += "Raison: Niveau en defaut";
                 else mess += "Raison: aucun niveau actif (Bas)\n";
                 mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-                id(_message_telegram)->execute(mess);
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);
 
   - id: script_stop_volet
     mode: single
@@ -372,4 +379,5 @@ script:
       - switch.turn_off: cde_eclairage
       - lambda: |-
           std::string mess = "Ordre STOP Volet\n";
-          id(_message_telegram)->execute(mess);
+          id(_message_telegram)->execute(mess,0);
+          id(_log_fichier)->execute(mess, 0);

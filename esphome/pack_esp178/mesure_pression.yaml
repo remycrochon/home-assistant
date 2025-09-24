@@ -13,12 +13,13 @@ binary_sensor:
     on_press:
         - lambda: |-                
             std::string mess= "ESP178 Seuil Pression Filtre Atteint";
-            id(_message_telegram)->execute(mess.c_str());     
+            id(_message_telegram)->execute(mess.c_str(),0); 
+            id(_log_fichier)->execute(mess.c_str(), 0);                
     on_release: 
         - lambda: |-                
             std::string mess= "ESP178 Pression filtre OK";
-            id(_message_telegram)->execute(mess.c_str());   
-
+            id(_message_telegram)->execute(mess.c_str(),0);   
+            id(_log_fichier)->execute(mess.c_str(), 0);
 sensor:
     # Mesure de la pression filtre Entrée ANA 3
   - platform: ads1115

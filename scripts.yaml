@@ -641,14 +641,14 @@ envoyer_message_log_esp178:
       description: Le message à loguer
       example: test depuis ESPHome
   description: ''
-envoyer_un_message_log_depuis_esp176:
-  alias: Envoyer un message log depuis ESP176
+envoyer_un_message_log_depuis_esphome:
   sequence:
   - action: telegram_bot.send_message
     metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       message: '"{{ message }}"'
+  alias: Envoyer un message log depuis ESPHOME
   mode: single
   fields:
     message:

@@ -35,8 +35,9 @@ time:
               snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
               mess += buf1;
 
-              id(_message_telegram)->execute(mess);
-
+              id(_message_telegram)->execute(mess,0);
+              id(_log_fichier)->execute(mess, 0);
+              
 globals:
   - id: g_memoire_ph
     type: float
@@ -399,7 +400,7 @@ script:
                       std::string mess = "ESP178 Debut injection pH\n";
                       mess += "Cible pH: " + std::to_string(id(_ph_cible).state) + "\n";
                       mess += "Mesure pH: " + std::to_string(id(g_memoire_ph));
-                      id(_message_telegram_v2)->execute(mess,id(g_tps_injection_ph_moins));                      
+                      id(_message_telegram)->execute(mess,id(g_tps_injection_ph_moins));                      
                   - logger.log:
                       format: "Ph Mesure ph: %f / pH Cible: %f"
                       args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
@@ -424,7 +425,9 @@ script:
                       id(conso_ph_totale).publish_state(id(g_conso_ph_totale));
                       id(conso_ph_jour).publish_state(id(g_conso_ph_jour));
                       std::string mess = "Fin Injection pH-Volume: " + std::to_string(volume)+ "l";
-                      id(_message_telegram)->execute(mess.c_str());
+                      id(_message_telegram)->execute(mess.c_str(),0);
+                      id(_log_fichier)->execute(mess.c_str(), 0);
+
                 else:
                   - switch.turn_off: cde_ppe_ph_moins
                   - logger.log: 
@@ -483,4 +486,5 @@ script:
                 CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
                 snprintf(buf, sizeof(buf), "Tps Fonct Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
                 mess += buf;
-                id(_message_telegram)->execute(mess);               
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);                

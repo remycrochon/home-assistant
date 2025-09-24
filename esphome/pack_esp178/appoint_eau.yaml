@@ -21,8 +21,6 @@ globals:
     restore_value: no
     initial_value: '0'
 
-
-
 select:
   - platform: template
     name: "Mode_Fonct_appoint_eau"
@@ -166,9 +164,10 @@ interval:
                                 std::to_string(duration / 3600) + "h " +
                                 std::to_string((duration % 3600) / 60) + "min " +
                                 std::to_string(duration % 60) + "s";
-              id(_message_telegram_v2)->execute(mess, duration);
+              id(_message_telegram)->execute(mess, duration);
+              id(_log_fichier)->execute(mess,duration);             
             }
-          }          
+          }
 
 script:
   # Regulation du niveau d'eau piscine

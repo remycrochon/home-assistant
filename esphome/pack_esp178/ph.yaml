@@ -6,12 +6,6 @@ time:
       - 1.pool.ntp.org
       - 2.pool.ntp.org
     on_time:
-      # Déclenchement du script de regul pH 1 fois par jour
-      - seconds: 0
-        minutes: 00
-        hours: 10
-        then:
-          - script.execute: _regul_ph
       # reset le compteur de temps à minuit
       - seconds: 0
         minutes: 0
@@ -93,6 +87,14 @@ button:
       - script.execute: _regul_ph
 
 datetime: 
+  - platform: template
+    id: heure_injection_ph
+    type: time
+    name: "Heure Injection pH"
+    optimistic: true
+    restore_value: true
+    icon: mdi:clock-start
+
   - platform: template
     id: duree_injection_ph
     type: time
@@ -305,6 +307,17 @@ switch:
     id: cde_ppe_ph_moins
 
 interval:
+  - interval: 60s
+    then:
+      - lambda: |-
+          auto now = id(sntp_time).now();
+          if (now.is_valid()) {
+            if (now.hour == id(heure_injection_ph).hour &&
+                now.minute == id(heure_injection_ph).minute &&
+                now.second == id(heure_injection_ph).second) {
+              id(_regul_ph).execute();
+            }
+          }
   - interval: 5s
     then: 
       - script.execute: _memorisation_ph

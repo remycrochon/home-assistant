@@ -7,12 +7,6 @@ time:
       - 1.pool.ntp.org
       - 2.pool.ntp.org
     on_time:
-      # Déclenchement du script Injection Clhore liquide 
-      - seconds: 0
-        minutes: 00
-        hours: 16
-        then:
-          - script.execute: _regul_chlore
       # reset le compteur de temps à minuit
       - seconds: 0
         minutes: 0
@@ -106,6 +100,14 @@ binary_sensor:
       return id(_temps_galet_chlore).state/3600 > id(_tps_max_galet_chlore).state;
 
 datetime:
+  - platform: template
+    id: heure_injection_chlore
+    type: time
+    name: "Heure Injection Chlore"
+    optimistic: true
+    restore_value: true
+    icon: mdi:clock-start
+
   - platform: template
     id: duree_injection_chlore
     type: time
@@ -318,6 +320,17 @@ switch:
     icon: mdi:pump
 
 interval:
+  - interval: 60s
+    then:
+      - lambda: |-
+          auto now = id(sntp_time).now();
+          if (now.is_valid()) {
+            if (now.hour == id(heure_injection_chlore).hour &&
+                now.minute == id(heure_injection_chlore).minute &&
+                now.second == id(heure_injection_chlore).second) {
+              id(_regul_ph).execute();
+            }
+          }
   - interval: 5s
     then: 
       - script.execute: _memorisation_orp

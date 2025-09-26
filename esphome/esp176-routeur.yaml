@@ -575,7 +575,7 @@ script:
   #  P Dispo= Prod-Conso Maison-Pu batteries (Negative en décharge)
   # Sinon:
   #   P Dispo = 0
-  # La sortie triac est calculée en fonction de la P_Dispo en recherchant sa valeur dans la table de correspondance établis en mode étalonnage
+  # La sortie triac est calculée en fonction de la P_Dispo en recherchant sa valeur dans la table de correspondance établie en mode étalonnage
   - id: regulation_interpolation
     mode: single
     then:
@@ -780,7 +780,8 @@ script:
           std::string mess = mess1;  // Utilise directement mess1 sans horodatage
           id(telegram_msg_buffer) = mess;
           ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
-      - homeassistant.service:
-          service: script.envoyer_un_message_log_depuis_esp176
+      - homeassistant.service:                
+          action: notify.send_message
           data:
-            message: !lambda 'return id(telegram_msg_buffer).c_str();'            
+            entity_id: notify.etalonnage_routeur
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'                

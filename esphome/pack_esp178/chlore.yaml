@@ -326,9 +326,8 @@ interval:
           auto now = id(sntp_time).now();
           if (now.is_valid()) {
             if (now.hour == id(heure_injection_chlore).hour &&
-                now.minute == id(heure_injection_chlore).minute &&
-                now.second == id(heure_injection_chlore).second) {
-              id(_regul_ph).execute();
+                now.minute == id(heure_injection_chlore).minute)  {
+              id(_regul_chlore).execute();
             }
           }
   - interval: 5s

@@ -130,10 +130,11 @@ select:
     id: _Mode_Fonctionnement_routeur
     on_value: 
       then:
-        - logger.log:
-            format: "Mode Fonct Routeur --> %s"
-            args: [ 'id(_Mode_Fonctionnement_routeur).state.c_str()' ]
-            level: INFO              
+        - lambda: |-
+            char mess[128];
+            snprintf(mess, sizeof(mess), "Mode Fonctionnement Routeur: %s", id(_Mode_Fonctionnement_routeur).state.c_str());
+            ESP_LOGI("fichier", "Message: %s", mess);
+            id(_log_fichier).execute(mess);  // Appelle le script _log_fichier avec le paramètre mess      
         # Passage en mode étalonnage
         - if:
             condition:
@@ -694,36 +695,16 @@ script:
 
             - lambda: |-
                 ESP_LOGI("striac", "Valeur striac: %.2f Pu ECS %.0f", id(striac), id(puecs).state);            
-            - script.execute: log_striac1
+
+            - lambda: |-
+                std::string mess = "";
+                mess += std::to_string(id(striac)) + ",";
+                mess += std::to_string(id(puecs).state);
+                ESP_LOGI("fichier", "Message: %s", mess.c_str());
+                id(_log_etalonnage).execute(mess);  // Appelle le script _log_message avec le paramètre mess
 
       - lambda: |-
           ESP_LOGI("striac", "Fin de l'étalonnage, striac = %.2f", id(striac));
-  ########################################################################""
-    # Enregistre dans un fichier
-  - id: log_striac
-    mode: single
-    then:
-      - lambda: |-   
-          std::string mess = "";
-          mess += std::to_string(id(striac)) + ",";
-          mess += std::to_string(id(puecs).state);
-          ESP_LOGI("fichier", "Message: %s", mess.c_str());
-          if (id(sntp_time).now().is_valid()) {
-            ESP_LOGI("fichier", "Temps valide: %s", id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str());
-          } else {
-            ESP_LOGI("fichier", "Temps non synchronisé");
-          }
-          id(_log_message).execute(mess); 
-
-  - id: log_striac1
-    mode: single
-    then:
-      - lambda: |-
-          std::string mess = "";
-          mess += std::to_string(id(striac)) + ",";
-          mess += std::to_string(id(puecs).state);
-          ESP_LOGI("fichier", "Message: %s", mess.c_str());
-          id(_log_message).execute(mess);  // Appelle le script _log_message avec le paramètre mess
 
   ########################################################################""
     # ------------  Pilotage led
@@ -772,7 +753,21 @@ script:
             - logger.log: "Relais Désactivé"
  
  ########################################################################""
-  - id: _log_message
+  - id: _log_fichier
+    parameters:
+      mess1: std::string  # Type explicite pour ESPHome
+    then:
+      - lambda: |-
+          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          id(telegram_msg_buffer) = mess;
+          ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
+      - homeassistant.service:                
+          action: notify.send_message
+          data:
+            entity_id: notify.log_esp176
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
+########################################################################""
+  - id: _log_etalonnage
     parameters:
       mess1: std::string  # Type explicite pour ESPHome
     then:
@@ -784,4 +779,4 @@ script:
           action: notify.send_message
           data:
             entity_id: notify.etalonnage_routeur
-            message: !lambda 'return id(telegram_msg_buffer).c_str();'                
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'            

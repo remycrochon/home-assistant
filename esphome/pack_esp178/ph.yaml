@@ -313,8 +313,7 @@ interval:
           auto now = id(sntp_time).now();
           if (now.is_valid()) {
             if (now.hour == id(heure_injection_ph).hour &&
-                now.minute == id(heure_injection_ph).minute &&
-                now.second == id(heure_injection_ph).second) {
+                now.minute == id(heure_injection_ph).minute) {
               id(_regul_ph).execute();
             }
           }

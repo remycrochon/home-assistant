@@ -1,0 +1,744 @@
+substitutions:
+  device_name: "esp176_routeur"
+  friendly_name: esp176
+  adress_ip: "192.168.0.176"
+  time_timezone: "Europe/Paris"
+  # Affectation des GPIO
+  GPIO_onewire: "GPIO27"
+  GPIO_sda: "GPIO21"
+  GPIO_scl: "GPIO22"
+  GPIO_tx: "GPIO17"
+  GPIO_rx: "GPIO16"  
+  GPIO_Led_jaune: "GPIO26"
+  GPIO_Led_rouge: "GPIO25"
+  GPIO_Led_status: "GPIO32"
+  GPIO_Relais: "GPIO5"
+  # Dimmer
+  GPIO_Gate_pin: "GPIO33"
+  GPIO_ZC_pin: "GPIO34"
+
+
+packages:
+  jsk: !include pack_esp176/jsk.yaml
+  table_pu: !include pack_esp176/table_pu.yaml
+
+esphome:
+  name: ${device_name}
+  on_boot:
+    priority: -100
+    # Force mode auto et tempok au demarrage
+    then: 
+      - binary_sensor.template.publish:
+          id: temperatureok
+          state: ON
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+    
+    
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: ${GPIO_Led_status} # led jaune
+    inverted: true
+
+# Enable logging
+logger:
+  baud_rate: 0
+  level: info
+
+#    modbus.component: INFO
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+web_server:
+  port: 80
+  version: 3
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org  
+
+# Protocole I2C
+i2c:
+  sda: ${GPIO_sda}
+  scl: ${GPIO_scl}
+  scan: True
+  id: bus_a
+  frequency: 400kHz
+
+# Mosquitto Proxmox
+mqtt:
+  broker: 192.168.0.204
+  username: !secret mqtt_pve_name
+  password: !secret mqtt_pve_pw
+  #internal_mqtt_default: internal
+
+globals:
+  - id: p_dispo
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: regul
+    type: std::string
+    restore_value: no
+    initial_value: '"Pas de régulation"'
+  - id: striac
+    type: float
+    restore_value: no
+    initial_value: '0'
+
+  # stocke temporairement le message à envoyer à telegram
+  - id: telegram_msg_buffer
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+
+# Sonde Temperature Dallas
+one_wire:
+  - platform: gpio  
+    pin: ${GPIO_onewire}
+
+# déclaration des modes de fonctionnement dans des "input select"
+select:
+  - platform: template
+    name: "Mode_Fonctionnement_routeur"
+    optimistic: true
+    restore_value: true
+    options:
+      - Auto
+      - Manu
+      - Arret
+      - Etalonnage
+    id: _Mode_Fonctionnement_routeur
+    on_value: 
+      then:
+        - lambda: |-
+            char mess[128];
+            snprintf(mess, sizeof(mess), "Mode Fonctionnement Routeur: %s", id(_Mode_Fonctionnement_routeur).state.c_str());
+            ESP_LOGI("fichier", "Message: %s", mess);
+            id(_log_fichier).execute(mess);  // Appelle le script _log_fichier avec le paramètre mess      
+        # Passage en mode étalonnage
+        - if:
+            condition:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Etalonnage";'
+            then:
+              - script.execute: etalonnage_striac
+        # Passage en mode Manu on remet à Zero le valid Routeur et la consigne Manu
+        - if:
+            condition:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Manu";'
+            then:
+              - lambda: |-
+                  id(ctriac_manu).publish_state(0);
+              - switch.turn_off: validrouteur
+        # Passage dans tous les modes on met à zéro le triac
+        - lambda: |-
+            id(striac) = 0;
+        - light.turn_off:
+            id: gradateur
+        - script.execute: calcul_injection        
+
+binary_sensor:
+  #Etat de la connection
+    - platform: status
+      name: "Status"
+  
+    - platform: template
+      name: "Temp Ok"
+      id: temperatureok
+  
+    - platform: template
+      name: "Seuil Prod Ok"
+      id: seuil_prod_ok
+
+    - platform: template
+      name: "Seuil SOC Ok"
+      id: seuil_soc_ok
+  
+# Input Number
+number:
+  # seuil SOC validation routeur
+  - platform: template
+    name: "Consigne Triac en manu"
+    id: ctriac_manu
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # Max sortie triac
+  - platform: template
+    name: "Puissance Max Triac"
+    id: pmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 10
+    max_value: 3000
+    unit_of_measurement: "W"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # Seuil MAX temperature
+  - platform: template
+    name: "T Max"
+    id: tmax
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 75
+    unit_of_measurement: "C°"
+    step: 0.1
+    icon: mdi:arrow-collapse-vertical
+
+  # Consigne Régul sur Puissance Batteries en mode Bulk
+  - platform: template
+    name: "Reserve Charge Batteries"
+    id: res_pubatt
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 2500
+    unit_of_measurement: "W"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # seuil SOC validation routeur
+  - platform: template
+    name: "Seuil SOC"
+    id: seuil_soc
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "%"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+  # seuil Production Photovoltaique de validation routeur 
+  - platform: template
+    name: "Seuil Production Val Routeur"
+    id: seuil_prod
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 100
+    max_value: 3000
+    unit_of_measurement: "W"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
+sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+    
+  ############### TEMPLATE  ######################"
+  # Affichage dans HA et sur l'afficheur
+  # Puissance lue par le JSk- Négative en injection/Positive en soutirage
+  - platform: template
+    name: "Pu Reseau"
+    id: pureseau1
+    unit_of_measurement: "W"
+    state_class: "measurement"
+    accuracy_decimals: 0
+  # Sortie triac de 0à100%
+  - platform: template
+    name: "Sortie Triac"
+    id: afstriac
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+  # Pu disponible
+  - platform: template
+    name: "Pu Disponible"
+    id: afpdispo
+    unit_of_measurement: "W"
+    state_class: "measurement"
+    accuracy_decimals: 0
+
+  # Sensor Intermediaire pour synoptique
+  - platform: template
+    name: "Cons batt en Cours"
+    id: cons_batt_cours
+    state_class: "measurement"
+    unit_of_measurement: "W"
+    accuracy_decimals: 0
+
+  # Les MQTT sont déclarés dans le Node Red du Cerbo GX
+  # https://venus.local:1881/#flow/dbd727f16cbe7b5f
+
+  - platform: mqtt_subscribe
+    name: "Conso Maison"
+    id: conso_maison
+    topic: mp2/multiplus2/conso_out1
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+
+  - platform: mqtt_subscribe
+    name: "Pu batterie"
+    id: pu_batteries
+    topic: mp2/batteries/puissance
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+        
+  - platform: mqtt_subscribe
+    name: "Pu Produite"
+    id: pu_prod
+    topic: mp2/multiplus2/prod_totale
+    unit_of_measurement: "W"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+
+  - platform: mqtt_subscribe
+    name: "Soc"
+    id: soc
+    topic: mp2/batteries/soc
+    unit_of_measurement: "%"
+    state_class: "measurement"  
+    accuracy_decimals: 2
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+          
+  - platform: mqtt_subscribe
+    name: "Etat Bus VE"
+    id: etatbus_ve
+    topic: mp2/multiplus2/etatbusve
+    accuracy_decimals: 0
+
+  # lecture sensor Home Assistant
+  - platform: homeassistant
+    name: "Status Bus VE"
+    entity_id: sensor.mp2_status_bus_ve
+    id: statusbusve
+
+  - platform: homeassistant
+    name: "Tarif Num"
+    entity_id: sensor.linky_n_tarif
+    id: hc
+  - platform: homeassistant
+    name: "Pu Clim"
+    entity_id: sensor.ecocompteur_clim
+    id: pu_clim
+
+  # Sonde Temperature radiateur
+  - platform: dallas_temp
+    address: 0xeb012112e461b128
+    name: "Temp triac"
+    id: temp_triac
+    update_interval: 60s
+    filters:
+      - filter_out: NAN
+ 
+# déclaration des "text_sensors"
+text_sensor:
+  - platform: template
+    name: "Mode Regulation"
+    id: moderegul
+      
+switch:
+  - platform: gpio
+    name: "Relais"
+    pin: ${GPIO_Relais}
+    id: relais
+
+  - platform: template
+    name: "Valid Routeur"    
+    id: validrouteur
+    optimistic: true
+    restore_mode: always_on
+
+  - platform: restart
+    name: "Restart"
+
+output:
+  #LEDS --------------------------------------
+  - id: led_jaune
+    platform: gpio
+    pin: ${GPIO_Led_jaune} 
+
+  - id: led_rouge
+    platform: gpio
+    pin: ${GPIO_Led_rouge}
+
+  # Pilotage du Dimmer
+  - platform: ac_dimmer
+    id: ecs
+    gate_pin: ${GPIO_Gate_pin}
+    method: leading
+    zero_cross_pin:
+      number: ${GPIO_ZC_pin} 
+      mode:
+        input: true
+      inverted: yes
+    min_power: 5%
+
+light:
+  - platform: monochromatic
+    name: "STriac"
+    output: ecs
+    id: gradateur
+    default_transition_length: 50ms
+
+  # Affichage
+display:
+  - platform: lcd_pcf8574
+    dimensions: 20x4
+    address: 0x27
+    update_interval: 20s  # Plus espacé pour alléger la charge CPU
+    lambda: |-
+      char ligne0[21];
+      char ligne1[21];
+      char ligne2[21];
+      char ligne3[21];
+
+      snprintf(ligne0, sizeof(ligne0), "Pr=%0.0fW Pe=%0.0fW", id(pureseau1).state, id(puecs).state);
+      snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
+      snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac), id(temperatureok).state ? "OK" : "NOK");
+      snprintf(ligne3, sizeof(ligne3), "Mode:%s", id(_Mode_Fonctionnement_routeur).state.c_str());
+
+      it.print(0, 0, ligne0);
+      it.print(0, 1, ligne1);
+      it.print(0, 2, ligne2);
+      it.print(0, 3, ligne3);
+
+interval:
+  - interval: 1s
+    then:
+      - script.execute: calcul_injection
+ 
+  - interval: 5s
+    then:      
+      - script.execute: etat_production
+      - script.execute: calcul_relais_surprod      
+
+ ########################################################################""
+script:
+  # Calcul du niveau de puissance à injecter dans le triac pilotant l'ECS
+  # En Auto: Conditions Initales de Démarrage:
+                                              # Mode de Fct=Auto
+                                              # Seuil Prod Ok
+                                              # Seuil SOC Ok
+                                              # temp Triac Ok
+                                              # Routeur Validé
+  - id: calcul_injection
+    mode: single
+    then:
+      - lambda: |-
+          //  Pu production > Seuil de production
+          id(seuil_prod_ok).publish_state(id(pu_prod).state > id(seuil_prod).state);
+
+          // # Seuil de SOC (avec hysteresis de 2 %)
+          if (id(soc).state >= id(seuil_soc).state) {
+            id(seuil_soc_ok).publish_state(true);
+          } else if (id(soc).state < (id(seuil_soc).state - 2)) {
+            id(seuil_soc_ok).publish_state(false);
+          }
+
+          // Surveille température triac
+          if (id(temp_triac).state < (id(tmax).state - 2)) {
+            id(temperatureok).publish_state(true);
+          } else if (id(temp_triac).state >= id(tmax).state) {
+            id(temperatureok).publish_state(false);
+          }
+          // Log de débug
+          // ESP_LOGI("regulp", "P Prod; %.0f Seuil: %.2f",id(pu_prod).state,id(seuil_prod).state);
+
+      # Si conditions non Ok alors RAZ du Triac
+      - if:
+          condition:
+            or:
+              # Cas 1 : Mode Arret ==> OFF
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Arret";'
+
+              # Cas 2 : Mode auto avec conditions NOK => OFF
+              - and:
+                  - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Auto";'
+                  - or:
+                      - switch.is_off: validrouteur
+                      - binary_sensor.is_off: temperatureok
+                      - binary_sensor.is_off: seuil_prod_ok
+                      - binary_sensor.is_off: seuil_soc_ok
+          then:
+            - lambda: |-
+                id(striac) = 0;
+                id(moderegul).publish_state("OFF");
+                id(afpdispo).publish_state(0);
+                id(cons_batt_cours).publish_state(0);
+                
+            - light.turn_off: gradateur
+            - logger.log:
+                format: "Régulation OFF - Mode: %s - Striac: %.1f"
+                args: ['id(moderegul).state.c_str()', 'id(striac)']
+                level: DEBUG
+      # Si toutes les conditions OK alors on calcule la S triac
+      - if:
+          condition:
+            and:
+              # Cas 3 : Mode auto + toutes les conditions OK => PID actif
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Auto";'
+              - switch.is_on: validrouteur
+              - binary_sensor.is_on: seuil_prod_ok
+              - binary_sensor.is_on: temperatureok
+              - binary_sensor.is_on: seuil_soc_ok
+          then:
+            # Vers script de régulation
+            - script.execute: regulation_interpolation
+
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(striac) / 100;
+              
+      # Mode Manuel
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_routeur).state == "Manu";'
+              - switch.is_on: validrouteur
+
+          then:
+            - lambda: |-
+                // Application de striac avec sécurité
+                id(striac) = id(ctriac_manu).state;
+
+                // Publication des états
+                id(afpdispo).publish_state(0);
+                id(moderegul).publish_state("Manu");
+                id(cons_batt_cours).publish_state(0);
+
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda |-
+                  return id(striac) / 100;
+
+      # Affichage STriac
+      - lambda: |-
+            id(afstriac).publish_state( id(striac)) ;
+  
+  ########################################################################""
+  # Principe de la régulation:
+  # Si Bus Ve en Bulk:, on partage le surplus entre la batterie (cons_batt) et l'ECS
+  #   P Dispo= Prod-Conso Maison-Reserve batteries
+  # Si Bus Ve en Absortion ou Float, cela signifie que la batterie est chargée, alors:
+  #  P Dispo= Prod-Conso Maison-Pu batteries (Negative en décharge)
+  # Sinon:
+  #   P Dispo = 0
+  # La sortie triac est calculée en fonction de la P_Dispo en recherchant sa valeur dans la table de correspondance établie en mode étalonnage
+  - id: regulation_interpolation
+    mode: single
+    then:
+       - lambda: |-
+          float result = 0.0;
+
+          // Sélection de Consigne et Mesure
+          if (id(etatbus_ve).state == 3) {
+            id(p_dispo) = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(res_pubatt).state;
+            if (id(p_dispo) < 0.0) id(p_dispo) = 0.0;
+            id(cons_batt_cours).publish_state(id(res_pubatt).state);
+            id(regul) = "Sur Pu batteries Bulk";
+          } else if ((id(etatbus_ve).state == 4) || (id(etatbus_ve).state == 5)) {
+            id(p_dispo) = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state + id(pu_batteries).state;
+            if (id(p_dispo) < 0.0) id(p_dispo) = 0.0;
+            id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
+            id(regul) = "Sur P Batt Absord/Float";
+          } else {
+            id(regul) = "Pas de régulation";
+            id(cons_batt_cours).publish_state(0);
+            id(p_dispo) = 0;
+          }
+
+          // Limite P dispo
+          id(p_dispo) = constrain(id(p_dispo), 0.0f, id(pmax).state);
+
+          // Interpolation dans la table
+          float striac_f = 0.0f;
+
+          for (size_t i = 1; i < id(table_puissance).size(); i++) {
+            float x0 = id(table_puissance)[i-1].first;   // % Triac
+            float y0 = id(table_puissance)[i-1].second;  // Puissance
+            float x1 = id(table_puissance)[i].first;
+            float y1 = id(table_puissance)[i].second;
+
+            if (id(p_dispo) <= y1) {
+              striac_f = x0 + (id(p_dispo) - y0) * (x1 - x0) / (y1 - y0);
+              break;
+            }
+            striac_f = x1;
+          }
+
+          // Sécurité
+          if (isnan(striac_f)) striac_f = 0.0;
+          id(striac) = constrain(striac_f, 0.0f, 100.0f);
+
+          // Publication
+          id(afpdispo).publish_state(id(p_dispo));
+          id(moderegul).publish_state(id(regul));
+
+          ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_clim: %.2f, pu_batt: %.2f, STriac: %.2f",
+            id(p_dispo), id(pu_prod).state, id(conso_maison).state, id(pu_clim).state, id(cons_batt_cours).state, id(striac));
+  ########################################################################""
+    # Mode Etalonnage Increment S Triac toutes les 20 s pour laisser du temps à la puissance pour se stabiliser
+  - id: etalonnage_striac
+    mode: restart  
+    then:
+
+      - lambda: |-
+          id(striac) = 0.0;
+      - while:
+          condition:
+            lambda: 'return id(striac) < 100.0;'  # S'arrête après striac = 100
+          then:
+            - lambda: |-
+                id(striac) += 1.0; // Incrémente striac
+                ESP_LOGI("striac", "Valeur striac: %.2f", id(striac));
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda 'return id(striac) / 100.0;'  # Normalise entre 0.0 et 1.0
+
+            - delay: 20s  # Temporisation
+
+            - lambda: |-
+                ESP_LOGI("striac", "Valeur striac: %.2f Pu ECS %.0f", id(striac), id(puecs).state);            
+
+            - lambda: |-
+                std::string mess = "{";
+                mess += std::to_string(id(striac)) + ",";
+                mess += std::to_string(id(puecs).state)+"}";
+                ESP_LOGI("fichier", "Message: %s", mess.c_str());
+                id(_log_etalonnage).execute(mess);  // Appelle le script _log_message avec le paramètre mess
+
+      - lambda: |-
+          ESP_LOGI("striac", "Fin de l'étalonnage, striac = %.2f", id(striac));
+
+  ########################################################################""
+    # ------------  Pilotage led
+  - id: etat_production
+    mode: single
+    then:
+      - if: 
+          condition:
+            sensor.in_range:
+              id: pureseau1
+              below: -50
+          then:
+            - output.turn_on: led_rouge
+          else:
+            - output.turn_off: led_rouge
+            
+      - if: 
+          condition:
+            switch.is_on: validrouteur
+          then:
+            - output.turn_on: led_jaune
+          else:
+            - output.turn_off: led_jaune
+ 
+ ########################################################################""
+  - id: calcul_relais_surprod
+    mode: single
+    then:
+     # Si sortie triac > 20 et Pu ECS >10, signifie que le triac est sans effet, pendant plus de 60s et que
+     # la température de l'ECS a atteint son max (Thermostat de l'ECS déclenché)
+     # alors on active le relais
+     # si Pu ECS > 10 alors on desactive le relais
+      - if: 
+          condition:
+            - lambda: 'return (id(striac)>=90 && id(puecs).state<10);'
+          then:
+            - delay: 300s
+            - switch.turn_on: relais
+            - logger.log: "Relais Activé"
+
+      - if: 
+          condition:
+            - lambda: 'return id(puecs).state >= 10;'
+          then:
+            - switch.turn_off: relais
+            - logger.log: "Relais Désactivé"
+ 
+ ########################################################################""
+  - id: _log_fichier
+    parameters:
+      mess1: std::string  # Type explicite pour ESPHome
+    then:
+      - lambda: |-
+          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          id(telegram_msg_buffer) = mess;
+          ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
+      - homeassistant.service:                
+          action: notify.send_message
+          data:
+            entity_id: notify.log_esp176
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'
+########################################################################""
+  - id: _log_etalonnage
+    parameters:
+      mess1: std::string  # Type explicite pour ESPHome
+    then:
+      - lambda: |-
+          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          id(telegram_msg_buffer) = mess;
+          ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
+      - homeassistant.service:                
+          action: notify.send_message
+          data:
+            entity_id: notify.etalonnage_routeur
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'            

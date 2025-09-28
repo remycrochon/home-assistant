@@ -1,0 +1,237 @@
+substitutions:
+  device_name: esp180-hotte-aspirante
+  adress_ip: "192.168.0.180"
+  friendly_name: esp180
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+      
+esp32:
+  board: mhetesp32minikit
+  framework:
+    type: esp-idf
+
+#  on_boot:
+#    priority: 800
+#    then: 
+#      - script.execute: calcul_vitesse    
+    
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 1min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+  baud_rate: 0
+  level: debug
+#  logs:
+#    light.component: very_verbose
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+
+# Connection Bus i2c (Afficheur, EZO,...)
+i2c:
+  sda: 17
+  scl: 16
+  scan: true
+  id: bus_a
+
+# Input Number
+number:
+  # Seuil humidité v1->v2
+  - platform: template
+    name: "${friendly_name} Seuil_V2 Hum"
+    id: seuilv2_hum
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    initial_value: 55
+    unit_of_measurement: "%"
+    step: 1
+
+  # Seuil humidité v2->v3
+  - platform: template
+    name: "${friendly_name} Seuil_V3 Hum"
+    id: seuilv3_hum
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    initial_value: 80
+    unit_of_measurement: "%"
+    step: 1
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
+
+sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+      
+  - platform: htu21d
+    model: htu21d
+    update_interval: 60s
+    temperature:
+      name: "${friendly_name}_Temperature_hotte"
+      id: temp_hotte
+      
+    humidity:
+      name: "${friendly_name}_Humidite_hotte"
+      id: hum_hotte
+      on_value:
+        then:
+          - script.execute: calcul_vitesse
+
+switch:
+  - platform: template
+    name: "${friendly_name} Hotte"    
+    id: hotte
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: v1
+      - delay: 100ms
+      - switch.turn_on: r1_lumiere
+
+    turn_off_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - switch.turn_off: v3  
+      - switch.turn_off: r2
+      - switch.turn_off: r3
+      - switch.turn_off: r4  
+      - switch.turn_off: r1_lumiere
+
+
+  - platform: template
+    name: "${friendly_name} Hotte V1"    
+    id: v1
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: r2      
+      - switch.turn_off: r3
+      - switch.turn_off: r4
+      - switch.turn_off: v2
+      - switch.turn_off: v3
+
+  - platform: template
+    name: "${friendly_name} Hotte V2"    
+    id: v2
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: r2            
+      - switch.turn_on: r3
+      - switch.turn_off: r4
+      - switch.turn_off: v1
+      - switch.turn_off: v3
+
+  - platform: template
+    name: "${friendly_name} Hotte V3"    
+    id: v3
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: r2
+      - switch.turn_off: r3
+      - switch.turn_on: r4
+      - switch.turn_off: v1
+      - switch.turn_off: v2      
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+  - platform: gpio
+    name: "${friendly_name} Hotte Lumiere"
+    pin: GPIO25 
+    id: r1_lumiere
+
+  - platform: gpio
+    name: "${friendly_name} R2"
+    pin: GPIO22
+    id: r2
+
+  - platform: gpio
+    name: "${friendly_name} R3"
+    pin: GPIO27
+    id: r3
+
+  - platform: gpio
+    name: "${friendly_name} R4"
+    pin: GPIO21
+    id: r4
+
+# Déclenchement des scripts à intervalles réguliers
+interval:
+  - interval: 60s
+    then:
+      - script.execute: calcul_vitesse
+
+script:
+  # Calcul vitesse aspiration
+  - id: calcul_vitesse
+    mode: single
+    then:
+
+      # Si Hotte en marche
+      # Si Humidité hotte < seuil v2 alors on enclenche V1
+      - if:
+          condition:
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
+          then:
+            - switch.turn_on: v1
+            - switch.turn_off: v2
+            - switch.turn_off: v3
+      
+      # Si Hotte en marche
+      # Si (humidité hotte > au seuil V1 et < seuil v2) alors on enclenche V2
+      - if:
+          condition:
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state >= id(seuilv2_hum).state;'
+            - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
+          then:
+            - switch.turn_off: v1
+            - switch.turn_on: v2
+            - switch.turn_off: v3
+      
+      # Si Hotte en marche
+      # Si Humidité hotte > au seuil V3 alors on enclenche V3   
+      - if:
+          condition:
+            - switch.is_on: hotte
+            - lambda: 'return id(hum_hotte).state >= id(seuilv3_hum).state;'
+          then:
+            - switch.turn_off: v1
+            - switch.turn_off: v2
+            - switch.turn_on: v3
+

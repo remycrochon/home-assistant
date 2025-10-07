@@ -101,6 +101,15 @@ mqtt:
       unique_id: mp2_valide_cp_par_mqtt" 
       state_topic: "mp2/multiplus2/valide_cp"
 
+    - name: "MP2 DESS Stragegie Reactive"
+      unique_id: mp2_dess_strategie_reactive" 
+      state_topic: "mp2/dess/strategie_reactive"
+
+
+
+
+
+
 # Victron
 modbus:
   - name: cerbo
@@ -725,3 +734,37 @@ template:
           {% endif %}
         attributes:
           last_soc: "{{ states('sensor.mp2_soc_mqtt')|float(0) }}"    
+
+      - name: "DESS Strategie"
+        unique_id: "mp2_dess_strategie_reactive_txt"
+        state: >
+          {% set mapper = {
+            '1': 'SCHEDULED_SELFCONSUME',
+            '2': 'SCHEDULED_CHARGE_ALLOW_GRID',
+            '3': 'SCHEDULED_CHARGE_ENHANCED',
+            '4': 'SELFCONSUME_ACCEPT_CHARGE',
+            '5': 'IDLE_SCHEDULED_FEEDIN',
+            '6': 'SCHEDULED_DISCHARGE',
+            '7': 'SELFCONSUME_ACCEPT_DISCHARGE',
+            '8': 'IDLE_MAINTAIN_SURPLUS',
+            '9': 'IDLE_MAINTAIN_TARGETSOC',
+            '10': 'SCHEDULED_CHARGE_SMOOTH_TRANSITION',
+            '11': 'SCHEDULED_CHARGE_FEEDIN',
+            '12': 'SCHEDULED_CHARGE_NO_GRID',
+            '13': 'SCHEDULED_MINIMUM_DISCHARGE',
+            '14': 'SELFCONSUME_NO_GRID',
+            '15': 'IDLE_NO_OPPORTUNITY',
+            '16': 'UNSCHEDULED_CHARGE_CATCHUP_TARGETSOC',
+            '17': 'SELFCONSUME_INCREASED_DISCHARGE',
+            '18': 'KEEP_BATTERY_CHARGED',
+            '19': 'SCHEDULED_DISCHARGE_SMOOTH_TRANSITION',
+            '92': 'DESS_DISABLED',
+            '93': 'SELFCONSUME_UNEXPECTED_EXCEPTION',
+            '94': 'SELFCONSUME_FAULTY_CHARGERATE',
+            '95': 'UNKNOWN_OPERATING_MODE',
+            '96': 'ESS_LOW_SOC',
+            '97': 'SELFCONSUME_UNMAPPED_STATE',
+            '98': 'SELFCONSUME_UNPREDICTED',
+            '99': 'NO_WINDOW'} %}
+          {% set state =  states('sensor.mp2_dess_strategie_reactive') %}
+          {{ mapper[state] if state in mapper else 'Unknown' }}          

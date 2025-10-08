@@ -1,6 +1,6 @@
 mqtt:
   sensor:
-# MQTT
+  # MQTT
     # 1=Charger Only;2=Inverter Only;3=On;4=Off
     - name: "MP2 Mode Fonctionnement par MQTT"
       unique_id: mp2_mode_fonctionnement_par_mqtt" 
@@ -100,15 +100,52 @@ mqtt:
     - name: "MP2 VALIDE CP MQTT"
       unique_id: mp2_valide_cp_par_mqtt" 
       state_topic: "mp2/multiplus2/valide_cp"
-
-    - name: "MP2 DESS Stragegie Reactive"
-      unique_id: mp2_dess_strategie_reactive" 
+    # DESS
+    - name: "MP2 DESS Strategie Reactive"
+      unique_id: "mp2_dess_strategie_reactive" 
       state_topic: "mp2/dess/strategie_reactive"
-
-
-
-
-
+      value_template: >
+        {% set mapper = {
+          '1': 'Autoconsommation planifiée',
+          '2': 'Charge planifiée (grille autorisée)',
+          '3': 'Charge planifiée renforcée',
+          '4': 'Autoconsommation (charge autorisée)',
+          '5': 'Veille (injection planifiée)',
+          '6': 'Décharge planifiée',
+          '7': 'Autoconsommation (décharge autorisée)',
+          '8': 'Veille (maintien surplus)',
+          '9': 'Veille (maintien SOC cible)',
+          '10': 'Charge planifiée (transition douce)',
+          '11': 'Charge planifiée (avec injection)',
+          '12': 'Charge planifiée (sans grille)',
+          '13': 'Décharge minimale planifiée',
+          '14': 'Autoconsommation (sans grille)',
+          '15': 'Veille (aucune opportunité)',
+          '16': 'Charge non planifiée (rattrapage SOC)',
+          '17': 'Autoconsommation (décharge accrue)',
+          '18': 'Maintien batterie chargée',
+          '19': 'Décharge planifiée (transition douce)',
+          '92': 'ESS désactivé',
+          '93': 'Autoconsommation (erreur imprévue)',
+          '94': 'Débit de charge défectueux',
+          '95': 'Mode inconnu',
+          '96': 'ESS SOC bas',
+          '97': 'Autoconsommation (état non mappé)',
+          '98': 'Autoconsommation (non prédit)',
+          '99': 'Aucune fenêtre active'
+        } %}
+        {{ mapper.get(value, 'Unknown') }}   
+    - name: "MP2 DESS Restiction Active"
+      unique_id: "mp2_dess_restriction_active" 
+      state_topic: "mp2/dess/restriction_active"
+      value_template: >
+        {% set mapper = {
+          '0': 'Aucune restriction entre batterie et réseau',
+          '1': 'Le flux du réseau vers la batterie est restreint',
+          '2': 'Le flux de la batterie vers le réseau est restreint',
+          '3': 'Aucun échange d’énergie entre batterie et réseau'
+        } %}
+        {{ mapper.get(value, 'Unknown') }}
 
 # Victron
 modbus:
@@ -129,8 +166,8 @@ modbus:
           state_off: 4
 
     sensors:
-# Compteur PhotoVoltaique ET112-1 - GRID METER
-# Energie
+      # Compteur PhotoVoltaique ET112-1 - GRID METER
+      # Energie
       # Energy 
       - name: "MP2 Energy Total Energy from net"
         unique_id: "mp2_total_energy_from_net"
@@ -153,7 +190,7 @@ modbus:
         device_class: "energy"
         state_class: "total"
 
-# Compteur PhotoVoltaique ET112-2 - PVMETER
+      # Compteur PhotoVoltaique ET112-2 - PVMETER
       # 
       - name: "MP2 Tension PV"
         unique_id: "mp2_tension_pv"
@@ -195,7 +232,7 @@ modbus:
         device_class: "energy"
         state_class: "total"
 
-# MPPT N1 250/70
+      # MPPT N1 250/70
       # 
       - name: "MP2 MPPT1 Tension PV "
         unique_id: "mp2_mppt1_tension_pv"
@@ -230,7 +267,7 @@ modbus:
         state_class: measurement
 
 
-# Multiplus 2
+      # Multiplus 2
       # PV - AC-coupled on input L1
       # Production PV couplée sur L1
       - name: "MP2 PC AC Couplet on L1"
@@ -366,7 +403,7 @@ modbus:
         scale: 10
 
 
-# Modbus Smart Shunt
+      # Modbus Smart Shunt
         # State of charge - SOC
         # Smart Shunt
       - name: "MP2 SS Tension Batteries"
@@ -453,7 +490,7 @@ modbus:
         state_class: measurement
         
 
-# Modbus MP2
+      # Modbus MP2
       - name: "MP2 Tension Entrée L1"
         unique_id: "mp2_tension_entree_l1"
         data_type: uint16
@@ -699,7 +736,7 @@ template:
         {% else %}
           {{ ((((battery_soc - battery_min_soc) * battery_max_capacity) / 100) / loads_current)|round(2) }}
         {% endif %}
-        
+
   - trigger:
       - platform: time_pattern
         minutes: "/1" # Toutes les minutes
@@ -735,36 +772,4 @@ template:
         attributes:
           last_soc: "{{ states('sensor.mp2_soc_mqtt')|float(0) }}"    
 
-      - name: "DESS Strategie"
-        unique_id: "mp2_dess_strategie_reactive_txt"
-        state: >
-          {% set mapper = {
-            '1': 'SCHEDULED_SELFCONSUME',
-            '2': 'SCHEDULED_CHARGE_ALLOW_GRID',
-            '3': 'SCHEDULED_CHARGE_ENHANCED',
-            '4': 'SELFCONSUME_ACCEPT_CHARGE',
-            '5': 'IDLE_SCHEDULED_FEEDIN',
-            '6': 'SCHEDULED_DISCHARGE',
-            '7': 'SELFCONSUME_ACCEPT_DISCHARGE',
-            '8': 'IDLE_MAINTAIN_SURPLUS',
-            '9': 'IDLE_MAINTAIN_TARGETSOC',
-            '10': 'SCHEDULED_CHARGE_SMOOTH_TRANSITION',
-            '11': 'SCHEDULED_CHARGE_FEEDIN',
-            '12': 'SCHEDULED_CHARGE_NO_GRID',
-            '13': 'SCHEDULED_MINIMUM_DISCHARGE',
-            '14': 'SELFCONSUME_NO_GRID',
-            '15': 'IDLE_NO_OPPORTUNITY',
-            '16': 'UNSCHEDULED_CHARGE_CATCHUP_TARGETSOC',
-            '17': 'SELFCONSUME_INCREASED_DISCHARGE',
-            '18': 'KEEP_BATTERY_CHARGED',
-            '19': 'SCHEDULED_DISCHARGE_SMOOTH_TRANSITION',
-            '92': 'DESS_DISABLED',
-            '93': 'SELFCONSUME_UNEXPECTED_EXCEPTION',
-            '94': 'SELFCONSUME_FAULTY_CHARGERATE',
-            '95': 'UNKNOWN_OPERATING_MODE',
-            '96': 'ESS_LOW_SOC',
-            '97': 'SELFCONSUME_UNMAPPED_STATE',
-            '98': 'SELFCONSUME_UNPREDICTED',
-            '99': 'NO_WINDOW'} %}
-          {% set state =  states('sensor.mp2_dess_strategie_reactive') %}
-          {{ mapper[state] if state in mapper else 'Unknown' }}          
+

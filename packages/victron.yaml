@@ -100,53 +100,31 @@ mqtt:
     - name: "MP2 VALIDE CP MQTT"
       unique_id: mp2_valide_cp_par_mqtt" 
       state_topic: "mp2/multiplus2/valide_cp"
+
     # DESS
     - name: "MP2 DESS Strategie Reactive"
       unique_id: "mp2_dess_strategie_reactive" 
       state_topic: "mp2/dess/strategie_reactive"
-      value_template: >
-        {% set mapper = {
-          '1': 'Autoconsommation planifiée',
-          '2': 'Charge planifiée (grille autorisée)',
-          '3': 'Charge planifiée renforcée',
-          '4': 'Autoconsommation (charge autorisée)',
-          '5': 'Veille (injection planifiée)',
-          '6': 'Décharge planifiée',
-          '7': 'Autoconsommation (décharge autorisée)',
-          '8': 'Veille (maintien surplus)',
-          '9': 'Veille (maintien SOC cible)',
-          '10': 'Charge planifiée (transition douce)',
-          '11': 'Charge planifiée (avec injection)',
-          '12': 'Charge planifiée (sans grille)',
-          '13': 'Décharge minimale planifiée',
-          '14': 'Autoconsommation (sans grille)',
-          '15': 'Veille (aucune opportunité)',
-          '16': 'Charge non planifiée (rattrapage SOC)',
-          '17': 'Autoconsommation (décharge accrue)',
-          '18': 'Maintien batterie chargée',
-          '19': 'Décharge planifiée (transition douce)',
-          '92': 'ESS désactivé',
-          '93': 'Autoconsommation (erreur imprévue)',
-          '94': 'Débit de charge défectueux',
-          '95': 'Mode inconnu',
-          '96': 'ESS SOC bas',
-          '97': 'Autoconsommation (état non mappé)',
-          '98': 'Autoconsommation (non prédit)',
-          '99': 'Aucune fenêtre active'
-        } %}
-        {{ mapper.get(value, 'Unknown') }}   
+
     - name: "MP2 DESS Restiction Active"
       unique_id: "mp2_dess_restriction_active" 
       state_topic: "mp2/dess/restriction_active"
-      value_template: >
-        {% set mapper = {
-          '0': 'Aucune restriction entre batterie et réseau',
-          '1': 'Le flux du réseau vers la batterie est restreint',
-          '2': 'Le flux de la batterie vers le réseau est restreint',
-          '3': 'Aucun échange d’énergie entre batterie et réseau'
-        } %}
-        {{ mapper.get(value, 'Unknown') }}
 
+    - name: "MP2 DESS Cible SOC dans l'heure"
+      unique_id: "mp2_dess_cible_soc_heure" 
+      state_topic: "mp2/dess/cible_soc_heure"
+
+    - name: "MP2 DESS Stratégie Dans l'heure"
+      unique_id: "mp2_dess_strategie_heure" 
+      state_topic: "mp2/dess/stratégie_heure"
+
+    - name: "MP2 DESS Status"
+      unique_id: "mp2_dess_status" 
+      state_topic: "mp2/dess/status"
+
+    - name: "MP2 DESS Erreur"
+      unique_id: "mp2_dess_erreur" 
+      state_topic: "mp2/dess/erreur"
 # Victron
 modbus:
   - name: cerbo

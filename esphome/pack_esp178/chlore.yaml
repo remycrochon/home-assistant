@@ -41,6 +41,10 @@ globals:
   - id: g_tps_injection_chlore
     type: float
     restore_value: no
+  # volume chlore
+  - id: g_volume_chlore
+    type: float
+    restore_value: no
 
   # Cumul de la conso Chlore totale et jour
   - id: g_conso_chl_totale
@@ -157,6 +161,19 @@ number:
     mode: box    
     unit_of_measurement: "%"
     icon: mdi:percent
+
+  # Niveau Chlore en mode Horaire
+  - platform: template
+    name: "chlore_cible_mode_h"
+    id: _chlore_cible_mode_h
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 10
+    unit_of_measurement: "ppm"
+    step: 0.01
+    icon: mdi:biohazard
 
   # Tps Max Galet Chlore
   - platform: template
@@ -376,12 +393,18 @@ script:
           then:
             - lambda: |-
                 float temps = 0.0f;
+                // consigne Volume clhore en mode Horaire
+                if (id(_Mode_Fonctionnement_filtration).state == "Horaire"){
+                  id(g_tps_injection_chlore)=id(_chlore_cible_mode_h).state;
+                } else {
+                  id(g_tps_injection_chlore)=id(_chlore_cible).state;
+                }
 
                 if (id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm") {
                   // Boucle ouverte : dosage selon concentration cible
                   float mp = 96.0f;   // concentration chlore actif en g/L (9.6%)
                   float vb = 50000.0f;  // volume piscine en L
-                  float nb = id(_chlore_cible).state;  // mg/L
+                  float nb = id(g_tps_injection_chlore);  // mg/L
                   float de = id(_debit_ppe_chlore).state;  // L/h
                   float q = (nb * vb) / (mp * 1000.0f);  // L
                   if (de > 0) {
@@ -425,6 +448,7 @@ script:
                 level: INFO
             - lambda: |-
                 std::string mess = "ESP178 Temps inj Chlore";
+                mess += "Poids Bidon Chlore: " + std::to_string(id(_poids_chlore).state)+" kg";
                 id(_message_telegram)->execute(mess, id(g_tps_injection_chlore));
                 id(_log_fichier)->execute(mess, id(g_tps_injection_chlore));
 

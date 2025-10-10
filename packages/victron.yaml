@@ -20,27 +20,6 @@ mqtt:
       device_class: power
       state_class: measurement
 
-    - name: "MP2 Prod VRM MO MQTT"
-      unique_id: mp2_prod_vrm_mo_mqtt" 
-      state_topic: "mp2/prediction/prod_onduleur"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: measurement
-
-    - name: "MP2 Prod VRM MPPT1 MQTT"
-      unique_id: mp2_prod_vrm_mppt1_mqtt" 
-      state_topic: "mp2/prediction/prod_mppt1"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: measurement
-
-    - name: "MP2 Prod VRM TOTAL MQTT"
-      unique_id: mp2_prod_vrm_total_mqtt" 
-      state_topic: "mp2/prediction/prod_total"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: measurement      
-
     - name: "MP2 Pu Grid L1 AC MQTT"
       unique_id: mp2_pu_grid_l1_mqtt" 
       state_topic: "mp2/multiplus2/grid_l1_ac"
@@ -61,13 +40,6 @@ mqtt:
       unit_of_measurement: 'W'
       device_class: power
       state_class: measurement 
-
-    - name: "MP2 Cible SOC par MQTT"
-      unique_id: mp2_cible_soc_par_mqtt" 
-      state_topic: "mp2/batteries/cible_soc"
-      unit_of_measurement: '%'
-      device_class: battery
-      state_class: measurement
 
     - name: "MP2 SOC theorique par MQTT"
       unique_id: mp2_soc_theorique_par_mqtt" 
@@ -100,6 +72,47 @@ mqtt:
     - name: "MP2 VALIDE CP MQTT"
       unique_id: mp2_valide_cp_par_mqtt" 
       state_topic: "mp2/multiplus2/valide_cp"
+
+      # DESS Remy
+
+    - name: "MP2 Prod VRM MO MQTT"
+      unique_id: mp2_prod_vrm_mo_mqtt" 
+      state_topic: "mp2/dess_remy/prod_onduleur"
+      unit_of_measurement: 'kW'
+      device_class: power
+      state_class: measurement
+
+    - name: "MP2 Prod VRM MPPT1 MQTT"
+      unique_id: mp2_prod_vrm_mppt1_mqtt" 
+      state_topic: "mp2/dess_remy/prod_mppt1"
+      unit_of_measurement: 'kW'
+      device_class: power
+      state_class: measurement
+
+    - name: "MP2 Prod VRM TOTAL MQTT"
+      unique_id: mp2_prod_vrm_total_mqtt" 
+      state_topic: "mp2/dess_remy/prod_total"
+      unit_of_measurement: 'kW'
+      device_class: power
+      state_class: measurement      
+
+    - name: "MP2 Cible SOC par MQTT"
+      unique_id: mp2_cible_soc_par_mqtt" 
+      state_topic: "mp2/dess_remy/cible_soc"
+      unit_of_measurement: '%'
+      device_class: battery
+      state_class: measurement
+
+    - name: "MP2 DESS Difference Cible-SOC"
+      unique_id: mp2_difference_cible_soc" 
+      state_topic: "mp2/dess_remy/diff_soc"
+      unit_of_measurement: '%'
+      device_class: battery
+      state_class: measurement
+
+    - name: "MP2 DESS H_Debut DESS Remy"
+      unique_id: mp2_dess_h_debut" 
+      state_topic: "mp2/dess_remy/h_debut"      
 
     # DESS
     - name: "MP2 DESS Strategie Reactive"

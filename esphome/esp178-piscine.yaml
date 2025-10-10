@@ -198,7 +198,7 @@ globals:
       restore_value: no
       initial_value: 'false'
 
-    # mémorise la durée de filtation dans les différents modes de fonctionnement
+    # mémorise la durée de filtration dans les différents modes de fonctionnement
     - id: g_tps_filtration
       type: float
       restore_value: no
@@ -211,6 +211,13 @@ globals:
     - id: g_temps_min_filtration
       type: float
       initial_value: '5'
+    # Flag en mode horaire
+    - id: flag_mode_h
+      type: bool
+      restore_value: no
+      initial_value: 'false'
+
+
     # Paliers temperature/Temps filtration avec le mode "Palier"
     # Seuils Température en °C
     # la durée est calculée manuellement par rapport au volume de la piscine: Vol=9*4*1.4=50.4 m3
@@ -858,7 +865,8 @@ script:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
             - lambda: 'return id(ent_at_force).state == false;'    
-            - lambda: 'return id(g_flag_hg) == false;'        
+            - lambda: 'return id(g_flag_hg) == false;'  
+     
           then:
             - lambda: |-
                   id(g_tps_filtration)=id(g_abaque_a)*pow(id(g_memoire_temp_eau),3)+id(g_abaque_b)*pow(id(g_memoire_temp_eau),2)+id(g_abaque_c)*id(g_memoire_temp_eau)+id(g_abaque_d);
@@ -881,9 +889,9 @@ script:
             - lambda: 'return id(g_flag_hg) == false;'
           then:
             - logger.log:
-                format: "Mode Abaque / Valeur Mem Temp: %.2f"
-                args: [ 'id(g_memoire_temp_eau)' ]
-                level: DEBUG
+                format: "Flag 1 Mode_h: %i "
+                args: [ 'id(flag_mode_h)' ]
+                level: INFO
 
             - datetime.time.set:
                 id: h_debut
@@ -915,8 +923,26 @@ script:
                         id(h_debut).hour, id(h_debut).minute,
                         id(duree_mode_horaire).hour, id(duree_mode_horaire).minute,
                         id(h_fin).hour, id(h_fin).minute);
+
+            - script.execute: _calcul_ma_at_ppe_filtration    
                
-            - script.execute: _calcul_ma_at_ppe_filtration
+            - if:
+                condition:
+                  - lambda: 'return !id(flag_mode_h);'
+                then:
+                  - lambda: |-
+                      id(flag_mode_h) = true;
+                  - if:
+                      condition:
+                        - lambda: 'return id(_chlore_cible_mode_h).state > 0;'
+                      then:
+                        - logger.log:
+                            format: "Exec Chore-Flag 2 Mode_h: %i "
+                            args: [ 'id(flag_mode_h)' ]
+                            level: INFO   
+                        - delay: 60s 
+                        - script.execute: _regul_chlore
+
 
   # Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
   # La variable: g_tps_filtration contient la durée en heure
@@ -1023,6 +1049,8 @@ script:
             - switch.turn_on: cde_ppe_filtration
           else:
             - switch.turn_off: cde_ppe_filtration
+            - lambda: |-
+                  id(flag_mode_h) = false;
     
              
   # Envoi d'un message à Telegram via HA, celui ci doit etre operationnel

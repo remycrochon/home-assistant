@@ -1000,8 +1000,8 @@
   - at: '22:05:00'
     id: '22:05'
     trigger: time
-  - at: 03:48:00
-    id: 3h48
+  - at: '22:00:00'
+    id: '22:00'
     trigger: time
   conditions: []
   actions:
@@ -1009,7 +1009,7 @@
     - conditions:
       - condition: trigger
         id:
-        - 3h48
+        - '22:00'
       sequence:
       - data_template:
           entity_id: input_number.mp2_memoire_estimation_production_jour
@@ -1025,12 +1025,11 @@
         metadata: {}
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: "    {{states(\"sensor.date_time\") }}{{-\"\\n\"-}} Prévi Prod
-            PV du Jour={{states('input_number.mp2_memoire_estimation_production_jour')}}
-            kwh{{-\"\\n\"-}} Prod PV du Jour={{states('sensor.mp2_total_energie_produite_jour')}}
-            kwh{{-\"\\n\"-}}\n    Prévi Prod PV Demain={{states('sensor.mp2_prod_vrm_total_mqtt')}}
-            kwh{{-\"\\n\"-}} SOC Actuel={{states('sensor.mp2_soc_mqtt')}} %{{-\"\\n\"-}}\n
-            \   SOC Cible= {{states('sensor.mp2_cible_soc_par_mqtt')}} %{{-\"\\n\"-}}"
+          message: "    {{states(\"sensor.date_time\") }}{{-\"\\n\"-}} Prévi ={{states('input_number.mp2_memoire_estimation_production_jour')}}
+            kwh / Realisée={{states('sensor.mp2_total_energie_produite_jour')}} kwh{{-\"\\n\"-}}\n
+            \   Prévi Demain={{states('sensor.mp2_prod_vrm_total_mqtt')}} kwh{{-\"\\n\"-}}
+            SOC Cible= {{states('sensor.mp2_cible_soc_par_mqtt')}} %-Actuel={{states('sensor.mp2_soc_mqtt')}}
+            %{{-\"\\n\"-}}\nh Debut= {{states('sensor.mp2_dess_h_debut_dess_remy')}}\n"
           title: Rapport Production PV
   mode: single
 - id: '1698053985865'

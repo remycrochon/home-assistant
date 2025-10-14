@@ -91,9 +91,9 @@ i2c:
 
 # Mosquitto Proxmox
 mqtt:
-  broker: 192.168.0.204
-  username: !secret mqtt_pve_name
-  password: !secret mqtt_pve_pw
+  broker: 192.168.0.37
+  username: !secret mqtt_ha_name
+  password: !secret mqtt_ha_pw
   #internal_mqtt_default: internal
 
 globals:

@@ -1636,6 +1636,10 @@ const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
 };
 
 
+var $71f67b2c94b2fafe$exports = {};
+$71f67b2c94b2fafe$exports = JSON.parse('{"card":{"stats":{"total_queries":"\u03A3\u03C5\u03BD\u03BF\u03BB\u03B9\u03BA\u03AC \u03B5\u03C1\u03C9\u03C4\u03AE\u03BC\u03B1\u03C4\u03B1","active_clients":"{number} \u03B5\u03BD\u03B5\u03C1\u03B3\u03BF\u03AF \u03C0\u03B5\u03BB\u03AC\u03C4\u03B5\u03C2","queries_blocked":"\u0391\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03AD\u03BD\u03B1 \u0395\u03C1\u03C9\u03C4\u03AE\u03BC\u03B1\u03C4\u03B1","list_blocked_queries":"\u039B\u03AF\u03C3\u03C4\u03B1 \u03B1\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03AD\u03BD\u03C9\u03BD \u03B5\u03C1\u03C9\u03C4\u03B7\u03BC\u03AC\u03C4\u03C9\u03BD","percentage_blocked":"\u03A0\u03BF\u03C3\u03BF\u03C3\u03C4\u03CC \u03C0\u03BF\u03C5 \u03B1\u03C0\u03BF\u03BA\u03BB\u03B5\u03AF\u03C3\u03C4\u03B7\u03BA\u03B5","list_all_queries":"\u039B\u03AF\u03C3\u03C4\u03B1 \u03CC\u03BB\u03C9\u03BD \u03C4\u03C9\u03BD \u03B5\u03C1\u03C9\u03C4\u03B7\u03BC\u03AC\u03C4\u03C9\u03BD","domains_on_lists":"\u03A4\u03BF\u03BC\u03B5\u03AF\u03C2 \u03C3\u03C4\u03B9\u03C2 \u039B\u03AF\u03C3\u03C4\u03B5\u03C2","manage_lists":"\u0394\u03B9\u03B1\u03C7\u03B5\u03AF\u03C1\u03B9\u03C3\u03B7 \u039B\u03B9\u03C3\u03C4\u03CE\u03BD"},"sections":{"pause":"\u03A0\u03B1\u03CD\u03C3\u03B7 \u0391\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03BF\u03CD \u0394\u03B9\u03B1\u03C6\u03B7\u03BC\u03AF\u03C3\u03B5\u03C9\u03BD","switches":"\u0394\u03B9\u03B1\u03BA\u03CC\u03C0\u03C4\u03B5\u03C2","actions":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B5\u03C2"},"units":{"seconds":"\u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03B1","second":"\u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03BF","minutes":"\u03BB\u03B5\u03C0\u03C4\u03AC","minute":"\u03BB\u03B5\u03C0\u03C4\u03CC","hours":"\u03CE\u03C1\u03B5\u03C2","hour":"\u03CE\u03C1\u03B1"}}}');
+
+
 var $9a28a77a5af263d9$exports = {};
 $9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"},\"sections\":{\"pause\":\"Pause Ad-Blocking\",\"switches\":\"Switches\",\"actions\":\"Actions\"},\"units\":{\"seconds\":\"seconds\",\"second\":\"second\",\"minutes\":\"minutes\",\"minute\":\"minute\",\"hours\":\"hours\",\"hour\":\"hour\"}}}");
 
@@ -1644,11 +1648,17 @@ var $ac00f57d502abb29$exports = {};
 $ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"},\"sections\":{\"pause\":\"Pausar Bloqueo de Anuncios\",\"switches\":\"Interruptores\",\"actions\":\"Acciones\"},\"units\":{\"seconds\":\"segundos\",\"second\":\"segundo\",\"minutes\":\"minutos\",\"minute\":\"minuto\",\"hours\":\"horas\",\"hour\":\"hora\"}}}");
 
 
+var $311afcb0e9c10c81$exports = {};
+$311afcb0e9c10c81$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Gesamtanzahl der Anfragen\",\"active_clients\":\"{number} aktive Clients\",\"queries_blocked\":\"Blockierte Anfragen\",\"list_blocked_queries\":\"Blockierte Anfragen anzeigen\",\"percentage_blocked\":\"Prozentual blockiert\",\"list_all_queries\":\"Alle Anfragen anzeigen\",\"domains_on_lists\":\"Domains auf Listen\",\"manage_lists\":\"Listen verwalten\"},\"sections\":{\"pause\":\"Werbeblockierung pausieren\",\"switches\":\"Schalter\",\"actions\":\"Aktionen\"},\"units\":{\"seconds\":\"Sekunden\",\"second\":\"Sekunde\",\"minutes\":\"Minuten\",\"minute\":\"Minute\",\"hours\":\"Stunden\",\"hour\":\"Stunde\"}}}");
+
+
 // Import other languages as needed above this line and in order
 // Define supported languages
 const $623ffaa3e77fea87$var$languages = {
+    el: $71f67b2c94b2fafe$exports,
     en: $9a28a77a5af263d9$exports,
-    es: $ac00f57d502abb29$exports
+    es: $ac00f57d502abb29$exports,
+    de: $311afcb0e9c10c81$exports
 };
 const $623ffaa3e77fea87$export$b3bd0bc58e36cd63 = (hass, key, search = '', replace = '')=>{
     let translated;
@@ -3479,7 +3489,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.15.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.15.4\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^21.1.7\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^5.3.1\",\"jsdom\":\"^26.1.0\",\"mocha\":\"^11.7.1\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.15.4\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.2.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.2\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.16.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.16.0\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^27.0.0\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^6.2.0\",\"jsdom\":\"^27.0.0\",\"mocha\":\"^11.7.4\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.16.0\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.3.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
 
 
 // Register the custom elements with the browser

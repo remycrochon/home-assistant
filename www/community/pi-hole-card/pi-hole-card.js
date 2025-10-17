@@ -1255,6 +1255,50 @@ function $043ab5348dd51237$export$c0e85c3982a3daa6(stateObj, state) {
 }
 
 
+var $71f67b2c94b2fafe$exports = {};
+$71f67b2c94b2fafe$exports = JSON.parse('{"card":{"stats":{"total_queries":"\u03A3\u03C5\u03BD\u03BF\u03BB\u03B9\u03BA\u03AC \u03B5\u03C1\u03C9\u03C4\u03AE\u03BC\u03B1\u03C4\u03B1","active_clients":"{number} \u03B5\u03BD\u03B5\u03C1\u03B3\u03BF\u03AF \u03C0\u03B5\u03BB\u03AC\u03C4\u03B5\u03C2","queries_blocked":"\u0391\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03AD\u03BD\u03B1 \u0395\u03C1\u03C9\u03C4\u03AE\u03BC\u03B1\u03C4\u03B1","list_blocked_queries":"\u039B\u03AF\u03C3\u03C4\u03B1 \u03B1\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03AD\u03BD\u03C9\u03BD \u03B5\u03C1\u03C9\u03C4\u03B7\u03BC\u03AC\u03C4\u03C9\u03BD","percentage_blocked":"\u03A0\u03BF\u03C3\u03BF\u03C3\u03C4\u03CC \u03C0\u03BF\u03C5 \u03B1\u03C0\u03BF\u03BA\u03BB\u03B5\u03AF\u03C3\u03C4\u03B7\u03BA\u03B5","list_all_queries":"\u039B\u03AF\u03C3\u03C4\u03B1 \u03CC\u03BB\u03C9\u03BD \u03C4\u03C9\u03BD \u03B5\u03C1\u03C9\u03C4\u03B7\u03BC\u03AC\u03C4\u03C9\u03BD","domains_on_lists":"\u03A4\u03BF\u03BC\u03B5\u03AF\u03C2 \u03C3\u03C4\u03B9\u03C2 \u039B\u03AF\u03C3\u03C4\u03B5\u03C2","manage_lists":"\u0394\u03B9\u03B1\u03C7\u03B5\u03AF\u03C1\u03B9\u03C3\u03B7 \u039B\u03B9\u03C3\u03C4\u03CE\u03BD"},"sections":{"pause":"\u03A0\u03B1\u03CD\u03C3\u03B7 \u0391\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03BF\u03CD \u0394\u03B9\u03B1\u03C6\u03B7\u03BC\u03AF\u03C3\u03B5\u03C9\u03BD","switches":"\u0394\u03B9\u03B1\u03BA\u03CC\u03C0\u03C4\u03B5\u03C2","actions":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B5\u03C2"},"units":{"seconds":"\u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03B1","second":"\u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03BF","minutes":"\u03BB\u03B5\u03C0\u03C4\u03AC","minute":"\u03BB\u03B5\u03C0\u03C4\u03CC","hours":"\u03CE\u03C1\u03B5\u03C2","hour":"\u03CE\u03C1\u03B1"},"ui":{"select_pi_or_group":"\u0395\u03C0\u03B9\u03BB\u03AD\u03BE\u03C4\u03B5 Pi \u03AE \u039F\u03BC\u03AC\u03B4\u03B1","partial":"\u039C\u03B5\u03C1\u03B9\u03BA\u03CC"}},"editor":{"space_around":"\u03A7\u03CE\u03C1\u03BF\u03C2 \u0393\u03CD\u03C1\u03C9","space_between":"\u03A7\u03CE\u03C1\u03BF\u03C2 \u0391\u03BD\u03AC\u03BC\u03B5\u03C3\u03B1","actions":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B5\u03C2","footer":"\u03A5\u03C0\u03BF\u03C3\u03AD\u03BB\u03B9\u03B4\u03BF","header":"\u039A\u03B5\u03C6\u03B1\u03BB\u03AF\u03B4\u03B1","pause_buttons":"\u039A\u03BF\u03C5\u03BC\u03C0\u03B9\u03AC \u03A0\u03B1\u03CD\u03C3\u03B7\u03C2","statistics":"\u03A3\u03C4\u03B1\u03C4\u03B9\u03C3\u03C4\u03B9\u03BA\u03AC","sensors":"\u0391\u03B9\u03C3\u03B8\u03B7\u03C4\u03AE\u03C1\u03B5\u03C2","switches":"\u0394\u03B9\u03B1\u03BA\u03CC\u03C0\u03C4\u03B5\u03C2","tap_action":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B1 \u0391\u03C6\u03AE\u03C2","hold_action":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B1 \u039A\u03C1\u03AC\u03C4\u03B7\u03C3\u03B7\u03C2","double_tap_action":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B1 \u0394\u03B9\u03C0\u03BB\u03AE\u03C2 \u0391\u03C6\u03AE\u03C2","content":"\u03A0\u03B5\u03C1\u03B9\u03B5\u03C7\u03CC\u03BC\u03B5\u03BD\u03BF","card_title":"\u03A4\u03AF\u03C4\u03BB\u03BF\u03C2 \u039A\u03AC\u03C1\u03C4\u03B1\u03C2","card_icon":"\u0395\u03B9\u03BA\u03BF\u03BD\u03AF\u03B4\u03B9\u03BF \u039A\u03AC\u03C1\u03C4\u03B1\u03C2","layout":"\u0394\u03B9\u03AC\u03C4\u03B1\u03BE\u03B7","sections_to_exclude":"\u0395\u03BD\u03CC\u03C4\u03B7\u03C4\u03B5\u03C2 \u03C0\u03C1\u03BF\u03C2 \u03B5\u03BE\u03B1\u03AF\u03C1\u03B5\u03C3\u03B7","sections_collapsed_by_default":"\u0395\u03BD\u03CC\u03C4\u03B7\u03C4\u03B5\u03C2 \u03C0\u03BF\u03C5 \u03C3\u03C5\u03BC\u03C0\u03C4\u03CD\u03C3\u03C3\u03BF\u03BD\u03C4\u03B1\u03B9 \u03B1\u03C0\u03CC \u03C0\u03C1\u03BF\u03B5\u03C0\u03B9\u03BB\u03BF\u03B3\u03AE","style_for_switches":"\u03A3\u03C4\u03C5\u03BB \u03B3\u03B9\u03B1 \u03B4\u03B9\u03B1\u03BA\u03CC\u03C0\u03C4\u03B5\u03C2","entities_to_exclude":"\u039F\u03BD\u03C4\u03CC\u03C4\u03B7\u03C4\u03B5\u03C2 \u03C0\u03C1\u03BF\u03C2 \u03B5\u03BE\u03B1\u03AF\u03C1\u03B5\u03C3\u03B7","styles":"\u03A3\u03C4\u03C5\u03BB","switch_spacing":"\u0394\u03B9\u03AC\u03C3\u03C4\u03B7\u03BC\u03B1 \u0394\u03B9\u03B1\u03BA\u03BF\u03C0\u03C4\u03CE\u03BD","interactions":"\u0391\u03BB\u03BB\u03B7\u03BB\u03B5\u03C0\u03B9\u03B4\u03C1\u03AC\u03C3\u03B5\u03B9\u03C2","pause_durations":"\u0394\u03B9\u03AC\u03C1\u03BA\u03B5\u03B9\u03B5\u03C2 \u03C0\u03B1\u03CD\u03C3\u03B7\u03C2","badge":"\u03A3\u03AE\u03BC\u03B1","information":"\u03A0\u03BB\u03B7\u03C1\u03BF\u03C6\u03BF\u03C1\u03AF\u03B5\u03C2","controls":"\u0388\u03BB\u03B5\u03B3\u03C7\u03BF\u03B9","features":"\u03A7\u03B1\u03C1\u03B1\u03BA\u03C4\u03B7\u03C1\u03B9\u03C3\u03C4\u03B9\u03BA\u03AC","disable_group_pausing":"\u0391\u03C0\u03B5\u03BD\u03B5\u03C1\u03B3\u03BF\u03C0\u03BF\u03AF\u03B7\u03C3\u03B7 \u03C0\u03B1\u03CD\u03C3\u03B7\u03C2 \u03BF\u03BC\u03AC\u03B4\u03B1\u03C2","pause_60_seconds":"60 \u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03B1","pause_5_minutes":"5 \u03BB\u03B5\u03C0\u03C4\u03AC","pause_15_minutes":"15 \u03BB\u03B5\u03C0\u03C4\u03AC","pi_hole_device":"\u03A3\u03C5\u03C3\u03BA\u03B5\u03C5\u03AE Pi-hole","entity_display_order":"\u03A3\u03B5\u03B9\u03C1\u03AC \u03B5\u03BC\u03C6\u03AC\u03BD\u03B9\u03C3\u03B7\u03C2 \u03BF\u03BD\u03C4\u03BF\u03C4\u03AE\u03C4\u03C9\u03BD (\u03BA\u03AC\u03BD\u03C4\u03B5 \u03BA\u03BB\u03B9\u03BA \u03BC\u03B5 \u03C3\u03B5\u03B9\u03C1\u03AC)","flex_default":"Flex (\u03C0\u03C1\u03BF\u03B5\u03C0\u03B9\u03BB\u03BF\u03B3\u03AE)"}}');
+
+
+var $9a28a77a5af263d9$exports = {};
+$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"},\"sections\":{\"pause\":\"Pause Ad-Blocking\",\"switches\":\"Switches\",\"actions\":\"Actions\"},\"units\":{\"seconds\":\"seconds\",\"second\":\"second\",\"minutes\":\"minutes\",\"minute\":\"minute\",\"hours\":\"hours\",\"hour\":\"hour\"},\"ui\":{\"select_pi_or_group\":\"Select Pi or Group\",\"partial\":\"Partial\"}},\"editor\":{\"space_around\":\"Space Around\",\"space_between\":\"Space Between\",\"actions\":\"Actions\",\"footer\":\"Footer\",\"header\":\"Header\",\"pause_buttons\":\"Pause Buttons\",\"statistics\":\"Statistics\",\"sensors\":\"Sensors\",\"switches\":\"Switches\",\"tap_action\":\"Tap Action\",\"hold_action\":\"Hold Action\",\"double_tap_action\":\"Double Tap Action\",\"content\":\"Content\",\"card_title\":\"Card Title\",\"card_icon\":\"Card Icon\",\"layout\":\"Layout\",\"sections_to_exclude\":\"Sections to exclude\",\"sections_collapsed_by_default\":\"Sections collapsed by default\",\"style_for_switches\":\"Style for switches\",\"entities_to_exclude\":\"Entities to exclude\",\"styles\":\"Styles\",\"switch_spacing\":\"Switch Spacing\",\"interactions\":\"Interactions\",\"pause_durations\":\"Pause durations\",\"badge\":\"Badge\",\"information\":\"Information\",\"controls\":\"Controls\",\"features\":\"Features\",\"disable_group_pausing\":\"Disable group pausing\",\"pause_60_seconds\":\"60 seconds\",\"pause_5_minutes\":\"5 minutes\",\"pause_15_minutes\":\"15 minutes\",\"pi_hole_device\":\"Pi-hole Device\",\"entity_display_order\":\"Entity display order (click in order)\",\"flex_default\":\"Flex (default)\"}}");
+
+
+var $ac00f57d502abb29$exports = {};
+$ac00f57d502abb29$exports = JSON.parse('{"card":{"stats":{"total_queries":"Peticiones totales","active_clients":"{number} clientes activos","queries_blocked":"Peticiones bloqueadas","list_blocked_queries":"Listar peticiones bloqueadas","percentage_blocked":"Porcentaje bloqueos","list_all_queries":"Listar todas las peticiones","domains_on_lists":"Dominios bloqueados","manage_lists":"Gestionar listas"},"sections":{"pause":"Pausar Bloqueo de Anuncios","switches":"Interruptores","actions":"Acciones"},"units":{"seconds":"segundos","second":"segundo","minutes":"minutos","minute":"minuto","hours":"horas","hour":"hora"},"ui":{"select_pi_or_group":"Seleccionar Pi o Grupo","partial":"Parcial"}},"editor":{"space_around":"Espacio Alrededor","space_between":"Espacio Entre","actions":"Acciones","footer":"Pie de P\xe1gina","header":"Encabezado","pause_buttons":"Botones de Pausa","statistics":"Estad\xedsticas","sensors":"Sensores","switches":"Interruptores","tap_action":"Acci\xf3n de Toque","hold_action":"Acci\xf3n de Mantener","double_tap_action":"Acci\xf3n de Doble Toque","content":"Contenido","card_title":"T\xedtulo de la Tarjeta","card_icon":"Icono de la Tarjeta","layout":"Dise\xf1o","sections_to_exclude":"Secciones a excluir","sections_collapsed_by_default":"Secciones colapsadas por defecto","style_for_switches":"Estilo para interruptores","entities_to_exclude":"Entidades a excluir","styles":"Estilos","switch_spacing":"Espaciado de Interruptores","interactions":"Interacciones","pause_durations":"Duraci\xf3n de pausas","badge":"Insignia","information":"Informaci\xf3n","controls":"Controles","features":"Caracter\xedsticas","disable_group_pausing":"Deshabilitar pausa de grupo","pause_60_seconds":"60 segundos","pause_5_minutes":"5 minutos","pause_15_minutes":"15 minutos","pi_hole_device":"Dispositivo Pi-hole","entity_display_order":"Orden de visualizaci\xf3n de entidades (hacer clic en orden)","flex_default":"Flex (predeterminado)"}}');
+
+
+var $311afcb0e9c10c81$exports = {};
+$311afcb0e9c10c81$exports = JSON.parse('{"card":{"stats":{"total_queries":"Gesamtanzahl der Anfragen","active_clients":"{number} aktive Clients","queries_blocked":"Blockierte Anfragen","list_blocked_queries":"Blockierte Anfragen anzeigen","percentage_blocked":"Prozentual blockiert","list_all_queries":"Alle Anfragen anzeigen","domains_on_lists":"Domains auf Listen","manage_lists":"Listen verwalten"},"sections":{"pause":"Werbeblockierung pausieren","switches":"Schalter","actions":"Aktionen"},"units":{"seconds":"Sekunden","second":"Sekunde","minutes":"Minuten","minute":"Minute","hours":"Stunden","hour":"Stunde"},"ui":{"select_pi_or_group":"Pi oder Gruppe ausw\xe4hlen","partial":"Teilweise"}},"editor":{"space_around":"Platz umher","space_between":"Platz dazwischen","actions":"Aktionen","footer":"Fu\xdfzeile","header":"Kopfzeile","pause_buttons":"Pause-Tasten","statistics":"Statistiken","sensors":"Sensoren","switches":"Schalter","tap_action":"Tipp-Aktion","hold_action":"Halte-Aktion","double_tap_action":"Doppel-Tipp-Aktion","content":"Inhalt","card_title":"Karten-Titel","card_icon":"Karten-Symbol","layout":"Layout","sections_to_exclude":"Auszuschlie\xdfende Abschnitte","sections_collapsed_by_default":"Standardm\xe4\xdfig eingeklappte Abschnitte","style_for_switches":"Stil f\xfcr Schalter","entities_to_exclude":"Auszuschlie\xdfende Entit\xe4ten","styles":"Stile","switch_spacing":"Schalter-Abstand","interactions":"Interaktionen","pause_durations":"Pause-Dauern","badge":"Abzeichen","information":"Informationen","controls":"Steuerungen","features":"Funktionen","disable_group_pausing":"Gruppen-Pausierung deaktivieren","pause_60_seconds":"60 Sekunden","pause_5_minutes":"5 Minuten","pause_15_minutes":"15 Minuten","pi_hole_device":"Pi-hole Ger\xe4t","entity_display_order":"Entit\xe4ts-Anzeigereihenfolge (in Reihenfolge klicken)","flex_default":"Flex (Standard)"}}');
+
+
+// Import other languages as needed above this line and in order
+// Define supported languages
+const $623ffaa3e77fea87$var$languages = {
+    el: $71f67b2c94b2fafe$exports,
+    en: $9a28a77a5af263d9$exports,
+    es: $ac00f57d502abb29$exports,
+    de: $311afcb0e9c10c81$exports
+};
+const $623ffaa3e77fea87$export$b3bd0bc58e36cd63 = (hass, key, search = '', replace = '')=>{
+    let translated;
+    translated = $623ffaa3e77fea87$var$getNestedTranslation($623ffaa3e77fea87$var$languages[hass.language], key) ?? $623ffaa3e77fea87$var$getNestedTranslation($623ffaa3e77fea87$var$languages.en, key) ?? key;
+    // Replace placeholders
+    if (search !== '' && replace !== '') translated = translated.replace(search, replace);
+    return translated;
+};
+// Helper function to safely navigate nested objects
+function $623ffaa3e77fea87$var$getNestedTranslation(obj, path) {
+    if (!obj) return undefined;
+    const keys = path.split('.');
+    let result = obj;
+    for (const key of keys){
+        if (result === undefined || result === null || typeof result !== 'object') return undefined;
+        result = result[key];
+    }
+    return typeof result === 'string' ? result : undefined;
+}
+
+
 
 /**
  * https://github.com/home-assistant/frontend/blob/dev/src/common/dom/fire_event.ts
@@ -1509,7 +1553,7 @@ const $a2b1c365027138cb$export$dfb737c0873de058 = (element, setup, hass, config)
         <ha-icon
           icon="${activeCount > 0 ? 'mdi:check-circle' : 'mdi:close-circle'}"
         ></ha-icon>
-        ${mixedStatus ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`Partial` : (0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.status)}
+        ${mixedStatus ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, 'card.ui.partial')}` : (0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.status)}
         ${activeCount <= 0 && hasRemainingTime ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${(0, $409574f4dbacb1f1$export$c18c768bbe3223b7)(hass, primary.remaining_until_blocking_mode, 'remaining-time')}` : ''}
       </div>
     </div>
@@ -1635,49 +1679,6 @@ const $155ab9b902a30933$export$d5b7427e28c21e7b = (num, options)=>{
     return defaultOptions;
 };
 
-
-var $71f67b2c94b2fafe$exports = {};
-$71f67b2c94b2fafe$exports = JSON.parse('{"card":{"stats":{"total_queries":"\u03A3\u03C5\u03BD\u03BF\u03BB\u03B9\u03BA\u03AC \u03B5\u03C1\u03C9\u03C4\u03AE\u03BC\u03B1\u03C4\u03B1","active_clients":"{number} \u03B5\u03BD\u03B5\u03C1\u03B3\u03BF\u03AF \u03C0\u03B5\u03BB\u03AC\u03C4\u03B5\u03C2","queries_blocked":"\u0391\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03AD\u03BD\u03B1 \u0395\u03C1\u03C9\u03C4\u03AE\u03BC\u03B1\u03C4\u03B1","list_blocked_queries":"\u039B\u03AF\u03C3\u03C4\u03B1 \u03B1\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03AD\u03BD\u03C9\u03BD \u03B5\u03C1\u03C9\u03C4\u03B7\u03BC\u03AC\u03C4\u03C9\u03BD","percentage_blocked":"\u03A0\u03BF\u03C3\u03BF\u03C3\u03C4\u03CC \u03C0\u03BF\u03C5 \u03B1\u03C0\u03BF\u03BA\u03BB\u03B5\u03AF\u03C3\u03C4\u03B7\u03BA\u03B5","list_all_queries":"\u039B\u03AF\u03C3\u03C4\u03B1 \u03CC\u03BB\u03C9\u03BD \u03C4\u03C9\u03BD \u03B5\u03C1\u03C9\u03C4\u03B7\u03BC\u03AC\u03C4\u03C9\u03BD","domains_on_lists":"\u03A4\u03BF\u03BC\u03B5\u03AF\u03C2 \u03C3\u03C4\u03B9\u03C2 \u039B\u03AF\u03C3\u03C4\u03B5\u03C2","manage_lists":"\u0394\u03B9\u03B1\u03C7\u03B5\u03AF\u03C1\u03B9\u03C3\u03B7 \u039B\u03B9\u03C3\u03C4\u03CE\u03BD"},"sections":{"pause":"\u03A0\u03B1\u03CD\u03C3\u03B7 \u0391\u03C0\u03BF\u03BA\u03BB\u03B5\u03B9\u03C3\u03BC\u03BF\u03CD \u0394\u03B9\u03B1\u03C6\u03B7\u03BC\u03AF\u03C3\u03B5\u03C9\u03BD","switches":"\u0394\u03B9\u03B1\u03BA\u03CC\u03C0\u03C4\u03B5\u03C2","actions":"\u0395\u03BD\u03AD\u03C1\u03B3\u03B5\u03B9\u03B5\u03C2"},"units":{"seconds":"\u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03B1","second":"\u03B4\u03B5\u03C5\u03C4\u03B5\u03C1\u03CC\u03BB\u03B5\u03C0\u03C4\u03BF","minutes":"\u03BB\u03B5\u03C0\u03C4\u03AC","minute":"\u03BB\u03B5\u03C0\u03C4\u03CC","hours":"\u03CE\u03C1\u03B5\u03C2","hour":"\u03CE\u03C1\u03B1"}}}');
-
-
-var $9a28a77a5af263d9$exports = {};
-$9a28a77a5af263d9$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Total queries\",\"active_clients\":\"{number} active clients\",\"queries_blocked\":\"Queries Blocked\",\"list_blocked_queries\":\"List blocked queries\",\"percentage_blocked\":\"Percentage Blocked\",\"list_all_queries\":\"List all queries\",\"domains_on_lists\":\"Domains on Lists\",\"manage_lists\":\"Manage lists\"},\"sections\":{\"pause\":\"Pause Ad-Blocking\",\"switches\":\"Switches\",\"actions\":\"Actions\"},\"units\":{\"seconds\":\"seconds\",\"second\":\"second\",\"minutes\":\"minutes\",\"minute\":\"minute\",\"hours\":\"hours\",\"hour\":\"hour\"}}}");
-
-
-var $ac00f57d502abb29$exports = {};
-$ac00f57d502abb29$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Peticiones totales\",\"active_clients\":\"{number} clientes activos\",\"queries_blocked\":\"Peticiones bloqueadas\",\"list_blocked_queries\":\"Listar peticiones bloqueadas\",\"percentage_blocked\":\"Porcentaje bloqueos\",\"list_all_queries\":\"Listar todas las peticiones\",\"domains_on_lists\":\"Dominios bloqueados\",\"manage_lists\":\"Gestionar listas\"},\"sections\":{\"pause\":\"Pausar Bloqueo de Anuncios\",\"switches\":\"Interruptores\",\"actions\":\"Acciones\"},\"units\":{\"seconds\":\"segundos\",\"second\":\"segundo\",\"minutes\":\"minutos\",\"minute\":\"minuto\",\"hours\":\"horas\",\"hour\":\"hora\"}}}");
-
-
-var $311afcb0e9c10c81$exports = {};
-$311afcb0e9c10c81$exports = JSON.parse("{\"card\":{\"stats\":{\"total_queries\":\"Gesamtanzahl der Anfragen\",\"active_clients\":\"{number} aktive Clients\",\"queries_blocked\":\"Blockierte Anfragen\",\"list_blocked_queries\":\"Blockierte Anfragen anzeigen\",\"percentage_blocked\":\"Prozentual blockiert\",\"list_all_queries\":\"Alle Anfragen anzeigen\",\"domains_on_lists\":\"Domains auf Listen\",\"manage_lists\":\"Listen verwalten\"},\"sections\":{\"pause\":\"Werbeblockierung pausieren\",\"switches\":\"Schalter\",\"actions\":\"Aktionen\"},\"units\":{\"seconds\":\"Sekunden\",\"second\":\"Sekunde\",\"minutes\":\"Minuten\",\"minute\":\"Minute\",\"hours\":\"Stunden\",\"hour\":\"Stunde\"}}}");
-
-
-// Import other languages as needed above this line and in order
-// Define supported languages
-const $623ffaa3e77fea87$var$languages = {
-    el: $71f67b2c94b2fafe$exports,
-    en: $9a28a77a5af263d9$exports,
-    es: $ac00f57d502abb29$exports,
-    de: $311afcb0e9c10c81$exports
-};
-const $623ffaa3e77fea87$export$b3bd0bc58e36cd63 = (hass, key, search = '', replace = '')=>{
-    let translated;
-    translated = $623ffaa3e77fea87$var$getNestedTranslation($623ffaa3e77fea87$var$languages[hass.language], key) ?? $623ffaa3e77fea87$var$getNestedTranslation($623ffaa3e77fea87$var$languages.en, key) ?? key;
-    // Replace placeholders
-    if (search !== '' && replace !== '') translated = translated.replace(search, replace);
-    return translated;
-};
-// Helper function to safely navigate nested objects
-function $623ffaa3e77fea87$var$getNestedTranslation(obj, path) {
-    if (!obj) return undefined;
-    const keys = path.split('.');
-    let result = obj;
-    for (const key of keys){
-        if (result === undefined || result === null || typeof result !== 'object') return undefined;
-        result = result[key];
-    }
-    return typeof result === 'string' ? result : undefined;
-}
 
 
 
@@ -3058,7 +3059,7 @@ class $2e202dca4c1e443f$export$6bb1cdd247a38e3e extends (0, $216640a6cb8d8606$ex
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
       <div class="pause-controls">
         <ha-select
-          .label=${'Select Pi or Group'}
+          .label=${(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(this.hass, 'card.ui.select_pi_or_group')}
           .value=${this.selectedEntityId}
           @selected=${this._handleSelectChange}
           fixedMenuPosition
@@ -3119,6 +3120,7 @@ class $2e202dca4c1e443f$export$6bb1cdd247a38e3e extends (0, $216640a6cb8d8606$ex
 
 
 
+
 // Constants for repeated patterns
 const $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER = [
     {
@@ -3146,304 +3148,319 @@ const $b642db848cc622aa$var$PI_HOLE_ENTITY_FILTER = [
         ]
     }
 ];
-const $b642db848cc622aa$var$SWITCH_SPACING_OPTIONS = [
-    {
-        label: 'Flex (default)',
-        value: 'flex'
-    },
-    {
-        label: 'Space Around',
-        value: 'space-around'
-    },
-    {
-        label: 'Space Between',
-        value: 'space-between'
-    }
-];
-const $b642db848cc622aa$var$SECTION_EXCLUDE_OPTIONS = [
-    {
-        label: 'Actions',
-        value: 'actions'
-    },
-    {
-        label: 'Footer',
-        value: 'footer'
-    },
-    {
-        label: 'Header',
-        value: 'header'
-    },
-    {
-        label: 'Pause Buttons',
-        value: 'pause'
-    },
-    {
-        label: 'Statistics',
-        value: 'statistics'
-    },
-    {
-        label: 'Sensors',
-        value: 'sensors'
-    },
-    {
-        label: 'Switches',
-        value: 'switches'
-    }
-];
-const $b642db848cc622aa$var$COLLAPSED_SECTION_OPTIONS = [
-    {
-        label: 'Pause Buttons',
-        value: 'pause'
-    },
-    {
-        label: 'Switches',
-        value: 'switches'
-    },
-    {
-        label: 'Actions',
-        value: 'actions'
-    }
-];
-const $b642db848cc622aa$var$PAUSE_DURATION_OPTIONS = [
-    {
-        label: '60 seconds',
-        value: '60s'
-    },
-    {
-        label: '5 minutes',
-        value: '5m'
-    },
-    {
-        label: '15 minutes',
-        value: '15m'
-    }
-];
+const $b642db848cc622aa$var$getSwitchSpacingOptions = (hass)=>{
+    const l = (label)=>(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, label);
+    return [
+        {
+            label: l('editor.flex_default'),
+            value: 'flex'
+        },
+        {
+            label: l('editor.space_around'),
+            value: 'space-around'
+        },
+        {
+            label: l('editor.space_between'),
+            value: 'space-between'
+        }
+    ];
+};
+const $b642db848cc622aa$var$getSectionExcludeOptions = (hass)=>{
+    const l = (label)=>(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, label);
+    return [
+        {
+            label: l('editor.actions'),
+            value: 'actions'
+        },
+        {
+            label: l('editor.footer'),
+            value: 'footer'
+        },
+        {
+            label: l('editor.header'),
+            value: 'header'
+        },
+        {
+            label: l('editor.pause_buttons'),
+            value: 'pause'
+        },
+        {
+            label: l('editor.statistics'),
+            value: 'statistics'
+        },
+        {
+            label: l('editor.sensors'),
+            value: 'sensors'
+        },
+        {
+            label: l('editor.switches'),
+            value: 'switches'
+        }
+    ];
+};
+const $b642db848cc622aa$var$getCollapsedSectionOptions = (hass)=>{
+    const l = (label)=>(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, label);
+    return [
+        {
+            label: l('editor.pause_buttons'),
+            value: 'pause'
+        },
+        {
+            label: l('editor.switches'),
+            value: 'switches'
+        },
+        {
+            label: l('editor.actions'),
+            value: 'actions'
+        }
+    ];
+};
+const $b642db848cc622aa$var$getPauseDurationOptions = (hass)=>{
+    const l = (label)=>(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, label);
+    return [
+        {
+            label: l('editor.pause_60_seconds'),
+            value: '60s'
+        },
+        {
+            label: l('editor.pause_5_minutes'),
+            value: '5m'
+        },
+        {
+            label: l('editor.pause_15_minutes'),
+            value: '15m'
+        }
+    ];
+};
 const $b642db848cc622aa$var$ACTION_SCHEMA = [
     {
         name: 'tap_action',
-        label: 'Tap Action',
+        label: 'editor.tap_action',
         selector: {
             ui_action: {}
         }
     },
     {
         name: 'hold_action',
-        label: 'Hold Action',
+        label: 'editor.hold_action',
         selector: {
             ui_action: {}
         }
     },
     {
         name: 'double_tap_action',
-        label: 'Double Tap Action',
+        label: 'editor.double_tap_action',
         selector: {
             ui_action: {}
         }
     }
 ];
-const $b642db848cc622aa$var$SCHEMA = [
-    {
-        name: 'device_id',
-        selector: {
-            device: {
-                filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER
-            }
+const $b642db848cc622aa$var$getSchema = (hass)=>{
+    const l = (label)=>(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(hass, label);
+    return [
+        {
+            name: 'device_id',
+            selector: {
+                device: {
+                    filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER
+                }
+            },
+            required: true,
+            label: 'editor.pi_hole_device'
         },
-        required: true,
-        label: `Pi-hole Device`
-    },
-    {
-        name: 'content',
-        label: 'Content',
-        type: 'expandable',
-        flatten: true,
-        icon: 'mdi:text-short',
-        schema: [
-            {
-                name: 'title',
-                required: false,
-                label: 'Card Title',
-                selector: {
-                    text: {}
-                }
-            },
-            {
-                name: 'icon',
-                required: false,
-                label: 'Card Icon',
-                selector: {
-                    icon: {
-                        placeholder: 'mdi:pi-hole'
+        {
+            name: 'content',
+            label: 'editor.content',
+            type: 'expandable',
+            flatten: true,
+            icon: 'mdi:text-short',
+            schema: [
+                {
+                    name: 'title',
+                    required: false,
+                    label: 'editor.card_title',
+                    selector: {
+                        text: {}
+                    }
+                },
+                {
+                    name: 'icon',
+                    required: false,
+                    label: 'editor.card_icon',
+                    selector: {
+                        icon: {
+                            placeholder: 'mdi:pi-hole'
+                        }
                     }
                 }
-            }
-        ]
-    },
-    {
-        name: 'layout',
-        label: 'Layout',
-        type: 'expandable',
-        flatten: true,
-        icon: 'mdi:view-grid-plus',
-        schema: [
-            {
-                name: 'exclude_sections',
-                label: 'Sections to exclude',
-                required: false,
-                selector: {
-                    select: {
-                        multiple: true,
-                        mode: 'list',
-                        options: $b642db848cc622aa$var$SECTION_EXCLUDE_OPTIONS
+            ]
+        },
+        {
+            name: 'layout',
+            label: 'editor.layout',
+            type: 'expandable',
+            flatten: true,
+            icon: 'mdi:view-grid-plus',
+            schema: [
+                {
+                    name: 'exclude_sections',
+                    label: 'editor.sections_to_exclude',
+                    required: false,
+                    selector: {
+                        select: {
+                            multiple: true,
+                            mode: 'list',
+                            options: $b642db848cc622aa$var$getSectionExcludeOptions(hass)
+                        }
+                    }
+                },
+                {
+                    name: 'collapsed_sections',
+                    label: 'editor.sections_collapsed_by_default',
+                    required: false,
+                    selector: {
+                        select: {
+                            multiple: true,
+                            mode: 'list',
+                            options: $b642db848cc622aa$var$getCollapsedSectionOptions(hass)
+                        }
+                    }
+                },
+                {
+                    name: 'switch_style',
+                    label: 'editor.style_for_switches',
+                    required: false,
+                    selector: {
+                        select: {
+                            multiple: false,
+                            mode: 'dropdown',
+                            options: $b642db848cc622aa$var$getSwitchSpacingOptions(hass)
+                        }
+                    }
+                },
+                {
+                    name: 'exclude_entities',
+                    label: 'editor.entities_to_exclude',
+                    required: false,
+                    selector: {
+                        entity: {
+                            multiple: true,
+                            filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER
+                        }
+                    }
+                },
+                {
+                    name: 'entity_order',
+                    label: 'editor.entity_display_order',
+                    required: false,
+                    selector: {
+                        entity: {
+                            multiple: true,
+                            filter: $b642db848cc622aa$var$PI_HOLE_ENTITY_FILTER
+                        }
                     }
                 }
-            },
-            {
-                name: 'collapsed_sections',
-                label: 'Sections collapsed by default',
-                required: false,
-                selector: {
-                    select: {
-                        multiple: true,
-                        mode: 'list',
-                        options: $b642db848cc622aa$var$COLLAPSED_SECTION_OPTIONS
+            ]
+        },
+        {
+            name: 'styles',
+            label: 'editor.styles',
+            type: 'expandable',
+            flatten: true,
+            icon: 'mdi:brush-variant',
+            schema: [
+                {
+                    name: 'switch_spacing',
+                    label: 'editor.switch_spacing',
+                    required: false,
+                    selector: {
+                        select: {
+                            multiple: false,
+                            mode: 'dropdown',
+                            options: $b642db848cc622aa$var$getSwitchSpacingOptions(hass)
+                        }
                     }
                 }
-            },
-            {
-                name: 'switch_style',
-                label: 'Style for switches',
-                required: false,
-                selector: {
-                    select: {
-                        multiple: false,
-                        mode: 'dropdown',
-                        options: $b642db848cc622aa$var$SWITCH_SPACING_OPTIONS
+            ]
+        },
+        {
+            name: 'interactions',
+            label: 'editor.interactions',
+            type: 'expandable',
+            flatten: true,
+            icon: 'mdi:gesture-tap',
+            schema: [
+                {
+                    name: 'pause_durations',
+                    label: 'editor.pause_durations',
+                    required: false,
+                    selector: {
+                        select: {
+                            multiple: true,
+                            custom_value: true,
+                            mode: 'list',
+                            options: $b642db848cc622aa$var$getPauseDurationOptions(hass)
+                        }
+                    }
+                },
+                {
+                    name: 'badge',
+                    label: 'editor.badge',
+                    type: 'expandable',
+                    icon: 'mdi:badge-account-horizontal',
+                    schema: $b642db848cc622aa$var$ACTION_SCHEMA
+                },
+                {
+                    name: 'stats',
+                    label: 'editor.statistics',
+                    type: 'expandable',
+                    icon: 'mdi:counter',
+                    schema: $b642db848cc622aa$var$ACTION_SCHEMA
+                },
+                {
+                    name: 'info',
+                    label: 'editor.information',
+                    type: 'expandable',
+                    icon: 'mdi:information-outline',
+                    schema: $b642db848cc622aa$var$ACTION_SCHEMA
+                },
+                {
+                    name: 'controls',
+                    label: 'editor.controls',
+                    type: 'expandable',
+                    icon: 'mdi:remote',
+                    schema: $b642db848cc622aa$var$ACTION_SCHEMA
+                }
+            ]
+        },
+        {
+            name: 'features',
+            label: 'editor.features',
+            type: 'expandable',
+            flatten: true,
+            icon: 'mdi:list-box',
+            schema: [
+                {
+                    name: 'features',
+                    label: 'editor.features',
+                    required: false,
+                    selector: {
+                        select: {
+                            multiple: true,
+                            mode: 'list',
+                            options: [
+                                {
+                                    label: l('editor.disable_group_pausing'),
+                                    value: 'disable_group_pausing'
+                                }
+                            ]
+                        }
                     }
                 }
-            },
-            {
-                name: 'exclude_entities',
-                label: 'Entities to exclude',
-                required: false,
-                selector: {
-                    entity: {
-                        multiple: true,
-                        filter: $b642db848cc622aa$var$PI_HOLE_INTEGRATION_FILTER
-                    }
-                }
-            },
-            {
-                name: 'entity_order',
-                label: 'Entity display order (click in order)',
-                required: false,
-                selector: {
-                    entity: {
-                        multiple: true,
-                        filter: $b642db848cc622aa$var$PI_HOLE_ENTITY_FILTER
-                    }
-                }
-            }
-        ]
-    },
-    {
-        name: 'styles',
-        label: 'Styles',
-        type: 'expandable',
-        flatten: true,
-        icon: 'mdi:brush-variant',
-        schema: [
-            {
-                name: 'switch_spacing',
-                label: 'Switch Spacing',
-                required: false,
-                selector: {
-                    select: {
-                        multiple: false,
-                        mode: 'dropdown',
-                        options: $b642db848cc622aa$var$SWITCH_SPACING_OPTIONS
-                    }
-                }
-            }
-        ]
-    },
-    {
-        name: 'interactions',
-        label: 'Interactions',
-        type: 'expandable',
-        flatten: true,
-        icon: 'mdi:gesture-tap',
-        schema: [
-            {
-                name: 'pause_durations',
-                label: 'Pause durations',
-                required: false,
-                selector: {
-                    select: {
-                        multiple: true,
-                        custom_value: true,
-                        mode: 'list',
-                        options: $b642db848cc622aa$var$PAUSE_DURATION_OPTIONS
-                    }
-                }
-            },
-            {
-                name: 'badge',
-                label: 'Badge',
-                type: 'expandable',
-                icon: 'mdi:badge-account-horizontal',
-                schema: $b642db848cc622aa$var$ACTION_SCHEMA
-            },
-            {
-                name: 'stats',
-                label: 'Statistics',
-                type: 'expandable',
-                icon: 'mdi:counter',
-                schema: $b642db848cc622aa$var$ACTION_SCHEMA
-            },
-            {
-                name: 'info',
-                label: 'Information',
-                type: 'expandable',
-                icon: 'mdi:information-outline',
-                schema: $b642db848cc622aa$var$ACTION_SCHEMA
-            },
-            {
-                name: 'controls',
-                label: 'Controls',
-                type: 'expandable',
-                icon: 'mdi:remote',
-                schema: $b642db848cc622aa$var$ACTION_SCHEMA
-            }
-        ]
-    },
-    {
-        name: 'features',
-        label: 'Features',
-        type: 'expandable',
-        flatten: true,
-        icon: 'mdi:list-box',
-        schema: [
-            {
-                name: 'features',
-                label: 'Features',
-                required: false,
-                selector: {
-                    select: {
-                        multiple: true,
-                        mode: 'list',
-                        options: [
-                            {
-                                label: 'Disable group pausing',
-                                value: 'disable_group_pausing'
-                            }
-                        ]
-                    }
-                }
-            }
-        ]
-    }
-];
+            ]
+        }
+    ];
+};
 class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$export$3f2f9f5909897157) {
     /**
    * renders the lit element card
@@ -3454,8 +3471,8 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
       <ha-form
         .hass=${this.hass}
         .data=${this._config}
-        .schema=${$b642db848cc622aa$var$SCHEMA}
-        .computeLabel=${(s)=>s.label}
+        .schema=${$b642db848cc622aa$var$getSchema(this.hass)}
+        .computeLabel=${(s)=>(0, $623ffaa3e77fea87$export$b3bd0bc58e36cd63)(this.hass, s.label)}
         @value-changed=${this._valueChanged}
       ></ha-form>
     `;
@@ -3489,7 +3506,7 @@ class $b642db848cc622aa$export$45a407047dba884a extends (0, $ab210b2da7b39b9d$ex
 
 
 var $b06602ab53bd58a3$exports = {};
-$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.16.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.16.0\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^27.0.0\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^6.2.0\",\"jsdom\":\"^27.0.0\",\"mocha\":\"^11.7.4\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.16.0\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.3.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
+$b06602ab53bd58a3$exports = JSON.parse("{\"name\":\"pi-hole\",\"version\":\"0.17.0\",\"author\":\"Patrick Masters\",\"license\":\"ISC\",\"description\":\"UDPATE ME.\",\"source\":\"src/index.ts\",\"module\":\"dist/pi-hole-card.js\",\"targets\":{\"module\":{\"includeNodeModules\":true}},\"scripts\":{\"watch\":\"parcel watch\",\"build\":\"parcel build\",\"format\":\"prettier --write .\",\"test\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha\",\"test:coverage\":\"nyc npm run test\",\"test:watch\":\"TS_NODE_PROJECT='./tsconfig.test.json' mocha --watch\",\"update\":\"npx npm-check-updates -u && yarn install\"},\"devDependencies\":{\"@istanbuljs/nyc-config-typescript\":\"^1.0.2\",\"@open-wc/testing\":\"^4.0.0\",\"@parcel/transformer-inline-string\":\"^2.16.0\",\"@testing-library/dom\":\"^10.4.1\",\"@trivago/prettier-plugin-sort-imports\":\"^5.2.2\",\"@types/chai\":\"^5.2.2\",\"@types/jsdom\":\"^27.0.0\",\"@types/mocha\":\"^10.0.10\",\"@types/sinon\":\"^17.0.4\",\"chai\":\"^6.2.0\",\"jsdom\":\"^27.0.0\",\"mocha\":\"^11.7.4\",\"nyc\":\"^17.1.0\",\"parcel\":\"^2.16.0\",\"prettier\":\"3.6.2\",\"prettier-plugin-organize-imports\":\"^4.3.0\",\"proxyquire\":\"^2.1.3\",\"sinon\":\"^21.0.0\",\"ts-node\":\"^10.9.2\",\"tsconfig-paths\":\"^4.2.0\",\"typescript\":\"^5.9.3\"},\"dependencies\":{\"@lit/task\":\"^1.0.3\",\"fast-deep-equal\":\"^3.1.3\",\"lit\":\"^3.3.1\"}}");
 
 
 // Register the custom elements with the browser

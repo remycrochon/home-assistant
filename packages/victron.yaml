@@ -25,7 +25,7 @@ mqtt:
       state_topic: "mp2/multiplus2/grid_l1_ac"
       unit_of_measurement: 'W'
       device_class: power
-      state_class: measurement           
+      state_class: measurement
 
     - name: "MP2 Conso Out1 MQTT"
       unique_id: mp2_conso_ac_l1_mqtt" 

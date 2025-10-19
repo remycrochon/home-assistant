@@ -1,0 +1,127 @@
+import logging
+from typing import Any
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity import Entity
+from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass, UnitOfTime
+
+from victron_mqtt import (
+    Device as VictronVenusDevice,
+    Metric as VictronVenusMetric,
+    MetricNature,
+    MetricType,
+)
+
+_LOGGER = logging.getLogger(__name__)
+
+class VictronBaseEntity(Entity):
+    """Implementation of a Victron Venus base entity."""
+
+    def __init__(
+        self,
+        device: VictronVenusDevice,
+        metric: VictronVenusMetric,
+        device_info: DeviceInfo,
+        type: str,
+    ) -> None:
+        """Initialize the sensor based on detauls in the metric."""
+        self._device = device
+        self._metric = metric
+        self._device_info = device_info
+        self._attr_unique_id = f"{type}.victron_mqtt_{metric.unique_id}"
+        self.entity_id = self._attr_unique_id
+        self._attr_native_unit_of_measurement = self._map_metric_to_unit_of_measurement(metric)
+        self._attr_device_class = self._map_metric_to_device_class(metric)
+        self._attr_state_class = self._map_metric_to_stateclass(metric)
+        self._attr_native_value = metric.value
+        self._attr_should_poll = False
+        self._attr_has_entity_name = True
+        self._attr_suggested_display_precision = metric.precision
+        self._attr_translation_key = metric.generic_short_id.replace('{', '').replace('}', '') # same as in merge_topics.py
+        self._attr_translation_placeholders = metric.key_values
+        _LOGGER.info("%s %s added. Based on: %s", type, self, repr(metric))
+
+    def __repr__(self) -> str:
+        """Return a string representation of the entity."""
+        return (
+            f"VictronBaseEntity(device={self._device.name}, "
+            f"unique_id={self._attr_unique_id}, "
+            f"metric={self._metric.short_id}, "
+            f"translation_key={self._attr_translation_key}, "
+            f"translation_placeholders={self._attr_translation_placeholders}, "
+            f"value={self._attr_native_value})"
+        )
+
+    def _on_update(self, metric: VictronVenusMetric, value: Any) -> None:
+        # Might be that the entity was removed or not added yet
+        if self.hass is None:
+            return
+        self._on_update_task(value)
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity about to be added to hass."""
+        await super().async_added_to_hass()
+        # Now we can safely register for updates as the entity is fully registered with Home Assistant
+        self._metric.on_update = self._on_update
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Run when entity will be removed from hass."""
+        # Remove our update callback by setting a no-op function
+        self._metric.on_update = None
+        await super().async_will_remove_from_hass()
+
+    def _map_metric_to_device_class(
+        self, metric: VictronVenusMetric
+    ) -> SensorDeviceClass | None:
+        match metric.metric_type:
+            case MetricType.TEMPERATURE:
+                return SensorDeviceClass.TEMPERATURE
+            case MetricType.POWER:
+                return SensorDeviceClass.POWER
+            case MetricType.APPARENT_POWER:
+                return SensorDeviceClass.APPARENT_POWER
+            case MetricType.ENERGY:
+                return SensorDeviceClass.ENERGY
+            case MetricType.VOLTAGE:
+                return SensorDeviceClass.VOLTAGE
+            case MetricType.CURRENT:
+                return SensorDeviceClass.CURRENT
+            case MetricType.FREQUENCY:
+                return SensorDeviceClass.FREQUENCY
+            case MetricType.ELECTRIC_STORAGE_PERCENTAGE:
+                return SensorDeviceClass.BATTERY
+            case MetricType.TEMPERATURE:
+                return SensorDeviceClass.TEMPERATURE
+            case MetricType.SPEED:
+                return SensorDeviceClass.SPEED
+            case MetricType.LIQUID_VOLUME:
+                return SensorDeviceClass.VOLUME
+            case MetricType.TIME:
+                return SensorDeviceClass.DURATION
+            case _:
+                return None
+
+    def _map_metric_to_stateclass(
+        self, metric: VictronVenusMetric
+    ) -> SensorStateClass | None:
+        if metric.metric_nature == MetricNature.CUMULATIVE:
+            return SensorStateClass.TOTAL
+        if metric.metric_nature == MetricNature.INSTANTANEOUS:
+            return SensorStateClass.MEASUREMENT
+
+        return None
+
+    def _map_metric_to_unit_of_measurement(
+        self, metric: VictronVenusMetric
+    ) -> str | None:
+        if metric.unit_of_measurement == 's':
+            return UnitOfTime.SECONDS
+        if metric.unit_of_measurement == 'm':
+            return UnitOfTime.MINUTES
+        if metric.unit_of_measurement == 'h':
+            return UnitOfTime.HOURS
+        return metric.unit_of_measurement
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information about the sensor."""
+        return self._device_info

@@ -1790,8 +1790,8 @@
   description: Lien entre HA et le nodered du MP2
   triggers:
   - id: mn
-    hours: /1
     trigger: time_pattern
+    minutes: /1
   - entity_id:
     - input_boolean.mp2_valid_ess_charge_prog_1
     - input_boolean.forcage_charge_pgm_mp2_100
@@ -1815,7 +1815,7 @@
       qos: '0'
       retain: false
       topic: ha/mp2/cp/forcage100
-      payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp2_100'') }}"'
+      payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp1_100'') }}"'
   - action: mqtt.publish
     metadata: {}
     data:

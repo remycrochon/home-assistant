@@ -159,7 +159,7 @@ select:
             id(striac) = 0;
         - light.turn_off:
             id: gradateur
-        - script.execute: calcul_injection        
+        - script.execute: calcul_injection_hp     
 
 binary_sensor:
   #Etat de la connection
@@ -369,10 +369,8 @@ sensor:
     entity_id: sensor.mp2_status_bus_ve
     id: statusbusve
 
-  - platform: homeassistant
-    name: "Tarif Num"
-    entity_id: sensor.linky_n_tarif
-    id: hc
+
+
   - platform: homeassistant
     name: "Pu Clim"
     entity_id: sensor.ecocompteur_clim
@@ -386,13 +384,40 @@ sensor:
     update_interval: 60s
     filters:
       - filter_out: NAN
- 
+
+  # Température ECS et seuils HA
+  - platform: homeassistant
+    id: temp_ecs_ha
+    entity_id: sensor.esp126_temp_ecs
+    name: "Température ECS HA"
+
+  - platform: homeassistant
+    id: seuil_bas_ha
+    entity_id: input_number.ecs_seuil_bas_temp
+    name: "Seuil bas ECS"
+
+  - platform: homeassistant
+    id: seuil_haut_ha
+    entity_id: input_number.ecs_seuil_haut_temp
+    name: "Seuil haut ECS" 
 # déclaration des "text_sensors"
 text_sensor:
   - platform: template
     name: "Mode Regulation"
     id: moderegul
-      
+  # Tarif HC.. ou HP..  
+  - platform: homeassistant
+    entity_id: sensor.esp124_tic_linky_ptec
+    id: tarif_ha
+    internal: true
+
+  - platform: template
+    name: "Tarif Actuel"
+    id: tarif
+    lambda: |-
+      return id(tarif_ha).state;
+    update_interval: 5s
+
 switch:
   - platform: gpio
     name: "Relais"
@@ -462,8 +487,15 @@ display:
 interval:
   - interval: 1s
     then:
-      - script.execute: calcul_injection
- 
+    - if:
+        condition:
+          lambda: |-
+            return id(tarif).state.rfind("HP", 0) == 0;
+        then:
+          - script.execute: calcul_injection_hp
+        else:
+          - script.execute: calcul_injection_hc
+
   - interval: 5s
     then:      
       - script.execute: etat_production
@@ -478,7 +510,7 @@ script:
                                               # Seuil SOC Ok
                                               # temp Triac Ok
                                               # Routeur Validé
-  - id: calcul_injection
+  - id: calcul_injection_hp
     mode: single
     then:
       - lambda: |-
@@ -573,6 +605,61 @@ script:
       - lambda: |-
             id(afstriac).publish_state( id(striac)) ;
   
+  ########################################################################
+  # Script HC : Chauffe dynamique (75% / 90%) selon la puissance réseau
+  ########################################################################
+  - id: calcul_injection_hc
+    mode: single
+    then:
+      - lambda: |-
+          // --- Lecture des capteurs HA ---
+          float temp_ecs = id(temp_ecs_ha).state;
+          float seuil_bas = id(seuil_bas_ha).state;
+          float seuil_haut = id(seuil_haut_ha).state;
+          float p_reseau = id(pureseau1).state;
+
+          // --- Sécurité température triac ---
+          if (id(temp_triac).state < (id(tmax).state - 2)) {
+            id(temperatureok).publish_state(true);
+          } else if (id(temp_triac).state >= id(tmax).state) {
+            id(temperatureok).publish_state(false);
+          }
+
+          // --- Conditions de chauffe ---
+          if (id(temperatureok).state && (temp_ecs < seuil_bas)) {
+            // Chauffe autorisée
+            if (p_reseau < 5000) {
+              id(striac) = 90.0;
+              id(moderegul).publish_state("HC Chauffe 90%");
+              ESP_LOGI("HC", "ECS %.1f°C < %.1f°C, P_reseau=%.0fW → Triac 90%%", temp_ecs, seuil_bas, p_reseau);
+            } else {
+              id(striac) = 75.0;
+              id(moderegul).publish_state("HC Chauffe 75%");
+              ESP_LOGI("HC", "ECS %.1f°C < %.1f°C, P_reseau=%.0fW → Triac 75%%", temp_ecs, seuil_bas, p_reseau);
+            }
+          } 
+          else if (temp_ecs >= seuil_haut) {
+            // ECS trop chaude → arrêt
+            id(striac) = 0.0;
+            id(moderegul).publish_state("HC ECS OK - Chauffe OFF");
+            ESP_LOGI("HC", "ECS %.1f°C ≥ %.1f°C → Chauffe OFF", temp_ecs, seuil_haut);
+          } 
+          else {
+            // Hors conditions → arrêt
+            id(striac) = 0.0;
+            id(moderegul).publish_state("HC Attente");
+            ESP_LOGI("HC", "ECS %.1f°C dans plage neutre → Chauffe OFF", temp_ecs);
+          }
+
+          // --- Application du triac ---
+          id(afpdispo).publish_state(0);
+          id(cons_batt_cours).publish_state(0);
+
+      - light.turn_on:
+          id: gradateur
+          brightness: !lambda |-
+            return id(striac) / 100.0;
+
   ########################################################################""
   # Principe de la régulation:
   # Si Bus Ve en Bulk:, on partage le surplus entre la batterie (cons_batt) et l'ECS

@@ -80,21 +80,21 @@ mqtt:
       state_topic: "mp2/dess_remy/prod_onduleur"
       unit_of_measurement: 'kW'
       device_class: power
-      state_class: measurement
+      state_class: total
 
     - name: "MP2 Prod VRM MPPT1 MQTT"
       unique_id: mp2_prod_vrm_mppt1_mqtt" 
       state_topic: "mp2/dess_remy/prod_mppt1"
       unit_of_measurement: 'kW'
       device_class: power
-      state_class: measurement
+      state_class: total
 
     - name: "MP2 Prod VRM TOTAL MQTT"
       unique_id: mp2_prod_vrm_total_mqtt" 
       state_topic: "mp2/dess_remy/prod_total"
       unit_of_measurement: 'kW'
       device_class: power
-      state_class: measurement      
+      state_class: total
 
     - name: "MP2 Cible SOC par MQTT"
       unique_id: mp2_cible_soc_par_mqtt" 

@@ -2891,3 +2891,42 @@
       resolved_message: ' '
       initial_delay: 300
       max_alerts: 3
+- id: '1761200992923'
+  alias: Choix Alimentation ECS
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+    enabled: true
+  - trigger: state
+    entity_id:
+    - input_select.choix_alim_ecs_ssol
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.choix_alim_ecs_ssol
+        state: Routeur
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.ecs_pv
+    - conditions:
+      - condition: state
+        entity_id: input_select.choix_alim_ecs_ssol
+        state: Reseau
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.ecs_reseau
+    default:
+    - action: script.turn_on
+      metadata: {}
+      target:
+        entity_id: script.ecs_off
+  mode: single

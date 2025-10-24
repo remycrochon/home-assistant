@@ -1,0 +1,15 @@
+globals:
+  - id: table_puissance_hc
+    type: std::vector<std::pair<float, float>>
+    restore_value: no
+    initial_value: |-
+      {
+        {0,     95},
+        {1000,  85},
+        {2000,  75},
+        {3000,  65},
+        {4000,  50},
+        {5000,  40},
+        {6000,  30},
+        {7000,  20}
+      }

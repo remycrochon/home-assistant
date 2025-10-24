@@ -40,6 +40,15 @@ input_select:
       - At Forcé
       - Ma Forcée
 
+  choix_alim_ecs_ssol:
+    name: Choix_Alim_Ecs_SSol
+    icon: mdi:water-boiler
+    options:
+      - Routeur
+      - Reseau 
+      - At Forcé
+
+
 input_boolean:
   ecs_av_pv:
     name: Ecs PV(=1 avec Routeur PV)

@@ -286,7 +286,6 @@ number:
     step: 1
     icon: mdi:arrow-collapse-vertical    
 
-
 sensor:
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "WiFi Signal dB"
@@ -393,10 +392,6 @@ sensor:
     accuracy_decimals: 0
 
   # lecture sensor Home Assistant
-  - platform: homeassistant
-    name: "Status Bus VE"
-    entity_id: sensor.mp2_status_bus_ve
-    id: statusbusve
 
   - platform: homeassistant
     entity_id: sensor.esp124_tic_linky_n_tarif
@@ -404,9 +399,9 @@ sensor:
     internal: true
 
   - platform: homeassistant
-    name: "Pu Clim"
     entity_id: sensor.ecocompteur_clim
     id: pu_clim
+    internal: true
 
   # Sonde Temperature radiateur
   - platform: dallas_temp

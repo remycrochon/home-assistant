@@ -18,6 +18,8 @@ from .const import (
     CONF_ATTR_PRIVATE,
     CONF_ATTR_SPORT_TYPE,
     CONF_ATTR_START_LATLONG,
+    CONF_NUM_RECENT_ACTIVITIES,
+    CONF_NUM_RECENT_ACTIVITIES_DEFAULT,
     CONF_PHOTOS,
     CONF_SENSOR_ACTIVITY_TYPE,
     CONF_SENSOR_CADENCE_AVG,
@@ -49,7 +51,6 @@ from .const import (
     CONFIG_IMG_SIZE,
     DEFAULT_ACTIVITY_TYPES,
     DOMAIN,
-    FACTOR_KILOJOULES_TO_KILOCALORIES,
     OAUTH2_AUTHORIZE,
     OAUTH2_TOKEN,
 )
@@ -138,11 +139,17 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
             CONF_ACTIVITY_TYPES_TO_TRACK, DEFAULT_ACTIVITY_TYPES
         )
 
-        # First pass: Group activities by type and find the most recent of each type
+        # Get number of recent activities from config
+        num_recent_activities = self.entry.options.get(
+            CONF_NUM_RECENT_ACTIVITIES, CONF_NUM_RECENT_ACTIVITIES_DEFAULT
+        )
+
+        # First pass: Identify activities needing detailed data
+        activities_needing_details = set()
         activities_by_type = {}
         athlete_id = None
 
-        for activity in activities_json:
+        for idx, activity in enumerate(activities_json):
             athlete_id = int(activity["athlete"]["id"])
             sport_type = activity.get("type")
 
@@ -150,13 +157,21 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
             if sport_type not in selected_activity_types:
                 continue
 
-            # Track the most recent activity per type (activities_json is already sorted by date desc)
+            activity_id = activity["id"]
+
+            # Track most recent per type
             if sport_type not in activities_by_type:
-                activities_by_type[sport_type] = activity["id"]
+                activities_by_type[sport_type] = activity_id
+                activities_needing_details.add(activity_id)
+
+            # Track first N recent activities
+            if idx < num_recent_activities:
+                activities_needing_details.add(activity_id)
 
         _LOGGER.debug(f"Found most recent activities per type: {activities_by_type}")
+        _LOGGER.debug(f"Activities needing detailed data: {activities_needing_details}")
 
-        # Second pass: Fetch detailed info only for the most recent activity of each type
+        # Second pass: Fetch detailed info for activities that need it
         activities = []
         for activity in activities_json:
             sport_type = activity.get("type")
@@ -167,20 +182,28 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
             activity_id = int(activity["id"])
             activity_dto = None
 
-            # Only fetch detailed info for the most recent activity of this type
-            if activity_id == activities_by_type.get(sport_type):
+            # Fetch detailed info for activities that need it
+            if activity_id in activities_needing_details:
                 _LOGGER.debug(
-                    f"Fetching detailed info for most recent {sport_type} activity: {activity_id}"
+                    f"Fetching detailed info for activity {activity_id} (type: {sport_type})"
                 )
-                activity_response = await self.oauth_session.async_request(
-                    method="GET",
-                    url=f"https://www.strava.com/api/v3/activities/{activity_id}",
-                )
-                activity_dto = (
-                    await activity_response.json()
-                    if activity_response.status == 200
-                    else None
-                )
+                try:
+                    activity_response = await self.oauth_session.async_request(
+                        method="GET",
+                        url=f"https://www.strava.com/api/v3/activities/{activity_id}",
+                    )
+                    if activity_response.status == 200:
+                        response_json = await activity_response.json()
+                        _LOGGER.debug(f"Activity {activity_id}: {response_json}")
+                        activity_dto = response_json
+                    else:
+                        _LOGGER.warning(
+                            f"Failed to fetch activity {activity_id}: {activity_response.status}"
+                        )
+                        activity_dto = None
+                except (aiohttp.ClientError, ValueError, KeyError) as e:
+                    _LOGGER.error(f"Error fetching activity {activity_id}: {e}")
+                    activity_dto = None
 
             activities.append(
                 self._sensor_activity(
@@ -248,12 +271,14 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
                 url=f"https://www.strava.com/api/v3/gear/{gear_id}",
             )
             if response.status == 200:
-                return await response.json()
+                response_json = await response.json()
+                _LOGGER.debug(f"Gear {gear_id}: {response_json}")
+                return response_json
             else:
                 _LOGGER.warning(f"Failed to fetch gear {gear_id}: {response.status}")
                 return {}
         except (aiohttp.ClientError, ValueError, KeyError) as e:
-            _LOGGER.warning(f"Error fetching gear {gear_id}: {e}")
+            _LOGGER.error(f"Error fetching gear {gear_id}: {e}")
             return {}
 
     def _sensor_activity(self, activity: dict, activity_dto: dict) -> dict:
@@ -271,6 +296,8 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
         gear_description = None
         gear_primary = None
         gear_frame_type = None
+
+        calories_kcal = None
 
         if activity_dto:
             # Extract gear information if present
@@ -294,6 +321,8 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
                 device_name = "Trainer"
                 device_type = "Trainer"
 
+            calories_kcal = activity_dto.get("calories")
+
         # Fallback to basic location info
         location = (
             activity.get("location_city")
@@ -314,14 +343,6 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
             CONF_SENSOR_ELAPSED_TIME: activity.get("elapsed_time"),
             CONF_SENSOR_MOVING_TIME: activity.get("moving_time"),
             CONF_SENSOR_KUDOS: activity.get("kudos_count"),
-            CONF_SENSOR_CALORIES: activity.get(
-                "calories",
-                (
-                    activity.get("kilojoules") * FACTOR_KILOJOULES_TO_KILOCALORIES
-                    if activity.get("kilojoules")
-                    else None
-                ),
-            ),
             CONF_SENSOR_ELEVATION: activity.get("total_elevation_gain"),
             CONF_SENSOR_POWER: activity.get("average_watts"),
             CONF_SENSOR_TROPHIES: activity.get("achievement_count"),
@@ -334,6 +355,8 @@ class StravaDataUpdateCoordinator(DataUpdateCoordinator):
             CONF_ATTR_COMMUTE: activity.get("commute", False),
             CONF_ATTR_PRIVATE: activity.get("private", False),
             CONF_ATTR_POLYLINE: activity.get("map", {}).get("summary_polyline", ""),
+            # Activity Details
+            CONF_SENSOR_CALORIES: calories_kcal,
             # Device source tracking
             CONF_SENSOR_DEVICE_NAME: device_name,
             CONF_SENSOR_DEVICE_TYPE: device_type,

@@ -20,7 +20,6 @@ substitutions:
 packages:
   jsk: !include pack_esp176/jsk.yaml
   table_pu: !include pack_esp176/table_pu.yaml
-  table_pu_hc: !include pack_esp176/table_pu_hc.yaml
 
 esphome:
   name: ${device_name}
@@ -497,12 +496,13 @@ interval:
     - if:
         condition:
           lambda: |-
-            return (id(tarif).state == 2 ||id(tarif).state == 4 ||id(tarif).state == 6) ; // tarif HC (1/3/5) Tarif HP(2/4/6) 
+            return (id(tarif).state == 2 ||id(tarif).state == 4 ||id(tarif).state == 6) ; // Tarif HP(2/4/6) 
+            //return (id(tarif).state == 1 ||id(tarif).state == 3 ||id(tarif).state == 5) ; // tarif HC (1/3/5)
         then:
           - script.execute: calcul_injection_hp
         else:
-          # - script.execute: calcul_injection_hc
-          - script.execute: calcul_injection_hc # On force en hp pour l'instant, HC est à debugger
+          # - script.execute: calcul_injection_hp
+          - script.execute: calcul_injection_hc 
 
   - interval: 5s
     then:      
@@ -511,13 +511,6 @@ interval:
 
  ########################################################################""
 script:
-  # Calcul du niveau de puissance à injecter dans le triac pilotant l'ECS
-  # En Auto: Conditions Initales de Démarrage:
-                                              # Mode de Fct=Auto
-                                              # Seuil Prod Ok
-                                              # Seuil SOC Ok
-                                              # temp Triac Ok
-                                              # Routeur Validé
   ########################################################################
   # 🔹 Script : calcul_injection_hp
   # -------------------------------------------------------
@@ -616,7 +609,7 @@ script:
               - binary_sensor.is_on: seuil_soc_ok
           then:
             - logger.log:
-                format: "✅ Conditions OK → Régulation interpolation active"
+                format: "✅ Conditions OK (HP) → Régulation interpolation active"
                 level: INFO
             - script.execute: regulation_interpolation
 
@@ -651,34 +644,8 @@ script:
       # ============================================================
       - lambda: |-
           id(afstriac).publish_state(id(striac));
-
-  
-   ########################################################################
-  # 🔹 Script : calcul_injection_hc
-  # -------------------------------------------------------
-  # Fonction :
-  #   - Active le triac en fonction de la puissance réseau (Pu_reseau)
-  #   - Utilise une table dynamique {Pu_reseau → %Triac}
-  #   - Chauffe uniquement en Heures Creuses (HC)
-  #
-  # Conditions de chauffe :
-  #   ✅ Mode Auto actif
-  #   ✅ Routeur validé
-  #   ✅ Température triac inférieure à T_max
-  #   ✅ Pas d'injection réseau négative (< -200 W)
-  #   ✅ ECS sous le seuil bas (temp_ecs < seuil_bas)
-  #
-  # Table utilisée : id(table_puissance_hc)
-  #   (modifiable via pack_esp176/table_pu_hc.yaml)
-  #
-  # Cas gérés :
-  #   1️⃣ Arret ou conditions NOK → OFF complet
-  #   2️⃣ Auto → interpolation sur table
-  #   3️⃣ Manu → triac = ctriac_manu
-  #
   ########################################################################
-  ########################################################################
-  # 🔹 Script : calcul_injection_hc (modèle HP amélioré)
+  # 🔹 Script : calcul_injection_hc (avec hystérésis ECS)
   # -------------------------------------------------------
   # Fonction :
   #   - Chauffe ECS uniquement pendant les heures creuses.
@@ -697,12 +664,6 @@ script:
   #   2️⃣ Auto + OK → régulation via table
   #   3️⃣ Manu → triac = consigne manuelle
   #
-  ########################################################################
-  ########################################################################
-  # 🔹 Script : calcul_injection_hc (structure identique à HP)
-  ########################################################################
-  ########################################################################
-  # 🔹 Script : calcul_injection_hc (avec hystérésis ECS)
   ########################################################################
   - id: calcul_injection_hc
     mode: single
@@ -759,7 +720,7 @@ script:
             - light.turn_off: gradateur
 
       # ============================================================
-      # 2️⃣ Mode Auto + toutes conditions OK → régulation active
+      # 2️⃣ Mode Auto + toutes conditions OK → régulation interpolation (HC)
       # ============================================================
       - if:
           condition:
@@ -774,52 +735,32 @@ script:
                 float seuil_haut = id(seuil_haut_ha).state;
                 float p_reseau   = id(pureseau1).state;
 
-                bool pas_injection = (p_reseau >= -10);
-                bool ecs_froide = (temp_ecs < seuil_bas);
-                bool ecs_chaude = (temp_ecs >= seuil_haut);
+                bool pas_injection  = (p_reseau >= -10);
+                bool ecs_froide     = (temp_ecs <  seuil_bas);
+                bool ecs_chaude     = (temp_ecs >= seuil_haut);
                 bool chauffe_active = (id(moderegul).state == "HC Chauffe active");
 
-                // =============================
                 // 🚨 Sécurité injection réseau
-                // =============================
                 if (!pas_injection) {
                   id(striac) = 0;
                   id(moderegul).publish_state("HC Sécurité Injection OFF");
                   ESP_LOGI("HC", "Injection réseau détectée (%.0f W) → OFF", p_reseau);
                 }
-
-                // =============================
-                // 🔥 Gestion ECS avec hystérésis
-                // =============================
+                // 🔥 Hystérésis ECS : on chauffe si ECS froide ou maintien si déjà en chauffe
                 else if (ecs_froide || chauffe_active) {
                   if (ecs_chaude) {
-                    // ECS atteinte → arrêt
                     id(striac) = 0;
                     id(moderegul).publish_state("HC ECS OK - Chauffe OFF");
                     ESP_LOGI("HC", "ECS %.1f°C ≥ %.1f°C → Chauffe arrêtée", temp_ecs, seuil_haut);
                   } else {
-                    // ECS encore froide ou en maintien → chauffe active
-                    float striac_f = 0.0f;
-                    for (size_t i = 1; i < id(table_puissance_hc).size(); i++) {
-                      float x0 = id(table_puissance_hc)[i-1].first;
-                      float y0 = id(table_puissance_hc)[i-1].second;
-                      float x1 = id(table_puissance_hc)[i].first;
-                      float y1 = id(table_puissance_hc)[i].second;
-                      if (p_reseau <= x1) {
-                        striac_f = y0 + (p_reseau - x0) * (y1 - y0) / (x1 - x0);
-                        break;
-                      }
-                      striac_f = y1;
-                    }
-                    id(striac) = constrain(striac_f, 0.0f, 100.0f);
+                    // 👉 DÉLÈGUE LE CALCUL À regulation_interpolation (branche HC interne)
                     id(moderegul).publish_state("HC Chauffe active");
-                    ESP_LOGI("HC", "ECS %.1f°C → chauffe maintenue jusqu’à %.1f°C → Triac %.1f%%",
-                             temp_ecs, seuil_haut, id(striac));
+                    ESP_LOGI("HC", "ECS %.1f°C < %.1f°C → Appel interpolation (HC)", temp_ecs, seuil_bas);
+                    id(regulation_interpolation).execute();  // appelle le script par son id
                   }
                 }
-
+                // ⚖️ Zone neutre : pas de chauffe
                 else {
-                  // Zone neutre sans chauffe
                   id(striac) = 0;
                   id(moderegul).publish_state("HC Attente");
                   ESP_LOGI("HC", "ECS %.1f°C dans plage neutre → OFF", temp_ecs);
@@ -831,7 +772,7 @@ script:
 
             - lambda: |-
                 id(afstriac).publish_state(id(striac));
-                id(afpdispo).publish_state(0);
+                //id(afpdispo).publish_state(0);
                 id(cons_batt_cours).publish_state(0);
 
       # ============================================================
@@ -856,67 +797,127 @@ script:
             - lambda: |-
                 id(afstriac).publish_state(id(striac));
 
-  ########################################################################""
-  # Principe de la régulation:
-  # Si Bus Ve en Bulk:, on partage le surplus entre la batterie (cons_batt) et l'ECS
-  #   P Dispo= Prod-Conso Maison-Reserve batteries
-  # Si Bus Ve en Absortion ou Float, cela signifie que la batterie est chargée, alors:
-  #  P Dispo= Prod-Conso Maison-Pu batteries (Negative en décharge)
-  # Sinon:
-  #   P Dispo = 0
-  # La sortie triac est calculée en fonction de la P_Dispo en recherchant sa valeur dans la table de correspondance établie en mode étalonnage
+   ########################################################################
+  # 🔹 Script : regulation_interpolation (commun HP + HC)
+  # -------------------------------------------------------
+  # Rôle :
+  #   - Calcule p_dispo puis striac par interpolation (table_puissance)
+  #   - Deux branches internes :
+  #       * HP → logique PV/batterie (Bulk / Absorb / Float)
+  #       * HC → objectif de puissance réseau (ex. 6000 W) pour ECS
+  #
+  # Hypothèse sur le capteur tarif :
+  #   Ajuste ICI la condition is_hp pour refléter ta réalité :
+  #   - Si chez toi HP = {1,3,5}  → garde ce code.
+  #   - Si HP = {2,4,6}           → remplace la condition (commentaire ci-dessous).
+  ########################################################################
   - id: regulation_interpolation
     mode: single
     then:
-       - lambda: |-
-          float result = 0.0;
+      - lambda: |-
+          // ============================================================
+          // 🔹 Détermination du mode tarifaire (HP / HC)
+          // ============================================================
+          // 👉HC = {1,3,5}, HP = {2,4,6}, 
+          bool is_hp = (id(tarif).state == 2 || id(tarif).state == 4 || id(tarif).state == 6);
+          float pdispo = 0.0f;  // puissance disponible pour ECS
 
-          // Sélection de Consigne et Mesure
-          if (id(etatbus_ve).state == 3) {
-            id(p_dispo) = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(res_pubatt).state;
-            if (id(p_dispo) < 0.0) id(p_dispo) = 0.0;
-            id(cons_batt_cours).publish_state(id(res_pubatt).state);
-            id(regul) = "Sur Pu batteries Bulk";
-          } else if ((id(etatbus_ve).state == 4) || (id(etatbus_ve).state == 5)) {
-            id(p_dispo) = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state + id(pu_batteries).state;
-            if (id(p_dispo) < 0.0) id(p_dispo) = 0.0;
-            id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
-            id(regul) = "Sur P Batt Absord/Float";
-          } else {
-            id(regul) = "Pas de régulation";
-            id(cons_batt_cours).publish_state(0);
-            id(p_dispo) = 0;
+          // ============================================================
+          // 🔸 Branche HP : régulation sur production PV / batteries
+          // ============================================================
+          if (is_hp) {
+            if (id(etatbus_ve).state == 3) {  // Bulk
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(res_pubatt).state;
+              if (pdispo < 0.0f) pdispo = 0.0f;
+              id(cons_batt_cours).publish_state(id(res_pubatt).state);
+              id(regul) = "HP Reg. (Bulk)";
+            } 
+            else if (id(etatbus_ve).state == 4 || id(etatbus_ve).state == 5) { // Absorption / Float
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state + id(pu_batteries).state;
+              if (pdispo < 0.0f) pdispo = 0.0f;
+              id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
+              id(regul) = "HP Reg. (Abs/Float)";
+            } 
+            else {
+              id(regul) = "HP Reg. (Bus VE NOK)";
+              id(cons_batt_cours).publish_state(0);
+              pdispo = 0.0f;
+            }
+
+            ESP_LOGI("regul",
+                     "HP → Prod=%.0fW | Conso=%.0fW | Clim=%.0fW | Batt=%.0fW | p_dispo=%.0fW | Mode=%s",
+                     id(pu_prod).state,
+                     id(conso_maison).state,
+                     id(pu_clim).state,
+                     id(pu_batteries).state,
+                     pdispo,
+                     id(regul).c_str());
           }
 
-          // Limite P dispo
-          id(p_dispo) = constrain(id(p_dispo), 0.0f, id(pmax).state);
+          // ============================================================
+          // 🔸 Branche HC : calcul prédictif réseau (chauffe ECS)
+          // ============================================================
+          else {
+            const float RESEAU_CIBLE_HC = 6000.0f;  // puissance max visée sur réseau
 
-          // Interpolation dans la table
+            float conso = id(conso_maison).state;
+            float clim  = id(pu_clim).state;
+            float batt  = id(pu_batteries).state;   // >0 décharge, <0 charge
+
+            // Sécurité anti-NaN
+            if (isnan(conso)) conso = 0;
+            if (isnan(clim))  clim  = 0;
+            if (isnan(batt))  batt  = 0;
+
+            // p_dispo = cible - conso_maison - pu_clim - pu_batteries
+            pdispo = RESEAU_CIBLE_HC - conso - clim - batt;
+            if (pdispo < 0.0f) pdispo = 0.0f;
+
+            id(regul) = "HC Chauffe ECS";
+            id(cons_batt_cours).publish_state(batt);
+
+            ESP_LOGI("regul",
+                     "HC → Cible=%.0fW | Conso=%.0fW | Clim=%.0fW | Batt=%.0fW | p_dispo=%.0fW",
+                     RESEAU_CIBLE_HC, conso, clim, batt, pdispo);
+          }
+
+          // ============================================================
+          // 🔹 Limitation & interpolation table puissance
+          // ============================================================
+          pdispo = constrain(pdispo, 0.0f, id(pmax).state);
+          id(p_dispo) = pdispo;
+
           float striac_f = 0.0f;
-
           for (size_t i = 1; i < id(table_puissance).size(); i++) {
             float x0 = id(table_puissance)[i-1].first;   // % Triac
             float y0 = id(table_puissance)[i-1].second;  // Puissance
             float x1 = id(table_puissance)[i].first;
             float y1 = id(table_puissance)[i].second;
-
-            if (id(p_dispo) <= y1) {
-              striac_f = x0 + (id(p_dispo) - y0) * (x1 - x0) / (y1 - y0);
+            if (pdispo <= y1) {
+              // interpolation linéaire
+              striac_f = x0 + (pdispo - y0) * (x1 - x0) / (y1 - y0);
               break;
             }
             striac_f = x1;
           }
 
-          // Sécurité
-          if (isnan(striac_f)) striac_f = 0.0;
+          // Sécurités & bornes
+          if (isnan(striac_f)) striac_f = 0.0f;
           id(striac) = constrain(striac_f, 0.0f, 100.0f);
 
-          // Publication
+          // Publication MQTT / HA
           id(afpdispo).publish_state(id(p_dispo));
           id(moderegul).publish_state(id(regul));
 
-          ESP_LOGI("regul", "p_dispo: %.2f, pu_prod: %.2f, conso_maison: %.2f, pu_clim: %.2f, pu_batt: %.2f, STriac: %.2f",
-            id(p_dispo), id(pu_prod).state, id(conso_maison).state, id(pu_clim).state, id(cons_batt_cours).state, id(striac));
+          // ============================================================
+          // 🔸 Log global synthétique (résumé clair HP/HC)
+          // ============================================================
+          ESP_LOGI("regul",
+                   "%s | p_dispo=%.0fW | STriac=%.1f%% | Mode=%s",
+                   is_hp ? "HP" : "HC",
+                   pdispo, id(striac),
+                   id(regul).c_str());
+
   ########################################################################""
     # Mode Etalonnage Increment S Triac toutes les 20 s pour laisser du temps à la puissance pour se stabiliser
   - id: etalonnage_striac

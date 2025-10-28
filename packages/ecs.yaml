@@ -4,67 +4,8 @@
 #                                                  #
 ####################################################
 
-input_number:
-  ecs_seuil_bas_temp:
-    name: Ecs Seuil bas Temp
-    min: 20
-    max: 60
-    step: 0.1
-    unit_of_measurement: "°C"
-    mode: box
-  ecs_seuil_bas_haut:
-    name: Ecs Seuil haut Temp
-    min: 30
-    max: 60
-    step: 0.1
-    unit_of_measurement: "°C"
-    mode: box
-
-input_datetime:
-  # Horaire Chauffe ECS
-  horaire_ecs_debut:
-    name: Horaire ECS Début
-    has_date: false
-    has_time: true
-  horaire_ecs_fin:
-    name: Horaire ECS Fin
-    has_date: false
-    has_time: true
-
-input_select:
-  ecs_ssol:
-    name: Ecs_SSol
-    icon: mdi:water-boiler
-    options:
-      - Auto
-      - At Forcé
-      - Ma Forcée
-
-  choix_alim_ecs_ssol:
-    name: Choix_Alim_Ecs_SSol
-    icon: mdi:water-boiler
-    options:
-      - Routeur
-      - Reseau 
-      - At Forcé
-
-
-input_boolean:
-  ecs_av_pv:
-    name: Ecs PV(=1 avec Routeur PV)
-  
 
 template:
-####################################
-# Si puissance superieur à 500w = ECS en Marche
-  - binary_sensor:
-    - name: "ecs_chauffe"
-      unique_id: "ecs_chauffe"
-      device_class: heat
-      state: >-
-          {% set a=states('sensor.ecocompteur_ecs')|float(default=0) %}
-          {{ a > 500 }}
-
 # 
   - sensor:
 ############################################ 21/12/2022

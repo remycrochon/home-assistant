@@ -2900,14 +2900,14 @@
     enabled: true
   - trigger: state
     entity_id:
-    - input_select.choix_alim_ecs_ssol
+    - input_select.mode_fonctionnement_ecs
   conditions: []
   actions:
   - choose:
     - conditions:
       - condition: state
-        entity_id: input_select.choix_alim_ecs_ssol
         state: Routeur
+        entity_id: input_select.mode_fonctionnement_ecs
       sequence:
       - action: script.turn_on
         metadata: {}
@@ -2916,7 +2916,7 @@
           entity_id: script.ecs_pv
     - conditions:
       - condition: state
-        entity_id: input_select.choix_alim_ecs_ssol
+        entity_id: input_select.mode_fonctionnement_ecs
         state: Reseau
       sequence:
       - action: script.turn_on

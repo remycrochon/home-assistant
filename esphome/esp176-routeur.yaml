@@ -337,7 +337,6 @@ sensor:
   # https://venus.local:1881/#flow/dbd727f16cbe7b5f
 
   - platform: mqtt_subscribe
-    name: "Conso Maison"
     id: conso_maison
     topic: mp2/multiplus2/conso_out1
     unit_of_measurement: "W"
@@ -349,7 +348,6 @@ sensor:
           send_every: 1
 
   - platform: mqtt_subscribe
-    name: "Pu batterie"
     id: pu_batteries
     topic: mp2/batteries/puissance
     unit_of_measurement: "W"
@@ -361,7 +359,6 @@ sensor:
           send_every: 1
         
   - platform: mqtt_subscribe
-    name: "Pu Produite"
     id: pu_prod
     topic: mp2/multiplus2/prod_totale
     unit_of_measurement: "W"
@@ -373,7 +370,6 @@ sensor:
           send_every: 1
 
   - platform: mqtt_subscribe
-    name: "Soc"
     id: soc
     topic: mp2/batteries/soc
     unit_of_measurement: "%"
@@ -385,7 +381,6 @@ sensor:
           send_every: 1
           
   - platform: mqtt_subscribe
-    name: "Etat Bus VE"
     id: etatbus_ve
     topic: mp2/multiplus2/etatbusve
     accuracy_decimals: 0

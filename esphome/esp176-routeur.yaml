@@ -113,11 +113,18 @@ globals:
     restore_value: no
     initial_value: '0'
 
+  - id: hc_chauffe          # mémorise l'état chauffe HC (hystérésis)
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+
   # stocke temporairement le message à envoyer à telegram
   - id: telegram_msg_buffer
     type: std::string
     restore_value: no
     initial_value: '""'
+
+
 
 # Sonde Temperature Dallas
 one_wire:
@@ -183,6 +190,19 @@ binary_sensor:
   
 # Input Number
 number:
+  # Simul Temp ECS
+  - platform: template
+    name: "Simul Temp ECS"
+    id: temp_ecs_ha_simu
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    unit_of_measurement: "C°"
+    step: 1
+    icon: mdi:arrow-collapse-vertical
+
   # seuil SOC validation routeur
   - platform: template
     name: "Consigne Triac en manu"
@@ -494,7 +514,7 @@ interval:
             return (id(tarif).state == 2 ||id(tarif).state == 4 ||id(tarif).state == 6) ; // Tarif HP(2/4/6) 
             //return (id(tarif).state == 1 ||id(tarif).state == 3 ||id(tarif).state == 5) ; // tarif HC (1/3/5)
         then:
-          - script.execute: calcul_injection_hp
+          - script.execute: calcul_injection_hp 
         else:
           # - script.execute: calcul_injection_hp
           - script.execute: calcul_injection_hc 
@@ -668,29 +688,28 @@ script:
       # 🧭 ÉVALUATION DES CONDITIONS DE DÉMARRAGE
       # ============================================================
       - lambda: |-
-          float temp_ecs   = id(temp_ecs_ha).state;
-          float seuil_bas  = id(seuil_bas_ha).state;
-          float seuil_haut = id(seuil_haut_ha).state;
-          float p_reseau   = id(pureseau1).state;
+          float temperature_ecs   = id(temp_ecs_ha).state;
+          float seuil_bas_ecs     = id(seuil_bas_ha).state;
+          float seuil_haut_ecs    = id(seuil_haut_ha).state;
+          float puissance_reseau  = id(pureseau1).state;
 
-          // ✅ Température triac OK ?
-          bool temp_ok = (id(temp_triac).state < (id(tmax).state - 2));
-          id(temperatureok).publish_state(temp_ok);
+          // ✅ Vérifie la température du triac
+          bool temperature_ok = (id(temp_triac).state < (id(tmax).state - 2));
+          id(temperatureok).publish_state(temperature_ok);
 
-          // ✅ Vérifie si ECS en chauffe (zone hystérésis)
-          bool ecs_froide = (temp_ecs < seuil_bas);
-          bool ecs_chaude = (temp_ecs >= seuil_haut);
-          bool ecs_hysteresis = id(moderegul).state == "HC Chauffe active";  // continue si déjà ON
+          // ✅ Détection état ECS
+          bool ecs_froide = (temperature_ecs < seuil_bas_ecs);
+          bool ecs_chaude = (temperature_ecs >= seuil_haut_ecs);
 
-          // ✅ Injection réseau ?
-          bool pas_injection = (p_reseau >= -10);
+          // ✅ Vérifie l'injection réseau (puissance négative)
+          bool injection_autorisee = (puissance_reseau >= -200);
 
-          // ✅ Log synthétique
+          // ✅ Log synthétique d’état
           ESP_LOGI("HC",
-            "Check HC → ECS=%.1f°C (%.1f–%.1f) | P_Réseau=%.0fW | TempTriac=%.1f°C | Valid=%d | TempOK=%d",
-            temp_ecs, seuil_bas, seuil_haut,
-            p_reseau, id(temp_triac).state,
-            id(validrouteur).state, temp_ok
+            "Check HC → ECS=%.1f°C (%.1f–%.1f) | P_Réseau=%.0fW | TempTriac=%.1f°C | TempOK=%d | Valid=%d",
+            temperature_ecs, seuil_bas_ecs, seuil_haut_ecs,
+            puissance_reseau, id(temp_triac).state,
+            temperature_ok, id(validrouteur).state
           );
 
       # ============================================================
@@ -708,6 +727,7 @@ script:
           then:
             - lambda: |-
                 id(striac) = 0;
+                id(hc_chauffe) = false;
                 id(moderegul).publish_state("HC OFF - Conditions NOK ou arrêt");
                 id(afpdispo).publish_state(0);
                 id(cons_batt_cours).publish_state(0);
@@ -725,50 +745,74 @@ script:
               - binary_sensor.is_on: temperatureok
           then:
             - lambda: |-
-                float temp_ecs   = id(temp_ecs_ha).state;
-                float seuil_bas  = id(seuil_bas_ha).state;
-                float seuil_haut = id(seuil_haut_ha).state;
-                float p_reseau   = id(pureseau1).state;
+                // =============================================
+                // 🔹 Lecture des valeurs courantes
+                // =============================================
+                float temperature_ecs   = id(temp_ecs_ha).state;
+                float seuil_bas_ecs     = id(seuil_bas_ha).state;
+                float seuil_haut_ecs    = id(seuil_haut_ha).state;
+                float puissance_reseau  = id(pureseau1).state;
 
-                bool pas_injection  = (p_reseau >= -10);
-                bool ecs_froide     = (temp_ecs <  seuil_bas);
-                bool ecs_chaude     = (temp_ecs >= seuil_haut);
-                bool chauffe_active = (id(moderegul).state == "HC Chauffe active");
+                bool injection_autorisee = (puissance_reseau >= -200);
+                bool ecs_froide = (temperature_ecs <  seuil_bas_ecs);
+                bool ecs_chaude = (temperature_ecs >= seuil_haut_ecs);
+                bool chauffe_active = id(hc_chauffe);
 
+                // =============================================
                 // 🚨 Sécurité injection réseau
-                if (!pas_injection) {
-                  id(striac) = 0;
+                // =============================================
+                if (!injection_autorisee) {
+                  id(striac) = 0.0f;
+                  id(hc_chauffe) = false;
                   id(moderegul).publish_state("HC Sécurité Injection OFF");
-                  ESP_LOGI("HC", "Injection réseau détectée (%.0f W) → OFF", p_reseau);
+                  ESP_LOGI("HC", "⛔ Injection détectée (%.0f W) → Chauffe arrêtée", puissance_reseau);
                 }
-                // 🔥 Hystérésis ECS : on chauffe si ECS froide ou maintien si déjà en chauffe
-                else if (ecs_froide || chauffe_active) {
-                  if (ecs_chaude) {
-                    id(striac) = 0;
-                    id(moderegul).publish_state("HC ECS OK - Chauffe OFF");
-                    ESP_LOGI("HC", "ECS %.1f°C ≥ %.1f°C → Chauffe arrêtée", temp_ecs, seuil_haut);
-                  } else {
-                    // 👉 DÉLÈGUE LE CALCUL À regulation_interpolation (branche HC interne)
+
+                // =============================================
+                // 🔥 Gestion de l’hystérésis ECS
+                // =============================================
+                else {
+                  // Cas 1️⃣ : ECS froide → démarrage de la chauffe
+                  if (ecs_froide) {
+                    id(hc_chauffe) = true;
                     id(moderegul).publish_state("HC Chauffe active");
-                    ESP_LOGI("HC", "ECS %.1f°C < %.1f°C → Appel interpolation (HC)", temp_ecs, seuil_bas);
-                    id(regulation_interpolation).execute();  // appelle le script par son id
+                    id(regulation_interpolation).execute();
+                    ESP_LOGI("HC", "🔥 ECS %.1f°C < %.1f°C → Démarrage chauffe (hystérésis ON)",
+                             temperature_ecs, seuil_bas_ecs);
+                  }
+                  // Cas 2️⃣ : chauffe en cours et ECS pas encore chaude → maintien
+                  else if (chauffe_active && !ecs_chaude) {
+                    id(moderegul).publish_state("HC Chauffe maintenue");
+                    id(regulation_interpolation).execute();
+                    ESP_LOGI("HC", "♨️ ECS %.1f°C (entre %.1f et %.1f) → Maintien chauffe",
+                             temperature_ecs, seuil_bas_ecs, seuil_haut_ecs);
+                  }
+                  // Cas 3️⃣ : ECS chaude → arrêt chauffe
+                  else if (ecs_chaude) {
+                    id(striac) = 0.0f;
+                    id(hc_chauffe) = false;
+                    id(moderegul).publish_state("HC ECS OK - Chauffe OFF");
+                    ESP_LOGI("HC", "✅ ECS %.1f°C ≥ %.1f°C → Chauffe arrêtée", temperature_ecs, seuil_haut_ecs);
+                  }
+                  // Cas 4️⃣ : Zone neutre (ni chaude ni froide)
+                  else {
+                    id(striac) = 0.0f;
+                    id(hc_chauffe) = false;
+                    id(moderegul).publish_state("HC Attente");
+                    ESP_LOGI("HC", "🕓 ECS %.1f°C dans zone neutre → Chauffe OFF", temperature_ecs);
                   }
                 }
-                // ⚖️ Zone neutre : pas de chauffe
-                else {
-                  id(striac) = 0;
-                  id(moderegul).publish_state("HC Attente");
-                  ESP_LOGI("HC", "ECS %.1f°C dans plage neutre → OFF", temp_ecs);
-                }
+
+                // =============================================
+                // 🔹 Mise à jour des affichages et capteurs
+                // =============================================
+                id(afstriac).publish_state(id(striac));
+                id(afpdispo).publish_state(id(p_dispo));
+                id(cons_batt_cours).publish_state(0);
 
             - light.turn_on:
                 id: gradateur
                 brightness: !lambda 'return id(striac) / 100.0f;'
-
-            - lambda: |-
-                id(afstriac).publish_state(id(striac));
-                //id(afpdispo).publish_state(0);
-                id(cons_batt_cours).publish_state(0);
 
       # ============================================================
       # 3️⃣ Mode Manuel → application directe de la consigne
@@ -782,7 +826,8 @@ script:
             - delay: 500ms
             - lambda: |-
                 id(striac) = id(ctriac_manu).state;
-                id(moderegul).publish_state("HC Mode Manu");
+                id(hc_chauffe) = false;
+                id(moderegul).publish_state("HC Mode Manuel");
                 id(afpdispo).publish_state(0);
                 id(cons_batt_cours).publish_state(0);
                 ESP_LOGI("HC", "🧩 Mode MANU → Triac forcé à %.1f%%", id(striac));
@@ -814,7 +859,8 @@ script:
           // 🔹 Détermination du mode tarifaire (HP / HC)
           // ============================================================
           // 👉HC = {1,3,5}, HP = {2,4,6}, 
-          bool is_hp = (id(tarif).state == 2 || id(tarif).state == 4 || id(tarif).state == 6);
+          bool is_hp = (id(tarif).state == 2 || id(tarif).state == 4 || id(tarif).state == 6); 
+          //bool is_hp = (id(tarif).state == 1 || id(tarif).state == 4 || id(tarif).state == 6);  // Pour test        
           float pdispo = 0.0f;  // puissance disponible pour ECS
 
           // ============================================================

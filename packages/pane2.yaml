@@ -174,27 +174,27 @@ openhasp:
 
       - obj: "p2b31"
         properties:
-          "text": "{{ states('sensor.esp180_temperature_hotte')|float(0)}} C°" 
+          "text": "{{ states('sensor.esp180_temperature_hotte')|float(0)|round(1)}} C°" 
       - obj: "p2b33"
         properties:
-          "text": "{{ states('sensor.esp180_humidite_hotte')|float(0)}} %" 
+          "text": "{{ states('sensor.esp180_humidite_hotte')|float(0)|round(1)}} %" 
 
 ####### PAGE 3 VMC ############### 
       - obj: "p3b10"
         properties:
-          "text": "{{ states('sensor.esp136_t_air_vicie')|float(0)}}C°" 
+          "text": "{{ states('sensor.esp136_t_air_vicie')|float(0)|round(1)}}C°" 
       - obj: "p3b11"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_air_neuf')|float(0)}}C°"
+          "text": "{{ states('sensor.esp136_tdeg_air_neuf')|float(0)|round(1)}}C°"
       - obj: "p3b12"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_insufflation')|float(0)}}C°" 
+          "text": "{{ states('sensor.esp136_tdeg_insufflation')|float(0)|round(1)}}C°" 
       - obj: "p3b13"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_aspiration')|float(0)}}C°"
+          "text": "{{ states('sensor.esp136_tdeg_aspiration')|float(0)|round(1)}}C°"
       - obj: "p3b14"
         properties:
-          "text": "{{ states('sensor.esp136_t_combles')|float(0)}}C°"
+          "text": "{{ states('sensor.esp136_t_combles')|float(0)|round(1)}}C°"
       - obj: "p3b16"
         properties:
           "text": "{{ states('sensor.esp136_rend')|float(0)|round(0)}} %"
@@ -269,7 +269,7 @@ openhasp:
 
       - obj: "p4b40" # S Triac
         properties:
-          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0)}}"
+          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0) }}"
       - obj: "p4b50" # ECS
         properties:
           "text": >

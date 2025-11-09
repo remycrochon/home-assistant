@@ -11,8 +11,6 @@ esphome:
     version: "1.0.1"
   platformio_options:
     lib_deps: NeoPixelBus@2.6.0
-  #platform: ESP32
-  #board: mhetesp32minikit    
       
 esp32:
   board: mhetesp32minikit

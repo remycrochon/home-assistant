@@ -1653,26 +1653,22 @@
         - sensor.cave_power
         - sensor.lywsd03mmc_cellier_batterie
         - sensor.chamb_parents_power
-        - sensor.chambre_nord_power
         - sensor.batteries_chambre_ssol_zb
         - sensor.detecteur_petite_porte_sous_sol_power
         - sensor.chambre_sud_power
         - sensor.detecteur_porte_frigo_power
-        - sensor.battery_sdb
+        - sensor.batterie_sdb
         - sensor.detecteur_porte_cellier_power
         - sensor.power_terrasse2
-        - sensor.zoe_battery_level
         - sensor.bp1_sonof_4d594222_power
         - sensor.climate_escalier_sous_sol_batterie
         - sensor.detecteur_porte_entree_batterie
         - sensor.lywsd03mmc_garage_batterie
         - sensor.lywsd03mmc_salon_batterie
-        - sensor.afficheur_temperature_2025_01_batterie
-        - sensor.afficheur_temperature_2025_02_batterie
         - sensor.detecteur_presence_2025_03_battery
-        - sensor.detecteur_spot_ext_cuisine_battery
         - sensor.tze200_3towulqd_ts0601_batterie
         - sensor.detecteur_porte_frigo_batterie
+        - sensor.chambre_nord_batterie
       custom_group_battery_level: 30
       exclude_sensors:
         entity_id:
@@ -1688,9 +1684,6 @@
         - sensor.mp2_soc_mqtt
         - sensor.s6_pro_batterie
         - sensor.px5_battery_level
-        - sensor.robot_niveau_batterie
-        - sensor.robot_am435x_awd_nr_soc
-        - sensor.tabxiaomi_battery_level
         - sensor.tablette_battery_level
         - sensor.mp2_soc_theorique_par_mqtt
         - sensor.myups_charge_de_la_batterie

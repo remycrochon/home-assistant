@@ -2538,8 +2538,8 @@
   alias: Ecran02- Actions toutes les 30 mn
   description: ''
   triggers:
-  - minutes: /30
-    trigger: time_pattern
+  - trigger: time_pattern
+    hours: /1
   conditions: []
   actions:
   - type: turn_on

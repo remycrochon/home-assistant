@@ -2923,3 +2923,29 @@
       target:
         entity_id: script.ecs_off
   mode: single
+- id: '1762929570836'
+  alias: Allumage Ecran02 Cuisine
+  description: ''
+  triggers:
+  - type: motion
+    device_id: f63a7a8078a6c8ad8bff217525241849
+    entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: d895e168f56c5b089b39c806fd2ce04b
+    entity_id: 371d3e5b732a9d86674c59171c732157
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.ecran02_backlight
+  mode: single

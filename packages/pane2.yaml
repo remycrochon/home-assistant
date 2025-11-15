@@ -2,7 +2,49 @@ openhasp:
   ecran02:
   ############### Page 0 All ###############
     objects:
-      - obj: "p0b2"
+      - obj: "p0b3"
+        properties:
+          "text": "{{ states('sensor.time') }}"
+      - obj: "p0b4"
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.rte_tempo_couleur_actuelle') %}
+            {% if couleur == "Bleu" %}
+            #1246f1
+            {% elif couleur == "Blanc" %}
+            #fafafa
+            {% elif couleur == "Rouge" %}
+            #f70404
+            {% else %} 
+            #49f704
+            {% endif %}
+          "text": "J"
+          "text_color": >
+          #fafafa
+
+
+      - obj: "p0b5"
+        properties:
+          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') |float(0)| round(1)) }}°C"
+      - obj: "p0b6"
+        properties:
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.lywsd03mmc_salon_temperature')|float(0) | round(1)) }}°C"
+
+      - obj: "p0b7"
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.rte_tempo_prochaine_couleur') %}
+            {% if couleur == "Bleu" %}
+            #1246f1
+            {% elif couleur == "Blanc" %}
+            #fafafa
+            {% elif couleur == "Rouge" %}
+            #f70404
+            {% else %} 
+            #49f704
+            {% endif %}
+
+      - obj: "p0b8"
         properties:
           "text_color": >
             {% set rssi = state_attr('openhasp.ecran02','rssi') | int(0) %}
@@ -17,16 +59,6 @@ openhasp:
             {% else %}
               #ff0000
             {% endif %}
-      - obj: "p0b3"
-        properties:
-          "text": "{{ states('sensor.time') }}"
-      - obj: "p0b6"
-        properties:
-          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') |float(0)| round(1)) }}°C"
-      - obj: "p0b7"
-        properties:
-          "text": "\uE2DC {{'%.1f' | format (states('sensor.lywsd03mmc_salon_temperature')|float(0) | round(1)) }}°C"
-
       ############### Page 1 Home ###############
       - obj: "p1b21" # Temp Ext
         properties:

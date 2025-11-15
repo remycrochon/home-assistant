@@ -18,8 +18,8 @@ streams:
   piscine_s1:
   - rtsp://tapo_piscine:56835683@192.168.0.67:554/stream1
   salon:
-  - rtsp://tapo_piscine:56835683@192.168.0.83:554/stream1  
-  salon_old:
+  - rtsp://tapo_salon:56835683@192.168.0.83:554/stream1  
+  bureau:
   - rtsp://admin:123456@192.168.0.90:554/8080
 webrtc:
 #  candidates:

@@ -1032,39 +1032,6 @@
             %{{-\"\\n\"-}}\nh Debut= {{states('sensor.mp2_dess_h_debut_dess_remy')}}\n"
           title: Rapport Production PV
   mode: single
-- id: '1698053985865'
-  alias: Spot Ext Cui old
-  description: ''
-  triggers:
-  - type: opened
-    device_id: 193f4cea2f12db0ab1a4d044df803df3
-    entity_id: b182f27a8204167b3f3b1893ec2d2196
-    domain: binary_sensor
-    trigger: device
-  conditions:
-  - condition: sun
-    before: sunrise
-    after: sunset
-    enabled: true
-  - condition: state
-    entity_id: input_boolean.nuit_jour
-    state: 'off'
-  actions:
-  - type: turn_on
-    device_id: c7b28db8c025b2f0bd975382bc4011f0
-    entity_id: 6cf8b08e53c983c0c298cedd8a864449
-    domain: switch
-  - delay:
-      hours: 0
-      minutes: 2
-      seconds: 0
-      milliseconds: 0
-  - type: turn_off
-    device_id: c7b28db8c025b2f0bd975382bc4011f0
-    entity_id: 6cf8b08e53c983c0c298cedd8a864449
-    domain: switch
-    enabled: true
-  mode: single
 - id: '1698142750238'
   alias: Notification niveau bas puits
   description: ''
@@ -1559,12 +1526,6 @@
   alias: Spot Ext Cuisine detecteur exterieur
   description: ''
   triggers:
-  - type: motion
-    device_id: f63a7a8078a6c8ad8bff217525241849
-    entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
-    domain: binary_sensor
-    trigger: device
-    enabled: false
   - type: opened
     device_id: 193f4cea2f12db0ab1a4d044df803df3
     entity_id: b182f27a8204167b3f3b1893ec2d2196
@@ -1600,7 +1561,7 @@
   actions:
   - type: turn_on
     device_id: c7b28db8c025b2f0bd975382bc4011f0
-    entity_id: 6cf8b08e53c983c0c298cedd8a864449
+    entity_id: ba339bcc22bbcb00636e4b664078d906
     domain: switch
   - delay:
       hours: 0
@@ -1609,9 +1570,8 @@
       milliseconds: 0
   - type: turn_off
     device_id: c7b28db8c025b2f0bd975382bc4011f0
-    entity_id: 6cf8b08e53c983c0c298cedd8a864449
+    entity_id: ba339bcc22bbcb00636e4b664078d906
     domain: switch
-    enabled: true
   mode: single
   trace:
     stored_traces: 15

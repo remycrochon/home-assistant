@@ -1623,7 +1623,7 @@
         - sensor.bp1_sonof_4d594222_power
         - sensor.climate_escalier_sous_sol_batterie
         - sensor.detecteur_porte_entree_batterie
-        - sensor.lywsd03mmc_garage_batterie
+        - sensor.garage_batterie
         - sensor.lywsd03mmc_salon_batterie
         - sensor.detecteur_presence_2025_03_battery
         - sensor.tze200_3towulqd_ts0601_batterie
@@ -1639,7 +1639,6 @@
         - sensor.alecto_ws1700_34_01_battery_numeric
         - sensor.am435x_awd_batterie
         - sensor.mp2_cible_soc_par_mqtt
-        - sensor.iphone_batterie
         - sensor.mp2_soc_mini_mqtt
         - sensor.mp2_soc_mqtt
         - sensor.s6_pro_batterie
@@ -1648,6 +1647,7 @@
         - sensor.mp2_soc_theorique_par_mqtt
         - sensor.myups_charge_de_la_batterie
         - sensor.iphone_de_remy_battery_level
+        device_id: 367dba31447009458e03b70e3a29b6b2
       notify_okay_message: Super! toutes les batteries sont okay :)
 - id: '1722434877942'
   alias: Camera Activation-Désactivation detection

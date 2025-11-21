@@ -11,16 +11,17 @@ from homeassistant.const import UnitOfTemperature
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import COORDINATOR
 from .const import DAIKIN_DEVICES
 from .const import DOMAIN as DAIKIN_DOMAIN
+from .coordinator import OnectaRuntimeData
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up Daikin water tank entities."""
-    coordinator = hass.data[DAIKIN_DOMAIN][COORDINATOR]
+    onecta_data: OnectaRuntimeData = config_entry.runtime_data
+    coordinator = onecta_data.coordinator
     for dev_id, device in hass.data[DAIKIN_DOMAIN][DAIKIN_DEVICES].items():
         supported_management_point_types = {
             "domesticHotWaterTank",
@@ -284,6 +285,7 @@ class DaikinWaterTank(CoordinatorEntity, WaterHeaterEntity):
         else:
             # Update local cached version
             self._attr_current_operation = operation_mode
+            self._attr_operation_list = self.get_operation_list()
             self.async_write_ha_state()
 
         return result
@@ -300,6 +302,7 @@ class DaikinWaterTank(CoordinatorEntity, WaterHeaterEntity):
                 hwtd = self.hotwatertank_data
                 hwtd["onOffMode"]["value"] = "on"
                 self._attr_current_operation = self.get_current_operation()
+                self._attr_operation_list = self.get_operation_list()
                 self.async_write_ha_state()
         else:
             _LOGGER.debug(
@@ -321,6 +324,7 @@ class DaikinWaterTank(CoordinatorEntity, WaterHeaterEntity):
                 hwtd = self.hotwatertank_data
                 hwtd["onOffMode"]["value"] = "off"
                 self._attr_current_operation = self.get_current_operation()
+                self._attr_operation_list = self.get_operation_list()
                 self.async_write_ha_state()
         else:
             _LOGGER.debug(

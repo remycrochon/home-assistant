@@ -1,0 +1,521 @@
+substitutions:
+  device_name: esp137-vmc
+  adress_ip: "192.168.0.137"
+
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+
+# Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO23
+    inverted: true
+
+logger:
+  level: DEBUG
+
+api:
+  
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+
+one_wire:
+  - platform: gpio  
+    pin: GPIO32
+
+# Sélecteur de mode (Manuel ou Automatique)
+select:
+  - platform: template
+    name: "Mode VMC"
+    id: vmc_mode
+    options:
+      - "Manuel"
+      - "Automatique"
+    optimistic: true
+    restore_value: true    
+    on_value:
+      then:
+        - if:
+            condition:
+              - lambda: 'return id(vmc_mode).state == "Manuel";'
+            then:
+              - script.execute: script_reset_vit
+        - logger.log:
+            format: "Mode VMC changé en : %s"
+            args: [ 'id(vmc_mode).state.c_str()' ]
+            level: INFO
+
+# Input Number pour les seuils
+number:
+  # Seuils pour le CO2
+  - platform: template
+    name: "Seuil Haut CO2"
+    id: seuil_haut_co2
+    optimistic: true
+    restore_value: true
+    initial_value: 700
+    mode: box
+    min_value: 0
+    max_value: 1500
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_dioxide
+
+  - platform: template
+    name: "Seuil Très Haut CO2"
+    id: seuil_tres_haut_co2
+    optimistic: true
+    restore_value: true
+    initial_value: 800
+    mode: box
+    min_value: 0
+    max_value: 3000
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_dioxide
+
+  # Seuils pour le PM2.5
+  - platform: template
+    name: "Seuil Haut PM2.5"
+    id: seuil_haut_pm25
+    optimistic: true
+    restore_value: true
+    initial_value: 35
+    mode: box
+    min_value: 0
+    max_value: 1000
+    step: 1
+    unit_of_measurement: "µg/m³"
+    device_class: pm25
+
+  - platform: template
+    name: "Seuil Très Haut PM2.5"
+    id: seuil_tres_haut_pm25
+    optimistic: true
+    restore_value: true
+    initial_value: 100
+    mode: box
+    min_value: 0
+    max_value: 2000
+    step: 1
+    unit_of_measurement: "µg/m³"
+    device_class: pm25
+
+  # Seuils pour le CO
+  - platform: template
+    name: "Seuil Haut CO"
+    id: seuil_haut_co
+    optimistic: true
+    restore_value: true
+    initial_value: 25
+    mode: box
+    min_value: 0
+    max_value: 100
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_monoxide
+
+  - platform: template
+    name: "Seuil Très Haut CO"
+    id: seuil_tres_haut_co
+    optimistic: true
+    restore_value: true
+    initial_value: 50
+    mode: box
+    min_value: 0
+    max_value: 200
+    step: 1
+    unit_of_measurement: "ppm"
+    device_class: carbon_monoxide
+
+sensor:
+  - platform: dallas_temp
+    address: 0xf9000000bc93d328
+    name: "Temp Air Neuf"
+    id: out
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0xa2000000bca51728
+    name: "Temp Air Vicié"
+    id: airv
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0x10000000bdc55428
+    name: "Temp insufflation"
+    id: insuf
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0xc1000000bced2428
+    name: "Temp aspiration"
+    id: aspi
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+    
+  - platform: dallas_temp
+    address: 0xbc01a14909646128
+    name: "Temp Combles"
+    id: combles
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: homeassistant
+    entity_id: sensor.ecocompteur_vmc_niv0
+    id: pu
+    unit_of_measurement: "W"
+    device_class: power
+
+  # Récupérer les valeurs de CO2, PM2.5 et CO depuis Home Assistant
+  - platform: homeassistant
+    entity_id: sensor.esp145_mh_z19_co2_value
+    id: co2_value
+    unit_of_measurement: "ppm"
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.esp145_conc_particules_2_5mm
+    id: pm25_value
+    unit_of_measurement: "µg/m³"
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.esp145_monoxide_carbon
+    id: co_value
+    unit_of_measurement: "ppm"
+    internal: true
+
+  - platform: template
+    name: "Rendement"
+    id: rend
+    update_interval: 10s
+    unit_of_measurement: "%"
+    icon: "mdi:percent"
+    state_class: "measurement"
+    accuracy_decimals: 0
+    lambda: |-
+      if (isnan(id(insuf).state) || isnan(id(out).state) || isnan(id(aspi).state)) {
+        return 0;
+      }
+      float denom = (id(aspi).state - id(out).state);
+      if (denom == 0) {
+        return 0;
+      }
+      float rendement = ((id(insuf).state - id(out).state) / denom) * 100;
+      if (rendement >= 100) {
+        return 100;
+      } else if (rendement < 0) {
+        return 0;
+      }
+      return rendement;
+
+  - platform: template
+    name: "Débit estimé VMC"
+    id: debit
+    unit_of_measurement: "m³/h"
+    icon: "mdi:fan"
+    state_class: "measurement"
+    update_interval: 60s
+    accuracy_decimals: 1
+    lambda: |-
+      if (isnan(id(pu).state)) {
+        return 0;
+      }
+      float debit = id(pu).state;
+      return debit;
+    filters:
+      - calibrate_polynomial:
+          degree: 2
+          datapoints:
+            - 30.14 -> 90
+            - 34.19 -> 105
+            - 38.87 -> 120
+            - 44.96 -> 135
+            - 52.45 -> 150
+            - 61.35 -> 165
+            - 71.66 -> 180
+            - 83.37 -> 195
+      - lambda: |-
+          if (x < 0) return 0;
+          return x;
+
+  - platform: template
+    name: "COP VMC"
+    device_class: power_factor
+    state_class: "measurement"
+    unit_of_measurement: ""
+    update_interval: 60s
+    accuracy_decimals: 2
+    lambda: |-
+      if (isnan(id(pu).state) || isnan(id(debit).state) || isnan(id(insuf).state) || isnan(id(out).state)) {
+        return 0;
+      }    
+      float debit_air = (id(debit).state / 3600.0);
+      float masse_volumique = 1.2;
+      float capacite_thermique = 1000.0;
+      float pu_thermique = debit_air * masse_volumique * capacite_thermique * 
+             (id(insuf).state - id(out).state);    
+      float puissance_electrique = id(pu).state;
+      if (puissance_electrique == 0) {
+        return 0;
+      }
+      float cop = pu_thermique / puissance_electrique;
+      if (cop < 0) {
+        return 0;
+      }
+      return cop;
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+
+text_sensor:
+  # Affichage Vitesse en clair
+  - platform: template
+    id: aff_vitesse
+    name: "affich_vitesse"
+    icon: mdi:timer
+    lambda: |-
+      float puiss = id(pu).state;
+      if (puiss < 2.0) {
+        return std::string("Arret");
+      } else if (puiss <= 35.0) {
+        return std::string("Vit 1");
+      } else if (puiss <= 70.0) {
+        return std::string("Vit 2");
+      } else {
+        return std::string("Vit 3");
+      }
+
+switch:   
+  - platform: gpio
+    name: "Vit_1"
+    pin: GPIO16
+    id: vit1
+    
+  - platform: template
+    name: "Vit_2"
+    id: vit2
+    turn_on_action:
+      - switch.turn_on: vit1
+      - delay: 2s
+      - switch.turn_off: vit1
+
+  - platform: template
+    name: "Vit_3"
+    id: vit3
+    turn_on_action:
+      - switch.turn_on: vit1
+      - delay: 6s
+      - switch.turn_off: vit1
+
+  - platform: template
+    name: "Valid Co"
+    id: val_co
+    optimistic: True
+    on_turn_on:
+      then:
+        - script.execute: calcul_mode_auto_v1
+    on_turn_off:
+      then:
+        - script.execute: calcul_mode_auto_v1
+
+  - platform: template
+    name: "Valid Co2"
+    id: val_co2
+    optimistic: True
+    on_turn_on:
+      then:
+        - script.execute: calcul_mode_auto_v1
+    on_turn_off:
+      then:
+        - script.execute: calcul_mode_auto_v1
+
+  - platform: template
+    name: "Valid pm25"
+    id: val_pm25
+    optimistic: True
+    on_turn_on:
+      then:
+        - script.execute: calcul_mode_auto_v1
+    on_turn_off:
+      then:
+        - script.execute: calcul_mode_auto_v1
+
+interval:
+  - interval: 60s
+    then:
+      - script.execute: calcul_mode_auto_v1
+
+# ------------------------  Scripts
+script:
+  # Automatisation pour le mode "Automatique"
+  - id: calcul_mode_auto_v1
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: 'return id(vmc_mode).state == "Automatique";'
+          then:
+            # Vérifier les seuils très hauts individuellement (priorité sur les seuils hauts)
+            - if:
+                condition:
+                  or:
+                    - lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                    - lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                    - lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
+                then:
+                  - script.execute: script_vit3
+                  - script.stop: script_vit2
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                      then:
+                        - logger.log:
+                            format: "CO2 - Val: %f, Seuil Tres Haut: %f"
+                            args: [ 'id(co2_value).state', 'id(seuil_tres_haut_co2).state']  
+                            level: INFO
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                      then:
+                        - logger.log:
+                            format: "CO - Val: %f, Seuil Tres Haut: %f"
+                            args: [ 'id(co_value).state', 'id(seuil_tres_haut_co).state']  
+                            level: INFO
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
+                      then:
+                        - logger.log:
+                            format: "PM2.5 - Val: %f, Seuil Tres Haut: %f"
+                            args: [ 'id(pm25_value).state', 'id(seuil_tres_haut_pm25).state']  
+                            level: INFO
+
+            # Vérifier les seuils hauts individuellement
+            - if:
+                condition:
+                  and:
+                    - or:
+                        - lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_haut_co2).state;'
+                        - lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_haut_pm25).state;'
+                        - lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_haut_co).state;'
+                    - not:
+                        or:
+                          - lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_tres_haut_co2).state;'
+                          - lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_tres_haut_co).state;'
+                          - lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_tres_haut_pm25).state;'
+                then:
+                  - script.execute: script_vit2
+                  - script.stop: script_vit3
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_co2).state && !isnan(id(co2_value).state) && id(co2_value).state > id(seuil_haut_co2).state;'
+                      then:
+                        - logger.log:
+                            format: "CO2 - Val: %f, Seuil Haut: %f"
+                            args: [ 'id(co2_value).state', 'id(seuil_haut_co2).state']  
+                            level: INFO
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_co).state && !isnan(id(co_value).state) && id(co_value).state > id(seuil_haut_co).state;'
+                      then:
+                        - logger.log:
+                            format: "CO - Val: %f, Seuil Haut: %f"
+                            args: [ 'id(co_value).state', 'id(seuil_haut_co).state']  
+                            level: INFO
+                  - if:
+                      condition: 
+                        lambda: 'return id(val_pm25).state && !isnan(id(pm25_value).state) && id(pm25_value).state > id(seuil_haut_pm25).state;'
+                      then:
+                        - logger.log:
+                            format: "PM2.5 - Val: %f, Seuil Haut: %f"
+                            args: [ 'id(pm25_value).state', 'id(seuil_haut_pm25).state']  
+                            level: INFO
+
+
+
+  # Sélection des vitesses          
+  - id: script_vit1            
+    mode: single
+    then:
+      - logger.log:
+          format: "Passage à Vitesse 1"
+          level: INFO
+      - switch.turn_on: vit1
+      - delay: 5s
+      - switch.turn_off: vit1
+      - logger.log:
+          format: "Fin Vitesse 1"
+          level: INFO
+
+  # Vitesse 2 pendant 30min, puis retour à Vitesse 1
+  - id: script_vit2           
+    mode: single
+    then:
+      - logger.log:
+          format: "Passage à Vitesse 2"
+          level: INFO
+      - switch.turn_on: vit2   # Passer à Vitesse 2
+      - delay: 30min           # Maintenir 30 minutes
+      - script.execute: script_vit1  # Revenir à Vitesse 1
+      - logger.log:
+          format: "Fin Vitesse 2, retour à Vitesse 1"
+          level: INFO
+
+  # Vitesse 3 pendant 15min, puis Vitesse 2 pendant 30min, puis retour à Vitesse 1
+  - id: script_vit3
+    mode: single
+    then:
+      - logger.log:
+          format: "Passage à Vitesse 3"
+          level: INFO
+      - switch.turn_on: vit3   # Passer à Vitesse 3
+      - delay: 15min           # Maintenir 15 minutes
+      - script.execute: script_vit2  # Passer à Vitesse 2 pendant 30 minutes
+      - logger.log:
+          format: "Fin Vitesse 3, passage à Vitesse 2"
+          level: INFO
+
+  - id: script_reset_vit
+    mode: single
+    then:
+      - logger.log:
+          format: "Réinitialisation des vitesses"
+          level: INFO
+      - switch.turn_off: vit1
+      - switch.turn_off: vit2
+      - switch.turn_off: vit3

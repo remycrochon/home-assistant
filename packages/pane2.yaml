@@ -138,28 +138,28 @@ openhasp:
 ####### PAGE 3 VMC ############### 
       - obj: "p3b10"
         properties:
-          "text": "{{ states('sensor.esp136_t_air_vicie')|float(0)|round(1)}}C°" 
+          "text": "{{ states('sensor.esp137_vmc_temp_air_vicie')|float(0)|round(1)}}C°" 
       - obj: "p3b11"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_air_neuf')|float(0)|round(1)}}C°"
+          "text": "{{ states('sensor.esp137_vmc_temp_air_neuf')|float(0)|round(1)}}C°"
       - obj: "p3b12"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_insufflation')|float(0)|round(1)}}C°" 
+          "text": "{{ states('sensor.esp137_vmc_temp_insufflation')|float(0)|round(1)}}C°" 
       - obj: "p3b13"
         properties:
-          "text": "{{ states('sensor.esp136_tdeg_aspiration')|float(0)|round(1)}}C°"
+          "text": "{{ states('sensor.esp137_vmc_temp_aspiration')|float(0)|round(1)}}C°"
       - obj: "p3b14"
         properties:
-          "text": "{{ states('sensor.esp136_t_combles')|float(0)|round(1)}}C°"
+          "text": "{{ states('sensor.esp137_vmc_temp_combles')|float(0)|round(1)}}C°"
       - obj: "p3b16"
         properties:
-          "text": "{{ states('sensor.esp136_rend')|float(0)|round(0)}} %"
+          "text": "{{ states('sensor.esp137_vmc_rendement')|float(0)|round(0)}} %"
       - obj: "p3b21"
         properties:
           "text": "{{ states('sensor.esp145_conc_particules_2_5mm')|float(0)|round(0)}}"      
       - obj: "p3b31"
         properties:
-          "text": "{{ states('sensor.esp136_cop_vmc')|float(0)|round(1)}}"   
+          "text": "{{ states('sensor.esp137_vmc_cop_vmc')|float(0)|round(1)}}"   
       - obj: "p3b41"
         properties:
           "text": "{{ states('sensor.ecocompteur_vmc_niv0')|float(0)|round(0)}} W"          
@@ -171,7 +171,7 @@ openhasp:
           "text": "{{ states('sensor.esp145_mh_z19_co2_value')|float(0)|round(0)}} ppm"
       - obj: "p3b71"
         properties:
-          "text": "{{ states('sensor.esp136_debit_estime_vmc')|float(0)|round(1)}} m3/h"          
+          "text": "{{ states('sensor.esp137_vmc_debit_estime_vmc')|float(0)|round(1)}} m3/h"          
       - obj: "p3b91" # Cde Relais
         properties:
           "val": '{{ 1 if is_state("switch.relais_cde_vmc_niv0_on_off", "on") else 0 }}'

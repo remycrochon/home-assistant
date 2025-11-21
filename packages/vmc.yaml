@@ -4,28 +4,6 @@
 #                                                  #
 ####################################################
 
-
-input_datetime:
-
-  # Horaire VMC Niv0
-  heure_vmc_niv0_ma:
-    name: Heure Ma Ete VMC_N0
-    has_date: false
-    has_time: true
-  heure_vmc_niv0_at:
-    name: Heure At Ete VMC_N0
-    has_date: false
-    has_time: true
-
-input_select:
-  vmc_niv0:
-    name: Vmc_Niv0
-    icon: mdi:fan
-    options:
-      - Hor
-      - Marche
-      - Arret
-    
 template:
   - sensor:
 # Limite les valeurs aberantes de la puissance de la VMC

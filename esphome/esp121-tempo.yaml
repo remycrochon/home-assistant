@@ -1,0 +1,397 @@
+# ESP32 S3 mini
+substitutions:
+  name_e1: "esp121-affichage-tempo"
+  friendly_name: esp121
+  adress_ip: 192.168.0.121
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${name_e1}
+  friendly_name: ${name_e1}
+  #platformio_options:
+   # lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    priority: 600
+    then:
+      - light.control:
+          id: rgb_led
+          brightness: 0.25
+          state: on        
+      - light.turn_on:
+          id: voyant_led
+          effect: 'Pulse led'
+          red: 100%
+          green: 0%
+          blue: 0%
+
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 4MB
+  cpu_frequency: 160MHZ
+  framework:
+    type: arduino
+
+psram:
+  mode: octal
+  speed: 80MHz
+  
+logger:
+  level: DEBUG
+api:
+
+web_server:
+  port: 80
+  version: 1
+  
+ota:
+  platform: esphome
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 1min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+  #output_power: 8.5dB
+  fast_connect: true           # Évite la recherche de SSID si tu n’as qu’un seul AP connu
+  output_power: 17dB           # Entre 15 et 20dB = plus stable qu’à 8.5dB
+  power_save_mode: none
+  on_connect:
+    - light.turn_on:
+        id: voyant_led
+        red: 0%
+        green: 100%
+        blue: 0%
+        brightness: 50%
+        effect: none
+  on_disconnect:
+    - light.turn_on:
+        id: voyant_led
+        effect: 'Pulse led'
+        red: 0%
+        green: 0%
+        blue: 100%
+
+light:
+  # Voyant mono-LED (WS2812) sur GPIO48
+  - platform: neopixelbus
+    id: voyant_led
+    name: "Pulse led"
+    pin: GPIO48
+    num_leds: 1
+    variant: ws2812
+    method:
+      type: esp32_rmt
+      channel: 0
+
+  # Bandeau 8 LEDs WS2812 sur GPIO3
+  - platform: neopixelbus
+    id: rgb_led
+    name: "RGB strip"
+    pin: GPIO3
+    num_leds: 8
+    variant: ws2812
+    method:
+      type: esp32_rmt
+      channel: 1
+
+
+time:
+  - platform: homeassistant
+    timezone: ${time_timezone} 
+
+globals:
+  # Niveau intensité lumineuse
+  - id: intlum
+    type: float
+    restore_value: no
+    initial_value: '10'
+  # Niveau intensité lumineuse
+  - id: intlum1
+    type: float
+    restore_value: no
+    initial_value: '0.25'
+  # Etat pour le clignotement
+  - id: blink_state
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+# Etat de la connection
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO16
+      inverted: True
+    name: bp_raz
+  - platform: status
+    name: "Status"
+
+sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+  - platform: homeassistant
+    entity_id: "sensor.mp2_tension_entree_l1"
+    id: u_reseau
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: Adresse IP
+    ssid:
+      name: Wifi connecté
+    mac_address:
+      name: Adresse Mac
+  - platform: homeassistant
+    name: "Tempo Jour"
+    entity_id: sensor.rte_tempo_couleur_actuelle
+    id: tempo_jour
+  - platform: homeassistant
+    name: "Tempo j+1"
+    entity_id: sensor.rte_tempo_prochaine_couleur
+    id: tempo_jour1
+
+switch:
+  - platform: restart
+    name: "Restart" 
+
+interval:
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            sensor.in_range:
+              id: u_reseau
+              below: 10
+          then:
+            - script.execute: blink_leds_red
+          else:
+            - script.execute: calcul_led_jour
+            - script.execute: calcul_led_jour1
+
+# ------------------------  Scripts
+script:
+  # Clignotement des LEDs en rouge si u_reseau < 10
+  - id: blink_leds_red
+    mode: single
+    then:
+      - lambda: |-
+          id(blink_state) = !id(blink_state);
+      - if:
+          condition:
+            lambda: 'return id(blink_state);'
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 0
+                range_to: 7
+                red: !lambda 'return id(intlum1);'
+                green: 0%
+                blue: 0%
+          else:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 0
+                range_to: 7
+                red: 0%
+                green: 0%
+                blue: 0%
+
+  # Couleur du Jour en cours
+  - id: calcul_led_jour
+    mode: single
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: |-
+                  return strcmp(id(tempo_jour).state.c_str(),"Bleu") != 0;
+              - lambda: |-
+                  return strcmp(id(tempo_jour).state.c_str(),"Blanc") != 0;
+              - lambda: |-
+                  return strcmp(id(tempo_jour).state.c_str(),"Rouge") != 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 0
+                range_to: 1
+                red: 0%
+                green: 0%
+                blue: 0%
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%          
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour).state.c_str(),"Bleu") == 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 0
+                range_to: 1
+                red: 0%
+                green: 0%
+                blue: !lambda |-
+                  return id(intlum1);
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour).state.c_str(),"Blanc") == 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 0
+                range_to: 1
+                red: !lambda |-
+                  return id(intlum1);
+                green: !lambda |-
+                  return id(intlum1);
+                blue: !lambda |-
+                  return id(intlum1);
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour).state.c_str(),"Rouge") == 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 0
+                range_to: 1
+                red: !lambda |-
+                  return id(intlum1);
+                green: 0%
+                blue: 0%
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%
+
+  # Couleur du lendemain
+  - id: calcul_led_jour1
+    mode: single
+    then:
+      - if: 
+          condition:
+            and:
+              - lambda: |-
+                  return strcmp(id(tempo_jour1).state.c_str(),"Bleu") != 0;
+              - lambda: |-
+                  return strcmp(id(tempo_jour1).state.c_str(),"Blanc") != 0;
+              - lambda: |-
+                  return strcmp(id(tempo_jour1).state.c_str(),"Rouge") != 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 5
+                range_to: 7
+                red: 0%
+                green: 0%
+                blue: 0%
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%      
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour1).state.c_str(),"Bleu") == 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 5
+                range_to: 7
+                red: 0%
+                green: 0%
+                blue: !lambda |-
+                  return id(intlum1);
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour1).state.c_str(),"Blanc") == 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 5
+                range_to: 7
+                red: !lambda |-
+                  return id(intlum1);
+                green: !lambda |-
+                  return id(intlum1);
+                blue: !lambda |-
+                  return id(intlum1);
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%
+      - if: 
+          condition:
+            - lambda: |-
+                return strcmp(id(tempo_jour1).state.c_str(),"Rouge") == 0;
+          then:
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 5
+                range_to: 7
+                red: !lambda |-
+                  return id(intlum1);
+                green: 0%
+                blue: 0%
+            - light.addressable_set:
+                id: rgb_led
+                range_from: 2
+                range_to: 4
+                red: 0%
+                green: 0%
+                blue: 0%

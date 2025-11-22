@@ -322,7 +322,7 @@ openhasp:
             {% endif %}
       - obj: "p5b56" # Conso
         properties:
-          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kW"
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kWh"
       - obj: "p5b57" # ECS
         properties:
           "text": >

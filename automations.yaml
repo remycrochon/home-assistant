@@ -1541,6 +1541,10 @@
     to:
     - 'on'
     id: FM Detection Cu
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
   - trigger: state
     entity_id:
     - binary_sensor.garage_ext_person_occupancy
@@ -1549,6 +1553,10 @@
     to:
     - 'on'
     id: FM Detection Gg
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
   - trigger: state
     entity_id:
     - binary_sensor.cuisine_person_occupancy

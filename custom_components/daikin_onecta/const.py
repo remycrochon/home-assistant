@@ -1,4 +1,4 @@
-"""Constants for Daikin Oncecta."""
+"""Constants for Daikin Onecta."""
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.components.sensor import CONF_STATE_CLASS
 from homeassistant.components.sensor import SensorDeviceClass
@@ -19,9 +19,6 @@ DOMAIN = "daikin_onecta"
 OAUTH2_AUTHORIZE = "https://idp.onecta.daikineurope.com/v1/oidc/authorize"
 OAUTH2_TOKEN = "https://idp.onecta.daikineurope.com/v1/oidc/token"
 
-DAIKIN_DATA = "daikin_data"
-DAIKIN_API = "daikin_api"
-DAIKIN_DEVICES = "daikin_devices"
 DAIKIN_API_URL = "https://api.onecta.daikineurope.com"
 
 SCHEDULE_OFF = "off"

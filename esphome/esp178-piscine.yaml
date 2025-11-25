@@ -147,6 +147,15 @@ time:
         hours: 0
         then:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_piscine_jour
+          - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
+          - lambda: |-
+              id(g_conso_ph_jour) = 0.0;
+              id(conso_ph_jour).publish_state(0.0);   
+          - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore
+          - lambda: |-
+              id(g_conso_chl_jour) = 0.0;
+              id(conso_chl_jour).publish_state(0.0);
+          - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
 
       # Notification du rapport journalier sur Telegram
       - seconds: 00
@@ -165,6 +174,38 @@ time:
               std::string mess = "ESP178 Tps Fonct ppe Chl";
               id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
               id(_log_fichier)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
+
+        # Notification du rapport journalier sur Telegram
+      - seconds: 05
+        minutes: 59
+        hours: 23
+        then:
+          - lambda: |-
+              std::string mess = "ESP178 Rapport Journalier pH\n";
+
+              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
+              char buf1[32];
+              snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+              mess += buf1;
+
+              id(_message_telegram)->execute(mess,0);
+              id(_log_fichier)->execute(mess, 0);
+
+      # Notification du rapport journalier sur Telegram
+      - seconds: 40
+        minutes: 59
+        hours: 23
+        then:
+          - lambda: |-
+              std::string mess = "ESP178 Rapport Journalier Chlore\n";
+              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_chlore).state, id(g_hh), id(g_mm), id(g_ss));
+              char buf1[32];
+              snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
+              mess += buf1;
+              id(_message_telegram)->execute(mess,0);
+              id(_log_fichier)->execute(mess, 0);
+
+
 
 # Connection Bus i2c (Afficheur, EZO,...)
 i2c:
@@ -211,11 +252,6 @@ globals:
     - id: g_temps_min_filtration
       type: float
       initial_value: '5'
-    # Flag en mode horaire
-    - id: flag_mode_h
-      type: bool
-      restore_value: no
-      initial_value: 'false'
 
 
     # Paliers temperature/Temps filtration avec le mode "Palier"
@@ -629,12 +665,6 @@ switch:
     name: "ent_arret_forcé"
     id: ent_at_force
     optimistic: True
-    lambda: |-
-      if (id(ent_at_force).state) {
-        return true;
-      } else {
-        return false;
-      }
     on_turn_on: 
       then:
         - script.execute: _fonctionnement_filtration        
@@ -886,13 +916,8 @@ script:
           condition:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Horaire";'
             - lambda: 'return id(ent_at_force).state == false;'
-            - lambda: 'return id(g_flag_hg) == false;'
-          then:
-            - logger.log:
-                format: "Flag 1 Mode_h: %i "
-                args: [ 'id(flag_mode_h)' ]
-                level: INFO
 
+          then:
             - datetime.time.set:
                 id: h_debut
                 time: !lambda |-
@@ -926,22 +951,6 @@ script:
 
             - script.execute: _calcul_ma_at_ppe_filtration    
                
-            - if:
-                condition:
-                  - lambda: 'return !id(flag_mode_h);'
-                then:
-                  - lambda: |-
-                      id(flag_mode_h) = true;
-                  - if:
-                      condition:
-                        - lambda: 'return id(_chlore_cible_mode_h).state > 0;'
-                      then:
-                        - logger.log:
-                            format: "Exec Chore-Flag 2 Mode_h: %i "
-                            args: [ 'id(flag_mode_h)' ]
-                            level: INFO   
-                        - delay: 60s 
-                        - script.execute: _regul_chlore
 
 
   # Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
@@ -1049,8 +1058,7 @@ script:
             - switch.turn_on: cde_ppe_filtration
           else:
             - switch.turn_off: cde_ppe_filtration
-            - lambda: |-
-                  id(flag_mode_h) = false;
+
     
              
   # Envoi d'un message à Telegram via HA, celui ci doit etre operationnel

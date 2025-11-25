@@ -1,36 +1,4 @@
-time:
-  - platform: sntp
-    timezone: Europe/Paris
-    servers:
-      - 0.pool.ntp.org
-      - 1.pool.ntp.org
-      - 2.pool.ntp.org
-    on_time:
-      # reset le compteur de temps à minuit
-      - seconds: 0
-        minutes: 0
-        hours: 0
-        then:
-          - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
-          - lambda: |-
-              id(g_conso_ph_jour) = 0.0;
-              id(conso_ph_jour).publish_state(0.0);
 
-        # Notification du rapport journalier sur Telegram
-      - seconds: 05
-        minutes: 59
-        hours: 23
-        then:
-          - lambda: |-
-              std::string mess = "ESP178 Rapport Journalier pH\n";
-
-              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
-              char buf1[32];
-              snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
-              mess += buf1;
-
-              id(_message_telegram)->execute(mess,0);
-              id(_log_fichier)->execute(mess, 0);
               
 globals:
   - id: g_memoire_ph

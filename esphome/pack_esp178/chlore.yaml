@@ -1,35 +1,4 @@
-time:
-  - platform: sntp
-    id: sntp_time1  
-    timezone: Europe/Paris
-    servers:
-      - 0.pool.ntp.org
-      - 1.pool.ntp.org
-      - 2.pool.ntp.org
-    on_time:
-      # reset le compteur de temps à minuit
-      - seconds: 0
-        minutes: 0
-        hours: 0
-        then:
-          - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore
-          - lambda: |-
-              id(g_conso_chl_jour) = 0.0;
-              id(conso_chl_jour).publish_state(0.0);
 
-      # Notification du rapport journalier sur Telegram
-      - seconds: 40
-        minutes: 59
-        hours: 23
-        then:
-          - lambda: |-
-              std::string mess = "ESP178 Rapport Journalier Chlore\n";
-              CONVERT_SECONDS(id(_temps_fonctionnement_ppe_chlore).state, id(g_hh), id(g_mm), id(g_ss));
-              char buf1[32];
-              snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
-              mess += buf1;
-              id(_message_telegram)->execute(mess,0);
-              id(_log_fichier)->execute(mess, 0);
 
 globals:
   - id: g_memoire_orp
@@ -161,19 +130,6 @@ number:
     mode: box    
     unit_of_measurement: "%"
     icon: mdi:percent
-
-  # Niveau Chlore en mode Horaire
-  - platform: template
-    name: "chlore_cible_mode_h"
-    id: _chlore_cible_mode_h
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 10
-    unit_of_measurement: "ppm"
-    step: 0.01
-    icon: mdi:biohazard
 
   # Tps Max Galet Chlore
   - platform: template
@@ -393,12 +349,8 @@ script:
           then:
             - lambda: |-
                 float temps = 0.0f;
-                // consigne Volume clhore en mode Horaire
-                if (id(_Mode_Fonctionnement_filtration).state == "Horaire"){
-                  id(g_tps_injection_chlore)=id(_chlore_cible_mode_h).state;
-                } else {
-                  id(g_tps_injection_chlore)=id(_chlore_cible).state;
-                }
+                id(g_tps_injection_chlore)=id(_chlore_cible).state;
+
 
                 if (id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm") {
                   // Boucle ouverte : dosage selon concentration cible
@@ -507,7 +459,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm";'
               - lambda: 'return id(_etat_galets_chlore).state == true;'
           then:
             - logger.log: 

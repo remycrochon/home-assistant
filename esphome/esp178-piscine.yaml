@@ -157,7 +157,7 @@ time:
               id(conso_chl_jour).publish_state(0.0);
           - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
 
-      # Notification du rapport journalier sur Telegram
+      # Notification du rapport journalier sur Telegram Filtration
       - seconds: 00
         minutes: 59
         hours: 23
@@ -175,7 +175,7 @@ time:
               id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
               id(_log_fichier)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
 
-        # Notification du rapport journalier sur Telegram
+        # Notification du rapport journalier sur Telegram Ph
       - seconds: 05
         minutes: 59
         hours: 23
@@ -191,7 +191,7 @@ time:
               id(_message_telegram)->execute(mess,0);
               id(_log_fichier)->execute(mess, 0);
 
-      # Notification du rapport journalier sur Telegram
+      # Notification du rapport journalier sur Telegram Chlore
       - seconds: 40
         minutes: 59
         hours: 23
@@ -388,7 +388,7 @@ button:
       - logger.log:
           format: "Fin arret jour de : %.0f h"
           args: [ 'id(duree_at_jour).state' ]
-          level: info 
+          level: INFO
   
   # Lance un test
   - platform: template
@@ -505,7 +505,7 @@ number:
     on_value: 
       then:
         - lambda: |-
-            id(g_memoire_temp_eau)=id(temp_eau).state;     
+            id(g_memoire_temp_eau)=id(simul_temp_eau).state;     
 
   # Temps de recirculation avant prise en compte mesure de température
   - platform: template
@@ -716,9 +716,6 @@ interval:
   - interval: 5s
     then:      
       - script.execute: _fonctionnement_filtration
-
-  - interval: 5s
-    then: 
       - script.execute: _memorisation_temperature_eau
 
   #- interval: 20s # Test
@@ -759,7 +756,7 @@ script:
           args: [ 'id(flag_tempo_ppe_filtre)','id(temp_eau).state','id(g_memoire_temp_eau)' ]
           level: DEBUG
 
-   # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
+  # Calcul de la durée de la filtration en fonction du mode de fonctionnement selectionné
   - id: _fonctionnement_filtration
     then:
       - logger.log:
@@ -896,7 +893,7 @@ script:
             - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
             - lambda: 'return id(ent_at_force).state == false;'    
             - lambda: 'return id(g_flag_hg) == false;'  
-     
+
           then:
             - lambda: |-
                   id(g_tps_filtration)=id(g_abaque_a)*pow(id(g_memoire_temp_eau),3)+id(g_abaque_b)*pow(id(g_memoire_temp_eau),2)+id(g_abaque_c)*id(g_memoire_temp_eau)+id(g_abaque_d);
@@ -950,7 +947,6 @@ script:
                         id(h_fin).hour, id(h_fin).minute);
 
             - script.execute: _calcul_ma_at_ppe_filtration    
-               
 
 
   # Calcul l'heure de debut et fin de filtration en fonction la durée de filtration et de l'heure pivot
@@ -1002,7 +998,7 @@ script:
           id(g_mm)=dt-id(g_hh)*60;
 
       - logger.log:
-          format: "H debut Filtration %2d:%.2d"
+          format: "H Fin Filtration %2d:%.2d"
           args: [ 'id(g_hh)', 'id(g_mm)' ]
           level: DEBUG
 

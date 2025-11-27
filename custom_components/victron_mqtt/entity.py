@@ -1,8 +1,8 @@
+"""Common code for Victron Venus integration."""
+
+from abc import abstractmethod
 import logging
 from typing import Any
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.entity import Entity
-from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass, UnitOfTime
 
 from victron_mqtt import (
     Device as VictronVenusDevice,
@@ -11,7 +11,15 @@ from victron_mqtt import (
     MetricType,
 )
 
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from homeassistant.const import EntityCategory, UnitOfTime
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity import Entity
+
+from .const import ENTITIES_DISABLE_BY_DEFAULT, ENTITIES_CATEGORY_DIAGNOSTIC, ENTITY_PREFIX
+
 _LOGGER = logging.getLogger(__name__)
+
 
 class VictronBaseEntity(Entity):
     """Implementation of a Victron Venus base entity."""
@@ -25,24 +33,32 @@ class VictronBaseEntity(Entity):
         simple_naming: bool,
         installation_id: str,
     ) -> None:
-        """Initialize the sensor based on detauls in the metric."""
+        """Initialize the entity."""
         self._device = device
         self._metric = metric
         self._device_info = device_info
         if simple_naming:
-            entity_id = f"{type}.victron_mqtt_{metric.unique_id}"
+            entity_id = f"{type}.{ENTITY_PREFIX}_{metric.unique_id}"
         else:
-            entity_id = f"{type}.victron_mqtt_{installation_id}_{metric.unique_id}"
+            entity_id = f"{type}.{ENTITY_PREFIX}_{installation_id}_{metric.unique_id}"
         self._attr_unique_id = entity_id
         self.entity_id = entity_id
-        self._attr_native_unit_of_measurement = self._map_metric_to_unit_of_measurement(metric)
+        self._attr_native_unit_of_measurement = self._map_metric_to_unit_of_measurement(
+            metric
+        )
         self._attr_device_class = self._map_metric_to_device_class(metric)
         self._attr_state_class = self._map_metric_to_stateclass(metric)
         self._attr_should_poll = False
         self._attr_has_entity_name = True
         self._attr_suggested_display_precision = metric.precision
-        self._attr_translation_key = metric.generic_short_id.replace('{', '').replace('}', '') # same as in merge_topics.py
+        self._attr_translation_key = metric.generic_short_id.replace("{", "").replace(
+            "}", ""
+        )  # same as in merge_topics.py
         self._attr_translation_placeholders = metric.key_values
+        # Specific changes related to HA
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC if metric.generic_short_id in ENTITIES_CATEGORY_DIAGNOSTIC else None
+        self._attr_entity_registry_enabled_default = False if metric.generic_short_id in ENTITIES_DISABLE_BY_DEFAULT else True
+
         _LOGGER.info("%s %s added. Based on: %s", type, self, repr(metric))
 
     def __repr__(self) -> str:
@@ -54,6 +70,10 @@ class VictronBaseEntity(Entity):
             f"translation_key={self._attr_translation_key}, "
             f"translation_placeholders={self._attr_translation_placeholders})"
         )
+
+    @abstractmethod
+    def _on_update_task(self, value: Any) -> None:
+        """Handle the metric update. Must be implemented by subclasses."""
 
     def _on_update(self, metric: VictronVenusMetric, value: Any) -> None:
         # Might be that the entity was removed or not added yet
@@ -77,8 +97,6 @@ class VictronBaseEntity(Entity):
         self, metric: VictronVenusMetric
     ) -> SensorDeviceClass | None:
         match metric.metric_type:
-            case MetricType.TEMPERATURE:
-                return SensorDeviceClass.TEMPERATURE
             case MetricType.POWER:
                 return SensorDeviceClass.POWER
             case MetricType.APPARENT_POWER:
@@ -106,7 +124,7 @@ class VictronBaseEntity(Entity):
 
     def _map_metric_to_stateclass(
         self, metric: VictronVenusMetric
-    ) -> SensorStateClass | None:
+    ) -> SensorStateClass | str | None:
         if metric.metric_nature == MetricNature.CUMULATIVE:
             return SensorStateClass.TOTAL
         if metric.metric_nature == MetricNature.INSTANTANEOUS:
@@ -117,11 +135,11 @@ class VictronBaseEntity(Entity):
     def _map_metric_to_unit_of_measurement(
         self, metric: VictronVenusMetric
     ) -> str | None:
-        if metric.unit_of_measurement == 's':
+        if metric.unit_of_measurement == "s":
             return UnitOfTime.SECONDS
-        if metric.unit_of_measurement == 'min':
+        if metric.unit_of_measurement == "min":
             return UnitOfTime.MINUTES
-        if metric.unit_of_measurement == 'h':
+        if metric.unit_of_measurement == "h":
             return UnitOfTime.HOURS
         return metric.unit_of_measurement
 

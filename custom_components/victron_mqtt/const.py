@@ -1,6 +1,11 @@
 """Constants for the victron_mqtt integration."""
-DOMAIN = "victron_mqtt"
 
+# Integration specific values (custom / builtin Home Assistant)
+DOMAIN = "victron_mqtt"
+DEFAULT_SIMPLE_NAMING = True
+ENTITY_PREFIX = "victron_mqtt"
+
+# generic config values
 CONF_INSTALLATION_ID = "installation_id"
 CONF_MODEL = "model"
 CONF_SERIAL = "serial"
@@ -25,3 +30,12 @@ SERVICE_PUBLISH = "publish"
 ATTR_METRIC_ID = "metric_id"
 ATTR_DEVICE_ID = "device_id"
 ATTR_VALUE = "value"
+
+# Not using GenericOnOff as some switches use different enums.
+# It has to be with value "On" to be on and "Off" to be off.
+SWITCH_ON = "On"
+SWITCH_OFF = "Off"
+
+# Entity IDs which needs special treatment
+ENTITIES_CATEGORY_DIAGNOSTIC = ["system_heartbeat"]
+ENTITIES_DISABLE_BY_DEFAULT = ["system_heartbeat"]

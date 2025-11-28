@@ -1599,6 +1599,10 @@
         device_id: c7b28db8c025b2f0bd975382bc4011f0
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
+      - type: turn_on
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
       - delay:
           hours: 0
           minutes: 2
@@ -1607,6 +1611,10 @@
       - type: turn_off
         device_id: c7b28db8c025b2f0bd975382bc4011f0
         entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
     - conditions:
       - condition: trigger
@@ -1618,6 +1626,10 @@
         device_id: c7b28db8c025b2f0bd975382bc4011f0
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
+      - type: turn_on
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
     - conditions:
       - condition: trigger
         id:
@@ -1627,6 +1639,10 @@
       - type: turn_off
         device_id: c7b28db8c025b2f0bd975382bc4011f0
         entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
   mode: single
   trace:
@@ -1667,7 +1683,6 @@
         entity_id:
         - sensor.bureau_power
         - sensor.cave_power
-        - sensor.lywsd03mmc_cellier_batterie
         - sensor.chamb_parents_power
         - sensor.batteries_chambre_ssol_zb
         - sensor.detecteur_petite_porte_sous_sol_power
@@ -1685,6 +1700,7 @@
         - sensor.tze200_3towulqd_ts0601_batterie
         - sensor.detecteur_porte_frigo_batterie
         - sensor.chambre_nord_batterie
+        - sensor.cellier_batterie
       custom_group_battery_level: 30
       exclude_sensors:
         entity_id:

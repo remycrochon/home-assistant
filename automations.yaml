@@ -1581,6 +1581,14 @@
     - 'on'
     to:
     - 'off'
+  - trigger: state
+    entity_id:
+    - binary_sensor.porte_garage_fermee
+    from:
+    - 'on'
+    to:
+    - 'off'
+    id: p_garage
   conditions:
   - condition: sun
     before: sunrise
@@ -1640,6 +1648,24 @@
         device_id: c7b28db8c025b2f0bd975382bc4011f0
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id:
+        - p_garage
+      sequence:
+      - type: turn_on
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+      - delay:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
       - type: turn_off
         device_id: f15eea59fe7ba768c177c779594e0add
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d

@@ -120,16 +120,4 @@ cover:
         device_class: garage
         always_confident: True
 
-# Ch amis sud
-  - platform: cover_rf_time_based
-    devices:
-      volet_amis_sud_proport:
-        name: Volet amis sud P
-        travelling_time_up: 21
-        travelling_time_down: 19
-        close_script_entity_id: script.volet_amis_sud_down
-        stop_script_entity_id: script.volet_amis_sud_grand_stop_2
-        open_script_entity_id: script.volet_amis_sud_up
-        always_confident: True
-
 

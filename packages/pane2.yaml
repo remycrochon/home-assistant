@@ -247,7 +247,7 @@ openhasp:
             {% set count = states('sensor.esp126_temp_ecs')|int(0) %}
             T ECS={{ count |round(0)}} °C
       
-      ############### Page 5 TEST ###############
+      ############### Page 5 ###############
       ############### Réseau
       - obj: "p5b24" # Grid Power
         properties:
@@ -332,3 +332,168 @@ openhasp:
             {% else %}
             {{ count }} W
             {% endif %}
+
+      ############### Page 6 ###############
+      ############### PORTE GARAGE
+      - obj: "p6b11" # porte_garage. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_garage', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_garage','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.porte_garage"
+      - obj: "p6b12" # porte_garage. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.porte_garage', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_garage', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_garage', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.porte_garage', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.porte_garage"
+      - obj: "p6b13" # porte_garage. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_garage', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_garage','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.porte_garage"
+      - obj: "p6b14"
+        properties:
+          "text": >
+            {{state_attr('cover.porte_garage','current_position')|int(0) |round(0)}}%
+
+      ############### PORTE SOUS SOL
+      - obj: "p6b21" # porte_sous_sol. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_sous_sol', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_sous_sol','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.porte_sous_sol"
+      - obj: "p6b22" # porte_sous_sol. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.porte_sous_sol', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_sous_sol', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_sous_sol', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.porte_sous_sol', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.porte_sous_sol"
+      - obj: "p6b23" # porte_sous_sol. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_sous_sol', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_sous_sol','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.porte_sous_sol"
+      - obj: "p6b24"
+        properties:
+          "text": >
+            {{state_attr('cover.porte_sous_sol','current_position')|int(0) |round(0)}}%
+
+      ############### Store Sud
+      - obj: "p6b31" # Store Sud. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.store_sud', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.store_sud','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.store_sud"
+      - obj: "p6b32" # store_sud. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.store_sud', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.store_sud', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.store_sud', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.store_sud', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.store_sud"
+      - obj: "p6b33" # store_sud. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.store_sud', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.store_sud','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.store_sud"
+      - obj: "p6b34"
+        properties:
+          "text": >
+            {{state_attr('cover.store_sud','current_position')|int(0) |round(0)}}%
+
+      ############### TOUS
+      - obj: "p6b41" # groupe_tous_volets. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_tous_volets', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_tous_volets','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.groupe_tous_volets"
+      - obj: "p6b42" # groupe_tous_volets. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.groupe_tous_volets', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_tous_volets', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_tous_volets', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.groupe_tous_volets', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.groupe_tous_volets"
+      - obj: "p6b43" # groupe_tous_volets. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_tous_volets', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_tous_volets','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.groupe_tous_volets"
+      - obj: "p6b44"
+        properties:
+          "text": >
+            {{state_attr('cover.groupe_tous_volets','current_position')|int(0) |round(0)}}%                

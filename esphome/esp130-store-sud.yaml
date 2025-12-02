@@ -1,0 +1,105 @@
+substitutions:
+  device_name: esp130-store-sud
+  friendly_name: esp130
+  adress_ip: "192.168.0.130"
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+
+
+# Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO5
+    inverted: True
+
+binary_sensor:
+#Etat de la connection
+  - platform: status
+    name: "Status"
+
+cover:
+  - platform: time_based
+    name: "Store Sud"
+    id: store_sud
+    open_action:
+      - switch.turn_on: relais1     # Ouverture
+    open_duration: 35s
+
+    close_action:
+      - switch.turn_on: relais3     # Fermeture
+    close_duration: 35s
+    
+    stop_action:
+      - switch.turn_on: relais2     # Stop
+
+switch:
+  - platform: gpio
+    name: "Ouverture"
+    pin: GPIO32
+    id: relais1
+    interlock: &interlock_group [relais1,relais2, relais3]
+    internal: true    
+    on_turn_on:
+      - delay: 300ms      # durée de l’impulsion (modifiable)
+      - switch.turn_off: relais1
+
+  - platform: gpio
+    name: "Stop"
+    pin: GPIO33
+    id: relais2
+    interlock: *interlock_group
+    internal: true    
+    on_turn_on:
+      - delay: 300ms      # durée de l’impulsion (modifiable)
+      - switch.turn_off: relais2
+
+  - platform: gpio
+    name: "Fermeture"
+    pin: GPIO25
+    id: relais3
+    interlock: *interlock_group
+    internal: true
+    on_turn_on:
+      - delay: 300ms      # durée de l’impulsion (modifiable)
+      - switch.turn_off: relais3
+
+  - platform: gpio
+    name: "Relais4"
+    pin: GPIO26
+    id: relais4
+    internal: true
+
+  - platform: restart
+    name: "Restart"

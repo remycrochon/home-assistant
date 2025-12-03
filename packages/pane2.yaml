@@ -5,23 +5,20 @@ openhasp:
       - obj: "p0b3"
         properties:
           "text": "{{ states('sensor.time') }}"
+
       - obj: "p0b4"
         properties:
           "bg_color": >
             {% set couleur = states('sensor.rte_tempo_couleur_actuelle') %}
             {% if couleur == "Bleu" %}
-            #1246f1
+            #0000FF
             {% elif couleur == "Blanc" %}
-            #fafafa
+            #FFFFFF
             {% elif couleur == "Rouge" %}
-            #f70404
+            #FF0000
             {% else %} 
-            #49f704
+            #00FF00
             {% endif %}
-          "text": "J"
-          "text_color": >
-          #fafafa
-
 
       - obj: "p0b5"
         properties:
@@ -35,11 +32,11 @@ openhasp:
           "bg_color": >
             {% set couleur = states('sensor.rte_tempo_prochaine_couleur') %}
             {% if couleur == "Bleu" %}
-            #1246f1
+            #0000FF
             {% elif couleur == "Blanc" %}
-            #fafafa
+            #FFFFFF
             {% elif couleur == "Rouge" %}
-            #f70404
+            #FF0000
             {% else %} 
             #49f704
             {% endif %}
@@ -416,8 +413,90 @@ openhasp:
           "text": >
             {{state_attr('cover.porte_sous_sol','current_position')|int(0) |round(0)}}%
 
+      ############### Bureau
+      - obj: "p6b31" # Bureau. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_bureau', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_bureau','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.groupe_bureau"
+      - obj: "p6b32" # store_sud. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.groupe_bureau', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_bureau', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_bureau', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.groupe_bureau', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.groupe_bureau"
+      - obj: "p6b33" # store_sud. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_bureau', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_bureau','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.groupe_bureau"
+      - obj: "p6b34"
+        properties:
+          "text": >
+            {{state_attr('cover.groupe_bureau','current_position')|int(0) |round(0)}}%
+
+      ############### Salle à Manger Salon
+      - obj: "p6b41" # volets_salon_rts. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.volets_salon_rts', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.volets_salon_rts','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.volets_salon_rts"
+      - obj: "p6b42" # volets_salon_rts. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.volets_salon_rts', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.volets_salon_rts', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.volets_salon_rts', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.volets_salon_rts', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.volets_salon_rts"
+      - obj: "p6b43" # volets_salon_rts. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.volets_salon_rts', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.volets_salon_rts','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.volets_salon_rts"
+      - obj: "p6b44"
+        properties:
+          "text": >
+            {{state_attr('cover.volets_salon_rts','current_position')|int(0) |round(0)}}%
+
       ############### Store Sud
-      - obj: "p6b31" # Store Sud. up button
+      - obj: "p6b51" # Store Sud. up button
         properties:
           "text_color": "{{ '#FFFF00' if is_state('cover.store_sud', 'opening') else '#FFFFFF' }}"
           "text_opa": "{{ '80' if is_state_attr('cover.store_sud','current_position', 100) else '255' }}"
@@ -426,7 +505,7 @@ openhasp:
             - service: cover.open_cover
               target:
                 entity_id: "cover.store_sud"
-      - obj: "p6b32" # store_sud. middle stop button
+      - obj: "p6b52" # store_sud. middle stop button
         properties:
           "text": >
             {% if is_state('cover.store_sud', 'closing') %}
@@ -443,7 +522,7 @@ openhasp:
             - service: cover.stop_cover
               target:
                 entity_id: "cover.store_sud"
-      - obj: "p6b33" # store_sud. down button
+      - obj: "p6b53" # store_sud. down button
         properties:
           "text_color": "{{ '#FFFF00' if is_state('cover.store_sud', 'closing') else '#FFFFFF' }}"
           "text_opa": "{{ '80' if is_state_attr('cover.store_sud','current_position', 0) else '255' }}"
@@ -452,13 +531,13 @@ openhasp:
             - service: cover.close_cover
               target:
                 entity_id: "cover.store_sud"
-      - obj: "p6b34"
+      - obj: "p6b54"
         properties:
           "text": >
             {{state_attr('cover.store_sud','current_position')|int(0) |round(0)}}%
 
       ############### TOUS
-      - obj: "p6b41" # groupe_tous_volets. up button
+      - obj: "p6b61" # groupe_tous_volets. up button
         properties:
           "text_color": "{{ '#FFFF00' if is_state('cover.groupe_tous_volets', 'opening') else '#FFFFFF' }}"
           "text_opa": "{{ '80' if is_state_attr('cover.groupe_tous_volets','current_position', 100) else '255' }}"
@@ -467,7 +546,7 @@ openhasp:
             - service: cover.open_cover
               target:
                 entity_id: "cover.groupe_tous_volets"
-      - obj: "p6b42" # groupe_tous_volets. middle stop button
+      - obj: "p6b62" # groupe_tous_volets. middle stop button
         properties:
           "text": >
             {% if is_state('cover.groupe_tous_volets', 'closing') %}
@@ -484,7 +563,7 @@ openhasp:
             - service: cover.stop_cover
               target:
                 entity_id: "cover.groupe_tous_volets"
-      - obj: "p6b43" # groupe_tous_volets. down button
+      - obj: "p6b63" # groupe_tous_volets. down button
         properties:
           "text_color": "{{ '#FFFF00' if is_state('cover.groupe_tous_volets', 'closing') else '#FFFFFF' }}"
           "text_opa": "{{ '80' if is_state_attr('cover.groupe_tous_volets','current_position', 0) else '255' }}"
@@ -493,7 +572,7 @@ openhasp:
             - service: cover.close_cover
               target:
                 entity_id: "cover.groupe_tous_volets"
-      - obj: "p6b44"
+      - obj: "p6b64"
         properties:
           "text": >
-            {{state_attr('cover.groupe_tous_volets','current_position')|int(0) |round(0)}}%                
+            {{state_attr('cover.groupe_tous_volets','current_position')|int(0) |round(0)}}%   

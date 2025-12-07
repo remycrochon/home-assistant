@@ -5,6 +5,7 @@ http:
   use_x_forwarded_for: true
   trusted_proxies:
     - 192.168.0.206
+    - 192.168.0.152
   ip_ban_enabled: true
   login_attempts_threshold: 5    
 

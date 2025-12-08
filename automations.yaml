@@ -1348,112 +1348,6 @@
         action: script.0_1_1_ouverture_volets_mode_absent_rts
     default: []
   mode: single
-- id: '1708433020641'
-  alias: ECS Automatismes Général
-  description: ''
-  triggers:
-  - entity_id:
-    - input_select.ecs_ssol
-    trigger: state
-  - event: sunrise
-    offset: 0
-    id: levee_soleil
-    trigger: sun
-  - event: sunset
-    offset: 0
-    id: couche_soleil
-    trigger: sun
-  - at: 03:00:00
-    id: a3h
-    trigger: time
-  - at: 05:59:00
-    id: a6h
-    trigger: time
-  - entity_id:
-    - sensor.esp126_temp_ecs
-    enabled: false
-    trigger: state
-  - entity_id:
-    - sensor.esp126_temp_ecs
-    id: tempbasse
-    below: input_number.ecs_seuil_bas_temp
-    trigger: numeric_state
-  - entity_id:
-    - sensor.esp126_temp_ecs
-    above: input_number.ecs_seuil_haut_temp
-    trigger: numeric_state
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Auto
-      - condition: numeric_state
-        entity_id: sensor.esp126_temp_ecs
-        below: input_number.ecs_seuil_bas_temp
-      - condition: trigger
-        id:
-        - a3h
-      sequence:
-      - data: {}
-        action: script.ecs_on
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Auto
-      - condition: sun
-        before: sunrise
-        after: sunset
-      - condition: or
-        conditions:
-        - condition: numeric_state
-          entity_id: sensor.esp126_temp_ecs
-          above: input_number.ecs_seuil_haut_temp
-        - condition: trigger
-          id:
-          - a6h
-      sequence:
-      - data: {}
-        action: script.ecs_off_off
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Auto
-      - condition: trigger
-        id:
-        - levee_soleil
-      sequence:
-      - data: {}
-        action: script.ecs_off
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Auto
-      - condition: trigger
-        id:
-        - couche_soleil
-      sequence:
-      - data: {}
-        action: script.ecs_off_off
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: At Forcé
-      sequence:
-      - data: {}
-        action: script.ecs_off_off
-    - conditions:
-      - condition: state
-        entity_id: input_select.ecs_ssol
-        state: Ma Forcée
-      sequence:
-      - data: {}
-        action: script.ecs_on
-    default: []
-  mode: single
-  trace:
-    stored_traces: 15
 - id: '1710317639852'
   alias: MP2 Défaut Status Bus VE
   description: Alarme Status Bus VE
@@ -3007,3 +2901,65 @@
     target:
       entity_id: light.ecran02_backlight
   mode: single
+- id: '1765209914301'
+  alias: Notification U6+ Bureau Deconnecté
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_u6_bureau
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}U6+ Bureau OFF Ligne'
+          title: FREE NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            U6+ Bureau OnLine'
+          title: FREEBOX OK!!
+      notify_device: 367dba31447009458e03b70e3a29b6b2
+      repeat_delay: 300
+      max_alerts: 10
+      initial_delay: 180
+      notify_message: ' '
+      resolved_message: ' '
+- id: '1765210056242'
+  alias: Notification U6+ Sous Sol Deconnecté
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_u6_sous_sol
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}U6+ Sous Sol OFF Ligne'
+          title: FREE NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            U6+ Sous Sol OnLine'
+          title: FREEBOX OK!!
+      notify_device: 367dba31447009458e03b70e3a29b6b2
+      repeat_delay: 300
+      max_alerts: 10
+      initial_delay: 180
+      notify_message: ' '
+      resolved_message: ' '

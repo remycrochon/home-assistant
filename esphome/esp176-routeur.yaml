@@ -61,12 +61,12 @@ logger:
   baud_rate: 0
   level: info
 
-#    modbus.component: INFO
 # Enable Home Assistant API
 api:
 
 ota:
   platform: esphome
+
 web_server:
   port: 80
   version: 3
@@ -76,9 +76,27 @@ time:
     id: sntp_time
     timezone: Europe/Paris
     servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org  
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org  
+    on_time:
+      # Mise à jour toutes les minutes du mode HP/HC
+      - seconds: 0
+        minutes: /1
+        then:
+          - lambda: |-
+              auto now = id(sntp_time).now();
+              if (!now.is_valid()) {
+                return;
+              }
+              int h = now.hour;   // 0..23
+
+              // HP : de 06:00 à 21:59
+              // HC : de 22:00 à 05:59
+              bool hp = (h >= 6 && h < 22);
+              id(is_hp_hours) = hp;
+
+              ESP_LOGD("horaire", "Heure = %02d:%02d → %s", h, now.minute, hp ? "HP" : "HC");
 
 # Protocole I2C
 i2c:
@@ -104,10 +122,12 @@ globals:
     type: float
     restore_value: no
     initial_value: '0'
+
   - id: regul
     type: std::string
     restore_value: no
     initial_value: '"Pas de régulation"'
+
   - id: striac
     type: float
     restore_value: no
@@ -118,15 +138,20 @@ globals:
     restore_value: true
     initial_value: 'false'
 
+  # 🔹 Indique si on est en heures pleines (HP) ou heures creuses (HC)
+  # HP : 06:00 → 22:00  ;  HC : 22:00 → 06:00
+  - id: is_hp_hours
+    type: bool
+    restore_value: no
+    initial_value: 'true'
+
   # stocke temporairement le message à envoyer à telegram
   - id: telegram_msg_buffer
     type: std::string
     restore_value: no
     initial_value: '""'
 
-
-
-# Sonde Temperature Dallas
+# Sonde Temperature Dallas
 one_wire:
   - platform: gpio  
     pin: ${GPIO_onewire}
@@ -173,20 +198,20 @@ select:
 
 binary_sensor:
   #Etat de la connection
-    - platform: status
-      name: "Status"
+  - platform: status
+    name: "Status"
   
-    - platform: template
-      name: "Temp Ok"
-      id: temperatureok
+  - platform: template
+    name: "Temp Ok"
+    id: temperatureok
   
-    - platform: template
-      name: "Seuil Prod Ok"
-      id: seuil_prod_ok
+  - platform: template
+    name: "Seuil Prod Ok"
+    id: seuil_prod_ok
 
-    - platform: template
-      name: "Seuil SOC Ok"
-      id: seuil_soc_ok
+  - platform: template
+    name: "Seuil SOC Ok"
+    id: seuil_soc_ok
   
 # Input Number
 number:
@@ -330,6 +355,7 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"
     accuracy_decimals: 0
+
   # Sortie triac de 0à100%
   - platform: template
     name: "Sortie Triac"
@@ -337,6 +363,7 @@ sensor:
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
+
   # Pu disponible
   - platform: template
     name: "Pu Disponible"
@@ -354,7 +381,6 @@ sensor:
     accuracy_decimals: 0
 
   # Les MQTT sont déclarés dans le Node Red du Cerbo GX
-  # https://venus.local:1881/#flow/dbd727f16cbe7b5f
 
   - platform: mqtt_subscribe
     id: conso_maison
@@ -408,11 +434,6 @@ sensor:
   # lecture sensor Home Assistant
 
   - platform: homeassistant
-    entity_id: sensor.esp124_tic_linky_n_tarif
-    id: tarif
-    internal: true
-
-  - platform: homeassistant
     entity_id: sensor.ecocompteur_clim
     id: pu_clim
     internal: true
@@ -426,12 +447,11 @@ sensor:
     filters:
       - filter_out: NAN
 
-  # Température ECS et seuils HA
+  # Température ECS HA
   - platform: homeassistant
     id: temp_ecs_ha
-    entity_id: sensor.esp126_temp_ecs
+    entity_id: sensor.esp139_ecs_temp_ecs
     name: "Température ECS HA"
-
 
 # déclaration des "text_sensors"
 text_sensor:
@@ -483,7 +503,7 @@ light:
     id: gradateur
     default_transition_length: 50ms
 
-  # Affichage
+# Affichage
 display:
   - platform: lcd_pcf8574
     dimensions: 20x4
@@ -497,7 +517,7 @@ display:
 
       snprintf(ligne0, sizeof(ligne0), "Pr=%0.0fW Pe=%0.0fW", id(pureseau1).state, id(puecs).state);
       snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
-      snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac), id(temperatureok).state ? "OK" : "NOK");
+      snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac).state, id(temperatureok).state ? "OK" : "NOK");
       snprintf(ligne3, sizeof(ligne3), "Mode:%s", id(_Mode_Fonctionnement_routeur).state.c_str());
 
       it.print(0, 0, ligne0);
@@ -508,44 +528,25 @@ display:
 interval:
   - interval: 1s
     then:
-    - if:
-        condition:
-          lambda: |-
-            return (id(tarif).state == 2 ||id(tarif).state == 4 ||id(tarif).state == 6) ; // Tarif HP(2/4/6) 
-            //return (id(tarif).state == 1 ||id(tarif).state == 3 ||id(tarif).state == 5) ; // tarif HC (1/3/5)
-        then:
-          - script.execute: calcul_injection_hp 
-        else:
-          # - script.execute: calcul_injection_hp
-          - script.execute: calcul_injection_hc 
+      - if:
+          condition:
+            lambda: |-
+              // HP de 06:00 à 22:00, sinon HC
+              return id(is_hp_hours);   // true = HP, false = HC
+          then:
+            - script.execute: calcul_injection_hp 
+          else:
+            - script.execute: calcul_injection_hc 
 
   - interval: 5s
     then:      
       - script.execute: etat_production
       - script.execute: calcul_relais_surprod      
 
- ########################################################################""
+ ########################################################################
 script:
   ########################################################################
   # 🔹 Script : calcul_injection_hp
-  # -------------------------------------------------------
-  # Fonction :
-  #   - Pilotage du triac ECS en mode "Auto" pendant les heures pleines (HP)
-  #   - Active la régulation par interpolation si toutes les conditions sont OK
-  #   - Gère aussi les modes "Manu" et "Arret"
-  #
-  # Conditions requises pour activer la régulation :
-  #   ✅ Mode Auto actif
-  #   ✅ Routeur validé
-  #   ✅ Production PV > seuil défini
-  #   ✅ SOC batterie > seuil SOC
-  #   ✅ Température triac inférieure à T_max
-  #
-  # Cas gérés :
-  #   1️⃣ Arret ou conditions NOK → triac = 0
-  #   2️⃣ Auto + conditions OK → appel du script regulation_interpolation
-  #   3️⃣ Manu → application directe de la consigne ctriac_manu
-  #
   ########################################################################
   - id: calcul_injection_hp
     mode: single
@@ -576,9 +577,6 @@ script:
             id(temperatureok).publish_state(true);
           }
 
-          // ------------------------------------------------------------
-          // 🪶 Log synthétique pour supervision
-          // ------------------------------------------------------------
           ESP_LOGI("HP", 
             "Check HP → Prod=%.0fW (Seuil=%.0f) | SOC=%.1f%% (Seuil=%.1f) | TempTriac=%.1f°C (Tmax=%.1f°C)",
             id(pu_prod).state, id(seuil_prod).state,
@@ -586,9 +584,7 @@ script:
             id(temp_triac).state, id(tmax).state
           );
 
-      # ============================================================
       # 1️⃣ Conditions NOK ou mode Arret → arrêt complet
-      # ============================================================
       - if:
           condition:
             or:
@@ -611,9 +607,7 @@ script:
                 ESP_LOGW("HP", "⚠️ Régulation OFF : conditions NOK ou arrêt manuel.");
             - light.turn_off: gradateur
 
-      # ============================================================
       # 2️⃣ Mode Auto + toutes conditions OK → régulation active
-      # ============================================================
       - if:
           condition:
             and:
@@ -633,9 +627,7 @@ script:
                 brightness: !lambda |-
                   return id(striac) / 100.0f;
 
-      # ============================================================
       # 3️⃣ Mode Manuel → application directe de la consigne
-      # ============================================================
       - if:
           condition:
             and:
@@ -654,39 +646,16 @@ script:
                 brightness: !lambda |-
                   return id(striac) / 100.0f;
 
-      # ============================================================
-      # 🖥️ Publication de la valeur du triac (affichage + MQTT)
-      # ============================================================
+      # Publication de la valeur du triac (affichage + MQTT)
       - lambda: |-
           id(afstriac).publish_state(id(striac));
+
   ########################################################################
   # 🔹 Script : calcul_injection_hc (avec hystérésis ECS)
-  # -------------------------------------------------------
-  # Fonction :
-  #   - Chauffe ECS uniquement pendant les heures creuses.
-  #   - Utilise une table {Pu_reseau → %Triac} pour moduler la chauffe.
-  #   - Vérifie les conditions de sécurité et la température ECS.
-  #
-  # Conditions d’activation :
-  #   ✅ Mode Auto actif
-  #   ✅ Routeur validé
-  #   ✅ Température triac < T_max
-  #   ✅ Pas d’injection réseau négative (< -10 W)
-  #   ✅ ECS sous le seuil bas (temp_ecs < seuil_bas)
-  #
-  # Cas gérés :
-  #   1️⃣ Arret ou conditions NOK → arrêt complet
-  #   2️⃣ Auto + OK → régulation via table
-  #   3️⃣ Manu → triac = consigne manuelle
-  #
   ########################################################################
   - id: calcul_injection_hc
     mode: single
     then:
-
-      # ============================================================
-      # 🧭 ÉVALUATION DES CONDITIONS DE DÉMARRAGE
-      # ============================================================
       - lambda: |-
           float temperature_ecs   = id(temp_ecs_ha).state;
           float seuil_bas_ecs     = id(seuil_bas_ha).state;
@@ -704,7 +673,6 @@ script:
           // ✅ Vérifie l'injection réseau (puissance négative)
           bool injection_autorisee = (puissance_reseau >= -200);
 
-          // ✅ Log synthétique d’état
           ESP_LOGI("HC",
             "Check HC → ECS=%.1f°C (%.1f–%.1f) | P_Réseau=%.0fW | TempTriac=%.1f°C | TempOK=%d | Valid=%d",
             temperature_ecs, seuil_bas_ecs, seuil_haut_ecs,
@@ -712,9 +680,7 @@ script:
             temperature_ok, id(validrouteur).state
           );
 
-      # ============================================================
       # 1️⃣ Conditions NOK ou mode Arret → arrêt complet
-      # ============================================================
       - if:
           condition:
             or:
@@ -734,9 +700,7 @@ script:
                 ESP_LOGW("HC", "⚠️ Chauffe OFF : conditions NOK ou arrêt manuel.");
             - light.turn_off: gradateur
 
-      # ============================================================
       # 2️⃣ Mode Auto + toutes conditions OK → régulation interpolation (HC)
-      # ============================================================
       - if:
           condition:
             and:
@@ -745,9 +709,6 @@ script:
               - binary_sensor.is_on: temperatureok
           then:
             - lambda: |-
-                // =============================================
-                // 🔹 Lecture des valeurs courantes
-                // =============================================
                 float temperature_ecs   = id(temp_ecs_ha).state;
                 float seuil_bas_ecs     = id(seuil_bas_ha).state;
                 float seuil_haut_ecs    = id(seuil_haut_ha).state;
@@ -758,21 +719,14 @@ script:
                 bool ecs_chaude = (temperature_ecs >= seuil_haut_ecs);
                 bool chauffe_active = id(hc_chauffe);
 
-                // =============================================
-                // 🚨 Sécurité injection réseau
-                // =============================================
+                // Sécurité injection
                 if (!injection_autorisee) {
                   id(striac) = 0.0f;
                   id(hc_chauffe) = false;
                   id(moderegul).publish_state("HC Sécurité Injection OFF");
                   ESP_LOGI("HC", "⛔ Injection détectée (%.0f W) → Chauffe arrêtée", puissance_reseau);
-                }
-
-                // =============================================
-                // 🔥 Gestion de l’hystérésis ECS
-                // =============================================
-                else {
-                  // Cas 1️⃣ : ECS froide → démarrage de la chauffe
+                } else {
+                  // ECS froide → démarrage
                   if (ecs_froide) {
                     id(hc_chauffe) = true;
                     id(moderegul).publish_state("HC Chauffe active");
@@ -780,21 +734,21 @@ script:
                     ESP_LOGI("HC", "🔥 ECS %.1f°C < %.1f°C → Démarrage chauffe (hystérésis ON)",
                              temperature_ecs, seuil_bas_ecs);
                   }
-                  // Cas 2️⃣ : chauffe en cours et ECS pas encore chaude → maintien
+                  // chauffe en cours et ECS pas encore chaude → maintien
                   else if (chauffe_active && !ecs_chaude) {
                     id(moderegul).publish_state("HC Chauffe maintenue");
                     id(regulation_interpolation).execute();
                     ESP_LOGI("HC", "♨️ ECS %.1f°C (entre %.1f et %.1f) → Maintien chauffe",
                              temperature_ecs, seuil_bas_ecs, seuil_haut_ecs);
                   }
-                  // Cas 3️⃣ : ECS chaude → arrêt chauffe
+                  // ECS chaude → arrêt
                   else if (ecs_chaude) {
                     id(striac) = 0.0f;
                     id(hc_chauffe) = false;
                     id(moderegul).publish_state("HC ECS OK - Chauffe OFF");
                     ESP_LOGI("HC", "✅ ECS %.1f°C ≥ %.1f°C → Chauffe arrêtée", temperature_ecs, seuil_haut_ecs);
                   }
-                  // Cas 4️⃣ : Zone neutre (ni chaude ni froide)
+                  // Zone neutre
                   else {
                     id(striac) = 0.0f;
                     id(hc_chauffe) = false;
@@ -803,9 +757,6 @@ script:
                   }
                 }
 
-                // =============================================
-                // 🔹 Mise à jour des affichages et capteurs
-                // =============================================
                 id(afstriac).publish_state(id(striac));
                 id(afpdispo).publish_state(id(p_dispo));
                 id(cons_batt_cours).publish_state(0);
@@ -814,9 +765,7 @@ script:
                 id: gradateur
                 brightness: !lambda 'return id(striac) / 100.0f;'
 
-      # ============================================================
       # 3️⃣ Mode Manuel → application directe de la consigne
-      # ============================================================
       - if:
           condition:
             and:
@@ -837,35 +786,18 @@ script:
             - lambda: |-
                 id(afstriac).publish_state(id(striac));
 
-   ########################################################################
+  ########################################################################
   # 🔹 Script : regulation_interpolation (commun HP + HC)
-  # -------------------------------------------------------
-  # Rôle :
-  #   - Calcule p_dispo puis striac par interpolation (table_puissance)
-  #   - Deux branches internes :
-  #       * HP → logique PV/batterie (Bulk / Absorb / Float)
-  #       * HC → objectif de puissance réseau (ex. 6000 W) pour ECS
-  #
-  # Hypothèse sur le capteur tarif :
-  #   Ajuste ICI la condition is_hp pour refléter ta réalité :
-  #   - Si chez toi HP = {1,3,5}  → garde ce code.
-  #   - Si HP = {2,4,6}           → remplace la condition (commentaire ci-dessous).
   ########################################################################
   - id: regulation_interpolation
     mode: single
     then:
       - lambda: |-
-          // ============================================================
-          // 🔹 Détermination du mode tarifaire (HP / HC)
-          // ============================================================
-          // 👉HC = {1,3,5}, HP = {2,4,6}, 
-          bool is_hp = (id(tarif).state == 2 || id(tarif).state == 4 || id(tarif).state == 6); 
-          //bool is_hp = (id(tarif).state == 1 || id(tarif).state == 4 || id(tarif).state == 6);  // Pour test        
+          // 🔹 Détermination du mode HP / HC à partir de l'heure
+          bool is_hp = id(is_hp_hours);  // true = HP (06–22h), false = HC (22–06h)
           float pdispo = 0.0f;  // puissance disponible pour ECS
 
-          // ============================================================
           // 🔸 Branche HP : régulation sur production PV / batteries
-          // ============================================================
           if (is_hp) {
             if (id(etatbus_ve).state == 3) {  // Bulk
               pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(res_pubatt).state;
@@ -894,10 +826,7 @@ script:
                      pdispo,
                      id(regul).c_str());
           }
-
-          // ============================================================
           // 🔸 Branche HC : calcul prédictif réseau (chauffe ECS)
-          // ============================================================
           else {
             const float RESEAU_CIBLE_HC = 6000.0f;  // puissance max visée sur réseau
 
@@ -905,7 +834,6 @@ script:
             float clim  = id(pu_clim).state;
             float batt  = id(pu_batteries).state;   // >0 décharge, <0 charge
 
-            // Sécurité anti-NaN
             if (isnan(conso)) conso = 0;
             if (isnan(clim))  clim  = 0;
             if (isnan(batt))  batt  = 0;
@@ -922,9 +850,7 @@ script:
                      RESEAU_CIBLE_HC, conso, clim, batt, pdispo);
           }
 
-          // ============================================================
           // 🔹 Limitation & interpolation table puissance
-          // ============================================================
           pdispo = constrain(pdispo, 0.0f, id(pmax).state);
           id(p_dispo) = pdispo;
 
@@ -942,29 +868,24 @@ script:
             striac_f = x1;
           }
 
-          // Sécurités & bornes
           if (isnan(striac_f)) striac_f = 0.0f;
           id(striac) = constrain(striac_f, 0.0f, 100.0f);
 
-          // Publication MQTT / HA
           id(afpdispo).publish_state(id(p_dispo));
           id(moderegul).publish_state(id(regul));
 
-          // ============================================================
-          // 🔸 Log global synthétique (résumé clair HP/HC)
-          // ============================================================
           ESP_LOGI("regul",
                    "%s | p_dispo=%.0fW | STriac=%.1f%% | Mode=%s",
                    is_hp ? "HP" : "HC",
                    pdispo, id(striac),
                    id(regul).c_str());
 
-  ########################################################################""
-    # Mode Etalonnage Increment S Triac toutes les 20 s pour laisser du temps à la puissance pour se stabiliser
+  ########################################################################
+  # Mode Etalonnage Increment S Triac
+  ########################################################################
   - id: etalonnage_striac
     mode: restart  
     then:
-
       - lambda: |-
           id(striac) = 0.0;
       - while:
@@ -988,13 +909,14 @@ script:
                 mess += std::to_string(id(striac)) + ",";
                 mess += std::to_string(id(puecs).state)+"}";
                 ESP_LOGI("fichier", "Message: %s", mess.c_str());
-                id(_log_etalonnage).execute(mess);  // Appelle le script _log_message avec le paramètre mess
+                id(_log_etalonnage).execute(mess);
 
       - lambda: |-
           ESP_LOGI("striac", "Fin de l'étalonnage, striac = %.2f", id(striac));
 
-  ########################################################################""
-    # ------------  Pilotage led
+  ########################################################################
+  # ------------  Pilotage led
+  ########################################################################
   - id: etat_production
     mode: single
     then:
@@ -1016,14 +938,10 @@ script:
           else:
             - output.turn_off: led_jaune
  
- ########################################################################""
+  ########################################################################
   - id: calcul_relais_surprod
     mode: single
     then:
-     # Si sortie triac > 20 et Pu ECS >10, signifie que le triac est sans effet, pendant plus de 60s et que
-     # la température de l'ECS a atteint son max (Thermostat de l'ECS déclenché)
-     # alors on active le relais
-     # si Pu ECS > 10 alors on desactive le relais
       - if: 
           condition:
             - lambda: 'return (id(striac)>=90 && id(puecs).state<10);'
@@ -1039,13 +957,13 @@ script:
             - switch.turn_off: relais
             - logger.log: "Relais Désactivé"
  
- ########################################################################""
+  ########################################################################
   - id: _log_fichier
     parameters:
-      mess1: std::string  # Type explicite pour ESPHome
+      mess1: std::string
     then:
       - lambda: |-
-          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          std::string mess = mess1;
           id(telegram_msg_buffer) = mess;
           ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
       - homeassistant.service:                
@@ -1053,17 +971,18 @@ script:
           data:
             entity_id: notify.log_esp176
             message: !lambda 'return id(telegram_msg_buffer).c_str();'
-########################################################################""
+
+  ########################################################################
   - id: _log_etalonnage
     parameters:
-      mess1: std::string  # Type explicite pour ESPHome
+      mess1: std::string
     then:
       - lambda: |-
-          std::string mess = mess1;  // Utilise directement mess1 sans horodatage
+          std::string mess = mess1;
           id(telegram_msg_buffer) = mess;
           ESP_LOGI("log_message", "Telegram buffer: %s", id(telegram_msg_buffer).c_str());
       - homeassistant.service:                
           action: notify.send_message
           data:
             entity_id: notify.etalonnage_routeur
-            message: !lambda 'return id(telegram_msg_buffer).c_str();'            
+            message: !lambda 'return id(telegram_msg_buffer).c_str();'

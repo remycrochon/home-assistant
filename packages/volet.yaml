@@ -43,7 +43,6 @@ input_datetime:
     has_date: false
     has_time: true
 
-
 input_number:
 # Consigne Min/max luminosité 
 # gestion volet: Calcul du Input_boolean Nuit/jout
@@ -62,24 +61,17 @@ input_number:
       unit_of_measurement: "Lux"
       icon: mdi:weather-sunny 
 
-binary_sensor:
-#inversion d'état pour l'alarme ALARMO
-  - platform: template
-    sensors:
-      porte_garage_non_fermee:
-        value_template: >-
-          {% if is_state('binary_sensor.porte_garage_fermee', 'on') %}
-            off
-          {% else %}
-            on
-          {% endif %} 
-      porte_ssol_non_fermee:
-        value_template: >-
-          {% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}
-            off
-          {% else %}
-            on
-          {% endif %} 
+template:
+  - binary_sensor:
+    - default_entity_id: binary_sensor.porte_garage_non_fermee
+      state: "{% if is_state('binary_sensor.porte_garage_fermee', 'on') %}\n  off\n{%
+        else %}\n  on\n{% endif %}"
+      name: porte_garage_non_fermee
+
+    - default_entity_id: binary_sensor.porte_ssol_non_fermee
+      state: "{% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}\n  off\n{%
+        else %}\n  on\n{% endif %}"
+      name: porte_ssol_non_fermee
 
 input_select:
   volets:

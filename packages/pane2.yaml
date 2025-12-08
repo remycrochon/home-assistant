@@ -241,7 +241,7 @@ openhasp:
       - obj: "p4b70" # Temp ECS
         properties:
           "text": >
-            {% set count = states('sensor.esp126_temp_ecs')|int(0) %}
+            {% set count = states('sensor.esp139_ecs_temp_ecs')|int(0) %}
             T ECS={{ count |round(0)}} °C
       
       ############### Page 5 ###############

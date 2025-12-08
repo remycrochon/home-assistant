@@ -216,33 +216,31 @@ sensor:
 #  - platform: moon
 
 #  - platform: season  
+template:
+  - sensor:
+    - unit_of_measurement: °
+      default_entity_id: sensor.sun_elevation
+      name: elevation soleil
+      state: '{{''%+.1f''|format(state_attr(''sun.sun'', ''elevation''))}}'
 
-  - platform: template
-    sensors:
-# Azimuth et elevation soleil
-      sun_elevation:
-        friendly_name: 'elevation soleil'
-        unit_of_measurement: "°"
-        value_template: "{{'%+.1f'|format(state_attr('sun.sun', 'elevation'))}}"
+    - unit_of_measurement: °
+      default_entity_id: sensor.sun_azimuth
+      name: azimut soleil
+      state: '{{''%+.1f''|format(state_attr(''sun.sun'', ''azimuth''))}}'
 
-      sun_azimuth:
-        friendly_name: 'azimut soleil'
-        unit_of_measurement: "°"
-        value_template: "{{'%+.1f'|format(state_attr('sun.sun', 'azimuth'))}}"
 
 # calcul de l'heure lever et coucher du soleil
-      heure_leve_soleil:
-        friendly_name: 'heure_leve_soleil'
-        value_template: >
-          {{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom('%H %M')}}
-        icon_template: mdi:weather-sunset-up
+    - default_entity_id: sensor.heure_leve_soleil
+      icon: mdi:weather-sunset-up
+      name: heure_leve_soleil
+      state: '{{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom(''%H
+        %M'')}}'
 
-      heure_couche_soleil:
-        friendly_name: 'heure_couche_soleil'
-        value_template: >
-          {{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(' %H %M')}}
-        icon_template: mdi:weather-sunset-down
-
+    - default_entity_id: sensor.heure_couche_soleil
+      icon: mdi:weather-sunset-down
+      name: heure_couche_soleil
+      state: '{{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(''
+        %H %M'')}}'
 
 # Prevision Pluie
 #      h_arrivee_pluie:
@@ -251,225 +249,150 @@ sensor:
 #          {{ as_timestamp(states('sensor.albi_next_rain')) | timestamp_custom('%H:%M') }}
 
 # Direction du vent
-      vp2_direction_du_vent:
-        friendly_name: "Vp2 Direction Du vent"
-        unique_id: "vp2_direction_du_vent"
-        #unit_of_measurement: 'card'
-        value_template: >
-          {% set dv=state_attr('weather.albi','wind_bearing')|float(default=0)%}
-          {% if dv<11 %}
-            {{'N'}}
-          {% elif dv<34 %}
-            {{'NNE'}}
-          {% elif dv<57 %}
-            {{'NE'}}
-          {% elif dv<79 %}
-            {{'ENE'}}
-          {% elif dv<101 %}
-            {{'E'}}
-          {% elif dv<124 %}
-            {{'ESE'}}
-          {% elif dv<146 %}
-            {{'SE'}}
-          {% elif dv<169 %}
-            {{'SSE'}}
-          {% elif dv<191 %}
-            {{'S'}}
-          {% elif dv<214 %}
-            {{'SSO'}}
-          {% elif dv<236 %}
-            {{'SO'}}
-          {% elif dv<259 %}
-            {{'OSO'}}
-          {% elif dv<281 %}
-            {{'O'}}
-          {% elif dv<304 %}
-            {{'ONO'}}
-          {% elif dv<326 %}
-            {{'NO'}}
-          {% elif dv<349 %}
-            {{'NNO'}}
-          {% else %}
-            {{'N'}}
-          {%endif%}
+    - unique_id: vp2_direction_du_vent
+      default_entity_id: sensor.vp2_direction_du_vent
+      name: Vp2 Direction Du vent
+      state: "{% set dv=state_attr('weather.albi','wind_bearing')|float(default=0)%}
+        {% if dv<11 %}\n  {{'N'}}\n{% elif dv<34 %}\n  {{'NNE'}}\n{% elif dv<57 %}\n
+        \ {{'NE'}}\n{% elif dv<79 %}\n  {{'ENE'}}\n{% elif dv<101 %}\n  {{'E'}}\n{%
+        elif dv<124 %}\n  {{'ESE'}}\n{% elif dv<146 %}\n  {{'SE'}}\n{% elif dv<169 %}\n
+        \ {{'SSE'}}\n{% elif dv<191 %}\n  {{'S'}}\n{% elif dv<214 %}\n  {{'SSO'}}\n{%
+        elif dv<236 %}\n  {{'SO'}}\n{% elif dv<259 %}\n  {{'OSO'}}\n{% elif dv<281 %}\n
+        \ {{'O'}}\n{% elif dv<304 %}\n  {{'ONO'}}\n{% elif dv<326 %}\n  {{'NO'}}\n{%
+        elif dv<349 %}\n  {{'NNO'}}\n{% else %}\n  {{'N'}}\n{%endif%}"
 
 
 # Integration Amber -> Pollen
 
-      grass_pollen_index_mod:
-        friendly_name: Pollen Grass Amber
-        unique_id: "grass_pollen_index_mod"
-        icon_template: 'mdi:flower'
-        value_template: >-
-          {% if is_state('sensor.pollen_grass_risk', 'low') %}
-            0
-          {% elif is_state('sensor.pollen_grass_risk','moderate') %}
-            1
-          {% elif is_state('sensor.pollen_grass_risk','high') %}
-            2
-          {% elif is_state('sensor.pollen_grass_risk','very_high') %}
-            3
-          {% else %}
-            Unknown
-          {% endif %}
+    - unique_id: grass_pollen_index_mod
+      default_entity_id: sensor.grass_pollen_index_mod
+      icon: mdi:flower
+      name: Pollen Grass Amber
+      state: "{% if is_state('sensor.pollen_grass_risk', 'low') %}\n  0\n{% elif is_state('sensor.pollen_grass_risk','moderate')
+        %}\n  1\n{% elif is_state('sensor.pollen_grass_risk','high') %}\n  2\n{% elif
+        is_state('sensor.pollen_grass_risk','very_high') %}\n  3\n{% else %}\n  Unknown\n{%
+        endif %}"
 
-      tree_pollen_index_mod:
-        friendly_name: Pollen Tree Amber
-        unique_id: "tree_pollen_index_mod"
-        icon_template: 'mdi:tree'
-        value_template: >-
-          {% if is_state('sensor.pollen_tree_risk', 'low') %}
-            0
-          {% elif is_state('sensor.pollen_tree_risk','moderate') %}
-            1
-          {% elif is_state('sensor.pollen_tree_risk','high') %}
-            2
-          {% elif is_state('sensor.pollen_tree_risk','very_high') %}
-            3
-          {% else %}
-            Unknown
-          {% endif %}     
+    - unique_id: tree_pollen_index_mod
+      default_entity_id: sensor.tree_pollen_index_mod
+      icon: mdi:tree
+      name: Pollen Tree Amber
+      state: "{% if is_state('sensor.pollen_tree_risk', 'low') %}\n  0\n{% elif is_state('sensor.pollen_tree_risk','moderate')
+        %}\n  1\n{% elif is_state('sensor.pollen_tree_risk','high') %}\n  2\n{% elif
+        is_state('sensor.pollen_tree_risk','very_high') %}\n  3\n{% else %}\n  Unknown\n{%
+        endif %}"
 
-      weed_pollen_index_mod:
-        friendly_name: Pollen Weed Amber
-        unique_id: "weed_pollen_index_mod"
-        icon_template: 'mdi:sprout'
-        value_template: >-
-          {% if is_state('sensor.pollen_weed_risk', 'low') %}
-            0
-          {% elif is_state('sensor.pollen_weed_risk','moderate') %}
-            1
-          {% elif is_state('sensor.pollen_weed_risk','high') %}
-            2
-          {% elif is_state('sensor.pollen_weed_risk','very_high') %}
-            3
-          {% else %}
-            Unknown
-          {% endif %}
+    - unique_id: weed_pollen_index_mod
+      default_entity_id: sensor.weed_pollen_index_mod
+      icon: mdi:sprout
+      name: Pollen Weed Amber
+      state: "{% if is_state('sensor.pollen_weed_risk', 'low') %}\n  0\n{% elif is_state('sensor.pollen_weed_risk','moderate')
+        %}\n  1\n{% elif is_state('sensor.pollen_weed_risk','high') %}\n  2\n{% elif
+        is_state('sensor.pollen_weed_risk','very_high') %}\n  3\n{% else %}\n  Unknown\n{%
+        endif %}"
 
 
 # Integration Météo France
+    - unique_id: mf_temperature
+      unit_of_measurement: °C
+      default_entity_id: sensor.mf_temperature
+      state: '{{ state_attr(''weather.albi'',''temperature'') }}'
+      name: mf_temperature
 
-      mf_temperature:
-        unique_id: "mf_temperature"
-        value_template: >-
-          {{ state_attr('weather.albi','temperature') }}
-        unit_of_measurement: °C
+    - unique_id: mf_humidity
+      default_entity_id: sensor.mf_humidity
+      state: '{{ state_attr(''weather.albi'',''humidity'') }}'
+      name: mf_humidity
 
-      mf_humidity:
-        unique_id: "mf_humidity"
-        value_template: >-
-          {{ state_attr('weather.albi','humidity') }}
-
-      mf_pressure:
-        unique_id: "mf_pressure"
-        value_template: >-
-          {{ state_attr('weather.albi','pressure') }}
-        unit_of_measurement: hPa
+    - unique_id: mf_pressure
+      unit_of_measurement: hPa
+      default_entity_id: sensor.mf_pressure
+      state: '{{ state_attr(''weather.albi'',''pressure'') }}'
+      name: mf_pressure
 
 #      mf_current_conditions:
 #        value_template: >-
 #          {{ states.weather.albi.state }}
 
-      mf_current_conditions:
-        unique_id: "mf_current_conditions"
-        value_template: >-
-          {% set weather_state = states('weather.albi') 
-            | replace('rainy', 'Pluvieux')
-            | replace('partlycloudy', 'Partiellement nuageux')
-            | replace('cloudy', 'Nuageux')
-            | replace('clear-night', 'Nuit claire')
-            | replace('fog', 'Brouillard')
-            | replace('hail', 'Grêle')
-            | replace('lightning-rainy', 'Pluie orageuse')
-            | replace('lightning', 'Orages') 
-            | replace('pouring', 'Fortes pluies')
-            | replace('snowy-rainy', 'Neigeux')
-            | replace('snowy', 'Neigeux')
-            | replace('sunny', 'Ensoleillé')
-            | replace('windy-variant', 'Venteux')
-            | replace('windy', 'Venteux')
-            | replace('exceptional', 'Exceptionel') %}
+    - unique_id: mf_current_conditions
+      default_entity_id: sensor.mf_current_conditions
+      state: "{% set weather_state = states('weather.albi') \n  | replace('rainy', 'Pluvieux')\n
+        \ | replace('partlycloudy', 'Partiellement nuageux')\n  | replace('cloudy',
+        'Nuageux')\n  | replace('clear-night', 'Nuit claire')\n  | replace('fog', 'Brouillard')\n
+        \ | replace('hail', 'Grêle')\n  | replace('lightning-rainy', 'Pluie orageuse')\n
+        \ | replace('lightning', 'Orages') \n  | replace('pouring', 'Fortes pluies')\n
+        \ | replace('snowy-rainy', 'Neigeux')\n  | replace('snowy', 'Neigeux')\n  |
+        replace('sunny', 'Ensoleillé')\n  | replace('windy-variant', 'Venteux')\n  |
+        replace('windy', 'Venteux')\n  | replace('exceptional', 'Exceptionel') %}"
+      name: mf_current_conditions
 
   #        feels_like
-      mf_visibility:
-        unique_id: "mf_visibility"
-        value_template: >-
-          {{state_attr('weather.albi','visibility') }}
-      
-      mf_wind_bearing:
-        unique_id: "mf_wind_bearing"
-        value_template: >-
-          {{state_attr('weather.albi','wind_bearing') }}
-        # {{states('sensor.vp2_win_dir')}}
+    - unique_id: mf_visibility
+      default_entity_id: sensor.mf_visibility
+      state: '{{state_attr(''weather.albi'',''visibility'') }}'
+      name: mf_visibility
 
-      mf_wind_speed:
-        unique_id: "mf_wind_speed"
-        value_template: >-
-          {{ state_attr('weather.albi','wind_speed') }}
+    - unique_id: mf_wind_bearing
+      default_entity_id: sensor.mf_wind_bearing
+      state: '{{state_attr(''weather.albi'',''wind_bearing'') }}'
+      name: mf_wind_bearing
 
-      mf_o3:
-        unique_id: "mf_o3"
-        value_template: >-
-          {{ state_attr('weather.albi','ozone') }}
+    - unique_id: mf_wind_speed
+      default_entity_id: sensor.mf_wind_speed
+      state: '{{ state_attr(''weather.albi'',''wind_speed'') }}'
+      name: mf_wind_speed
+
+    - unique_id: mf_o3
+      default_entity_id: sensor.mf_o3
+      state: '{{ state_attr(''weather.albi'',''ozone'') }}'
+      name: mf_o3
 
 
 # Meteo france
     # Utilisés dans boutton-card de la page /remy-2/home 
-      meteo_france_orage:
-        unique_id: "meteo_france_orage"
-        friendly_name: Orages
-        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Orages'') }}'
-      meteo_france_inondation:
-        unique_id: "meteo_france_inondation"
-        friendly_name: Inondation
-        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Inondation'') }}'
-      meteo_france_pluie_inondation:
-        unique_id: "meteo_france_pluie_inondation"
-        friendly_name: Pluie-Inondation
-        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Pluie-inondation'') }}'       
-      meteo_france_grand_froid:
-        unique_id: "meteo_france_grand_froid"
-        friendly_name: Grand-froid
-        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Grand-froid'') }}'         
-      meteo_france_vent:
-        unique_id: "meteo_france_vent"
-        friendly_name: Vent violent
-        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Vent violent'') }}'          
-      meteo_france_neige:
-        unique_id: "meteo_france_neige"
-        friendly_name: Neige-verglas
-        value_template: '{{ state_attr(''sensor.81_weather_alert'', ''Neige-verglas'') }}'        
+    - unique_id: meteo_france_orage
+      default_entity_id: sensor.meteo_france_orage
+      name: Orages
+      state: '{{ state_attr(''sensor.81_weather_alert'', ''Orages'') }}'
+
+    - unique_id: meteo_france_inondation
+      default_entity_id: sensor.meteo_france_inondation
+      name: Inondation
+      state: '{{ state_attr(''sensor.81_weather_alert'', ''Inondation'') }}'
+
+    - unique_id: meteo_france_pluie_inondation
+      default_entity_id: sensor.meteo_france_pluie_inondation
+      name: Pluie-Inondation
+      state: '{{ state_attr(''sensor.81_weather_alert'', ''Pluie-inondation'') }}'      
+
+    - unique_id: meteo_france_grand_froid
+      default_entity_id: sensor.meteo_france_grand_froid
+      name: Grand-froid
+      state: '{{ state_attr(''sensor.81_weather_alert'', ''Grand-froid'') }}'      
+
+    - unique_id: meteo_france_vent
+      default_entity_id: sensor.meteo_france_vent
+      name: Vent violent
+      state: '{{ state_attr(''sensor.81_weather_alert'', ''Vent violent'') }}'        
+
+    - unique_id: meteo_france_neige
+      default_entity_id: sensor.meteo_france_neige
+      name: Neige-verglas
+      state: '{{ state_attr(''sensor.81_weather_alert'', ''Neige-verglas'') }}'     
 
 
-      weather_icon:
-        unique_id: "weather_icon"
-        value_template: >-
-          {% set weather_icon = states('weather.albi') 
-            | replace('rainy', '☔️')
-            | replace('partlycloudy', '⛅️')
-            | replace('cloudy', '☁️')
-            | replace('clear-night', '✨')
-            | replace('fog', '🌀')
-            | replace('hail', '🌧')
-            | replace('lightning-rainy', '⛈')
-            | replace('lightning', '⚡️') 
-            | replace('pourring', '️☔️')
-            | replace('snowy-rainy', '❄️️')
-            | replace('snowy', '❄️')
-            | replace('sunny', '☀️')
-            | replace('windy-variant', '💨')
-            | replace('windy', '💨')
-            | replace('exceptional', '⚠️') %}     
-
-          {% if not state_attr('weather.maison', 'temperature') == 'Indisponible' -%}
-            {% if states('weather.albi') == 'lightning-rainy' -%}
-              ⛈
-            {% else -%}
-            {{ weather_icon }}
-            {% endif -%}
-          {% else -%}
-          {% endif -%}
-          
+    - unique_id: weather_icon
+      default_entity_id: sensor.weather_icon
+      state: "{% set weather_icon = states('weather.albi') \n  | replace('rainy', '☔️')\n
+        \ | replace('partlycloudy', '⛅️')\n  | replace('cloudy', '☁️')\n  | replace('clear-night',
+        '✨')\n  | replace('fog', '\U0001F300')\n  | replace('hail', '\U0001F327')\n
+        \ | replace('lightning-rainy', '⛈')\n  | replace('lightning', '⚡️') \n  | replace('pourring',
+        '️☔️')\n  | replace('snowy-rainy', '❄️️')\n  | replace('snowy', '❄️')\n  | replace('sunny',
+        '☀️')\n  | replace('windy-variant', '\U0001F4A8')\n  | replace('windy', '\U0001F4A8')\n
+        \ | replace('exceptional', '⚠️') %}     \n\n{% if not state_attr('weather.maison',
+        'temperature') == 'Indisponible' -%}\n  {% if states('weather.albi') == 'lightning-rainy'
+        -%}\n    ⛈\n  {% else -%}\n  {{ weather_icon }}\n  {% endif -%}\n{% else -%}
+        {% endif -%}"
+      name: weather_icon
 
 

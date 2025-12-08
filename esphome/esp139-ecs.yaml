@@ -1,0 +1,180 @@
+substitutions:
+  device_name: esp139-ecs
+  adress_ip: "192.168.0.139"
+
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+
+  reboot_timeout: 5min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+
+# Utilisez la LED de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
+status_led:
+  pin:
+    number: GPIO23
+    inverted: true
+
+logger:
+  level: DEBUG
+
+api:
+  
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+
+one_wire:
+  - platform: gpio  
+    pin: GPIO32
+
+sensor:
+  - platform: dallas_temp
+    address: 0x3649465609646128
+    name: "Temp Trés Haut"
+    id: temp_th
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0xc0ae154809646128
+    name: "Temp Haut"
+    id: temp_h
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0xab48885709646128
+    name: "temp_ecs"
+    id: temp_m
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0x82012111efe81d28
+    name: "Temp Bas"
+    id: temp_b
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+    
+  - platform: dallas_temp
+    address: 0x61b6945709646128
+    name: "Temp Trés Bas"
+    id: temp_tb
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: dallas_temp
+    address: 0x94000000855c4e28
+    name: "Temp Sortie Régulateur"
+    id: temp_s_regule
+    update_interval: 10s
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: template
+    name: "Ballon volume eau chaude"
+    id: ballon_volume_chaud
+    unit_of_measurement: "L"
+    icon: "mdi:water-thermometer"
+    accuracy_decimals: 0
+    update_interval: 10s
+    lambda: |-
+      // Paramètres physiques
+      const float V_TOTAL = 200.0f;   // volume total du ballon en litres
+      const float T_SEUIL = 40.0f;    // température mini eau "utile"
+      const float K = 4.0f;           // raideur de la transition hyperbolique (2 à 6)
+
+      // Récupération des 5 sondes (du haut vers le bas)
+      float T[5] = {
+        id(temp_th).state,
+        id(temp_h).state,
+        id(temp_m).state,
+        id(temp_b).state,
+        id(temp_tb).state
+      };
+
+      // Si une sonde est indispo → on sort en NAN
+      for (int i = 0; i < 5; i++) {
+        if (isnan(T[i])) {
+          return NAN;
+        }
+      }
+
+      const int SEGMENTS = 4;                         // 5 sondes → 4 segments verticaux
+      const float V_SEG = V_TOTAL / SEGMENTS;         // volume par segment
+      float volume = 0.0f;
+
+      for (int i = 0; i < SEGMENTS; i++) {
+        float Th = T[i];       // température en haut du segment
+        float Tb = T[i+1];     // température en bas du segment
+        float f = 0.0f;        // fraction d'eau chaude dans le segment (0..1)
+
+        if (Th >= T_SEUIL && Tb >= T_SEUIL) {
+          // Segment entièrement au-dessus du seuil
+          f = 1.0f;
+        } else if (Th < T_SEUIL && Tb < T_SEUIL) {
+          // Segment entièrement en dessous du seuil
+          f = 0.0f;
+        } else {
+          // Zone de transition : on interpole + correction hyperbolique
+          float denom = Th - Tb;
+
+          if (fabs(denom) < 0.01f) {
+            // Gradient quasi nul → on considère homogène
+            f = (Th >= T_SEUIL) ? 1.0f : 0.0f;
+          } else {
+            // interpolation linéaire de la position de T_SEUIL
+            float f_lin = (Th - T_SEUIL) / denom;
+            if (f_lin < 0.0f) f_lin = 0.0f;
+            if (f_lin > 1.0f) f_lin = 1.0f;
+
+            // Application d'une sigmoïde hyperbolique autour de 0.5
+            float x = f_lin - 0.5f;     // recentrage en 0
+            float num = tanh(K * x);
+            float den = tanh(K * 0.5f); // normalisation pour que f reste bien dans [0,1]
+            float f_hyp = 0.5f * (num / den + 1.0f);
+
+            f = f_hyp;
+          }
+        }
+
+        // Sécurité bornes
+        if (f < 0.0f) f = 0.0f;
+        if (f > 1.0f) f = 1.0f;
+
+        volume += f * V_SEG;
+      }
+
+      return volume;
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+
+switch:   
+  - platform: gpio
+    name: "Relais"
+    pin: GPIO16
+    id: relais

@@ -44,6 +44,12 @@ one_wire:
   - platform: gpio  
     pin: GPIO32
 
+globals:
+  - id: last_volume_chaud
+    type: float
+    restore_value: yes
+    initial_value: '0'
+
 sensor:
   - platform: dallas_temp
     address: 0x3649465609646128
@@ -108,28 +114,42 @@ sensor:
 
       // Récupération des 5 sondes (du haut vers le bas)
       float T[5] = {
-        id(temp_th).state,
-        id(temp_h).state,
-        id(temp_m).state,
-        id(temp_b).state,
-        id(temp_tb).state
+        id(temp_th).state,  // Très haut
+        id(temp_h).state,   // Haut
+        id(temp_m).state,   // Milieu
+        id(temp_b).state,   // Bas (résistance)
+        id(temp_tb).state   // Très bas
       };
 
-      // Si une sonde est indispo → on sort en NAN
+      bool all_ok = true;
       for (int i = 0; i < 5; i++) {
         if (isnan(T[i])) {
-          return NAN;
+          all_ok = false;
         }
       }
 
-      const int SEGMENTS = 4;                         // 5 sondes → 4 segments verticaux
-      const float V_SEG = V_TOTAL / SEGMENTS;         // volume par segment
+      // Si une sonde est indispo → on garde le dernier volume valide
+      if (!all_ok) {
+        ESP_LOGW("ecs", "Lecture DS18B20 manquante → on garde last_volume_chaud = %.0f L", id(last_volume_chaud));
+        return id(last_volume_chaud);
+      }
+
+      // 🔧 Correction monotone :
+      // on impose que T[0] >= T[1] >= T[2] >= T[3] >= T[4]
+      for (int i = 1; i < 5; i++) {
+        if (T[i] > T[i-1]) {
+          T[i] = T[i-1];
+        }
+      }
+
+      const int   SEGMENTS = 4;                  // 5 sondes → 4 segments verticaux
+      const float V_SEG    = V_TOTAL / SEGMENTS; // volume par segment
       float volume = 0.0f;
 
       for (int i = 0; i < SEGMENTS; i++) {
         float Th = T[i];       // température en haut du segment
         float Tb = T[i+1];     // température en bas du segment
-        float f = 0.0f;        // fraction d'eau chaude dans le segment (0..1)
+        float f  = 0.0f;       // fraction d'eau chaude dans le segment (0..1)
 
         if (Th >= T_SEUIL && Tb >= T_SEUIL) {
           // Segment entièrement au-dessus du seuil
@@ -145,15 +165,15 @@ sensor:
             // Gradient quasi nul → on considère homogène
             f = (Th >= T_SEUIL) ? 1.0f : 0.0f;
           } else {
-            // interpolation linéaire de la position de T_SEUIL
+            // interpolation linéaire de la position de T_SEUIL entre Th et Tb
             float f_lin = (Th - T_SEUIL) / denom;
             if (f_lin < 0.0f) f_lin = 0.0f;
             if (f_lin > 1.0f) f_lin = 1.0f;
 
             // Application d'une sigmoïde hyperbolique autour de 0.5
-            float x = f_lin - 0.5f;     // recentrage en 0
+            float x   = f_lin - 0.5f;      // recentrage en 0
             float num = tanh(K * x);
-            float den = tanh(K * 0.5f); // normalisation pour que f reste bien dans [0,1]
+            float den = tanh(K * 0.5f);    // normalisation pour garder [0,1]
             float f_hyp = 0.5f * (num / den + 1.0f);
 
             f = f_hyp;
@@ -167,6 +187,8 @@ sensor:
         volume += f * V_SEG;
       }
 
+      // On mémorise le dernier volume valide
+      id(last_volume_chaud) = volume;
       return volume;
 
 binary_sensor:

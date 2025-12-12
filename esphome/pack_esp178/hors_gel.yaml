@@ -18,7 +18,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Hors Gel --> %s"
-            args: [ 'id(_Mode_Fonctionnement_hg).state.c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_hg).current_option()' ]
             level: INFO
 number:
   # Seuil 1 Temp Hors gel
@@ -60,7 +60,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
+              - lambda: 'return id(_Mode_Fonctionnement_hg).current_option() == "Activé";'
               - lambda: 'return id(temp_ext).state > id(s1_temp_hg).state;'
           then:
             - lambda: |-
@@ -73,7 +73,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
+              - lambda: 'return id(_Mode_Fonctionnement_hg).current_option() == "Activé";'
               - lambda: 'return id(temp_ext).state < id(s1_temp_hg).state;'
               - lambda: 'return id(temp_ext).state > id(s2_temp_hg).state;'
               - lambda: 'return id(g_flag_hg) == false;'
@@ -106,7 +106,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_hg).state == "Activé";'
+              - lambda: 'return id(_Mode_Fonctionnement_hg).current_option() == "Activé";'
               - lambda: 'return id(temp_ext).state < id(s1_temp_hg).state;'
               - lambda: 'return id(temp_ext).state < id(s2_temp_hg).state;'
               - lambda: 'return id(g_flag_hg) == false;'

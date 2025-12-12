@@ -74,6 +74,8 @@ sensor:
     update_interval: 10s
     device_class: temperature
     accuracy_decimals: 2
+    filters: 
+      - offset: 2
 
   - platform: dallas_temp
     address: 0x82012111efe81d28

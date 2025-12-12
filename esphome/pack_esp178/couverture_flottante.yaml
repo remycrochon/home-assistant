@@ -26,7 +26,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Volet --> %s"
-            args: [ 'id(_Mode_Fonctionnement_volet).state.c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_volet).current_option()' ]
             level: INFO
 
 binary_sensor: 
@@ -80,7 +80,7 @@ binary_sensor:
                   condition:
                     and:
                       - binary_sensor.is_on: volet_ouvert
-                      - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+                      - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
                   then:
                     - script.execute: _regul_eau
                     - lambda: |-
@@ -193,7 +193,7 @@ script:
 
           // Horaire - ouverture
           if (now.is_valid() && current_minute == ouv_minute &&
-              id(_Mode_Fonctionnement_volet).state == "Horaire" &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Horaire" &&
               !id(action_ouv_executee)) {
             id(action_ouv_executee) = true;
             id(script_ouv_volet).execute();
@@ -201,7 +201,7 @@ script:
 
           // Horaire - fermeture
           if (now.is_valid() && current_minute == ferm_minute &&
-              id(_Mode_Fonctionnement_volet).state == "Horaire" &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Horaire" &&
               !id(action_ferm_executee)) {
             id(action_ferm_executee) = true;
             id(script_ferm_volet).execute();
@@ -209,9 +209,9 @@ script:
 
           // Auto - ouverture = H Début Filtration + 15 mn
           if (now.is_valid() && current_minute == debut_minute &&
-              id(_Mode_Fonctionnement_volet).state == "Auto" &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Auto" &&
               !id(action_ouv_executee)) {
-            auto mode_filtration = id(_Mode_Fonctionnement_filtration).state;
+            auto mode_filtration = id(_Mode_Fonctionnement_filtration).current_option();
             if (mode_filtration == "Horaire" || mode_filtration == "Palier" ||
                 mode_filtration == "Classique" || mode_filtration == "Abaque") {
               id(action_ouv_executee) = true;
@@ -221,7 +221,7 @@ script:
 
           // Auto - fermeture = F Fin filtration + 30mn
           if (now.is_valid() && current_minute == fin_minute &&
-              id(_Mode_Fonctionnement_volet).state == "Auto" &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Auto" &&
               !id(action_ferm_executee)) {
             id(action_ferm_executee) = true;
             id(script_ferm_volet).execute();
@@ -236,10 +236,10 @@ script:
           std::string heure_ouv_str;
           std::string heure_ferm_str;
 
-          if (id(_Mode_Fonctionnement_volet).state == "Horaire") {
+          if (id(_Mode_Fonctionnement_volet).current_option() == "Horaire") {
             heure_ouv_str = to_string(id(h_ouv_volet).hour) + ":" + (id(h_ouv_volet).minute < 10 ? "0" : "") + to_string(id(h_ouv_volet).minute);
             heure_ferm_str = to_string(id(h_ferm_volet).hour) + ":" + (id(h_ferm_volet).minute < 10 ? "0" : "") + to_string(id(h_ferm_volet).minute);
-          } else if (id(_Mode_Fonctionnement_volet).state == "Auto") {
+          } else if (id(_Mode_Fonctionnement_volet).current_option() == "Auto") {
             int debut_min = id(h_debut).minute + 15;
             int debut_hr = id(h_debut).hour + (debut_min / 60);
             debut_min = debut_min % 60;
@@ -269,7 +269,9 @@ script:
       - switch.turn_off: cde_volet_ouverture
       - lambda: |-
           std::string mess = "Ouverture Volet Piscine\n";
-          mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
+          mess += "Mode: ";
+          mess += id(_Mode_Fonctionnement_volet).current_option();
+          mess += "\n";
           id(_message_telegram)->execute(mess,0);
           id(_log_fichier)->execute(mess, 0);
 
@@ -296,7 +298,9 @@ script:
                 if (haut && inter) mess += "Haut + Intermediaire\n";
                 else if (haut)    mess += "Haut\n";
                 else if (inter)   mess += "Intermediaire\n";
-                mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
+                mess += "Mode: ";
+                mess += id(_Mode_Fonctionnement_volet).current_option();
+                mess += "\n";
                 id(_message_telegram)->execute(mess,0);
                 id(_log_fichier)->execute(mess, 0);
           else:
@@ -305,7 +309,9 @@ script:
                 std::string mess = "Ouverture Volet Piscine BLOQUEE\n";
                 if (def) mess += "Niveau en defaut";
                 else mess += "Raison: aucun niveau actif (Bas)\n";
-                mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
+                mess += "Mode: ";
+                mess += id(_Mode_Fonctionnement_volet).current_option();
+                mess += "\n";
                 id(_message_telegram)->execute(mess,0);
                 id(_log_fichier)->execute(mess, 0);                
 
@@ -321,7 +327,9 @@ script:
       - switch.turn_off: cde_eclairage
       - lambda: |-
           std::string mess = "Fermeture Volet Piscine\n";
-          mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
+          mess += "Mode: ";
+          mess += id(_Mode_Fonctionnement_volet).current_option();
+          mess += "\n";
           id(_message_telegram)->execute(mess,0);
           id(_log_fichier)->execute(mess, 0);          
 
@@ -348,9 +356,11 @@ script:
                 if (haut && inter) mess += "Haut + Intermediaire\n";
                 else if (haut)    mess += "Haut\n";
                 else if (inter)   mess += "Intermediaire\n";
-                mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-                id(_message_telegram)->execute(mess,0);
-                id(_log_fichier)->execute(mess, 0);
+                  mess += "Mode: ";
+                  mess += id(_Mode_Fonctionnement_volet).current_option();
+                  mess += "\n";
+                  id(_message_telegram)->execute(mess,0);
+                  id(_log_fichier)->execute(mess, 0);
 
             - switch.turn_on: cde_eclairage
             - delay: 20s
@@ -361,10 +371,14 @@ script:
                 bool def = id(niv_defaut).state;
                 std::string mess = "Fermeture Volet Piscine BLOQUEE\n";
                 if (def) mess += "Raison: Niveau en defaut";
-                else mess += "Raison: aucun niveau actif (Bas)\n";
-                mess += "Mode: " + id(_Mode_Fonctionnement_volet).state + "\n";
-                id(_message_telegram)->execute(mess,0);
-                id(_log_fichier)->execute(mess, 0);
+                else
+                  std::string mess;
+                  mess += "Raison: aucun niveau actif (Bas)\n";
+                  mess += "Mode: ";
+                  mess += id(_Mode_Fonctionnement_volet).current_option();
+                  mess += "\n";
+                  id(_message_telegram)->execute(mess,0);
+                  id(_log_fichier)->execute(mess, 0);
 
   - id: script_stop_volet
     mode: single

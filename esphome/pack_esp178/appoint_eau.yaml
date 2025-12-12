@@ -21,7 +21,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Regul Eau --> %s"
-            args: [ 'id(_Mode_Fonctionnement_regul_eau).state.c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_regul_eau).current_option()' ]
             level: INFO        
         - script.stop: _regul_eau
         - delay: 1s            
@@ -48,7 +48,7 @@ binary_sensor:
             condition:
               and:
                 - binary_sensor.is_on: niv_haut
-                - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+                - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
             then:
               - logger.log:
                   format: "Fermeture vanne eau : Niveau haut atteint en mode Auto"
@@ -165,7 +165,7 @@ script:
     then:
       - if:
           condition:
-            lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Auto";'
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
           then:
             - if:
                 condition:
@@ -200,7 +200,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "Ma_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
           then: 
             - logger.log: 
                 format: "Ouverture vanne eau Mode Ma Forçé"
@@ -210,7 +210,7 @@ script:
       - if:
           condition:
             or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).state == "At_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
           then:
             - logger.log: 
                 format: "Fermeture vanne eau Mode At Forçé"

@@ -41,13 +41,13 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Regul chlore --> %s"
-            args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option()' ]
             level: INFO 
         - if:
             condition:
               or:
-                - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Ma_f";'
-                - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "At_f";'   
+                - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Ma_f";'
+                - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "At_f";'   
             then:
               - script.stop: _regul_chlore
               - delay: 1s            
@@ -343,8 +343,8 @@ script:
             and:
               - switch.is_on: cde_ppe_filtration
               - or:
-                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm";'
-                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto ORP";'
+                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Ppm";'
+                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto ORP";'
 
           then:
             - lambda: |-
@@ -352,7 +352,7 @@ script:
                 id(g_tps_injection_chlore)=id(_chlore_cible).state;
 
 
-                if (id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm") {
+                if (id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Ppm") {
                   // Boucle ouverte : dosage selon concentration cible
                   float mp = 96.0f;   // concentration chlore actif en g/L (9.6%)
                   float vb = 50000.0f;  // volume piscine en L
@@ -364,7 +364,7 @@ script:
                   }
                   ESP_LOGI("Dosage Chlore", "Mode Auto Ppm (mg/L) → Quantité: %.2f L, Temps: %.2f s", q, temps);
 
-                } else if (id(_Mode_Fonctionnement_regul_chlore).state == "Auto ORP") {
+                } else if (id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto ORP") {
                   // Boucle fermée : dosage selon ORP
                   float consigne = id(consigne_orp).state;
                   float mesure = id(orp_ezo).state;
@@ -396,7 +396,7 @@ script:
             - switch.turn_on: cde_ppe_chlore
             - logger.log:
                 format: "Marche ppe Chlore en %s"
-                args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
+                args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option()' ]
                 level: INFO
             - lambda: |-
                 std::string mess = "ESP178 Temps inj Chlore";
@@ -409,7 +409,7 @@ script:
             - switch.turn_off: cde_ppe_chlore
             - logger.log:
                 format: "Arrêt ppe Chlore en %s"
-                args: [ 'id(_Mode_Fonctionnement_regul_chlore).state.c_str()' ]
+                args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option()' ]
                 level: INFO
             - lambda: |-
                 float debit = id(_debit_ppe_chlore).state;
@@ -435,7 +435,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Ma_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Ma_f";'
               - switch.is_on: cde_ppe_filtration
           then:
             - switch.turn_on: cde_ppe_chlore
@@ -445,7 +445,7 @@ script:
       - if:
           condition:
             or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "At_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "At_f";'
               - switch.is_off: cde_ppe_filtration
           then:
             - switch.turn_off: cde_ppe_chlore
@@ -459,7 +459,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).state == "Auto Ppm";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Ppm";'
               - lambda: 'return id(_etat_galets_chlore).state == true;'
           then:
             - logger.log: 

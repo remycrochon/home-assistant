@@ -357,11 +357,11 @@ select:
         - script.execute: _fonctionnement_filtration        
         - logger.log:
             format: "Mode Fonct Filtration --> %s"
-            args: [ 'id(_Mode_Fonctionnement_filtration).state.c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_filtration).current_option()' ]
             level: INFO
         - lambda: |-
             char buf[64];
-            snprintf(buf, sizeof(buf), "Mode Fonct Filtration --> %s", id(_Mode_Fonctionnement_filtration).state.c_str());
+            snprintf(buf, sizeof(buf), "Mode Fonct Filtration --> %s", id(_Mode_Fonctionnement_filtration).current_option());
             id(_message_telegram)->execute(std::string(buf),0);
             id(_log_fichier)->execute(std::string(buf),0);
 
@@ -797,7 +797,7 @@ script:
       # Mode Arret forcé Input Select
       - if:
           condition:
-              - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "At_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_filtration).current_option() == "At_f";'
               - lambda: 'return id(ent_at_force).state == false;'
               - lambda: 'return id(g_flag_hg) == false;'
           then:
@@ -812,7 +812,7 @@ script:
       # Mode Marche forcée Input Select
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Ma_f";'
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).current_option() == "Ma_f";'
             - lambda: 'return id(ent_at_force).state == false;'
             - lambda: 'return id(g_flag_hg) == false;'
           then:
@@ -836,7 +836,7 @@ script:
       # Durée = Tps paliers 5
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Palier";'
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).current_option() == "Palier";'
             - lambda: 'return id(ent_at_force).state == false;'
             - lambda: 'return id(g_flag_hg) == false;'
           then:
@@ -871,7 +871,7 @@ script:
       # La durée de filtration en h est égale à la température de l'eau divisée par 2
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Classique";'
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).current_option() == "Classique";'
             - lambda: 'return id(ent_at_force).state == false;'     
             - lambda: 'return id(g_flag_hg) == false;'       
           then:
@@ -890,7 +890,7 @@ script:
       #
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Abaque";'
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).current_option() == "Abaque";'
             - lambda: 'return id(ent_at_force).state == false;'    
             - lambda: 'return id(g_flag_hg) == false;'  
 
@@ -911,7 +911,7 @@ script:
       # je m'en sers surtout l'hiver
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_filtration).state == "Horaire";'
+            - lambda: 'return id(_Mode_Fonctionnement_filtration).current_option() == "Horaire";'
             - lambda: 'return id(ent_at_force).state == false;'
 
           then:

@@ -1896,7 +1896,7 @@
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
         V'
-      title: Defaut Secteur U Linky
+      title: Defaut Secteur Vu par MP2
   mode: single
 - id: '1730650651996'
   alias: Comptage Energie maison tempo

@@ -36,13 +36,13 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Regul pH --> %s"
-            args: [ 'id(_Mode_Fonctionnement_regul_ph).state.c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_regul_ph).current_option()' ]
             level: INFO
         - if:
             condition:
               or:
-                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Ma_f";'
-                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "At_f";'
+                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Ma_f";'
+                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "At_f";'
             then:                    
               - script.stop: _regul_ph   
               - delay: 1s            
@@ -316,7 +316,7 @@ script:
     then:
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
+            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Auto";'
           then:
             - logger.log:
                 format: "Log mem ph: %f / pH Cible: %f"
@@ -417,7 +417,7 @@ script:
       - if:
           condition:
             and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Ma_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Ma_f";'
               - switch.is_on: cde_ppe_filtration
           then:
             - switch.turn_on: cde_ppe_ph_moins
@@ -427,7 +427,7 @@ script:
       - if:
           condition:
             or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "At_f";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "At_f";'
               - switch.is_off: cde_ppe_filtration
           then:
             - switch.turn_off: cde_ppe_ph_moins
@@ -441,7 +441,7 @@ script:
     then:
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).state == "Auto";'
+            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Auto";'
             - lambda: 'return id(g_memoire_ph) < id(_ph_cible).state;'
             - script.is_running: _regul_ph
 

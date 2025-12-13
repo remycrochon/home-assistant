@@ -41,7 +41,7 @@ wifi:
     - ssid: !secret wifi_esp
       password: !secret mdpwifi_esp
   reboot_timeout: 5min
-
+  min_auth_mode: WPA2
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
@@ -216,8 +216,6 @@ binary_sensor:
   
 # Input Number
 number:
-
-
   # seuil SOC validation routeur
   - platform: template
     name: "Consigne Triac en manu"
@@ -333,7 +331,6 @@ number:
     step: 5
     icon: mdi:water
 
-
 sensor:
   - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
     name: "WiFi Signal dB"
@@ -386,49 +383,42 @@ sensor:
 
   # Les MQTT sont déclarés dans le Node Red du Cerbo GX
 
-  - platform: mqtt_subscribe
+  - platform: homeassistant
+    entity_id: sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1
     id: conso_maison
-    topic: mp2/multiplus2/conso_out1
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 2
+    internal: true
     filters:
       - sliding_window_moving_average:
           window_size: 10
           send_every: 1
 
-  - platform: mqtt_subscribe
+  - platform: homeassistant
+    entity_id: sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_power
     id: pu_batteries
-    topic: mp2/batteries/puissance
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 2
+    internal: true
     filters:
       - sliding_window_moving_average:
           window_size: 10
           send_every: 1
-        
-  - platform: mqtt_subscribe
+ 
+  - platform: homeassistant
+    entity_id: sensor.mp2_production_solaire_totale
     id: pu_prod
-    topic: mp2/multiplus2/prod_totale
-    unit_of_measurement: "W"
-    state_class: "measurement"  
-    accuracy_decimals: 2
+    internal: true
     filters:
       - sliding_window_moving_average:
           window_size: 10
           send_every: 1
 
-  - platform: mqtt_subscribe
+  - platform: homeassistant
+    entity_id: sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_soc
     id: soc
-    topic: mp2/batteries/soc
-    unit_of_measurement: "%"
-    state_class: "measurement"  
-    accuracy_decimals: 2
+    internal: true
     filters:
       - sliding_window_moving_average:
           window_size: 10
           send_every: 1
+
           
   - platform: mqtt_subscribe
     id: etatbus_ve

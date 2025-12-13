@@ -35,6 +35,7 @@ wifi:
   power_save_mode: none
   enable_btm: true
   enable_rrm: true
+  min_auth_mode: WPA2
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254

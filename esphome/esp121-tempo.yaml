@@ -56,6 +56,7 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
+  min_auth_mode: WPA2
 
   #output_power: 8.5dB
   fast_connect: true           # Évite la recherche de SSID si tu n’as qu’un seul AP connu

@@ -15,27 +15,6 @@ mqtt:
 
       # DESS Remy
 
-    - name: "MP2 Prod VRM MO MQTT"
-      unique_id: mp2_prod_vrm_mo_mqtt" 
-      state_topic: "mp2/dess_remy/prod_onduleur"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: total
-
-    - name: "MP2 Prod VRM MPPT1 MQTT"
-      unique_id: mp2_prod_vrm_mppt1_mqtt" 
-      state_topic: "mp2/dess_remy/prod_mppt1"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: total
-
-    - name: "MP2 Prod VRM TOTAL MQTT"
-      unique_id: mp2_prod_vrm_total_mqtt" 
-      state_topic: "mp2/dess_remy/prod_total"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: total
-
     - name: "MP2 Cible SOC par MQTT"
       unique_id: mp2_cible_soc_par_mqtt" 
       state_topic: "mp2/dess_remy/cible_soc"
@@ -56,97 +35,30 @@ mqtt:
 
 
 # Victron
-modbus:
-  - name: cerbo
-    host: 192.168.0.86
-    type: tcp
-    port: 502
-    switches:
-      - name: "MP2 cde"
-        slave: 227
-        address: 33
-        command_on: 3
-        command_off: 4
-        verify:
-          input_type: holding
-          address: 33
-          state_on: 3
-          state_off: 4
+#modbus:
+#  - name: cerbo
+#    host: 192.168.0.86
+#    type: tcp
+#    port: 502
+#    switches:
+#      - name: "MP2 cde"
+#        slave: 227
+#        address: 33
+#        command_on: 3
+#        command_off: 4
+#        verify:
+#          input_type: holding
+#          address: 33
+#          state_on: 3
+#          state_off: 4
 
-    sensors:
-      # Compteur PhotoVoltaique ET112-1 - GRID METER
-      # Energie
-      # Energy 
-      - name: "MP2 Energy Total Energy from net"
-        unique_id: "mp2_total_energy_from_net"
-        data_type: uint32
-        slave: 31
-        address: 2634
-        scale: 0.01
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
-
-      # Energy 
-      - name: "MP2 Energy Total Energy to net"
-        unique_id: "mp2_total_energy_to_net"
-        data_type: uint32
-        slave: 31
-        address: 2636
-        scale: 0.01
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
-
-      # Compteur PhotoVoltaique ET112-2 - PVMETER
-      # 
-      - name: "MP2 Energy Produite PV"
-        unique_id: "mp2_energy_produite_pv"
-        data_type: uint32
-        slave: 32
-        address: 1046
-        scale: 0.01
-        unit_of_measurement: "kWh"
-        device_class: "energy"
-        state_class: "total"
-
-      # MPPT N1 250/70
-      # 
-
-      # Status bus VE
-      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
-      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
-      - name: "MP2 Status bus VE"
-        unique_id: "mp2_status_bus_ve"
-        slave: 227
-        address: 31
-        data_type: uint16
-        scale: 1
-   
-
-template:
-  - sensor:
-
-
-    # Affichage Status bus VE
-      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
-      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
-
-    - name: "Mp2 Affichage Status Bus VE"
-      unique_id: "mp2_affichage_status_bus_ve"
-      state: >-
-        {% set st = states('sensor.mp2_status_bus_ve') | int(default=0) %}
-        {% for num, text in [(0, 'Off'), (1, 'Low power'),(2, 'Defaut')
-        ,(3, 'Bulk'),(4, 'Absorption'),(5, 'Float'),(6, 'Stockage')
-        ,(7, 'Equalize'),(8, 'Traverse'),(9, 'Inverser'),
-        (10, 'Power Assist') ,(11, 'Power Supply'),(252, 'PControl externe')
-        ] %}
-            {% if st == num %}
-              {{ text }}
-            {%endif%}
-        {% endfor %} 
-
-
-
- 
-
+#    sensors:
+#      # Status bus VE
+#      # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
+#      # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
+#      - name: "MP2 Status bus VE"
+#        unique_id: "mp2_status_bus_ve"
+#        slave: 227
+#        address: 31
+#        data_type: uint16
+#        scale: 1

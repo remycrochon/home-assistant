@@ -186,7 +186,7 @@ openhasp:
       - obj: "p4b20" # Prod
         properties:
           "text": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|int(0) %}
+            {% set count = states('sensor.mp2_production_solaire_totale')|int(0) %}
             {% if count >= 1000 %}
               P={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -195,7 +195,7 @@ openhasp:
       - obj: "p4b21" # Maison
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|int(0) %}
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|int(0) %}
             {% if count >= 1000 %}
               M={{ (count/1000) |round(2)}} kW
             {% else %}
@@ -249,7 +249,7 @@ openhasp:
       - obj: "p5b24" # Grid Power
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_grid_l1_ac_mppt')|int(0) %}
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power')|int(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -267,7 +267,7 @@ openhasp:
       - obj: "p5b34" # Puissance production
         properties:
           "text": >
-            {% set count = states('sensor.mp2_prod_totale_mqtt')|float(0) %}
+            {% set count = states('sensor.mp2_production_solaire_totale')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -285,7 +285,7 @@ openhasp:
       - obj: "p5b44" # Charge/Décharge
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|int(0) %}
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|int(0) %}
             {% if count >= 0 %}
               {{"\uE6c1"}}
             {% else %}
@@ -294,7 +294,7 @@ openhasp:
       - obj: "p5b45" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_pu_batteries_par_mqtt')|float(0)*-1 %}
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0)*-1 %}
             {% if count|abs >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -302,7 +302,7 @@ openhasp:
             {% endif %}
       - obj: "p5b46" # SOC
         properties:
-          "text": "{{ states('sensor.mp2_soc_mqtt')|int(0) }} %"
+          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')|int(0) }} %"
       - obj: "p5b47" # Tps restant
         properties:
           "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float(0) }}"
@@ -311,7 +311,7 @@ openhasp:
       - obj: "p5b55" # Puissance
         properties:
           "text": >
-            {% set count = states('sensor.mp2_conso_out1_mqtt')|float(0) %}
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|float(0) %}
             {% if count >= 1000 %}
             {{ (count/1000) |round(2)}} kW
             {% else %}
@@ -319,7 +319,7 @@ openhasp:
             {% endif %}
       - obj: "p5b56" # Conso
         properties:
-          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kWh"
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int(0) }} kWh"
       - obj: "p5b57" # ECS
         properties:
           "text": >

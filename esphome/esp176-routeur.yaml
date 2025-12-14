@@ -1,3 +1,7 @@
+# Affichage Status bus VE
+# 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
+# 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
+
 substitutions:
   device_name: "esp176-routeur"
   friendly_name: esp176
@@ -107,16 +111,7 @@ i2c:
   id: bus_a
   frequency: 400kHz
 
-# Mosquitto HA
-mqtt:
-  broker: 192.168.0.37
-  username: !secret mqtt_ha_name
-  password: !secret mqtt_ha_pw
-  discovery: false  
-  birth_message:            # désactive les messages de démarrage
-  will_message:             # désactive les messages "offline"
-  log_topic: null           # désactive les logs MQTT
-  topic_prefix: "esp176mute"  # évite toute collision avec HA
+
   
 globals:
   - id: p_dispo
@@ -381,7 +376,7 @@ sensor:
     unit_of_measurement: "W"
     accuracy_decimals: 0
 
-  # Les MQTT sont déclarés dans le Node Red du Cerbo GX
+  # Lecture dans HA
 
   - platform: homeassistant
     entity_id: sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1
@@ -419,14 +414,6 @@ sensor:
           window_size: 10
           send_every: 1
 
-          
-  - platform: mqtt_subscribe
-    id: etatbus_ve
-    topic: mp2/multiplus2/etatbusve
-    accuracy_decimals: 0
-
-  # lecture sensor Home Assistant
-
   - platform: homeassistant
     entity_id: sensor.ecocompteur_clim
     id: pu_clim
@@ -458,6 +445,11 @@ text_sensor:
   - platform: template
     name: "Mode Regulation"
     id: moderegul
+
+  - platform: homeassistant
+    entity_id: sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
+    id: etatbus_ve
+    internal: true
 
 switch:
   - platform: gpio
@@ -710,49 +702,76 @@ script:
               - binary_sensor.is_on: temperatureok
           then:
             - lambda: |-
-                float volume_ecs       = id(volume_ecs_ha).state;
-                float seuil_bas_vol    = id(seuil_bas_ha).state;
-                float seuil_haut_vol   = id(seuil_haut_ha).state;
+                float volume_ecs       = id(volume_ecs_ha).state;        // en L
+                float seuil_bas_vol    = id(seuil_bas_ha).state;         // en L
+                float seuil_haut_vol   = id(seuil_haut_ha).state;        // en L
                 float puissance_reseau = id(pureseau1).state;
 
+                // Puissance dispo locale pour ce calcul HC
+                float pdispo = 0.0f;
+
+                // ---- Test de l'état bus VE ----
+                if (id(etatbus_ve).state == "Bulk") {  // Bulk
+                  pdispo = id(pu_prod).state
+                           - id(conso_maison).state
+                           - id(pu_clim).state
+                           - id(res_pubatt).state;
+                  if (pdispo < 0.0f) pdispo = 0.0f;
+                  id(cons_batt_cours).publish_state(id(res_pubatt).state);
+                  id(regul) = "HC Reg. (Bulk)";
+                }
+                else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "Float") { // Absorption / Float
+                  pdispo = id(pu_prod).state
+                           - id(conso_maison).state
+                           - id(pu_clim).state
+                           + id(pu_batteries).state;
+                  if (pdispo < 0.0f) pdispo = 0.0f;
+                  id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
+                  id(regul) = "HC Reg. (Abs/Float)";
+                }
+                else {
+                  pdispo = 0.0f;
+                  id(cons_batt_cours).publish_state(0);
+                  id(regul) = "HC Reg. (Bus VE NOK)";
+                }
+
+                // ---- Logique ECS HC avec hystérésis ----
                 bool injection_autorisee = (puissance_reseau >= -200);
-                bool ecs_froide = (volume_ecs <  seuil_bas_vol);
-                bool ecs_chaude = (volume_ecs >= seuil_haut_vol);
-                bool chauffe_active = id(hc_chauffe);
+                bool ecs_froide          = (volume_ecs <  seuil_bas_vol);
+                bool ecs_chaude          = (volume_ecs >= seuil_haut_vol);
+                bool chauffe_active      = id(hc_chauffe);  // global bool → OK
 
                 // Sécurité injection
                 if (!injection_autorisee) {
-                  id(striac) = 0.0f;
+                  id(striac)     = 0.0f;
                   id(hc_chauffe) = false;
                   id(moderegul).publish_state("HC Sécurité Injection OFF");
                   ESP_LOGI("HC", "⛔ Injection détectée (%.0f W) → Chauffe arrêtée", puissance_reseau);
                 } else {
-                  // Volume trop faible → démarrage
                   if (ecs_froide) {
+                    // Volume trop faible → démarrage
                     id(hc_chauffe) = true;
                     id(moderegul).publish_state("HC Chauffe active (Volume bas)");
-                    id(regulation_interpolation).execute();
                     ESP_LOGI("HC", "🔥 Volume ECS %.0fL < %.0fL → Démarrage chauffe (hystérésis ON)",
                              volume_ecs, seuil_bas_vol);
                   }
-                  // chauffe en cours et volume pas encore suffisant → maintien
                   else if (chauffe_active && !ecs_chaude) {
+                    // Chauffe en cours → maintien
                     id(moderegul).publish_state("HC Chauffe maintenue");
-                    id(regulation_interpolation).execute();
                     ESP_LOGI("HC", "♨️ Volume ECS %.0fL (entre %.0f et %.0fL) → Maintien chauffe",
                              volume_ecs, seuil_bas_vol, seuil_haut_vol);
                   }
-                  // Volume confortable → arrêt
                   else if (ecs_chaude) {
-                    id(striac) = 0.0f;
+                    // Volume confortable → arrêt
+                    id(striac)     = 0.0f;
                     id(hc_chauffe) = false;
                     id(moderegul).publish_state("HC Volume OK - Chauffe OFF");
                     ESP_LOGI("HC", "✅ Volume ECS %.0fL ≥ %.0fL → Chauffe arrêtée",
                              volume_ecs, seuil_haut_vol);
                   }
-                  // Zone neutre
                   else {
-                    id(striac) = 0.0f;
+                    // Zone neutre → OFF
+                    id(striac)     = 0.0f;
                     id(hc_chauffe) = false;
                     id(moderegul).publish_state("HC Attente (Volume neutre)");
                     ESP_LOGI("HC", "🕓 Volume ECS %.0fL dans zone neutre → Chauffe OFF",
@@ -760,9 +779,13 @@ script:
                   }
                 }
 
+                // On limite et pousse quelques valeurs en sortie
+                pdispo = constrain(pdispo, 0.0f, id(pmax).state);
+                id(p_dispo) = pdispo;             // global
                 id(afstriac).publish_state(id(striac));
                 id(afpdispo).publish_state(id(p_dispo));
-                id(cons_batt_cours).publish_state(0);
+                // cons_batt_cours déjà mis plus haut selon le mode
+
 
             - light.turn_on:
                 id: gradateur
@@ -802,13 +825,13 @@ script:
 
           // 🔸 Branche HP : régulation sur production PV / batteries
           if (is_hp) {
-            if (id(etatbus_ve).state == 3) {  // Bulk
+            if (id(etatbus_ve).state == "Bulk") {  // Bulk
               pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(res_pubatt).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(res_pubatt).state);
               id(regul) = "HP Reg. (Bulk)";
             } 
-            else if (id(etatbus_ve).state == 4 || id(etatbus_ve).state == 5) { // Absorption / Float
+            else if (id(etatbus_ve).state == "Absortion" || id(etatbus_ve).state == "Float") { // Absorption / Float
               pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state + id(pu_batteries).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);

@@ -95,7 +95,7 @@ wifi:
    - ssid: !secret wifi_esp
      password: !secret mdpwifi_esp
   reboot_timeout: 5min
-
+  min_auth_mode: WPA2
 #ethernet:
 #  type: W5500
 #  clk_pin: GPIO17

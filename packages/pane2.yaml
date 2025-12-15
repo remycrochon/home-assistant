@@ -38,7 +38,7 @@ openhasp:
             {% elif couleur == "Rouge" %}
             #FF0000
             {% else %} 
-            #49f704
+            #00FF00
             {% endif %}
 
       - obj: "p0b8"
@@ -241,8 +241,8 @@ openhasp:
       - obj: "p4b70" # Temp ECS
         properties:
           "text": >
-            {% set count = states('sensor.esp139_ecs_temp_ecs')|int(0) %}
-            T ECS={{ count |round(0)}} °C
+            {% set volume = states('sensor.esp139_ecs_ballon_volume_eau_chaude')|int(0) %}
+            VOL={{ volume |round(0)}} L
       
       ############### Page 5 ###############
       ############### Réseau
@@ -279,7 +279,7 @@ openhasp:
             
       - obj: "p5b36" # Prévision
         properties:
-          "text": "{{ states('sensor.mp2_prod_vrm_total_mqtt')|int(0) }} kWh"
+          "text": "{{ states('input_number.mp2_memoire_estimation_production_jour')|int(0) }} kWh"
 
       ############# Batteries
       - obj: "p5b44" # Charge/Décharge
@@ -305,8 +305,9 @@ openhasp:
           "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')|int(0) }} %"
       - obj: "p5b47" # Tps restant
         properties:
-          "text": "{{ states('sensor.mp2_temps_restant_batteries_mini_soc_v2')|float(0) }}"
-
+          "text": >-
+            {% set s = states('sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_time_to_go') | float(0) | int %}
+            {{ '%02d' | format(s // 3600) }}:{{ '%02d' | format((s % 3600) // 60) }}
       ################## Maison
       - obj: "p5b55" # Puissance
         properties:

@@ -18,9 +18,8 @@ wifi:
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 0
-
   reboot_timeout: 5min
-  
+  min_auth_mode: WPA2 
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254

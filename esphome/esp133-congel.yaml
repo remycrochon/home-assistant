@@ -19,7 +19,7 @@ wifi:
     - ssid: !secret wifi
       password: !secret mdpwifi
       priority: 0
-
+  min_auth_mode: WPA2
   reboot_timeout: 5min
   
   manual_ip:

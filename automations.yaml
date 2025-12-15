@@ -1013,8 +1013,8 @@
       sequence:
       - data_template:
           entity_id: input_number.mp2_memoire_estimation_production_jour
-          value: '{% set a=states(''sensor.mp2_prod_vrm_total_mqtt'')|float %}  {{a
-            }}'
+          value: '{% set a=states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|float
+            %}  {{a }}'
         action: input_number.set_value
     - conditions:
       - condition: trigger
@@ -1027,9 +1027,10 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: "    {{states(\"sensor.date_time\") }}{{-\"\\n\"-}} Prévi ={{states('input_number.mp2_memoire_estimation_production_jour')}}
             kwh / Realisée={{states('sensor.mp2_total_energie_produite_jour')}} kwh{{-\"\\n\"-}}\n
-            \   Prévi Demain={{states('sensor.mp2_prod_vrm_total_mqtt')}} kwh{{-\"\\n\"-}}
-            SOC Cible= {{states('sensor.mp2_cible_soc_par_mqtt')}} %-Actuel={{states('sensor.mp2_soc_mqtt')}}
-            %{{-\"\\n\"-}}\nh Debut= {{states('sensor.mp2_dess_h_debut_dess_remy')}}\n"
+            \  Prévi Demain={{states('sensor.victron_remote_monitoring_production_d_energie_estimee_demain')|round(1)}}
+            kwh{{-\"\\n\"-}} SOC Cible= {{states('sensor.mp2_cible_soc_par_mqtt')}}
+            %-Actuel={{states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')}}
+            %\n"
           title: Rapport Production PV
   mode: single
 - id: '1698142750238'
@@ -1155,34 +1156,28 @@
   description: Actions en fonction du changement de modes de  Tempo
   triggers:
   - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
-    to: '1'
-    id: HC Bleu
+    - sensor.esp124_tic_linky_tarif_fourniture
+    to:
+    - HP BLANC
+    id: DEBUT HP Blanc
     trigger: state
   - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
-    to: '2'
-    id: HP Bleu
+    - sensor.esp124_tic_linky_tarif_fourniture
+    id: FIN HP Blanc
+    trigger: state
+    from:
+    - HP BLANC
+  - entity_id:
+    - sensor.esp124_tic_linky_tarif_fourniture
+    to:
+    - HP ROUGE
+    id: DEBUT HP ROUGE
     trigger: state
   - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
-    to: '3'
-    id: HC Blanc
-    trigger: state
-  - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
-    to: '4'
-    id: HP Blanc
-    trigger: state
-  - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
-    to: '6'
-    id: hprouge
-    trigger: state
-  - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
-    id: sortiehprouge
-    from: '6'
+    - sensor.esp124_tic_linky_tarif_fourniture
+    id: FIN HP ROUGE
+    from:
+    - HP ROUGE
     trigger: state
   conditions: []
   actions:
@@ -1190,7 +1185,8 @@
     - conditions:
       - condition: trigger
         id:
-        - hprouge
+        - DEBUT HP ROUGE
+        - DEBUT HP Blanc
       sequence:
       - action: switch.turn_on
         target:
@@ -1201,11 +1197,12 @@
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}'
-          title: Passage HP ROUGE - Forçage Arret ppe Piscine
+          title: DEBUT HP ROUGE ou BLANC-> Forçage Arret ppe Piscine
     - conditions:
       - condition: trigger
         id:
-        - sortiehprouge
+        - FIN HP Blanc
+        - FIN HP ROUGE
       sequence:
       - action: switch.turn_off
         target:
@@ -1217,7 +1214,7 @@
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}'
-          title: Sortie HP ROUGE
+          title: Sortie HP ROUGE ou BLANC
   mode: single
   trace:
     stored_traces: 15
@@ -1352,44 +1349,38 @@
   alias: MP2 Défaut Status Bus VE
   description: Alarme Status Bus VE
   triggers:
-  - entity_id:
-    - sensor.mp2_mode_fonctionnement_par_mqtt
-    trigger: state
-    enabled: false
   - trigger: state
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
     to: unavailable
     for:
-      hours: 0
-      minutes: 0
       seconds: 5
   - trigger: state
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
     to: unknown
     for:
-      hours: 0
-      minutes: 0
       seconds: 5
   - trigger: state
     entity_id:
     - sensor.mp2_affichage_status_bus_ve
-    to: 'Off'
     for:
-      hours: 0
-      minutes: 0
-      seconds: 5
-  conditions: []
+      minutes: 2
+  conditions:
+  - condition: template
+    value_template: "{% set st = states('sensor.mp2_affichage_status_bus_ve') %} {{
+      st in ['unknown','unavailable']\n   or st not in ['Float','Bulk','Absorption','Passthrough','Inverting']
+      }}"
   actions:
   - action: telegram_bot.send_message
-    metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: '{{states("sensor.date_time") }}{{-"\n"-}}
-
-        MP2-Status Bus VE -> {{states("sensor.mp2_affichage_status_bus_ve") }}'
       title: ALARME!! DISFONCTIONNEMENT BUS VE
+      message: '{{ states(''sensor.date_time'') }}{{-"\n"-}}
+
+        MP2-Status Bus VE -> {{ states(''sensor.mp2_affichage_status_bus_ve'') }}
+
+        Etats attendus: Float/Bulk/Absorption/Passthrough/Inverting'
   mode: single
 - id: '1711527591458'
   alias: Aqara Magic Cube
@@ -1885,7 +1876,7 @@
   triggers:
   - trigger: numeric_state
     entity_id:
-    - sensor.mp2_tension_entree_l1
+    - sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_voltage
     below: 20
     id: tensionbasse
   conditions: []
@@ -1894,7 +1885,7 @@
     metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.mp2_tension_entree_l1'')}}
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_voltage'')}}
         V'
       title: Defaut Secteur Vu par MP2
   mode: single
@@ -1903,7 +1894,7 @@
   description: Attribue le comptage d’énergie maison en fonction du tarif Tempo
   triggers:
   - entity_id:
-    - sensor.esp124_tic_linky_n_tarif
+    - sensor.esp124_tic_linky_tarif_fourniture
     trigger: state
   conditions: []
   actions:
@@ -1911,7 +1902,8 @@
     - conditions:
       - condition: state
         entity_id: sensor.esp124_tic_linky_n_tarif
-        state: '1'
+        state:
+        - HC BLEU
       sequence:
       - data:
           option: HC BLEU
@@ -1921,8 +1913,9 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state: '2'
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HP BLEU
       sequence:
       - data:
           option: HP BLEU
@@ -1932,8 +1925,9 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state: '3'
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HC BLANC
       sequence:
       - data:
           option: HC BLANC
@@ -1943,8 +1937,9 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state: '4'
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HP BLANC
       sequence:
       - data:
           option: HP BLANC
@@ -1954,8 +1949,9 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state: '5'
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HC ROUGE
       sequence:
       - data:
           option: HC ROUGE
@@ -1965,8 +1961,9 @@
           - select.compteur_energie_maison_tempo
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state: '6'
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HP ROUGE
       sequence:
       - data:
           option: HP ROUGE
@@ -2516,7 +2513,7 @@
     '
   triggers:
   - entity_id:
-    - sensor.mp2_soc_mqtt
+    - sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
     trigger: state
   conditions:
   - condition: sun
@@ -2525,7 +2522,7 @@
   - choose:
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.mp2_soc_mqtt
+        entity_id: sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
         below: 23
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc
@@ -2544,12 +2541,12 @@
         metadata: {}
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{ now().strftime(''%H:%M:%S'') }} – SOC = {{ states(''sensor.mp2_soc_mqtt'')
+          message: '{{ now().strftime(''%H:%M:%S'') }} – SOC = {{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc)'')
             }}     %'
           title: 'Piscine : SoC < 25 %'
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.mp2_soc_mqtt
+        entity_id: sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
         above: 30
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc

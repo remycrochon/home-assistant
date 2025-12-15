@@ -15,6 +15,7 @@ wifi:
     - ssid: !secret wifi
       password: !secret mdpwifi
   reboot_timeout: 5min
+  min_auth_mode: WPA2  
   fast_connect: True
   manual_ip:
     static_ip: ${adress_ip}

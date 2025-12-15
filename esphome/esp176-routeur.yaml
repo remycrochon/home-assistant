@@ -831,7 +831,7 @@ script:
               id(cons_batt_cours).publish_state(id(res_pubatt).state);
               id(regul) = "HP Reg. (Bulk)";
             } 
-            else if (id(etatbus_ve).state == "Absortion" || id(etatbus_ve).state == "Float") { // Absorption / Float
+            else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "Float") { // Absorption / Float
               pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state + id(pu_batteries).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);

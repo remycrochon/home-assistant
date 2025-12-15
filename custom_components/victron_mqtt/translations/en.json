@@ -142,7 +142,7 @@
         "name": "Control ignore AC-in-1"
       },
       "vebus_inverter_setting_alarm_grid_lost": {
-        "name": "Loss of grid alarm setting"
+        "name": "Grid lost alarm setting"
       }
     },
     "button": {
@@ -506,14 +506,29 @@
       "evcharger_mode": {
         "name": "EV charger mode"
       },
+      "evcharger_position": {
+        "name": "EV charger position"
+      },
       "evcharger_power_phase": {
         "name": "EV charger power {phase}"
+      },
+      "evcharger_session_cost": {
+        "name": "EV charger last session cost"
+      },
+      "evcharger_session_energy": {
+        "name": "EV charger last session energy"
+      },
+      "evcharger_session_time": {
+        "name": "EV charger last session time"
       },
       "evcharger_set_current": {
         "name": "EV charger set current"
       },
       "evcharger_status": {
         "name": "EV charger status"
+      },
+      "evcharger_total_energy": {
+        "name": "EV charger total energy"
       },
       "generator_gen_id_cool_down_timer": {
         "name": "Generator cool down timer"
@@ -1131,7 +1146,7 @@
         "name": "Inverter active AC input"
       },
       "vebus_inverter_alarm_grid_lost": {
-        "name": "Loss of grid alarm"
+        "name": "Grid lost alarm"
       },
       "vebus_inverter_alarm_high_dc_current": {
         "name": "Inverter high DC current alarm"
@@ -1274,7 +1289,7 @@
         "name": "Control ignore AC-in-1"
       },
       "vebus_inverter_setting_alarm_grid_lost": {
-        "name": "Loss of grid alarm setting"
+        "name": "Grid lost alarm setting"
       }
     },
     "time": {

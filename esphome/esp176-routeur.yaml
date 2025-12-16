@@ -110,8 +110,6 @@ i2c:
   scan: True
   id: bus_a
   frequency: 400kHz
-
-
   
 globals:
   - id: p_dispo
@@ -292,7 +290,7 @@ number:
   # Simul Vol ECS
   - platform: template
     name: "Simul Vol ECS"
-    id: volume_ecs_ha_simul
+    id: volume_ecs_ha_simule
     optimistic: true
     restore_value: true
     mode: box
@@ -649,169 +647,83 @@ script:
   - id: calcul_injection_hc
     mode: single
     then:
+      - script.execute: decision_chauffe_hc
+      - script.execute: apply_chauffe_hc
+
+  - id: decision_chauffe_hc
+    mode: single
+    then:
       - lambda: |-
-          float volume_ecs       = id(volume_ecs_ha).state;        // en L
-          float seuil_bas_vol    = id(seuil_bas_ha).state;         // en L
-          float seuil_haut_vol   = id(seuil_haut_ha).state;        // en L
-          float puissance_reseau = id(pureseau1).state;
+          float vol = id(volume_ecs_ha).state;
+          float sb  = id(seuil_bas_ha).state;
+          float sh  = id(seuil_haut_ha).state;
+          float p_reseau = id(pureseau1).state;
 
-          // ✅ Vérifie la température du triac
-          bool temperature_ok = (id(temp_triac).state < (id(tmax).state - 2));
-          id(temperatureok).publish_state(temperature_ok);
+          bool temp_ok = (id(temp_triac).state < (id(tmax).state - 2));
+          id(temperatureok).publish_state(temp_ok);
 
-          // ✅ Détection état ECS (sur le volume)
-          bool ecs_froide = (volume_ecs <  seuil_bas_vol);   // pas assez d'eau chaude
-          bool ecs_chaude = (volume_ecs >= seuil_haut_vol);  // volume confortable
-
-          // ✅ Vérifie l'injection réseau (puissance négative)
-          bool injection_autorisee = (puissance_reseau >= -200);
+          bool injection_ok = (p_reseau >= -200);
 
           ESP_LOGI("HC",
-            "Check HC → Volume ECS=%.0fL (%.0f–%.0fL) | P_Réseau=%.0fW | TempTriac=%.1f°C | TempOK=%d | Valid=%d",
-            volume_ecs, seuil_bas_vol, seuil_haut_vol,
-            puissance_reseau, id(temp_triac).state,
-            temperature_ok, id(validrouteur).state
+            "HC Decision → Vol=%.0fL (SB=%.0f / SH=%.0f) | chauffe=%d | P_Réseau=%.0fW | TempOK=%d",
+            vol, sb, sh, id(hc_chauffe), p_reseau, temp_ok
           );
 
-      # 1️⃣ Conditions NOK ou mode Arret → arrêt complet
+          // Sécurités globales
+          if (id(_Mode_Fonctionnement_routeur).current_option() != std::string("Auto") ||
+              !id(validrouteur).state ||
+              !temp_ok ||
+              !injection_ok) {
+
+            id(hc_chauffe) = false;
+            id(moderegul).publish_state("HC OFF - Sécurité");
+            ESP_LOGW("HC", "⛔ Chauffe OFF (sécurité)");
+            return;
+          }
+
+          // ----- HYSTÉRÉSIS ECS -----
+          if (vol < sb) {
+            // Démarrage forcé
+            id(hc_chauffe) = true;
+            id(moderegul).publish_state("HC ON - Volume < SB");
+            ESP_LOGI("HC", "🔥 Vol %.0f < %.0f → ON", vol, sb);
+          }
+          else if (vol >= sh) {
+            // Arrêt forcé
+            id(hc_chauffe) = false;
+            id(moderegul).publish_state("HC OFF - Volume ≥ SH");
+            ESP_LOGI("HC", "✅ Vol %.0f ≥ %.0f → OFF", vol, sh);
+          }
+          else {
+            // Zone SB–SH → on conserve l'état précédent
+            if (id(hc_chauffe)) {
+              id(moderegul).publish_state("HC ON - Maintien");
+              ESP_LOGI("HC", "♨️ Vol %.0f (SB–SH) → Maintien ON", vol);
+            } else {
+              id(moderegul).publish_state("HC OFF - Attente");
+              ESP_LOGI("HC", "🕓 Vol %.0f (SB–SH) → OFF", vol);
+            }
+          }
+
+  - id: apply_chauffe_hc
+    mode: single
+    then:
       - if:
           condition:
-            or:
-              - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Arret";'
-              - and:
-                  - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option()  == "Auto";'
-                  - or:
-                      - switch.is_off: validrouteur
-                      - binary_sensor.is_off: temperatureok
+            lambda: 'return id(hc_chauffe);'
           then:
+            - script.execute: regulation_interpolation
+            - light.turn_on:
+                id: gradateur
+                brightness: !lambda 'return id(striac) / 100.0f;'
             - lambda: |-
-                id(striac) = 0;
-                id(hc_chauffe) = false;
-                id(moderegul).publish_state("HC OFF - Conditions NOK ou arrêt");
+                id(afstriac).publish_state(id(striac));
+          else:
+            - lambda: |-
+                id(striac) = 0.0f;
+                id(afstriac).publish_state(0);
                 id(afpdispo).publish_state(0);
-                id(cons_batt_cours).publish_state(0);
-                ESP_LOGW("HC", "⚠️ Chauffe OFF : conditions NOK ou arrêt manuel.");
             - light.turn_off: gradateur
-
-      # 2️⃣ Mode Auto + toutes conditions OK → régulation interpolation (HC) sur le volume
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option()  == "Auto";'
-              - switch.is_on: validrouteur
-              - binary_sensor.is_on: temperatureok
-          then:
-            - lambda: |-
-                float volume_ecs       = id(volume_ecs_ha).state;        // en L
-                float seuil_bas_vol    = id(seuil_bas_ha).state;         // en L
-                float seuil_haut_vol   = id(seuil_haut_ha).state;        // en L
-                float puissance_reseau = id(pureseau1).state;
-
-                // Puissance dispo locale pour ce calcul HC
-                float pdispo = 0.0f;
-
-                // ---- Test de l'état bus VE ----
-                if (id(etatbus_ve).state == "Bulk") {  // Bulk
-                  pdispo = id(pu_prod).state
-                           - id(conso_maison).state
-                           - id(pu_clim).state
-                           - id(res_pubatt).state;
-                  if (pdispo < 0.0f) pdispo = 0.0f;
-                  id(cons_batt_cours).publish_state(id(res_pubatt).state);
-                  id(regul) = "HC Reg. (Bulk)";
-                }
-                else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "Float") { // Absorption / Float
-                  pdispo = id(pu_prod).state
-                           - id(conso_maison).state
-                           - id(pu_clim).state
-                           + id(pu_batteries).state;
-                  if (pdispo < 0.0f) pdispo = 0.0f;
-                  id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
-                  id(regul) = "HC Reg. (Abs/Float)";
-                }
-                else {
-                  pdispo = 0.0f;
-                  id(cons_batt_cours).publish_state(0);
-                  id(regul) = "HC Reg. (Bus VE NOK)";
-                }
-
-                // ---- Logique ECS HC avec hystérésis ----
-                bool injection_autorisee = (puissance_reseau >= -200);
-                bool ecs_froide          = (volume_ecs <  seuil_bas_vol);
-                bool ecs_chaude          = (volume_ecs >= seuil_haut_vol);
-                bool chauffe_active      = id(hc_chauffe);  // global bool → OK
-
-                // Sécurité injection
-                if (!injection_autorisee) {
-                  id(striac)     = 0.0f;
-                  id(hc_chauffe) = false;
-                  id(moderegul).publish_state("HC Sécurité Injection OFF");
-                  ESP_LOGI("HC", "⛔ Injection détectée (%.0f W) → Chauffe arrêtée", puissance_reseau);
-                } else {
-                  if (ecs_froide) {
-                    // Volume trop faible → démarrage
-                    id(hc_chauffe) = true;
-                    id(moderegul).publish_state("HC Chauffe active (Volume bas)");
-                    ESP_LOGI("HC", "🔥 Volume ECS %.0fL < %.0fL → Démarrage chauffe (hystérésis ON)",
-                             volume_ecs, seuil_bas_vol);
-                  }
-                  else if (chauffe_active && !ecs_chaude) {
-                    // Chauffe en cours → maintien
-                    id(moderegul).publish_state("HC Chauffe maintenue");
-                    ESP_LOGI("HC", "♨️ Volume ECS %.0fL (entre %.0f et %.0fL) → Maintien chauffe",
-                             volume_ecs, seuil_bas_vol, seuil_haut_vol);
-                  }
-                  else if (ecs_chaude) {
-                    // Volume confortable → arrêt
-                    id(striac)     = 0.0f;
-                    id(hc_chauffe) = false;
-                    id(moderegul).publish_state("HC Volume OK - Chauffe OFF");
-                    ESP_LOGI("HC", "✅ Volume ECS %.0fL ≥ %.0fL → Chauffe arrêtée",
-                             volume_ecs, seuil_haut_vol);
-                  }
-                  else {
-                    // Zone neutre → OFF
-                    id(striac)     = 0.0f;
-                    id(hc_chauffe) = false;
-                    id(moderegul).publish_state("HC Attente (Volume neutre)");
-                    ESP_LOGI("HC", "🕓 Volume ECS %.0fL dans zone neutre → Chauffe OFF",
-                             volume_ecs);
-                  }
-                }
-
-                // On limite et pousse quelques valeurs en sortie
-                pdispo = constrain(pdispo, 0.0f, id(pmax).state);
-                id(p_dispo) = pdispo;             // global
-                id(afstriac).publish_state(id(striac));
-                id(afpdispo).publish_state(id(p_dispo));
-                // cons_batt_cours déjà mis plus haut selon le mode
-
-
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda 'return id(striac) / 100.0f;'
-
-      # 3️⃣ Mode Manuel → inchangé
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option()  == "Manu";'
-              - switch.is_on: validrouteur
-          then:
-            - delay: 500ms
-            - lambda: |-
-                id(striac) = id(ctriac_manu).state;
-                id(hc_chauffe) = false;
-                id(moderegul).publish_state("HC Mode Manuel");
-                id(afpdispo).publish_state(0);
-                id(cons_batt_cours).publish_state(0);
-                ESP_LOGI("HC", "🧩 Mode MANU → Triac forcé à %.1f%%", id(striac));
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda 'return id(striac) / 100.0f;'
-            - lambda: |-
-                id(afstriac).publish_state(id(striac));
-
   ########################################################################
   # 🔹 Script : regulation_interpolation (commun HP + HC)
   ########################################################################
@@ -905,6 +817,8 @@ script:
                    is_hp ? "HP" : "HC",
                    pdispo, id(striac),
                    id(regul).c_str());
+
+
 
   ########################################################################
   # Mode Etalonnage Increment S Triac

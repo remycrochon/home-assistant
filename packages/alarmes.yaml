@@ -20,15 +20,6 @@ template:
 # normalement sur off
 # Déclaré dans http://192.168.0.37:8123/config/helpers
 
-# Surveillance discordance PAC entre l'état du thermostat et l'état du switch de commande   
-# normalement sur on  
-    - name: "alarme_discord_pac"
-      unique_id: "alarme_discord_pac"
-      state: >-
-        {% set a=states("sensor.ecocompteur_pac")| float(default=0)>400 %}
-        {% set b=states("switch.altherma") %}
-        {{ (a==true and b=="on") or (a==false and b=="off") }}
-      device_class: "connectivity"
         
 # Surveillance status PAC
 # normalement sur on

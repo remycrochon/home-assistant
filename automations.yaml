@@ -149,7 +149,7 @@
       - data: {}
         action: lawn_mower.dock
         target:
-          device_id: 7808727539e5cd0a67cbd0484d1835d4
+          device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
       - action: telegram_bot.send_message
         metadata: {}
         data:
@@ -212,28 +212,29 @@
       sensor_entity: binary_sensor.alarme_status_pac
       alert_state: 'off'
       alert_action:
-      - data:
-          message: PAC Off Line{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Etat Reseau !!!
-        action: notify.telegram
-      - data:
-          message: PAC Off Line {{-"\n"-}}{{states("sensor.date_time") }}
-        action: notify.telegram
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            PAC OFF LINE'
+          title: ALERTE PAC!!
       resolved_action:
-      - data:
-          message: PAC On Line{{-"\n"-}} {{states("sensor.date_time") }}
-          title: Etat RESEAU!!!
-        action: notify.telegram
-      - data:
-          message: PAC On Line{{-"\n"-}}{{states("sensor.date_time") }}
-        action: notify.telegram
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            PAC ON LINE'
+          title: FIN ALERTE PAC!!
       notify_message: ' '
       notify_device: 367dba31447009458e03b70e3a29b6b2
       repeat_delay: 600
       resolved_message: ' '
       initial_delay: 300
       max_alerts: 10
-      condition_entity: input_boolean.inhib_alarme_pac
 - id: '1634569580188'
   alias: Blueprint Notification Porte Cellier Ouverte
   description: Blue Print
@@ -318,43 +319,6 @@
       resolved_message: ' Porte Garage OK'
       initial_delay: 300
       max_alerts: 5
-- id: '1634570304569'
-  alias: Blueprint Notification Discordance PAC
-  description: ' Surveillance discordance PAC entre l''état du thermostat et l''état
-    du switch de commande '
-  use_blueprint:
-    path: pavax/nagging_alert_notification.yaml
-    input:
-      condition_entity_state: 'on'
-      sensor_entity: binary_sensor.alarme_discord_pac
-      alert_state: 'off'
-      alert_action:
-      - data:
-          message: Discordance PAC=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
-            {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Etat PAC !!!
-        action: notify.telegram
-      - data:
-          message: Discordance PAC=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
-            {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
-        action: notify.telegram
-      resolved_action:
-      - data:
-          message: PAC OK=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
-            {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
-          title: Etat PAC !!!
-        action: notify.telegram
-      - data:
-          message: PAC OK=> PU= {{states("sensor.ecocompteur_pac")}} et Pilotage=
-            {{states("switch.altherma")}}{{-"\n"-}}{{states("sensor.date_time") }}
-        action: notify.telegram
-      notify_device: 367dba31447009458e03b70e3a29b6b2
-      repeat_delay: 1200
-      max_alerts: 10
-      initial_delay: 1200
-      dismiss_entity: input_boolean.inhib_alarme_pac
-      resolved_message: ' '
-      notify_message: ' '
 - id: '1634571065075'
   alias: Blueprint  Notification Porte frigo garage ouverte
   description: '# Alarme porte frigo garage ouverte   '
@@ -955,11 +919,14 @@
     trigger: numeric_state
   conditions: []
   actions:
-  - data:
-      message: T° = {{states('sensor.esp127_temperature') }}{{-"\n"-}}{{states("sensor.date_time")
-        }}
-      title: Temperature Haute Stérilisateur !!!
-    action: notify.telegram
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: 'T° = {{states(''sensor.esp127_temperature'')
+
+        }}{{-"\n"-}}{{states("sensor.date_time") }}'
+      title:
   mode: single
 - id: '1690355630909'
   alias: 08 Restart Addon UPS si en défaut
@@ -1014,7 +981,7 @@
       - data_template:
           entity_id: input_number.mp2_memoire_estimation_production_jour
           value: '{% set a=states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|float
-            %}  {{a }}'
+            (0)|round(1)%} {{a }}'
         action: input_number.set_value
     - conditions:
       - condition: trigger
@@ -1866,10 +1833,16 @@
     entity_id: calendar.anniversaires
     state: 'on'
   actions:
-  - data:
-      message: Il y a l'anniversaire de {{ states.calendar.anniversaires.attributes.message
-        }} a souhaiter aujourd'hui
-    action: notify.telegram
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: 'Il y a l''anniversaire de {{
+
+        states.calendar.anniversaires.attributes.message }} a souhaiter
+
+        aujourd''hui'
+      title:
 - id: '1729177635873'
   alias: Defaut Secteur
   description: Surveille la tension d'entrée du MP2
@@ -2107,7 +2080,7 @@
         target:
           entity_id:
           - switch.schedule_e7a1a2
-          - switch.schedule_6aebea
+          - switch.schedule_989d67
         data: {}
     - conditions:
       - condition: trigger
@@ -2118,7 +2091,7 @@
         target:
           entity_id:
           - switch.schedule_e7a1a2
-          - switch.schedule_6aebea
+          - switch.schedule_989d67
         data: {}
   mode: single
 - id: '1736001989085'
@@ -2960,3 +2933,32 @@
       initial_delay: 180
       notify_message: ' '
       resolved_message: ' '
+- id: '1765795366962'
+  alias: Spot exterieur Sous Sol
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.porte_ssol_fermee
+    - binary_sensor.porte_ssol_ouverte
+  conditions:
+  - condition: sun
+    before: sunrise
+    after: sunset
+  actions:
+  - type: turn_on
+    device_id: 9abdcc29fb6b89797b09f79661a5081a
+    entity_id: 328ac7c86c891be87f12bcefad0e0b01
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 3
+      seconds: 0
+      milliseconds: 0
+  - type: turn_off
+    device_id: 9abdcc29fb6b89797b09f79661a5081a
+    entity_id: 328ac7c86c891be87f12bcefad0e0b01
+    domain: switch
+    metadata:
+      secondary: false
+  mode: restart

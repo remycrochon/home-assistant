@@ -1,9 +1,11 @@
 """Main Hub class."""
 
+from collections.abc import Callable
 import logging
-from typing import Callable
+
 
 from victron_mqtt import (
+    AuthenticationError,
     CannotConnectError,
     Device as VictronVenusDevice,
     DeviceType,
@@ -22,8 +24,8 @@ from homeassistant.const import (
     CONF_USERNAME,
     EVENT_HOMEASSISTANT_STOP,
 )
-from homeassistant.core import Event, HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import (
@@ -42,9 +44,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-NewMetricCallback = Callable[
-    [VictronVenusDevice, VictronVenusMetric, DeviceInfo, str], None
-]
+NewMetricCallback = Callable[[VictronVenusDevice, VictronVenusMetric, DeviceInfo, str], None]
 
 class Hub:
     """Victron MQTT Hub for managing communication and sensors."""
@@ -59,11 +59,11 @@ class Hub:
         """
 
         _LOGGER.info("Initializing hub. ConfigEntry: %s, data: %s", entry, entry.data)
+        config = entry.data
         self.hass = hass
-        self.entry = entry
+        self.host = config[CONF_HOST]
         self.id = entry.unique_id
 
-        config = entry.data
         op = config.get(CONF_OPERATION_MODE, OperationMode.FULL.value)
         operation_mode: OperationMode = (
             OperationMode(op) if not isinstance(op, OperationMode) else op
@@ -82,11 +82,9 @@ class Hub:
             "Final excluded device types: %s", [dt.code for dt in excluded_device_types]
         )
 
-        host = config.get(CONF_HOST)
-        assert host is not None
 
         self._hub: VictronVenusHub = VictronVenusHub(
-            host=host,
+            host=self.host,
             port=config.get(CONF_PORT, 1883),
             username=config.get(CONF_USERNAME) or None,
             password=config.get(CONF_PASSWORD) or None,
@@ -103,21 +101,23 @@ class Hub:
             ),
         )
         self._hub.on_new_metric = self._on_new_metric
-        self.add_entities_map: dict[MetricKind, NewMetricCallback] = {}
-
+        self.new_metric_callbacks: dict[MetricKind, NewMetricCallback] = {}
 
     async def start(self) -> None:
         """Start the Victron MQTT hub."""
         _LOGGER.info("Starting hub")
         try:
             await self._hub.connect()
+        except AuthenticationError as auth_error:
+            raise ConfigEntryAuthFailed(
+                f"Authentication failed for {self.host}: {auth_error}"
+            ) from auth_error
         except CannotConnectError as connect_error:
             raise ConfigEntryNotReady(
                 f"Cannot connect to the hub: {connect_error}"
             ) from connect_error
-        self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self.stop)
 
-    async def stop(self, event: Event | None = None) -> None:
+    async def stop(self) -> None:
         """Stop the Victron MQTT hub."""
         _LOGGER.info("Stopping hub")
         await self._hub.disconnect()
@@ -131,9 +131,9 @@ class Hub:
         _LOGGER.info("New metric received. Device: %s, Metric: %s", device, metric)
         assert hub.installation_id is not None
         device_info = Hub._map_device_info(device, hub.installation_id)
-        self.add_entities_map[metric.metric_kind](
-            device, metric, device_info, hub.installation_id
-        )
+        callback = self.new_metric_callbacks.get(metric.metric_kind)
+        if callback is not None:
+            callback(device, metric, device_info, hub.installation_id)
 
     @staticmethod
     def _map_device_info(
@@ -157,21 +157,17 @@ class Hub:
     def register_new_metric_callback(
         self, kind: MetricKind, new_metric_callback: NewMetricCallback
     ) -> None:
-        """Register a callback to add entities for a specific metric kind."""
-        _LOGGER.info(
-            "Registering AddEntitiesCallback. kind: %s, AddEntitiesCallback: %s",
-            kind,
-            new_metric_callback,
+        """Register a callback to handle a new specific metric kind."""
+        _LOGGER.info("Registering NewMetricCallback. kind: %s", kind)
+        assert kind not in self.new_metric_callbacks, (
+            f"NewMetricCallback for kind {kind} is already registered"
         )
-        assert kind not in self.add_entities_map, (
-            f"AddEntitiesCallback for kind {kind} is already registered"
-        )
-        self.add_entities_map[kind] = new_metric_callback
+        self.new_metric_callbacks[kind] = new_metric_callback
 
     def unregister_all_new_metric_callbacks(self) -> None:
-        """Unregister all callbacks to add entities for all metric kinds."""
-        _LOGGER.info("Unregistering AddEntitiesCallback")
-        self.add_entities_map.clear()
+        """Unregister all callbacks to handle new metrics for all metric kinds."""
+        _LOGGER.info("Unregistering NewMetricCallback")
+        self.new_metric_callbacks.clear()
 
     def publish(
         self, metric_id: str, device_id: str, value: str | float | None

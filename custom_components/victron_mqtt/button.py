@@ -12,7 +12,7 @@ from victron_mqtt import (
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -38,9 +38,7 @@ async def async_setup_entry(
         installation_id: str,
     ) -> None:
         """Handle new sensor metric discovery."""
-        assert isinstance(metric, VictronVenusWritableMetric), (
-            f"Expected metric to be a VictronVenusWritableMetric. Got {type(metric)}"
-        )
+        assert isinstance(metric, VictronVenusWritableMetric)
         async_add_entities(
             [
                 VictronButton(
@@ -72,14 +70,12 @@ class VictronButton(VictronBaseEntity, ButtonEntity):
             device, metric, device_info, "button", simple_naming, installation_id
         )
 
+    @callback
     def _on_update_task(self, value: Any) -> None:
         pass
 
     def press(self) -> None:
         """Press the button."""
         _LOGGER.info("Pressing button: %s", self._attr_unique_id)
+        assert isinstance(self._metric, VictronVenusWritableMetric)
         self._metric.set(SWITCH_ON)
-
-    def __repr__(self) -> str:
-        """Return a string representation of the sensor."""
-        return f"VictronButton({super().__repr__()})"

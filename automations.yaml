@@ -2514,7 +2514,7 @@
         metadata: {}
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{ now().strftime(''%H:%M:%S'') }} – SOC = {{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc)'')
+          message: '{{ now().strftime(''%H:%M:%S'') }} – SOC = {{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
             }}     %'
           title: 'Piscine : SoC < 25 %'
     - conditions:

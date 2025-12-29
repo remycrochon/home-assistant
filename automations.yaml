@@ -1153,6 +1153,26 @@
       - condition: trigger
         id:
         - DEBUT HP ROUGE
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.schedule_e7a1a2
+          - switch.schedule_989d67
+        data: {}
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
+        data: {}
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}'
+          title: DEBUT HP ROUGE -> Forçage Arret ppe Piscine et CP 100%
+    - conditions:
+      - condition: trigger
+        id:
         - DEBUT HP Blanc
       sequence:
       - action: switch.turn_on
@@ -1164,7 +1184,7 @@
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}'
-          title: DEBUT HP ROUGE ou BLANC-> Forçage Arret ppe Piscine
+          title: DEBUT HP BLANC-> Forçage Arret ppe Piscine
     - conditions:
       - condition: trigger
         id:
@@ -1174,7 +1194,12 @@
       - action: switch.turn_off
         target:
           entity_id:
-          - switch.esp178_piscine_ent_arret_forc
+          - switch.schedule_e7a1a2
+          - switch.schedule_989d67
+        data: {}
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
         data: {}
       - action: telegram_bot.send_message
         metadata: {}
@@ -2060,14 +2085,16 @@
   triggers:
   - trigger: state
     entity_id:
-    - sensor.rte_tempo_prochaine_couleur
-    to: Rouge
+    - sensor.rte_tempo_couleur_actuelle
+    to:
+    - Rouge
     id: vers_rouge
   - trigger: state
     entity_id:
-    - sensor.rte_tempo_prochaine_couleur
+    - sensor.rte_tempo_couleur_actuelle
     id: sortie_rouge
-    from: Rouge
+    from:
+    - Rouge
   conditions: []
   actions:
   - choose:

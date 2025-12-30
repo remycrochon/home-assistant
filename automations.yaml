@@ -1343,25 +1343,25 @@
   triggers:
   - trigger: state
     entity_id:
-    - sensor.mp2_affichage_status_bus_ve
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
     to: unavailable
     for:
       seconds: 5
   - trigger: state
     entity_id:
-    - sensor.mp2_affichage_status_bus_ve
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
     to: unknown
     for:
       seconds: 5
   - trigger: state
     entity_id:
-    - sensor.mp2_affichage_status_bus_ve
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
     for:
       minutes: 2
   conditions:
   - condition: template
-    value_template: "{% set st = states('sensor.mp2_affichage_status_bus_ve') %} {{
-      st in ['unknown','unavailable']\n   or st not in ['Float','Bulk','Absorption','Passthrough','Inverting']
+    value_template: "{% set st = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state\n')
+      %} {{ st in ['unknown','unavailable']\n   or st not in ['Float','Bulk','Absorption','Passthrough','Inverting']
       }}"
   actions:
   - action: telegram_bot.send_message
@@ -1370,7 +1370,8 @@
       title: ALARME!! DISFONCTIONNEMENT BUS VE
       message: '{{ states(''sensor.date_time'') }}{{-"\n"-}}
 
-        MP2-Status Bus VE -> {{ states(''sensor.mp2_affichage_status_bus_ve'') }}
+        MP2-Status Bus VE -> {{ states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
+        }}
 
         Etats attendus: Float/Bulk/Absorption/Passthrough/Inverting'
   mode: single

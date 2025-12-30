@@ -417,6 +417,11 @@ sensor:
     id: pu_clim
     internal: true
 
+  - platform: homeassistant
+    entity_id: sensor.ecocompteur_pac
+    id: pu_pac
+    internal: true
+
   # Sonde Temperature radiateur
   - platform: dallas_temp
     address: 0xeb012112e461b128
@@ -427,12 +432,12 @@ sensor:
       - filter_out: NAN
 
   # Température ECS HA
-  - platform: homeassistant
-    id: temp_ecs_ha
-    entity_id: sensor.esp139_ecs_temp_ecs
-    name: "Température ECS HA"
-  # Volume d'eau chaude dispo (en L) mesuré par ESP126
+  #- platform: homeassistant
+  #  id: temp_ecs_ha9
+  #  entity_id: sensor.esp139_ecs_temp_ecs
+  #  name: "Température ECS HA"
 
+  # Volume d'eau chaude dispo (en L) mesuré par ESP126
   - platform: homeassistant
     id: volume_ecs_ha
     entity_id: sensor.esp139_ecs_ballon_volume_eau_chaude
@@ -738,13 +743,13 @@ script:
           // 🔸 Branche HP : régulation sur production PV / batteries
           if (is_hp) {
             if (id(etatbus_ve).state == "Bulk") {  // Bulk
-              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(res_pubatt).state;
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state - id(res_pubatt).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(res_pubatt).state);
               id(regul) = "HP Reg. (Bulk)";
             } 
             else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "Float") { // Absorption / Float
-              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state + id(pu_batteries).state;
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state + id(pu_batteries).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
               id(regul) = "HP Reg. (Abs/Float)";
@@ -756,10 +761,11 @@ script:
             }
 
             ESP_LOGI("regul",
-                     "HP → Prod=%.0fW | Conso=%.0fW | Clim=%.0fW | Batt=%.0fW | p_dispo=%.0fW | Mode=%s",
+                     "HP → Prod=%.0fW | Conso=%.0fW | Clim=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW | Mode=%s",
                      id(pu_prod).state,
                      id(conso_maison).state,
                      id(pu_clim).state,
+                     id(pu_pac).state,
                      id(pu_batteries).state,
                      pdispo,
                      id(regul).c_str());
@@ -770,22 +776,24 @@ script:
 
             float conso = id(conso_maison).state;
             float clim  = id(pu_clim).state;
+            float pac  = id(pu_pac).state;
             float batt  = id(pu_batteries).state;   // >0 décharge, <0 charge
 
             if (isnan(conso)) conso = 0;
             if (isnan(clim))  clim  = 0;
+            if (isnan(pac))  pac  = 0;
             if (isnan(batt))  batt  = 0;
 
             // p_dispo = cible - conso_maison - pu_clim - pu_batteries
-            pdispo = RESEAU_CIBLE_HC - conso - clim - batt;
+            pdispo = RESEAU_CIBLE_HC - conso - clim - pac - batt;
             if (pdispo < 0.0f) pdispo = 0.0f;
 
             id(regul) = "HC Chauffe ECS";
             id(cons_batt_cours).publish_state(batt);
 
             ESP_LOGI("regul",
-                     "HC → Cible=%.0fW | Conso=%.0fW | Clim=%.0fW | Batt=%.0fW | p_dispo=%.0fW",
-                     RESEAU_CIBLE_HC, conso, clim, batt, pdispo);
+                     "HC → Cible=%.0fW | Conso=%.0fW | Clim=%.0fW | PAC=%.0fW| Batt=%.0fW | p_dispo=%.0fW",
+                     RESEAU_CIBLE_HC, conso, clim, pac, batt, pdispo);
           }
 
           // 🔹 Limitation & interpolation table puissance

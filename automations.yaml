@@ -964,9 +964,6 @@
   alias: MP2 Memorisation Production Jour
   description: ''
   triggers:
-  - at: '22:05:00'
-    id: '22:05'
-    trigger: time
   - at: '22:00:00'
     id: '22:00'
     trigger: time
@@ -977,16 +974,6 @@
       - condition: trigger
         id:
         - '22:00'
-      sequence:
-      - data_template:
-          entity_id: input_number.mp2_memoire_estimation_production_jour
-          value: '{% set a=states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|float
-            (0)|round(1)%} {{a }}'
-        action: input_number.set_value
-    - conditions:
-      - condition: trigger
-        id:
-        - '22:05'
       sequence:
       - action: telegram_bot.send_message
         metadata: {}
@@ -999,6 +986,16 @@
             %-Actuel={{states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')}}
             %\n"
           title: Rapport Production PV
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+      - data_template:
+          entity_id: input_number.mp2_memoire_estimation_production_jour
+          value: '{% set a=states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|float
+            (0)|round(1)%} {{a }}'
+        action: input_number.set_value
   mode: single
 - id: '1698142750238'
   alias: Notification niveau bas puits
@@ -1156,12 +1153,6 @@
       sequence:
       - action: switch.turn_on
         target:
-          entity_id:
-          - switch.schedule_e7a1a2
-          - switch.schedule_989d67
-        data: {}
-      - action: switch.turn_on
-        target:
           entity_id: switch.esp178_piscine_ent_arret_forc
         data: {}
       - action: telegram_bot.send_message
@@ -1191,12 +1182,6 @@
         - FIN HP Blanc
         - FIN HP ROUGE
       sequence:
-      - action: switch.turn_off
-        target:
-          entity_id:
-          - switch.schedule_e7a1a2
-          - switch.schedule_989d67
-        data: {}
       - action: switch.turn_off
         target:
           entity_id: switch.esp178_piscine_ent_arret_forc
@@ -1360,9 +1345,9 @@
       minutes: 2
   conditions:
   - condition: template
-    value_template: "{% set st = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state\n')
-      %} {{ st in ['unknown','unavailable']\n   or st not in ['Float','Bulk','Absorption','Passthrough','Inverting']
-      }}"
+    value_template: '{% set st = states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
+      %}  {{ st in [''unknown'',''unavailable''] or st not in [''Float'',''Bulk'',''Absorption'',''Passthrough'',''Inverting'']
+      }}'
   actions:
   - action: telegram_bot.send_message
     data:
@@ -2086,13 +2071,13 @@
   triggers:
   - trigger: state
     entity_id:
-    - sensor.rte_tempo_couleur_actuelle
+    - sensor.rte_tempo_prochaine_couleur
     to:
     - Rouge
     id: vers_rouge
   - trigger: state
     entity_id:
-    - sensor.rte_tempo_couleur_actuelle
+    - sensor.rte_tempo_prochaine_couleur
     id: sortie_rouge
     from:
     - Rouge
@@ -2519,6 +2504,7 @@
   conditions:
   - condition: sun
     after: sunrise
+    before: sunset
   actions:
   - choose:
     - conditions:

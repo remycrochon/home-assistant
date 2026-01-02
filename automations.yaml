@@ -1120,25 +1120,25 @@
   description: Actions en fonction du changement de modes de  Tempo
   triggers:
   - entity_id:
-    - sensor.esp124_tic_linky_tarif_fourniture
+    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
     to:
     - HP BLANC
     id: DEBUT HP Blanc
     trigger: state
   - entity_id:
-    - sensor.esp124_tic_linky_tarif_fourniture
+    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
     id: FIN HP Blanc
     trigger: state
     from:
     - HP BLANC
   - entity_id:
-    - sensor.esp124_tic_linky_tarif_fourniture
+    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
     to:
     - HP ROUGE
     id: DEBUT HP ROUGE
     trigger: state
   - entity_id:
-    - sensor.esp124_tic_linky_tarif_fourniture
+    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
     id: FIN HP ROUGE
     from:
     - HP ROUGE

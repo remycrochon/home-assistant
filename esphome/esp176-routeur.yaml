@@ -466,6 +466,12 @@ switch:
     optimistic: true
     restore_mode: always_on
 
+  - platform: template
+    name: "Auto Reserve Batteries"
+    id: auto_reserve_batt
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
   - platform: restart
     name: "Restart"
 
@@ -537,7 +543,9 @@ interval:
     then:      
       - script.execute: etat_production
       - script.execute: calcul_relais_surprod      
-
+  - interval: 30s
+    then:
+      - script.execute: maj_reserve_batt_auto
  ########################################################################
 script:
   ########################################################################
@@ -826,6 +834,66 @@ script:
                    pdispo, id(striac),
                    id(regul).c_str());
 
+
+  - id: maj_reserve_batt_auto
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(auto_reserve_batt).state) return;
+
+          float soc_val = id(soc).state;
+          float pv  = id(pu_prod).state;
+          std::string st = id(etatbus_ve).state;
+
+          if (isnan(soc_val)) soc_val = 0;
+          if (isnan(pv))  pv  = 0;
+
+          // Paramètres (à ajuster)
+          const float SOC_LOW   = 92.0f;   // en dessous → on charge fort
+          const float SOC_HIGH  = 98.0f;   // au-dessus → on privilégie ECS
+          const float PV_MIN    = 1200.0f;  // en dessous → pas la peine d'assouplir
+          const float R_MIN     = 0.0f;    // réserve min
+          const float R_MAX     = 1900.0f; // réserve max "raisonnable"
+
+          float r = id(res_pubatt).state; // valeur actuelle
+
+          // Cas 1 : PV faible → réserve haute (on protège la charge batterie)
+          if (pv < PV_MIN) {
+            r = 1200.0f;
+          }
+          else {
+            // Cas 2 : SOC bas → réserve haute
+            if (soc_val <= SOC_LOW) {
+              r = R_MAX;
+            }
+            // Cas 3 : SOC haut → réserve basse pour retarder la fin (éviter FLOAT)
+            else if (soc_val >= SOC_HIGH) {
+              r = R_MIN; // ou 200W si vous voulez garder une micro-charge
+            }
+            // Cas 4 : interpolation entre les deux
+            else {
+              float t = (soc_val - SOC_LOW) / (SOC_HIGH - SOC_LOW); // 0..1
+              r = R_MAX + t * (R_MIN - R_MAX);
+            }
+          }
+
+          // Option : si déjà en Float, inutile de garder une réserve haute
+          // (vous pouvez au contraire mettre R_MIN pour maximiser ECS)
+          if (st == "Float") {
+            r = R_MIN;
+          }
+
+          // Sécurités
+          if (r < R_MIN) r = R_MIN;
+          if (r > R_MAX) r = R_MAX;
+
+          // Évite de spammer HA pour des petites variations
+          float cur = id(res_pubatt).state;
+          if (fabsf(cur - r) >= 50.0f) {
+            id(res_pubatt).publish_state(r);
+            ESP_LOGI("RES", "Auto reserve: SOC=%.1f PV=%.0fW State=%s -> res_pubatt=%.0fW",
+                     soc_val, pv, st.c_str(), r);
+          }
 
 
   ########################################################################

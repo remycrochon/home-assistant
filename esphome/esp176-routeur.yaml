@@ -543,7 +543,7 @@ interval:
     then:      
       - script.execute: etat_production
       - script.execute: calcul_relais_surprod      
-  - interval: 30s
+  - interval: 60s
     then:
       - script.execute: maj_reserve_batt_auto
  ########################################################################
@@ -833,8 +833,9 @@ script:
                    is_hp ? "HP" : "HC",
                    pdispo, id(striac),
                    id(regul).c_str());
-
-
+  ########################################################################
+  # Script : Calcul dynamique de la production PV attribuée aux batteries
+  ########################################################################
   - id: maj_reserve_batt_auto
     mode: single
     then:
@@ -849,10 +850,10 @@ script:
           if (isnan(pv))  pv  = 0;
 
           // Paramètres (à ajuster)
-          const float SOC_LOW   = 92.0f;   // en dessous → on charge fort
-          const float SOC_HIGH  = 98.0f;   // au-dessus → on privilégie ECS
-          const float PV_MIN    = 1200.0f;  // en dessous → pas la peine d'assouplir
-          const float R_MIN     = 0.0f;    // réserve min
+          const float SOC_LOW   = 70.0f;   // en dessous → on charge fort
+          const float SOC_HIGH  = 90.0f;   // au-dessus → on privilégie ECS
+          const float PV_MIN    = id(seuil_prod).state;  // en dessous → pas la peine d'assouplir
+          const float R_MIN     = 50.0f;    // réserve min pour garder une micro-charge
           const float R_MAX     = 1900.0f; // réserve max "raisonnable"
 
           float r = id(res_pubatt).state; // valeur actuelle
@@ -868,7 +869,7 @@ script:
             }
             // Cas 3 : SOC haut → réserve basse pour retarder la fin (éviter FLOAT)
             else if (soc_val >= SOC_HIGH) {
-              r = R_MIN; // ou 200W si vous voulez garder une micro-charge
+              r = R_MIN; 
             }
             // Cas 4 : interpolation entre les deux
             else {

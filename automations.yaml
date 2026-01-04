@@ -1119,37 +1119,17 @@
   alias: Asservissements Modes Tempo
   description: Actions en fonction du changement de modes de  Tempo
   triggers:
-  - entity_id:
+  - trigger: state
+    entity_id:
     - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
-    to:
-    - HP BLANC
-    id: DEBUT HP Blanc
-    trigger: state
-  - entity_id:
-    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
-    id: FIN HP Blanc
-    trigger: state
-    from:
-    - HP BLANC
-  - entity_id:
-    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
-    to:
-    - HP ROUGE
-    id: DEBUT HP ROUGE
-    trigger: state
-  - entity_id:
-    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
-    id: FIN HP ROUGE
-    from:
-    - HP ROUGE
-    trigger: state
   conditions: []
   actions:
   - choose:
     - conditions:
-      - condition: trigger
-        id:
-        - DEBUT HP ROUGE
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+        state:
+        - HP ROUGE
       sequence:
       - action: switch.turn_on
         target:
@@ -1162,9 +1142,10 @@
           message: '{{states("sensor.date_time") }}'
           title: DEBUT HP ROUGE -> Forçage Arret ppe Piscine et CP 100%
     - conditions:
-      - condition: trigger
-        id:
-        - DEBUT HP Blanc
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+        state:
+        - HP BLANC
       sequence:
       - action: switch.turn_on
         target:
@@ -1177,10 +1158,10 @@
           message: '{{states("sensor.date_time") }}'
           title: DEBUT HP BLANC-> Forçage Arret ppe Piscine
     - conditions:
-      - condition: trigger
-        id:
-        - FIN HP Blanc
-        - FIN HP ROUGE
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+        state:
+        - HP BLEU
       sequence:
       - action: switch.turn_off
         target:

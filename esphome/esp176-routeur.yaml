@@ -854,7 +854,7 @@ script:
           const float SOC_HIGH  = 90.0f;   // au-dessus → on privilégie ECS
           const float PV_MIN    = id(seuil_prod).state;  // en dessous → pas la peine d'assouplir
           const float R_MIN     = 50.0f;    // réserve min pour garder une micro-charge
-          const float R_MAX     = 1900.0f; // réserve max "raisonnable"
+          const float R_MAX     = 2500.0f; // réserve max "raisonnable"
 
           float r = id(res_pubatt).state; // valeur actuelle
 

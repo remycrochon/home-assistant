@@ -1121,15 +1121,15 @@
   triggers:
   - trigger: state
     entity_id:
-    - sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+    - sensor.esp124_tic_linky_n_tarif
   conditions: []
   actions:
   - choose:
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state:
-        - HP ROUGE
+        - '6.0'
       sequence:
       - action: switch.turn_on
         target:
@@ -1143,9 +1143,9 @@
           title: DEBUT HP ROUGE -> Forçage Arret ppe Piscine et CP 100%
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state:
-        - HP BLANC
+        - '4.0'
       sequence:
       - action: switch.turn_on
         target:
@@ -1159,9 +1159,9 @@
           title: DEBUT HP BLANC-> Forçage Arret ppe Piscine
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_libelle_tarif_fournisseur_en_cours
+        entity_id: sensor.esp124_tic_linky_n_tarif
         state:
-        - HP BLEU
+        - '2.0'
       sequence:
       - action: switch.turn_off
         target:

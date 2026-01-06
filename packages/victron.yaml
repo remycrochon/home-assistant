@@ -13,6 +13,13 @@ mqtt:
       unique_id: mp2_valide_cp_par_mqtt" 
       state_topic: "mp2/multiplus2/valide_cp"
 
+
+    - name: "Capacité Batterie Estimée par NR"
+      state_topic: "mp2/batteries/capacity_est_ah"
+      unit_of_measurement: "Ah"
+      icon: mdi:battery-charging-outline
+      state_class: measurement
+
       # DESS Remy
 
     - name: "MP2 Cible SOC par MQTT"

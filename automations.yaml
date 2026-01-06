@@ -1556,7 +1556,6 @@
         - sensor.chamb_parents_power
         - sensor.batteries_chambre_ssol_zb
         - sensor.detecteur_petite_porte_sous_sol_power
-        - sensor.chambre_sud_power
         - sensor.detecteur_porte_frigo_power
         - sensor.batterie_sdb
         - sensor.detecteur_porte_cellier_power
@@ -1571,6 +1570,9 @@
         - sensor.detecteur_porte_frigo_batterie
         - sensor.chambre_nord_batterie
         - sensor.cellier_batterie
+        - sensor.detecteur_de_fumee_bureau_batterie
+        - sensor.detecteur_de_fumee_couloir_bureau_batterie
+        - sensor.chambre_sud_batterie
       custom_group_battery_level: 30
       exclude_sensors:
         entity_id:
@@ -1581,8 +1583,6 @@
         - sensor.alecto_ws1700_34_01_battery_numeric
         - sensor.am435x_awd_batterie
         - sensor.mp2_cible_soc_par_mqtt
-        - sensor.mp2_soc_mini_mqtt
-        - sensor.mp2_soc_mqtt
         - sensor.s6_pro_batterie
         - sensor.px5_battery_level
         - sensor.tablette_battery_level

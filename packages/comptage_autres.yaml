@@ -12,7 +12,7 @@ template:
     - name: "Puissance Autres"
       unique_id: "puissance_autres"
       state: >-
-        {% set a = states('sensor.mp2_conso_ac_l1') | float(default=0) | round(2) %}
+        {% set a = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1') | float(default=0) | round(2) %}
         {% set b = states('sensor.pzem_pisc_puissance') | float(default=0) | round(2) %}
         {% set c = states('sensor.pzem_sdb_puissance') | float(default=0) | round(2) %}
         {% set d = states('sensor.ecocompteur_pac') | float(default=0) | round(2) %}
@@ -24,7 +24,7 @@ template:
         {% set j = states('sensor.ecocompteur_clim') | float(default=0) | round(2) %}
         {% set k = states('sensor.pc_onduleur_eaton_puissance') | float(default=0) | round(2) %}
         {% set l = states('sensor.esp131_pzem_chalet_puissance') | float(default=0) | round(2) %}
-        {% set total=(a-b-c-d-e-f-g-h-i-j-k-l) | round(2)%}
+        {% set total=(a-c-f-g-h-i-k-l) | round(2)%}
         {% if total >= 0 %}
           {{ total }}
         {% else%}

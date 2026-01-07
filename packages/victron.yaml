@@ -38,7 +38,12 @@ mqtt:
 
     - name: "MP2 DESS H_Debut DESS Remy"
       unique_id: mp2_dess_h_debut" 
-      state_topic: "mp2/dess_remy/h_debut"      
+      state_topic: "mp2/dess_remy/h_debut"   
+
+    - name: "MP2 DESS Durée DESS Remy"
+      unique_id: mp2_dess_duree" 
+      state_topic: "mp2/dess_remy/duree"      
+
 
 
 # Victron

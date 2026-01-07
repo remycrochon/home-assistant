@@ -1686,7 +1686,7 @@
   triggers:
   - id: mn
     trigger: time_pattern
-    minutes: /1
+    seconds: /10
   - entity_id:
     - input_boolean.mp2_valid_ess_charge_prog_1
     - input_boolean.forcage_charge_pgm_mp1_100
@@ -2050,42 +2050,39 @@
   alias: Activation Forcage Charge Programmée 1 si tempo Rouge
   description: ''
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.rte_tempo_prochaine_couleur
-    to:
-    - Rouge
-    id: vers_rouge
-  - trigger: state
-    entity_id:
-    - sensor.rte_tempo_prochaine_couleur
-    id: sortie_rouge
-    from:
-    - Rouge
+  - trigger: time
+    at: '21:59:00'
   conditions: []
   actions:
   - choose:
     - conditions:
-      - condition: trigger
-        id:
-        - vers_rouge
+      - condition: state
+        entity_id: sensor.rte_tempo_prochaine_couleur
+        state:
+        - Rouge
       sequence:
-      - action: switch.turn_on
+      - action: input_number.max
+        metadata: {}
         target:
-          entity_id:
-          - switch.schedule_e7a1a2
-          - switch.schedule_989d67
+          entity_id: input_number.mp2_niveau_forcage_cp1
+        data: {}
+      - action: input_boolean.turn_on
+        metadata: {}
+        target:
+          entity_id: input_boolean.forcage_charge_pgm_mp1_100
         data: {}
     - conditions:
-      - condition: trigger
-        id:
-        - sortie_rouge
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: sensor.rte_tempo_prochaine_couleur
+          state:
+          - Rouge
       sequence:
-      - action: switch.turn_off
+      - action: input_boolean.turn_off
+        metadata: {}
         target:
-          entity_id:
-          - switch.schedule_e7a1a2
-          - switch.schedule_989d67
+          entity_id: input_boolean.forcage_charge_pgm_mp1_100
         data: {}
   mode: single
 - id: '1736001989085'

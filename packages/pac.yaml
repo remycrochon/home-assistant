@@ -189,14 +189,14 @@ template:
       unique_id: "espaltherma_cop"
       state_class: "measurement"
       state: >-
-        {% set debit = states('sensor.espaltherma_capteur_debit') | float(default=0) %}
-        {% set rt1 = states('sensor.espaltherma_temp_eau_depart_echangeur_plaque') | float(default=0) %}
-        {% set rt4 = states('sensor.espaltherma_temp_eau_retour_rt4') | float(default=0) %}
-        {% set i = states('sensor.espaltherma_courant_primaire') | float(default=0) %}
+        {% set debit = states('sensor.esp126_pac_capteur_de_debit_l_min') | float(default=0) %}
+        {% set rt1 = states('sensor.esp126_pac_leaving_water_temp_apres_buh_r2t') | float(default=0) %}
+        {% set rt4 = states('sensor.esp126_pac_temp_d_eau_d_entree_r4t') | float(default=0) %}
+        {% set i = states('sensor.esp126_pac_courant_primaire_inv_a') | float(default=0) %}
         {% set u = states('sensor.linky_umoy') | float(default=0) %}
         {% set pu = states('sensor.ecocompteur_pac') | float(default=0) %}
-        {% if is_state("sensor.espaltherma_mode_fonctionnement", "Heating")
-          and (states('sensor.espaltherma_courant_primaire')|float(default=0) >0) %}
+        {% if is_state("sensor.esp126_pac_mode_de_fonctionnement", "Heating")
+          and (states('sensor.esp126_pac_courant_primaire_inv_a')|float(default=0) >0) %}
           {% set cop=((debit*0.06*1.16)*(rt1-rt4)/(pu/1000))| float(default=0) | round(2) %}
           {% if (cop>=0) and (cop<10) %}
             {{ cop }}
@@ -218,7 +218,7 @@ template:
         {% set p101=20 %}
         {% set a=(p102-p103)/(p100-p101) | float(default=0) %}
         {% set b=p103-a*p101 | float %}
-        {% set t = states('sensor.espaltherma_temp_air_ext_r6t') | float(default=0) %}
+        {% set t = states('sensor.esp126_pac_temp_d_air_exterieur_r1t') | float(default=0) %}
         {% if t<= p100 %}
           {{ p100 }}
         {%else%}

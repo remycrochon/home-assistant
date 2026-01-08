@@ -68,12 +68,7 @@ template:
     - name: "EcoCompteur PAC"
       unique_id: "ecocompteur_pac"
       state: >-
-        {% set etat = states('sensor.althermasensors') %}
-        {% if etat == "unavailable" %}
-          0
-        {% else%}
           {{states('sensor.ecocompteur_pac_0')| float(default=0) |round(2)}}
-        {%endif%}
       unit_of_measurement: "W"
       device_class: "power"
       state_class: "measurement"
@@ -81,12 +76,7 @@ template:
     - name: "EcoCompteur Clim"
       unique_id: "ecocompteur_clim"
       state: >-
-        {% set etat = states('binary_sensor.esp179_status') %}
-        {% if etat == "off" %}
-          0
-        {% else%}
           {{states('sensor.ecocompteur_clim_0')| float(default=0) |round(2)}}
-        {%endif%}
       unit_of_measurement: "W"
       device_class: "power"
       state_class: "measurement"  

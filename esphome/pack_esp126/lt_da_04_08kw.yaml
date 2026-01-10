@@ -1,0 +1,361 @@
+# =========================================================
+# Conversion labeldef.h -> ESPHome (format identique au 1er)
+# Plateforme: altherma_hub
+# =========================================================
+
+# anchors
+.altherma_base: &altherma_base
+  platform: altherma_hub
+  altherma_hub_id: altherma_hub_1
+
+.temp: &temp
+  <<: *altherma_base
+  device_class: temperature
+  unit_of_measurement: °C
+  state_class: measurement
+  accuracy_decimals: 1
+
+.binary: &binary
+  <<: *altherma_base
+
+.current: &current
+  <<: *altherma_base
+  device_class: current
+  unit_of_measurement: A
+  icon: mdi:current-ac
+  state_class: measurement
+  accuracy_decimals: 1
+
+.voltage: &voltage
+  <<: *altherma_base
+  device_class: voltage
+  unit_of_measurement: V
+  state_class: measurement
+
+.rps: &rps
+  <<: *altherma_base
+  unit_of_measurement: rps
+  state_class: measurement
+
+.rpm: &rpm
+  <<: *altherma_base
+  unit_of_measurement: rpm
+  state_class: measurement
+
+.text: &text
+  <<: *altherma_base
+
+
+# =========================
+# SENSORS (numériques)
+# =========================
+sensor:
+  # {0x20,0,105,2,1,"Temp. d air extérieur(R1T)"}
+  - <<: *temp
+    name: "Temp. d air extérieur (R1T)"
+    register: 0x20
+    offset: 0
+    convid: 105
+    datasize: 2
+
+  # {0x20,10,105,2,1,"Temp. tuyau de liquide (R6T)"}
+  - <<: *temp
+    name: "Temp. tuyau de liquide (R6T)"
+    register: 0x20
+    offset: 10
+    convid: 105
+    datasize: 2
+
+  # {0x20,12,105,2,1,"Temp. de dissipateur de chaleur"}
+  - <<: *temp
+    name: "Temp. de dissipateur de chaleur"
+    register: 0x20
+    offset: 12
+    convid: 105
+    datasize: 2
+
+  # {0x20,14,105,2,2,"Capteur de pression"}
+  - <<: *altherma_base
+    name: "Capteur de pression"
+    register: 0x20
+    offset: 14
+    convid: 105
+    datasize: 2
+    device_class: pressure
+    unit_of_measurement: bar
+    state_class: measurement
+    accuracy_decimals: 2
+
+  # {0x21,0,105,2,-1,"Courant primaire INV (A)"}
+  - <<: *current
+    name: "Courant primaire INV (A)"
+    register: 0x21
+    offset: 0
+    convid: 105
+    datasize: 2
+
+  # {0x21,2,105,2,-1,"Courant secondaire INV (A)"}
+  - <<: *current
+    name: "Courant secondaire INV (A)"
+    register: 0x21
+    offset: 2
+    convid: 105
+    datasize: 2
+
+  # {0x30,0,152,1,-1,"Fréquence INV (rps)"}
+  - <<: *rps
+    name: "Fréquence INV (rps)"
+    register: 0x30
+    offset: 0
+    convid: 152
+    datasize: 1
+
+  # {0x30,1,152,1,-1,"Fréquence INV 2 (rps)"}
+  - <<: *rps
+    name: "Fréquence INV 2 (rps)"
+    register: 0x30
+    offset: 1
+    convid: 152
+    datasize: 1
+
+  # {0x30,0,211,1,-1,"Ventilateur 1 (10 rpm)"}
+  - <<: *rpm
+    name: "Ventilateur 1 (rpm)"
+    register: 0x30
+    offset: 0
+    convid: 211
+    datasize: 1
+    filters:
+      - multiply: 10
+
+  # {0x30,1,211,1,-1,"Ventilateur 2 (palier)"}
+  - <<: *rpm
+    name: "Ventilateur 2 (palier)"
+    register: 0x30
+    offset: 1
+    convid: 211
+    datasize: 1
+
+  # {0x60,9,105,2,1,"Consigne LW (principal)"}
+  - <<: *temp
+    name: "Consigne LW (principal)"
+    register: 0x60
+    offset: 9
+    convid: 105
+    datasize: 2
+
+  # {0x61,2,105,2,1,"Laisser temp. eau avant BUH (R1T)"}
+  - <<: *temp
+    name: "Leaving water temp. avant BUH (R1T)"
+    register: 0x61
+    offset: 2
+    convid: 105
+    datasize: 2
+
+  # {0x61,4,105,2,1,"Laisser temp. eau après BUH (R2T)"}
+  - <<: *temp
+    name: "Leaving water temp. après BUH (R2T)"
+    register: 0x61
+    offset: 4
+    convid: 105
+    datasize: 2
+    
+  # {0x61,6,105,2,1,"Temp. réfrig. côté liquide (R3T)"}
+  - <<: *temp
+    name: "Temp. réfrig. côté liquide (R3T)"
+    register: 0x61
+    offset: 6
+    convid: 105
+    datasize: 2
+
+  # {0x61,8,105,2,1,"Temp. d eau d entrée (R4T)"}
+  - <<: *temp
+    name: "Temp. d eau d entrée (R4T)"
+    register: 0x61
+    offset: 8
+    convid: 105
+    datasize: 2
+    
+  # {0x61,12,105,2,1,"Temp. ambiante intérieure (R1T)"}
+  - <<: *temp
+    name: "Temp. ambiante intérieure (R1T)"
+    register: 0x61
+    offset: 12
+    convid: 105
+    datasize: 2
+    
+  # {0x61,14,105,2,1,"Capteur ext. de temp. ambiante intérieure (R6T)"}
+  - <<: *temp
+    name: "Capteur ext. temp. ambiante intérieure (R6T)"
+    register: 0x61
+    offset: 14
+    convid: 105
+    datasize: 2
+    
+  # {0x62,5,105,2,1,"Consigne Thermostat int"}
+  - <<: *temp
+    name: "Consigne Thermostat int"
+    register: 0x62
+    offset: 5
+    convid: 105
+    datasize: 2
+
+  # {0x62,9,105,2,-1,"Capteur de débit (l/min)"}
+  - <<: *altherma_base
+    name: "Capteur de débit (l/min)"
+    register: 0x62
+    offset: 9
+    convid: 105
+    datasize: 2
+    unit_of_measurement: l/min
+    state_class: measurement
+    accuracy_decimals: 1
+
+  # {0x62,11,105,1,2,"Pression d eau"}
+  - <<: *altherma_base
+    name: "Pression d eau"
+    register: 0x62
+    offset: 11
+    convid: 105
+    datasize: 1
+    device_class: pressure
+    unit_of_measurement: bar
+    state_class: measurement
+    accuracy_decimals: 2
+
+  # {0x62,12,152,1,-1,"Signal de pompe à eau (0:max-100:arrêt)"}
+  - <<: *altherma_base
+    name: "Signal pompe à eau (0-100)"
+    register: 0x62
+    offset: 12
+    convid: 152
+    datasize: 1
+    state_class: measurement
+    accuracy_decimals: 0
+    filters:
+      - lambda: return x -100;
+
+
+# =========================
+# BINARY SENSORS (ON/OFF)
+# =========================
+binary_sensor:
+  # {0x10,1,304,1,-1,"Dégivrage"}
+  - <<: *binary
+    name: "Dégivrage"
+    register: 0x10
+    offset: 1
+    convid: 304
+    datasize: 1
+    device_class: running
+
+  # {0x10,1,307,1,-1,"Thermostat ON/OFF Ext"}
+  #- <<: *binary
+  #  name: "Thermostat ON/OFF Ext"
+  #  register: 0x10
+  #  offset: 1
+  #  convid: 307
+  #  datasize: 1
+  #  device_class: running
+
+  # {0x60,2,303,1,-1,"Thermostat ON/OFF Int"}
+  - <<: *binary
+    name: "Thermostat ON/OFF Int"
+    register: 0x60
+    offset: 2
+    convid: 303
+    datasize: 1
+    device_class: running
+
+  # {0x60,2,302,1,-1,"Protection antigel"}
+  - <<: *binary
+    name: "Protection antigel"
+    register: 0x60
+    offset: 2
+    convid: 302
+    datasize: 1
+    device_class: cold
+
+  # {0x60,12,304,1,-1,"Palier1 BUH"}
+  - <<: *binary
+    name: "Palier1 BUH"
+    register: 0x60
+    offset: 12
+    convid: 304
+    datasize: 1
+
+  # {0x60,12,303,1,-1,"Palier2 BUH"}
+  - <<: *binary
+    name: "Palier2 BUH"
+    register: 0x60
+    offset: 12
+    convid: 303
+    datasize: 1
+
+  # {0x62,8,302,1,-1,"Fonctionnement de pompe de circulation"}
+  - <<: *binary
+    name: "Pompe de circulation (ON/OFF)"
+    register: 0x62
+    offset: 8
+    convid: 302
+    datasize: 1
+    device_class: running
+
+# =========================
+# TEXT SENSORS (états / codes)
+# =========================
+text_sensor:
+  # {0x10,0,217,1,-1,"Mode de fonctionnement"}
+  - <<: *text
+    name: "Mode de fonctionnement"
+    icon: mdi:state-machine
+    register: 0x10
+    offset: 0
+    convid: 217
+    datasize: 1
+
+  # {0x10,4,203,1,-1,"Type de dysfonctionnement"}
+  - <<: *text
+    name: "Type de dysfonctionnement"
+    register: 0x10
+    offset: 4
+    convid: 203
+    datasize: 1
+    entity_category: diagnostic
+
+  # {0x10,5,204,1,-1,"Code de dysfonctionnement"}
+  - <<: *text
+    name: "Code de dysfonctionnement"
+    register: 0x10
+    offset: 5
+    convid: 204
+    datasize: 1
+    entity_category: diagnostic
+
+  # {0x60,3,204,1,-1,"Code de dysfonctionnement"}
+  - <<: *text
+    name: "Code de dysfonctionnement (IU)"
+    register: 0x60
+    offset: 3
+    convid: 204
+    datasize: 1
+    entity_category: diagnostic
+
+  # {0x60,4,152,1,-1,"Code d erreur détaillé"}
+  - <<: *text
+    name: "Code d erreur détaillé"
+    register: 0x60
+    offset: 4
+    convid: 152
+    datasize: 1
+    entity_category: diagnostic
+
+  # {0x60,5,203,1,-1,"Type de dysfonctionnement"}
+  - <<: *text
+    name: "Type de dysfonctionnement (IU)"
+    register: 0x60
+    offset: 5
+    convid: 203
+    datasize: 1
+    entity_category: diagnostic
+

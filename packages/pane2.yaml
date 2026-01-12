@@ -306,7 +306,8 @@ openhasp:
       - obj: "p5b47" # Tps restant
         properties:
           "text": >-
-            {% set s = states('sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_time_to_go') | float(0) | int %}
+            {% set h = states('sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_time_to_go') | float(0) %}
+            {% set s = (h * 3600) | int %}
             {{ '%02d' | format(s // 3600) }}:{{ '%02d' | format((s % 3600) // 60) }}
       ################## Maison
       - obj: "p5b55" # Puissance

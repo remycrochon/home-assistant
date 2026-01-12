@@ -3,20 +3,15 @@ substitutions:
   adress_ip: "192.168.0.180"
   friendly_name: esp180
   time_timezone: "Europe/Paris"
-  
+
 esphome:
   name: ${device_name}
-      
+
 esp32:
   board: mhetesp32minikit
   framework:
     type: arduino
 
-#  on_boot:
-#    priority: 800
-#    then: 
-#      - script.execute: calcul_vitesse    
-    
 wifi:
   networks:
     - ssid: !secret wifi
@@ -28,13 +23,10 @@ wifi:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
 
-# Enable logging
 logger:
   baud_rate: 0
   level: debug
-#  logs:
-#    light.component: very_verbose
-# Enable Home Assistant API
+
 api:
 
 ota:
@@ -43,14 +35,37 @@ ota:
 web_server:
   port: 80
 
-# Connection Bus i2c (Afficheur, EZO,...)
+# Bus I2C (HTU21D)
 i2c:
   sda: 17
   scl: 16
   scan: true
   id: bus_a
 
-# Input Number
+globals:
+  # Anti-yo-yo : horodatage dernier changement de vitesse (ms)
+  - id: last_change_ms
+    type: uint32_t
+    initial_value: '0'
+
+binary_sensor:
+  # Etat de la connexion
+  - platform: status
+    name: "${friendly_name}_Status"
+
+# ========= MODE DE REGULATION =========
+select:
+  - platform: template
+    name: "${friendly_name} Mode Regulation"
+    id: mode_regulation
+    optimistic: true
+    restore_value: true
+    options:
+      - "PM2.5 + Humidite"
+      - "Humidite seule"
+      - "PM2.5 seule"
+    initial_option: "PM2.5 + Humidite"
+
 number:
   # Seuil humidité v1->v2
   - platform: template
@@ -78,85 +93,104 @@ number:
     unit_of_measurement: "%"
     step: 1
 
-binary_sensor:
-#Etat de la connection
-  - platform: status
-    name: "${friendly_name}_Status"
+  # Seuils PM2.5 (fumées) : V1/V2/V3
+  - platform: template
+    name: "${friendly_name} Seuil_V1 PM2.5"
+    id: seuilv1_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 15
+    unit_of_measurement: "µg/m³"
+    step: 1
 
-sensor:
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-    name: "WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
+  - platform: template
+    name: "${friendly_name} Seuil_V2 PM2.5"
+    id: seuilv2_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 35
+    unit_of_measurement: "µg/m³"
+    step: 1
 
-  - platform: copy # Reports the WiFi signal strength in %
-    source_id: wifi_signal_db
-    name: "WiFi Signal Percent"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "Signal %"
-    entity_category: "diagnostic"
-    device_class: ""
-      
-  - platform: htu21d
-    model: htu21d
-    update_interval: 60s
-    temperature:
-      name: "${friendly_name}_Temperature_hotte"
-      id: temp_hotte
-      
-    humidity:
-      name: "${friendly_name}_Humidite_hotte"
-      id: hum_hotte
-      on_value:
-        then:
-          - script.execute: calcul_vitesse
+  - platform: template
+    name: "${friendly_name} Seuil_V3 PM2.5"
+    id: seuilv3_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 75
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  # Seuil Auto-ON (si hotte OFF et auto activé)
+  - platform: template
+    name: "${friendly_name} Seuil Auto-ON PM2.5"
+    id: seuil_auto_on_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 40
+    unit_of_measurement: "µg/m³"
+    step: 1
 
 switch:
+  # Activation auto (PM2.5 -> allume la hotte)
   - platform: template
-    name: "${friendly_name} Hotte"    
+    name: "${friendly_name} Auto Hotte (PM2.5)"
+    id: auto_hotte
+    optimistic: true
+
+  - platform: template
+    name: "${friendly_name} Hotte"
     id: hotte
     optimistic: true
     turn_on_action:
       - switch.turn_on: v1
       - delay: 100ms
       - switch.turn_on: r1_lumiere
-
     turn_off_action:
       - switch.turn_off: v1
       - switch.turn_off: v2
-      - switch.turn_off: v3  
+      - switch.turn_off: v3
       - switch.turn_off: r2
       - switch.turn_off: r3
-      - switch.turn_off: r4  
+      - switch.turn_off: r4
       - switch.turn_off: r1_lumiere
 
-
   - platform: template
-    name: "${friendly_name} Hotte V1"    
+    name: "${friendly_name} Hotte V1"
     id: v1
     optimistic: true
     turn_on_action:
-      - switch.turn_on: r2      
+      - switch.turn_on: r2
       - switch.turn_off: r3
       - switch.turn_off: r4
       - switch.turn_off: v2
       - switch.turn_off: v3
 
   - platform: template
-    name: "${friendly_name} Hotte V2"    
+    name: "${friendly_name} Hotte V2"
     id: v2
     optimistic: true
     turn_on_action:
-      - switch.turn_on: r2            
+      - switch.turn_on: r2
       - switch.turn_on: r3
       - switch.turn_off: r4
       - switch.turn_off: v1
       - switch.turn_off: v3
 
   - platform: template
-    name: "${friendly_name} Hotte V3"    
+    name: "${friendly_name} Hotte V3"
     id: v3
     optimistic: true
     turn_on_action:
@@ -164,14 +198,15 @@ switch:
       - switch.turn_off: r3
       - switch.turn_on: r4
       - switch.turn_off: v1
-      - switch.turn_off: v2      
+      - switch.turn_off: v2
 
   - platform: restart
     name: "${friendly_name} Restart"
 
+  # Relais
   - platform: gpio
     name: "${friendly_name} Hotte Lumiere"
-    pin: GPIO25 
+    pin: GPIO25
     id: r1_lumiere
 
   - platform: gpio
@@ -189,49 +224,160 @@ switch:
     pin: GPIO21
     id: r4
 
-# Déclenchement des scripts à intervalles réguliers
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+  # Temp/Hum hotte
+  - platform: htu21d
+    model: htu21d
+    update_interval: 60s
+    temperature:
+      name: "${friendly_name}_Temperature_hotte"
+      id: temp_hotte
+    humidity:
+      name: "${friendly_name}_Humidite_hotte"
+      id: hum_hotte
+      on_value:
+        then:
+          - script.execute: calcul_vitesse
+
+  # PM2.5 depuis Home Assistant (esp138 placé sur la hotte)
+
+  - platform: homeassistant
+    id: pm25_hotte_ha
+    entity_id: sensor.esp138_qualite_air_nb_de_particules_2_5  # 
+    internal: true
+
+  # Publication locale (facultatif mais pratique)
+  - platform: template
+    name: "${friendly_name}_PM2_5_Hotte"
+    id: pm25_hotte
+    unit_of_measurement: "µg/m³"
+    accuracy_decimals: 0
+    update_interval: 10s
+    lambda: |-
+      if (!id(pm25_hotte_ha).has_state()) return NAN;
+      return id(pm25_hotte_ha).state;
+
 interval:
-  - interval: 60s
+  # Recalcule toutes les 10s : réactivité sur PM2.5
+  - interval: 10s
     then:
       - script.execute: calcul_vitesse
 
 script:
-  # Calcul vitesse aspiration
   - id: calcul_vitesse
     mode: single
     then:
+      # 1) Auto-ON éventuel (fumées) - seulement si mode inclut PM2.5
+      - lambda: |-
+          const std::string mode = id(mode_regulation).state;
+          const bool mode_avec_pm = (mode == "PM2.5 + Humidite" || mode == "PM2.5 seule");
 
-      # Si Hotte en marche
-      # Si Humidité hotte < seuil v2 alors on enclenche V1
-      - if:
-          condition:
-            - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
-          then:
-            - switch.turn_on: v1
-            - switch.turn_off: v2
-            - switch.turn_off: v3
-      
-      # Si Hotte en marche
-      # Si (humidité hotte > au seuil V1 et < seuil v2) alors on enclenche V2
-      - if:
-          condition:
-            - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state >= id(seuilv2_hum).state;'
-            - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
-          then:
-            - switch.turn_off: v1
-            - switch.turn_on: v2
-            - switch.turn_off: v3
-      
-      # Si Hotte en marche
-      # Si Humidité hotte > au seuil V3 alors on enclenche V3   
-      - if:
-          condition:
-            - switch.is_on: hotte
-            - lambda: 'return id(hum_hotte).state >= id(seuilv3_hum).state;'
-          then:
-            - switch.turn_off: v1
-            - switch.turn_off: v2
-            - switch.turn_on: v3
+          if (!mode_avec_pm) return;
 
+          const bool pm_ok = id(pm25_hotte_ha).has_state() && !isnan(id(pm25_hotte_ha).state);
+          if (!pm_ok) return;
+
+          const float pm = id(pm25_hotte_ha).state;
+
+          // Si auto activé, hotte OFF et PM au-dessus du seuil => allumage
+          if (id(auto_hotte).state && !id(hotte).state && pm >= id(seuil_auto_on_pm).state) {
+            id(hotte).turn_on();
+
+            // Choix vitesse au démarrage auto
+            if (pm >= id(seuilv2_pm).state) id(v2).turn_on();
+            else id(v1).turn_on();
+
+            id(last_change_ms) = millis();
+          }
+
+      # 2) Régulation de vitesse si hotte ON
+      - if:
+          condition:
+            - switch.is_on: hotte
+          then:
+            - lambda: |-
+                const std::string mode = id(mode_regulation).state;
+
+                const bool pm_ok = id(pm25_hotte_ha).has_state() && !isnan(id(pm25_hotte_ha).state);
+                const float pm  = pm_ok ? id(pm25_hotte_ha).state : NAN;
+
+                const float hum = id(hum_hotte).state;
+
+                // Détermination de la cible selon le mode
+                int target = 1; // 1=V1, 2=V2, 3=V3
+
+                // MODE 1 : PM2.5 + HUMIDITE (priorité PM, fallback hum)
+                if (mode == "PM2.5 + Humidite") {
+                  if (pm_ok) {
+                    if (pm >= id(seuilv3_pm).state)      target = 3;
+                    else if (pm >= id(seuilv2_pm).state) target = 2;
+                    else                                  target = 1;
+                  } else {
+                    if (hum >= id(seuilv3_hum).state)      target = 3;
+                    else if (hum >= id(seuilv2_hum).state) target = 2;
+                    else                                    target = 1;
+                  }
+
+                // MODE 2 : HUMIDITE SEULE
+                } else if (mode == "Humidite seule") {
+                  if (hum >= id(seuilv3_hum).state)      target = 3;
+                  else if (hum >= id(seuilv2_hum).state) target = 2;
+                  else                                    target = 1;
+
+                // MODE 3 : PM2.5 SEULE
+                } else { // "PM2.5 seule"
+                  if (pm_ok) {
+                    if (pm >= id(seuilv3_pm).state)      target = 3;
+                    else if (pm >= id(seuilv2_pm).state) target = 2;
+                    else                                  target = 1;
+                  } else {
+                    target = 1; // sécurité si PM indisponible
+                  }
+                }
+
+                // Vitesse courante estimée
+                int cur = 1;
+                if (id(v3).state) cur = 3;
+                else if (id(v2).state) cur = 2;
+                else if (id(v1).state) cur = 1;
+
+                // Anti-yo-yo : on interdit de baisser trop vite
+                const uint32_t now_ms = millis();
+                const uint32_t HOLD_MS = 90000; // 90s avant autoriser la baisse
+
+                if (target < cur && (now_ms - id(last_change_ms)) < HOLD_MS) {
+                  target = cur;
+                }
+
+                // Appliquer si changement
+                if (target != cur) {
+                  if (target == 1) {
+                    id(v1).turn_on();
+                    id(v2).turn_off();
+                    id(v3).turn_off();
+                  } else if (target == 2) {
+                    id(v1).turn_off();
+                    id(v2).turn_on();
+                    id(v3).turn_off();
+                  } else {
+                    id(v1).turn_off();
+                    id(v2).turn_off();
+                    id(v3).turn_on();
+                  }
+                  id(last_change_ms) = now_ms;
+                }

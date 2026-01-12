@@ -961,7 +961,7 @@
     action: hassio.addon_restart
   mode: single
 - id: '1690434314772'
-  alias: MP2 Memorisation Production Jour
+  alias: Rapport Production Jour
   description: ''
   triggers:
   - at: '22:00:00'
@@ -986,6 +986,13 @@
             %-Actuel={{states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')}}
             %\n"
           title: Rapport Production PV
+      - action: notify.send_message
+        data:
+          message: '{{states(''input_number.mp2_memoire_estimation_production_jour'')}},{{states(''sensor.mp2_total_energie_produite_jour'')}},{{states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|round(1)}},{{states(''sensor.mp2_cible_soc_par_mqtt'')}},{{states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
+        target:
+          entity_id:
+          - notify.file_energie2024
+          - notify.suivi_prod
       - delay:
           hours: 0
           minutes: 1

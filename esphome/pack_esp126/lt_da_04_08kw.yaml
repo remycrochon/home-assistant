@@ -57,6 +57,7 @@ sensor:
     offset: 0
     convid: 105
     datasize: 2
+    id: temp_r1t
 
   # {0x20,10,105,2,1,"Temp. tuyau de liquide (R6T)"}
   - <<: *temp
@@ -93,6 +94,7 @@ sensor:
     offset: 0
     convid: 105
     datasize: 2
+    id: int_primaire
 
   # {0x21,2,105,2,-1,"Courant secondaire INV (A)"}
   - <<: *current
@@ -175,6 +177,7 @@ sensor:
     offset: 8
     convid: 105
     datasize: 2
+    id: temp_rt4
     
   # {0x61,12,105,2,1,"Temp. ambiante intérieure (R1T)"}
   - <<: *temp
@@ -210,6 +213,7 @@ sensor:
     unit_of_measurement: l/min
     state_class: measurement
     accuracy_decimals: 1
+    id: debit_pac
 
   # {0x62,11,105,1,2,"Pression d eau"}
   - <<: *altherma_base
@@ -313,6 +317,7 @@ text_sensor:
     offset: 0
     convid: 217
     datasize: 1
+    id: mode_fonctionnement
 
   # {0x10,4,203,1,-1,"Type de dysfonctionnement"}
   - <<: *text

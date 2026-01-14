@@ -80,4 +80,79 @@ binary_sensor:
 #Etat de la connection
   - platform: status
     name: "Status"
+sensor:
+  - platform: homeassistant
+    id: pu_pac
+    entity_id: sensor.ecocompteur_pac
+    internal: true
+
+  - platform: template
+    id: temp_dep_calculee
+    name: "temp_dep_calculee"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: 30s
+    lambda: |-
+      // Paramètres (identiques à votre template HA)
+      const float p102 = 37.0f;
+      const float p103 = 25.0f;
+      const float p100 = -10.0f;
+      const float p101 = 20.0f;
+
+      // Température extérieure
+      float t = id(temp_r1t).state;
+      if (isnan(t)) return NAN;
+
+      // Coefficients de la droite
+      const float a = (p102 - p103) / (p100 - p101);
+      const float b = p103 - a * p101;
+
+      // Clamp + calcul
+      if (t <= p100) return p100;
+      if (t >= p101) return p101;
+
+      return (a * t) + b;
+
+  - platform: template
+    id: cop
+    name: "cop"
+    unit_of_measurement: ""
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: 30s
+    lambda: |-
+      // Lecture des entrées
+      float debit = id(debit_pac).state;            // L/min
+      float rt1   = id(temp_r1t).state;         // °C
+      float rt4   = id(temp_rt4).state;         // °C
+      float i     = id(int_primaire).state; // A
+      float pu    = id(pu_pac).state;            // W
+
+      // Garde-fous NaN
+      if (isnan(debit) || isnan(rt1) || isnan(rt4) || isnan(i) || isnan(pu)) {
+        return NAN;
+      }
+
+      // Mode chauffage (text_sensor)
+      if (strcmp(id(mode_fonctionnement).state.c_str(), "Heating") != 0) {
+        return 0.0f;
+      }
+
+      // Courant > 0 obligatoire
+      if (i <= 0.0f || pu <= 0.0f) {
+        return 0.0f;
+      }
+
+      // Calcul COP
+      // (debit * 0.06 * 1.16) * (rt1 - rt4) / (pu / 1000)
+      float cop = (debit * 0.06f * 1.16f) * (rt1 - rt4) / (pu / 1000.0f);
+
+      // Filtrage identique à HA
+      if (cop >= 0.0f && cop < 10.0f) {
+        return cop;
+      }
+
+      return 0.0f;
 

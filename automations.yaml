@@ -1698,7 +1698,9 @@
     - input_boolean.mp2_valid_ess_charge_prog_1
     - input_boolean.forcage_charge_pgm_mp1_100
     - input_number.mp2_niveau_forcage_cp1
-    - sensor.esp124_tic_linky_ptec
+    - input_boolean.mp2_validation_dess_victron
+    - sensor.rte_tempo_prochaine_couleur
+    - sensor.rte_tempo_couleur_actuelle
     trigger: state
   conditions: []
   actions:
@@ -1732,8 +1734,24 @@
       evaluate_payload: false
       qos: '0'
       retain: false
-      topic: ha/mp2/cp/hc
-      payload: '"{{ states(''sensor.esp124_tic_linky_ptec'') }}"'
+      topic: ha/mp2/cp/validdess
+      payload: '"{{ states(''input_boolean.mp2_validation_dess_victron'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/tempo_j1
+      payload: '"{{ states(''sensor.rte_tempo_prochaine_couleur'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/tempo_j
+      payload: '"{{ states(''sensor.rte_tempo_couleur_actuelle'') }}"'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet

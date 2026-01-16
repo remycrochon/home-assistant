@@ -202,39 +202,6 @@
         }}'
       title: Réseau:!!!
   mode: single
-- id: '1634569261594'
-  alias: Blueprint Notification Alarme Status PAC
-  description: Blue Print
-  use_blueprint:
-    path: pavax/nagging_alert_notification.yaml
-    input:
-      condition_entity_state: 'on'
-      sensor_entity: binary_sensor.alarme_status_pac
-      alert_state: 'off'
-      alert_action:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}
-
-            PAC OFF LINE'
-          title: ALERTE PAC!!
-      resolved_action:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}
-
-            PAC ON LINE'
-          title: FIN ALERTE PAC!!
-      notify_message: ' '
-      notify_device: 367dba31447009458e03b70e3a29b6b2
-      repeat_delay: 600
-      resolved_message: ' '
-      initial_delay: 300
-      max_alerts: 10
 - id: '1634569580188'
   alias: Blueprint Notification Porte Cellier Ouverte
   description: Blue Print
@@ -988,10 +955,9 @@
           title: Rapport Production PV
       - action: notify.send_message
         data:
-          message: '{{states(''input_number.mp2_memoire_estimation_production_jour'')}},{{states(''sensor.mp2_total_energie_produite_jour'')}},{{states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|round(1)}},{{states(''sensor.mp2_cible_soc_par_mqtt'')}},{{states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
+          message: '{{states("sensor.date_time") }},{{states(''input_number.mp2_memoire_estimation_production_jour'')}},{{states(''sensor.mp2_total_energie_produite_jour'')}},{{states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|round(1)}},{{states(''sensor.mp2_cible_soc_par_mqtt'')}},{{states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
         target:
           entity_id:
-          - notify.file_energie2024
           - notify.suivi_prod
       - delay:
           hours: 0
@@ -1973,7 +1939,8 @@
   actions:
   - action: notify.send_message
     data:
-      message: ',{{ states(''sensor.cout_energie_tous_tarifs_maison'') }}, {{ states(''sensor.cout_energie_tous_tarifs_reseau_jour'')}}'
+      message: '{{states("sensor.date_time") }},{{ states(''sensor.cout_energie_tous_tarifs_maison'')
+        }}, {{ states(''sensor.cout_energie_tous_tarifs_reseau_jour'')}}'
     target:
       entity_id: notify.file_energie2024
   mode: single
@@ -2979,3 +2946,22 @@
     metadata:
       secondary: false
   mode: restart
+- id: '1768469404756'
+  alias: Suivi_dess
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: /1
+  conditions:
+  - condition: time
+    after: '21:00:00'
+    before: 07:00:00
+  actions:
+  - action: notify.send_message
+    data:
+      message: '{{states("sensor.date_time") }},{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dynamicess_reactive_strategy'')}},{{
+        states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dynamicess_target_soc'')
+        }}, {{ states(''sensor.mp2_cible_soc_par_mqtt'')}}, {{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
+    target:
+      entity_id: notify.suivi_dess
+  mode: single

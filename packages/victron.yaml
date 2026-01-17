@@ -20,15 +20,9 @@ mqtt:
       state_class: measurement
 
       # DESS Remy
-    - name: "MP2 Prod VRM TOTAL MQTT"
-      unique_id: mp2_prod_vrm_total_mqtt" 
-      state_topic: "mp2/dess_remy/prod_total"
-      unit_of_measurement: 'kW'
-      device_class: power
-      state_class: measurement      
 
-    - name: "MP2 Cible SOC par MQTT"
-      unique_id: mp2_cible_soc_par_mqtt" 
+    - name: "MP2 DESS Cible SOC par MQTT"
+      unique_id: mp2_dess_cible_soc" 
       state_topic: "mp2/dess_remy/cible_soc"
       unit_of_measurement: '%'
       device_class: battery
@@ -49,6 +43,9 @@ mqtt:
       unique_id: mp2_dess_duree" 
       state_topic: "mp2/dess_remy/duree"      
 
+    - name: "MP2 DESS Remy Log Audit"
+      unique_id: mp2_dess_log_audit" 
+      state_topic: "mp2/dess_remy/log_audit"      
 
 
 # Victron

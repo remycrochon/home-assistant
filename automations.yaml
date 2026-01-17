@@ -461,106 +461,6 @@
       max_alerts: 5
       resolved_message: ' '
       notify_message: ' '
-- id: '1638433932226'
-  alias: 01-02-01 VMC Niv0 Automatismes
-  description: ' '
-  triggers:
-  - entity_id: input_select.vmc_niv0
-    id: mode
-    trigger: state
-  - at: input_datetime.heure_vmc_niv0_ma
-    trigger: time
-  - at: input_datetime.heure_vmc_niv0_at
-    trigger: time
-  - event: sunrise
-    offset: 0
-    id: levee_soleil
-    trigger: sun
-  - value_template: '{% set temp=states(''sensor.vp2_temp_out'') | float(0) %}
-
-      {% set saison=states(''sensor.season'') | default("") %}
-
-      {% set mode=states(''input_select.vmc_niv0'') | default("") %}
-
-      {% set soleil=states(''sun.sun'') | default("") %}
-
-      {{ (temp< 0) and (saison == "autumn" or saison=="winter") and (mode=="CO2 PM2.5")
-      and (soleil == ''below_horizon'')}}
-
-      '
-    id: temp_basse
-    trigger: template
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_niv0
-        state: Hor
-      sequence:
-      - choose:
-        - conditions:
-          - condition: time
-            after: input_datetime.heure_vmc_niv0_ma
-            before: input_datetime.heure_vmc_niv0_at
-          sequence:
-          - target:
-              entity_id:
-              - switch.relais_cde_vmc_niv0_on_off
-            data: {}
-            action: switch.turn_on
-        default:
-        - target:
-            entity_id:
-            - switch.relais_cde_vmc_niv0_on_off
-          data: {}
-          action: switch.turn_off
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_niv0
-        state: Arret
-      sequence:
-      - target:
-          entity_id:
-          - switch.relais_cde_vmc_niv0_on_off
-        data: {}
-        action: switch.turn_off
-    - conditions:
-      - condition: state
-        entity_id: input_select.vmc_niv0
-        state: Marche
-      sequence:
-      - target:
-          entity_id:
-          - switch.relais_cde_vmc_niv0_on_off
-        data: {}
-        action: switch.turn_on
-    - conditions:
-      - condition: trigger
-        id:
-        - temp_basse
-      sequence:
-      - data: {}
-        target:
-          entity_id:
-          - switch.relais_cde_vmc_niv0_on_off
-        action: switch.turn_off
-    - conditions:
-      - condition: trigger
-        id:
-        - levee_soleil
-      - condition: state
-        entity_id: input_select.vmc_niv0
-        state: CO2 PM2.5
-      sequence:
-      - data: {}
-        target:
-          entity_id: switch.relais_cde_vmc_niv0_on_off
-        action: switch.turn_on
-    default: []
-  mode: single
-  trace:
-    stored_traces: 10
 - id: '1642614758763'
   alias: Changement HP<->HC
   description: ''
@@ -949,13 +849,13 @@
           message: "    {{states(\"sensor.date_time\") }}{{-\"\\n\"-}} Prévi ={{states('input_number.mp2_memoire_estimation_production_jour')}}
             kwh / Realisée={{states('sensor.mp2_total_energie_produite_jour')}} kwh{{-\"\\n\"-}}\n
             \  Prévi Demain={{states('sensor.victron_remote_monitoring_production_d_energie_estimee_demain')|round(1)}}
-            kwh{{-\"\\n\"-}} SOC Cible= {{states('sensor.mp2_cible_soc_par_mqtt')}}
+            kwh{{-\"\\n\"-}} SOC Cible= {{states('sensor.mp2_dess_cible_soc_par_mqtt')}}
             %-Actuel={{states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')}}
             %\n"
           title: Rapport Production PV
       - action: notify.send_message
         data:
-          message: '{{states("sensor.date_time") }},{{states(''input_number.mp2_memoire_estimation_production_jour'')}},{{states(''sensor.mp2_total_energie_produite_jour'')}},{{states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|round(1)}},{{states(''sensor.mp2_cible_soc_par_mqtt'')}},{{states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
+          message: '{{states("sensor.date_time") }},{{states(''input_number.mp2_memoire_estimation_production_jour'')}},{{states(''sensor.mp2_total_energie_produite_jour'')}},{{states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|round(1)}},{{states(''sensor.mp2_dess_cible_soc_par_mqtt'')}},{{states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
         target:
           entity_id:
           - notify.suivi_prod
@@ -992,28 +892,6 @@
 
         Niveau Puit: {{states(''sensor.esp174_niveau_puit'')|float(0)|round(2)}} ml'
       title: Niveau eau puit inferieur à 0.8 ml depuis 10mn
-  mode: single
-- id: '1698395745098'
-  alias: 01 Redemarage NODERED
-  description: ''
-  triggers:
-  - minutes: /3
-    trigger: time_pattern
-  conditions: []
-  actions:
-  - if:
-    - condition: state
-      entity_id: binary_sensor.node_red_en_cours_d_execution
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 0
-      state: 'on'
-    then: []
-    else:
-    - data:
-        addon: a0d7b954_nodered
-      action: hassio.addon_restart
   mode: single
 - id: '1698923695048'
   alias: Alerte Météo actualisation
@@ -1555,7 +1433,7 @@
         - sensor.alecto_ws1700_0b_01_battery_numeric
         - sensor.alecto_ws1700_34_01_battery_numeric
         - sensor.am435x_awd_batterie
-        - sensor.mp2_cible_soc_par_mqtt
+        - sensor.mp2_dess_cible_soc_par_mqtt
         - sensor.s6_pro_batterie
         - sensor.px5_battery_level
         - sensor.tablette_battery_level
@@ -1660,14 +1538,6 @@
   - id: mn
     trigger: time_pattern
     seconds: /10
-  - entity_id:
-    - input_boolean.mp2_valid_ess_charge_prog_1
-    - input_boolean.forcage_charge_pgm_mp1_100
-    - input_number.mp2_niveau_forcage_cp1
-    - input_boolean.mp2_validation_dess_victron
-    - sensor.rte_tempo_prochaine_couleur
-    - sensor.rte_tempo_couleur_actuelle
-    trigger: state
   conditions: []
   actions:
   - action: mqtt.publish
@@ -1718,6 +1588,14 @@
       retain: false
       topic: ha/mp2/cp/tempo_j
       payload: '"{{ states(''sensor.rte_tempo_couleur_actuelle'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/energie_reseau_jour
+      payload: '"{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'') }}"'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet
@@ -2950,18 +2828,17 @@
   alias: Suivi_dess
   description: ''
   triggers:
-  - trigger: time_pattern
-    hours: /1
-  conditions:
-  - condition: time
-    after: '21:00:00'
-    before: 07:00:00
+  - trigger: state
+    entity_id:
+    - sensor.mp2_dess_remy_log_audit
+  - trigger: mqtt
+    options:
+      topic: mp2/dess_remy/log_audit
+  conditions: []
   actions:
   - action: notify.send_message
     data:
-      message: '{{states("sensor.date_time") }},{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dynamicess_reactive_strategy'')}},{{
-        states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dynamicess_target_soc'')
-        }}, {{ states(''sensor.mp2_cible_soc_par_mqtt'')}}, {{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')}}'
+      message: '{{states("sensor.date_time") }},{{ states(''sensor.mp2_dess_remy_log_audit'')}}'
     target:
       entity_id: notify.suivi_dess
   mode: single

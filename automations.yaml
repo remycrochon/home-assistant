@@ -2842,3 +2842,30 @@
     target:
       entity_id: notify.suivi_dess
   mode: single
+- id: '1768665992129'
+  alias: Comptage Conso 6-22 Maison
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:00:00
+    variables:
+      tariff: jour_6_22
+  - trigger: time
+    at: '22:00:00'
+    variables:
+      tariff: hors_jour
+  conditions: []
+  actions:
+  - action: select.select_option
+    metadata: {}
+    data:
+      option: '{{ tariff }}'
+    target:
+      entity_id: select.comptage_energie_conso_maison_6_22
+  - action: select.select_option
+    metadata: {}
+    data:
+      option: '{{ tariff }}'
+    target:
+      entity_id: sensor.comptage_energie_conso_maison_6_22_hours_jour
+  mode: single

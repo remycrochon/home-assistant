@@ -1,9 +1,21 @@
 Home Assistant notifications (Log started: 2026-01-15T10:00:00.161290+00:00)
 --------------------------------------------------------------------------------
-2026-01-17, 16:02,DESS_perso @ 15:54 | conso=20.4kWh | pv=5.7kWh | deficit=15.2kWh | SoC=64.5%→cible=100% (Δ=35.5%) | batt_utile=10.16kWh | dispo=6.24kWh | a_charger=3.92kWh | soc_a_charger=35.5%
-2026-01-17, 17:49,DESS_perso @ 16:02 | conso=20.3kWh | pv=5.7kWh | deficit=15.1kWh | SoC=64.3%→cible=100% (Δ=35.7%) | batt_utile=10.16kWh | dispo=6.22kWh | a_charger=3.94kWh | soc_a_charger=35.7%
-2026-01-17, 19:04,DESS_perso @ 17:49 | conso=20.3kWh | pv=5.6kWh | deficit=15.2kWh | SoC=58.5%→cible=100% (Δ=41.5%) | batt_utile=10.16kWh | dispo=5.58kWh | a_charger=4.58kWh | soc_a_charger=41.5%
-2026-01-17, 21:45,DESS_perso @ 19:04 | conso=20.2kWh | pv=5kWh | deficit=15.7kWh | SoC=53%→cible=100% (Δ=47.0%) | batt_utile=10.16kWh | dispo=4.97kWh | a_charger=5.19kWh | soc_a_charger=47%
-2026-01-17, 22:00,DESS_perso @ 21:45 | conso=20.4kWh | pv=5.2kWh | deficit=15.7kWh | SoC=37%→cible=100% (Δ=63.0%) | batt_utile=10.16kWh | dispo=3.2kWh | a_charger=6.96kWh | soc_a_charger=63%
-2026-01-17, 22:05,H_dynamique @ 22:00 | evt=BT_START | BTwin=22:00→05:45 | horloge=1 | SoC=36.0%→cible=100% (Δ=64.0%) | need=348m (bulk=288m abs=60m) | hdebut=23:55 (1435m) | hfin=05:45 (345m) | dispo=465m | ok=true | flags=wrap,hyst<10
-2026-01-17, 23:35,AUDIT_DESS @ 22:05 | cible=100.0% | SoC06=59.6% (Δ=-40.4%) | SoC22=36.1% | Grid06-22=0.100kWh | checks=[SoC06:NOK,Grid:OK,SoC22:OK] | NOK:SoC06
+
+2026-01-18, 21:45,SOC Cible @ 19:40 | SoC=57.2% → cible=75.2% | conso_J1=12.7kWh | pv_J1=6kWh | deficit=7.2kWh | batt_utile=10.16kWh | dispo=5.43kWh | a_charger=1.99kWh | soc_a_charger=18% | DoD=70.9%
+2026-01-18, 22:05,SOC Cible @ 21:45 | SoC=43.9% → cible=82.5% | conso_J1=13kWh | pv_J1=5.5kWh | deficit=8kWh | batt_utile=10.16kWh | dispo=3.96kWh | a_charger=4.26kWh | soc_a_charger=38.6% | DoD=78.8%
+2026-01-18, 22:05,AUDIT_DESS @ 22:05 | cible=82.5% | SoC06=99.4% (Δ=16.9%) | SoC22=42.9% | Grid06-22=0.300kWh | checks=[SoC06:NOK,Grid:OK,SoC22:OK] | NOK:SoC06
+2026-01-18, 22:20,H_DYN_EVENT @ 22:05 | OVERRIDE sent start=02:45 end=05:45 | SoC=42.6% cible=83% need=180m
+2026-01-18, 22:35,H_DYN_EVENT @ 22:20 | OVERRIDE sent start=02:40 end=05:45 | SoC=41.6% cible=83% need=185m
+2026-01-18, 22:50,H_DYN_EVENT @ 22:35 | OVERRIDE sent start=02:35 end=05:45 | SoC=40.6% cible=83% need=189m
+2026-01-18, 23:05,H_DYN_EVENT @ 22:50 | OVERRIDE sent start=02:30 end=05:45 | SoC=39.9% cible=83% need=192m
+2026-01-18, 23:20,H_DYN_EVENT @ 23:05 | OVERRIDE sent start=02:30 end=05:45 | SoC=39.2% cible=83% need=195m
+2026-01-18, 23:35,H_DYN_EVENT @ 23:20 | OVERRIDE sent start=02:25 end=05:45 | SoC=38.4% cible=83% need=199m
+2026-01-18, 23:50,H_DYN_EVENT @ 23:35 | OVERRIDE sent start=02:20 end=05:45 | SoC=37.5% cible=83% need=203m
+2026-01-19, 00:05,H_DYN_EVENT @ 23:50 | OVERRIDE sent start=02:15 end=05:45 | SoC=36.8% cible=83% need=206m
+2026-01-19, 00:20,H_DYN_EVENT @ 00:05 | OVERRIDE sent start=02:15 end=05:45 | SoC=36.2% cible=83% need=209m
+2026-01-19, 00:35,H_DYN_EVENT @ 00:20 | OVERRIDE sent start=02:10 end=05:45 | SoC=35.4% cible=83% need=212m
+2026-01-19, 00:50,H_DYN_EVENT @ 00:35 | OVERRIDE sent start=02:05 end=05:45 | SoC=34.7% cible=83% need=216m
+2026-01-19, 01:05,H_DYN_EVENT @ 00:50 | OVERRIDE sent start=02:05 end=05:45 | SoC=34.0% cible=83% need=219m
+2026-01-19, 01:20,H_DYN_EVENT @ 01:05 | OVERRIDE sent start=02:00 end=05:45 | SoC=33.2% cible=83% need=222m
+2026-01-19, 01:35,H_DYN_EVENT @ 01:20 | OVERRIDE sent start=01:55 end=05:45 | SoC=32.4% cible=83% need=226m
+2026-01-19, 01:50,H_DYN_EVENT @ 01:35 | OVERRIDE sent start=01:55 end=05:45 | SoC=31.5% cible=83% need=230m

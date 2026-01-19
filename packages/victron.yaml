@@ -3,14 +3,14 @@ mqtt:
   # MQTT
 
     - name: "MP2 SOC theorique par MQTT"
-      unique_id: mp2_soc_theorique_par_mqtt" 
+      unique_id: mp2_soc_theorique_par_mqtt
       state_topic: "mp2/batteries/soc_theorique"
       unit_of_measurement: '%'
       device_class: battery
       state_class: measurement
 
     - name: "MP2 VALIDE CP MQTT"
-      unique_id: mp2_valide_cp_par_mqtt" 
+      unique_id: mp2_valide_cp_par_mqtt
       state_topic: "mp2/multiplus2/valide_cp"
 
     - name: "Capacité Batterie Estimée par NR"
@@ -22,32 +22,38 @@ mqtt:
       # DESS Remy
 
     - name: "MP2 DESS Cible SOC par MQTT"
-      unique_id: mp2_dess_cible_soc" 
+      unique_id: mp2_dess_cible_soc
       state_topic: "mp2/dess_remy/cible_soc"
       unit_of_measurement: '%'
       device_class: battery
       state_class: measurement
 
     - name: "MP2 DESS Difference Cible-SOC"
-      unique_id: mp2_difference_cible_soc" 
+      unique_id: mp2_difference_cible_soc
       state_topic: "mp2/dess_remy/diff_soc"
       unit_of_measurement: '%'
       device_class: battery
       state_class: measurement
 
     - name: "MP2 DESS H_Debut DESS Remy"
-      unique_id: mp2_dess_h_debut" 
+      unique_id: mp2_dess_h_debut
       state_topic: "mp2/dess_remy/h_debut"   
 
     - name: "MP2 DESS Durée DESS Remy"
-      unique_id: mp2_dess_duree" 
+      unique_id: mp2_dess_duree
       state_topic: "mp2/dess_remy/duree"      
 
     - name: "MP2 DESS Remy Log Audit"
-      unique_id: mp2_dess_log_audit" 
+      unique_id: mp2_dess_log_audit
       state_topic: "mp2/dess_remy/log_audit"      
 
-
+    - name: "MP2 DESS Previ Conso 6-22 J1"
+      unique_id: mp2_dess_previ_conso_6_22_j1
+      state_topic: "mp2/dess_remy/previ_conso_6-22-J1"
+      unit_of_measurement: "kWh"
+      device_class: "energy"
+      state_class: "measurement"
+      
 # Victron
 #modbus:
 #  - name: cerbo

@@ -777,24 +777,6 @@
       initial_delay: 180
       notify_message: ' '
       resolved_message: ' '
-- id: '1687859491524'
-  alias: Température haute stérilisateur
-  description: ''
-  triggers:
-  - entity_id: sensor.esp127_temperature
-    above: 98
-    trigger: numeric_state
-  conditions: []
-  actions:
-  - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: 'T° = {{states(''sensor.esp127_temperature'')
-
-        }}{{-"\n"-}}{{states("sensor.date_time") }}'
-      title:
-  mode: single
 - id: '1690355630909'
   alias: 08 Restart Addon UPS si en défaut
   description: ''
@@ -2041,26 +2023,6 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Garage'
           title: Caméra Garage
-- id: '1737980607664'
-  alias: Debbug
-  description: ''
-  triggers: []
-  conditions: []
-  actions:
-  - data:
-      level: warning
-      message: 'Valeur de some_integer: {{ some_integer }}, valeur de some_string:
-        {{ some_string }}'
-    action: system_log.write
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ some_integer + some_string }}'
-      sequence:
-      - data:
-          message: Action choisie
-        action: notify.notify
-  mode: single
 - id: '1738429994514'
   alias: Volets Suivi Azimuth Soleil bureau été sur Seuils
   description: Gestion par seuils fixes selon le soleil, la radiation solaire et la
@@ -2221,40 +2183,6 @@
         {{ states(''sensor.am435x_awd_nombre_de_collisions'')|round(0)}}, {{ states(''sensor.am435x_awd_duree_d_utilisation_des_lames'')|round(0)}}'
     target:
       entity_id: notify.statistique_am435x
-  mode: single
-- id: '1741591881874'
-  alias: Energie Changement HP<->HC
-  description: ''
-  triggers:
-  - trigger: time
-    at: input_datetime.debut_heure_creuse
-    id: dhc
-  - trigger: time
-    at: input_datetime.fin_heure_creuse
-    id: fhc
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - dhc
-      sequence:
-      - action: select.select_option
-        data:
-          option: hc
-        target:
-          entity_id: select.compteur_energie_autres_jour
-    - conditions:
-      - condition: trigger
-        id:
-        - fhc
-      sequence:
-      - action: select.select_option
-        data:
-          option: hp
-        target:
-          entity_id: select.compteur_energie_autres_jour
   mode: single
 - id: '1741796346707'
   alias: Rechargement Auto Automower Husqvarna
@@ -2850,22 +2778,35 @@
     at: 06:00:00
     variables:
       tariff: jour_6_22
+    id: '6'
   - trigger: time
     at: '22:00:00'
     variables:
       tariff: hors_jour
+    id: '22'
   conditions: []
   actions:
-  - action: select.select_option
-    metadata: {}
-    data:
-      option: '{{ tariff }}'
-    target:
-      entity_id: select.comptage_energie_conso_maison_6_22
-  - action: select.select_option
-    metadata: {}
-    data:
-      option: '{{ tariff }}'
-    target:
-      entity_id: sensor.comptage_energie_conso_maison_6_22_hours_jour
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - '6'
+      sequence:
+      - action: select.select_option
+        metadata: {}
+        data:
+          option: jour_6_22
+        target:
+          entity_id: select.comptage_energie_conso_maison_6_22
+    - conditions:
+      - condition: trigger
+        id:
+        - '22'
+      sequence:
+      - action: select.select_option
+        metadata: {}
+        data:
+          option: hours_jour
+        target:
+          entity_id: select.comptage_energie_conso_maison_6_22
   mode: single

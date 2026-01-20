@@ -7,7 +7,7 @@ influxdb:
   ssl: false
   host: 192.168.0.203
   port: 8086
-  token: MIHpxE0nvvcBM7BBPB9LUotWxEvh6JPJDJVqv33JBY8syCNN7BvyS43NDdVy945UUMjBnVyzyaBvovzWKf9wIg==
+  token: !secret influxDB_token 
   organization: 859933fbd6d2be44
   bucket: homeassistant
   tags:

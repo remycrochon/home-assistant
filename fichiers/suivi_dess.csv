@@ -115,3 +115,144 @@ Home Assistant notifications (Log started: 2026-01-15T10:00:00.161290+00:00)
 2026-01-20, 00:20,H_DYN_EVENT @ 00:05 | OVERRIDE sent start=00:55 end=05:45 | SoC=25.8% cible=90% need=288m
 2026-01-20, 00:35,H_DYN_EVENT @ 00:20 | OVERRIDE sent start=00:55 end=05:45 | SoC=25.7% cible=90% need=288m
 2026-01-20, 00:50,H_DYN_EVENT @ 00:35 | OVERRIDE sent start=00:55 end=05:45 | SoC=25.7% cible=90% need=288m
+2026-01-20, 06:00,H_DYN_EVENT @ 00:50 | OVERRIDE sent start=01:00 end=05:45 | SoC=26.9% cible=90% need=283m
+2026-01-20, 08:07,DELTA_SOC @ 06:00 | SoC=86.7% | Cible=89.7% | Δ=-3.0%
+2026-01-20, 08:07,DELTA_SOC @ 08:07 | SoC=79.2% | Cible=89.7% | Δ=-10.5%
+2026-01-20, 08:08,SOC Cible @ 08:07 | SoC=79.2% → cible=56.2% | conso_J1=15.2kWh | pv_J1=10.6kWh | deficit=5.1kWh | batt_utile=10.16kWh | dispo=7.86kWh | a_charger=0kWh | soc_a_charger=0% | DoD=50.2%
+2026-01-20, 08:08,DELTA_SOC @ 08:08 | SoC=79.2% | Cible=56.2% | Δ=+23.0%
+2026-01-20, 08:48,SOC Cible @ 08:08 | SoC=79.2% → cible=56.2% | conso_J1=15.2kWh | pv_J1=10.6kWh | deficit=5.1kWh | batt_utile=10.16kWh | dispo=7.86kWh | a_charger=0kWh | soc_a_charger=0% | DoD=50.2%
+2026-01-20, 08:48,DELTA_SOC @ 08:48 | SoC=76.1% | Cible=56.2% | Δ=+19.9%
+2026-01-20, 08:49,SOC Cible @ 08:48 | SoC=76.1% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.52kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 08:49,DELTA_SOC @ 08:49 | SoC=76.1% | Cible=52.6% | Δ=+23.5%
+2026-01-20, 08:49,SOC Cible @ 08:49 | SoC=76.1% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.52kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 08:50,DELTA_SOC @ 08:49 | SoC=76.0% | Cible=52.6% | Δ=+23.4%
+2026-01-20, 08:55,SOC Cible @ 08:50 | SoC=76% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.51kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 08:55,DELTA_SOC @ 08:55 | SoC=75.7% | Cible=52.6% | Δ=+23.1%
+2026-01-20, 08:57,SOC Cible @ 08:55 | SoC=75.7% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.47kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 08:57,DELTA_SOC @ 08:57 | SoC=75.5% | Cible=52.6% | Δ=+22.9%
+2026-01-20, 08:57,SOC Cible @ 08:57 | SoC=75.5% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.45kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 08:57,DELTA_SOC @ 08:57 | SoC=75.5% | Cible=52.6% | Δ=+22.9%
+2026-01-20, 09:03,SOC Cible @ 08:57 | SoC=75.5% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.45kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:03,DELTA_SOC @ 09:03 | SoC=75.1% | Cible=52.6% | Δ=+22.5%
+2026-01-20, 09:03,SOC Cible @ 09:03 | SoC=75.1% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.41kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:03,DELTA_SOC @ 09:03 | SoC=75.1% | Cible=52.6% | Δ=+22.5%
+2026-01-20, 09:09,SOC Cible @ 09:03 | SoC=75% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.4kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:09,DELTA_SOC @ 09:09 | SoC=74.6% | Cible=52.6% | Δ=+22.0%
+2026-01-20, 09:12,SOC Cible @ 09:09 | SoC=74.6% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.35kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:12,DELTA_SOC @ 09:12 | SoC=74.4% | Cible=52.6% | Δ=+21.8%
+2026-01-20, 09:19,SOC Cible @ 09:12 | SoC=74.4% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.33kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:19,DELTA_SOC @ 09:19 | SoC=73.9% | Cible=52.6% | Δ=+21.3%
+2026-01-20, 09:30,SOC Cible @ 09:19 | SoC=73.9% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.28kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:30,DELTA_SOC @ 09:30 | SoC=73.2% | Cible=52.6% | Δ=+20.6%
+2026-01-20, 09:34,SOC Cible @ 09:30 | SoC=73.2% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.2kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:34,DELTA_SOC @ 09:34 | SoC=72.8% | Cible=52.6% | Δ=+20.2%
+2026-01-20, 09:37,SOC Cible @ 09:34 | SoC=72.7% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.14kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:37,DELTA_SOC @ 09:37 | SoC=72.5% | Cible=52.6% | Δ=+19.9%
+2026-01-20, 09:55,SOC Cible @ 09:37 | SoC=72.5% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.12kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:55,DELTA_SOC @ 09:55 | SoC=71.5% | Cible=52.6% | Δ=+18.9%
+2026-01-20, 09:58,SOC Cible @ 09:55 | SoC=71.5% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=7.01kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:58,DELTA_SOC @ 09:58 | SoC=71.3% | Cible=52.6% | Δ=+18.7%
+2026-01-20, 09:58,SOC Cible @ 09:58 | SoC=71.3% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=6.99kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 09:58,DELTA_SOC @ 09:58 | SoC=71.3% | Cible=52.6% | Δ=+18.7%
+2026-01-20, 10:01,SOC Cible @ 09:58 | SoC=71.3% → cible=52.6% | conso_J1=15.2kWh | pv_J1=11kWh | deficit=4.7kWh | batt_utile=10.16kWh | dispo=6.99kWh | a_charger=0kWh | soc_a_charger=0% | DoD=46.3%
+2026-01-20, 10:01,DELTA_SOC @ 10:01 | SoC=71.1% | Cible=70.0% | Δ=+1.1%
+2026-01-20, 10:03,SOC Cible @ 10:01 | SoC=71.1% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.97kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:04,DELTA_SOC @ 10:03 | SoC=71.0% | Cible=70.0% | Δ=+1.0%
+2026-01-20, 10:10,SOC Cible @ 10:04 | SoC=71% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.96kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:10,DELTA_SOC @ 10:10 | SoC=70.7% | Cible=70.0% | Δ=+0.7%
+2026-01-20, 10:15,SOC Cible @ 10:10 | SoC=70.7% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.92kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:15,DELTA_SOC @ 10:15 | SoC=70.5% | Cible=70.0% | Δ=+0.5%
+2026-01-20, 10:16,SOC Cible @ 10:15 | SoC=70.5% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.9kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:17,DELTA_SOC @ 10:16 | SoC=70.4% | Cible=51.7% | Δ=+18.7%
+2026-01-20, 10:18,SOC Cible @ 10:17 | SoC=70.4% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.89kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:18,DELTA_SOC @ 10:18 | SoC=70.3% | Cible=51.7% | Δ=+18.6%
+2026-01-20, 10:21,SOC Cible @ 10:18 | SoC=70.3% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.88kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:22,DELTA_SOC @ 10:21 | SoC=70.2% | Cible=51.7% | Δ=+18.5%
+2026-01-20, 10:26,SOC Cible @ 10:22 | SoC=70.2% → cible=51.7% | conso_J1=15.1kWh | pv_J1=11kWh | deficit=4.6kWh | batt_utile=10.16kWh | dispo=6.87kWh | a_charger=0kWh | soc_a_charger=0% | DoD=45.3%
+2026-01-20, 10:26,DELTA_SOC @ 10:26 | SoC=70.0% | Cible=70.0% | Δ=+0.0%
+2026-01-20, 10:30,SOC Cible @ 10:26 | SoC=70% → cible=34.5% | conso_J1=15.1kWh | pv_J1=12.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.84kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 10:30,DELTA_SOC @ 10:30 | SoC=69.9% | Cible=34.5% | Δ=+35.4%
+2026-01-20, 11:51,SOC Cible @ 10:30 | SoC=69.9% → cible=34.5% | conso_J1=15.1kWh | pv_J1=12.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.83kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 11:51,DELTA_SOC @ 11:51 | SoC=68.2% | Cible=70.0% | Δ=-1.8%
+2026-01-20, 11:52,SOC Cible @ 11:51 | SoC=68.2% → cible=33.6% | conso_J1=15kWh | pv_J1=12.9kWh | deficit=2.6kWh | batt_utile=10.16kWh | dispo=6.65kWh | a_charger=0kWh | soc_a_charger=0% | DoD=25.6%
+2026-01-20, 11:52,DELTA_SOC @ 11:52 | SoC=68.2% | Cible=33.6% | Δ=+34.6%
+2026-01-20, 11:53,SOC Cible @ 11:52 | SoC=68.2% → cible=33.6% | conso_J1=15kWh | pv_J1=12.9kWh | deficit=2.6kWh | batt_utile=10.16kWh | dispo=6.65kWh | a_charger=0kWh | soc_a_charger=0% | DoD=25.6%
+2026-01-20, 11:53,DELTA_SOC @ 11:53 | SoC=68.2% | Cible=33.6% | Δ=+34.6%
+2026-01-20, 11:58,SOC Cible @ 11:53 | SoC=68.2% → cible=33.6% | conso_J1=15kWh | pv_J1=12.9kWh | deficit=2.6kWh | batt_utile=10.16kWh | dispo=6.65kWh | a_charger=0kWh | soc_a_charger=0% | DoD=25.6%
+2026-01-20, 11:58,DELTA_SOC @ 11:58 | SoC=68.5% | Cible=70.0% | Δ=-1.5%
+2026-01-20, 12:00,SOC Cible @ 11:58 | SoC=68.5% → cible=33.6% | conso_J1=15kWh | pv_J1=12.9kWh | deficit=2.6kWh | batt_utile=10.16kWh | dispo=6.68kWh | a_charger=0kWh | soc_a_charger=0% | DoD=25.6%
+2026-01-20, 12:00,DELTA_SOC @ 12:00 | SoC=68.6% | Cible=33.6% | Δ=+35.0%
+2026-01-20, 12:03,SOC Cible @ 12:00 | SoC=68.6% → cible=33.6% | conso_J1=15kWh | pv_J1=12.9kWh | deficit=2.6kWh | batt_utile=10.16kWh | dispo=6.69kWh | a_charger=0kWh | soc_a_charger=0% | DoD=25.6%
+2026-01-20, 12:03,DELTA_SOC @ 12:03 | SoC=68.8% | Cible=33.6% | Δ=+35.2%
+2026-01-20, 12:04,SOC Cible @ 12:03 | SoC=68.8% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.71kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 12:04,DELTA_SOC @ 12:04 | SoC=68.9% | Cible=30.8% | Δ=+38.1%
+2026-01-20, 12:14,SOC Cible @ 12:04 | SoC=68.9% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.72kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 12:14,DELTA_SOC @ 12:14 | SoC=69.2% | Cible=70.0% | Δ=-0.8%
+2026-01-20, 12:17,SOC Cible @ 12:14 | SoC=69.2% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.76kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 12:17,DELTA_SOC @ 12:17 | SoC=69.2% | Cible=30.8% | Δ=+38.4%
+2026-01-20, 12:18,SOC Cible @ 12:17 | SoC=69.2% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.76kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 12:18,DELTA_SOC @ 12:18 | SoC=69.2% | Cible=30.8% | Δ=+38.4%
+2026-01-20, 12:20,SOC Cible @ 12:18 | SoC=69.2% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.76kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 12:20,DELTA_SOC @ 12:20 | SoC=69.2% | Cible=30.8% | Δ=+38.4%
+2026-01-20, 15:09,SOC Cible @ 12:20 | SoC=69.2% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.76kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 16:18,SOC Cible @ 12:20 | SoC=69.2% → cible=30.8% | conso_J1=14.7kWh | pv_J1=12.9kWh | deficit=2.3kWh | batt_utile=10.16kWh | dispo=6.76kWh | a_charger=0kWh | soc_a_charger=0% | DoD=22.6%
+2026-01-20, 16:20,DELTA_SOC @ 16:18 | SoC=75.0% | Cible=70.0% | Δ=+5.0%
+2026-01-20, 16:20,DELTA_SOC @ 16:20 | SoC=74.9% | Cible=70.0% | Δ=+4.9%
+2026-01-20, 16:21,SOC Cible @ 16:20 | SoC=74.9% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.39kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:21,DELTA_SOC @ 16:21 | SoC=74.9% | Cible=34.5% | Δ=+40.4%
+2026-01-20, 16:26,SOC Cible @ 16:21 | SoC=74.9% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.39kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:26,DELTA_SOC @ 16:26 | SoC=74.7% | Cible=70.0% | Δ=+4.7%
+2026-01-20, 16:27,SOC Cible @ 16:26 | SoC=74.7% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.36kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:27,DELTA_SOC @ 16:27 | SoC=74.7% | Cible=34.5% | Δ=+40.2%
+2026-01-20, 16:28,SOC Cible @ 16:27 | SoC=74.7% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.36kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:28,DELTA_SOC @ 16:28 | SoC=74.7% | Cible=34.5% | Δ=+40.2%
+2026-01-20, 16:31,SOC Cible @ 16:28 | SoC=74.7% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.36kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:31,DELTA_SOC @ 16:31 | SoC=74.6% | Cible=34.5% | Δ=+40.1%
+2026-01-20, 16:35,SOC Cible @ 16:31 | SoC=74.6% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.35kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:35,DELTA_SOC @ 16:35 | SoC=74.4% | Cible=34.5% | Δ=+39.9%
+2026-01-20, 16:36,SOC Cible @ 16:35 | SoC=74.4% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.33kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:36,DELTA_SOC @ 16:36 | SoC=74.4% | Cible=34.5% | Δ=+39.9%
+2026-01-20, 16:39,SOC Cible @ 16:36 | SoC=74.4% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.33kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:40,DELTA_SOC @ 16:39 | SoC=74.3% | Cible=34.5% | Δ=+39.8%
+2026-01-20, 16:42,SOC Cible @ 16:40 | SoC=74.3% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.32kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:42,DELTA_SOC @ 16:42 | SoC=74.2% | Cible=34.5% | Δ=+39.7%
+2026-01-20, 16:44,SOC Cible @ 16:42 | SoC=74.2% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.31kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:44,DELTA_SOC @ 16:44 | SoC=74.1% | Cible=34.5% | Δ=+39.6%
+2026-01-20, 16:46,SOC Cible @ 16:44 | SoC=74.1% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.3kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:46,DELTA_SOC @ 16:46 | SoC=74.0% | Cible=34.5% | Δ=+39.5%
+2026-01-20, 16:48,SOC Cible @ 16:46 | SoC=74% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.29kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:48,DELTA_SOC @ 16:48 | SoC=73.9% | Cible=34.5% | Δ=+39.4%
+2026-01-20, 16:53,SOC Cible @ 16:48 | SoC=73.9% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.28kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:53,DELTA_SOC @ 16:53 | SoC=73.7% | Cible=34.5% | Δ=+39.2%
+2026-01-20, 16:54,SOC Cible @ 16:53 | SoC=73.7% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.25kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 16:54,DELTA_SOC @ 16:54 | SoC=73.6% | Cible=34.5% | Δ=+39.1%
+2026-01-20, 17:24,SOC Cible @ 16:54 | SoC=73.6% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7.24kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:24,DELTA_SOC @ 17:24 | SoC=71.5% | Cible=70.0% | Δ=+1.5%
+2026-01-20, 17:25,SOC Cible @ 17:24 | SoC=71.4% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=7kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:26,DELTA_SOC @ 17:25 | SoC=71.3% | Cible=34.5% | Δ=+36.8%
+2026-01-20, 17:28,SOC Cible @ 17:26 | SoC=71.3% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.99kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:28,DELTA_SOC @ 17:28 | SoC=71.1% | Cible=34.5% | Δ=+36.6%
+2026-01-20, 17:29,SOC Cible @ 17:28 | SoC=71.1% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.97kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:29,DELTA_SOC @ 17:29 | SoC=71.0% | Cible=34.5% | Δ=+36.5%
+2026-01-20, 17:30,SOC Cible @ 17:29 | SoC=71% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.96kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:32,SOC Cible @ 17:30 | SoC=70.9% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.94kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:32,DELTA_SOC @ 17:32 | SoC=70.8% | Cible=50.0% | Δ=+20.8%
+2026-01-20, 17:37,SOC Cible @ 17:32 | SoC=70.8% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.93kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:38,DELTA_SOC @ 17:37 | SoC=70.3% | Cible=35.0% | Δ=+35.3%
+2026-01-20, 17:44,SOC Cible @ 17:38 | SoC=70.3% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.88kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:44,DELTA_SOC @ 17:44 | SoC=69.8% | Cible=34.5% | Δ=+35.3%
+2026-01-20, 17:49,SOC Cible @ 17:44 | SoC=69.8% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.82kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:49,DELTA_SOC @ 17:49 | SoC=69.3% | Cible=34.5% | Δ=+34.8%
+2026-01-20, 17:51,SOC Cible @ 17:49 | SoC=69.3% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.77kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:51,DELTA_SOC @ 17:51 | SoC=69.2% | Cible=34.5% | Δ=+34.7%
+2026-01-20, 17:55,SOC Cible @ 17:51 | SoC=69.2% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.76kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 17:55,DELTA_SOC @ 17:55 | SoC=68.8% | Cible=34.5% | Δ=+34.3%
+2026-01-20, 21:45,SOC Cible @ 17:55 | SoC=68.8% → cible=34.5% | conso_J1=14.1kWh | pv_J1=11.9kWh | deficit=2.7kWh | batt_utile=10.16kWh | dispo=6.71kWh | a_charger=0kWh | soc_a_charger=0% | DoD=26.6%
+2026-01-20, 22:05,SOC Cible @ 21:45 | SoC=46.6% → cible=35.4% | conso_J1=14.1kWh | pv_J1=11.8kWh | deficit=2.8kWh | batt_utile=10.16kWh | dispo=4.26kWh | a_charger=0kWh | soc_a_charger=0% | DoD=27.6%
+2026-01-20, 22:06,AUDIT_DESS @ 22:05 | cible=35.4% | SoC06=86.7% (Δ=51.3%) | SoC22=45.6% | Grid06-22=0.400kWh | checks=[SoC06:NOK,Grid:NOK,SoC22:OK] | NOK:SoC06+Grid
+2026-01-20, 22:21,H_DYN_EVENT @ 22:06 | OVERRIDE sent start=04:15 end=05:45 | SoC=45.2% cible=35% need=90m
+2026-01-20, 22:36,H_DYN_EVENT @ 22:21 | OVERRIDE sent start=04:15 end=05:45 | SoC=44.4% cible=35% need=90m
+2026-01-20, 22:51,H_DYN_EVENT @ 22:36 | OVERRIDE sent start=04:15 end=05:45 | SoC=43.5% cible=35% need=90m
+2026-01-20, 23:01,H_DYN_EVENT @ 22:51 | OVERRIDE sent start=04:15 end=05:45 | SoC=42.7% cible=35% need=90m
+2026-01-20, 23:01,DELTA_SOC @ 23:01 | SoC=42.0% | Cible=35.4% | Δ=+6.6%
+2026-01-20, 23:02,SOC Cible @ 23:01 | SoC=42% → cible=31.7% | conso_J1=13.7kWh | pv_J1=11.8kWh | deficit=2.4kWh | batt_utile=10.16kWh | dispo=3.75kWh | a_charger=0kWh | soc_a_charger=0% | DoD=23.6%

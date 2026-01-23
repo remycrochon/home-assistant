@@ -2,6 +2,8 @@
 # 0=Off;1=Low Power;2=Fault;3=Bulk;4=Absorption;5=Float;6=Storage;
 # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
 
+# ligne 101 pour tester ecs en journée
+
 substitutions:
   device_name: "esp176-routeur"
   friendly_name: esp176
@@ -37,8 +39,8 @@ esphome:
 
 esp32:
   board: esp32dev
-  framework:
-    type: arduino
+  framework: 
+    type: esp-idf
     
 wifi:
   networks:
@@ -63,8 +65,8 @@ status_led:
 # Enable logging
 logger:
   baud_rate: 0
-  level: info
-
+  level: INFO
+  
 # Enable Home Assistant API
 api:
 
@@ -109,7 +111,15 @@ i2c:
   scl: ${GPIO_scl}
   scan: True
   id: bus_a
-  frequency: 400kHz
+  frequency: 100kHz
+
+# ----------- GP8403 (DAC) -----------
+# Sortie analogique 0..10V sur CH1/CH2
+gp8403:
+  id: my_gp8403
+  voltage: 10V
+  model: GP8403
+  address: 0x5f
   
 globals:
   - id: p_dispo
@@ -186,8 +196,8 @@ select:
         # Passage dans tous les modes on met à zéro le triac
         - lambda: |-
             id(striac) = 0;
-        - light.turn_off:
-            id: gradateur
+        - output.turn_off: out_gradateur_0_10v
+
         - script.execute: calcul_injection_hp     
 
 binary_sensor:
@@ -209,6 +219,31 @@ binary_sensor:
   
 # Input Number
 number:
+  - platform: template
+    name: "Consigne 0-10V (V)"
+    id: consigne_0_10v
+    optimistic: true
+    restore_value: true
+    min_value: 0.0
+    max_value: 10.0
+    step: 0.01
+    unit_of_measurement: "V"
+    mode: slider
+    set_action:
+      - lambda: |-
+          float v = x;
+          if (v < 0.0f) v = 0.0f;
+          if (v > 10.0f) v = 10.0f;
+
+          float level = v / 10.0f;   // 0..10V -> 0..1
+          id(out_gradateur_0_10v).set_level(level);
+
+          // Optionnel: miroir en % si tu veux garder striac/afstriac
+          //id(striac) = level * 100.0f;
+          //id(afstriac).publish_state(id(striac));
+
+          ESP_LOGI("DAC", "Consigne=%.2fV -> level=%.4f", v, level);
+
   # seuil SOC validation routeur
   - platform: template
     name: "Consigne Triac en manu"
@@ -485,24 +520,11 @@ output:
     platform: gpio
     pin: ${GPIO_Led_rouge}
 
-  # Pilotage du Dimmer
-  - platform: ac_dimmer 
-    id: ecs
-    gate_pin: ${GPIO_Gate_pin}
-    method: leading
-    zero_cross_pin:
-      number: ${GPIO_ZC_pin} 
-      mode:
-        input: true
-      inverted: yes
-    min_power: 5%
-
-light:
-  - platform: monochromatic
-    name: "STriac"
-    output: ecs
-    id: gradateur
-    default_transition_length: 50ms
+  # Pilotage du Variareur LSA-H3P40YB-40A
+  - platform: gp8403
+    gp8403_id: my_gp8403
+    channel: 0
+    id: out_gradateur_0_10v
 
 # Affichage
 display:
@@ -608,7 +630,8 @@ script:
                 id(afpdispo).publish_state(0);
                 id(cons_batt_cours).publish_state(0);
                 ESP_LOGW("HP", "⚠️ Régulation OFF : conditions NOK ou arrêt manuel.");
-            - light.turn_off: gradateur
+            - output.turn_off: out_gradateur_0_10v
+
 
       # 2️⃣ Mode Auto + toutes conditions OK → régulation active
       - if:
@@ -625,10 +648,10 @@ script:
                 level: INFO
             - script.execute: regulation_interpolation
 
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(striac) / 100.0f;
+            - output.set_level:
+                id: out_gradateur_0_10v
+                level: !lambda 'return id(striac) / 100.0f;'
+
 
       # 3️⃣ Mode Manuel → application directe de la consigne
       - if:
@@ -644,10 +667,10 @@ script:
                 id(moderegul).publish_state("Manu");
                 id(cons_batt_cours).publish_state(0);
                 ESP_LOGI("HP", "🧩 Mode MANU → Triac forcé à %.1f%%", id(striac));
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda |-
-                  return id(striac) / 100.0f;
+            - output.set_level:
+                id: out_gradateur_0_10v
+                level: !lambda 'return id(striac) / 100.0f;'
+
 
       # Publication de la valeur du triac (affichage + MQTT)
       - lambda: |-
@@ -726,9 +749,9 @@ script:
             lambda: 'return id(hc_chauffe);'
           then:
             - script.execute: regulation_interpolation
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda 'return id(striac) / 100.0f;'
+            - output.set_level:
+                id: out_gradateur_0_10v
+                level: !lambda 'return id(striac) / 100.0f;'
             - lambda: |-
                 id(afstriac).publish_state(id(striac));
           else:
@@ -736,7 +759,8 @@ script:
                 id(striac) = 0.0f;
                 id(afstriac).publish_state(0);
                 id(afpdispo).publish_state(0);
-            - light.turn_off: gradateur
+            - output.turn_off: out_gradateur_0_10v
+
   ########################################################################
   # 🔹 Script : regulation_interpolation (commun HP + HC)
   ########################################################################
@@ -805,7 +829,12 @@ script:
           }
 
           // 🔹 Limitation & interpolation table puissance
-          pdispo = constrain(pdispo, 0.0f, id(pmax).state);
+          float pmax_v = id(pmax).state;
+          if (!std::isfinite(pmax_v)) pmax_v = 0.0f;
+
+          if (pdispo < 0.0f) pdispo = 0.0f;
+          if (pdispo > pmax_v) pdispo = pmax_v;
+
           id(p_dispo) = pdispo;
 
           float striac_f = 0.0f;
@@ -823,7 +852,9 @@ script:
           }
 
           if (isnan(striac_f)) striac_f = 0.0f;
-          id(striac) = constrain(striac_f, 0.0f, 100.0f);
+          if (striac_f < 0.0f) striac_f = 0.0f;
+          if (striac_f > 100.0f) striac_f = 100.0f;
+          id(striac) = striac_f;
 
           id(afpdispo).publish_state(id(p_dispo));
           id(moderegul).publish_state(id(regul));
@@ -912,9 +943,10 @@ script:
             - lambda: |-
                 id(striac) += 1.0; // Incrémente striac
                 ESP_LOGI("striac", "Valeur striac: %.2f", id(striac));
-            - light.turn_on:
-                id: gradateur
-                brightness: !lambda 'return id(striac) / 100.0;'  # Normalise entre 0.0 et 1.0
+            - output.set_level:
+                id: out_gradateur_0_10v
+                level: !lambda 'return id(striac) / 100.0f;'
+
 
             - delay: 20s  # Temporisation
 

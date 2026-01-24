@@ -172,33 +172,36 @@ select:
       - Arret
       - Etalonnage
     id: _Mode_Fonctionnement_routeur
-    on_value: 
+    on_value:
       then:
         - lambda: |-
             char mess[128];
-            snprintf(mess, sizeof(mess), "Mode Fonctionnement Routeur: %s", id(_Mode_Fonctionnement_routeur).current_option());
+            snprintf(mess, sizeof(mess), "Mode Fonctionnement Routeur: %s",
+                     id(_Mode_Fonctionnement_routeur).current_option());
             ESP_LOGI("fichier", "Message: %s", mess);
-            id(_log_fichier).execute(mess);  // Appelle le script _log_fichier avec le paramètre mess      
-        # Passage en mode étalonnage
+            id(_log_fichier).execute(mess);
+
+        # --- Si Etalonnage : on lance et on ne touche plus à la sortie ---
         - if:
             condition:
-              - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Etalonnage";'
+              lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Etalonnage";'
             then:
               - script.execute: etalonnage_striac
-        # Passage en mode Manu on remet à Zero le valid Routeur et la consigne Manu
-        - if:
-            condition:
-              - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option()  == "Manu";'
-            then:
-              - lambda: |-
-                  id(ctriac_manu).publish_state(0);
-              - switch.turn_off: validrouteur
-        # Passage dans tous les modes on met à zéro le triac
-        - lambda: |-
-            id(striac) = 0;
-        - output.turn_off: out_gradateur_0_10v
+            else:
+              # Passage en Manu : remise à zéro + validrouteur OFF (comme tu fais)
+              - if:
+                  condition:
+                    lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Manu";'
+                  then:
+                    - lambda: |-
+                        id(ctriac_manu).publish_state(0);
+                    - switch.turn_off: validrouteur
 
-        - script.execute: calcul_injection_hp     
+              # Dans tous les autres modes (Auto/Manu/Arret) : on met à zéro et on coupe puis on recalcul
+              - lambda: |-
+                  id(striac) = 0.0f;
+              - output.turn_off: out_gradateur_0_10v
+              - script.execute: calcul_injection_hp
 
 binary_sensor:
   #Etat de la connection
@@ -219,31 +222,6 @@ binary_sensor:
   
 # Input Number
 number:
-  - platform: template
-    name: "Consigne 0-10V (V)"
-    id: consigne_0_10v
-    optimistic: true
-    restore_value: true
-    min_value: 0.0
-    max_value: 10.0
-    step: 0.01
-    unit_of_measurement: "V"
-    mode: slider
-    set_action:
-      - lambda: |-
-          float v = x;
-          if (v < 0.0f) v = 0.0f;
-          if (v > 10.0f) v = 10.0f;
-
-          float level = v / 10.0f;   // 0..10V -> 0..1
-          id(out_gradateur_0_10v).set_level(level);
-
-          // Optionnel: miroir en % si tu veux garder striac/afstriac
-          //id(striac) = level * 100.0f;
-          //id(afstriac).publish_state(id(striac));
-
-          ESP_LOGI("DAC", "Consigne=%.2fV -> level=%.4f", v, level);
-
   # seuil SOC validation routeur
   - platform: template
     name: "Consigne Triac en manu"
@@ -385,14 +363,27 @@ sensor:
     state_class: "measurement"
     accuracy_decimals: 0
 
-  # Sortie triac de 0à100%
+  # Sortie triac de 0 à 100%
   - platform: template
     name: "Sortie Triac"
     id: afstriac
     unit_of_measurement: "%"
     state_class: "measurement"  
     accuracy_decimals: 2
-
+  # Sortie triac de 0 à 10V 
+  - platform: template
+    name: "Consigne 0-10V (V)"
+    id: consigne_0_10v
+    unit_of_measurement: "V"
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: 1s
+    lambda: |-
+      // striac = 0..100 (%)
+      float pct = id(striac);
+      if (pct < 0.0f) pct = 0.0f;
+      if (pct > 100.0f) pct = 100.0f;
+      return (pct / 100.0f) * 10.0f;
   # Pu disponible
   - platform: template
     name: "Pu Disponible"
@@ -554,12 +545,17 @@ interval:
       - if:
           condition:
             lambda: |-
-              // HP de 06:00 à 22:00, sinon HC
-              return id(is_hp_hours);   // true = HP, false = HC
+              return id(_Mode_Fonctionnement_routeur).current_option() != std::string("Etalonnage");            
           then:
-            - script.execute: calcul_injection_hp
-          else:
-            - script.execute: calcul_injection_hc
+            - if:
+                condition:
+                  lambda: |-
+                    // HP de 06:00 à 22:00, sinon HC
+                    return id(is_hp_hours);   // true = HP, false = HC
+                then:
+                  - script.execute: calcul_injection_hp
+                else:
+                  - script.execute: calcul_injection_hc
 
   - interval: 5s
     then:      
@@ -779,6 +775,137 @@ script:
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(res_pubatt).state);
               id(regul) = "HP Reg. (Bulk)";
+            }
+            else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "Float") { // Absorption / Float
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state + id(pu_batteries).state;
+              if (pdispo < 0.0f) pdispo = 0.0f;
+              id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
+              id(regul) = "HP Reg. (Abs/Float)";
+            }
+            else {
+              id(regul) = "HP Reg. (Bus VE NOK)";
+              id(cons_batt_cours).publish_state(0);
+              pdispo = 0.0f;
+            }
+
+            ESP_LOGI("regul",
+                     "HP → Prod=%.0fW | Conso=%.0fW | Clim=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW | Mode=%s",
+                     id(pu_prod).state,
+                     id(conso_maison).state,
+                     id(pu_clim).state,
+                     id(pu_pac).state,
+                     id(pu_batteries).state,
+                     pdispo,
+                     id(regul).c_str());
+          }
+          // 🔸 Branche HC : calcul prédictif réseau (chauffe ECS)
+          else {
+            const float RESEAU_CIBLE_HC = 6000.0f;  // puissance max visée sur réseau
+
+            float conso = id(conso_maison).state;
+            float clim  = id(pu_clim).state;
+            float pac   = id(pu_pac).state;
+            float batt  = id(pu_batteries).state;   // >0 décharge, <0 charge
+
+            if (std::isnan(conso)) conso = 0;
+            if (std::isnan(clim))  clim  = 0;
+            if (std::isnan(pac))   pac   = 0;
+            if (std::isnan(batt))  batt  = 0;
+
+            // p_dispo = cible - conso_maison - pu_clim - pu_pac - pu_batteries
+            pdispo = RESEAU_CIBLE_HC - conso - clim - pac - batt;
+            if (pdispo < 0.0f) pdispo = 0.0f;
+
+            id(regul) = "HC Chauffe ECS";
+            id(cons_batt_cours).publish_state(batt);
+
+            ESP_LOGI("regul",
+                     "HC → Cible=%.0fW | Conso=%.0fW | Clim=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW",
+                     RESEAU_CIBLE_HC, conso, clim, pac, batt, pdispo);
+          }
+
+          // 🔹 Limitation pdispo par pmax
+          float pmax_v = id(pmax).state;
+          if (!std::isfinite(pmax_v) || pmax_v < 0.0f) pmax_v = 0.0f;
+
+          if (pdispo < 0.0f) pdispo = 0.0f;
+          if (pdispo > pmax_v) pdispo = pmax_v;
+
+          id(p_dispo) = pdispo;
+          id(afpdispo).publish_state(pdispo);
+          id(moderegul).publish_state(id(regul));
+
+          // ✅ Garde-fou : si pas de puissance dispo => sortie 0%
+          if (pdispo <= 0.0f || id(table_puissance).size() < 2) {
+            id(striac) = 0.0f;
+            ESP_LOGI("regul",
+                     "%s | p_dispo=%.0fW -> STriac=0.0%% | Mode=%s",
+                     is_hp ? "HP" : "HC",
+                     pdispo,
+                     id(regul).c_str());
+            return;
+          }
+
+          // 🔹 Interpolation sur table puissance (robuste segments plats)
+          float striac_f = id(table_puissance).back().first;   // défaut = dernier %
+          float last_y   = id(table_puissance).back().second;
+
+          // Si pdispo au-delà du max de table => dernier point direct
+          if (pdispo >= last_y) {
+            striac_f = id(table_puissance).back().first;
+          } else {
+            for (size_t i = 1; i < id(table_puissance).size(); i++) {
+              float x0 = id(table_puissance)[i-1].first;   // % Triac
+              float y0 = id(table_puissance)[i-1].second;  // Puissance
+              float x1 = id(table_puissance)[i].first;
+              float y1 = id(table_puissance)[i].second;
+
+              // On cherche le 1er segment qui "couvre" pdispo
+              if (pdispo <= y1) {
+                float dy = (y1 - y0);
+
+                // ✅ Protection segment plat (dy=0) -> pas d'interpolation
+                if (fabsf(dy) < 0.0001f) {
+                  // Segment plat: on choisit x1 (ou x0) ; ici x1
+                  striac_f = x1;
+                } else {
+                  // interpolation linéaire
+                  striac_f = x0 + (pdispo - y0) * (x1 - x0) / dy;
+                }
+                break;
+              }
+            }
+          }
+
+          // 🔹 Clamp final 0..100
+          if (std::isnan(striac_f) || !std::isfinite(striac_f)) striac_f = 0.0f;
+          if (striac_f < 0.0f) striac_f = 0.0f;
+          if (striac_f > 100.0f) striac_f = 100.0f;
+
+          id(striac) = striac_f;
+          id(afstriac).publish_state(id(striac));
+
+          ESP_LOGI("regul",
+                   "%s | p_dispo=%.0fW | STriac=%.1f%% | Mode=%s",
+                   is_hp ? "HP" : "HC",
+                   pdispo, id(striac),
+                   id(regul).c_str());
+
+  - id: regulation_interpolation_old
+    mode: single
+    then:
+      - lambda: |-
+          // 🔹 Détermination du mode HP / HC à partir de l'heure
+          bool is_hp = id(is_hp_hours);  // true = HP (06–22h), false = HC (22–06h)
+          float pdispo = 0.0f;  // puissance disponible pour ECS
+
+          // 🔸 Branche HP : régulation sur production PV / batteries
+          if (is_hp) {
+            if (id(etatbus_ve).state == "Bulk") {  // Bulk
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state - id(res_pubatt).state;
+              if (pdispo < 0.0f) pdispo = 0.0f;
+              id(cons_batt_cours).publish_state(id(res_pubatt).state);
+              id(regul) = "HP Reg. (Bulk)";
             } 
             else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "Float") { // Absorption / Float
               pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state + id(pu_batteries).state;
@@ -943,10 +1070,14 @@ script:
             - lambda: |-
                 id(striac) += 1.0; // Incrémente striac
                 ESP_LOGI("striac", "Valeur striac: %.2f", id(striac));
+            - lambda: |-
+                id(afstriac).publish_state(id(striac));    
+                id(afpdispo).publish_state(0);            
+                id(moderegul).publish_state("Etalonnage");
+                id(cons_batt_cours).publish_state(0);
             - output.set_level:
                 id: out_gradateur_0_10v
                 level: !lambda 'return id(striac) / 100.0f;'
-
 
             - delay: 20s  # Temporisation
 
@@ -956,7 +1087,7 @@ script:
             - lambda: |-
                 std::string mess = "{";
                 mess += std::to_string(id(striac)) + ",";
-                mess += std::to_string(id(puecs).state)+"}";
+                mess += std::to_string(id(puecs).state)+"},";
                 ESP_LOGI("fichier", "Message: %s", mess.c_str());
                 id(_log_etalonnage).execute(mess);
 

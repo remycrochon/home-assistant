@@ -2,12 +2,21 @@ mqtt:
   sensor:
   # MQTT
 
-    - name: "MP2 SOC theorique par MQTT"
-      unique_id: mp2_soc_theorique_par_mqtt
+    - name: "MP2 SoC théorique Chatgpt"
+      unique_id: mp2_soc_th_json
       state_topic: "mp2/batteries/soc_theorique"
-      unit_of_measurement: '%'
+      unit_of_measurement: "%"
       device_class: battery
       state_class: measurement
+      value_template: "{{ value_json.get('SoCth', 0) | float(0) }}"
+
+    - name: "MP2 SoC théorique Lineaire"
+      unique_id: mp2_soc_lin_json
+      state_topic: "mp2/batteries/soc_theorique"
+      unit_of_measurement: "%"
+      device_class: battery
+      state_class: measurement
+      value_template: "{{ value_json.get('SoClin', 0) | float(0) }}"
 
     - name: "MP2 VALIDE CP MQTT"
       unique_id: mp2_valide_cp_par_mqtt

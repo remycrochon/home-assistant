@@ -463,7 +463,7 @@
       notify_message: ' '
 - id: '1642614758763'
   alias: Changement HP<->HC
-  description: ''
+  description: 1/3/5=HC_2/4/6=HP
   triggers:
   - entity_id:
     - sensor.esp124_tic_linky_tarif_distributeur
@@ -476,13 +476,13 @@
         conditions:
         - condition: state
           entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '1'
+          state: '1.0'
         - condition: state
           entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '3'
+          state: '3.0'
         - condition: state
           entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '5'
+          state: '5.0'
       sequence:
       - data:
           option: hc
@@ -503,13 +503,13 @@
         conditions:
         - condition: state
           entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '2'
+          state: '2.0'
         - condition: state
           entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '4'
+          state: '4.0'
         - condition: state
           entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '6'
+          state: '6.0'
       sequence:
       - data:
           option: hp

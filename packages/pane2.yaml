@@ -302,7 +302,7 @@ openhasp:
             {% endif %}
       - obj: "p5b46" # SOC
         properties:
-          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')|int(0) }} %"
+          "text": "{{ states('sensor.mp2_soc_affiche')|int(0) }} %"
       - obj: "p5b47" # Tps restant
         properties:
           "text": >-

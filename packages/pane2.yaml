@@ -124,7 +124,9 @@ openhasp:
           "up":
             - service: homeassistant.toggle
               entity_id: "switch.esp180_hotte_lumiere"
-
+      - obj: "p2b29"
+        properties:
+          "text": "{{ states('sensor.esp180_hotte_aspirante_esp180_pm2_5_hotte')|float(0)|round(1)}} ppm"
       - obj: "p2b31"
         properties:
           "text": "{{ states('sensor.esp180_temperature_hotte')|float(0)|round(1)}} C°" 

@@ -149,6 +149,7 @@ switch:
     name: "${friendly_name} Auto Hotte (PM2.5)"
     id: auto_hotte
     optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
 
   - platform: template
     name: "${friendly_name} Hotte"
@@ -258,7 +259,7 @@ sensor:
 
   - platform: homeassistant
     id: pm25_hotte_ha
-    entity_id: sensor.esp138_qualite_air_nb_de_particules_2_5  # 
+    entity_id: sensor.esp138_qualite_air_concentration_de_particules_2_5mm # 
     internal: true
 
   # Publication locale (facultatif mais pratique)
@@ -266,6 +267,8 @@ sensor:
     name: "${friendly_name}_PM2_5_Hotte"
     id: pm25_hotte
     unit_of_measurement: "µg/m³"
+    device_class: pm25
+    state_class: measurement
     accuracy_decimals: 0
     update_interval: 10s
     lambda: |-

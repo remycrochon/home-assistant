@@ -5,14 +5,4 @@
 ####################################################
 
 
-template:
-
-#Indique que la machine à laver est en fonctionnement
-  - binary_sensor:
-      - name: "MaLaver en marche"
-        unique_id: "mal_en_marche"
-        delay_off:
-          minutes: 5
-        state: >
-          {{ states('sensor.puissance_pc_mal')|float(default=0) > 15 }}
 

@@ -48,8 +48,17 @@ globals:
     type: uint32_t
     initial_value: '0'
 
+  # Auto-OFF : mémorise si la hotte a été démarrée automatiquement
+  - id: auto_started
+    type: bool
+    initial_value: 'false'
+
+  # Auto-OFF : début période "air redevenu propre"
+  - id: clean_since_ms
+    type: uint32_t
+    initial_value: '0'
+
 binary_sensor:
-  # Etat de la connexion
   - platform: status
     name: "${friendly_name}_Status"
 
@@ -143,6 +152,32 @@ number:
     unit_of_measurement: "µg/m³"
     step: 1
 
+  # Seuil Auto-OFF (si hotte auto-démarrée)
+  - platform: template
+    name: "${friendly_name} Seuil Auto-OFF PM2.5"
+    id: seuil_auto_off_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 12
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  # Délai Auto-OFF (air propre maintenu X secondes)
+  - platform: template
+    name: "${friendly_name} Auto-OFF Delai"
+    id: auto_off_delay_s
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 30
+    max_value: 1800
+    initial_value: 300
+    unit_of_measurement: "s"
+    step: 10
+
 switch:
   # Activation auto (PM2.5 -> allume la hotte)
   - platform: template
@@ -159,6 +194,10 @@ switch:
       - switch.turn_on: v1
       - delay: 100ms
       - switch.turn_on: r1_lumiere
+      # Si allumage manuel, on ne veut pas d'auto-off "forcé"
+      - lambda: |-
+          id(auto_started) = false;
+          id(clean_since_ms) = 0;
     turn_off_action:
       - switch.turn_off: v1
       - switch.turn_off: v2
@@ -167,6 +206,9 @@ switch:
       - switch.turn_off: r3
       - switch.turn_off: r4
       - switch.turn_off: r1_lumiere
+      - lambda: |-
+          id(auto_started) = false;
+          id(clean_since_ms) = 0;
 
   - platform: template
     name: "${friendly_name} Hotte V1"
@@ -256,10 +298,9 @@ sensor:
           - script.execute: calcul_vitesse
 
   # PM2.5 depuis Home Assistant (esp138 placé sur la hotte)
-
   - platform: homeassistant
     id: pm25_hotte_ha
-    entity_id: sensor.esp138_qualite_air_concentration_de_particules_2_5mm # 
+    entity_id: sensor.esp138_qualite_air_concentration_de_particules_2_5mm
     internal: true
 
   # Publication locale (facultatif mais pratique)
@@ -276,7 +317,6 @@ sensor:
       return id(pm25_hotte_ha).state;
 
 interval:
-  # Recalcule toutes les 10s : réactivité sur PM2.5
   - interval: 10s
     then:
       - script.execute: calcul_vitesse
@@ -289,7 +329,6 @@ script:
       - lambda: |-
           const std::string mode = id(mode_regulation).state;
           const bool mode_avec_pm = (mode == "PM2.5 + Humidite" || mode == "PM2.5 seule");
-
           if (!mode_avec_pm) return;
 
           const bool pm_ok = id(pm25_hotte_ha).has_state() && !isnan(id(pm25_hotte_ha).state);
@@ -299,6 +338,7 @@ script:
 
           // Si auto activé, hotte OFF et PM au-dessus du seuil => allumage
           if (id(auto_hotte).state && !id(hotte).state && pm >= id(seuil_auto_on_pm).state) {
+            // Allumage "auto" : on passe par la hotte mais on marque auto_started ensuite
             id(hotte).turn_on();
 
             // Choix vitesse au démarrage auto
@@ -306,15 +346,20 @@ script:
             else id(v1).turn_on();
 
             id(last_change_ms) = millis();
+
+            // Marqueur Auto-OFF actif
+            id(auto_started) = true;
+            id(clean_since_ms) = 0;
           }
 
-      # 2) Régulation de vitesse si hotte ON
+      # 2) Régulation de vitesse + Auto-OFF si hotte ON
       - if:
           condition:
             - switch.is_on: hotte
           then:
             - lambda: |-
                 const std::string mode = id(mode_regulation).state;
+                const bool mode_avec_pm = (mode == "PM2.5 + Humidite" || mode == "PM2.5 seule");
 
                 const bool pm_ok = id(pm25_hotte_ha).has_state() && !isnan(id(pm25_hotte_ha).state);
                 const float pm  = pm_ok ? id(pm25_hotte_ha).state : NAN;
@@ -383,4 +428,22 @@ script:
                     id(v3).turn_on();
                   }
                   id(last_change_ms) = now_ms;
+                }
+
+                // ===== AUTO-OFF (uniquement si auto-démarrée + auto_hotte ON + mode avec PM) =====
+                if (id(auto_hotte).state && mode_avec_pm && id(auto_started)) {
+                  // air "propre" si PM <= seuil_auto_off_pm
+                  if (pm_ok && pm <= id(seuil_auto_off_pm).state) {
+                    if (id(clean_since_ms) == 0) id(clean_since_ms) = now_ms;
+
+                    const uint32_t delay_ms = (uint32_t) (id(auto_off_delay_s).state * 1000.0f);
+                    if ((now_ms - id(clean_since_ms)) >= delay_ms) {
+                      id(hotte).turn_off();
+                      id(auto_started) = false;
+                      id(clean_since_ms) = 0;
+                    }
+                  } else {
+                    // pas assez propre -> on réarme le chrono
+                    id(clean_since_ms) = 0;
+                  }
                 }

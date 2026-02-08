@@ -1,5 +1,6 @@
 """Miscellaneous support functions for Watchman."""
 
+from collections.abc import AsyncGenerator
 import fnmatch
 import os
 import re
@@ -7,6 +8,7 @@ from types import MappingProxyType
 from typing import Any
 
 import anyio
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, split_entity_id
 from homeassistant.helpers import entity_registry as er
@@ -18,7 +20,6 @@ from ..const import (
     CONF_HEADER,
     CONF_IGNORED_FILES,
     CONF_IGNORED_ITEMS,
-    CONF_IGNORED_LABELS,
     CONF_IGNORED_STATES,
     CONF_INCLUDED_FOLDERS,
     CONF_REPORT_PATH,
@@ -48,7 +49,9 @@ def get_val(
     return val
 
 
-def to_lists(options, key, section=None):
+def to_lists(
+    options: MappingProxyType[str, Any] | dict[str, Any], key: str, section: str | None = None
+) -> list[str]:
     """Transform configuration value to the list of strings."""
     val = get_val(options, key, section)
     if isinstance(val, list):
@@ -58,7 +61,9 @@ def to_lists(options, key, section=None):
     return [x.strip() for x in val.split(",") if x.strip()]
 
 
-def to_listi(options, key, section=None):
+def to_listi(
+    options: MappingProxyType[str, Any] | dict[str, Any], key: str, section: str | None = None
+) -> list[int]:
     """Transform configuration value to the list of integers."""
     val = get_val(options, key, section)
     return [int(x) for x in val.split(",") if x.strip()]
@@ -66,6 +71,8 @@ def to_listi(options, key, section=None):
 
 def get_entry(hass: HomeAssistant) -> Any:
     """Return Watchman's ConfigEntry instance."""
+    if DOMAIN_DATA not in hass.data:
+        return None
     return hass.config_entries.async_get_entry(
         hass.data[DOMAIN_DATA]["config_entry_id"]
     )
@@ -73,18 +80,20 @@ def get_entry(hass: HomeAssistant) -> Any:
 
 def get_config(hass: HomeAssistant, key: str, default: Any | None = None) -> Any:
     """Get configuration value from ConfigEntry."""
-    assert hass.data.get(DOMAIN_DATA)
+    if DOMAIN_DATA not in hass.data:
+        return default
+
     entry = hass.config_entries.async_get_entry(
         hass.data[DOMAIN_DATA]["config_entry_id"]
     )
 
-    assert isinstance(entry, ConfigEntry)
+    if not isinstance(entry, ConfigEntry):
+        return default
 
     if key in [
         CONF_INCLUDED_FOLDERS,
         CONF_IGNORED_ITEMS,
         CONF_IGNORED_FILES,
-        CONF_IGNORED_LABELS,
     ]:
         return to_lists(entry.data, key)
 
@@ -99,13 +108,12 @@ def get_config(hass: HomeAssistant, key: str, default: Any | None = None) -> Any
         section_name = CONF_SECTION_APPEARANCE_LOCATION
         if key == CONF_COLUMNS_WIDTH:
             return to_listi(entry.data, CONF_COLUMNS_WIDTH, section_name)
-        else:
-            return get_val(entry.data, key, section_name)
+        return get_val(entry.data, key, section_name)
 
-    assert False, "Unknown key {}".format(key)
+    return default
 
 
-async def async_is_valid_path(path) -> bool:
+async def async_is_valid_path(path: str) -> bool:
     """Validate the report path."""
     folder, f_name = os.path.split(path)
     if is_valid := (
@@ -115,7 +123,9 @@ async def async_is_valid_path(path) -> bool:
     return is_valid
 
 
-async def async_get_next_file(folder_tuples, ignored_files):
+async def async_get_next_file(
+    folder_tuples: list[tuple[str, str]], ignored_files: list[str]
+) -> AsyncGenerator[tuple[str, bool]]:
     """Return next file from scan queue."""
     if not ignored_files:
         ignored_files = ""
@@ -133,7 +143,7 @@ async def async_get_next_file(folder_tuples, ignored_files):
             )
 
 
-def get_included_folders(hass):
+def get_included_folders(hass: HomeAssistant) -> list[tuple[str, str]]:
     """Gather the list of folders to parse."""
     folders = []
 
@@ -148,15 +158,17 @@ def get_included_folders(hass):
     return folders
 
 
-def is_action(hass, entry):
+def is_action(hass: HomeAssistant, entry: str) -> bool:
     """Check whether config entry is an action."""
     if not isinstance(entry, str):
         return False
-    domain, service = entry.split(".")[0], ".".join(entry.split(".")[1:])
+    domain, service = entry.split(".", maxsplit=1)[0], ".".join(entry.split(".")[1:])
     return hass.services.has_service(domain, service)
 
 
-def get_entity_state(hass, entry, friendly_names=False):
+def get_entity_state(
+    hass: HomeAssistant, entry: str, *, friendly_names: bool = False
+) -> tuple[str, str | None]:
     """Return entity state or 'missing' if entity does not extst."""
     entity_state = hass.states.get(entry)
     entity_registry = er.async_get(hass)
@@ -176,3 +188,28 @@ def get_entity_state(hass, entry, friendly_names=False):
             state = "available"
 
     return state, name
+
+
+def obfuscate_id(item_id: str) -> str:
+    """Obfuscate entity or action ID for logging."""
+    if not isinstance(item_id, str) or "." not in item_id:
+        return item_id
+
+    parts = item_id.split(".", 1)
+    domain = parts[0]
+    name = parts[1]
+
+    if len(name) <= 3:
+        return f"{domain}.{name}"
+
+    prefix = name[:3]
+    suffix = name[3:]
+
+    masked_suffix = ""
+    for char in suffix:
+        if char.isalnum():
+            masked_suffix += "*"
+        else:
+            masked_suffix += char
+
+    return f"{domain}.{prefix}{masked_suffix}"

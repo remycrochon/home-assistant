@@ -2286,3 +2286,909 @@ Home Assistant notifications (Log started: 2026-02-04T08:32:38.564737+00:00)
 2026-02-10, 01:41,⚡ CP1 ON | SoC=56.4% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
 2026-02-10, 01:51,⚡ CP1 ON | SoC=59.1% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
 2026-02-10, 01:51,H_DYN @ 01:51 | SoC=61.7% cible=100% (Δ=38.3%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 02:01,⚡ CP1 ON | SoC=61.7% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 02:11,⚡ CP1 ON | SoC=64.3% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 02:21,⚡ CP1 ON | SoC=66.9% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 02:31,⚡ CP1 ON | SoC=69.6% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 02:31,H_DYN @ 02:31 | SoC=72.2% cible=100% (Δ=27.8%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 02:41,⚡ CP1 ON | SoC=72.2% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 02:41,H_DYN @ 02:41 | SoC=74.3% cible=100% (Δ=25.7%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 02:51,⚡ CP1 ON | SoC=74.3% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 03:01,⚡ CP1 ON | SoC=75.5% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 03:01,H_DYN @ 03:01 | SoC=77.5% cible=100% (Δ=22.5%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 03:11,⚡ CP1 ON | SoC=77.5% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 03:11,H_DYN @ 03:11 | SoC=80.2% cible=100% (Δ=19.8%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 03:21,⚡ CP1 ON | SoC=80.2% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 03:21,H_DYN @ 03:21 | SoC=82.8% cible=100% (Δ=17.2%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 03:31,⚡ CP1 ON | SoC=82.8% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 03:31,H_DYN @ 03:31 | SoC=84% cible=100% (Δ=16%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 03:41,⚡ CP1 ON | SoC=84.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 03:51,⚡ CP1 ON | SoC=85.1% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 04:01,⚡ CP1 ON | SoC=87.7% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 04:11,⚡ CP1 ON | SoC=90.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 04:21,⚡ CP1 ON | SoC=92.3% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 04:31,⚡ CP1 ON | SoC=94.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 04:31,H_DYN @ 04:31 | SoC=95.1% cible=100% (Δ=4.9%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 04:41,⚡ CP1 ON | SoC=95.1% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 04:41,H_DYN @ 04:41 | SoC=96.3% cible=100% (Δ=3.7%) | safety=TRUE | win=01:00→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-10, 04:51,⚡ CP1 ON | SoC=96.3% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:01,⚡ CP1 ON | SoC=97.2% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:11,⚡ CP1 ON | SoC=97.9% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:21,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:31,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:41,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:51,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=01:00 | Hfin=05:45 | Durée=04:45 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-10, 05:51,H_DYN @ 05:51 | SoC=99.7% cible=100% (need=0.3%) | safety=FALSE | out=-1 | l_status=7 | reason=Hors fenetre de tir
+2026-02-10, 06:00,⏱️ CP1 OFF | SoC=99.7% | Seuil=100% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:00,DELTA_SOC @ 06:00 | SoC=99.3% | Cible=100.0% | Δ=-0.7%
+2026-02-10, 06:01,unknown
+2026-02-10, 06:01,H_DYN @ 06:01 | SoC=99.3% cible=89% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:11,⏱️ CP1 OFF | SoC=99.3% | Seuil=89% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:15,⏱️ CP1 OFF | SoC=98.9% | Seuil=89% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:21,unknown
+2026-02-10, 06:21,H_DYN @ 06:21 | SoC=98.2% cible=89% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:30,⏱️ CP1 OFF | SoC=98.2% | Seuil=89% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:31,unknown
+2026-02-10, 06:31,H_DYN @ 06:31 | SoC=97.6% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:41,⏱️ CP1 OFF | SoC=97.6% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:41,H_DYN @ 06:41 | SoC=97% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:45,⏱️ CP1 OFF | SoC=97.0% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 06:51,unknown
+2026-02-10, 06:51,H_DYN @ 06:51 | SoC=95.8% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:00,⏱️ CP1 OFF | SoC=95.8% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:01,unknown
+2026-02-10, 07:01,H_DYN @ 07:01 | SoC=94.9% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:11,⏱️ CP1 OFF | SoC=94.9% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:15,⏱️ CP1 OFF | SoC=93.9% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:21,unknown
+2026-02-10, 07:21,H_DYN @ 07:21 | SoC=93.3% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:30,⏱️ CP1 OFF | SoC=93.3% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:31,unknown
+2026-02-10, 07:31,H_DYN @ 07:31 | SoC=92.7% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:41,⏱️ CP1 OFF | SoC=92.7% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:45,⏱️ CP1 OFF | SoC=92.0% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 07:51,unknown
+2026-02-10, 08:00,⏱️ CP1 OFF | SoC=91.4% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:01,unknown
+2026-02-10, 08:01,H_DYN @ 08:01 | SoC=90.6% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:11,⏱️ CP1 OFF | SoC=90.6% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:11,H_DYN @ 08:11 | SoC=90% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:15,⏱️ CP1 OFF | SoC=90.0% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:21,unknown
+2026-02-10, 08:21,H_DYN @ 08:21 | SoC=89.2% cible=86% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:30,⏱️ CP1 OFF | SoC=89.2% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:31,unknown
+2026-02-10, 08:31,H_DYN @ 08:31 | SoC=88.6% cible=97% (need=8.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:41,⏱️ CP1 OFF | SoC=88.6% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:41,H_DYN @ 08:41 | SoC=87.9% cible=97% (need=9.4%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:45,⏱️ CP1 OFF | SoC=87.9% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 08:51,unknown
+2026-02-10, 08:51,H_DYN @ 08:51 | SoC=87.2% cible=97% (need=10.1%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:00,⏱️ CP1 OFF | SoC=87.2% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:01,unknown
+2026-02-10, 09:01,H_DYN @ 09:01 | SoC=86.5% cible=97% (need=10.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:11,⏱️ CP1 OFF | SoC=86.5% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:15,⏱️ CP1 OFF | SoC=85.9% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:21,unknown
+2026-02-10, 09:21,H_DYN @ 09:21 | SoC=85.3% cible=97% (need=12%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:30,⏱️ CP1 OFF | SoC=85.3% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:31,unknown
+2026-02-10, 09:31,H_DYN @ 09:31 | SoC=84.6% cible=97% (need=12.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:41,⏱️ CP1 OFF | SoC=84.6% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:41,H_DYN @ 09:41 | SoC=83.9% cible=97% (need=13.4%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:45,⏱️ CP1 OFF | SoC=83.9% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 09:51,unknown
+2026-02-10, 09:51,H_DYN @ 09:51 | SoC=83.3% cible=97% (need=14%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:00,⏱️ CP1 OFF | SoC=83.3% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:01,unknown
+2026-02-10, 10:01,H_DYN @ 10:01 | SoC=82.8% cible=97% (need=14.5%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:11,⏱️ CP1 OFF | SoC=82.8% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:15,⏱️ CP1 OFF | SoC=81.4% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:21,unknown
+2026-02-10, 10:21,H_DYN @ 10:21 | SoC=79.7% cible=97% (need=17.6%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:30,⏱️ CP1 OFF | SoC=79.7% | Seuil=97% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:31,unknown
+2026-02-10, 10:31,H_DYN @ 10:31 | SoC=78.2% cible=86% (need=8.2%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:41,⏱️ CP1 OFF | SoC=78.2% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:41,H_DYN @ 10:41 | SoC=77% cible=86% (need=9.4%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:45,⏱️ CP1 OFF | SoC=77.0% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 10:51,unknown
+2026-02-10, 11:00,⏱️ CP1 OFF | SoC=75.6% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:01,unknown
+2026-02-10, 11:01,H_DYN @ 11:01 | SoC=74.3% cible=86% (need=12.1%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:11,⏱️ CP1 OFF | SoC=74.3% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:11,H_DYN @ 11:11 | SoC=73.2% cible=86% (need=13.2%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:15,⏱️ CP1 OFF | SoC=73.2% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:21,unknown
+2026-02-10, 11:21,H_DYN @ 11:21 | SoC=72.6% cible=86% (need=13.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:30,⏱️ CP1 OFF | SoC=72.6% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:31,unknown
+2026-02-10, 11:41,⏱️ CP1 OFF | SoC=72.2% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:45,⏱️ CP1 OFF | SoC=72.1% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 11:51,unknown
+2026-02-10, 11:51,H_DYN @ 11:51 | SoC=72.1% cible=86% (need=14.3%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:00,⏱️ CP1 OFF | SoC=72.1% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:01,unknown
+2026-02-10, 12:01,H_DYN @ 12:01 | SoC=71.7% cible=86% (need=14.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:11,⏱️ CP1 OFF | SoC=71.7% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:15,⏱️ CP1 OFF | SoC=71.4% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:21,unknown
+2026-02-10, 12:30,⏱️ CP1 OFF | SoC=70.4% | Seuil=86% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:31,unknown
+2026-02-10, 12:31,H_DYN @ 12:31 | SoC=68.8% cible=72% (need=3.1%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:41,⏱️ CP1 OFF | SoC=68.8% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:45,⏱️ CP1 OFF | SoC=67.6% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 12:51,unknown
+2026-02-10, 13:00,⏱️ CP1 OFF | SoC=66.7% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:01,unknown
+2026-02-10, 13:01,H_DYN @ 13:01 | SoC=66.2% cible=72% (need=5.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:11,⏱️ CP1 OFF | SoC=66.2% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:11,H_DYN @ 13:11 | SoC=66% cible=72% (need=5.9%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:15,⏱️ CP1 OFF | SoC=66.0% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:21,unknown
+2026-02-10, 13:21,H_DYN @ 13:21 | SoC=65.6% cible=72% (need=6.3%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:30,⏱️ CP1 OFF | SoC=65.6% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:31,unknown
+2026-02-10, 13:31,H_DYN @ 13:31 | SoC=65.1% cible=72% (need=6.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:41,⏱️ CP1 OFF | SoC=65.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:41,H_DYN @ 13:41 | SoC=64.7% cible=72% (need=7.2%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:45,⏱️ CP1 OFF | SoC=64.7% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 13:51,unknown
+2026-02-10, 13:51,H_DYN @ 13:51 | SoC=64.4% cible=72% (need=7.5%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:00,⏱️ CP1 OFF | SoC=64.4% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:01,unknown
+2026-02-10, 14:11,⏱️ CP1 OFF | SoC=64.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:11,H_DYN @ 14:11 | SoC=63.7% cible=72% (need=8.2%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:15,⏱️ CP1 OFF | SoC=63.7% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:21,unknown
+2026-02-10, 14:21,H_DYN @ 14:21 | SoC=63.1% cible=72% (need=8.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:30,⏱️ CP1 OFF | SoC=63.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:31,unknown
+2026-02-10, 14:31,H_DYN @ 14:31 | SoC=62.7% cible=72% (need=9.2%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:41,⏱️ CP1 OFF | SoC=62.7% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:41,H_DYN @ 14:41 | SoC=62.2% cible=72% (need=9.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:45,⏱️ CP1 OFF | SoC=62.2% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 14:51,unknown
+2026-02-10, 15:00,⏱️ CP1 OFF | SoC=61.7% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:01,unknown
+2026-02-10, 15:01,H_DYN @ 15:01 | SoC=61.1% cible=72% (need=10.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:11,⏱️ CP1 OFF | SoC=61.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:11,H_DYN @ 15:11 | SoC=61.1% cible=72% (need=10.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:15,⏱️ CP1 OFF | SoC=61.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:21,unknown
+2026-02-10, 15:30,⏱️ CP1 OFF | SoC=60.9% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:31,unknown
+2026-02-10, 15:31,H_DYN @ 15:31 | SoC=60.8% cible=72% (need=11.1%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:41,⏱️ CP1 OFF | SoC=60.8% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:45,⏱️ CP1 OFF | SoC=60.4% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 15:51,unknown
+2026-02-10, 16:00,⏱️ CP1 OFF | SoC=60.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:01,unknown
+2026-02-10, 16:11,⏱️ CP1 OFF | SoC=59.6% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:11,H_DYN @ 16:11 | SoC=59.1% cible=72% (need=12.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:15,⏱️ CP1 OFF | SoC=59.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:21,unknown
+2026-02-10, 16:30,⏱️ CP1 OFF | SoC=58.0% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:31,unknown
+2026-02-10, 16:41,⏱️ CP1 OFF | SoC=55.6% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:41,H_DYN @ 16:41 | SoC=53.9% cible=72% (need=18%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:45,⏱️ CP1 OFF | SoC=53.9% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 16:51,unknown
+2026-02-10, 17:00,⏱️ CP1 OFF | SoC=52.1% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:01,unknown
+2026-02-10, 17:11,⏱️ CP1 OFF | SoC=50.7% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:11,H_DYN @ 17:11 | SoC=49.4% cible=72% (need=22.5%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:15,⏱️ CP1 OFF | SoC=49.4% | Seuil=72% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:21,unknown
+2026-02-10, 17:21,H_DYN @ 17:21 | SoC=48.6% cible=68% (need=19.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:30,⏱️ CP1 OFF | SoC=48.6% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:31,unknown
+2026-02-10, 17:31,H_DYN @ 17:31 | SoC=47.8% cible=68% (need=20.5%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:41,⏱️ CP1 OFF | SoC=47.8% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:41,H_DYN @ 17:41 | SoC=46.9% cible=68% (need=21.4%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:45,⏱️ CP1 OFF | SoC=46.9% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 17:51,unknown
+2026-02-10, 17:51,H_DYN @ 17:51 | SoC=45.7% cible=68% (need=22.6%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:00,⏱️ CP1 OFF | SoC=45.7% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:01,unknown
+2026-02-10, 18:01,H_DYN @ 18:01 | SoC=44.7% cible=68% (need=23.6%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:11,⏱️ CP1 OFF | SoC=44.7% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:11,H_DYN @ 18:11 | SoC=43.7% cible=68% (need=24.6%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:15,⏱️ CP1 OFF | SoC=43.7% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:21,unknown
+2026-02-10, 18:30,⏱️ CP1 OFF | SoC=42.7% | Seuil=68% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:31,unknown
+2026-02-10, 18:31,H_DYN @ 18:31 | SoC=41.9% cible=75% (need=32.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:41,⏱️ CP1 OFF | SoC=41.9% | Seuil=75% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:45,⏱️ CP1 OFF | SoC=41.0% | Seuil=75% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 18:51,unknown
+2026-02-10, 19:00,⏱️ CP1 OFF | SoC=40.1% | Seuil=75% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:01,unknown
+2026-02-10, 19:11,⏱️ CP1 OFF | SoC=39.3% | Seuil=75% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:15,⏱️ CP1 OFF | SoC=38.7% | Seuil=75% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:21,unknown
+2026-02-10, 19:21,H_DYN @ 19:21 | SoC=38% cible=73% (need=34.8%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:30,⏱️ CP1 OFF | SoC=38.0% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:31,unknown
+2026-02-10, 19:31,H_DYN @ 19:31 | SoC=37.3% cible=73% (need=35.5%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:41,⏱️ CP1 OFF | SoC=37.3% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:41,H_DYN @ 19:41 | SoC=36.5% cible=73% (need=36.3%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:45,⏱️ CP1 OFF | SoC=36.5% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 19:51,unknown
+2026-02-10, 19:51,H_DYN @ 19:51 | SoC=35.6% cible=73% (need=37.2%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:00,⏱️ CP1 OFF | SoC=35.6% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:01,unknown
+2026-02-10, 20:11,⏱️ CP1 OFF | SoC=34.7% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:11,H_DYN @ 20:11 | SoC=33.9% cible=73% (need=38.9%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:15,⏱️ CP1 OFF | SoC=33.9% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:21,unknown
+2026-02-10, 20:21,H_DYN @ 20:21 | SoC=33.1% cible=73% (need=39.7%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:30,⏱️ CP1 OFF | SoC=33.1% | Seuil=73% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:31,unknown
+2026-02-10, 20:31,H_DYN @ 20:31 | SoC=32.2% cible=76% (need=43.3%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:41,⏱️ CP1 OFF | SoC=32.2% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:41,H_DYN @ 20:41 | SoC=31.4% cible=76% (need=44.1%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:45,⏱️ CP1 OFF | SoC=31.4% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 20:51,unknown
+2026-02-10, 21:01,⏱️ CP1 OFF | SoC=30.5% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:01,H_DYN @ 21:01 | SoC=29.6% cible=76% (need=45.9%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:11,⏱️ CP1 OFF | SoC=29.6% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:11,H_DYN @ 21:11 | SoC=28.9% cible=76% (need=46.6%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:21,⏱️ CP1 OFF | SoC=28.9% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:21,H_DYN @ 21:21 | SoC=28.2% cible=76% (need=47.3%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:31,⏱️ CP1 OFF | SoC=28.2% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:31,H_DYN @ 21:31 | SoC=27.6% cible=76% (need=47.9%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:41,⏱️ CP1 OFF | SoC=27.6% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:45,⏱️ CP1 OFF | SoC=26.9% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 21:52,unknown
+2026-02-10, 21:52,H_DYN @ 21:51 | SoC=26.2% cible=76% (need=49.3%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-10, 22:00,⏱️ CP1 OFF | SoC=26.2% | Seuil=76% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-10, 22:02,⏱️ CP1 OFF | SoC=25.4% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:02,H_DYN @ 22:02 | SoC=25.2% cible=76% (need=50.3%) | safety=TRUE | win=01:55→05:45 | nowInWin=false | need=227m (bulk=227m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 22:05,⏱️ CP1 OFF | SoC=25.2% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:12,AUDIT_DESS @ 22:05 | cible=75.5% | SoC06=99.3% (Δ=23.8%) | SoC22=25.4% | Grid06-22=0.300kWh | checks=[SoC06:NOK,Grid:NOK,SoC22:OK] | NOK:SoC06+Grid
+2026-02-10, 22:22,⏱️ CP1 OFF | SoC=24.2% | Seuil=76% | Hdeb=01:50 | Hfin=05:45 | Durée=03:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:32,⏱️ CP1 OFF | SoC=23.4% | Seuil=76% | Hdeb=01:50 | Hfin=05:45 | Durée=03:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:32,H_DYN @ 22:32 | SoC=22.6% cible=76% (need=52.9%) | safety=TRUE | win=01:45→05:45 | nowInWin=false | need=239m (bulk=239m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 22:41,⏱️ CP1 OFF | SoC=22.6% | Seuil=76% | Hdeb=01:45 | Hfin=05:45 | Durée=04:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=45.96V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=45.95V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=45.94V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.17V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.18V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.18V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.19V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.19V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.20V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.20V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.20V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.21V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.21V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:41,BL_GUARD @ 22:41 | Ubatt=46.22V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:41 | Ubatt=46.22V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.22V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,H_DYN @ 22:42 | SoC=21.9% cible=76% (need=53.6%) | safety=TRUE | win=01:40→05:45 | nowInWin=false | need=242m (bulk=242m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 22:42,⏱️ CP1 OFF | SoC=21.9% | Seuil=76% | Hdeb=01:40 | Hfin=05:45 | Durée=04:05 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.23V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.23V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.23V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.24V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.24V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.24V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.24V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.25V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.25V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.25V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.25V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:42,BL_GUARD @ 22:42 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:42 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.26V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.27V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:43,BL_GUARD @ 22:43 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:43 | Ubatt=46.28V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.29V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:44,BL_GUARD @ 22:44 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:44 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.30V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:45,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:45 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.31V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:46,BL_GUARD @ 22:46 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:46 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.32V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:47,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:47 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.33V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:48,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:48 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:49,BL_GUARD @ 22:49 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:49 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.34V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:50,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:50 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.35V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.36V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.37V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.37V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.37V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.38V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.38V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.38V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.39V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.39V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:51,BL_GUARD @ 22:51 | Ubatt=46.39V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:51 | Ubatt=46.40V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,H_DYN @ 22:52 | SoC=21.9% cible=76% (need=53.6%) | safety=TRUE | win=01:40→05:45 | nowInWin=false | need=242m (bulk=242m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 22:52,⏱️ CP1 OFF | SoC=21.9% | Seuil=76% | Hdeb=01:40 | Hfin=05:45 | Durée=04:05 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.40V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.42V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.41V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.41V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.41V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.42V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.42V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.42V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.43V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.42V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.43V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.43V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.43V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.44V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.44V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.44V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.44V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.45V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:52,BL_GUARD @ 22:52 | Ubatt=46.45V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:52 | Ubatt=46.46V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.46V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.46V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.47V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.47V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.47V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.47V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.47V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.47V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.48V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.48V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.48V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.49V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.49V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.48V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.49V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.49V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.49V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:53,BL_GUARD @ 22:53 | Ubatt=46.49V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:53 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.50V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.51V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.52V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.52V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.52V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.52V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:54,BL_GUARD @ 22:54 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:54 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.54V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.54V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.54V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.53V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.54V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.54V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:55,BL_GUARD @ 22:55 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:55 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.56V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.55V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.56V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.56V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.56V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.57V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:56,BL_GUARD @ 22:56 | Ubatt=46.58V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:56 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.59V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.60V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.62V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:57,BL_GUARD @ 22:57 | Ubatt=46.61V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:57 | Ubatt=46.62V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.62V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.62V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.62V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.62V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.63V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:58,BL_GUARD @ 22:58 | Ubatt=46.64V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:58 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.65V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.66V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 22:59,BL_GUARD @ 22:59 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 22:59 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.67V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.68V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.68V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.68V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.68V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.68V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.68V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.70V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.69V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:00,BL_GUARD @ 23:00 | Ubatt=46.70V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:00 | Ubatt=46.70V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.70V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.70V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:01,BL_GUARD @ 23:01 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:01 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,H_DYN @ 23:02 | SoC=22.1% cible=76% (need=53.4%) | safety=TRUE | win=01:40→05:45 | nowInWin=false | need=241m (bulk=241m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 23:02,⏱️ CP1 OFF | SoC=22.1% | Seuil=76% | Hdeb=01:40 | Hfin=05:45 | Durée=04:05 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:02,BL_GUARD @ 23:02 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:02 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:03,BL_GUARD @ 23:03 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:03 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:04,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:04 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:05,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:05 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:06,BL_GUARD @ 23:06 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:06 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:07,BL_GUARD @ 23:07 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:07 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:08,BL_GUARD @ 23:08 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:08 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.71V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.72V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.73V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:09,BL_GUARD @ 23:09 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:09 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.74V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.75V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.76V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.77V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.77V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.77V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.78V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.78V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.78V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.79V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.79V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.78V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:10,BL_GUARD @ 23:10 | Ubatt=46.79V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:10 | Ubatt=46.79V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.80V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.80V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.79V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.79V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.80V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.80V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.80V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:11,BL_GUARD @ 23:11 | Ubatt=46.80V | FORCE State=5 (discharge disabled)
+2026-02-10, 23:12,BL_GUARD @ 23:11 | Ubatt=46.81V | RELEASE -> BatteryLife libre
+2026-02-10, 23:12,H_DYN @ 23:12 | SoC=22.2% cible=76% (need=53.3%) | safety=TRUE | win=01:45→05:45 | nowInWin=false | need=240m (bulk=240m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 23:22,⏱️ CP1 OFF | SoC=22.2% | Seuil=76% | Hdeb=01:45 | Hfin=05:45 | Durée=04:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 23:22,H_DYN @ 23:22 | SoC=22.4% cible=76% (need=53.1%) | safety=TRUE | win=01:45→05:45 | nowInWin=false | need=239m (bulk=239m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 23:32,⏱️ CP1 OFF | SoC=22.4% | Seuil=76% | Hdeb=01:45 | Hfin=05:45 | Durée=04:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 23:32,H_DYN @ 23:32 | SoC=22.7% cible=76% (need=52.8%) | safety=TRUE | win=01:45→05:45 | nowInWin=false | need=238m (bulk=238m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 23:42,⏱️ CP1 OFF | SoC=22.7% | Seuil=76% | Hdeb=01:45 | Hfin=05:45 | Durée=04:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-10, 23:42,H_DYN @ 23:42 | SoC=22.9% cible=76% (need=52.6%) | safety=TRUE | win=01:45→05:45 | nowInWin=false | need=237m (bulk=237m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-10, 23:52,⏱️ CP1 OFF | SoC=22.9% | Seuil=76% | Hdeb=01:45 | Hfin=05:45 | Durée=04:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 00:02,⏱️ CP1 OFF | SoC=23.2% | Seuil=76% | Hdeb=01:45 | Hfin=05:45 | Durée=04:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 00:12,⏱️ CP1 OFF | SoC=23.4% | Seuil=76% | Hdeb=01:50 | Hfin=05:45 | Durée=03:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 00:22,⏱️ CP1 OFF | SoC=23.6% | Seuil=76% | Hdeb=01:50 | Hfin=05:45 | Durée=03:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 00:32,⏱️ CP1 OFF | SoC=23.9% | Seuil=76% | Hdeb=01:50 | Hfin=05:45 | Durée=03:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 00:42,⏱️ CP1 OFF | SoC=24.1% | Seuil=76% | Hdeb=01:50 | Hfin=05:45 | Durée=03:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 00:52,⏱️ CP1 OFF | SoC=24.4% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 01:02,⏱️ CP1 OFF | SoC=24.6% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 01:02,H_DYN @ 01:02 | SoC=24.8% cible=76% (need=50.7%) | safety=TRUE | win=01:55→05:45 | nowInWin=false | need=229m (bulk=229m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-11, 01:12,⏱️ CP1 OFF | SoC=24.8% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 01:22,⏱️ CP1 OFF | SoC=25.1% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 01:22,H_DYN @ 01:22 | SoC=25.3% cible=76% (need=50.2%) | safety=TRUE | win=01:55→05:45 | nowInWin=false | need=226m (bulk=226m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-11, 01:32,⏱️ CP1 OFF | SoC=25.3% | Seuil=76% | Hdeb=01:55 | Hfin=05:45 | Durée=03:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 01:42,⏱️ CP1 OFF | SoC=25.6% | Seuil=76% | Hdeb=02:00 | Hfin=05:45 | Durée=03:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-11, 01:42,H_DYN @ 01:42 | SoC=25.8% cible=76% (need=49.7%) | safety=TRUE | win=02:00→05:45 | nowInWin=false | need=224m (bulk=224m abs=0m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-11, 01:52,⏱️ CP1 OFF | SoC=25.8% | Seuil=76% | Hdeb=02:00 | Hfin=05:45 | Durée=03:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin

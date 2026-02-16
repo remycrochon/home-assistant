@@ -9,12 +9,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import STORAGE_VERSION, STORAGE_KEY
+from .const import (
+    STORAGE_VERSION,
+    STORAGE_KEY,
+    SHORT_SILENCE_THRESHOLD_S,
+    TRIM_BUFFER_S,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 STORAGE_KEY_RECORDER = f"{STORAGE_KEY}.recorder"
-
 
 
 class RecorderStore(Store):
@@ -257,8 +261,17 @@ class CycleRecorder:
 
         # 2. Tail Trim
         # Time from last active sample to recording end
+        # For manual recordings, we want to be conservative because of drying phases.
         raw_tail_trim = max(0.0, rec_end_ts - tail_ts)
-        steps_tail = int(raw_tail_trim / avg_dt)
-        tail_trim = steps_tail * avg_dt
+        
+        # If tail silence is less than 10 minutes, suggest 0 trim to be safe.
+        # Dishwashers often have 5-10 min silent periods that are NOT the end.
+        if raw_tail_trim < SHORT_SILENCE_THRESHOLD_S: 
+            tail_trim = 0.0
+        else:
+            # If it's very long, suggest trimming but keep a 1-minute buffer
+            tail_trim = max(0.0, raw_tail_trim - TRIM_BUFFER_S)
+            steps_tail = int(tail_trim / avg_dt)
+            tail_trim = steps_tail * avg_dt
 
         return round(head_trim, 1), round(tail_trim, 1), round(avg_dt, 1)

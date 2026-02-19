@@ -851,6 +851,11 @@
           value: '{% set a=states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')|float
             (0)|round(1)%} {{a }}'
         action: input_number.set_value
+      - data_template:
+          entity_id: input_number.mp2_memoire_estimation_conso_jour
+          value: '{% set a=states(''sensor.mp2_dess_previ_conso_6_22_j1'')|float (0)|round(1)%}
+            {{a }}'
+        action: input_number.set_value
   mode: single
 - id: '1698142750238'
   alias: Notification niveau bas puits

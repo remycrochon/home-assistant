@@ -180,7 +180,7 @@ openhasp:
             - service: homeassistant.toggle
               entity_id: "switch.relais_cde_vmc_niv0_on_off"
 
-      ############### Page 4 Home ###############
+      ############### Page 4 ECS ###############
       ###############
       - obj: "p4b10" # Regule
         properties:
@@ -323,16 +323,10 @@ openhasp:
             {% endif %}
       - obj: "p5b56" # Conso
         properties:
-          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int(0) }} kWh"
-      - obj: "p5b57" # ECS
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kWh"
+      - obj: "p5b57" # PREVI
         properties:
-          "text": >
-            {% set count = states('sensor.ecocompteur_ecs')|float(0) %}
-            {% if count >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
-            {% else %}
-            {{ count }} W
-            {% endif %}
+          "text": "{{ states('input_number.mp2_memoire_estimation_conso_jour')|int(0) }} kWh"
 
       ############### Page 6 ###############
       ############### PORTE GARAGE

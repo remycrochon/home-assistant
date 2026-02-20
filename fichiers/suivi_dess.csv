@@ -5580,3 +5580,299 @@ Home Assistant notifications (Log started: 2026-02-04T08:32:38.564737+00:00)
 2026-02-19, 01:49,H_DYN @ 01:49 | SoC=75.6% cible=100% (need=24.4%) | safety=TRUE | win=02:55→05:45 | nowInWin=false | need=170m (bulk=110m abs=60m) | l_status=-1 | out=-1 | reason=need_outwin
 2026-02-19, 01:59,⏱️ CP1 OFF | SoC=75.6% | Seuil=100% | Hdeb=02:55 | Hfin=05:45 | Durée=02:50 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
 2026-02-19, 01:59,H_DYN @ 01:59 | SoC=75.1% cible=100% (need=24.9%) | safety=TRUE | win=02:50→05:45 | nowInWin=false | need=173m (bulk=113m abs=60m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-19, 02:09,⏱️ CP1 OFF | SoC=75.1% | Seuil=100% | Hdeb=02:50 | Hfin=05:45 | Durée=02:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-19, 02:19,⏱️ CP1 OFF | SoC=74.7% | Seuil=100% | Hdeb=02:50 | Hfin=05:45 | Durée=02:55 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-19, 02:19,H_DYN @ 02:19 | SoC=74.2% cible=100% (need=25.8%) | safety=TRUE | win=02:45→05:45 | nowInWin=false | need=177m (bulk=117m abs=60m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-19, 02:29,⏱️ CP1 OFF | SoC=74.2% | Seuil=100% | Hdeb=02:45 | Hfin=05:45 | Durée=03:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-19, 02:29,H_DYN @ 02:29 | SoC=73.8% cible=100% (need=26.2%) | safety=TRUE | win=02:45→05:45 | nowInWin=false | need=178m (bulk=118m abs=60m) | l_status=-1 | out=-1 | reason=need_outwin
+2026-02-19, 02:39,⏱️ CP1 OFF | SoC=73.8% | Seuil=100% | Hdeb=02:45 | Hfin=05:45 | Durée=03:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-19, 02:49,⏱️ CP1 OFF | SoC=73.4% | Seuil=100% | Hdeb=02:45 | Hfin=05:45 | Durée=03:00 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=need_outwin
+2026-02-19, 02:49,H_DYN @ 02:49 | SoC=73% cible=100% (need=27%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | need=182m (bulk=122m abs=60m) | l_status=-1 | out=7 | reason=need_inwin
+2026-02-19, 02:59,⚡ CP1 ON | SoC=73.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=need_inwin
+2026-02-19, 02:59,H_DYN @ 02:59 | SoC=75.5% cible=100% (Δ=24.5%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 03:09,⚡ CP1 ON | SoC=75.5% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 03:09,H_DYN @ 03:09 | SoC=78.2% cible=100% (Δ=21.8%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 03:19,⚡ CP1 ON | SoC=78.2% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 03:19,H_DYN @ 03:19 | SoC=80.8% cible=100% (Δ=19.2%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 03:29,⚡ CP1 ON | SoC=80.8% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 03:29,H_DYN @ 03:29 | SoC=83.4% cible=100% (Δ=16.6%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 03:39,⚡ CP1 ON | SoC=83.4% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 03:39,H_DYN @ 03:39 | SoC=86% cible=100% (Δ=14%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 03:49,⚡ CP1 ON | SoC=86.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 03:59,⚡ CP1 ON | SoC=88.6% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 03:59,H_DYN @ 03:59 | SoC=91.2% cible=100% (Δ=8.8%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 04:09,⚡ CP1 ON | SoC=91.2% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 04:09,H_DYN @ 04:09 | SoC=93.3% cible=100% (Δ=6.7%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 04:19,⚡ CP1 ON | SoC=93.3% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 04:19,H_DYN @ 04:19 | SoC=95% cible=100% (Δ=5%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 04:29,⚡ CP1 ON | SoC=95.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 04:29,H_DYN @ 04:29 | SoC=96.3% cible=100% (Δ=3.7%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 04:39,⚡ CP1 ON | SoC=96.3% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 04:39,H_DYN @ 04:39 | SoC=97.2% cible=100% (Δ=2.8%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 04:49,⚡ CP1 ON | SoC=97.2% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 04:59,⚡ CP1 ON | SoC=98.1% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 04:59,H_DYN @ 04:59 | SoC=98.6% cible=100% (Δ=1.4%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 05:09,⚡ CP1 ON | SoC=98.6% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 05:19,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 05:19,H_DYN @ 05:19 | SoC=100% cible=100% (Δ=0%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 05:29,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 05:29,H_DYN @ 05:29 | SoC=100% cible=100% (Δ=0%) | safety=TRUE | win=02:40→05:45 | nowInWin=true | l_status=7 | out=7 | reason=gel_keep_on
+2026-02-19, 05:39,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 05:49,⚡ CP1 ON | SoC=100.0% | Seuil=100% | Hdeb=02:40 | Hfin=05:45 | Durée=03:05 | status_cp1(payload)=7 | havalid=on | Sortie1=7 | reason=gel_keep_on
+2026-02-19, 05:49,H_DYN @ 05:49 | SoC=99.8% cible=100% (need=0.2%) | safety=FALSE | out=-1 | l_status=7 | reason=Hors fenetre de tir
+2026-02-19, 05:59,⏱️ CP1 OFF | SoC=99.8% | Seuil=100% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:00,⏱️ CP1 OFF | SoC=99.2% | Seuil=100% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:09,unknown
+2026-02-19, 06:09,H_DYN @ 06:09 | SoC=98% cible=67% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:15,⏱️ CP1 OFF | SoC=98.0% | Seuil=67% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:19,unknown
+2026-02-19, 06:29,⏱️ CP1 OFF | SoC=97.3% | Seuil=67% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:29,H_DYN @ 06:29 | SoC=96.7% cible=67% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:30,⏱️ CP1 OFF | SoC=96.7% | Seuil=67% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:39,unknown
+2026-02-19, 06:39,H_DYN @ 06:39 | SoC=96% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:45,⏱️ CP1 OFF | SoC=96.0% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:49,unknown
+2026-02-19, 06:49,H_DYN @ 06:49 | SoC=95.4% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 06:59,⏱️ CP1 OFF | SoC=95.4% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:00,⏱️ CP1 OFF | SoC=94.8% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:09,unknown
+2026-02-19, 07:09,⏱️ CP1 OFF | SoC=94.3% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:15,⏱️ CP1 OFF | SoC=94.3% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:18,unknown
+2026-02-19, 07:19,unknown
+2026-02-19, 07:29,⏱️ CP1 OFF | SoC=93.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:30,⏱️ CP1 OFF | SoC=93.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:39,unknown
+2026-02-19, 07:45,⏱️ CP1 OFF | SoC=92.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:49,unknown
+2026-02-19, 07:49,H_DYN @ 07:49 | SoC=91.7% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:59,⏱️ CP1 OFF | SoC=91.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 07:59,H_DYN @ 07:59 | SoC=91.2% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:00,⏱️ CP1 OFF | SoC=91.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:05,unknown
+2026-02-19, 08:05,unknown
+2026-02-19, 08:05,unknown
+2026-02-19, 08:09,unknown
+2026-02-19, 08:09,H_DYN @ 08:09 | SoC=90.7% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:15,⏱️ CP1 OFF | SoC=90.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:19,unknown
+2026-02-19, 08:29,⏱️ CP1 OFF | SoC=90.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:29,H_DYN @ 08:29 | SoC=89.6% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:30,⏱️ CP1 OFF | SoC=89.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:39,unknown
+2026-02-19, 08:39,H_DYN @ 08:39 | SoC=88.9% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:45,⏱️ CP1 OFF | SoC=88.9% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:49,unknown
+2026-02-19, 08:49,H_DYN @ 08:49 | SoC=88.5% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:59,⏱️ CP1 OFF | SoC=88.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 08:59,H_DYN @ 08:59 | SoC=88% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:00,⏱️ CP1 OFF | SoC=88.0% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:09,unknown
+2026-02-19, 09:15,⏱️ CP1 OFF | SoC=87.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:19,unknown
+2026-02-19, 09:19,H_DYN @ 09:19 | SoC=87.5% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:29,⏱️ CP1 OFF | SoC=87.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:30,⏱️ CP1 OFF | SoC=87.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:39,unknown
+2026-02-19, 09:39,H_DYN @ 09:39 | SoC=87.1% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:45,⏱️ CP1 OFF | SoC=87.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:49,unknown
+2026-02-19, 09:59,⏱️ CP1 OFF | SoC=86.9% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 09:59,H_DYN @ 09:59 | SoC=86.6% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:00,⏱️ CP1 OFF | SoC=86.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:09,unknown
+2026-02-19, 10:09,H_DYN @ 10:09 | SoC=86.4% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:15,⏱️ CP1 OFF | SoC=86.4% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:19,unknown
+2026-02-19, 10:19,H_DYN @ 10:19 | SoC=85.9% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:29,⏱️ CP1 OFF | SoC=85.9% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:29,H_DYN @ 10:29 | SoC=85.4% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:30,⏱️ CP1 OFF | SoC=85.4% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:39,unknown
+2026-02-19, 10:39,H_DYN @ 10:39 | SoC=85.1% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:45,⏱️ CP1 OFF | SoC=85.1% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:49,unknown
+2026-02-19, 10:49,H_DYN @ 10:49 | SoC=84.9% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 10:59,⏱️ CP1 OFF | SoC=84.9% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:00,⏱️ CP1 OFF | SoC=84.9% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:09,unknown
+2026-02-19, 11:09,H_DYN @ 11:09 | SoC=85.1% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:15,⏱️ CP1 OFF | SoC=85.1% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:19,unknown
+2026-02-19, 11:19,H_DYN @ 11:19 | SoC=85% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:29,⏱️ CP1 OFF | SoC=85.0% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:30,⏱️ CP1 OFF | SoC=85.4% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:39,unknown
+2026-02-19, 11:45,⏱️ CP1 OFF | SoC=85.9% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:49,unknown
+2026-02-19, 11:59,⏱️ CP1 OFF | SoC=85.9% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 11:59,H_DYN @ 11:59 | SoC=85.8% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:00,⏱️ CP1 OFF | SoC=85.8% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:09,unknown
+2026-02-19, 12:09,H_DYN @ 12:09 | SoC=85.9% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:15,⏱️ CP1 OFF | SoC=85.9% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:19,unknown
+2026-02-19, 12:19,H_DYN @ 12:19 | SoC=86.3% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:29,⏱️ CP1 OFF | SoC=86.3% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:30,⏱️ CP1 OFF | SoC=86.7% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:39,unknown
+2026-02-19, 12:45,⏱️ CP1 OFF | SoC=86.8% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:49,unknown
+2026-02-19, 12:49,H_DYN @ 12:49 | SoC=86.8% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:59,⏱️ CP1 OFF | SoC=86.8% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 12:59,H_DYN @ 12:59 | SoC=86.6% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:00,⏱️ CP1 OFF | SoC=86.6% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:09,unknown
+2026-02-19, 13:09,H_DYN @ 13:09 | SoC=86.2% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:15,⏱️ CP1 OFF | SoC=86.2% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:19,unknown
+2026-02-19, 13:19,H_DYN @ 13:19 | SoC=86.1% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:29,⏱️ CP1 OFF | SoC=86.1% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:29,H_DYN @ 13:29 | SoC=86.5% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:30,⏱️ CP1 OFF | SoC=86.5% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:39,unknown
+2026-02-19, 13:45,⏱️ CP1 OFF | SoC=86.7% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:49,unknown
+2026-02-19, 13:49,H_DYN @ 13:49 | SoC=87.2% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 13:59,⏱️ CP1 OFF | SoC=87.2% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:00,⏱️ CP1 OFF | SoC=87.5% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:09,unknown
+2026-02-19, 14:09,H_DYN @ 14:09 | SoC=87.9% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:15,⏱️ CP1 OFF | SoC=87.9% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:19,unknown
+2026-02-19, 14:29,⏱️ CP1 OFF | SoC=88.2% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:30,⏱️ CP1 OFF | SoC=88.3% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:39,unknown
+2026-02-19, 14:39,H_DYN @ 14:39 | SoC=88.2% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:45,⏱️ CP1 OFF | SoC=88.2% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 14:49,unknown
+2026-02-19, 14:59,⏱️ CP1 OFF | SoC=88.2% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:00,⏱️ CP1 OFF | SoC=88.2% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:09,unknown
+2026-02-19, 15:09,H_DYN @ 15:09 | SoC=88.3% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:15,⏱️ CP1 OFF | SoC=88.3% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:19,unknown
+2026-02-19, 15:19,H_DYN @ 15:19 | SoC=88.1% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:29,⏱️ CP1 OFF | SoC=88.1% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:29,H_DYN @ 15:29 | SoC=88% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:30,⏱️ CP1 OFF | SoC=88.0% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:39,unknown
+2026-02-19, 15:39,H_DYN @ 15:39 | SoC=88.2% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:45,⏱️ CP1 OFF | SoC=88.2% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:49,unknown
+2026-02-19, 15:49,H_DYN @ 15:49 | SoC=88.3% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:59,⏱️ CP1 OFF | SoC=88.3% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 15:59,H_DYN @ 15:59 | SoC=88.1% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:00,⏱️ CP1 OFF | SoC=88.1% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:09,unknown
+2026-02-19, 16:09,H_DYN @ 16:09 | SoC=88% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:15,⏱️ CP1 OFF | SoC=88.0% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:19,unknown
+2026-02-19, 16:19,H_DYN @ 16:19 | SoC=87.8% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:29,⏱️ CP1 OFF | SoC=87.8% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:29,H_DYN @ 16:29 | SoC=87.5% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:30,⏱️ CP1 OFF | SoC=87.5% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:39,unknown
+2026-02-19, 16:39,H_DYN @ 16:39 | SoC=87.5% cible=55% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:45,⏱️ CP1 OFF | SoC=87.5% | Seuil=55% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 16:50,unknown
+2026-02-19, 16:50,H_DYN @ 16:50 | SoC=87.1% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:00,⏱️ CP1 OFF | SoC=87.1% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:00,unknown
+2026-02-19, 17:10,⏱️ CP1 OFF | SoC=86.7% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:15,⏱️ CP1 OFF | SoC=86.2% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:20,unknown
+2026-02-19, 17:20,H_DYN @ 17:20 | SoC=85.7% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:30,⏱️ CP1 OFF | SoC=85.7% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:30,unknown
+2026-02-19, 17:30,H_DYN @ 17:30 | SoC=85.1% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:40,⏱️ CP1 OFF | SoC=85.1% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:45,⏱️ CP1 OFF | SoC=84.6% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 17:50,unknown
+2026-02-19, 18:00,⏱️ CP1 OFF | SoC=83.8% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:00,unknown
+2026-02-19, 18:10,⏱️ CP1 OFF | SoC=83.3% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:15,⏱️ CP1 OFF | SoC=82.8% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:20,unknown
+2026-02-19, 18:20,H_DYN @ 18:20 | SoC=82.2% cible=56% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:30,⏱️ CP1 OFF | SoC=82.2% | Seuil=56% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:30,unknown
+2026-02-19, 18:30,H_DYN @ 18:30 | SoC=81.6% cible=61% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:40,⏱️ CP1 OFF | SoC=81.6% | Seuil=61% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:45,⏱️ CP1 OFF | SoC=81.1% | Seuil=61% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 18:50,unknown
+2026-02-19, 18:50,H_DYN @ 18:50 | SoC=80.6% cible=61% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:00,⏱️ CP1 OFF | SoC=80.6% | Seuil=61% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:00,unknown
+2026-02-19, 19:10,⏱️ CP1 OFF | SoC=80.1% | Seuil=61% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:10,H_DYN @ 19:10 | SoC=79.6% cible=61% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:15,⏱️ CP1 OFF | SoC=79.6% | Seuil=61% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:20,unknown
+2026-02-19, 19:30,⏱️ CP1 OFF | SoC=79.0% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:30,unknown
+2026-02-19, 19:40,⏱️ CP1 OFF | SoC=78.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:40,H_DYN @ 19:40 | SoC=77.9% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:45,⏱️ CP1 OFF | SoC=77.9% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 19:50,unknown
+2026-02-19, 19:50,H_DYN @ 19:50 | SoC=77.3% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:00,⏱️ CP1 OFF | SoC=77.3% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:00,unknown
+2026-02-19, 20:00,H_DYN @ 20:00 | SoC=76.7% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:10,⏱️ CP1 OFF | SoC=76.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:10,H_DYN @ 20:10 | SoC=76.1% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:15,⏱️ CP1 OFF | SoC=76.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:20,unknown
+2026-02-19, 20:30,⏱️ CP1 OFF | SoC=75.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:30,⏱️ CP1 OFF | SoC=75.0% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:40,unknown
+2026-02-19, 20:45,⏱️ CP1 OFF | SoC=74.4% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 20:50,unknown
+2026-02-19, 20:50,H_DYN @ 20:50 | SoC=73.8% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:00,⏱️ CP1 OFF | SoC=73.8% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:10,⏱️ CP1 OFF | SoC=73.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:10,H_DYN @ 21:10 | SoC=72.7% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:20,⏱️ CP1 OFF | SoC=72.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:20,H_DYN @ 21:20 | SoC=72.2% cible=57% (need=0%) | safety=FALSE | out=-1 | l_status=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:30,⏱️ CP1 OFF | SoC=72.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:40,⏱️ CP1 OFF | SoC=71.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:45,⏱️ CP1 OFF | SoC=71.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 21:50,unknown
+2026-02-19, 22:00,⏱️ CP1 OFF | SoC=70.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=Hors fenetre de tir
+2026-02-19, 22:00,⏱️ CP1 OFF | SoC=70.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 22:10,⏱️ CP1 OFF | SoC=70.2% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 22:10,H_DYN @ 22:10 | SoC=69.8% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-19, 22:20,⏱️ CP1 OFF | SoC=69.8% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 22:20,H_DYN @ 22:20 | SoC=69.3% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-19, 22:30,⏱️ CP1 OFF | SoC=69.3% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 22:30,H_DYN @ 22:30 | SoC=68.8% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-19, 22:40,⏱️ CP1 OFF | SoC=68.8% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 22:50,⏱️ CP1 OFF | SoC=68.4% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 22:50,H_DYN @ 22:50 | SoC=67.9% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-19, 23:00,⏱️ CP1 OFF | SoC=67.9% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 23:10,⏱️ CP1 OFF | SoC=67.3% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 23:10,H_DYN @ 23:10 | SoC=66.7% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-19, 23:20,⏱️ CP1 OFF | SoC=66.7% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 23:30,⏱️ CP1 OFF | SoC=66.0% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 23:40,⏱️ CP1 OFF | SoC=65.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 23:40,H_DYN @ 23:40 | SoC=65.1% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-19, 23:50,⏱️ CP1 OFF | SoC=65.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-19, 23:50,H_DYN @ 23:50 | SoC=64.6% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-20, 00:00,⏱️ CP1 OFF | SoC=64.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 00:10,⏱️ CP1 OFF | SoC=64.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 00:20,⏱️ CP1 OFF | SoC=63.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 00:20,H_DYN @ 00:20 | SoC=63.1% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-20, 00:30,⏱️ CP1 OFF | SoC=63.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 00:40,⏱️ CP1 OFF | SoC=62.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 00:50,⏱️ CP1 OFF | SoC=62.0% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 00:50,H_DYN @ 00:50 | SoC=61.5% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-20, 01:00,⏱️ CP1 OFF | SoC=61.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 01:10,⏱️ CP1 OFF | SoC=60.9% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 01:10,H_DYN @ 01:10 | SoC=60.6% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-20, 01:20,⏱️ CP1 OFF | SoC=60.6% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 01:20,H_DYN @ 01:20 | SoC=60.1% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-20, 01:30,⏱️ CP1 OFF | SoC=60.1% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 01:40,⏱️ CP1 OFF | SoC=59.5% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 01:40,H_DYN @ 01:40 | SoC=59% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible
+2026-02-20, 01:50,⏱️ CP1 OFF | SoC=59.0% | Seuil=57% | Hdeb=00:00 | Hfin=05:45 | Durée=05:45 | status_cp1(payload)=-1 | havalid=on | Sortie1=-1 | reason=soc>=cible
+2026-02-20, 01:50,H_DYN @ 01:50 | SoC=58.6% cible=57% (need=0%) | safety=TRUE | out=-1 | l_status=-1 | reason=soc>=cible

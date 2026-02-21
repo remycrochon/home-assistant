@@ -35,7 +35,6 @@ ota:
 web_server:
   port: 80
 
-# Bus I2C (HTU21D)
 i2c:
   sda: 17
   scl: 16
@@ -43,17 +42,14 @@ i2c:
   id: bus_a
 
 globals:
-  # Anti-yo-yo : horodatage dernier changement de vitesse (ms)
   - id: last_change_ms
     type: uint32_t
     initial_value: '0'
 
-  # Auto-OFF : mémorise si la hotte a été démarrée automatiquement
   - id: auto_started
     type: bool
     initial_value: 'false'
 
-  # Auto-OFF : début période "air redevenu propre"
   - id: clean_since_ms
     type: uint32_t
     initial_value: '0'
@@ -62,7 +58,6 @@ binary_sensor:
   - platform: status
     name: "${friendly_name}_Status"
 
-# ========= MODE DE REGULATION =========
 select:
   - platform: template
     name: "${friendly_name} Mode Regulation"
@@ -76,7 +71,6 @@ select:
     initial_option: "PM2.5 + Humidite"
 
 number:
-  # Seuil humidité v1->v2
   - platform: template
     name: "${friendly_name} Seuil_V2 Hum"
     id: seuilv2_hum
@@ -89,7 +83,6 @@ number:
     unit_of_measurement: "%"
     step: 1
 
-  # Seuil humidité v2->v3
   - platform: template
     name: "${friendly_name} Seuil_V3 Hum"
     id: seuilv3_hum
@@ -102,7 +95,6 @@ number:
     unit_of_measurement: "%"
     step: 1
 
-  # Seuils PM2.5 (fumées) : V1/V2/V3
   - platform: template
     name: "${friendly_name} Seuil_V1 PM2.5"
     id: seuilv1_pm
@@ -139,7 +131,6 @@ number:
     unit_of_measurement: "µg/m³"
     step: 1
 
-  # Seuil Auto-ON (si hotte OFF et auto activé)
   - platform: template
     name: "${friendly_name} Seuil Auto-ON PM2.5"
     id: seuil_auto_on_pm
@@ -152,7 +143,6 @@ number:
     unit_of_measurement: "µg/m³"
     step: 1
 
-  # Seuil Auto-OFF (si hotte auto-démarrée)
   - platform: template
     name: "${friendly_name} Seuil Auto-OFF PM2.5"
     id: seuil_auto_off_pm
@@ -161,11 +151,10 @@ number:
     mode: box
     min_value: 0
     max_value: 500
-    initial_value: 12
+    initial_value: 20
     unit_of_measurement: "µg/m³"
     step: 1
 
-  # Délai Auto-OFF (air propre maintenu X secondes)
   - platform: template
     name: "${friendly_name} Auto-OFF Delai"
     id: auto_off_delay_s
@@ -179,7 +168,6 @@ number:
     step: 10
 
 switch:
-  # Activation auto (PM2.5 -> allume la hotte)
   - platform: template
     name: "${friendly_name} Auto Hotte (PM2.5)"
     id: auto_hotte
@@ -194,9 +182,8 @@ switch:
       - switch.turn_on: v1
       - delay: 100ms
       - switch.turn_on: r1_lumiere
-      # Si allumage manuel, on ne veut pas d'auto-off "forcé"
+      # Ne pas écraser auto_started ici (sinon casse l'auto-off)
       - lambda: |-
-          id(auto_started) = false;
           id(clean_since_ms) = 0;
     turn_off_action:
       - switch.turn_off: v1
@@ -246,7 +233,6 @@ switch:
   - platform: restart
     name: "${friendly_name} Restart"
 
-  # Relais
   - platform: gpio
     name: "${friendly_name} Hotte Lumiere"
     pin: GPIO25
@@ -283,7 +269,6 @@ sensor:
     entity_category: "diagnostic"
     device_class: ""
 
-  # Temp/Hum hotte
   - platform: htu21d
     model: htu21d
     update_interval: 60s
@@ -297,13 +282,11 @@ sensor:
         then:
           - script.execute: calcul_vitesse
 
-  # PM2.5 depuis Home Assistant (esp138 placé sur la hotte)
   - platform: homeassistant
     id: pm25_hotte_ha
     entity_id: sensor.esp138_qualite_air_concentration_de_particules_2_5mm
     internal: true
 
-  # Publication locale (facultatif mais pratique)
   - platform: template
     name: "${friendly_name}_PM2_5_Hotte"
     id: pm25_hotte
@@ -325,7 +308,7 @@ script:
   - id: calcul_vitesse
     mode: single
     then:
-      # 1) Auto-ON éventuel (fumées) - seulement si mode inclut PM2.5
+      # 1) Auto-ON (seulement si mode inclut PM2.5)
       - lambda: |-
           const std::string mode = id(mode_regulation).state;
           const bool mode_avec_pm = (mode == "PM2.5 + Humidite" || mode == "PM2.5 seule");
@@ -336,23 +319,20 @@ script:
 
           const float pm = id(pm25_hotte_ha).state;
 
-          // Si auto activé, hotte OFF et PM au-dessus du seuil => allumage
           if (id(auto_hotte).state && !id(hotte).state && pm >= id(seuil_auto_on_pm).state) {
-            // Allumage "auto" : on passe par la hotte mais on marque auto_started ensuite
+            // Marqueur Auto-OFF actif AVANT d'allumer la hotte
+            id(auto_started) = true;
+            id(clean_since_ms) = 0;
+
             id(hotte).turn_on();
 
-            // Choix vitesse au démarrage auto
             if (pm >= id(seuilv2_pm).state) id(v2).turn_on();
             else id(v1).turn_on();
 
             id(last_change_ms) = millis();
-
-            // Marqueur Auto-OFF actif
-            id(auto_started) = true;
-            id(clean_since_ms) = 0;
           }
 
-      # 2) Régulation de vitesse + Auto-OFF si hotte ON
+      # 2) Régulation vitesse + Auto-OFF si hotte ON
       - if:
           condition:
             - switch.is_on: hotte
@@ -366,10 +346,8 @@ script:
 
                 const float hum = id(hum_hotte).state;
 
-                // Détermination de la cible selon le mode
-                int target = 1; // 1=V1, 2=V2, 3=V3
+                int target = 1;
 
-                // MODE 1 : PM2.5 + HUMIDITE (priorité PM, fallback hum)
                 if (mode == "PM2.5 + Humidite") {
                   if (pm_ok) {
                     if (pm >= id(seuilv3_pm).state)      target = 3;
@@ -380,39 +358,32 @@ script:
                     else if (hum >= id(seuilv2_hum).state) target = 2;
                     else                                    target = 1;
                   }
-
-                // MODE 2 : HUMIDITE SEULE
                 } else if (mode == "Humidite seule") {
                   if (hum >= id(seuilv3_hum).state)      target = 3;
                   else if (hum >= id(seuilv2_hum).state) target = 2;
                   else                                    target = 1;
-
-                // MODE 3 : PM2.5 SEULE
-                } else { // "PM2.5 seule"
+                } else { // PM2.5 seule
                   if (pm_ok) {
                     if (pm >= id(seuilv3_pm).state)      target = 3;
                     else if (pm >= id(seuilv2_pm).state) target = 2;
                     else                                  target = 1;
                   } else {
-                    target = 1; // sécurité si PM indisponible
+                    target = 1;
                   }
                 }
 
-                // Vitesse courante estimée
                 int cur = 1;
                 if (id(v3).state) cur = 3;
                 else if (id(v2).state) cur = 2;
                 else if (id(v1).state) cur = 1;
 
-                // Anti-yo-yo : on interdit de baisser trop vite
                 const uint32_t now_ms = millis();
-                const uint32_t HOLD_MS = 90000; // 90s avant autoriser la baisse
+                const uint32_t HOLD_MS = 90000;
 
                 if (target < cur && (now_ms - id(last_change_ms)) < HOLD_MS) {
                   target = cur;
                 }
 
-                // Appliquer si changement
                 if (target != cur) {
                   if (target == 1) {
                     id(v1).turn_on();
@@ -430,20 +401,18 @@ script:
                   id(last_change_ms) = now_ms;
                 }
 
-                // ===== AUTO-OFF (uniquement si auto-démarrée + auto_hotte ON + mode avec PM) =====
+                // Auto-OFF : seulement si auto-démarrée + auto_hotte ON + mode avec PM
                 if (id(auto_hotte).state && mode_avec_pm && id(auto_started)) {
-                  // air "propre" si PM <= seuil_auto_off_pm
                   if (pm_ok && pm <= id(seuil_auto_off_pm).state) {
                     if (id(clean_since_ms) == 0) id(clean_since_ms) = now_ms;
 
-                    const uint32_t delay_ms = (uint32_t) (id(auto_off_delay_s).state * 1000.0f);
+                    const uint32_t delay_ms = (uint32_t)(id(auto_off_delay_s).state * 1000.0f);
                     if ((now_ms - id(clean_since_ms)) >= delay_ms) {
                       id(hotte).turn_off();
                       id(auto_started) = false;
                       id(clean_since_ms) = 0;
                     }
                   } else {
-                    // pas assez propre -> on réarme le chrono
                     id(clean_since_ms) = 0;
                   }
                 }

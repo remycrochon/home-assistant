@@ -3983,46 +3983,6 @@
         entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
         type: close
   mode: single
-- id: '1777272438037'
-  alias: BleuPrint MAJ ESPHome LXC disponible
-  description: Blue Print
-  use_blueprint:
-    path: pavax/nagging_alert_notification.yaml
-    input:
-      condition_entity_state: 'on'
-      sensor_entity: binary_sensor.esphome_lxc_update_disponible
-      alert_state: 'on'
-      alert_action:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: ESPHOME LXC - MAJ dispo
-          message: '{{ states("sensor.date_time") }}
-
-            ESPHome LXC : mise à jour disponible
-
-            Installée : {{ states(''sensor.esphome_lxc_version'') }}
-
-            Dernière  : {{ states(''sensor.esphome_lxc_version_la_plus_recente'')
-            }}'
-      resolved_action:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: ESPHOME LXC - OK
-          message: '{{ states("sensor.date_time") }}
-
-            ESPHome LXC à jour
-
-            Version : {{ states(''sensor.esphome_lxc_version'') }}'
-      notify_device: e3e6d517ff15af6c0ac17f0455a06420
-      repeat_delay: 21600
-      max_alerts: 10
-      initial_delay: 300
-      notify_message: ' '
-      resolved_message: ' '
 - id: '1777273219869'
   alias: Rapport Piscine Journalier IA
   description: ''

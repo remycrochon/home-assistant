@@ -1,0 +1,29 @@
+homeassistant:
+  # Load packages
+  packages: !include_dir_named packages
+  allowlist_external_dirs:
+    - "/config/fichiers/"
+
+
+# Inclusion groupes/automatismes/script/scene
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+
+
+#ovh:
+#""  domain: maj.rem81.com
+#  username: !secret ovh_username
+#  password: !secret ovh_password
+
+#sensor:
+#  - platform: zwift
+#    username: !secret my_zwift_username
+#    password: !secret my_zwift_password
+
+
+#daikin_residential:
+#  email: !secret daikin_user
+#  password: !secret daikin_pwd

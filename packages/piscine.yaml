@@ -1,0 +1,18 @@
+####################################################
+#                                                  #
+#                   PISCINE                        #
+#                                                  #
+####################################################
+
+
+template:
+  - sensor:
+# Heure Pivot du Soleil
+    - name: "Heure pivot Soleil"
+      unique_id: "heure_pivot_soleil"
+      state: >
+        {{ as_timestamp(state_attr("sun.sun", "next_noon")) | timestamp_custom('%H %M')}}
+      icon: mdi:weather-sunset
+
+
+

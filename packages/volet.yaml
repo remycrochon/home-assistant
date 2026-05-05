@@ -1,0 +1,92 @@
+input_boolean:
+
+# Calcul Jour/nuit selon luminosite et position du soleil sur l'horizon
+  nuit_jour:
+    name: Nuit=0/Jour=1
+    icon: mdi:weather-sunny
+
+input_datetime:
+  # Horaires Volets ete
+  horaire_ete_volet_ouv:
+    name: Horaire ete volets ouverture
+    has_date: false
+    has_time: true
+  horaire_ete_volet_ferm:
+    name: Horaire ete volets fermeture
+    has_date: false
+    has_time: true
+  # Horaires Volets hiver
+  horaire_hiver_volet_ouv:
+    name: Horaire hiver volets ouverture
+    has_date: false
+    has_time: true
+
+# Horaire surveillance porte
+  heure_debut_alarme_porte:
+    name: Heure debut alarme portes
+    has_date: false
+    has_time: true
+  heure_fin_alarme_porte:
+    name: Heure fin alarme portes
+    has_date: false
+    has_time: true
+
+input_number:
+# Consigne Min/max luminosité 
+# gestion volet: Calcul du Input_boolean Nuit/jout
+    luminosite_seuil_bas:
+      name: Lum. seuil bas
+      mode: box
+      min: 0
+      max: 10
+      unit_of_measurement: "Lux"
+      icon: mdi:weather-sunny
+    luminosite_seuil_haut:
+      name: Lum. seuil haut
+      mode: box
+      min: 10
+      max: 50
+      unit_of_measurement: "Lux"
+      icon: mdi:weather-sunny 
+
+template:
+  - binary_sensor:
+    - default_entity_id: binary_sensor.porte_garage_non_fermee
+      state: "{% if is_state('binary_sensor.porte_garage_fermee', 'on') %}\n  off\n{%
+        else %}\n  on\n{% endif %}"
+      name: porte_garage_non_fermee
+
+    - default_entity_id: binary_sensor.porte_ssol_non_fermee
+      state: "{% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}\n  off\n{%
+        else %}\n  on\n{% endif %}"
+      name: porte_ssol_non_fermee
+
+cover:
+# Volets Proportionnels
+# Porte Sous Sol
+  - platform: cover_rf_time_based
+    devices:
+      porte_sous_sol:
+        name: Porte sous sol
+        travelling_time_up: 21
+        travelling_time_down: 21
+        close_script_entity_id: script.porte_sous_sol_down
+        stop_script_entity_id: script.porte_sous_sol_stop
+        open_script_entity_id: script.porte_sous_sol_up
+        device_class: garage
+        always_confident: True
+
+# Porte garage
+  - platform: cover_rf_time_based
+    devices:
+      porte_garage:
+        name: Porte garage
+        travelling_time_up: 21
+        travelling_time_down: 21
+        close_script_entity_id: script.porte_garage_down
+        stop_script_entity_id: script.porte_garage_stop
+        open_script_entity_id: script.porte_garage_up
+        device_class: garage
+        always_confident: True
+
+

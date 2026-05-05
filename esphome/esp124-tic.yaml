@@ -1,0 +1,688 @@
+substitutions:
+  device_name: esp124-tic
+  adress_ip: "192.168.0.124"
+  friendly_name: esp124
+  time_timezone: "Europe/Paris"
+
+esphome:
+  name: ${device_name}
+  project:
+    name: "rem81.esp124-TIC"
+    version: "1.0.1"
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+      
+esp32:
+  board: mhetesp32minikit
+  framework:
+    type: arduino
+    
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+  min_auth_mode: WPA2
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+    
+mqtt:
+  broker: 192.168.0.204
+  port: 1883
+  username: !secret mqtt_pve_name
+  password: !secret mqtt_pve_pw
+  topic_prefix: esp124-tic
+# Enable logging
+logger:
+#  baud_rate: 0
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+  
+web_server:
+  port: 80
+
+font:
+  - file: "fonts/arial.ttf"
+    id: arial
+    size: 15
+
+i2c:
+  sda: GPIO21 #D2=pin 19
+  scl: GPIO22 #D1=pin 20
+  scan: True
+  id: bus_a
+  
+# 
+uart:
+  id: uart_a
+  rx_pin: GPIO23
+#  tx_pin: GPIO1
+  baud_rate: 9600
+  parity: EVEN
+  data_bits: 7
+
+teleinfo:
+  id: myteleinfo
+  uart_id: uart_a
+  update_interval: 10s
+  historical_mode: false
+  
+# Led WS2812 RGB  
+light:
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: rgb_led
+        from: 0
+        to: 0
+
+  - platform: neopixelbus
+    num_leds: 1
+    pin: GPIO18
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
+globals:
+  # Ecart maximum admissible entre deux lectures
+  - id: ecart_max
+    type: float
+    restore_value: no
+    initial_value: '1000'
+
+  - id: hex_to_binary
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+
+  - id: update_binary
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+
+sensor:
+# Energie Active soutirée totale
+  - platform: teleinfo
+    id: hc_hp
+    tag_name: "EAST"
+    name: "Linky HPHC KWH"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"  
+    filters:
+      - filter_out: 0.0
+      - lambda: |-
+          return x/1000;
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};          
+          
+
+# Energie Active soutirée Index01 HC Bleu
+  - platform: teleinfo
+    id: hcbleu
+    tag_name: "EASF01"
+    name: "Linky HC Bleu kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
+      - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};      
+
+# Energie Active soutirée Index02 HP Bleu
+  - platform: teleinfo
+    id: hpbleu
+    tag_name: "EASF02"
+    name: "Linky HP Bleu kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;      
+      - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};      
+
+# Energie Active soutirée Index03 HC Blanc
+  - platform: teleinfo
+    id: hcblanc
+    tag_name: "EASF03"
+    name: "Linky HC Blanc kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
+      - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};      
+
+# Energie Active soutirée Index04 HP Blanc
+  - platform: teleinfo
+    id: hpblanc
+    tag_name: "EASF04"
+    name: "Linky HP Blanc kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - lambda: return x / 1000;
+      - filter_out: 0.0   
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};       
+
+# Energie Active soutirée Index05 HC Rouge
+  - platform: teleinfo
+    id: hcrouge
+    tag_name: "EASF05"
+    name: "Linky HC Rouge kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"      
+    filters:
+      - multiply: 0.001
+      - filter_out: 0.0
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};
+# Energie Active soutirée Index06 HP Rouge
+  - platform: teleinfo
+    id: hprouge
+    tag_name: "EASF06"
+    name: "Linky HP Rouge kWh"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"  
+    filters:
+      - lambda: return x / 1000;
+      - filter_out: 0.0   
+      - lambda: |-
+          float MAX_DIFFERENCE = id(ecart_max);  // Difference max entre de lecture, à ajuster selon votre cas de figure.
+          static float last_value = NAN;
+          if (isnan(last_value) || std::abs(x - last_value) < MAX_DIFFERENCE)
+            return last_value = x;
+          else
+            return {};       
+
+#Puissance apparente de coupure
+  - platform: teleinfo
+    id: pcoup
+    tag_name: "PCOUP"
+    name: "Linky PCOUP"
+    unit_of_measurement: "kVA"
+    device_class: "power"
+    state_class: "measurement"      
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+#Puissance apparente instantanée ph1 
+
+  - platform: teleinfo
+    id: papp
+    tag_name: "SINSTS"
+    name: "Linky PAPP"
+    unit_of_measurement: "VA"
+    device_class: "power"
+    state_class: "measurement"  
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+
+#Tension moyenne ph1
+  - platform: teleinfo
+    id: umoy1
+    tag_name: "UMOY1"
+    name: "Linky Umoy"
+    unit_of_measurement: "V"
+    device_class: "voltage"
+    state_class: "measurement"      
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+#Courant efficace ph1
+  - platform: teleinfo
+    id: iinst
+    tag_name: "IRMS1"
+    name: "Linky I Inst"
+    unit_of_measurement: "A"
+    device_class: "current"
+    state_class: "measurement"       
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Numero du Tarif en cours
+  - platform: teleinfo
+    id: ntarif
+    tag_name: "NTARF"
+    name: "linky N Tarif"
+    unit_of_measurement: ""
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+############### TEMPLATE  ######################"
+# Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
+  - platform: template
+    name: "Linky P/PCoup"
+    id: p100
+    icon: mdi:flash
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      return ((id(papp).state/1000)/id(pcoup).state*100);
+
+# Lecture dans HA de la conso du jour
+  - platform: homeassistant
+    name: "HCHP J"
+    unit_of_measurement: "kWh"
+    entity_id: sensor.compteur_energie_total_jour_tous_tarifs
+    id: hphcj
+
+    
+#######################################
+text_sensor:
+# Registre de statuts
+  - platform: teleinfo
+    id: stge
+    tag_name: "STGE"
+    name: "linky Statuts"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    on_value:
+      then:
+        - lambda: |-
+            std::string hex = x;
+            if (hex.length() != 8) {
+              ESP_LOGD("linky", "Erreur format registre STGE: %s", hex.c_str());
+              return;
+            }
+            std::string binary = "";
+            for (char c : hex) {
+              int val = std::stoi(std::string(1, c), nullptr, 16);
+              for (int i = 3; i >= 0; i--) {
+                binary += (val & (1 << i)) ? "1" : "0";
+              }
+            }
+            id(hex_to_binary) = binary;
+            id(update_binary) = true;
+            ESP_LOGD("linky", "STGE=%s, Binaire=%s", hex.c_str(), binary.c_str());
+# nom du calendrier tarifaire
+  - platform: teleinfo
+    id: ngtf
+    tag_name: "NGTF"
+    name: "linky Nom calendrier tarifaire"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Libellé tarif fournisseur en cours
+  - platform: teleinfo
+    id: ltarf
+    tag_name: "LTARF"
+    name: "linky Libelle tarif fournisseur en cours"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Convertion du tarif en cours
+  - platform: template
+    id: tarif
+    name: "Linky PTEC"
+    lambda: |-
+      if ( id(ntarif).state == 1 || id(ntarif).state == 3 || id(ntarif).state == 5){
+        return { "HC.." };
+      } else {
+        return { "HP.." };
+      }
+
+  # Bits 1-3: Organe de coupure
+  - platform: template
+    name: "Linky Organe de Coupure"
+    id: linky_organe_de_coupure
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_1_3 = id(hex_to_binary).substr(28, 3);
+      if (bits_1_3 == "000") return {"Fermé"};
+      else if (bits_1_3 == "001") return {"Ouvert sur Surpuissance"};
+      else if (bits_1_3 == "010") return {"Ouvert sur Surtension"};
+      else if (bits_1_3 == "011") return {"Ouvert sur Délestage"};
+      else if (bits_1_3 == "100") return {"Ouvert sur Ordre CPL ou Euridis"};
+      else if (bits_1_3 == "101") return {"Ouvert sur Surchauffe avec I>Imax"};
+      else if (bits_1_3 == "110") return {"Ouvert sur Surchauffe avec I<Imax"};
+      else return {"??"};
+
+  # Bit 4: Cache-borne
+  - platform: template
+    name: "Linky Cache Borne"
+    id: linky_cache_borne
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[27] == '0') ? std::string("Ferme") : std::string("Ouvert");
+
+  # Bit 6: Surtension
+  - platform: template
+    name: "Linky Surtension"
+    id: linky_surtension
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[25] == '0') ? std::string("Pas de Surtension") : std::string("Surtension");
+
+  # Bit 7: Dépassement Puissance de Référence
+  - platform: template
+    name: "Linky Depassement Pref"
+    id: linky_dep_pref
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[24] == '0') ? std::string("Pas de Depassement") : std::string("Depassement en Cours");
+
+  # Bit 8: Producteur/Consommateur
+  - platform: template
+    name: "Linky Fonctionnement"
+    id: linky_fonct_prod_conso
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[23] == '0') ? std::string("Consommateur") : std::string("Producteur");
+
+  # Bits 10-13: Tarif en cours (fourniture)
+  - platform: template
+    name: "Linky Tarif Fourniture"
+    id: linky_tarif_fourniture
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_10_13 = id(hex_to_binary).substr(18, 4);
+      if (bits_10_13 == "0000") return {"HC BLEU"};
+      else if (bits_10_13 == "0001") return {"HP BLEU"};
+      else if (bits_10_13 == "0010") return {"HC BLANC"};
+      else if (bits_10_13 == "0011") return {"HP BLANC"};
+      else if (bits_10_13 == "0100") return {"HP ROUGE"};
+      else if (bits_10_13 == "0101") return {"HC ROUGE"};
+      else if (bits_10_13 == "0110") return {"Energie ventilée sur index 7"};
+      else if (bits_10_13 == "0111") return {"Energie ventilée sur index 8"};
+      else if (bits_10_13 == "1000") return {"Energie ventilée sur index 9"};
+      else if (bits_10_13 == "1001") return {"Energie ventilée sur index 10"};
+      else return {"??"};
+
+  # Bits 14-15: Tarif distributeur
+  - platform: template
+    name: "Linky Tarif Distributeur"
+    id: linky_tarif_distributeur
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_14_15 = id(hex_to_binary).substr(16, 2);
+      if (bits_14_15 == "00") return {"Energie ventilée sur index 1"};
+      else if (bits_14_15 == "01") return {"Energie ventilée sur index 2"};
+      else if (bits_14_15 == "10") return {"Energie ventilée sur index 3"};
+      else if (bits_14_15 == "11") return {"Energie ventilée sur index 4"};
+      else return {"??"};
+
+  # Bit 16: Mode dégradé horloge
+  - platform: template
+    name: "Linky Mode Horloge"
+    id: linky_mode_horloge
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[15] == '0') ? std::string("Horloge correcte") : std::string("Horloge mode degrade");
+
+  # Bit 17: Etat TIC
+  - platform: template
+    name: "Linky Etat TIC"
+    id: linky_etat_tic
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[14] == '0') ? std::string("Mode Historique") : std::string("Mode Standard");
+
+  # Bits 19-20: Etat communication Euridis
+  - platform: template
+    name: "Linky Com Euridis"
+    id: linky_com_euridis
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_19_20 = id(hex_to_binary).substr(11, 2);
+      if (bits_19_20 == "00") return {"Com désactivée"};
+      else if (bits_19_20 == "01") return {"Com active sans sécurité"};
+      else if (bits_19_20 == "11") return {"Com active avec sécurité"};
+      else return {"Com ??"};
+
+  # Bits 21-22: Statut CPL
+  - platform: template
+    name: "Linky Statut CPL"
+    id: linky_statut_cpl
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_21_22 = id(hex_to_binary).substr(9, 2);
+      if (bits_21_22 == "00") return {"New/unlock"};
+      else if (bits_21_22 == "01") return {"New/Lock"};
+      else if (bits_21_22 == "11") return {"Registered"};
+      else return {"Com ??"};
+
+  # Bit 23: Synchro CPL
+  - platform: template
+    name: "Linky Synchro CPL"
+    id: linky_synchro_cpl
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[8] == '0') ? std::string("Compteur non synchronise") : std::string("Compteur synchronise");
+
+  # Bits 24-25: Couleur du jour (Tempo)
+  - platform: template
+    name: "Linky Couleur Jour Tempo"
+    id: linky_couleur_j_tempo
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_24_25 = id(hex_to_binary).substr(6, 2);
+      if (bits_24_25 == "00") return {"Contrat non Tempo"};
+      else if (bits_24_25 == "01") return {"Bleu"};
+      else if (bits_24_25 == "10") return {"Blanc"};
+      else if (bits_24_25 == "11") return {"Rouge"};
+      else return {"Couleur J tempo indéfinie"};
+
+  # Bits 26-27: Couleur J+1 (Tempo)
+  - platform: template
+    name: "Linky Couleur J+1 Tempo"
+    id: linky_couleur_j1_tempo
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_26_27 = id(hex_to_binary).substr(4, 2);
+      if (bits_26_27 == "00") return {"Pas d'information"};
+      else if (bits_26_27 == "01") return {"Bleu"};
+      else if (bits_26_27 == "10") return {"Blanc"};
+      else if (bits_26_27 == "11") return {"Rouge"};
+      else return {"Couleur J+1 tempo indéfinie"};
+
+  # Bits 28-29: Préavis Pointes Mobiles
+  - platform: template
+    name: "Linky Préavis Pointes Mobiles"
+    id: linky_preavis_p_mobiles
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_28_29 = id(hex_to_binary).substr(2, 2);
+      if (bits_28_29 == "00") return {"Pas de préavis en cours"};
+      else if (bits_28_29 == "01") return {"Préavis PM1 en cours"};
+      else if (bits_28_29 == "10") return {"Préavis PM2 en cours"};
+      else if (bits_28_29 == "11") return {"Préavis PM3 en cours"};
+      else return {"Préavis en cours indéfini"};
+
+  # Bits 30-31: Pointes Mobiles
+  - platform: template
+    name: "Linky Pointe Mobile"
+    id: linky_pointe_mobile
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      std::string bits_30_31 = id(hex_to_binary).substr(0, 2);  // Correction ici : bits 30-31 sont les 2 premiers
+      if (bits_30_31 == "00") return {"Pas de pointe mobile"};
+      else if (bits_30_31 == "01") return {"PM1 en cours"};
+      else if (bits_30_31 == "10") return {"PM2 en cours"};
+      else if (bits_30_31 == "11") return {"PM3 en cours"};
+      else return {"Pointe mobile indéfinie"};
+
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+# Version 2.0
+# Capteurs pour les bits du registre STGE
+  # Bit 0: Contact Sec
+  - platform: template
+    name: "Linky Contact Sec"
+    id: linky_contact_sec
+    device_class: connectivity
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[31] == '0');  // Fermé = true (on), Ouvert = false (off)
+
+  # Bit 9: Sens de l'énergie active
+  - platform: template
+    name: "Linky Sens Energie Active"
+    id: linky_sens_energie_active
+    device_class: power
+    icon: "mdi:flash"
+    lambda: |-
+      if (!id(update_binary) || id(hex_to_binary).length() != 32) return {};
+      return (id(hex_to_binary)[22] == '0');  // Positive = true (on), Négative = false (off)
+
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+# Affichage
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    brightness: 100%
+    lambda: |-
+      it.printf(0,0,id(arial),"P=%.0f VA",id(papp).state);
+      it.printf(75,0,id(arial),"-%.0f %%",id(p100).state);
+      it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
+      it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
+      std::string tarif_ = id(ltarf).state;
+      it.printf(0,45,id(arial), tarif_.c_str());      
+
+interval:
+  - interval: 1h
+    then:
+      - script.execute: calcul_led_jour
+
+# ------------------------  Scripts
+script:
+# 
+# Couleur du Jour en cours
+  - id: calcul_led_jour
+    mode: single
+    then:
+      - logger.log:
+          format: "Ltarf= %f"
+          args: [ 'id(ntarif).state']
+
+      - if: 
+          condition:
+            - lambda: |-
+                return ( id(ntarif).state == 1 || id(ntarif).state == 2);
+
+          then:
+            - light.control:
+                id: led1
+                brightness: 75%
+                state: on
+                red: 0% 
+                green: 0%
+                blue: 100%    
+
+      - if: 
+          condition:
+            - lambda: |-
+                return ( id(ntarif).state == 3 || id(ntarif).state == 4);
+          then:
+            - light.control:
+                id: led1
+                brightness: 75%
+                state: on
+                red: 100% 
+                green: 100%
+                blue: 100%    
+          
+      - if: 
+          condition:
+            - lambda: |-
+                return ( id(ntarif).state == 5 || id(ntarif).state == 6);
+          then:
+            - light.control:
+                id: led1
+                brightness: 75%
+                state: on
+                red: 100% 
+                green: 0%
+                blue: 0%    

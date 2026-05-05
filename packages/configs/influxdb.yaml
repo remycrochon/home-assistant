@@ -1,0 +1,65 @@
+# InfluxDB
+# https://www.home-assistant.io/integrations/influxdb/
+# base influxdb
+
+influxdb:
+  #api_version: 2
+  #ssl: false
+  #host: 192.168.0.203
+  #port: 8086
+  #token: !secret influxDB_token 
+  #organization: 859933fbd6d2be44
+  #bucket: homeassistant
+  tags:
+    source: HA
+  tags_attributes:
+    - friendly_name
+  default_measurement: units
+
+  include:
+    domains:
+      - binary_sensor
+      - input_boolean
+      - input_datetime
+      - input_number
+      - input_select
+      - input_text
+      - number      
+      - sensor
+      - switch
+      - button
+      - light
+      - utility_meter
+
+      
+  exclude:
+    domains:
+      - camera
+      - zone
+      - automation
+      - cover
+      - script
+      - alarm_control_panel
+      - persistent_notification
+      - update
+      - conversation
+      - tag
+      - event
+      - notify
+      - select
+      - remote
+      - media_player
+      - calendar
+      - image
+      - time
+      - text
+      - group
+      - vacuum
+      - sun
+      - device_tracker
+      - weather
+      - group   
+      - person
+      - climate
+      - lawn_mower      
+

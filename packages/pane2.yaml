@@ -1,0 +1,591 @@
+openhasp:
+  ecran02:
+############### Page 0 All ###############
+    objects:
+      - obj: "p0b3"
+        properties:
+          "text": "{{ states('sensor.time') }}"
+
+      - obj: "p0b4"
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.rte_tempo_couleur_actuelle') %}
+            {% if couleur == "Bleu" %}
+            #0000FF
+            {% elif couleur == "Blanc" %}
+            #FFFFFF
+            {% elif couleur == "Rouge" %}
+            #FF0000
+            {% else %} 
+            #00FF00
+            {% endif %}
+
+      - obj: "p0b5"
+        properties:
+          "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') |float(0)| round(1)) }}°C"
+      - obj: "p0b6"
+        properties:
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.lywsd03mmc_salon_temperature')|float(0) | round(1)) }}°C"
+
+      - obj: "p0b7"
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.rte_tempo_prochaine_couleur') %}
+            {% if couleur == "Bleu" %}
+            #0000FF
+            {% elif couleur == "Blanc" %}
+            #FFFFFF
+            {% elif couleur == "Rouge" %}
+            #FF0000
+            {% else %} 
+            #00FF00
+            {% endif %}
+
+      - obj: "p0b8"
+        properties:
+          "text_color": >
+            {% set rssi = state_attr('openhasp.ecran02','rssi') | int(0) %}
+            {% if rssi >= -50 %}
+              #00ff00
+            {% elif rssi >= -60 %}
+              #ccff00
+            {% elif rssi >= -70 %}
+              #ff9100
+            {% elif rssi >= -80 %}
+              #ff5500
+            {% else %}
+              #ff0000
+            {% endif %}
+
+      - obj: "p0b18" #BP Volet, passe en rouge si alarme portes
+        properties:
+          "bg_color": "{{ '#ff0000' if is_state('binary_sensor.alarmes_portes', 'on') else '#EE82EE' }}"
+
+############### Page 1 Home ###############
+      - obj: "p1b21" # Temp Ext
+        properties:
+          "text": "{{ states('sensor.vp2_temp_out')|float(0)|round(1) }}°C"
+      - obj: "p1b22" # Hum
+        properties:
+          "text": "{{ states('sensor.vp2_humidity_out')|float(0)|round(0) }}%"
+      
+      - obj: "p1b31" # Temp Int
+        properties:
+          "text": "{{ states('sensor.vp2_barometer')|float(0)|round(0) }} mba"
+            
+      - obj: "p1b41" # Vent
+        properties:
+          "text": "{{ states('sensor.vp2_win_speed')|float(0)|round(1) }} km/h"
+            
+      - obj: "p1b51" # pluie
+        properties:
+          "text": "{{ states('sensor.vp2_rainjour')|float(0)|round(1) }} mm"
+            
+
+####### PAGE 2 - HOTTE ############### 
+
+      - obj: "p2b22" # AUTO
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_auto_hotte_pm2_5", "on") else 0 }}'
+          "text": '{{ "AUTO" if is_state("switch.esp180_hotte_auto_hotte_pm2_5", "on") else "MANU" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_auto_hotte_pm2_5', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              target:
+                entity_id: "switch.esp180_hotte_auto_hotte_pm2_5"
+
+
+      - obj: "p2b23" # STOP
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_hotte", "on") else 0 }}'
+          "text": '{{ "STOP" if is_state("switch.esp180_hotte_hotte", "on") else "MAR" | e }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              target:
+                entity_id: "switch.esp180_hotte_hotte"
+
+      - obj: "p2b24" # Vitesse 1
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_hotte_v1", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte_v1', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_hotte_v1"
+      - obj: "p2b25" # Vitesse 2
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_hotte_v2", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte_v2', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_hotte_v2"
+      - obj: "p2b26" # Vitesse 3
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_hotte_v3", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte_v3', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_hotte_v3"
+      - obj: "p2b27" # Lumiere
+        properties:
+          "val": '{{ 1 if is_state("switch.esp180_hotte_hotte_lumiere", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte_lumiere', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.esp180_hotte_hotte_lumiere"
+      - obj: "p2b29"
+        properties:
+          "text": "{{ states('sensor.esp180_hotte_pm2_5_hotte')|float(0)|round(1)}} ppm"
+      - obj: "p2b31"
+        properties:
+          "text": "{{ states('sensor.esp180_hotte_temperature_hotte')|float(0)|round(1)}} C°" 
+      - obj: "p2b33"
+        properties:
+          "text": "{{ states('sensor.esp180_hotte_humidite_hotte')|float(0)|round(1)}} %" 
+
+####### PAGE 3 VMC ############### 
+      - obj: "p3b10"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_temp_air_vicie')|float(0)|round(1)}}C°" 
+      - obj: "p3b11"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_temp_air_neuf')|float(0)|round(1)}}C°"
+      - obj: "p3b12"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_temp_insufflation')|float(0)|round(1)}}C°" 
+      - obj: "p3b13"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_temp_aspiration')|float(0)|round(1)}}C°"
+      - obj: "p3b14"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_temp_combles')|float(0)|round(1)}}C°"
+      - obj: "p3b16"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_rendement')|float(0)|round(0)}} %"
+      - obj: "p3b21"
+        properties:
+          "text": "{{ states('sensor.esp145_conc_particules_2_5mm')|float(0)|round(0)}}"      
+      - obj: "p3b31"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_cop_vmc')|float(0)|round(1)}}"   
+      - obj: "p3b41"
+        properties:
+          "text": "{{ states('sensor.ecocompteur_vmc_niv0')|float(0)|round(0)}} W"          
+      - obj: "p3b51"
+        properties:
+          "text": "{{ states('sensor.esp145_monoxide_carbon')|float(0)|round(0)}} ppm"             
+      - obj: "p3b61"
+        properties:
+          "text": "{{ states('sensor.esp145_mh_z19_co2_value')|float(0)|round(0)}} ppm"
+      - obj: "p3b71"
+        properties:
+          "text": "{{ states('sensor.esp137_vmc_debit_estime_vmc')|float(0)|round(1)}} m3/h"          
+      - obj: "p3b91" # Cde Relais
+        properties:
+          "val": '{{ 1 if is_state("switch.relais_cde_vmc_niv0_on_off", "on") else 0 }}'
+          "text_color": "{{ '#00ff00' if is_state('switch.relais_cde_vmc_niv0_on_off', 'on') else '#ffffff' }}" 
+        event:
+          "up":
+            - service: homeassistant.toggle
+              entity_id: "switch.relais_cde_vmc_niv0_on_off"
+
+############### Page 4 ECS ###############
+      ###############
+      - obj: "p4b10" # Regule
+        properties:
+          "text": "Reg: {{ states('sensor.esp176_routeur_mode_regulation') }}"      
+      - obj: "p4b20" # Prod
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_production_solaire_totale')|int(0) %}
+            {% if count >= 1000 %}
+              P={{ (count/1000) |round(2)}} kW
+            {% else %}
+              P={{ count |round(0)}} W
+            {% endif %}
+      - obj: "p4b21" # Maison
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|int(0) %}
+            {% if count >= 1000 %}
+              M={{ (count/1000) |round(2)}} kW
+            {% else %}
+              M={{ count |round(0)}} W
+            {% endif %}
+      - obj: "p4b22" # Consigne Batteries
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_batt_en_cours')|int(0) %}
+            {% if count >= 1000 %}
+              C={{ (count/1000) |round(2)}} kW
+            {% else %}
+              C={{ count |round(0)}} W
+            {% endif %}
+      - obj: "p4b30" # P Dispo
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_esp32_routeur_1r_pu_disponible')|int(0) %}
+            {% if count >= 1000 %}
+              D={{ (count/1000) |round(2)}} kW
+            {% else %}
+              D={{ count |round(0) }}W
+            {% endif %}
+
+      - obj: "p4b40" # S Triac
+        properties:
+          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0) }}"
+      - obj: "p4b50" # ECS
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_esp32_routeur_1r_p_ecs_jsymk')|int(0) %}
+            {% if count >= 1000 %}
+              P ECS={{ (count/1000) |round(2)}} kW
+            {% else %}
+              P ECS={{ count |round(0)}} W
+            {% endif %}
+      - obj: "p4b60" # TEMP Triac
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_routeur_temp_triac')|int(0) %}
+            T Triac={{ count |round(0)}} °C
+
+      - obj: "p4b70" # Temp ECS
+        properties:
+          "text": >
+            {% set volume = states('sensor.esp139_ecs_ballon_volume_eau_chaude')|int(0) %}
+            VOL={{ volume |round(0)}} L
+      
+############### Page 5 Elec ###############
+      ############### Réseau
+      - obj: "p5b24" # Grid Power
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power')|int(0) %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p5b25" # Grid Conso
+        properties:
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int(0) }} kWh"
+            
+      - obj: "p5b26" # Grid Inject
+        properties:
+          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int(0) }} kWh"
+      
+      ##################### Solaire
+      - obj: "p5b34" # Puissance production
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_production_solaire_totale')|float(0) %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p5b35" # Production
+        properties:
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int(0) }} kWh"
+            
+      - obj: "p5b36" # Prévision
+        properties:
+          "text": "{{ states('input_number.mp2_memoire_estimation_production_jour')|int(0) }} kWh"
+
+      ############# Batteries
+      - obj: "p5b44" # Charge/Décharge
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|int(0) %}
+            {% if count >= 0 %}
+              {{"\uE6c1"}}
+            {% else %}
+              {{"\uE6c2"}}
+            {% endif %}
+      - obj: "p5b45" # Puissance
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0)*-1 %}
+            {% if count|abs >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p5b46" # SOC
+        properties:
+          "text": "{{ states('sensor.mp2_soc_affiche')|int(0) }} %"
+      - obj: "p5b47" # Tps restant
+        properties:
+          "text": >-
+            {% set h = states('sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_time_to_go') | float(0) %}
+            {% set s = (h * 3600) | int %}
+            {{ '%02d' | format(s // 3600) }}:{{ '%02d' | format((s % 3600) // 60) }}
+      ################## Maison
+      - obj: "p5b55" # Puissance
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|float(0) %}
+            {% if count >= 1000 %}
+            {{ (count/1000) |round(2)}} kW
+            {% else %}
+            {{ count }} W
+            {% endif %}
+      - obj: "p5b56" # Conso
+        properties:
+          "text": "{{ states('sensor.mp2_energy_conso_ac_l1_jour')|int(0) }} kWh"
+      - obj: "p5b57" # PREVI
+        properties:
+          "text": "{{ states('sensor.mp2_dess_previ_conso_6_22_j1')|int(0) }} kWh"
+
+############### Page 6 ###############
+      ############### PORTE GARAGE
+      - obj: "p6b11" # porte_garage. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_garage', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_garage','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.porte_garage"
+      - obj: "p6b12" # porte_garage. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.porte_garage', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_garage', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_garage', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.porte_garage', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.porte_garage"
+      - obj: "p6b13" # porte_garage. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_garage', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_garage','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.porte_garage"
+      - obj: "p6b14"
+        properties:
+          "text": >
+            {{state_attr('cover.porte_garage','current_position')|int(0) |round(0)}}%
+
+      ############### PORTE SOUS SOL
+      - obj: "p6b21" # porte_sous_sol. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_sous_sol', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_sous_sol','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.porte_sous_sol"
+      - obj: "p6b22" # porte_sous_sol. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.porte_sous_sol', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_sous_sol', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.porte_sous_sol', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.porte_sous_sol', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.porte_sous_sol"
+      - obj: "p6b23" # porte_sous_sol. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.porte_sous_sol', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.porte_sous_sol','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.porte_sous_sol"
+      - obj: "p6b24"
+        properties:
+          "text": >
+            {{state_attr('cover.porte_sous_sol','current_position')|int(0) |round(0)}}%
+
+      ############### Bureau
+      - obj: "p6b31" # Bureau. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_bureau', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_bureau','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.groupe_bureau"
+      - obj: "p6b32" # store_sud. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.groupe_bureau', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_bureau', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_bureau', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.groupe_bureau', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.groupe_bureau"
+      - obj: "p6b33" # store_sud. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_bureau', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_bureau','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.groupe_bureau"
+      - obj: "p6b34"
+        properties:
+          "text": >
+            {{state_attr('cover.groupe_bureau','current_position')|int(0) |round(0)}}%
+
+      ############### Salle à Manger Salon
+      - obj: "p6b41" # volets_salon_rts. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.volets_salon_rts', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.volets_salon_rts','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.volets_salon_rts"
+      - obj: "p6b42" # volets_salon_rts. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.volets_salon_rts', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.volets_salon_rts', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.volets_salon_rts', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.volets_salon_rts', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.volets_salon_rts"
+      - obj: "p6b43" # volets_salon_rts. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.volets_salon_rts', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.volets_salon_rts','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.volets_salon_rts"
+      - obj: "p6b44"
+        properties:
+          "text": >
+            {{state_attr('cover.volets_salon_rts','current_position')|int(0) |round(0)}}%
+
+      ############### Store Sud
+      - obj: "p6b51" # Store Sud. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.store_sud', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.store_sud','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.store_sud"
+      - obj: "p6b52" # store_sud. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.store_sud', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.store_sud', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.store_sud', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.store_sud', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.store_sud"
+      - obj: "p6b53" # store_sud. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.store_sud', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.store_sud','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.store_sud"
+      - obj: "p6b54"
+        properties:
+          "text": >
+            {{state_attr('cover.store_sud','current_position')|int(0) |round(0)}}%
+
+      ############### TOUS
+      - obj: "p6b61" # groupe_tous_volets. up button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_tous_volets', 'opening') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_tous_volets','current_position', 100) else '255' }}"
+        event:
+          "down":
+            - service: cover.open_cover
+              target:
+                entity_id: "cover.groupe_tous_volets"
+      - obj: "p6b62" # groupe_tous_volets. middle stop button
+        properties:
+          "text": >
+            {% if is_state('cover.groupe_tous_volets', 'closing') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_tous_volets', 'opening') %}
+            {{ "\uE4DB" | e }}
+            {%-elif is_state('cover.groupe_tous_volets', 'closed') %}
+            {{ "\uF11C" | e }}
+            {%-elif is_state('cover.groupe_tous_volets', 'open') %}
+            {{ "\uF11E" | e }}
+            {% endif %}
+        event:
+          "down":
+            - service: cover.stop_cover
+              target:
+                entity_id: "cover.groupe_tous_volets"
+      - obj: "p6b63" # groupe_tous_volets. down button
+        properties:
+          "text_color": "{{ '#FFFF00' if is_state('cover.groupe_tous_volets', 'closing') else '#FFFFFF' }}"
+          "text_opa": "{{ '80' if is_state_attr('cover.groupe_tous_volets','current_position', 0) else '255' }}"
+        event:
+          "down":
+            - service: cover.close_cover
+              target:
+                entity_id: "cover.groupe_tous_volets"
+      - obj: "p6b64"
+        properties:
+          "text": >
+            {{state_attr('cover.groupe_tous_volets','current_position')|int(0) |round(0)}}%   

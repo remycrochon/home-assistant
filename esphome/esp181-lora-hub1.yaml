@@ -1,0 +1,149 @@
+substitutions:
+  adress_ip: 192.168.0.181
+  name_e1: esp182lorae1
+  name_e2: esp183lorae2
+  name_hub: esp181lorahub
+
+
+esphome:
+  name: ${name_hub}
+  
+esp32:
+  board: esp32-c3-devkitm-1
+  cpu_frequency: 160MHZ
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+  hardware_uart: UART0
+  level: DEBUG
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+  fast_connect: true
+  reboot_timeout: 2min
+  output_power: 20dB
+  power_save_mode: none
+  enable_btm: true
+  enable_rrm: true
+  min_auth_mode: WPA2
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: 192.168.0.254
+    #dns1: !secret dns1
+    dns2: !secret dns2
+
+#web_server:
+#  port: 80
+
+spi:
+  clk_pin: GPIO04 #04
+  mosi_pin: GPIO06 #07
+  miso_pin: GPIO01 #02
+
+sx127x:
+  data_rate: 1Mhz
+  dio0_pin: GPIO05 #03
+  cs_pin: GPIO07 #010
+  rst_pin: GPIO03 #08  
+  pa_pin: BOOST
+  pa_power: 8
+  bandwidth: 125_0kHz
+  crc_enable: true
+  frequency: 433920000
+  modulation: LORA
+  rx_start: true
+  sync_value: 0x12
+  spreading_factor: 7
+  preamble_size: 8
+  coding_rate: CR_4_6
+  on_packet:
+    then:
+      - sensor.template.publish:
+          id: lora_rssi
+          state: !lambda 'return rssi;'
+      - lambda: |-
+          ESP_LOGD("lambda", "packet %s", format_hex(x).c_str());
+          ESP_LOGD("lambda", "rssi %.2f", rssi);
+          ESP_LOGD("lambda", "snr %.2f", snr);
+
+packet_transport:
+  platform: sx127x
+  update_interval: 10s
+  encryption: !secret encryption_key
+  rolling_code_enable: false
+  providers:
+    - name: ${name_e1}
+      encryption: !secret encryption_key
+    - name: ${name_e2}
+      encryption: !secret encryption_key      
+  sensors: 
+    - id: temperature_${name_e1}
+    - id: compteur_${name_e1}
+    - id: contact_${name_e2}
+    - id: compteur_${name_e2}
+
+sensor:
+  # Capteurs venant de lorae1
+  - platform: packet_transport
+    provider: ${name_e1}
+    name: temperature_${name_e1}
+    internal: false
+    id: temperature_${name_e1}
+    remote_id: ${name_e1}_temperature
+    device_class: temperature
+    accuracy_decimals: 2
+
+  - platform: packet_transport
+    provider: ${name_e1}
+    name: compteur_${name_e1}
+    internal: false
+    id: compteur_${name_e1}
+    remote_id: ${name_e1}_compteur
+    device_class: frequency
+
+  # Capteurs venant de lorae2
+  - platform: packet_transport
+    provider: ${name_e2}
+    name: contact_${name_e2}
+    internal: false
+    id: contact_${name_e2}
+    remote_id: ${name_e2}_contact
+    #device_class: opening
+
+  - platform: packet_transport
+    provider: ${name_e2}
+    name: compteur_${name_e2}
+    internal: false    
+    id: compteur_${name_e2}
+    remote_id: ${name_e2}_compteur
+    device_class: frequency    
+
+  # Capteur pour RSSI
+  - platform: template
+    name: "LoRa RSSI"
+    id: lora_rssi
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 60s
+
+binary_sensor:
+  - platform: status
+    name: "Status"    
+
+switch:
+  - platform: restart
+    name: "Restart"

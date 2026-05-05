@@ -1,0 +1,468 @@
+porte_sous_sol_up:
+  alias: porte_sous_sol_up
+  sequence:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.mvt_porte_sous_sol
+  mode: single
+  icon: mdi:garage-open-variant
+ecs_on:
+  sequence:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs_router_pv
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_relais_ecs
+    data: {}
+  mode: single
+  alias: Ecs_Reseau
+  icon: mdi:water-boiler-auto
+ecs_off:
+  sequence:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_relais_ecs_router_pv
+    data: {}
+  mode: single
+  alias: Ecs_Pv
+  icon: mdi:water-boiler-auto
+porte_garage_down:
+  alias: porte_garage_down
+  sequence:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.mvt_porte_garage
+  mode: single
+  icon: mdi:garage-variant
+porte_garage_up:
+  alias: porte_garage_up
+  sequence:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: open
+    target:
+      entity_id: input_text.mvt_porte_garage
+  mode: single
+  icon: mdi:garage-open-variant
+porte_garage_stop:
+  alias: porte_garage_stop
+  sequence:
+  - condition: state
+    entity_id: binary_sensor.porte_garage_fermee
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.porte_garage_ouverte
+    state: 'off'
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_garage
+    data: {}
+  mode: single
+  icon: mdi:garage-alert-variant
+porte_sous_sol_stop:
+  alias: porte_sous_sol_stop
+  sequence:
+  - condition: state
+    entity_id: binary_sensor.porte_ssol_fermee
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.porte_ssol_ouverte
+    state: 'off'
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  mode: single
+  icon: mdi:garage-alert-variant
+ecs_off_off:
+  alias: Ecs_Off
+  sequence:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_relais_ecs_router_pv
+    data: {}
+  mode: single
+  icon: mdi:water-boiler-auto
+'1706464871250':
+  alias: Volets RTS Fermeture
+  sequence:
+  - data: {}
+    target:
+      entity_id:
+      - cover.volet_sdb_rts
+      - cover.volet_parents_grand_zb_volets
+      - cover.volet_ch_parts_petit
+      - cover.volet_salon_petit
+      - cover.bureau_gauche_rts
+      - cover.bureau_droit_rts
+    action: cover.close_cover
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state:
+        - Auto Général
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state:
+        - Auto Pos Soleil
+    then:
+    - data: {}
+      enabled: true
+      action: cover.close_cover
+      target:
+        entity_id:
+        - cover.volet_grand_ch_sud_zb
+  - if:
+    - condition: state
+      entity_id: input_select.mode_volets_chamb_sud
+      state:
+      - Auto Général
+    then:
+    - data: {}
+      enabled: true
+      action: cover.close_cover
+      target:
+        entity_id: cover.volet_ch_sud
+  - if:
+    - condition: state
+      entity_id: input_select.mode_volets_chamb_nord
+      state:
+      - Auto Général
+    then:
+    - action: cover.close_cover
+      metadata: {}
+      target:
+        entity_id: cover.volet_ch_nord
+      data: {}
+  mode: single
+  icon: mdi:window-shutter
+  description: ''
+0_0_1_ouverture_volets_rts:
+  alias: Volets RTS Ouverture
+  sequence:
+  - target:
+      entity_id:
+      - cover.volet_cuisine
+      - cover.volet_sdb_rts
+      - cover.volet_sam_volets_zb
+    data: {}
+    action: cover.open_cover
+  - target:
+      entity_id:
+      - cover.volet_salon_petit
+    data: {}
+    action: cover.open_cover
+    enabled: true
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+    enabled: true
+  - if:
+    - condition: state
+      entity_id: input_select.mode_volets_bureau
+      state:
+      - Auto Général
+    then:
+    - action: cover.open_cover
+      target:
+        entity_id:
+        - cover.bureau_droit_rts
+        - cover.bureau_gauche_rts
+      data: {}
+    enabled: true
+  - if:
+    - condition: state
+      entity_id: input_select.mode_volets_chamb_nord
+      state:
+      - Auto Général
+    then:
+    - action: cover.open_cover
+      metadata: {}
+      data: {}
+      target:
+        entity_id: cover.volet_ch_nord
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+    enabled: true
+  - if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state:
+        - Auto Général
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state:
+        - Auto Pos Soleil
+    then:
+    - action: cover.open_cover
+      data: {}
+      target:
+        entity_id:
+        - cover.volet_grand_ch_sud_zb
+  - if:
+    - condition: state
+      entity_id: input_select.mode_volets_chamb_sud
+      state:
+      - Auto Général
+    then:
+    - action: cover.open_cover
+      data: {}
+      target:
+        entity_id: cover.volet_ch_sud
+  mode: single
+  icon: mdi:window-shutter-open
+  description: ''
+'1706601448211':
+  alias: porte_sous_sol_down
+  sequence:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.cde_porte_ssol
+    data: {}
+  - service: input_text.set_value
+    data:
+      value: close
+    target:
+      entity_id: input_text.mvt_porte_sous_sol
+  mode: single
+  icon: mdi:garage-variant
+0_1_1_ouverture_volets_mode_absent_rts:
+  alias: Volets Mode absent RTS Ouverture
+  sequence:
+  - data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+      - cover.volet_cuisine
+      - cover.volet_sdb_rts
+      - cover.volet_ch_nord
+      - cover.volets_ch_parents_rts
+      - cover.volet_sam_volets_zb
+      - cover.volet_parents_grand_zb_volets
+      - cover.bureau_gauche_rts
+      - cover.bureau_droit_rts
+      - cover.volet_grand_ch_sud_zb
+      - cover.volet_ch_sud
+    action: cover.open_cover
+  mode: single
+  icon: mdi:window-shutter-open
+  description: ''
+0_1_0_fermeture_volets_mode_absent_rts:
+  alias: Volets Mode absent RTS Fermeture
+  sequence:
+  - data: {}
+    target:
+      entity_id:
+      - cover.volet_salon_petit
+      - cover.volet_cuisine
+      - cover.volet_sdb_rts
+      - cover.volet_ch_nord
+      - cover.volets_ch_parents_rts
+      - cover.volet_sam_volets_zb
+      - cover.volet_parents_grand_zb_volets
+      - cover.bureau_droit_rts
+      - cover.bureau_gauche_rts
+      - cover.volet_ch_sud
+      - cover.volet_grand_ch_sud_zb
+    action: cover.close_cover
+  mode: single
+  icon: mdi:window-shutter
+  description: ''
+ssh_command:
+  alias: ssh_command
+  sequence:
+  - action: python_script.ssh_command
+    metadata: {}
+    data:
+      file: /homeassistant/python_scripts/ssh_command.py
+      host: 192.168.0.84
+      user: remy
+      pass: 56835683
+      command: ls -la
+  description: ''
+activation_camera:
+  sequence:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Désactivation Détection video
+        surveillance'
+      title: Caméra
+  - action: switch.turn_off
+    target:
+      entity_id:
+      - switch.cuisine_detect
+      - switch.cuisine_motion
+      - switch.cuisine_recordings
+      - switch.cuisine_snapshots
+      - switch.piscine_detect
+      - switch.piscine_motion
+      - switch.piscine_recordings
+      - switch.piscine_snapshots
+      - switch.garage_ext_detect
+      - switch.garage_ext_motion
+      - switch.garage_ext_recordings
+      - switch.garage_ext_snapshots
+    data: {}
+  alias: Desactivation Camera
+  description: ''
+activation_camera_2:
+  sequence:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Activation Détection video
+        surveillance'
+      title: Caméra
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.cuisine_detect
+      - switch.cuisine_motion
+      - switch.piscine_detect
+      - switch.piscine_motion
+      - switch.garage_ext_detect
+      - switch.garage_ext_motion
+      - switch.piscine_snapshots
+      - switch.cuisine_snapshots
+      - switch.garage_ext_snapshots
+      - switch.piscine_recordings
+      - switch.cuisine_recordings
+      - switch.garage_ext_recordings
+    data: {}
+  alias: Activation caméra
+  description: ''
+envoyer_message_log_esp178:
+  alias: Envoyer un message log depuis ESP178
+  sequence:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '"{{ message }}"'
+  mode: single
+  fields:
+    message:
+      description: Le message à loguer
+      example: test depuis ESPHome
+  description: ''
+envoyer_un_message_log_depuis_esphome:
+  sequence:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '"{{ message }}"'
+  alias: Envoyer un message log depuis ESPHOME
+  mode: single
+  fields:
+    message:
+      description: Le message à loguer
+      example: test depuis ESPHome
+  description: ''

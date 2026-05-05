@@ -1,0 +1,357 @@
+substitutions:
+  device_name: esp180-hotte
+  adress_ip: "192.168.0.180"
+  friendly_name: esp180
+  time_timezone: "Europe/Paris"
+
+esphome:
+  name: esp180
+
+esp32:
+  board: mhetesp32minikit
+  framework:
+    type: esp-idf
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 1min
+  min_auth_mode: WPA2
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+logger:
+  baud_rate: 0
+  level: debug
+
+api:
+
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+
+i2c:
+  sda: 17
+  scl: 16
+  scan: true
+  id: bus_a
+
+globals:
+  # Anti-yo-yo : horodatage dernier changement de vitesse (ms)
+  - id: last_change_ms
+    type: uint32_t
+    initial_value: '0'
+
+  # Auto-OFF : mémorise si la hotte a été démarrée automatiquement
+  - id: auto_started
+    type: bool
+    initial_value: 'false'
+
+  # Auto-OFF : début période "air redevenu propre"
+  - id: clean_since_ms
+    type: uint32_t
+    initial_value: '0'
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+
+number:
+  # Seuils PM2.5 (fumées) : V1/V2/V3
+  - platform: template
+    name: "Seuil_V1 PM2.5"
+    id: seuilv1_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 25
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  - platform: template
+    name: "Seuil_V2 PM2.5"
+    id: seuilv2_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 60
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  - platform: template
+    name: "Seuil_V3 PM2.5"
+    id: seuilv3_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 120
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  # Auto-ON / Auto-OFF PM2.5
+  - platform: template
+    name: "Seuil Auto-ON PM2.5"
+    id: seuil_auto_on_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 40
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  - platform: template
+    name: "Seuil Auto-OFF PM2.5"
+    id: seuil_auto_off_pm
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 500
+    initial_value: 20
+    unit_of_measurement: "µg/m³"
+    step: 1
+
+  - platform: template
+    name: "Auto-OFF Delai"
+    id: auto_off_delay_s
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 10
+    max_value: 1800
+    initial_value: 300
+    unit_of_measurement: "s"
+    step: 10
+
+switch:
+  # Activation auto (PM2.5 -> allume / éteint la hotte)
+  - platform: template
+    name: "Auto Hotte (PM2.5)"
+    id: auto_hotte
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    turn_off_action:
+      - switch.turn_off: hotte
+
+  - platform: template
+    name: "Hotte"
+    id: hotte
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: v1
+      - delay: 100ms
+      - switch.turn_on: r1_lumiere
+      - lambda: |-
+          // Ne pas casser l'auto-off, juste réinitialiser le timer "air propre"
+          id(clean_since_ms) = 0;
+    turn_off_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - switch.turn_off: v3
+      - switch.turn_off: r2
+      - switch.turn_off: r3
+      - switch.turn_off: r4
+      - switch.turn_off: r1_lumiere
+      - lambda: |-
+          id(auto_started) = false;
+          id(clean_since_ms) = 0;
+
+  - platform: template
+    name: "Hotte V1"
+    id: v1
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: r2
+      - switch.turn_off: r3
+      - switch.turn_off: r4
+      - switch.turn_off: v2
+      - switch.turn_off: v3
+
+  - platform: template
+    name: "Hotte V2"
+    id: v2
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: r2
+      - switch.turn_on: r3
+      - switch.turn_off: r4
+      - switch.turn_off: v1
+      - switch.turn_off: v3
+
+  - platform: template
+    name: "Hotte V3"
+    id: v3
+    optimistic: true
+    turn_on_action:
+      - switch.turn_on: r2
+      - switch.turn_off: r3
+      - switch.turn_on: r4
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+
+  - platform: restart
+    name: "Restart"
+
+  # Relais
+  - platform: gpio
+    name: "Hotte Lumiere"
+    pin: GPIO25
+    id: r1_lumiere
+
+  - platform: gpio
+    name: "R2"
+    pin: GPIO22
+    id: r2
+
+  - platform: gpio
+    name: "R3"
+    pin: GPIO27
+    id: r3
+
+  - platform: gpio
+    name: "R4"
+    pin: GPIO21
+    id: r4
+
+sensor:
+  # Indicateurs réseau
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+  # Temp/Hum indicatifs seulement
+  - platform: htu21d
+    model: htu21d
+    update_interval: 60s
+    temperature:
+      name: "Temperature_hotte"
+      id: temp_hotte
+    humidity:
+      name: "Humidite_hotte"
+      id: hum_hotte
+
+  # PM2.5 depuis Home Assistant (esp138 sur la hotte)
+  - platform: homeassistant
+    id: pm25_hotte_ha
+    entity_id: sensor.esp138_qualite_air_concentration_de_particules_2_5mm
+    internal: true
+
+  # Publication locale (visible dans HA côté esp180)
+  - platform: template
+    name: "PM2_5_Hotte"
+    id: pm25_hotte
+    unit_of_measurement: "µg/m³"
+    device_class: pm25
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 10s
+    lambda: |-
+      if (!id(pm25_hotte_ha).has_state()) return NAN;
+      return id(pm25_hotte_ha).state;
+
+interval:
+  - interval: 10s
+    then:
+      - script.execute: calcul_vitesse
+
+script:
+  - id: calcul_vitesse
+    mode: single
+    then:
+      - lambda: |-
+          // Lecture PM
+          const bool pm_ok = id(pm25_hotte_ha).has_state() && !isnan(id(pm25_hotte_ha).state);
+          if (!pm_ok) return;
+
+          const float pm = id(pm25_hotte_ha).state;
+          const uint32_t now_ms = millis();
+
+          // ===== AUTO-ON =====
+          if (id(auto_hotte).state && !id(hotte).state && pm >= id(seuil_auto_on_pm).state) {
+            // Marqueur auto (pour autoriser auto-off)
+            id(auto_started) = true;
+            id(clean_since_ms) = 0;
+
+            id(hotte).turn_on();
+
+            // Vitesse au démarrage auto
+            if (pm >= id(seuilv3_pm).state)      id(v3).turn_on();
+            else if (pm >= id(seuilv2_pm).state) id(v2).turn_on();
+            else                                 id(v1).turn_on();
+
+            id(last_change_ms) = now_ms;
+          }
+
+          // Si hotte OFF, rien d'autre à faire
+          if (!id(hotte).state) return;
+
+          // ===== REGULATION VITESSE (PM uniquement) =====
+          int target = 1;
+          if (pm >= id(seuilv3_pm).state)      target = 3;
+          else if (pm >= id(seuilv2_pm).state) target = 2;
+          else if (pm >= id(seuilv1_pm).state) target = 1;
+          else                                  target = 1;
+
+          int cur = 1;
+          if (id(v3).state) cur = 3;
+          else if (id(v2).state) cur = 2;
+          else if (id(v1).state) cur = 1;
+
+          // Anti-yo-yo (baisse retardée)
+          const uint32_t HOLD_MS = 90000; // 90s
+          if (target < cur && (now_ms - id(last_change_ms)) < HOLD_MS) {
+            target = cur;
+          }
+
+          if (target != cur) {
+            if (target == 1) {
+              id(v1).turn_on(); id(v2).turn_off(); id(v3).turn_off();
+            } else if (target == 2) {
+              id(v1).turn_off(); id(v2).turn_on(); id(v3).turn_off();
+            } else {
+              id(v1).turn_off(); id(v2).turn_off(); id(v3).turn_on();
+            }
+            id(last_change_ms) = now_ms;
+          }
+
+          // ===== AUTO-OFF =====
+          // Ne coupe automatiquement QUE si elle a été auto-démarrée
+          if (id(auto_hotte).state && id(auto_started)) {
+            if (pm <= id(seuil_auto_off_pm).state) {
+              if (id(clean_since_ms) == 0) id(clean_since_ms) = now_ms;
+
+              const uint32_t delay_ms = (uint32_t)(id(auto_off_delay_s).state * 1000.0f);
+              if ((now_ms - id(clean_since_ms)) >= delay_ms) {
+                id(hotte).turn_off();
+                id(auto_started) = false;
+                id(clean_since_ms) = 0;
+              }
+            } else {
+              // air pas assez propre -> reset chrono
+              id(clean_since_ms) = 0;
+            }
+          }

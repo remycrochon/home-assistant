@@ -1,0 +1,64 @@
+####################################################
+#                                                  #
+#                     SYSTEME                      #
+#                                                  #
+####################################################
+input_boolean:
+  alim_tablette_ok:
+    name: Alim Tablette OK=On
+
+
+  # https://forum.hacf.fr/t/scan-interval-dun-sensor-command-line/5182
+  #- platform: command_line
+  #  name: "Portainer Online"
+  #  command: response=$(curl -LIk -m 3 http://192.168.0.153:9000 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"
+  #  scan_interval: 90
+  #  value_template: "{{ value }}"
+
+switch:
+# Commande de reboot du RPI Weex
+  - platform: wake_on_lan
+    name: RebootWeeks
+    host: 192.168.0.62
+    mac: B8:27:EB:27:F8:6F
+    turn_off:
+      service: shell_command.turn_off_remote_pc
+      
+
+mqtt:
+  sensor:
+    - name: "ESPHome LXC Version"
+      state_topic: "monitor/esphome_lxc/version"
+
+    - name: "ESPHome LXC Version la plus récente"
+      state_topic: "monitor/esphome_lxc/latest"
+
+    - name: "ESPHome LXC CPU"
+      state_topic: "monitor/esphome_lxc/cpu_pct"
+      unit_of_measurement: "%"
+      state_class: measurement
+
+    - name: "ESPHome LXC Mémoire"
+      state_topic: "monitor/esphome_lxc/mem_pct"
+      unit_of_measurement: "%"
+      state_class: measurement
+
+  binary_sensor:
+    - name: "ESPHome LXC En cours d'exécution"
+      state_topic: "monitor/esphome_lxc/status"
+      payload_on: "running"
+      payload_off: "stopped"
+
+sensor:
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'date_time_utc'
+      - 'date_time_iso'
+      - 'time_date'
+      - 'time_utc'
+
+
+

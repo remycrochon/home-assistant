@@ -1,0 +1,73 @@
+####################################################
+#                                                  #
+#               CALCUL DES ALARMES                 #
+#                                                  #
+####################################################
+
+
+# Test Alert
+input_boolean:
+  test_alert:
+    name: Test Alert
+
+template:
+  - binary_sensor:
+# Surveillance de la temperature du congelateur     
+# normalement sur off
+# Déclaré dans http://192.168.0.37:8123/config/helpers
+
+# Surveillance de la temperature du chalet     
+# normalement sur off
+# Déclaré dans http://192.168.0.37:8123/config/helpers
+
+        
+# Surveillance status PAC
+# normalement sur on
+    - name: "alarme_status_pac"
+      unique_id: "alarme_status_pac"
+      state: >-
+        {% set a=states("sensor.esp_altherma_status") %}
+        {{ a=="Online" }}
+      device_class: "connectivity"
+
+# Surveillance porte garage
+# normalement sur on
+    - name: "alarme_porte_garage"
+      unique_id: "alarme_porte_garage"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.porte_garage_fermee") %}
+        {{ a==True and b=="off" }}
+      device_class: "problem"
+
+# Surveillance porte sous sol
+# normalement sur on
+    - name: "alarme_porte_sous_sol"
+      unique_id: "alarme_porte_sous_sol"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.porte_ssol_fermee") %}
+        {{ a==True and b=="off" }}
+      device_class: "problem"
+
+# Surveillance porte cellier
+# Sur off si fermée
+    - name: "alarme_porte_cellier"
+      unique_id: "alarme_porte_cellier"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.porte_cellier") %}
+        {{ a==True and b=="on" }}
+      device_class: "problem"
+
+# Surveillance porte sous-sol petite
+# Sur off si fermée
+    - name: "alarme_petite_porte_sous_sol"
+      unique_id: "alarme_petite_porte_sous_sol"
+      state: >-
+        {% set a=is_state("sun.sun", "below_horizon") %}
+        {% set b=states("binary_sensor.detecteur_petite_porte_sous_sol") %}
+        {{ a==True and b=="on" }}
+      device_class: "problem"
+
+

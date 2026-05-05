@@ -1,0 +1,4328 @@
+- id: '1610184966825'
+  alias: Calcul Boolean Nuit/Jour
+  description: ''
+  triggers:
+  - value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) >
+      states(''input_number.luminosite_seuil_haut'')|float(default=0) and is_state("sun.sun",
+      "above_horizon") }}'
+    id: nuit->jour
+    trigger: template
+  - value_template: '{{ states(''sensor.bh1750_illuminance'')|float(default=0) < states(''input_number.luminosite_seuil_bas'')|float(default=0)
+      and is_state("sun.sun", "below_horizon") }}'
+    id: jour->nuit
+    trigger: template
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - target:
+          entity_id: input_boolean.nuit_jour
+        data: {}
+        action: input_boolean.turn_on
+    - conditions:
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - target:
+          entity_id: input_boolean.nuit_jour
+        data: {}
+        action: input_boolean.turn_off
+    default: []
+  mode: single
+- id: '1610371647929'
+  alias: 04 Purge base de données
+  description: ''
+  triggers:
+  - at: 00:05:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
+      keep_days: 10
+      repack: true
+    action: recorder.purge
+  mode: single
+- id: '1617185147880'
+  alias: Surveillance et Alarme Appoint d'eau
+  description: Ferme la vanne d'eau si ouverte depuis 1 heure
+  triggers:
+  - entity_id:
+    - switch.esp178_piscine_cde_ev_eau
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+    trigger: state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      message: '        {{states("sensor.date_time") }}{{-"\n"-}}EV eau ouverte depuis
+        plus de 1         heure'
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: Alarme EV Appoint d'eau Piscine
+  - target:
+      entity_id:
+      - switch.esp178_piscine_cde_ev_eau
+    action: switch.turn_off
+    data: {}
+  - action: select.select_option
+    metadata: {}
+    data:
+      option: At_f
+    target:
+      entity_id:
+      - select.esp178_piscine_mode_fonct_appoint_eau
+  mode: single
+- id: '1617199790692'
+  alias: Notification alarme niveau bas
+  description: ' '
+  triggers:
+  - entity_id:
+    - binary_sensor.esp178_piscine_niv_bas
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    trigger: state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      title: ALARME
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: Niveau bas Piscine
+  - action: select.select_option
+    data:
+      option: At_f
+    target:
+      entity_id:
+      - select.esp178_piscine_mode_fonct_appoint_eau
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.esp178_piscine_cde_ev_eau
+  mode: single
+- id: '1629296468909'
+  alias: Robot AMX435 Surveillance Pluviometrie
+  description: ''
+  triggers:
+  - entity_id: sensor.vp2_pluviometrie_moyenne
+    above: input_number.seuil_pluie_stop_robot
+    id: seuil_haut
+    trigger: numeric_state
+  - entity_id:
+    - sensor.vp2_pluviometrie_moyenne
+    id: seuil_bas
+    below: input_number.seuil_pluie_stop_robot
+    trigger: numeric_state
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+  - trigger: state
+    entity_id:
+    - binary_sensor.vp2_trigger_intensite_pluvieuse
+    from: 'off'
+    to: 'on'
+    id: intensité
+    enabled: false
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - seuil_haut
+        - intensité
+      sequence:
+      - data: {}
+        action: lawn_mower.dock
+        target:
+          device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          title: Robot-Début Alerte Meteo Pluie !!!
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '    Le robot tondeuse a été garé à cause de la forte pluie:{{-"\n"-}}
+            Pluvio     Moyenne 10mn ({{states(''sensor.vp2_pluviometrie_moyenne'')}}
+            mm) {{-"\n"-}} >     Seuil Stop robot ({{states(''input_number.seuil_pluie_stop_robot'')}}
+            mm)     {{-"\n"-}} ou Intensité pluvieuse ({{states(''sensor.vp2_rain_rate'')}}
+            mm/h)     > 3 mm/h pendant 5mn. {{-"\n"-}} {{states("sensor.date_time")
+            }}'
+    - conditions:
+      - condition: trigger
+        id: seuil_bas
+      sequence:
+      - data: {}
+        action: lawn_mower.start_mowing
+        target:
+          device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
+        enabled: true
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: Reprise programme horaire!!{{-"\n"-}} Pluvio Moyenne 10mn (     {{states('sensor.vp2_pluviometrie_moyenne')}}
+            mm) {{-"\n"-}} < Seuil Stop     robot ({{states('input_number.seuil_pluie_stop_robot')}}
+            mm) pendant 1h.     {{-"\n"-}}{{states("sensor.date_time") }}
+          title: Robot- Fin Alerte Meteo Pluie !!!
+  mode: single
+  trace:
+    stored_traces: 10
+- id: '1632232387237'
+  alias: Reseau Notification Nouvelle IP
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.myip
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    trigger: state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: 'Nouvelle IP: {{ states("sensor.myip")}}     {{-"\n"-}}{{states("sensor.date_time")
+        }}'
+      title: Réseau:!!!
+  mode: single
+- id: '1634569580188'
+  alias: Blueprint Notification Porte Cellier Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_porte_cellier
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Cellier ouverte
+            après le coucher du soleil'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Cellier OK'
+      notify_message: ' '
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 600
+      resolved_message: ' '
+      max_alerts: 5
+      initial_delay: 300
+- id: '1634569751638'
+  alias: Blueprints Notification Porte Sous Sol Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      sensor_entity: binary_sensor.alarme_porte_sous_sol
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Sous_Sol ouverte
+            après le coucher du soleil'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Sous_Sol OK'
+      notify_message: Porte Sous _Sol Ouverte
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      resolved_message: Porte Sous Sol Ok
+      initial_delay: 300
+      condition_entity_state: 'off'
+      max_alerts: 20
+      repeat_delay: 600
+- id: '1634569897913'
+  alias: Blueprint Notification Porte Garage Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_porte_garage
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Garage ouverte
+            après le coucher du soleil'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Garage OK'
+      notify_message: Porte Garage ouverte après le coucher du soleil
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 600
+      resolved_message: ' Porte Garage OK'
+      initial_delay: 300
+      max_alerts: 5
+- id: '1634571065075'
+  alias: Blueprint  Notification Porte frigo garage ouverte
+  description: '# Alarme porte frigo garage ouverte   '
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.detecteur_porte_frigo_ouverture
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Frigo Garage Ouverte'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Porte Frigo Garage Fermée'
+      notify_message: ' '
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 60
+      resolved_message: ' '
+      initial_delay: 60
+      max_alerts: 5
+- id: '1634571983587'
+  alias: Blueprint Notification Temp congelo haute
+  description: '# Surveillance de la temperature du congelateur  '
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_temp_congelo_haute
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            T° Haute = {{states("sensor.temp_congelo_garage")|float(0)|round(2) }}°C'
+          title: Congelateur
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            T° OK = {{states("sensor.temp_congelo_garage")|float(0)|round(2) }}°C'
+          title: Congelateur
+      notify_message: ' '
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      resolved_message: ' '
+      initial_delay: 300
+      max_alerts: 10
+- id: '1634621594490'
+  alias: Blueprint Notification Def Com VP2
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_communication_vantage_pro_2
+      alert_state: 'Off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Etat Reseau !!!
+          message: VP2 Off Line{{-"\n"-}}{{states("sensor.date_time") }}
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: VP2 On Line{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Etat RESEAU!!!
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      initial_delay: 60
+      max_alerts: 5
+      resolved_message: ' '
+      notify_message: ' '
+- id: '1634916685737'
+  alias: 03 Pusch gitub
+  description: pousse vers githtub
+  triggers:
+  - at: 02:00
+    trigger: time
+  conditions: []
+  actions:
+  - data: {}
+    action: shell_command.push_to_github
+    response_variable: reponse_push
+  - if:
+    - condition: template
+      value_template: '{{ reponse_push[''returncode''] == 0 }}'
+    then:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        message: '{{ reponse_push[''stdout''] }}'
+        title: Push Github OK
+    - action: persistent_notification.create
+      metadata: {}
+      data:
+        message: '{{ reponse_push[''stdout''] }}'
+        title: Push Github OK ok
+    else:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        message: '{{ reponse_push[''stderr''] }}'
+        title: Push Github en erreur
+    - action: persistent_notification.create
+      metadata: {}
+      data:
+        message: '{{ reponse_push[''stderr''] }}'
+        title: Push Github en erreur
+  mode: single
+- id: '1637073026237'
+  alias: Balise ouverture Porte sous sol
+  description: ''
+  triggers:
+  - tag_id: 297289a4-380e-4137-bbdc-b21e165e76cc
+    trigger: tag
+  conditions: []
+  actions:
+  - target:
+      entity_id:
+      - cover.porte_sous_sol
+    data: {}
+    action: cover.open_cover
+  mode: single
+- id: '1637074521273'
+  alias: Balise ouverture porte garage
+  description: ''
+  triggers:
+  - tag_id: dca56861-8baf-4881-a5c8-4b99d90c3716
+    trigger: tag
+  conditions: []
+  actions:
+  - target:
+      entity_id:
+      - cover.porte_garage
+    data: {}
+    action: cover.open_cover
+  mode: single
+- id: '1638119466260'
+  alias: BluePrint Notification Def Com Linky
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_communication_linky
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: Com Linky off Line{{-"\n"-}}{{states("sensor.date_time") }}
+          title: Attention!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: Com Linky On Line{{-"\n"-}} {{states("sensor.date_time") }}
+          title: Tout Va Bien
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      initial_delay: 60
+      max_alerts: 5
+      resolved_message: ' '
+      notify_message: ' '
+- id: '1642614758763'
+  alias: Changement HP<->HC
+  description: 1/3/5=HC_2/4/6=HP
+  triggers:
+  - entity_id:
+    - sensor.esp124_tic_linky_tarif_distributeur
+    trigger: state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.esp124_tic_linky_n_tarif
+          state: '1.0'
+        - condition: state
+          entity_id: sensor.esp124_tic_linky_n_tarif
+          state: '3.0'
+        - condition: state
+          entity_id: sensor.esp124_tic_linky_n_tarif
+          state: '5.0'
+      sequence:
+      - data:
+          option: hc
+        target:
+          entity_id:
+          - select.compteur_energie_pac
+          - select.compteur_energie_autres_jour
+          - select.compteur_energie_onduleur_jour
+          - select.compteur_energie_vmc_jour
+          - select.compteur_energie_sdb_jour
+          - select.compteur_energie_wc_jour
+          - select.compteur_energie_cuisine_jour
+          - select.compteur_energie_mal_jour
+          - sensor.compteur_energie_piscine_jour_hp_hc
+        action: select.select_option
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.esp124_tic_linky_n_tarif
+          state: '2.0'
+        - condition: state
+          entity_id: sensor.esp124_tic_linky_n_tarif
+          state: '4.0'
+        - condition: state
+          entity_id: sensor.esp124_tic_linky_n_tarif
+          state: '6.0'
+      sequence:
+      - data:
+          option: hp
+        target:
+          entity_id:
+          - select.compteur_energie_pac
+          - select.compteur_energie_autres_jour
+          - select.compteur_energie_onduleur_jour
+          - select.compteur_energie_vmc_jour
+          - select.compteur_energie_sdb_jour
+          - select.compteur_energie_wc_jour
+          - select.compteur_energie_cuisine_jour
+          - select.compteur_energie_mal_jour
+          - sensor.compteur_energie_piscine_jour_hp_hc
+        action: select.select_option
+    default: []
+  mode: single
+- id: '1642958036645'
+  alias: Blueprint Notification Petite Porte Sous Sol Ouverte
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_petite_porte_sous_sol
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Petite Porte Sous-Sol
+            ouverte après le coucher du soleil'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Petite Porte Sous-Sol OK'
+      notify_message: ' Petite Porte Sous-Sol ouverte après le coucher du soleil'
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 600
+      resolved_message: 'Petite Porte Sous-Sol OK '
+      max_alerts: 5
+      initial_delay: 300
+- id: '1644765337710'
+  alias: 00 Démarrage System
+  description: ''
+  triggers:
+  - event: start
+    trigger: homeassistant
+  conditions: []
+  actions:
+  - data:
+      addon: a0d7b954_nut
+    action: hassio.addon_restart
+  mode: single
+- id: '1653294353395'
+  alias: Sous sol position ouverte
+  description: ''
+  triggers:
+  - entity_id:
+    - binary_sensor.porte_ssol_ouverte
+    to: 'on'
+    from: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - data:
+      confident: true
+      position: 100
+      position_type: target
+      entity_id: cover.porte_sous_sol
+    action: cover_rf_time_based.set_known_position
+  mode: single
+- id: '1653294805612'
+  alias: Garage position fermee
+  description: ''
+  triggers:
+  - entity_id:
+    - binary_sensor.porte_garage_fermee
+    to: 'on'
+    from: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - data:
+      confident: true
+      position: 0
+      position_type: target
+      entity_id: cover.porte_garage
+    action: cover_rf_time_based.set_known_position
+  mode: single
+- id: '1653294983774'
+  alias: Sous sol position fermee
+  description: ''
+  triggers:
+  - entity_id:
+    - binary_sensor.porte_ssol_fermee
+    to: 'on'
+    from: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - data:
+      confident: true
+      position: 0
+      position_type: target
+      entity_id: cover.porte_sous_sol
+    action: cover_rf_time_based.set_known_position
+  mode: single
+- id: '1653295223147'
+  alias: Garage position ouverte
+  description: ''
+  triggers:
+  - entity_id:
+    - binary_sensor.porte_garage_ouverte
+    to: 'on'
+    from: 'off'
+    trigger: state
+  conditions: []
+  actions:
+  - data:
+      confident: true
+      position: 100
+      position_type: target
+      entity_id: cover.porte_garage
+    action: cover_rf_time_based.set_known_position
+  mode: single
+- id: '1656059504847'
+  alias: Robot AMX435 Al Bp Notif Tps lames atteint
+  description: Surveillance du temps d'utilisation des lame du robot
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.amx435x_temps_usage_lames_atteint
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Lames robot à remplacer ={{states("sensor.am435x_awd_duree_d_utilisation_des_lames")|float(0)|round(2)}}
+            h'
+          title: Alarme Robot AMX435X!!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Lames robot OK'
+          title: Fin Alarme Robot AMX435X!!!
+      notify_message: Alerte {{ entity_name }}Déclenché
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 3600
+      resolved_message: Alerte {{ entity_name }} Résolu
+      initial_delay: 1
+      max_alerts: 10
+- id: '1669919504303'
+  alias: BluePrint Notification Temp basse Chalet
+  description: '# Surveillance de la temperature du chalet'
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_temp_chalet_basse
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }} {{-"\n"-}}T° Basse Chalet ={{states("sensor.esp174_temperature_air")
+            }}°C'
+          title: Alarme Temperature Basse Chalet!!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }} {{-"\n"-}}T° Basse Chalet ={{states("sensor.esp174_temperature_air")
+            }}°C'
+          title: Fin Alarme Temperature Basse Chalet!!!
+      notify_message: ' '
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 1800
+      resolved_message: ' '
+      initial_delay: 300
+      max_alerts: 5
+- id: '1671811895133'
+  alias: Spots Exterieurs Terrasse Couverte
+  description: ''
+  triggers:
+  - device_id: 191305ef12c4538ae3dc593438f5e19d
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+  - event_type: motioneye.motion_detected
+    event_data:
+      device_id: ae78c8213b3a95e1ef3d7ac161697e42
+    trigger: event
+  conditions: []
+  actions:
+  - type: toggle
+    device_id: 216e88150c3bb7fa0e5a68ac407485f9
+    entity_id: switch.spots_ext_sud
+    domain: switch
+  mode: single
+- id: '1678531257946'
+  alias: Surveillance Puissance Onduleur Bureau la nuit
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.pc_lidl_2023_c_active_power
+    above: 100
+  conditions:
+  - condition: time
+    after: '23:00:00'
+    before: 05:00:00
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: PC Bureau Allumé apres 23:00{{-"\n"-}}{{states("sensor.date_time")
+        }}
+  mode: single
+- id: '1686145474191'
+  alias: BleuPrint Defaut Communication FreeBox
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: sensor.freebox_statut
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}FreeBox OFF Ligne'
+          title: FREE NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            FreeBox OnLine'
+          title: FREEBOX OK!!
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      max_alerts: 10
+      initial_delay: 180
+      notify_message: ' '
+      resolved_message: ' '
+- id: '1690355630909'
+  alias: 08 Restart Addon UPS si en défaut
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.myups_code_d_etat
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    trigger: state
+  - entity_id:
+    - binary_sensor.network_ups_tools_en_cours_d_execution
+    from: 'off'
+    trigger: state
+  - entity_id:
+    - binary_sensor.network_ups_tools_en_cours_d_execution
+    to: unavailable
+    trigger: state
+  - entity_id:
+    - binary_sensor.network_ups_tools_en_cours_d_execution
+    to: unknown
+    trigger: state
+  - at: 00:30:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
+      addon: a0d7b954_nut
+    action: hassio.addon_restart
+  mode: single
+- id: '1698142750238'
+  alias: Notification niveau bas puits
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.esp174_niveau_remplissage_puit
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    below: 0.8
+    trigger: numeric_state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+        Niveau Puit: {{states(''sensor.esp174_niveau_puit'')|float(0)|round(2)}} ml'
+      title: Niveau eau puit inferieur à 0.8 ml depuis 10mn
+  mode: single
+- id: '1698923695048'
+  alias: Alerte Météo actualisation
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: time_pattern
+    hours: /6
+  - platform: time
+    at: 06:30:00
+  - platform: time
+    at: '16:30:00'
+  condition: []
+  action:
+  - data:
+      entity_id:
+      - sensor.meteo_france_alertes_81
+    target:
+      entity_id:
+      - sensor.meteo_france_alertes_81
+    action: homeassistant.update_entity
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - data:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_today
+    target:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_today
+    action: homeassistant.update_entity
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - data:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_tomorrow
+    target:
+      entity_id:
+      - sensor.meteo_france_alerts_picture_tomorrow
+    action: homeassistant.update_entity
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - data:
+      entity_id:
+      - camera.mf_alerte_today
+      - camera.mf_alerte_tomorrow
+    target:
+      entity_id:
+      - camera.mf_alerte_today
+      - camera.mf_alerte_tomorrow
+    action: homeassistant.update_entity
+  mode: single
+- id: '1699429641790'
+  alias: 02 Backup total HA 2:00 du matin
+  description: ''
+  triggers:
+  - at: 02:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - data:
+      compressed: true
+      location: truenas
+    action: hassio.backup_full
+  mode: single
+- id: '1700469604629'
+  alias: Asservissements Modes Tempo
+  description: Actions en fonction du changement de modes de  Tempo
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.esp124_tic_linky_n_tarif
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_n_tarif
+        state:
+        - '6.0'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
+        data: {}
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}'
+          title: DEBUT HP ROUGE -> Forçage Arret ppe Piscine et CP 100%
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_n_tarif
+        state:
+        - '4.0'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
+        data: {}
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}'
+          title: DEBUT HP BLANC-> Forçage Arret ppe Piscine
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_n_tarif
+        state:
+        - '2.0'
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
+        data: {}
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}'
+          title: Sortie HP ROUGE ou BLANC
+  mode: single
+  trace:
+    stored_traces: 15
+- id: '1706170202385'
+  alias: Ecran01 Actions toutes les 30 mn
+  description: ''
+  triggers:
+  - minutes: /30
+    trigger: time_pattern
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 31203080ff3e67d781d95be03b42e98e
+    entity_id: d3873f4313e0bcaae08d3a2cfca3300f
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - type: turn_off
+    device_id: 31203080ff3e67d781d95be03b42e98e
+    entity_id: d3873f4313e0bcaae08d3a2cfca3300f
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - type: turn_off
+    device_id: 31203080ff3e67d781d95be03b42e98e
+    entity_id: caf58cffba51ee848ade4eaa4c57a127
+    domain: light
+  mode: single
+- id: '1706466237260'
+  alias: Volet Automatisme Général RTS old
+  description: Ete->Ouvre et ferme sur Horaire_Hiver->Ouvre sur Horaire et ferme au
+    couché du soleil_Absent->Ouvre et ferme au levée et couchée du soleil
+  triggers:
+  - entity_id:
+    - input_boolean.nuit_jour
+    from: 'on'
+    to: 'off'
+    id: jour->nuit
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    trigger: state
+  - at: input_datetime.horaire_ete_volet_ouv
+    id: heure_ouv_ete
+    trigger: time
+  - at: input_datetime.horaire_ete_volet_ferm
+    id: heure_ferm_ete
+    trigger: time
+  - entity_id:
+    - input_boolean.nuit_jour
+    id: nuit->jour
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    trigger: state
+  - at: input_datetime.horaire_hiver_volet_ouv
+    id: ouv_hiv
+    trigger: time
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - data: {}
+        action: script.1706464871250
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id:
+        - ouv_hiv
+      sequence:
+      - data: {}
+        action: script.0_0_1_ouverture_volets_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id:
+        - heure_ouv_ete
+      sequence:
+      - data: {}
+        action: script.0_0_1_ouverture_volets_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id:
+        - heure_ferm_ete
+      sequence:
+      - data: {}
+        action: script.1706464871250
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: jour->nuit
+      sequence:
+      - data: {}
+        action: script.0_1_0_fermeture_volets_mode_absent_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: nuit->jour
+      sequence:
+      - data: {}
+        action: script.0_1_1_ouverture_volets_mode_absent_rts
+    default: []
+  mode: single
+- id: '1710317639852'
+  alias: MP2 Défaut Status Bus VE
+  description: Alarme Status Bus VE
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
+    to: unavailable
+    for:
+      seconds: 5
+  - trigger: state
+    entity_id:
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
+    to: unknown
+    for:
+      seconds: 5
+  - trigger: state
+    entity_id:
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
+    for:
+      minutes: 2
+  conditions:
+  - condition: template
+    value_template: '{% set st = states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
+      %}  {{ st in [''unknown'',''unavailable''] or st not in [''Float'',''Bulk'',''Absorption'',''Passthrough'',''Inverting'',''float'',''bulk'',''absorption'',''passthrough'',''inverting'']
+      }}'
+  actions:
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: ALARME!! DISFONCTIONNEMENT BUS VE
+      message: '{{ states(''sensor.date_time'') }}{{-"\n"-}}
+
+        MP2-Status Bus VE -> {{ states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
+        }}
+
+        Etats attendus: Float/float/Bulk/bulk/Absorption/absorption/Passthrough/passthrough/Inverting/inverting'
+  mode: single
+- id: '1711527591458'
+  alias: Aqara Magic Cube
+  description: ''
+  use_blueprint:
+    path: brent/zha-aqara-magic-cube-57-actions.yaml
+    input:
+      remote: d77c1d0ca21349e462286aedbcc553cf
+      one_to_one:
+      - action: switch.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.multiprise_ldl_2024_12_commutateur
+      slide_on_two: []
+      slide_on_one:
+      - target:
+          entity_id: switch.lumiere_salon
+        data: {}
+        action: switch.toggle
+      cube_flip_1:
+      - action: switch.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.tc6_bp1
+- id: '1711609776550'
+  alias: Spot Ext Cuisine detecteur exterieur
+  description: ''
+  triggers:
+  - type: opened
+    device_id: 193f4cea2f12db0ab1a4d044df803df3
+    entity_id: b182f27a8204167b3f3b1893ec2d2196
+    domain: binary_sensor
+    trigger: device
+    enabled: true
+    id: Detecteur porte
+  - trigger: state
+    entity_id:
+    - binary_sensor.cuisine_person_occupancy
+    from:
+    - 'off'
+    to:
+    - 'on'
+    id: FM Detection Cu
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+  - trigger: state
+    entity_id:
+    - binary_sensor.garage_ext_person_occupancy
+    from:
+    - 'off'
+    to:
+    - 'on'
+    id: FM Detection Gg
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+  - trigger: state
+    entity_id:
+    - binary_sensor.cuisine_person_occupancy
+    id: FD Detection Cu
+    from:
+    - 'on'
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  - trigger: state
+    entity_id:
+    - binary_sensor.garage_ext_person_occupancy
+    id: FD Detection Gge
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    from:
+    - 'on'
+    to:
+    - 'off'
+  - trigger: state
+    entity_id:
+    - binary_sensor.porte_garage_fermee
+    from:
+    - 'on'
+    to:
+    - 'off'
+    id: p_garage
+  conditions:
+  - condition: sun
+    before: sunrise
+    after: sunset
+  - condition: numeric_state
+    entity_id: sensor.bh1750_illuminance
+    below: 10
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Detecteur porte
+      sequence:
+      - type: turn_on
+        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
+      - type: turn_on
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+      - delay:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
+      - type: turn_off
+        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id:
+        - FM Detection Cu
+        - FM Detection Gg
+      sequence:
+      - type: turn_on
+        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
+      - type: turn_on
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id:
+        - FD Detection Cu
+        - FD Detection Gge
+      sequence:
+      - type: turn_off
+        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id:
+        - p_garage
+      sequence:
+      - type: turn_on
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+      - delay:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+  mode: single
+  trace:
+    stored_traces: 50
+- id: '1711979815836'
+  alias: Notifications Batteries Basses & Actions
+  description: ''
+  use_blueprint:
+    path: Blackshome/low-battery-notifications-and-actions.yaml
+    input:
+      notify_device:
+      - e3e6d517ff15af6c0ac17f0455a06420
+      include_time: time_enabled
+      time: 08:00:00
+      notify_title: Notification Batterie basse <30%
+      include_easy_notify: enable_easy_notify
+      include_custom_actions: disabled_custom_actions
+      custom_actions:
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: 'les appareils suivant ont moins de 30% de     batterie:{{-"\n"-}}{{all_sensors|replace('',
+            '', ''\n'')| replace(''!'', ''.'') }}  '
+          title: Probleme Batterie !!!
+      action_button_to_do: '"{{all_sensors}}"'
+      sensor_selection: enable_battery_sensors_custom_group
+      button_entity: input_button.button_aide_batterie_basse
+      include_button: enable_button_trigger
+      battery_level: 20
+      include_persistent_notification: enable_persistent_notification
+      custom_group:
+        entity_id:
+        - sensor.bureau_power
+        - sensor.cave_power
+        - sensor.chamb_parents_power
+        - sensor.batteries_chambre_ssol_zb
+        - sensor.detecteur_petite_porte_sous_sol_power
+        - sensor.detecteur_porte_frigo_power
+        - sensor.batterie_sdb
+        - sensor.detecteur_porte_cellier_power
+        - sensor.power_terrasse2
+        - sensor.bp1_sonof_4d594222_power
+        - sensor.climate_escalier_sous_sol_batterie
+        - sensor.detecteur_porte_entree_batterie
+        - sensor.garage_batterie
+        - sensor.lywsd03mmc_salon_batterie
+        - sensor.detecteur_presence_2025_03_battery
+        - sensor.tze200_3towulqd_ts0601_batterie
+        - sensor.detecteur_porte_frigo_batterie
+        - sensor.chambre_nord_batterie
+        - sensor.cellier_batterie
+        - sensor.detecteur_de_fumee_bureau_batterie
+        - sensor.detecteur_de_fumee_couloir_bureau_batterie
+        - sensor.chambre_sud_batterie
+      custom_group_battery_level: 30
+      exclude_sensors:
+        entity_id:
+        - sensor.alecto_8a_01_battery_numeric
+        - sensor.alecto_ca_01_battery_numeric
+        - sensor.alecto_ws1700_0b_01_battery_numeric
+        - sensor.alecto_ws1700_34_01_battery_numeric
+        - sensor.am435x_awd_batterie
+        - sensor.mp2_dess_cible_soc_par_mqtt
+        - sensor.s6_pro_batterie
+        - sensor.px5_battery_level
+        - sensor.tablette_battery_level
+        - sensor.mp2_soc_theorique_par_mqtt
+        - sensor.myups_charge_de_la_batterie
+        - sensor.iphoneremy_battery_level
+      notify_okay_message: Super! toutes les batteries sont okay :)
+- id: '1722434877942'
+  alias: Camera Activation-Désactivation detection
+  description: Activation detection entre 5:30 et 23:30
+  triggers:
+  - at: 06:00:00
+    id: desactive
+    trigger: time
+  - at: '23:30:00'
+    id: active
+    trigger: time
+  - trigger: homeassistant
+    event: start
+    id: ha
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - active
+      sequence:
+      - action: script.activation_camera_2
+        metadata: {}
+        data: {}
+        enabled: true
+    - conditions:
+      - condition: trigger
+        id:
+        - desactive
+      sequence:
+      - action: script.activation_camera
+        metadata: {}
+        data: {}
+  mode: single
+- id: '1724083468200'
+  alias: Notification Niveau Haut
+  description: ' '
+  triggers:
+  - entity_id:
+    - binary_sensor.esp178_piscine_niv_haut
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    trigger: state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+        Niveau Haut Piscine Atteint'
+      title: Avertissement!
+  mode: single
+- id: '1726147313541'
+  alias: Robot AMX435 Notif Erreur
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.am435x_awd_error
+    id: error
+    trigger: state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.am435x_awd_error
+      state: unavailable
+    enabled: false
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      message: '{{states("sensor.date_time")}} {% set er=states(''sensor.am435x_awd_error'')%}     {%
+        if er=="no_error" %}       Pas de Probleme     {%- else -%}       Probleme={{er}}     {%-
+        endif%}  '
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: Robot notification
+  mode: single
+  trace:
+    stored_traces: 10
+- id: '1726422825041'
+  alias: Recopie Etat HA vers NodeRed MP2
+  description: Lien entre HA et le nodered du MP2
+  triggers:
+  - id: mn
+    trigger: time_pattern
+    seconds: /10
+  conditions: []
+  actions:
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/validcp
+      payload: '"{{ states(''input_boolean.mp2_valid_ess_charge_prog_1'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/forcage100
+      payload: '"{{ states(''input_boolean.forcage_charge_pgm_mp1_100'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/niveauforcagecp1
+      payload: '"{{ states(''input_number.mp2_niveau_forcage_cp1'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/validdess
+      payload: '"{{ states(''input_boolean.mp2_validation_dess_victron'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/tempo_j1
+      payload: '"{{ states(''sensor.rte_tempo_prochaine_couleur'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/tempo_j
+      payload: '"{{ states(''sensor.rte_tempo_couleur_actuelle'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/cp/energie_reseau_jour
+      payload: '"{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'') }}"'
+  mode: single
+- id: '1726480156769'
+  alias: Surveillance Puissance Chalet
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.esp131_pzem_chalet_puissance
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    above: 500
+    trigger: numeric_state
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} Puissance Chalet > 300w
+        depuis 10mn{{-"\n"-}} P= {{states(''sensor.esp131_pzem_chalet_puissance'')|float(0)|round(2)}}
+        W'
+      title: Consommation Chalet
+  mode: single
+- id: '1728311341373'
+  alias: '07 Notification: anniversaire à souhaiter'
+  description: Rappel anniversaire
+  triggers:
+  - event: start
+    offset: '7:0:0'
+    entity_id: calendar.anniversaires
+    trigger: calendar
+    enabled: false
+  - trigger: time
+    at: 07:00:00
+  conditions:
+  - condition: state
+    entity_id: calendar.anniversaires
+    state: 'on'
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: 'Il y a l''anniversaire de {{
+
+        states.calendar.anniversaires.attributes.message }} a souhaiter
+
+        aujourd''hui'
+      title:
+- id: '1729177635873'
+  alias: Defaut Secteur
+  description: Surveille la tension d'entrée du MP2
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_voltage
+    below: 20
+    id: tensionbasse
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} U Secteur= {{states(''sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_voltage'')}}
+        V'
+      title: Defaut Secteur Vu par MP2
+  mode: single
+- id: '1730650651996'
+  alias: Comptage Energie maison tempo
+  description: Attribue le comptage d’énergie maison en fonction du tarif Tempo
+  triggers:
+  - entity_id:
+    - sensor.esp124_tic_linky_tarif_fourniture
+    trigger: state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_n_tarif
+        state:
+        - HC BLEU
+      sequence:
+      - data:
+          option: HC BLEU
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HP BLEU
+      sequence:
+      - data:
+          option: HP BLEU
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HC BLANC
+      sequence:
+      - data:
+          option: HC BLANC
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HP BLANC
+      sequence:
+      - data:
+          option: HP BLANC
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HC ROUGE
+      sequence:
+      - data:
+          option: HC ROUGE
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    - conditions:
+      - condition: state
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
+        state:
+        - HP ROUGE
+      sequence:
+      - data:
+          option: HP ROUGE
+        action: select.select_option
+        target:
+          entity_id:
+          - select.compteur_energie_maison_tempo
+    default: []
+  mode: single
+- id: '1731925188807'
+  alias: Enregistrement cout reseau maison
+  description: A 23:59
+  triggers:
+  - trigger: time
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - action: notify.send_message
+    data:
+      message: '{{states("sensor.date_time") }},{{ states(''sensor.cout_energie_tous_tarifs_maison'')
+        }}, {{ states(''sensor.cout_energie_tous_tarifs_reseau_jour'')}}'
+    target:
+      entity_id: notify.file_energie2024
+  mode: single
+- id: '1733215941844'
+  alias: Comptage Energie Reseau 6-22-6
+  description: Reset à 6 et 22h, permet de se caler au mode tempo
+  triggers:
+  - trigger: time
+    at: 06:00:00
+    id: '6'
+  - trigger: time
+    at: '22:00:00'
+    id: '22'
+  conditions: []
+  actions:
+  - action: utility_meter.reset
+    data: {}
+    target:
+      entity_id:
+      - sensor.consomation_energie_reseau_6_22_6
+  mode: single
+- id: '1733389750506'
+  alias: Reboot Weewx 2024
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.reboot_weewx_2024
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: ha/weewx/reboot
+      payload: 'true'
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: ha/weewx/reboot
+      payload: 'false'
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.reboot_weewx_2024
+  mode: single
+- id: '1734008684960'
+  alias: Commande PC1 multi Lidl avec telecommande 3bp
+  description: ''
+  triggers:
+  - device_id: a99b6ceefe58486a2713f82c60f9b7b8
+    domain: rfxtrx
+    type: command
+    subtype: 'On'
+    trigger: device
+    id: 'on'
+  - device_id: a99b6ceefe58486a2713f82c60f9b7b8
+    domain: rfxtrx
+    type: command
+    subtype: 'Off'
+    trigger: device
+    id: 'off'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - 'on'
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.multiprise_ldl_2024_12_commutateur
+    - conditions:
+      - condition: trigger
+        id:
+        - 'off'
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.multiprise_ldl_2024_12_commutateur
+  mode: single
+- id: '1735490750135'
+  alias: Activation Forcage Charge Programmée 1 si tempo Rouge
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:45:00'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.rte_tempo_prochaine_couleur
+        state: Rouge
+      sequence:
+      - choose:
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.victron_remote_monitoring_production_d_energie_estimee_demain
+            below: 20
+          sequence:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.mp2_niveau_forcage_cp1
+            data:
+              value: 100
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.forcage_charge_pgm_mp1_100
+        - conditions:
+          - condition: numeric_state
+            entity_id: sensor.victron_remote_monitoring_production_d_energie_estimee_demain
+            above: 19.999
+            below: 22.5
+          sequence:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.mp2_niveau_forcage_cp1
+            data:
+              value: 90
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.forcage_charge_pgm_mp1_100
+        default:
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mp2_niveau_forcage_cp1
+          data:
+            value: 80
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.forcage_charge_pgm_mp1_100
+    - conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: sensor.rte_tempo_prochaine_couleur
+          state: Rouge
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.forcage_charge_pgm_mp1_100
+  mode: single
+- id: '1736001989085'
+  alias: Le tag Porte Garage est scanné
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: dca56861-8baf-4881-a5c8-4b99d90c3716
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id: cover.porte_garage
+  mode: single
+- id: '1736002049783'
+  alias: Le tag Porte sous sol est scanné
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: 6e75d49a-ec3d-4bfc-bd4f-2d1ab41b7cb1
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id: cover.porte_sous_sol
+  mode: single
+- id: '1736002677516'
+  alias: Le tag Porte sous-sol 2 est scanné
+  description: ''
+  triggers:
+  - trigger: tag
+    tag_id: 297289a4-380e-4137-bbdc-b21e165e76cc
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    metadata: {}
+    data: {}
+    target:
+      entity_id: cover.porte_sous_sol
+  mode: single
+- id: '1737366517257'
+  alias: Notification Detection Frigate
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.zone_cuisine_all_occupancy
+    from: 'off'
+    to: 'on'
+    id: detecte
+  - trigger: state
+    entity_id:
+    - binary_sensor.garage_ext_all_occupancy
+    from: 'off'
+    to: 'on'
+    id: garage
+  conditions:
+  - condition: sun
+    before: sunrise
+    after: sunset
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - detecte
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Cuisine'
+          title: Caméra Cuisine
+    - conditions:
+      - condition: trigger
+        id:
+        - garage
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Garage'
+          title: Caméra Garage
+- id: '1738429994514'
+  alias: Volets Suivi Azimuth Soleil bureau été sur Seuils
+  description: Gestion par seuils fixes selon le soleil, la radiation solaire et la
+    température
+  triggers:
+  - minutes: /10
+    trigger: time_pattern
+  conditions:
+  - condition: state
+    entity_id: input_select.volets
+    state: Auto Pos Soleil
+  - condition: sun
+    before: sunset
+    after: sunrise
+  actions:
+  - variables:
+      orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
+        }}'
+      angle_exposition: '{{ states(''input_number.angle_exposition_volet_bureau'')
+        | float }}'
+      elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
+        float }}'
+      ouverture_min: 0
+      ouverture_max: 100
+      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
+      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
+      azimut_min: '{{ orientation_volet - angle_exposition }}'
+      azimut_max: '{{ orientation_volet + angle_exposition }}'
+      radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
+      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      temperature_ext: '{{ states(''sensor.vp2_temp_out'') | float }}'
+      temperature_seuil: '{{ states(''input_number.temperature_seuil_volets'') | float(30)
+        }}'
+      position_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% elif elevation_soleil
+        < 40 %}\n  40\n{% elif elevation_soleil < 60 %}\n  30\n{% else %}\n  10\n{%
+        endif %}"
+      fermeture_finale: '{% set pos = position_brute | float %} {% set pos = [pos,
+        ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
+        | round(0) }}'
+      position_effective: "{% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext
+        > temperature_seuil %}\n  0\n{% elif azimut_min <= azimut_soleil <= azimut_max
+        and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil
+        %}\n  {{ fermeture_finale }}\n{% elif radiation_solaire <= radiation_seuil
+        and temperature_ext <= temperature_seuil %}\n  100\n{% else %}\n  unknown\n{%
+        endif %}"
+  - data:
+      message: 'Debug volet bureau: Azimut={{ azimut_soleil }} ({{ azimut_min }} →
+        {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
+        }} > Seuil={{ radiation_seuil }}, Temp={{ temperature_ext }} > Seuil={{ temperature_seuil
+        }}, Position brute={{ position_brute }}, clampée={{ fermeture_finale }}, appliquée
+        = {{ position_effective }}, Limites : ouverture_min={{ ouverture_min }} /
+        ouverture_max={{ ouverture_max }}
+
+        '
+      level: error
+    action: system_log.write
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: 'Azimut soleil = {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max
+        }})
+
+        | Élévation = {{ elevation_soleil }}
+
+        | Radiation = {{ radiation_solaire }} (seuil = {{ radiation_seuil }})
+
+        | Température = {{ temperature_ext }} (seuil = {{ temperature_seuil }})
+
+        | Position brute = {{ position_brute }} → clampée = {{ fermeture_finale }}
+        → appliquée = {{ position_effective }}'
+    target:
+      entity_id: input_text.volets_debug_bureau
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ azimut_min <= azimut_soleil <= azimut_max and\n   temperature_ext
+          > temperature_seuil }}"
+      sequence:
+      - data:
+          position: 0
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
+      - condition: template
+        value_template: "{{ azimut_min <= azimut_soleil <= azimut_max and\n   elevation_soleil
+          > elevation_min and\n   radiation_solaire > radiation_seuil and\n   temperature_ext
+          <= temperature_seuil }}"
+      sequence:
+      - data:
+          position: '{{ fermeture_finale }}'
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
+      - condition: template
+        value_template: "{{ radiation_solaire <= radiation_seuil and\n   temperature_ext
+          <= temperature_seuil }}"
+      sequence:
+      - data:
+          position: 100
+        target:
+          entity_id:
+          - cover.bureau_gauche_rts
+          - cover.bureau_droit_rts
+        action: cover.set_cover_position
+  mode: single
+- id: '1738578799131'
+  alias: Gestion Alim Imprimante Brother
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.imp_brother_statut
+    to: unavailable
+  - trigger: state
+    entity_id:
+    - sensor.imp_brother_statut
+    to: down
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.pc_lidl_2024_a_commutateur
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.pc_lidl_2024_a_commutateur
+  mode: single
+- id: '1741098557072'
+  alias: Statistiques Robot am435x
+  description: A 23:59
+  triggers:
+  - trigger: time
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - action: notify.send_message
+    data:
+      message: '{% set tf=states(''sensor.am435x_awd_temps_de_fonctionnement_total'')|float(0)%}
+        {% set tr=states(''sensor.am435x_awd_temps_de_recherche_total'')|float(0)%}
+        {% set tt=states(''sensor.am435x_awd_temps_de_tonte_total'')|float(0)%} {{states("sensor.date_time")}},
+        {{ (tf*24)|round(0) }}, {{ (tr/(tf*24)*100)|round(2)}}, {{ (tt/(tf*24)*100)|round(2)}},
+        {{ states(''sensor.am435x_awd_distance_parcourue_totale'')|round(0) }}, {{
+        states(''sensor.am435x_awd_nombre_de_cycles_de_charge'')|round(0)}}, {{ states(''sensor.am435x_awd_temps_de_charge_total'')|round(0)}},
+        {{ states(''sensor.am435x_awd_nombre_de_collisions'')|round(0)}}, {{ states(''sensor.am435x_awd_duree_d_utilisation_des_lames'')|round(0)}}'
+    target:
+      entity_id: notify.statistique_am435x
+  mode: single
+- id: '1741796346707'
+  alias: Rechargement Auto Automower Husqvarna
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - lawn_mower.am435x_awd
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  conditions: []
+  actions:
+  - action: homeassistant.reload_config_entry
+    data:
+      entry_id: husqvarna_automower
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+        L''intégration Husqvarna Automower est indisponible.
+
+        Tentative de rechargement automatique effectuée.'
+      title: Congelateur
+  mode: single
+- id: '1746164692289'
+  alias: Ecran02- Actions toutes les 30 mn
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: /1
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: d895e168f56c5b089b39c806fd2ce04b
+    entity_id: 1a2c179a98b26f9d3603fa6f7978b684
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - type: turn_off
+    device_id: d895e168f56c5b089b39c806fd2ce04b
+    entity_id: 1a2c179a98b26f9d3603fa6f7978b684
+    domain: switch
+  mode: single
+- id: '1746555411905'
+  alias: Gestion de la pompe piscine selon le SoC batterie
+  description: 'Coupe la pompe si SoC < 25 % pendant 1 min, rétablissement si SoC
+    > 26 %
+
+    '
+  triggers:
+  - entity_id:
+    - sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
+    trigger: state
+  conditions:
+  - condition: sun
+    after: sunrise
+    before: sunset
+  actions:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
+        below: 23
+      - condition: state
+        entity_id: input_boolean.flag_arret_piscine_sur_soc
+        state: 'off'
+      sequence:
+      - target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
+        action: switch.turn_on
+        data: {}
+      - target:
+          entity_id:
+          - input_boolean.flag_arret_piscine_sur_soc
+        action: input_boolean.turn_on
+        data: {}
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{ now().strftime(''%H:%M:%S'') }} – SOC = {{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+            }}     %'
+          title: 'Piscine : SoC < 25 %'
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
+        above: 30
+      - condition: state
+        entity_id: input_boolean.flag_arret_piscine_sur_soc
+        state: 'on'
+      sequence:
+      - target:
+          entity_id: switch.esp178_piscine_ent_arret_forc
+        action: switch.turn_off
+        data: {}
+      - action: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.flag_arret_piscine_sur_soc
+  mode: single
+- id: '1751955751827'
+  alias: Volets Suivi Azimuth Soleil bureau été (progressif)
+  description: 'Fermeture progressive des volets en fonction de l''élévation du soleil,
+    de la radiation et de la température
+
+    '
+  triggers:
+  - minutes: /10
+    trigger: time_pattern
+  conditions:
+  - condition: state
+    entity_id: input_select.volets
+    state: Auto Pos Soleil
+  - condition: sun
+    before: sunset
+    after: sunrise
+  actions:
+  - variables:
+      orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
+        }}'
+      angle_exposition: '{{ states(''input_number.angle_exposition_volet_bureau'')
+        | float }}'
+      elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
+        float }}'
+      ouverture_min: 0
+      ouverture_max: 100
+      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
+      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
+      azimut_min: '{{ orientation_volet - angle_exposition }}'
+      azimut_max: '{{ orientation_volet + angle_exposition }}'
+      radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
+      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      temperature_ext: '{{ states(''sensor.vp2_temp_out'') | float }}'
+      temperature_seuil: '{{ states(''input_number.temperature_seuil_volets'') | float(30)
+        }}'
+      fermeture_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% else
+        %}\n  {{ 100 - (((elevation_soleil - elevation_min) / (90 - elevation_min))
+        * 100) | round(0) }}\n{% endif %}"
+      fermeture_finale: '{% set pos = fermeture_brute | float %} {% set pos = [pos,
+        ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
+        | round(0) }}'
+      position_effective: "{% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext
+        > temperature_seuil %}\n  0\n{% elif azimut_min <= azimut_soleil <= azimut_max
+        and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil
+        %}\n  {{ fermeture_finale }}\n{% elif radiation_solaire <= radiation_seuil
+        and temperature_ext <= temperature_seuil %}\n  100\n{% else %}\n  unknown\n{%
+        endif %}"
+  - data:
+      message: 'Debug volet bureau (progressif) :Azimut={{ azimut_soleil }} ({{ azimut_min
+        }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
+        }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{
+        temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale
+        }}, appliquée={{ position_effective }}
+
+        '
+    action: system_log.write
+  - target:
+      entity_id: input_text.volets_debug_bureau
+    data:
+      value: "Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}) \n|
+        Élévation={{ elevation_soleil }}\n| Radiation={{ radiation_solaire }} (seuil={{
+        radiation_seuil }})\n| Temp={{ temperature_ext }} (seuil={{ temperature_seuil
+        }})\n| fermeture_brute={{ fermeture_brute }} → clampée={{ fermeture_finale
+        }} → appliquée={{ position_effective }}"
+    action: input_text.set_value
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and temperature_ext
+          > temperature_seuil }}'
+      sequence:
+      - data:
+          position: 0
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
+      - condition: template
+        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil
+          > elevation_min and radiation_solaire > radiation_seuil and temperature_ext
+          <= temperature_seuil }}'
+      sequence:
+      - data:
+          position: '{{ fermeture_finale }}'
+        target:
+          entity_id:
+          - cover.bureau_droit_2
+          - cover.bureau_gauche_rts
+        action: cover.set_cover_position
+    - conditions:
+      - condition: template
+        value_template: '{{ radiation_solaire <= radiation_seuil and temperature_ext
+          <= temperature_seuil }}'
+      sequence:
+      - data:
+          position: 100
+        target:
+          entity_id:
+          - cover.bureau_gauche_rts
+          - cover.bureau_droit_rts
+        action: cover.set_cover_position
+  mode: single
+- id: '1753556651919'
+  alias: Alarme Com LoRa ID02
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_com_lora_e1
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}LoRa ID01 OFF Ligne'
+          title: LoRa ID01 NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            LoRa ID01 OnLine'
+          title: LoRa ID01 OK!!
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      max_alerts: 2
+      initial_delay: 60
+      notify_message: ' '
+      resolved_message: ' '
+- id: '1756141389021'
+  alias: BP Alarme Volet Piscine Ouvert
+  description: '# Surveillance volet piscine apres le couché du soleil'
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.alarme_volet_piscine_ouvert
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Volet Piscine Ouvert'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Volet Piscine Fermé'
+      notify_message: ' '
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      resolved_message: ' '
+      initial_delay: 300
+      max_alerts: 3
+- id: '1761200992923'
+  alias: Choix Alimentation ECS
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+    enabled: true
+  - trigger: state
+    entity_id:
+    - input_select.mode_fonctionnement_ecs
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        state: Routeur
+        entity_id: input_select.mode_fonctionnement_ecs
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.ecs_pv
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_fonctionnement_ecs
+        state: Reseau
+      sequence:
+      - action: script.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.ecs_reseau
+    default:
+    - action: script.turn_on
+      metadata: {}
+      target:
+        entity_id: script.ecs_off
+  mode: single
+- id: '1762929570836'
+  alias: Allumage Ecran02 Cuisine
+  description: ''
+  triggers:
+  - type: motion
+    device_id: f63a7a8078a6c8ad8bff217525241849
+    entity_id: 4b474d7b778812c1ca35464b7bcb7ba0
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: d895e168f56c5b089b39c806fd2ce04b
+    entity_id: 371d3e5b732a9d86674c59171c732157
+    domain: light
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.ecran02_backlight
+  mode: single
+- id: '1765209914301'
+  alias: Notification U6+ Bureau Deconnecté
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_u6_bureau
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}U6+ Bureau OFF Ligne'
+          title: FREE NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            U6+ Bureau OnLine'
+          title: FREEBOX OK!!
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      max_alerts: 10
+      initial_delay: 180
+      notify_message: ' '
+      resolved_message: ' '
+- id: '1765210056242'
+  alias: Notification U6+ Sous Sol Deconnecté
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.status_u6_sous_sol
+      alert_state: 'off'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}U6+ Sous Sol OFF Ligne'
+          title: FREE NOK!!
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            U6+ Sous Sol OnLine'
+          title: FREEBOX OK!!
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 300
+      max_alerts: 10
+      initial_delay: 180
+      notify_message: ' '
+      resolved_message: ' '
+- id: '1765795366962'
+  alias: Spot exterieur Sous Sol
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.porte_ssol_fermee
+    - binary_sensor.porte_ssol_ouverte
+  conditions: []
+  actions:
+  - if:
+    - condition: sun
+      before: sunrise
+      after: sunset
+    then:
+    - type: turn_on
+      device_id: 9abdcc29fb6b89797b09f79661a5081a
+      entity_id: 328ac7c86c891be87f12bcefad0e0b01
+      domain: switch
+    - delay:
+        hours: 0
+        minutes: 3
+        seconds: 0
+        milliseconds: 0
+    - type: turn_off
+      device_id: 9abdcc29fb6b89797b09f79661a5081a
+      entity_id: 328ac7c86c891be87f12bcefad0e0b01
+      domain: switch
+      metadata:
+        secondary: false
+    else:
+    - type: turn_off
+      device_id: 9abdcc29fb6b89797b09f79661a5081a
+      entity_id: 328ac7c86c891be87f12bcefad0e0b01
+      domain: switch
+      metadata:
+        secondary: false
+  mode: restart
+- id: '1768665992129'
+  alias: Comptage Conso 6-22 Maison
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:00:00
+    variables:
+      tariff: jour_6_22
+    id: '6'
+  - trigger: time
+    at: '22:00:00'
+    variables:
+      tariff: hors_jour
+    id: '22'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - '6'
+      sequence:
+      - action: select.select_option
+        metadata: {}
+        data:
+          option: jour_6_22
+        target:
+          entity_id: select.comptage_energie_conso_maison_6_22
+    - conditions:
+      - condition: trigger
+        id:
+        - '22'
+      sequence:
+      - action: select.select_option
+        metadata: {}
+        data:
+          option: hours_jour
+        target:
+          entity_id: select.comptage_energie_conso_maison_6_22
+  mode: single
+- id: '1773999155732'
+  alias: Rapport 23:59 Journalier Recap Energie IA V2
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      conso_totale: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
+        | float(0) | round(2) }}'
+      bleu_hc: '{{ states(''sensor.compteur_energie_hc_bleu_jour'') | float(0) | round(2)
+        }}'
+      bleu_hp: '{{ states(''sensor.compteur_energie_hp_bleu_jour'') | float(0) | round(2)
+        }}'
+      blanc_hc: '{{ states(''sensor.compteur_energie_hc_blanc_jour'') | float(0) |
+        round(2) }}'
+      blanc_hp: '{{ states(''sensor.compteur_energie_hp_blanc_jour'') | float(0) |
+        round(2) }}'
+      rouge_hc: '{{ states(''sensor.compteur_energie_hc_rouge_jour'') | float(0) |
+        round(2) }}'
+      rouge_hp: '{{ states(''sensor.compteur_energie_hp_rouge_jour'') | float(0) |
+        round(2) }}'
+      total_hc: "{{\n  (\n    states('sensor.compteur_energie_hc_bleu_jour') | float(0)
+        +\n    states('sensor.compteur_energie_hc_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hc_rouge_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      total_hp: "{{\n  (\n    states('sensor.compteur_energie_hp_bleu_jour') | float(0)
+        +\n    states('sensor.compteur_energie_hp_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hp_rouge_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      poste_dominant: "{% set postes = {\n  'Bleu HC': states('sensor.compteur_energie_hc_bleu_jour')
+        | float(0),\n  'Bleu HP': states('sensor.compteur_energie_hp_bleu_jour') |
+        float(0),\n  'Blanc HC': states('sensor.compteur_energie_hc_blanc_jour') |
+        float(0),\n  'Blanc HP': states('sensor.compteur_energie_hp_blanc_jour') |
+        float(0),\n  'Rouge HC': states('sensor.compteur_energie_hc_rouge_jour') |
+        float(0),\n  'Rouge HP': states('sensor.compteur_energie_hp_rouge_jour') |
+        float(0)\n} %} {{ postes | dictsort(by='value') | last | first }}"
+      couleur_demain: '{{ states(''sensor.rte_tempo_prochaine_couleur'') }}'
+      cout_jour_txt: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }} €\n{% endif %}"
+      pv_jour_txt: "{% set v = states('sensor.mp2_total_energie_produite_jour') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      import_reseau_txt: "{% set v = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      export_reseau_txt: "{% set v = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      bat_min_txt: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} %\n{% endif %}"
+      bat_max_txt: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} %\n{% endif %}"
+      soc_soir_txt: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(1) }} %\n{% endif %}"
+      previ_prod_jour: '{{ states(''input_number.mp2_memoire_estimation_production_jour'')
+        | float(0) | round(2) }}'
+      realise_prod_jour: '{{ states(''sensor.mp2_total_energie_produite_jour'') |
+        float(0) | round(2) }}'
+      ecart_prod_jour: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      ecart_prod_jour_txt: "{% set e =\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0)\n  ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_prod_pct_txt: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
+        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
+      previ_conso_6_22: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
+        | round(2) }}'
+      realise_conso_6_22: '{{ states(''sensor.comptage_energie_conso_maison_6_22_jour_6_22'')
+        | float(0) | round(2) }}'
+      ecart_conso_6_22: "{{\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
+        \ ) | round(2)\n}}"
+      ecart_conso_6_22_txt: "{% set e =\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
+        \ ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_conso_6_22_pct_txt: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+        | float(0) %} {% set r = states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
+        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: recap_energie
+    data:
+      task_name: recap energie journalier complet
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique.
+
+        Rédige un message Telegram en français, factuel, compact et utile. N''invente
+        aucune donnée. Si une donnée vaut "n/d", indique simplement qu''elle n''est
+        pas disponible. 8 lignes maximum. Commence par un emoji.
+
+        Mets en avant : - la consommation totale du jour, - la répartition heures
+        creuses / heures pleines, - le poste Tempo dominant, - le coût du jour si
+        disponible, - la production PV si disponible, - l''import/export réseau si
+        disponibles, - la batterie si disponible, - une analyse très courte du prévu/réalisé
+        production, - une analyse très courte du prévu/réalisé consommation 6-22h,
+        - un conseil très court pour demain selon la couleur Tempo.
+
+        Pour l''analyse prévu/réalisé : - indique clairement si le réalisé est au-dessus,
+        en dessous ou conforme à la prévision, - utilise les écarts fournis, - reste
+        synthétique.
+
+        Données du jour : - Date : {{ date_jour }} - Consommation totale : {{ conso_totale
+        }} kWh - Total HC : {{ total_hc }} kWh - Total HP : {{ total_hp }} kWh - Bleu
+        HC : {{ bleu_hc }} kWh - Bleu HP : {{ bleu_hp }} kWh - Blanc HC : {{ blanc_hc
+        }} kWh - Blanc HP : {{ blanc_hp }} kWh - Rouge HC : {{ rouge_hc }} kWh - Rouge
+        HP : {{ rouge_hp }} kWh - Poste dominant : {{ poste_dominant }} - Coût du
+        jour : {{ cout_jour_txt }} - Production PV : {{ pv_jour_txt }} - Import réseau
+        : {{ import_reseau_txt }} - Export réseau : {{ export_reseau_txt }} - Batterie
+        mini du jour : {{ bat_min_txt }} - Batterie maxi du jour : {{ bat_max_txt
+        }} - SOC actuel/soir : {{ soc_soir_txt }} - Couleur Tempo demain : {{ couleur_demain
+        }}
+
+        Analyse prévision / réalisé production : - Prévision production jour : {{
+        previ_prod_jour }} kWh - Réalisé production jour : {{ realise_prod_jour }}
+        kWh - Ecart production : {{ ecart_prod_jour_txt }} - Ecart production % :
+        {{ ecart_prod_pct_txt }}
+
+        Analyse prévision / réalisé consommation 6-22h : - Prévision consommation
+        6-22h : {{ previ_conso_6_22 }} kWh - Réalisé consommation 6-22h : {{ realise_conso_6_22
+        }} kWh - Ecart consommation 6-22h : {{ ecart_conso_6_22_txt }} - Ecart consommation
+        6-22h % : {{ ecart_conso_6_22_pct_txt }}'
+      structure:
+        titre:
+          description: Titre très court du message Telegram
+          required: true
+          selector:
+            text:
+        message:
+          description: Message Telegram complet sur 5 à 8 lignes
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  recap_energie is defined and\n  recap_energie.data
+          is defined and\n  recap_energie.data.message is defined\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "{{\n  recap_energie.data.titre\n  if recap_energie.data.titre is
+            defined\n  else 'Recap Journalier Energie'\n}}"
+          message: '{{ recap_energie.data.message }} {% if recap_energie.data.niveau
+            is defined %} {{ ''\n'' }}Niveau : {{ recap_energie.data.niveau }} {%
+            endif %}'
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Recap Journalier Energie
+        message: '{{ date_jour }} {{ ''\n'' }}Conso totale : {{ conso_totale }} kWh
+          {{ ''\n'' }}HC / HP : {{ total_hc }} / {{ total_hp }} kWh {{ ''\n'' }}Poste
+          dominant : {{ poste_dominant }} {{ ''\n'' }}Coût : {{ cout_jour_txt }} {{
+          ''\n'' }}PV : {{ pv_jour_txt }} {{ ''\n'' }}Import / Export : {{ import_reseau_txt
+          }} / {{ export_reseau_txt }} {{ ''\n'' }}Batterie min / max / soir : {{
+          bat_min_txt }} / {{ bat_max_txt }} / {{ soc_soir_txt }} {{ ''\n'' }}Prod
+          prévue / réalisée : {{ previ_prod_jour }} / {{ realise_prod_jour }} kWh
+          (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt }}) {{ ''\n'' }}Conso
+          6-22 prévue / réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
+          }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt }})
+          {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
+  - action: notify.send_message
+    target:
+      entity_id: notify.suivi_prod
+    data:
+      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ conso_totale }}, {{
+        total_hc }}, {{ total_hp }}, {{ poste_dominant | replace('','', '' '') }},
+        {{ cout_jour_txt | replace('' €'', '''') | replace('','', ''.'') if cout_jour_txt
+        != ''n/d'' else ''n/d'' }}, {{ pv_jour_txt | replace('' kWh'', '''') | replace('','',
+        ''.'') if pv_jour_txt != ''n/d'' else ''n/d'' }}, {{ import_reseau_txt | replace(''
+        kWh'', '''') | replace('','', ''.'') if import_reseau_txt != ''n/d'' else
+        ''n/d'' }}, {{ export_reseau_txt | replace('' kWh'', '''') | replace('','',
+        ''.'') if export_reseau_txt != ''n/d'' else ''n/d'' }}, {{ bat_min_txt | replace(''
+        %'', '''') if bat_min_txt != ''n/d'' else ''n/d'' }}, {{ bat_max_txt | replace(''
+        %'', '''') if bat_max_txt != ''n/d'' else ''n/d'' }}, {{ soc_soir_txt | replace(''
+        %'', '''') if soc_soir_txt != ''n/d'' else ''n/d'' }}, {{ previ_prod_jour
+        }}, {{ realise_prod_jour }}, {{ ecart_prod_jour }}, {{ ecart_prod_pct_txt
+        | replace('' %'', '''') if ecart_prod_pct_txt != ''n/d'' else ''n/d'' }},
+        {{ previ_conso_6_22 }}, {{ realise_conso_6_22 }}, {{ ecart_conso_6_22 }},
+        {{ ecart_conso_6_22_pct_txt | replace('' %'', '''') if ecart_conso_6_22_pct_txt
+        != ''n/d'' else ''n/d'' }}, {{ couleur_demain }}'
+  mode: single
+- id: '1774000425673'
+  alias: Rapport 22:00 DESS IA
+  description: ''
+  triggers:
+  - trigger: time
+    at: '22:00:00'
+    id: '22:00'
+  conditions: []
+  actions:
+  - variables:
+      date_snapshot: '{{ states(''sensor.date_time'') }}'
+      previ_prod_demain: '{{ states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
+        | float(0) | round(1) }}'
+      soc_cible: '{{ states(''sensor.mp2_dess_cible_soc_par_mqtt'') | float(0) | round(0)
+        }}'
+      soc_actuel: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) }}'
+      forcage_actif_num: '{{ 1 if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
+        ''on'') else 0 }}'
+      forcage_actif_txt: '{{ ''actif'' if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
+        ''on'') else ''inactif'' }}'
+      niveau_forcage: "{% if is_state('input_boolean.forcage_charge_pgm_mp1_100',
+        'on') %}\n  {{ states('input_number.mp2_niveau_forcage_cp1') | float(0) |
+        round(0) }}\n{% else %}\n  n/d\n{% endif %}"
+      ecart_soc_cible_txt: '{% set cible = states(''sensor.mp2_dess_cible_soc_par_mqtt'')
+        | float(0) %} {% set actuel = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) %} {{ ''%+.1f'' | format((actuel - cible) | round(1)) }} %'
+      ecart_soc_forcage_txt: "{% if is_state('input_boolean.forcage_charge_pgm_mp1_100',
+        'on') %}\n  {% set forcage = states('input_number.mp2_niveau_forcage_cp1')
+        | float(0) %}\n  {% set actuel = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        | float(0) %}\n  {{ '%+.1f' | format((actuel - forcage) | round(1)) }} %\n{%
+        else %}\n  n/d\n{% endif %}"
+      perte_nuit_estimee_pct: 27
+      soc_prevu_0545_sans_charge: '{% set soc = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) %} {% set perte = 27 %} {{ [soc - perte, 0] | max | round(1) }}'
+      besoin_corrige_pct_txt: '{% set cible = states(''sensor.mp2_dess_cible_soc_par_mqtt'')
+        | float(0) %} {% set soc = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
+        %} {{ [cible - soc_fin, 0] | max | round(1) }}'
+      heure_fin_charge_txt: 05:45
+      duree_charge_previ_min_txt: "{% set cap_ah = 300 %} {% set i_avg = 40 %} {%
+        set abs_min_default = 60 %} {% set min_win = 15 %} {% set max_win = 8 * 60
+        %} {% set cible = states('sensor.mp2_dess_cible_soc_par_mqtt') | float(0)
+        %} {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
+        %} {% set need_pct = [cible - soc_fin, 0] | max %} {% if need_pct <= 0 %}\n
+        \ 0\n{% else %}\n  {% set ah_needed = (need_pct / 100) * cap_ah %}\n  {% set
+        bulk_min = (ah_needed / i_avg) * 60 if i_avg > 0 else 0 %}\n  {% set abs_min
+        = abs_min_default if cible >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min
+        + abs_min) | round(0, 'ceil')) %}\n  {% if ns.need < min_win %}{% set ns.need
+        = min_win %}{% endif %}\n  {% if ns.need > max_win %}{% set ns.need = max_win
+        %}{% endif %}\n  {{ ns.need | int }}\n{% endif %}"
+      heure_debut_charge_previ_txt: "{% set step = 5 %} {% set start_floor = 22 *
+        60 %} {% set end_fixed = 5 * 60 + 45 %} {% set cap_ah = 300 %} {% set i_avg
+        = 40 %} {% set abs_min_default = 60 %} {% set min_win = 15 %} {% set max_win
+        = 8 * 60 %} {% set cible = states('sensor.mp2_dess_cible_soc_par_mqtt') |
+        float(0) %} {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
+        %} {% set need_pct = [cible - soc_fin, 0] | max %} {% if need_pct <= 0 %}\n
+        \ n/d\n{% else %}\n  {% set ah_needed = (need_pct / 100) * cap_ah %}\n  {%
+        set bulk_min = (ah_needed / i_avg) * 60 if i_avg > 0 else 0 %}\n  {% set abs_min
+        = abs_min_default if cible >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min
+        + abs_min) | round(0, 'ceil')) %}\n  {% if ns.need < min_win %}{% set ns.need
+        = min_win %}{% endif %}\n  {% if ns.need > max_win %}{% set ns.need = max_win
+        %}{% endif %}\n  {% set ns.start = (((end_fixed - ns.need) // step) * step)
+        | int %}\n  {% if ns.start < 0 %}{% set ns.start = ns.start + 1440 %}{% endif
+        %}\n  {% if not (ns.start >= start_floor or ns.start < end_fixed) %}\n    {%
+        set ns.start = start_floor %}\n  {% endif %}\n  {{ '%02d:%02d' | format((ns.start
+        // 60) | int, (ns.start % 60) | int) }}\n{% endif %}"
+      synthese_charge_previ_txt: "{% set step = 5 %} {% set start_floor = 22 * 60
+        %} {% set end_fixed = 5 * 60 + 45 %} {% set cap_ah = 300 %} {% set i_avg =
+        40 %} {% set abs_min_default = 60 %} {% set min_win = 15 %} {% set max_win
+        = 8 * 60 %} {% set cible = states('sensor.mp2_dess_cible_soc_par_mqtt') |
+        float(0) %} {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
+        %} {% set need_pct = [cible - soc_fin, 0] | max %} {% if need_pct <= 0 %}\n
+        \ pas de charge prévisionnelle nécessaire\n{% else %}\n  {% set ah_needed
+        = (need_pct / 100) * cap_ah %}\n  {% set bulk_min = (ah_needed / i_avg) *
+        60 if i_avg > 0 else 0 %}\n  {% set abs_min = abs_min_default if cible >=
+        95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min) | round(0,
+        'ceil')) %}\n  {% if ns.need < min_win %}{% set ns.need = min_win %}{% endif
+        %}\n  {% if ns.need > max_win %}{% set ns.need = max_win %}{% endif %}\n  {%
+        set ns.start = (((end_fixed - ns.need) // step) * step) | int %}\n  {% if
+        ns.start < 0 %}{% set ns.start = ns.start + 1440 %}{% endif %}\n  {% if not
+        (ns.start >= start_floor or ns.start < end_fixed) %}\n    {% set ns.start
+        = start_floor %}\n  {% endif %}\n  début estimé {{ '%02d:%02d' | format((ns.start
+        // 60) | int, (ns.start % 60) | int) }}, fin 05:45, durée ~{{ ns.need | int
+        }} min\n{% endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: rapport_dess_ia
+    data:
+      task_name: rapport dess 22h
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique.
+
+        Rédige un message Telegram en français. Sois factuel, compact et utile. N''invente
+        aucune donnée. 6 lignes maximum. Commence par un emoji.
+
+        Analyse uniquement la situation DESS à 22:00.
+
+        Tu dois : - indiquer si le forçage DESS est actif ou non, - si le forçage
+        est actif, mentionner le niveau de forçage demandé, - comparer le SOC actuel
+        au SOC cible, - si le forçage est actif, comparer aussi le SOC actuel au niveau
+        de forçage, - rappeler la prévision de production demain, - estimer le SOC
+        à 05:45 sans charge en tenant compte d''une baisse nocturne historique, -
+        indiquer l''heure prévisionnelle de début de charge pour finir à 05:45, -
+        préciser que cette estimation repose sur une baisse nocturne moyenne de 27
+        %, - conclure par une remarque très courte sur la cohérence de la situation.
+
+        Données : - Horodatage : {{ date_snapshot }} - Prévision production demain
+        : {{ previ_prod_demain }} kWh - Forçage DESS : {{ forcage_actif_txt }} - Forçage
+        DESS (0/1) : {{ forcage_actif_num }} - Niveau de forçage demandé : {{ niveau_forcage
+        }} - SOC cible : {{ soc_cible }} % - SOC actuel : {{ soc_actuel }} % - Ecart
+        SOC actuel - SOC cible : {{ ecart_soc_cible_txt }} - Ecart SOC actuel - niveau
+        de forçage : {{ ecart_soc_forcage_txt }} - Baisse nocturne historique estimée
+        22:00->05:45 : {{ perte_nuit_estimee_pct }} % - SOC prévu à 05:45 sans charge
+        : {{ soc_prevu_0545_sans_charge }} % - Besoin corrigé de charge : {{ besoin_corrige_pct_txt
+        }} % - Heure prévisionnelle de début de charge : {{ heure_debut_charge_previ_txt
+        }} - Heure prévisionnelle de fin de charge : {{ heure_fin_charge_txt }} -
+        Durée prévisionnelle de charge : {{ duree_charge_previ_min_txt }} min - Synthèse
+        prévisionnelle : {{ synthese_charge_previ_txt }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  rapport_dess_ia is defined and\n  rapport_dess_ia.data
+          is defined and\n  (rapport_dess_ia.data | string | trim | length) > 0\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Rapport DESS 22h
+          message: '{{ rapport_dess_ia.data }}'
+    default:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport DESS 22h
+        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Prévi demain = {{ previ_prod_demain
+          }} kWh{{-\"\\n\"-}}\n    Forçage DESS = {{ forcage_actif_txt }}{% if forcage_actif_num
+          == 1 %} / Niveau = {{ niveau_forcage }} %{% endif %}{{-\"\\n\"-}}\n    SOC
+          cible = {{ soc_cible }} % / Actuel = {{ soc_actuel }} %{{-\"\\n\"-}}\n    Ecart
+          SOC-cible = {{ ecart_soc_cible_txt }}{% if forcage_actif_num == 1 %} / Ecart
+          SOC-forçage = {{ ecart_soc_forcage_txt }}{% endif %}{{-\"\\n\"-}}\n    SOC
+          prévu à 05:45 sans charge = {{ soc_prevu_0545_sans_charge }} %{{-\"\\n\"-}}\n
+          \   Charge prévisionnelle = {{ synthese_charge_previ_txt }}\n"
+  - action: notify.send_message
+    target:
+      entity_id: notify.suivi_dess
+    data:
+      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ previ_prod_demain
+        }}, {{ forcage_actif_num }}, {{ niveau_forcage if forcage_actif_num == 1 else
+        '''' }}, {{ soc_cible }}, {{ soc_actuel }}, {{ ecart_soc_cible_txt | replace(''
+        %'','''') }}, {{ ecart_soc_forcage_txt | replace('' %'','''') if forcage_actif_num
+        == 1 else '''' }}, {{ perte_nuit_estimee_pct }}, {{ soc_prevu_0545_sans_charge
+        }}, {{ besoin_corrige_pct_txt }}, {{ heure_debut_charge_previ_txt }}, {{ heure_fin_charge_txt
+        }}, {{ duree_charge_previ_min_txt }}'
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: input_number.set_value
+    data:
+      entity_id: input_number.mp2_memoire_estimation_production_jour
+      value: '{% set a = states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
+        | float(0) | round(1) %} {{ a }}'
+  - action: input_number.set_value
+    data:
+      entity_id: input_number.mp2_memoire_estimation_conso_jour
+      value: '{% set a = states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
+        | round(1) %} {{ a }}'
+  mode: single
+- id: '1774028162818'
+  alias: Volet Chambre Parents - V3 été heure réglable
+  description: 'Journée : suivi solaire V2 entre l''heure d''ouverture réglable et
+    sunset. Soir : fermeture automatique à sunset + 30 min. Matin : ouverture automatique
+    à l''heure définie par helper.
+
+    '
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: start
+  - trigger: time_pattern
+    minutes: /10
+    id: periodic
+  - trigger: state
+    entity_id:
+    - input_select.mode_volets_chamb_parents
+    - input_datetime.heure_ouverture_volet_parents
+    - input_number.orientation_volets_parents
+    - input_number.angle_exposition_volet_parent
+    - input_number.elevation_mini_volet_parents
+    - input_number.radiation_seuil_volets
+    - input_number.seuil_temperature_volets
+    id: params
+  - trigger: time
+    at: input_datetime.heure_ouverture_volet_parents
+    id: morning_open
+  - trigger: sun
+    event: sunset
+    offset: 00:30:00
+    id: sunset_close
+  conditions:
+  - condition: state
+    entity_id: input_select.mode_volets_chamb_parents
+    state: Auto Pos Soleil
+  actions:
+  - variables:
+      morning_open_time: '{{ states(''input_datetime.heure_ouverture_volet_parents'')
+        }}'
+      orientation: '{{ states(''input_number.orientation_volets_parents'') | float(0)
+        }}'
+      angle: '{{ states(''input_number.angle_exposition_volet_parent'') | float(0)
+        }}'
+      elevation_min: '{{ states(''input_number.elevation_mini_volet_parents'') | float(0)
+        }}'
+      azimuth: '{{ state_attr(''sun.sun'', ''azimuth'') | float(0) }}'
+      elevation: '{{ state_attr(''sun.sun'', ''elevation'') | float(-90) }}'
+      gamma: '{{ (((orientation - azimuth + 180) % 360) - 180) | float(0) }}'
+      gamma_abs: '{{ (gamma | float(0)) | abs }}'
+      radiation: '{{ states(''sensor.vp2_radiation_moyenne'') | float(0) }}'
+      radiation_threshold: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      temperature: '{{ states(''sensor.vp2_temp_out'') | float(0) }}'
+      temperature_threshold: '{{ states(''input_number.seuil_temperature_volets'')
+        | float(30) }}'
+      meteo_ok: '{{ states(''weather.albi'') in [''sunny'', ''partlycloudy''] }}'
+      azimuth_ok: '{{ gamma_abs | float(999) <= angle | float(0) }}'
+      elevation_ok: '{{ elevation | float(-90) > elevation_min | float(0) }}'
+      radiation_ok: '{{ radiation | float(0) > radiation_threshold | float(0) }}'
+      temp_hot: '{{ temperature | float(0) > temperature_threshold | float(30) }}'
+      elev_span: '{% set v = 65 - (elevation_min | float(0)) %} {{ [v, 1] | max }}'
+      coef_elev: '{% set v = ((elevation | float(0)) - (elevation_min | float(0)))
+        / (elev_span | float(1)) %} {{ [[v, 0] | max, 1] | min }}'
+      angle_safe: '{{ [angle | float(0), 1] | max }}'
+      coef_azi: '{% set v = 1 - ((gamma_abs | float(0)) / (angle_safe | float(1)))
+        %} {{ [[v, 0] | max, 1] | min }}'
+      coef_mix: '{{ ((coef_elev | float(0)) * 0.70 + (coef_azi | float(0)) * 0.30)
+        }}'
+      progressive_pos: '{% set pos = 100 - ((coef_mix | float(0)) * 85) %} {{ [[pos,
+        15] | max, 100] | min | round(0) }}'
+      current_pos: "{# A ADAPTER POUR UNE AUTRE PIECE : capteur de position + cover
+        #} {% set s = states('sensor.position_petit_volet_ch_parents') %} {% if s
+        not in ['unknown', 'unavailable', 'none', ''] %}\n  {{ s | int(100) }}\n{%
+        else %}\n  {{ state_attr('cover.volet_ch_parts_petit', 'current_position')
+        | int(100) }}\n{% endif %}"
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''morning_open'' }}'
+      sequence:
+      - variables:
+          target_pos: 100
+          reason: ouverture programmée à l'heure réglable
+          delta_pos: '{{ ((current_pos | int(100)) - 100) | abs }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_parent
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_parts_petit
+          data:
+            position: 100
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''sunset_close'' }}'
+      sequence:
+      - variables:
+          target_pos: 0
+          reason: fermeture programmée à sunset + 30 min
+          delta_pos: '{{ (current_pos | int(100)) | abs }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_parent
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_parts_petit
+          data:
+            position: 0
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''start'', ''periodic'', ''params''] }}'
+      - condition: template
+        value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_parents''))
+          }}
+
+          '
+      - condition: sun
+        before: sunset
+      sequence:
+      - variables:
+          target_pos: "{% if azimuth_ok and elevation_ok and temp_hot %}\n  0\n{%
+            elif azimuth_ok and elevation_ok and radiation_ok and meteo_ok %}\n  {{
+            progressive_pos }}\n{% else %}\n  100\n{% endif %}"
+          reason: "{% if azimuth_ok and elevation_ok and temp_hot %}\n  façade exposée
+            + chaleur => fermeture totale\n{% elif azimuth_ok and elevation_ok and
+            radiation_ok and meteo_ok %}\n  façade exposée + soleil utile => fermeture
+            progressive\n{% elif not azimuth_ok %}\n  soleil hors façade => ouverture\n{%
+            elif not elevation_ok %}\n  élévation insuffisante => ouverture\n{% elif
+            not radiation_ok %}\n  radiation insuffisante => ouverture\n{% elif not
+            meteo_ok %}\n  météo peu favorable => ouverture\n{% else %}\n  ouverture
+            par défaut\n{% endif %}"
+          delta_pos: '{{ ((current_pos | int(100)) - (target_pos | int(100))) | abs
+            }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_parent
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_parts_petit
+          data:
+            position: '{{ target_pos | int(100) }}'
+    default:
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.debug_volet_parent
+      data:
+        value: 'Trigger={{ trigger.id }}
+
+          Heure ouverture={{states(''input_datetime.heure_ouverture_volet_parents'')[:5]
+          }}
+
+          Pas de pilotage : hors fenêtre active (avant heure ouverture ou après sunset).'
+  mode: single
+- id: '1774078919953'
+  alias: Volet Chambre Sud - V3 été heure réglable
+  description: 'Journée : suivi solaire V2 entre l''heure d''ouverture réglable et
+    sunset. Soir : fermeture automatique à sunset + 30 min. Matin : ouverture automatique
+    à l''heure définie par helper.
+
+    '
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: start
+  - trigger: time_pattern
+    minutes: /10
+    id: periodic
+  - trigger: state
+    entity_id:
+    - input_select.mode_volets_chamb_sud
+    - input_datetime.heure_ouverture_volet_sud
+    - input_number.orientation_volet_ch_sud
+    - input_number.angle_exposition_volet_ch_sud
+    - input_number.elevation_volet_ch_sud
+    - input_number.radiation_seuil_volets
+    - input_number.seuil_temperature_volets
+    id: params
+  - trigger: time
+    at: input_datetime.heure_ouverture_volet_sud
+    id: morning_open
+  - trigger: sun
+    event: sunset
+    offset: 00:30:00
+    id: sunset_close
+  conditions:
+  - condition: state
+    entity_id: input_select.mode_volets_chamb_sud
+    state: Auto Pos Soleil
+  actions:
+  - variables:
+      morning_open_time: '{{ states(''input_datetime.heure_ouverture_volet_sud'')
+        }}'
+      orientation: '{{ states(''input_number.orientation_volet_ch_sud'') | float(0)
+        }}'
+      angle: '{{ states(''input_number.angle_exposition_volet_ch_sud'') | float(0)
+        }}'
+      elevation_min: '{{ states(''input_number.elevation_volet_ch_sud'') | float(0)
+        }}'
+      azimuth: '{{ state_attr(''sun.sun'', ''azimuth'') | float(0) }}'
+      elevation: '{{ state_attr(''sun.sun'', ''elevation'') | float(-90) }}'
+      gamma: '{{ (((orientation - azimuth + 180) % 360) - 180) | float(0) }}'
+      gamma_abs: '{{ (gamma | float(0)) | abs }}'
+      radiation: '{{ states(''sensor.vp2_radiation_moyenne'') | float(0) }}'
+      radiation_threshold: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      temperature: '{{ states(''sensor.vp2_temp_out'') | float(0) }}'
+      temperature_threshold: '{{ states(''input_number.seuil_temperature_volets'')
+        | float(30) }}'
+      meteo_ok: '{{ states(''weather.albi'') in [''sunny'', ''partlycloudy''] }}'
+      azimuth_ok: '{{ gamma_abs | float(999) <= angle | float(0) }}'
+      elevation_ok: '{{ elevation | float(-90) > elevation_min | float(0) }}'
+      radiation_ok: '{{ radiation | float(0) > radiation_threshold | float(0) }}'
+      temp_hot: '{{ temperature | float(0) > temperature_threshold | float(30) }}'
+      elev_span: '{% set v = 65 - (elevation_min | float(0)) %} {{ [v, 1] | max }}'
+      coef_elev: '{% set v = ((elevation | float(0)) - (elevation_min | float(0)))
+        / (elev_span | float(1)) %} {{ [[v, 0] | max, 1] | min }}'
+      angle_safe: '{{ [angle | float(0), 1] | max }}'
+      coef_azi: '{% set v = 1 - ((gamma_abs | float(0)) / (angle_safe | float(1)))
+        %} {{ [[v, 0] | max, 1] | min }}'
+      coef_mix: '{{ ((coef_elev | float(0)) * 0.70 + (coef_azi | float(0)) * 0.30)
+        }}'
+      progressive_pos: '{% set pos = 100 - ((coef_mix | float(0)) * 85) %} {{ [[pos,
+        15] | max, 100] | min | round(0) }}'
+      current_pos: "{% set s = states('sensor.position_volet_ch_sud') %} {% if s not
+        in ['unknown', 'unavailable', 'none', ''] %}\n  {{ s | int(100) }}\n{% else
+        %}\n  {{ state_attr('cover.volet_ch_sud', 'current_position') | int(100) }}\n{%
+        endif %}"
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''morning_open'' }}'
+      sequence:
+      - variables:
+          target_pos: 100
+          reason: ouverture programmée à l'heure réglable
+          delta_pos: '{{ ((current_pos | int(100)) - 100) | abs }}'
+      - action: input_text.set_value
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+        target:
+          entity_id: input_text.debug_volet_ch_sud
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_sud
+          data:
+            position: 100
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''sunset_close'' }}'
+      sequence:
+      - variables:
+          target_pos: 0
+          reason: fermeture programmée à sunset + 30 min
+          delta_pos: '{{ (current_pos | int(100)) | abs }}'
+      - action: input_text.set_value
+        target:
+          entity_id:
+          - input_text.debug_volet_ch_sud
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_sud
+          data:
+            position: 0
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''start'', ''periodic'', ''params''] }}'
+      - condition: template
+        value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_sud''))
+          }}
+
+          '
+      - condition: sun
+        before: sunset
+      sequence:
+      - variables:
+          target_pos: "{% if azimuth_ok and elevation_ok and temp_hot %}\n  0\n{%
+            elif azimuth_ok and elevation_ok and radiation_ok and meteo_ok %}\n  {{
+            progressive_pos }}\n{% else %}\n  100\n{% endif %}"
+          reason: "{% if azimuth_ok and elevation_ok and temp_hot %}\n  façade exposée
+            + chaleur => fermeture totale\n{% elif azimuth_ok and elevation_ok and
+            radiation_ok and meteo_ok %}\n  façade exposée + soleil utile => fermeture
+            progressive\n{% elif not azimuth_ok %}\n  soleil hors façade => ouverture\n{%
+            elif not elevation_ok %}\n  élévation insuffisante => ouverture\n{% elif
+            not radiation_ok %}\n  radiation insuffisante => ouverture\n{% elif not
+            meteo_ok %}\n  météo peu favorable => ouverture\n{% else %}\n  ouverture
+            par défaut\n{% endif %}"
+          delta_pos: '{{ ((current_pos | int(100)) - (target_pos | int(100))) | abs
+            }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_ch_sud
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_sud
+          data:
+            position: '{{ target_pos | int(100) }}'
+    default:
+    - action: input_text.set_value
+      data:
+        value: 'Trigger={{ trigger.id }}
+
+          Heure ouverture={{states(''input_datetime.heure_ouverture_volet_sud'')[:5]
+          }}
+
+          Pas de pilotage : hors fenêtre active (avant heure ouverture ou après sunset).'
+      target:
+        entity_id: input_text.debug_volet_ch_sud
+  mode: single
+- id: '1774080403621'
+  alias: Volet Chambre Nord - V3 été heure réglable
+  description: 'Journée : suivi solaire V2 entre l''heure d''ouverture réglable et
+    sunset. Soir : fermeture automatique à sunset + 30 min. Matin : ouverture automatique
+    à l''heure définie par helper.
+
+    '
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: start
+  - trigger: time_pattern
+    minutes: /10
+    id: periodic
+  - trigger: state
+    entity_id:
+    - input_select.mode_volets_chamb_nord
+    - input_datetime.heure_ouverture_volet_nord
+    - input_number.orientation_volet_ch_nord
+    - input_number.angle_exposition_volet_ch_nord
+    - input_number.elevation_volet_ch_nord
+    - input_number.radiation_seuil_volets
+    - input_number.seuil_temperature_volets
+    id: params
+  - trigger: time
+    at: input_datetime.heure_ouverture_volet_nord
+    id: morning_open
+  - trigger: sun
+    event: sunset
+    offset: 00:30:00
+    id: sunset_close
+  conditions:
+  - condition: state
+    entity_id: input_select.mode_volets_chamb_nord
+    state: Auto Pos Soleil
+  actions:
+  - variables:
+      morning_open_time: '{{ states(''input_datetime.heure_ouverture_volet_nord'')
+        }}'
+      orientation: '{{ states(''input_number.orientation_volet_ch_nord'') | float(0)
+        }}'
+      angle: '{{ states(''input_number.angle_exposition_volet_ch_nord'') | float(0)
+        }}'
+      elevation_min: '{{ states(''input_number.elevation_volet_ch_nord'') | float(0)
+        }}'
+      azimuth: '{{ state_attr(''sun.sun'', ''azimuth'') | float(0) }}'
+      elevation: '{{ state_attr(''sun.sun'', ''elevation'') | float(-90) }}'
+      gamma: '{{ (((orientation - azimuth + 180) % 360) - 180) | float(0) }}'
+      gamma_abs: '{{ (gamma | float(0)) | abs }}'
+      radiation: '{{ states(''sensor.vp2_radiation_moyenne'') | float(0) }}'
+      radiation_threshold: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
+        }}'
+      temperature: '{{ states(''sensor.vp2_temp_out'') | float(0) }}'
+      temperature_threshold: '{{ states(''input_number.seuil_temperature_volets'')
+        | float(30) }}'
+      meteo_ok: '{{ states(''weather.albi'') in [''sunny'', ''partlycloudy''] }}'
+      azimuth_ok: '{{ gamma_abs | float(999) <= angle | float(0) }}'
+      elevation_ok: '{{ elevation | float(-90) > elevation_min | float(0) }}'
+      radiation_ok: '{{ radiation | float(0) > radiation_threshold | float(0) }}'
+      temp_hot: '{{ temperature | float(0) > temperature_threshold | float(30) }}'
+      elev_span: '{% set v = 65 - (elevation_min | float(0)) %} {{ [v, 1] | max }}'
+      coef_elev: '{% set v = ((elevation | float(0)) - (elevation_min | float(0)))
+        / (elev_span | float(1)) %} {{ [[v, 0] | max, 1] | min }}'
+      angle_safe: '{{ [angle | float(0), 1] | max }}'
+      coef_azi: '{% set v = 1 - ((gamma_abs | float(0)) / (angle_safe | float(1)))
+        %} {{ [[v, 0] | max, 1] | min }}'
+      coef_mix: '{{ ((coef_elev | float(0)) * 0.70 + (coef_azi | float(0)) * 0.30)
+        }}'
+      progressive_pos: '{% set pos = 100 - ((coef_mix | float(0)) * 85) %} {{ [[pos,
+        15] | max, 100] | min | round(0) }}'
+      current_pos: "{% set s = states('sensor.position_volet_ch_nord') %} {% if s
+        not in ['unknown', 'unavailable', 'none', ''] %}\n  {{ s | int(100) }}\n{%
+        else %}\n  {{ state_attr('cover.volet_ch_nord', 'current_position') | int(100)
+        }}\n{% endif %}"
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''morning_open'' }}'
+      sequence:
+      - variables:
+          target_pos: 100
+          reason: ouverture programmée à l'heure réglable
+          delta_pos: '{{ ((current_pos | int(100)) - 100) | abs }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_ch_nord
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_nord
+          data:
+            position: 100
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id == ''sunset_close'' }}'
+      sequence:
+      - variables:
+          target_pos: 0
+          reason: fermeture programmée à sunset + 30 min
+          delta_pos: '{{ (current_pos | int(100)) | abs }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_ch_nord
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_nord
+          data:
+            position: 0
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''start'', ''periodic'', ''params''] }}'
+      - condition: template
+        value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_nord''))
+          }}
+
+          '
+      - condition: sun
+        before: sunset
+      sequence:
+      - variables:
+          target_pos: "{% if azimuth_ok and elevation_ok and temp_hot %}\n  0\n{%
+            elif azimuth_ok and elevation_ok and radiation_ok and meteo_ok %}\n  {{
+            progressive_pos }}\n{% else %}\n  100\n{% endif %}"
+          reason: "{% if azimuth_ok and elevation_ok and temp_hot %}\n  façade exposée
+            + chaleur => fermeture totale\n{% elif azimuth_ok and elevation_ok and
+            radiation_ok and meteo_ok %}\n  façade exposée + soleil utile => fermeture
+            progressive\n{% elif not azimuth_ok %}\n  soleil hors façade => ouverture\n{%
+            elif not elevation_ok %}\n  élévation insuffisante => ouverture\n{% elif
+            not radiation_ok %}\n  radiation insuffisante => ouverture\n{% elif not
+            meteo_ok %}\n  météo peu favorable => ouverture\n{% else %}\n  ouverture
+            par défaut\n{% endif %}"
+          delta_pos: '{{ ((current_pos | int(100)) - (target_pos | int(100))) | abs
+            }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_ch_nord
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Raison={{ reason }}'
+      - if:
+        - condition: template
+          value_template: '{{ delta_pos | int(0) >= 5 }}'
+        then:
+        - action: cover.set_cover_position
+          target:
+            entity_id: cover.volet_ch_nord
+          data:
+            position: '{{ target_pos | int(100) }}'
+    default:
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.debug_volet_ch_nord
+      data:
+        value: 'Trigger={{ trigger.id }}
+
+          Heure ouverture={{states(''input_datetime.heure_ouverture_volet_nord'')[:5]}}
+
+          Pas de pilotage : hors fenêtre active (avant heure ouverture ou après sunset).'
+  mode: single
+- id: '1774291163691'
+  alias: Volet Automatisme Général RTS V2
+  description: Ete -> ouvre et ferme sur horaire Hiver -> ouvre sur horaire et ferme
+    sur transition jour/nuit Absent -> ouvre et ferme sur transitions jour/nuit
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: ha_start
+  - trigger: template
+    id: jour_vers_nuit
+    value_template: "{{ states('sensor.bh1750_illuminance') | float(0)\n   < states('input_number.luminosite_seuil_bas')
+      | float(0)\n   and is_state('sun.sun', 'below_horizon') }}"
+  - trigger: template
+    id: nuit_vers_jour
+    value_template: "{{ states('sensor.bh1750_illuminance') | float(0)\n   > states('input_number.luminosite_seuil_haut')
+      | float(0)\n   and is_state('sun.sun', 'above_horizon') }}"
+  - trigger: time
+    at: input_datetime.horaire_ete_volet_ouv
+    id: heure_ouv_ete
+  - trigger: time
+    at: input_datetime.horaire_ete_volet_ferm
+    id: heure_ferm_ete
+  - trigger: time
+    at: input_datetime.horaire_hiver_volet_ouv
+    id: ouv_hiv
+  actions:
+  - variables:
+      lux: '{{ states(''sensor.bh1750_illuminance'') | float(0) }}'
+      seuil_haut: '{{ states(''input_number.luminosite_seuil_haut'') | float(0) }}'
+      seuil_bas: '{{ states(''input_number.luminosite_seuil_bas'') | float(0) }}'
+      is_day_now: '{{ lux > seuil_haut and is_state(''sun.sun'', ''above_horizon'')
+        }}'
+      is_night_now: '{{ lux < seuil_bas and is_state(''sun.sun'', ''below_horizon'')
+        }}'
+      mode_volets: '{{ states(''input_select.volets'') }}'
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: jour_vers_nuit
+      sequence:
+      - action: script.1706464871250
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: ouv_hiv
+      sequence:
+      - action: script.0_0_1_ouverture_volets_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Hiv
+      - condition: trigger
+        id: ha_start
+      - condition: template
+        value_template: '{{ is_night_now }}'
+      sequence:
+      - action: script.1706464871250
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id: heure_ouv_ete
+      sequence:
+      - action: script.0_0_1_ouverture_volets_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Auto Ete
+      - condition: trigger
+        id: heure_ferm_ete
+      sequence:
+      - action: script.1706464871250
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: jour_vers_nuit
+      sequence:
+      - action: script.0_1_0_fermeture_volets_mode_absent_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: nuit_vers_jour
+      sequence:
+      - action: script.0_1_1_ouverture_volets_mode_absent_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: ha_start
+      - condition: template
+        value_template: '{{ is_day_now }}'
+      sequence:
+      - action: script.0_1_1_ouverture_volets_mode_absent_rts
+    - conditions:
+      - condition: state
+        entity_id: input_select.volets
+        state: Absent
+      - condition: trigger
+        id: ha_start
+      - condition: template
+        value_template: '{{ is_night_now }}'
+      sequence:
+      - action: script.0_1_0_fermeture_volets_mode_absent_rts
+    default: []
+  mode: single
+- id: '1774451906271'
+  alias: Garage - notification à l'approche
+  description: ''
+  triggers:
+  - trigger: zone
+    entity_id: device_tracker.iphoneremy
+    zone: zone.maison
+    event: enter
+  conditions: []
+  actions:
+  - action: notify.mobile_app_iphoneremy
+    data:
+      title: Approche domicile
+      message: Ouvrir le garage ?
+      data:
+        actions:
+        - action: OPEN_SOUSSOL
+          title: Ouvrir
+        - action: IGNORE_SOUSOL
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Iphone Rémy en approche de
+        la maison'
+  mode: single
+- id: '1774459643119'
+  alias: Garage - ouverture depuis notification
+  description: ''
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: OPEN_SOUSSOL
+  conditions: []
+  actions:
+  - action: cover.open_cover
+    target:
+      entity_id:
+      - cover.porte_sous_sol
+    data: {}
+  mode: single
+- id: '1774627273773'
+  alias: Garage - Telegram à l'approche
+  description: ''
+  triggers:
+  - trigger: zone
+    entity_id: device_tracker.iphoneremy
+    zone: zone.maison
+    event: enter
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.porte_ssol_fermee
+    state: 'on'
+  actions:
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{ states(''sensor.date_time'') }} {{- "\n" -}}iPhone Rémy en approche
+        de la maison {{- "\n" -}}Ouvrir la porte du sous-sol ?'
+      inline_keyboard:
+      - Ouvrir:/OPEN_SOUSSOL, Ignorer:/IGNORE_SOUSSOL
+  mode: single
+- id: '1774628788135'
+  alias: Garage - Actions Telegram
+  description: ''
+  triggers:
+  - trigger: event
+    event_type: telegram_callback
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.event.data.command == ''/OPEN_SOUSSOL'' }}'
+      sequence:
+      - action: telegram_bot.answer_callback_query
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          callback_query_id: '{{ trigger.event.data.id }}'
+          message: Ouverture en cours
+          show_alert: false
+      - action: cover.open_cover
+        target:
+          entity_id: cover.porte_sous_sol
+      - action: telegram_bot.edit_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          chat_id: '{{ trigger.event.data.chat_id }}'
+          message_id: '{{ trigger.event.data.message.message_id }}'
+          message: '{{ states(''sensor.date_time'') }} {{- "\n" -}}iPhone Rémy en
+            approche de la maison {{- "\n" -}}✅ Porte du sous-sol ouverte'
+          inline_keyboard: []
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.event.data.command == ''/IGNORE_SOUSSOL'' }}'
+      sequence:
+      - action: telegram_bot.answer_callback_query
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          callback_query_id: '{{ trigger.event.data.id }}'
+          message: Action annulée
+          show_alert: false
+      - action: telegram_bot.edit_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          chat_id: '{{ trigger.event.data.chat_id }}'
+          message_id: '{{ trigger.event.data.message.message_id }}'
+          message: '{{ states(''sensor.date_time'') }} {{- "\n" -}}iPhone Rémy en
+            approche de la maison {{- "\n" -}}❌ Ouverture annulée'
+          inline_keyboard: []
+  mode: single
+- id: '1774631414016'
+  alias: Ferme store si rafale de vent ou coucher soleil
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.vp2_rafale
+    above: input_number.seuil_haut_rafale_de_vent
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+    id: rafale
+  - trigger: sun
+    event: sunset
+    offset: 0
+    id: coucher_soleil
+  conditions:
+  - condition: device
+    device_id: 88221e2f7a125b74f30b7cf7cf12054a
+    domain: cover
+    entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
+    type: is_open
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: rafale
+      sequence:
+      - device_id: 88221e2f7a125b74f30b7cf7cf12054a
+        domain: cover
+        entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
+        type: close
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Fermeture Store Terrasse sur rafale de Vent
+          message: '{{ states("sensor.date_time") }}
+
+            Rafale de Vent: {{ states(''sensor.vp2_rafale'') | float(0) | round(2)
+            }} m/s'
+    - conditions:
+      - condition: trigger
+        id: coucher_soleil
+      sequence:
+      - device_id: 88221e2f7a125b74f30b7cf7cf12054a
+        domain: cover
+        entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
+        type: close
+  mode: single
+- id: '1777272438037'
+  alias: BleuPrint MAJ ESPHome LXC disponible
+  description: Blue Print
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.esphome_lxc_update_disponible
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: ESPHOME LXC - MAJ dispo
+          message: '{{ states("sensor.date_time") }}
+
+            ESPHome LXC : mise à jour disponible
+
+            Installée : {{ states(''sensor.esphome_lxc_version'') }}
+
+            Dernière  : {{ states(''sensor.esphome_lxc_version_la_plus_recente'')
+            }}'
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: ESPHOME LXC - OK
+          message: '{{ states("sensor.date_time") }}
+
+            ESPHome LXC à jour
+
+            Version : {{ states(''sensor.esphome_lxc_version'') }}'
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 21600
+      max_alerts: 10
+      initial_delay: 300
+      notify_message: ' '
+      resolved_message: ' '
+- id: '1777273219869'
+  alias: Rapport Piscine Journalier IA
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:45:00'
+  conditions: []
+  actions:
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      temp_eau_txt: "{% set v = states('sensor.esp178_piscine_temperature_eau') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(1) }} °C\n{% endif %}"
+      temp_ext_txt: "{% set v = states('sensor.vp2_temp_out') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} °C\n{% endif %}"
+      ph_txt: "{% set v = states('sensor.esp178_piscine_ph_ezo_filtre') %} {% if v
+        in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n
+        \ {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      ph_cible_txt: "{% set v = states('number.esp178_piscine_ph_cible') %} {% if
+        v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  7.2\n{% else %}\n
+        \ {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      orp_txt: "{% set v = states('sensor.esp178_piscine_orp_ezo_filtre') %} {% if
+        v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n
+        \ {{ (v | float(0)) | round(0) }} mV\n{% endif %}"
+      orp_cible_txt: "{% set v = states('number.esp178_piscine_consigne_orp') %} {%
+        if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  700\n{% else
+        %}\n  {{ (v | float(0)) | round(0) }}\n{% endif %}"
+      chlore_libre_txt: "{% set v = states('sensor.my_sampling_point_pl_chlorine_free')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} ppm\n{% endif %}"
+      pression_filtre_txt: "{% set v = states('sensor.esp178_piscine_pression_filtre')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} bar\n{% endif %}"
+      mode_filtration_txt: '{{ states(''select.esp178_piscine_mode_fonctionnement_filtration'')
+        }}'
+      temps_filtration_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      energie_jour_txt: "{% set v = states('sensor.compteur_energie_piscine_jour_hp_hc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      conso_ph_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_ph_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      conso_chl_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_chl_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      poids_chlore_txt: "{% set v = states('sensor.esp129_pesage_chlore_poids_chlore')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      appoint_eau_jour_txt: "{% set v = states('sensor.esp173_cpt_eau_piscine') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ v }}\n{% endif %}"
+      niveau_txt: "{% if is_state('binary_sensor.esp178_piscine_niv_defaut', 'on')
+        %}\n  défaut niveau\n{% elif is_state('binary_sensor.esp178_piscine_niv_bas',
+        'on') %}\n  niveau bas\n{% elif is_state('binary_sensor.esp178_piscine_niv_inter',
+        'on') %}\n  niveau intermédiaire\n{% elif is_state('binary_sensor.esp178_piscine_niv_haut',
+        'on') %}\n  niveau haut\n{% else %}\n  niveau inconnu\n{% endif %}"
+      volet_txt: "{% if is_state('binary_sensor.esp178_piscine_volet_ferme', 'on')
+        %}\n  fermé\n{% elif is_state('binary_sensor.esp178_piscine_volet_ouvert',
+        'on') %}\n  ouvert\n{% else %}\n  intermédiaire / inconnu\n{% endif %}"
+      statut_esp_txt: "{% if is_state('binary_sensor.esp178_piscine_status', 'on')
+        %}\n  connecté\n{% else %}\n  hors ligne\n{% endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: false
+    response_variable: recap_piscine
+    data:
+      task_name: recap piscine journalier
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant de suivi piscine.
+
+        Rédige un message Telegram en français. Sois factuel, clair, compact et utile.
+        N''invente aucune donnée. Si une donnée vaut "n/d", indique simplement qu''elle
+        n''est pas disponible. 8 lignes maximum. Commence par un emoji.
+
+        Structure souhaitée : - 1 ligne synthèse globale, - 1 à 2 lignes qualité de
+        l''eau, - 1 à 2 lignes fonctionnement / filtration, - 1 ligne consommations
+        / produits, - 1 ligne état général / anomalies éventuelles, - 1 courte recommandation
+        si nécessaire.
+
+        Interprétation attendue : - comparer le pH à sa cible, - comparer l''ORP à
+        sa consigne, - signaler si la pression filtre paraît élevée, - commenter brièvement
+        le temps de filtration et l''énergie du jour, - signaler tout point d''attention
+        sur niveau, volet, appoint d''eau ou connexion ESP.
+
+        Données : - Date : {{ date_jour }} - Température eau : {{ temp_eau_txt }}
+        - Température extérieure : {{ temp_ext_txt }} - pH filtré : {{ ph_txt }} -
+        pH cible : {{ ph_cible_txt }} - ORP filtré : {{ orp_txt }} - ORP cible : {{
+        orp_cible_txt }} mV - Chlore libre : {{ chlore_libre_txt }} - Pression filtre
+        : {{ pression_filtre_txt }} - Mode filtration : {{ mode_filtration_txt }}
+        - Temps filtration du jour : {{ temps_filtration_txt }} - Energie piscine
+        du jour : {{ energie_jour_txt }} - Consommation pH du jour : {{ conso_ph_jour_txt
+        }} - Consommation chlore du jour : {{ conso_chl_jour_txt }} - Poids chlore
+        restant : {{ poids_chlore_txt }} - Appoint eau du jour : {{ appoint_eau_jour_txt
+        }} - Etat niveau : {{ niveau_txt }} - Etat volet : {{ volet_txt }} - Etat
+        ESP piscine : {{ statut_esp_txt }}'
+      structure:
+        titre:
+          description: Titre court du message
+          required: true
+          selector:
+            text:
+        message:
+          description: Message Telegram complet
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  recap_piscine is defined\n  and recap_piscine.data
+          is defined\n  and recap_piscine.data is mapping\n  and recap_piscine.data.message
+          is defined\n  and (recap_piscine.data.message | string | trim | length)
+          > 0\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "{{\n  recap_piscine.data.titre\n  if recap_piscine.data.titre is
+            defined\n  else 'Rapport Piscine'\n}}"
+          message: '{{ recap_piscine.data.message }} {% if recap_piscine.data.niveau
+            is defined %} {{ ''\n'' }}Niveau : {{ recap_piscine.data.niveau }} {%
+            endif %}'
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport Piscine
+        message: 'Fallback utilisé : pas de réponse IA structurée exploitable.'
+  mode: single
+- id: '1777274484685'
+  alias: Rapport Piscine Journalier IA V2
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:45:00'
+  conditions: []
+  actions:
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      temp_eau: '{{ states(''sensor.esp178_piscine_temperature_eau'') | float(0) }}'
+      temp_eau_txt: "{% set v = states('sensor.esp178_piscine_temperature_eau') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(1) }} °C\n{% endif %}"
+      temp_ext_txt: "{% set v = states('sensor.vp2_temp_out') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} °C\n{% endif %}"
+      ph_mesure: '{{ states(''sensor.esp178_piscine_ph_ezo_filtre'') | float(0) }}'
+      ph_cible: '{{ states(''number.esp178_piscine_ph_cible'') | float(7.2) }}'
+      ph_txt: "{% set v = states('sensor.esp178_piscine_ph_ezo_filtre') %} {% if v
+        in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n
+        \ {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      ph_cible_txt: '{{ ph_cible | round(2) }}'
+      ecart_ph_txt: '{{ (ph_mesure - ph_cible) | round(2) }}'
+      orp_mesure: '{{ states(''sensor.esp178_piscine_orp_ezo_filtre'') | float(0)
+        }}'
+      orp_cible: '{{ states(''number.esp178_piscine_consigne_orp'') | float(700) }}'
+      orp_txt: "{% set v = states('sensor.esp178_piscine_orp_ezo_filtre') %} {% if
+        v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n
+        \ {{ (v | float(0)) | round(0) }} mV\n{% endif %}"
+      orp_cible_txt: '{{ orp_cible | round(0) }}'
+      ecart_orp_txt: '{{ (orp_mesure - orp_cible) | round(0) }}'
+      chlore_libre_txt: "{% set v = states('sensor.my_sampling_point_pl_chlorine_free')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} ppm\n{% endif %}"
+      pression_filtre: '{{ states(''sensor.esp178_piscine_pression_filtre'') | float(0)
+        }}'
+      pression_filtre_txt: "{% set v = states('sensor.esp178_piscine_pression_filtre')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} bar\n{% endif %}"
+      mode_filtration_txt: '{{ states(''select.esp178_piscine_mode_fonctionnement_filtration'')
+        }}'
+      temps_filtration_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      energie_jour: '{{ states(''sensor.compteur_energie_piscine_jour_hp_hc'') | float(0)
+        }}'
+      energie_jour_txt: "{% set v = states('sensor.compteur_energie_piscine_jour_hp_hc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      conso_ph_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_ph_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      conso_chl_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_chl_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      poids_chlore_txt: "{% set v = states('sensor.esp129_pesage_chlore_poids_chlore')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      appoint_eau_jour_txt: "{% set v = states('sensor.esp173_cpt_eau_piscine') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ v }}\n{% endif %}"
+      niveau_txt: "{% if is_state('binary_sensor.esp178_piscine_niv_defaut', 'on')
+        %}\n  défaut niveau\n{% elif is_state('binary_sensor.esp178_piscine_niv_bas',
+        'on') %}\n  niveau bas\n{% elif is_state('binary_sensor.esp178_piscine_niv_inter',
+        'on') %}\n  niveau intermédiaire\n{% elif is_state('binary_sensor.esp178_piscine_niv_haut',
+        'on') %}\n  niveau haut\n{% else %}\n  niveau inconnu\n{% endif %}"
+      volet_txt: "{% if is_state('binary_sensor.esp178_piscine_volet_ferme', 'on')
+        %}\n  fermé\n{% elif is_state('binary_sensor.esp178_piscine_volet_ouvert',
+        'on') %}\n  ouvert\n{% else %}\n  intermédiaire / inconnu\n{% endif %}"
+      statut_esp_txt: "{% if is_state('binary_sensor.esp178_piscine_status', 'on')
+        %}\n  connecté\n{% else %}\n  hors ligne\n{% endif %}"
+      pompe_filtre_txt: "{% if is_state('switch.esp178_piscine_cde_pompe_filtration',
+        'on') %}\n  en marche\n{% else %}\n  arrêtée\n{% endif %}"
+      mode_ph_txt: '{{ states(''select.esp178_piscine_mode_fonctionnement_regul_ph'')
+        }}'
+      mode_chlore_txt: '{{ states(''select.esp178_piscine_mode_fonct_regul_chlore'')
+        }}'
+      appoint_mode_txt: '{{ states(''select.esp178_piscine_mode_fonct_appoint_eau'')
+        }}'
+  - action: ai_task.generate_data
+    response_variable: recap_piscine
+    data:
+      task_name: recap piscine journalier v2
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant de suivi piscine.
+
+        Rédige un message Telegram en français. Sois factuel, clair, compact et utile.
+        N''invente aucune donnée. Si une donnée vaut "n/d", indique simplement qu''elle
+        n''est pas disponible. 8 lignes maximum. Commence par un emoji.
+
+        Objectif : faire un vrai bilan de fin de journée, pas une simple liste.
+
+        Structure souhaitée : - 1 ligne de synthèse globale, - 1 à 2 lignes qualité
+        d''eau, - 1 à 2 lignes filtration / fonctionnement, - 1 ligne produits / consommations,
+        - 1 ligne état général / anomalies, - 1 courte recommandation si utile.
+
+        Interprétation attendue : - comparer le pH à sa cible et dire s''il est bon,
+        un peu haut ou un peu bas, - comparer l''ORP à sa consigne, - commenter le
+        chlore libre si disponible, - signaler si la pression filtre paraît élevée
+        ou à surveiller, - commenter brièvement le temps de filtration et l''énergie
+        du jour, - signaler tout point d''attention sur appoint d''eau, niveau, volet
+        ou état ESP, - si tout est correct, le dire simplement.
+
+        Données : - Date : {{ date_jour }} - Température eau : {{ temp_eau_txt }}
+        - Température extérieure : {{ temp_ext_txt }} - pH filtré : {{ ph_txt }} -
+        pH cible : {{ ph_cible_txt }} - Ecart pH : {{ ecart_ph_txt }} - ORP filtré
+        : {{ orp_txt }} - ORP cible : {{ orp_cible_txt }} mV - Ecart ORP : {{ ecart_orp_txt
+        }} mV - Chlore libre : {{ chlore_libre_txt }} - Pression filtre : {{ pression_filtre_txt
+        }} - Mode filtration : {{ mode_filtration_txt }} - Pompe filtration : {{ pompe_filtre_txt
+        }} - Temps filtration du jour : {{ temps_filtration_txt }} - Energie piscine
+        du jour : {{ energie_jour_txt }} - Mode régulation pH : {{ mode_ph_txt }}
+        - Mode régulation chlore : {{ mode_chlore_txt }} - Consommation pH du jour
+        : {{ conso_ph_jour_txt }} - Consommation chlore du jour : {{ conso_chl_jour_txt
+        }} - Poids chlore restant : {{ poids_chlore_txt }} - Mode appoint eau : {{
+        appoint_mode_txt }} - Appoint eau du jour : {{ appoint_eau_jour_txt }} - Etat
+        niveau : {{ niveau_txt }} - Etat volet : {{ volet_txt }} - Etat ESP piscine
+        : {{ statut_esp_txt }}'
+      structure:
+        titre:
+          description: Titre court du message
+          required: true
+          selector:
+            text:
+        message:
+          description: Message Telegram complet
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  recap_piscine is defined\n  and recap_piscine.data
+          is defined\n  and recap_piscine.data is mapping\n  and recap_piscine.data.message
+          is defined\n  and (recap_piscine.data.message | string | trim | length)
+          > 0\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "{{\n  recap_piscine.data.titre\n  if recap_piscine.data.titre is
+            defined\n  else 'Rapport Piscine'\n}}"
+          message: '{{ recap_piscine.data.message }} {% if recap_piscine.data.niveau
+            is defined %} {{ ''\n'' }}Niveau : {{ recap_piscine.data.niveau }} {%
+            endif %}'
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport Piscine
+        message: '{{ date_jour }} {{ ''\n'' }}Eau / Ext : {{ temp_eau_txt }} / {{
+          temp_ext_txt }} {{ ''\n'' }}pH : {{ ph_txt }} (cible {{ ph_cible_txt }},
+          écart {{ ecart_ph_txt }}) {{ ''\n'' }}ORP : {{ orp_txt }} (cible {{ orp_cible_txt
+          }} mV, écart {{ ecart_orp_txt }} mV) {{ ''\n'' }}Chlore libre : {{ chlore_libre_txt
+          }} | Pression filtre : {{ pression_filtre_txt }} {{ ''\n'' }}Filtration
+          : mode {{ mode_filtration_txt }}, pompe {{ pompe_filtre_txt }}, temps {{
+          temps_filtration_txt }}, énergie {{ energie_jour_txt }} {{ ''\n'' }}Conso
+          pH / chlore : {{ conso_ph_jour_txt }} / {{ conso_chl_jour_txt }} | Stock
+          chlore : {{ poids_chlore_txt }} {{ ''\n'' }}Appoint eau : {{ appoint_eau_jour_txt
+          }} | Niveau : {{ niveau_txt }} | Volet : {{ volet_txt }} {{ ''\n'' }}ESP
+          piscine : {{ statut_esp_txt }}'
+  mode: single

@@ -1,0 +1,205 @@
+substitutions:
+  device_name: esp141-affichage-pv
+  adress_ip: "192.168.0.141"
+  friendly_name: esp141
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  project:
+    name: "rem81.Affichage_Pv"
+    version: "2.0.0"
+
+esp8266:
+  board: d1_mini
+  framework:
+    version: recommended
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 1min
+  min_auth_mode: WPA2  
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+logger:
+api:
+ota:
+  platform: esphome
+web_server:
+  port: 80
+
+time:
+  - platform: homeassistant
+    timezone: ${time_timezone} 
+
+globals:
+  # Niveau intensité lumineuse
+  - id: intlum
+    type: float
+    restore_value: no
+    initial_value: '10'
+  # Niveau intensité lumineuse
+  - id: intlum1
+    type: float
+    restore_value: no
+    initial_value: '0.25'
+  # Etat pour le clignotement
+  - id: blink_state
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+# Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "Status"
+
+sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+  - platform: homeassistant
+    entity_id: "sensor.mp2_tension_entree_l1"
+    id: u_reseau
+
+output:
+  - platform: gpio
+    pin: GPIO14 # D5
+    id: led_bleu_jour
+  - platform: gpio
+    pin: GPIO12 # D6
+    id: led_blanc_jour
+  - platform: gpio
+    pin: GPIO13 # D7
+    id: led_rouge_jour
+  - platform: gpio
+    pin: GPIO4 # D2
+    id: led_bleu_jour1
+  - platform: gpio
+    pin: GPIO5 # D1
+    id: led_blanc_jour1
+  - platform: gpio
+    pin: GPIO2 # D4
+    id: led_rouge_jour1
+
+
+text_sensor:
+  - platform: homeassistant
+    name: "Tempo Jour"
+    entity_id: sensor.rte_tempo_couleur_actuelle
+    id: tempo_jour
+  - platform: homeassistant
+    name: "Tempo j+1"
+    entity_id: sensor.rte_tempo_prochaine_couleur
+    id: tempo_jour1
+
+switch:
+  - platform: restart
+    name: "Restart" 
+
+interval:
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            sensor.in_range:
+              id: u_reseau
+              below: 10
+          then:
+            - script.execute: blink_leds_red
+          else:
+            - script.execute: calcul_led_jour
+            - script.execute: calcul_led_jour1
+
+# ------------------------  Scripts
+script:
+  # Clignotement des LEDs en rouge si u_reseau < 10
+  - id: blink_leds_red
+    mode: single
+    then:
+      - lambda: |-
+          id(blink_state) = !id(blink_state);
+      - if:
+          condition:
+            lambda: 'return id(blink_state);'
+          then:
+            - output.turn_on: led_bleu_jour
+            - output.turn_on: led_bleu_jour1
+            - delay: 1s
+            - output.turn_on: led_blanc_jour
+            - output.turn_on: led_blanc_jour1
+            - delay: 1s
+            - output.turn_on: led_rouge_jour
+            - output.turn_on: led_rouge_jour1
+            - delay: 1s
+                
+          else:
+            - output.turn_off: led_bleu_jour
+            - output.turn_off: led_bleu_jour1
+            - output.turn_off: led_blanc_jour
+            - output.turn_off: led_blanc_jour1
+            - output.turn_off: led_rouge_jour
+            - output.turn_off: led_rouge_jour1
+
+  # Couleur du Jour en cours
+  - id: calcul_led_jour
+    mode: single
+    then:
+      - output.turn_off: led_bleu_jour
+      - output.turn_off: led_blanc_jour
+      - output.turn_off: led_rouge_jour
+      - if:
+          condition:
+            lambda: 'return id(tempo_jour).state == "Bleu";'
+          then:
+            - output.turn_on: led_bleu_jour
+      - if:
+          condition:
+            lambda: 'return id(tempo_jour).state == "Blanc";'
+          then:
+            - output.turn_on: led_blanc_jour
+      - if:
+          condition:
+            lambda: 'return id(tempo_jour).state == "Rouge";'
+          then:
+            - output.turn_on: led_rouge_jour
+
+  # Couleur du lendemain
+  - id: calcul_led_jour1
+    mode: single
+    then:
+      - output.turn_off: led_bleu_jour1
+      - output.turn_off: led_blanc_jour1
+      - output.turn_off: led_rouge_jour1
+      - if:
+          condition:
+            lambda: 'return id(tempo_jour1).state == "Bleu";'
+          then:
+            - output.turn_on: led_bleu_jour1
+      - if:
+          condition:
+            lambda: 'return id(tempo_jour1).state == "Blanc";'
+          then:
+            - output.turn_on: led_blanc_jour1
+      - if:
+          condition:
+            lambda: 'return id(tempo_jour1).state == "Rouge";'
+          then:
+            - output.turn_on: led_rouge_jour1

@@ -1,0 +1,9 @@
+#
+# configuration des log
+# 
+# https://www.home-assistant.io/integrations/logger/
+logger:
+  default: warning
+  logs:
+    homeassistant.components: error
+    custom_components: error

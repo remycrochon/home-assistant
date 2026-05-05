@@ -1,0 +1,67 @@
+# Secrets / sensibles
+secrets.yaml
+**/secrets.yaml
+.storage/
+.cloud/
+.ssh/
+.vscode/settings.json
+
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.token
+*.secret
+
+# Runtime Home Assistant
+.HA_VERSION
+.cache/
+.ha_run.lock
+home-assistant_v2.db*
+home-assistant.log*
+*.log
+*.db
+*.db-shm
+*.db-wal
+.omv_cookies.json
+
+# Ancien Git / sauvegardes
+.git.old-*/
+.git.old*/
+
+# HACS / composants récupérables
+custom_components/
+
+# Caches ESPHome
+esphome/.esphome/
+esphome/**/.esphome/
+esphome/**/.pioenvs/
+esphome/**/.piolibdeps/
+esphome/**/build/
+
+# Fichiers variables / bruit
+gitpush-debug.log
+git-etat.txt
+git-public-etat.txt
+git-public-final.txt
+git-secrets-check.txt
+watchman_report.txt
+fichiers/*.csv
+
+# Divers
+__pycache__/
+*.pyc
+.DS_Store
+
+# Archives / doublons / vieux fichiers à ne pas publier
+esphome/esphome/
+esphome/**/archive/
+packages/old/
+packages/sos/
+packages/**/*old*
+packages/**/*copy*
+packages/**/*test*
+packages/**/*.txt
+packages/configs/notifications_telegram_old
+packages/configs/tts.yaml.inhibe

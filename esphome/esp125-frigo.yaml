@@ -1,0 +1,185 @@
+substitutions:
+  device_name: esp125-frigo
+  adress_ip: "192.168.0.125"
+
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+    advanced:
+      minimum_chip_revision: "3.0"
+            
+# Enable logging
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+  reboot_timeout: 5min
+  min_auth_mode: WPA2
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+
+web_server:
+  port: 80
+  version: 3
+
+one_wire:
+  - platform: gpio  
+    pin: GPIO4
+    id: ow1
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "Status"
+    
+number:
+  - platform: template
+    name: "Puissance chauffage manuel"
+    id: puissance_manuelle
+    min_value: 0
+    max_value: 100
+    step: 1
+    mode: box
+    restore_value: true
+    initial_value: 0  # première mise sous tension
+    unit_of_measurement: "%"
+    set_action:
+      - light.turn_on:
+          id: manual_heater
+          brightness: !lambda 'return x / 100.0;'
+
+sensor:
+  - platform: dallas_temp
+    one_wire_id: ow1
+    name: "Temp DS18B20 Resistance"
+    address:  0xf300eca700000328
+    id: temp_ds18b20_r
+    device_class: temperature
+    state_class: "measurement"
+    update_interval: 5s
+    accuracy_decimals: 1
+    filters:
+      - lambda: |-
+          if (isnan(x)) return {};  // ignore valeur NaN
+          return x;
+
+  - platform: dallas_temp
+    one_wire_id: ow1
+    name: "Temp DS18B20 Degivrage"
+    address: 0x9900000491efe528
+    id: temp_ds18b20_d
+    device_class: temperature
+    state_class: "measurement"
+    update_interval: 5s
+    accuracy_decimals: 1
+    filters:
+      - lambda: |-
+          if (isnan(x)) return {};  // ignore valeur NaN
+          return x; 
+# --- Capteur PID ---
+  - platform: pid
+    name: "PID Sortie"
+    type: HEAT
+
+  - platform: pid
+    name: "PID P"
+    type: PROPORTIONAL
+
+  - platform: pid
+    name: "PID I"
+    type: INTEGRAL
+
+  - platform: pid
+    name: "PID D"
+    type: DERIVATIVE
+
+  - platform: pid
+    name: "PID Erreur"
+    type: ERROR
+
+# declenche l'Autotune
+button:
+  - platform: template
+    name: "PID Climate Autotune"
+    on_press:
+      - climate.pid.autotune: pid_climate
+
+# Sortie PWM du chauffage
+output:
+  - platform: ledc
+    pin: GPIO23
+    frequency: 1000 Hz
+    id: pwm_heater
+    max_power: 100%
+            
+# --- Mode manuel (light dimmable) ---
+light:
+  - platform: monochromatic
+    output: pwm_heater
+    id: manual_heater
+    name: "Sortie Chauffage (Manuel)"
+    restore_mode: ALWAYS_OFF
+
+# --- Sélecteur de mode ---
+switch:
+  - platform: template
+    name: "Mode Manuel Chauffage"
+    id: chauffage_mode_manuel
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
+      - logger.log: "Mode manuel activé : PID désactivé"
+      - climate.control:
+          id: pid_climate
+          mode: "OFF"
+      - light.turn_on:
+          id: manual_heater
+          brightness: !lambda 'return id(puissance_manuelle).state / 100.0;'
+
+    turn_off_action:
+      - logger.log: "Mode manuel désactivé : PID activé"
+      - light.turn_off:
+          id: manual_heater
+      - climate.control:
+          id: pid_climate
+          mode: HEAT
+
+# --- Lier l'ID du PID pour contrôle ---
+climate:
+  - platform: pid
+    id: pid_climate   # 
+    name: "Regulation PID"
+    sensor: temp_ds18b20_r
+    default_target_temperature: 1°C
+    heat_output: pwm_heater
+    control_parameters:
+      kp: 0.37040 #0.71901 #0.13143
+      ki: 0.02178 #0.02875 #0.00305
+      kd: 1.5750  #4.49541 #1.41370
+      output_averaging_samples: 5
+      derivative_averaging_samples: 2
+      
+    deadband_parameters:
+      threshold_high: 0.2°C
+      threshold_low: -0.2°C
+    visual:
+      min_temperature: -3°C
+      max_temperature: 10°C
+      temperature_step:
+        target_temperature: 0.1
+        current_temperature: 0.1
+

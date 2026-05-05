@@ -1,0 +1,94 @@
+esphome:
+  name: esp132-pzem-cuisine
+esp8266:
+  board: d1_mini
+  framework:
+    version: recommended
+    
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+  min_auth_mode: WPA2
+  manual_ip:
+    static_ip: 192.168.0.132
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: 192.168.0.254    
+
+# Calcul énergie
+external_components:
+  - source: github://dentra/esphome-components    
+
+# Necessaire pour le calcul d'énergie
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+  platform: esphome
+web_server:
+  port: 80
+
+# Configuration UART
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "esp132_Status"
+
+sensor:
+  - platform: pzemac
+    current:
+      name: "pzem_cuisine_courant"
+      unit_of_measurement: "A"
+    voltage:
+      name: "pzem_cuisine_tension"
+      unit_of_measurement: "V"
+    energy:
+      name: "pzem_cuisine_energy"
+      unit_of_measurement: "kWh"
+      filters:
+        - multiply: 0.001
+    power:
+      id: puissance
+      name: "pzem_cuisine_puissance"
+      unit_of_measurement: "W"
+    frequency:
+      name: "pzem_cuisine_frequence"
+      unit_of_measurement: "hz"
+    update_interval: 10s
+
+  - platform: energy_statistics
+    total: puissance
+    energy_today:
+      name: "Energie Jour"
+    energy_yesterday:
+      name: "Energie Hier"
+    energy_week:
+      name: "Energie Semaine"
+    energy_month:
+      name: "Energie Mois"
+    energy_year:
+      name: "Energie Annnée"    

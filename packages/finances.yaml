@@ -1,0 +1,87 @@
+# Example configuration.yaml entry
+sensor:
+  - platform: cryptoinfo_advanced
+    id: "main wallet"
+    cryptocurrency_name: "bitcoin"
+    currency_name: "eur"
+    unit_of_measurement: "€"
+    multiplier: 1
+    update_frequency: 1 # (default = 60) number of minutes to refresh data of the sensor      
+
+  - platform: statistics
+    name: "BTC MM 6h"
+    unique_id: btc_mm_6h
+    entity_id: sensor.btc_price_eur
+    state_characteristic: mean
+    max_age:
+      hours: 6
+
+  - platform: statistics
+    name: "BTC MM30"
+    unique_id: btc_mm30
+    entity_id: sensor.btc_price_eur
+    state_characteristic: mean
+    max_age:
+      days: 30
+
+  - platform: statistics
+    name: "BTC MM50"
+    unique_id: btc_mm50
+    entity_id: sensor.btc_price_eur
+    state_characteristic: mean
+    max_age:
+      days: 50
+
+  - platform: statistics
+    name: "BTC MM200"
+    unique_id: btc_mm200
+    entity_id: sensor.btc_price_eur
+    state_characteristic: mean
+    max_age:
+      days: 200
+
+template:
+  - sensor:
+      - name: "BTC Price EUR"
+        unique_id: btc_price_eur
+        state: >
+          {{ state_attr('sensor.cryptoinfo_main_wallet', 'baseprice') | float(0) }}
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: measurement
+
+      - name: "Stratégie Bitcoin"
+        unique_id: strategie_btc_mm50
+        state: >
+          {% set p = states('sensor.btc_price_eur') | float(0) %}
+          {% set m = states('sensor.btc_mm50') | float(0) %}
+          {% if p > 0 and m > 0 and p > m %}
+            BTC au-dessus de la MM50
+          {% else %}
+            BTC sous la MM50
+          {% endif %}
+
+      - name: "BTC Écart vs MA 6h"
+        unique_id: btc_ecart_ma6h_pct
+        unit_of_measurement: "%"
+        state: >
+          {% set p = states('sensor.btc_price_eur') | float(0) %}
+          {% set ma = states('sensor.btc_mm_6h') | float(0) %}
+          {% if p > 0 and ma > 0 %}
+            {{ ((p - ma) / ma * 100) | round(2) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "BTC Signal 6h"
+        unique_id: btc_signal_6h
+        state: >
+          {% set d = states('sensor.btc_ecart_ma6h_pct') | float(0) %}
+          {% if d > 0.5 %}
+            ↗ Hausse
+          {% elif d < -0.5 %}
+            ↘ Baisse
+          {% else %}
+            → Neutre
+          {% endif %}
+

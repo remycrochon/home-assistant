@@ -1,0 +1,59 @@
+####################################################
+#                                                  #
+#              EAU CHAUDE SANITAIRE                #
+#                                                  #
+####################################################
+
+
+template:
+# 
+  - sensor:
+############################################ 21/12/2022
+# sensor.ecocompteur_ecs:
+# Si switch.cde_relais_ecs->
+#   template: sensor.puissance_ecs_reseau_kw
+#     Integration en kW: sensor.energie_ecs_reseau->
+#       utility_meter: energy_ecs_reseau_usage_daily->
+#         sensor.compteur_energie_ecs_reseau_jour_hp
+#         sensor.compteur_energie_ecs_reseau_jour_hc
+
+# Le compteur PV est inclus dans l'ESP Routeur
+# Calcul puissance ECS si mode réseau
+# 
+    - name: puissance_ecs_reseau_w
+      unique_id: "puissance_ecs_reseau_w"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "W"
+      state: >-
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set rel_ecs=states('switch.cde_relais_ecs')%}
+        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
+          {{ pu_ecs }}
+        {%else%}
+          0
+        {%endif%}
+
+    - name: puissance_ecs_reseau_kw
+      unique_id: "puissance_ecs_reseau_kw"
+      device_class: "power"
+      state_class: "measurement"    
+      unit_of_measurement: "kW"
+      state: >-
+        {% set pu_ecs=states('sensor.ecocompteur_ecs')|float(default=0) %}
+        {% set rel_ecs=states('switch.cde_relais_ecs')%}
+        {% if (pu_ecs>0) and (rel_ecs=="on")%}          
+          {{ pu_ecs/1000 }}
+        {%else%}
+          0
+        {%endif%}
+
+# L'integrale de rieumman
+# Les utily_meter
+# Totalisation des energies PV ET RESEAU
+# sont déclarés dans "/config/helpers"
+
+
+
+
+

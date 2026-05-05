@@ -1,0 +1,9 @@
+# HTTP
+# https://home-assistant.io/components/http/
+
+http:
+  ip_ban_enabled: true
+  login_attempts_threshold: 5  
+  #use_x_forwarded_for: true
+  #trusted_proxies:
+  #  - 192.168.0.0/24

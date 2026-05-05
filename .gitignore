@@ -42,10 +42,6 @@ esphome/**/build/
 
 # Fichiers variables / bruit
 gitpush-debug.log
-git-etat.txt
-git-public-etat.txt
-git-public-final.txt
-git-secrets-check.txt
 watchman_report.txt
 fichiers/*.csv
 
@@ -55,7 +51,7 @@ __pycache__/
 .DS_Store
 
 # Archives / doublons / vieux fichiers à ne pas publier
-esphome/esphome/
+esphome/
 esphome/**/archive/
 packages/old/
 packages/sos/
@@ -66,3 +62,8 @@ packages/**/*.txt
 packages/configs/notifications_telegram_old
 packages/configs/tts.yaml.inhibe
 git-a-commiter.txt
+esphome/esphome/
+git-etat.txt
+git-public-etat.txt
+git-public-final.txt
+git-secrets-check.txt

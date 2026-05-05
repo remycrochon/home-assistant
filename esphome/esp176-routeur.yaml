@@ -24,8 +24,8 @@ substitutions:
   GPIO_ZC_pin: "GPIO34"
 
 packages:
-  jsk: !include /root/esphome/pack_esp176/jsk.yaml
-  table_pu: !include /root/esphome/pack_esp176/table_pu.yaml
+  jsk: !include pack_esp176/jsk.yaml
+  table_pu: !include pack_esp176/table_pu.yaml
 
 esphome:
   name: ${device_name}

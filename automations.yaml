@@ -2950,9 +2950,11 @@
       milliseconds: 0
   - action: input_number.set_value
     data:
-      entity_id: input_number.mp2_memoire_estimation_production_jour
       value: '{% set a = states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
         | float(0) | round(1) %} {{ a }}'
+    target:
+      entity_id:
+      - input_number.mp2_memoire_estimation_production_jour
   - action: input_number.set_value
     data:
       entity_id: input_number.mp2_memoire_estimation_conso_jour

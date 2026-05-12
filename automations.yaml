@@ -2957,9 +2957,11 @@
       - input_number.mp2_memoire_estimation_production_jour
   - action: input_number.set_value
     data:
-      entity_id: input_number.mp2_memoire_estimation_conso_jour
       value: '{% set a = states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
         | round(1) %} {{ a }}'
+    target:
+      entity_id:
+      - input_number.mp2_memoire_estimation_conso_jour
   mode: single
 - id: '1774028162818'
   alias: Volet Chambre Parents - V3 été heure réglable

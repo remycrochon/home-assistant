@@ -1,0 +1,34 @@
+mqtt:
+  sensor:
+    - name: "lxc_frigate_120 Frigate Recordings Utilisation"
+      unique_id: lxc_frigate_120_frigate_recordings_utilisation_pct
+      state_topic: "proxmox/frigate/recordings"
+      availability_topic: "proxmox/frigate/recordings/availability"
+      value_template: "{{ value_json.used_percent }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+      json_attributes_topic: "proxmox/frigate/recordings"
+
+    - name: "lxc_frigate_120 Frigate Recordings Utilisé"
+      unique_id: lxc_frigate_120_frigate_recordings_utilise_gb
+      state_topic: "proxmox/frigate/recordings"
+      availability_topic: "proxmox/frigate/recordings/availability"
+      value_template: "{{ value_json.used_gb }}"
+      unit_of_measurement: "GB"
+      state_class: measurement
+
+    - name: "lxc_frigate_120 Frigate Recordings Libre"
+      unique_id: lxc_frigate_120_frigate_recordings_libre_gb
+      state_topic: "proxmox/frigate/recordings"
+      availability_topic: "proxmox/frigate/recordings/availability"
+      value_template: "{{ value_json.free_gb }}"
+      unit_of_measurement: "GB"
+      state_class: measurement
+
+    - name: "lxc_frigate_120 Frigate Recordings Taille"
+      unique_id: lxc_frigate_120_frigate_recordings_taille_gb
+      state_topic: "proxmox/frigate/recordings"
+      availability_topic: "proxmox/frigate/recordings/availability"
+      value_template: "{{ value_json.size_gb }}"
+      unit_of_measurement: "GB"
+      state_class: measurement

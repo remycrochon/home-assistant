@@ -25,7 +25,7 @@ openhasp:
           "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') |float(0)| round(1)) }}°C"
       - obj: "p0b6"
         properties:
-          "text": "\uE2DC {{'%.1f' | format (states('sensor.lywsd03mmc_salon_temperature')|float(0) | round(1)) }}°C"
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.salon_ts0101_temperature')|float(0) | round(1)) }}°C"
 
       - obj: "p0b7"
         properties:

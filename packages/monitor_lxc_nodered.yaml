@@ -1,0 +1,46 @@
+mqtt:
+  sensor:
+    - name: "Node-RED LXC Version"
+      unique_id: nodered_lxc_version
+      state_topic: "monitor/nodered_lxc/version"
+      icon: mdi:package-variant
+
+    - name: "Node-RED LXC Version la plus récente"
+      unique_id: nodered_lxc_latest
+      state_topic: "monitor/nodered_lxc/latest"
+      icon: mdi:cloud-download
+
+    - name: "Node-RED LXC CPU"
+      unique_id: nodered_lxc_cpu_pct
+      state_topic: "monitor/nodered_lxc/cpu_pct"
+      unit_of_measurement: "%"
+      state_class: measurement
+      device_class: power_factor
+      icon: mdi:cpu-64-bit
+
+    - name: "Node-RED LXC Mémoire"
+      unique_id: nodered_lxc_mem_pct
+      state_topic: "monitor/nodered_lxc/mem_pct"
+      unit_of_measurement: "%"
+      state_class: measurement
+      icon: mdi:memory
+
+  binary_sensor:
+    - name: "Node-RED LXC En cours d'exécution"
+      unique_id: nodered_lxc_running
+      state_topic: "monitor/nodered_lxc/status"
+      payload_on: "running"
+      payload_off: "stopped"
+      device_class: running
+      
+template:
+  - binary_sensor:
+      - name: "Node-RED LXC Mise à jour disponible"
+        unique_id: nodered_lxc_update
+        device_class: update
+        state: >
+          {% set cur = states('sensor.node_red_lxc_version') %}
+          {% set lat = states('sensor.node_red_lxc_version_la_plus_recente') %}
+          {{ cur not in ['unknown','unavailable','none',''] and
+             lat not in ['unknown','unavailable','none',''] and
+             cur != lat }}      

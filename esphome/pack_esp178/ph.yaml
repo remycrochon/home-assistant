@@ -361,10 +361,10 @@ script:
                           // Log pour débogage
                           ESP_LOGI("regul_ph", "Écart: %.2f, Quantité: %.2f ml, Débit: %.3f ml/s, Facteur: %.2f, Durée: %.2f s", ecart, quantite_necessaire * 1000.0, debit_ml_s, facteur_correction, duree);
                           id(g_tps_injection_ph_moins) = duree;
-
                 else:
                   - lambda: |-
                       id(g_tps_injection_ph_moins)=0;
+
                       ESP_LOGI("regul_ph",
                           "Pas d'injection: mem_ph=%.2f cible=%.2f hysteresis=%.2f filtration=%d tempo=%d",
                           id(g_memoire_ph),
@@ -372,6 +372,27 @@ script:
                           id(_ph_hysteresis).state,
                           id(cde_ppe_filtration).state,
                           id(flag_tempo_ppe_filtre));
+
+                      char buf[256];
+                      snprintf(buf, sizeof(buf),
+                          "ESP178 Pas d'injection pH\n"
+                          "Mem pH: %.2f\n"
+                          "Cible pH: %.2f\n"
+                          "Hysteresis: %.2f\n"
+                          "Seuil injection: %.2f\n"
+                          "Filtration: %s\n"
+                          "Tempo filtre: %s",
+                          id(g_memoire_ph),
+                          id(_ph_cible).state,
+                          id(_ph_hysteresis).state,
+                          id(_ph_cible).state + id(_ph_hysteresis).state,
+                          id(cde_ppe_filtration).state ? "ON" : "OFF",
+                          id(flag_tempo_ppe_filtre) ? "OK" : "NON");
+
+                      std::string mess = buf;
+                      id(_message_telegram)->execute(mess.c_str(),0);
+                      id(_log_fichier)->execute(mess.c_str(), 0);
+
             - lambda: |-
                 id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
 

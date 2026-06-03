@@ -4290,3 +4290,21 @@
           }} | Niveau : {{ niveau_txt }} | Volet : {{ volet_txt }} {{ ''\n'' }}ESP
           piscine : {{ statut_esp_txt }}'
   mode: single
+- id: '1780388409934'
+  alias: PVE2 Not Running
+  description: ''
+  triggers:
+  - type: not_running
+    device_id: 982520a421084554c3d26b7b93c25a98
+    entity_id: cf669dafb764a71143512201c67bfa6c
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}} PVE Not Running'
+      title: Defaut PVE2
+  mode: single

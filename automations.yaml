@@ -2160,8 +2160,8 @@
   mode: single
 - id: '1746555411905'
   alias: Gestion de la pompe piscine selon le SoC batterie
-  description: 'Coupe la pompe si SoC < 25 % pendant 1 min, rétablissement si SoC
-    > 26 %
+  description: 'Coupe la pompe si SoC < 23 % pendant 1 min, rétablissement si SoC
+    > 30 %
 
     '
   triggers:
@@ -4308,3 +4308,18 @@
       message: '{{states("sensor.date_time") }}{{-"\n"-}} PVE Not Running'
       title: Defaut PVE2
   mode: single
+- id: '1780500669922'
+  alias: Météo matin - Telegram 8h
+  description: Envoie la température et l'humidité extérieure chaque matin à 8h via
+    Telegram
+  triggers:
+  - platform: time
+    at: 08:00:00
+  actions:
+  - data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: "\U0001F324 Météo extérieure"
+      message: "{{ now().strftime('%A %d %B %Y') }}\n\U0001F321 Température : {{ states('sensor.vp2_temp_out')
+        | round(1) }}°C\n\U0001F4A7 Humidité : {{ states('sensor.vp2_humidity_out')
+        | round(0) | int }}%"
+    action: telegram_bot.send_message

@@ -2964,10 +2964,10 @@
       - input_number.mp2_memoire_estimation_conso_jour
   mode: single
 - id: '1774028162818'
-  alias: Volet Chambre Parents - V3 été heure réglable
-  description: 'Journée : suivi solaire V2 entre l''heure d''ouverture réglable et
-    sunset. Soir : fermeture automatique à sunset + 30 min. Matin : ouverture automatique
-    à l''heure définie par helper.
+  alias: Volet Chambre Parents - V4 été heure ouverture/fermeture réglable
+  description: 'Ouverture à heure réglable. Suivi solaire en journée. Fermeture à
+    heure réglable sauf si heure fermeture = 00:00. Si modification manuelle dans
+    la journée, suspension jusqu''à l''ouverture du lendemain.
 
     '
   triggers:
@@ -2981,19 +2981,22 @@
     entity_id:
     - input_select.mode_volets_chamb_parents
     - input_datetime.heure_ouverture_volet_parents
+    - input_datetime.heure_fermeture_volet_parents
     - input_number.orientation_volets_parents
     - input_number.angle_exposition_volet_parent
     - input_number.elevation_mini_volet_parents
     - input_number.radiation_seuil_volets
     - input_number.seuil_temperature_volets
     id: params
+  - trigger: state
+    entity_id: sensor.position_petit_volet_ch_parents
+    id: position_changed
   - trigger: time
     at: input_datetime.heure_ouverture_volet_parents
     id: morning_open
-  - trigger: sun
-    event: sunset
-    offset: 00:30:00
-    id: sunset_close
+  - trigger: time
+    at: input_datetime.heure_fermeture_volet_parents
+    id: evening_close
   conditions:
   - condition: state
     entity_id: input_select.mode_volets_chamb_parents
@@ -3001,6 +3004,13 @@
   actions:
   - variables:
       morning_open_time: '{{ states(''input_datetime.heure_ouverture_volet_parents'')
+        }}'
+      evening_close_time: '{{ states(''input_datetime.heure_fermeture_volet_parents'')
+        }}'
+      fermeture_active: '{{ evening_close_time[:5] != ''00:00'' }}'
+      override_manuel: '{{ is_state(''input_boolean.volet_parent_override_manuel'',
+        ''on'') }}'
+      commande_auto: '{{ is_state(''input_boolean.volet_parent_commande_auto'', ''on'')
         }}'
       orientation: '{{ states(''input_number.orientation_volets_parents'') | float(0)
         }}'
@@ -3033,19 +3043,46 @@
         }}'
       progressive_pos: '{% set pos = 100 - ((coef_mix | float(0)) * 85) %} {{ [[pos,
         15] | max, 100] | min | round(0) }}'
-      current_pos: "{# A ADAPTER POUR UNE AUTRE PIECE : capteur de position + cover
-        #} {% set s = states('sensor.position_petit_volet_ch_parents') %} {% if s
-        not in ['unknown', 'unavailable', 'none', ''] %}\n  {{ s | int(100) }}\n{%
-        else %}\n  {{ state_attr('cover.volet_ch_parts_petit', 'current_position')
+      current_pos: "{% set s = states('sensor.position_petit_volet_ch_parents') %}
+        {% if s not in ['unknown', 'unavailable', 'none', ''] %}\n  {{ s | int(100)
+        }}\n{% else %}\n  {{ state_attr('cover.volet_ch_parts_petit', 'current_position')
         | int(100) }}\n{% endif %}"
   - choose:
     - conditions:
       - condition: template
+        value_template: '{{ trigger.id == ''position_changed'' }}'
+      - condition: template
+        value_template: '{{ not commande_auto }}'
+      - condition: template
+        value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_parents''))
+          }}
+
+          '
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.volet_parent_override_manuel
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_parent
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Position modifiée manuellement.
+
+            Automatisme suspendu jusqu''à l''ouverture programmée du lendemain.
+
+            Position actuelle={{ current_pos }}'
+    - conditions:
+      - condition: template
         value_template: '{{ trigger.id == ''morning_open'' }}'
       sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.volet_parent_override_manuel
       - variables:
           target_pos: 100
-          reason: ouverture programmée à l'heure réglable
+          reason: ouverture programmée à l'heure réglable, reprise automatique
           delta_pos: '{{ ((current_pos | int(100)) - 100) | abs }}'
       - action: input_text.set_value
         target:
@@ -3055,45 +3092,44 @@
 
             Heure ouverture={{ morning_open_time[:5] }}
 
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Fermeture active={{ fermeture_active }}
+
             Cible={{ target_pos }}
 
             Actuelle={{ current_pos }}
 
             Delta={{ delta_pos }}
 
-            Gamma={{ gamma | round(1) }}
-
-            Azimut={{ azimuth | round(1) }}
-
-            Élévation={{ elevation | round(1) }}
-
-            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
-
-            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
-
-            Azimuth_OK={{ azimuth_ok }}
-
-            Elevation_OK={{ elevation_ok }}
-
-            Meteo_OK={{ meteo_ok }}
-
             Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
         then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.volet_parent_commande_auto
         - action: cover.set_cover_position
           target:
             entity_id: cover.volet_ch_parts_petit
           data:
             position: 100
+        - delay: 00:01:00
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.volet_parent_commande_auto
     - conditions:
       - condition: template
-        value_template: '{{ trigger.id == ''sunset_close'' }}'
+        value_template: '{{ trigger.id == ''evening_close'' }}'
+      - condition: template
+        value_template: '{{ fermeture_active }}'
+      - condition: template
+        value_template: '{{ not override_manuel }}'
       sequence:
       - variables:
           target_pos: 0
-          reason: fermeture programmée à sunset + 30 min
+          reason: fermeture programmée à l'heure réglable
           delta_pos: '{{ (current_pos | int(100)) | abs }}'
       - action: input_text.set_value
         target:
@@ -3101,7 +3137,7 @@
         data:
           value: 'Trigger={{ trigger.id }}
 
-            Heure ouverture={{ morning_open_time[:5] }}
+            Heure fermeture={{ evening_close_time[:5] }}
 
             Cible={{ target_pos }}
 
@@ -3109,37 +3145,35 @@
 
             Delta={{ delta_pos }}
 
-            Gamma={{ gamma | round(1) }}
-
-            Azimut={{ azimuth | round(1) }}
-
-            Élévation={{ elevation | round(1) }}
-
-            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
-
-            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
-
-            Azimuth_OK={{ azimuth_ok }}
-
-            Elevation_OK={{ elevation_ok }}
-
-            Meteo_OK={{ meteo_ok }}
-
             Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
         then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.volet_parent_commande_auto
         - action: cover.set_cover_position
           target:
             entity_id: cover.volet_ch_parts_petit
           data:
             position: 0
+        - delay: 00:01:00
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.volet_parent_commande_auto
     - conditions:
       - condition: template
         value_template: '{{ trigger.id in [''start'', ''periodic'', ''params''] }}'
       - condition: template
+        value_template: '{{ not override_manuel }}'
+      - condition: template
         value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_parents''))
+          }}
+
+          '
+      - condition: template
+        value_template: '{{ not fermeture_active or now() < today_at(states(''input_datetime.heure_fermeture_volet_parents''))
           }}
 
           '
@@ -3168,6 +3202,10 @@
 
             Heure ouverture={{ morning_open_time[:5] }}
 
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Fermeture active={{ fermeture_active }}
+
             Cible={{ target_pos }}
 
             Actuelle={{ current_pos }}
@@ -3180,9 +3218,9 @@
 
             Élévation={{ elevation | round(1) }}
 
-            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+            Radiation={{ radiation | round(0) }} (seuil={{ radiation_threshold }})
 
-            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+            Temp={{ temperature | round(1) }} (seuil={{ temperature_threshold }})
 
             Azimuth_OK={{ azimuth_ok }}
 
@@ -3190,16 +3228,25 @@
 
             Meteo_OK={{ meteo_ok }}
 
+            Override manuel={{ override_manuel }}
+
             Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
         then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.volet_parent_commande_auto
         - action: cover.set_cover_position
           target:
             entity_id: cover.volet_ch_parts_petit
           data:
             position: '{{ target_pos | int(100) }}'
+        - delay: 00:01:00
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.volet_parent_commande_auto
     default:
     - action: input_text.set_value
       target:
@@ -3207,10 +3254,15 @@
       data:
         value: 'Trigger={{ trigger.id }}
 
-          Heure ouverture={{states(''input_datetime.heure_ouverture_volet_parents'')[:5]
-          }}
+          Pas de pilotage.
 
-          Pas de pilotage : hors fenêtre active (avant heure ouverture ou après sunset).'
+          Heure ouverture={{ morning_open_time[:5] }}
+
+          Heure fermeture={{ evening_close_time[:5] }}
+
+          Fermeture active={{ fermeture_active }}
+
+          Override manuel={{ override_manuel }}'
   mode: single
 - id: '1774078919953'
   alias: Volet Chambre Sud - V3 été heure réglable
@@ -4308,18 +4360,3 @@
       message: '{{states("sensor.date_time") }}{{-"\n"-}} PVE Not Running'
       title: Defaut PVE2
   mode: single
-- id: '1780500669922'
-  alias: Météo matin - Telegram 8h
-  description: Envoie la température et l'humidité extérieure chaque matin à 8h via
-    Telegram
-  triggers:
-  - platform: time
-    at: 08:00:00
-  actions:
-  - data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      title: "\U0001F324 Météo extérieure"
-      message: "{{ now().strftime('%A %d %B %Y') }}\n\U0001F321 Température : {{ states('sensor.vp2_temp_out')
-        | round(1) }}°C\n\U0001F4A7 Humidité : {{ states('sensor.vp2_humidity_out')
-        | round(0) | int }}%"
-    action: telegram_bot.send_message

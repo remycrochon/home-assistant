@@ -1,4 +1,17 @@
 
 shell_command:
   push_to_github: /config/gitpush.sh 
-  turn_off_remote_pc: "ssh -i /config/.ssh/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' homeassistant@192.168.0.62 sudo reboot -h now"
+  reboot_rpi_weewx2024: >-
+    ssh -i /config/.ssh/id_ed25519
+    -o UserKnownHostsFile=/config/.ssh/known_hosts
+    -o BatchMode=yes
+    -o ConnectTimeout=10
+    remy@192.168.0.84
+    'nohup sudo /usr/sbin/reboot >/dev/null 2>&1 &'  
+  reboot_rpi_weewx2021: >-
+    ssh -i /config/.ssh/id_ed25519_weewx2021
+    -o StrictHostKeyChecking=no
+    -o BatchMode=yes
+    -o ConnectTimeout=10
+    pi@192.168.0.62
+    'nohup sudo -n /sbin/reboot >/dev/null 2>&1 &'

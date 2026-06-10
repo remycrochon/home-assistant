@@ -2130,7 +2130,7 @@
     '
   triggers:
   - entity_id:
-    - sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
+    - sensor.mp2_soc_affiche
     trigger: state
   conditions:
   - condition: sun
@@ -2140,7 +2140,7 @@
   - choose:
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
+        entity_id: sensor.mp2_soc_affiche
         below: 23
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc
@@ -2164,7 +2164,7 @@
           title: 'Piscine : SoC < 25 %'
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc
+        entity_id: sensor.mp2_soc_affiche
         above: 30
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc

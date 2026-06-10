@@ -13,7 +13,7 @@ esp32:
   framework:
     type: esp-idf  
     advanced:
-      minimum_chip_revision: "3.0"
+      sram1_as_iram: true
       
 wifi:
   networks:
@@ -28,9 +28,11 @@ wifi:
 
   manual_ip:
     static_ip: ${adress_ip}
-    gateway: 192.168.0.1
+    gateway: 192.168.0.254
     subnet: 255.255.255.0
-
+    dns1: !secret dns1
+    dns2: !secret dns2
+    
 # Enable logging
 logger:
   baud_rate: 0

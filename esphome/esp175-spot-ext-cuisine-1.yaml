@@ -20,9 +20,8 @@ wifi:
   manual_ip:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
-    subnet: 255.255.255.0
-    dns1: 192.168.0.214
-    dns2: 192.168.0.210
+    dns1: !secret dns1
+    dns2: !secret dns2
 
 # Enable logging
 logger:

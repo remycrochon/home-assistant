@@ -1,27 +1,25 @@
-
-              
 globals:
   - id: g_memoire_ph
     type: float
     restore_value: yes
     initial_value: '7.2'
 
-  # temps d'injection ph
   - id: g_tps_injection_ph_moins
     type: float
     restore_value: no
+    initial_value: '0.0'
 
-  # Cumul de la conso pH totale et jour
   - id: g_conso_ph_totale
     type: float
     restore_value: yes
     initial_value: '0.0'
+
   - id: g_conso_ph_jour
     type: float
     restore_value: yes
     initial_value: '0.0'
 
-# déclaration des modes de fonctionnement dans des "input select"
+
 select:
   - platform: template
     name: "Mode_Fonctionnement_regul_ph"
@@ -32,21 +30,23 @@ select:
       - Ma_f
       - At_f
     id: _Mode_Fonctionnement_regul_ph
-    on_value: 
+    on_value:
       then:
         - logger.log:
             format: "Mode Fonct Regul pH --> %s"
-            args: [ 'id(_Mode_Fonctionnement_regul_ph).current_option()' ]
+            args: [ 'id(_Mode_Fonctionnement_regul_ph).current_option().c_str()' ]
             level: INFO
+
         - if:
             condition:
               or:
                 - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Ma_f";'
                 - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "At_f";'
-            then:                    
-              - script.stop: _regul_ph   
-              - delay: 1s            
-              - script.execute: _regul_ph       
+            then:
+              - script.stop: _regul_ph
+              - delay: 1s
+              - script.execute: _regul_ph
+
 
 button:
   - platform: template
@@ -54,7 +54,8 @@ button:
     on_press:
       - script.execute: _regul_ph
 
-datetime: 
+
+datetime:
   - platform: template
     id: heure_injection_ph
     type: time
@@ -71,9 +72,8 @@ datetime:
     restore_value: true
     icon: mdi:clock
 
-# Input Number
+
 number:
-  # Simulation Niveau pH
   - platform: template
     name: "simule_pH"
     id: simul_ph_ezo
@@ -86,7 +86,6 @@ number:
     step: 0.01
     icon: mdi:ph
 
-  # Cible Régulation pH
   - platform: template
     name: "pH_Cible"
     id: _ph_cible
@@ -98,7 +97,6 @@ number:
     unit_of_measurement: "pH"
     step: 0.01
 
-  # Hysterisis pH: S'additionne à la consigne dans la comparaison avec la cible
   - platform: template
     name: "pH_Hysteris"
     id: _ph_hysteresis
@@ -110,35 +108,31 @@ number:
     unit_of_measurement: "pH"
     step: 0.01
 
-  # Facteur de correction par cycle (fraction de la correction totale)
   - platform: template
     name: "facteur_correction_ph"
     id: facteur_correction_ph
     optimistic: true
     restore_value: true
-    initial_value: 50    
+    initial_value: 50
     mode: box
     min_value: 1
     max_value: 100.0
-    unit_of_measurement: ""
+    unit_of_measurement: "%"
     step: 0.1
     icon: mdi:percent
 
-  # Debit Pompe pH moins
-  # Etalonnage du 18/07/2024: 4.272 l/h
-  # Etalonnage du 17/05/2025: 4.269 l/h
   - platform: template
     name: "debit_ppe_ph_moins"
     id: _debit_ppe_moins
     optimistic: true
     initial_value: 4.269
+    restore_value: true
     mode: box
     min_value: 0.5
     max_value: 7.2
     unit_of_measurement: "l/h"
     step: 0.001
 
-  # Durée marche pompe ph cycle
   - platform: template
     name: "durée_injection_phmoins"
     id: duree_inject_phmoins
@@ -153,44 +147,6 @@ number:
 
 
 sensor:
-  # Mesure du pH
-  # Procédure étalonnage:
-    # Mettre 1 s dans "update interval"
-    # Mettre accuracy_decimals: 3
-    # Decommenter le log
-    # Commenter les 4 lignes calibrate_linear
-    # Décommenter le LOGI du "on_value"  
-    # ainsi on moyenne sur 15 s avec un affichage toutes les 5s 
-    # 1-Faire une mesure avec solution étalon de 4.0
-    # 2-Attendre 2 à 3 minutes que ca se stabilise
-    # 3-relever la valeur du pH
-    # 4-Toujours bien rincer la sonde à l'eau déminéralisée entre deux solutions
-    # Refaire étapes 1 à 4 avec une solution étalon de 6.86
-    # Puis avec une solution étalon de 9.18
-    # Saisir les valeurs relevés dans "Calibrate_linear"
-    # Décommenter les 4 lignes calibrate_linear    
-    # Remettre 60 s dans "update interval"
-    # Mettre accuracy_decimals: 2
-    # Commenter le LOGI du "on_value"  
-    # Compiler
-  # Fin procédure étalonnage
-
-  # Etalonnage 28 juin 2023          
-  #      - 4.547 -> 4.0
-  #      - 7.282 -> 6.86
-  #      - 9.447 -> 9.18
-  # Etalonnage 6 juillet 2022          
-  #      - 4.44 -> 4.0
-  #      - 7.17 -> 6.86
-  #      - 9.41 -> 9.18
-  # Etalonnage 20 juin 2024
-  #      - 4.665 -> 4.0
-  #      - 7.482 -> 6.86
-  #      - 9.505 -> 9.18
-  # Etalonnage 21 mai 2025
-  #      - 4.76 -> 4.0
-  #      - 7.50 -> 6.86
-  #      - 9.49 -> 9.18
   - platform: ezo
     id: ph_ezo
     name: "ph_ezo"
@@ -199,7 +155,7 @@ sensor:
     accuracy_decimals: 2
     state_class: measurement
     update_interval: 60s
-    icon: mdi:ph    
+    icon: mdi:ph
     filters:
       - sliding_window_moving_average:
           window_size: 15
@@ -212,7 +168,8 @@ sensor:
     on_value:
       then:
         - lambda: |-
-            // ESP_LOGI("ph_ezo", "Mesure pH (étalonnage): %.2f", id(ph_ezo).state);
+            // ESP_LOGI("ph_ezo", "Mesure pH etalonnage: %.3f", id(ph_ezo).state);
+
   - platform: template
     id: ph_ezo_filtre
     name: "pH EZO Filtré"
@@ -221,37 +178,35 @@ sensor:
     state_class: measurement
     icon: mdi:ph
 
-  # mémorise le temps d'injection calculé
   - platform: template
     name: "tps_injection_ph_moins"
     id: _tps_injection_ph_moins
     unit_of_measurement: "s"
-    state_class: "measurement" 
+    state_class: measurement
     icon: mdi:ph
 
-  # Affiche le volume de pH moins à injecter
   - platform: template
     name: "vol_injection_ph_moins"
     id: _vol_injection_ph_moins
     unit_of_measurement: "l"
-    state_class: "measurement" 
-    icon: mdi:ph    
-    
-  # Ppe pH
+    accuracy_decimals: 3
+    state_class: measurement
+    icon: mdi:ph
+
   - platform: duty_time
     id: _temps_fonctionnement_ppe_ph
-    name: 'temps_ma_ppe_ph'
+    name: "temps_ma_ppe_ph"
     lambda: "return id(cde_ppe_ph_moins).state == true;"
     restore: true
-    icon: mdi:pump    
-    filters: 
+    icon: mdi:pump
+    filters:
       - round: 0
-  # Affiche la conso de pH
+
   - platform: template
     name: "Conso_pH_Totale"
     id: conso_ph_totale
     lambda: "return id(g_conso_ph_totale);"
-    update_interval: 60s  # ou plus fréquent selon besoin
+    update_interval: 60s
     unit_of_measurement: "l"
     accuracy_decimals: 3
     icon: mdi:counter
@@ -262,60 +217,77 @@ sensor:
     name: "Conso_pH_Jour"
     id: conso_ph_jour
     lambda: "return id(g_conso_ph_jour);"
-    update_interval: 60s  # ou plus fréquent selon besoin
+    update_interval: 60s
     unit_of_measurement: "l"
     accuracy_decimals: 3
     icon: mdi:counter
     state_class: total_increasing
-    device_class: water    
+    device_class: water
+
+
 switch:
   - platform: gpio
     name: "cde_ppe_ph_moins"
     pin: ${GPIO_rel_ppe_ph}
     id: cde_ppe_ph_moins
 
+
 interval:
   - interval: 60s
     then:
       - lambda: |-
           auto now = id(sntp_time).now();
+
           if (now.is_valid()) {
             if (now.hour == id(heure_injection_ph).hour &&
                 now.minute == id(heure_injection_ph).minute) {
               id(_regul_ph).execute();
             }
           }
+
   - interval: 5s
-    then: 
+    then:
       - script.execute: _memorisation_ph
       - script.execute: _securisation_regul_ph
 
+
 script:
-  # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire du Ph qui est
-  # prise en compte dans les scripts.
-  # sinon on travaille avec le pH mémorisé avant l'arret précédent
   - id: _memorisation_ph
     then:
       - lambda: |-
-          bool ph_valide = !isnan(id(ph_ezo).state);
-          bool pompe_active = id(flag_tempo_ppe_filtre);
+          bool ph_valide = !isnan(id(ph_ezo).state) &&
+                           id(ph_ezo).state > 0.0f &&
+                           id(ph_ezo).state < 14.0f;
 
-          if (ph_valide && pompe_active) {
+          bool tempo_filtration_ok = id(flag_tempo_ppe_filtre);
+
+          if (ph_valide && tempo_filtration_ok) {
             id(g_memoire_ph) = id(ph_ezo).state;
-            ESP_LOGD("pH", "pH actualisé à %.2f (pH_valide=%d, pompe_active=%d)",
-            id(g_memoire_ph), ph_valide, pompe_active);
+
+            ESP_LOGD("pH",
+              "pH actualise a %.2f - ph_valide=%d tempo_filtration=%d",
+              id(g_memoire_ph),
+              ph_valide,
+              tempo_filtration_ok
+            );
           } else {
-            ESP_LOGD("pH", "PH NON mis à jour (ph_valide=%d, pompe_active=%d)",
-            ph_valide, pompe_active);
+            ESP_LOGD("pH",
+              "pH non actualise - ph_valide=%d tempo_filtration=%d pH_inst=%.2f mem=%.2f",
+              ph_valide,
+              tempo_filtration_ok,
+              id(ph_ezo).state,
+              id(g_memoire_ph)
+            );
           }
+
           id(ph_ezo_filtre).publish_state(id(g_memoire_ph));
 
-  # Script principal pour la régulation du pH
+
   - id: _regul_ph
     mode: single
     then:
       - logger.log:
-          format: "Mode=%s mem_ph=%.2f ph=%.2f cible=%.2f hyst=%.2f filtration=%d tempo=%d"
+          format: "Regul pH: mode=%s mem_ph=%.2f ph=%.2f cible=%.2f hyst=%.2f filtration=%d tempo=%d debit=%.3f"
           args:
             - 'id(_Mode_Fonctionnement_regul_ph).current_option().c_str()'
             - 'id(g_memoire_ph)'
@@ -324,185 +296,452 @@ script:
             - 'id(_ph_hysteresis).state'
             - 'id(cde_ppe_filtration).state'
             - 'id(flag_tempo_ppe_filtre)'
+            - 'id(_debit_ppe_moins).state'
           level: INFO
+
+      # ============================================================
+      # MODE AUTO
+      # ============================================================
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Auto";'
+            lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Auto";'
           then:
-            - logger.log:
-                format: "Log mem ph: %f / pH Cible: %f"
-                args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                level: debug
-            - if:
-                condition:
-                  and:
-                    - lambda: 'return id(g_memoire_ph) > (id(_ph_cible).state+id(_ph_hysteresis).state);'
-                    - lambda: 'return id(g_memoire_ph) > 0;'
-                    - switch.is_on: cde_ppe_filtration 
-                then:
-                  - lambda: |-
-                      float ecart = abs(id(g_memoire_ph) - id(_ph_cible).state);
-                          // Volume de la piscine (fixe à 43,2 m³)
-                          float volume_piscine = 43.2;
-                          // Quantité de référence : 0,2 l pour 0,1 unité de pH pour 10 m³
-                          float quantite_ref_ph = 0.2;
-                          // Calcul de la quantité nécessaire pour corriger l'écart total (en litres)
-                          float quantite_necessaire = (ecart / 0.1) * quantite_ref_ph * (volume_piscine / 10.0);
-                          // Conversion du débit de l/h en ml/s (1 l = 1000 ml, 1 h = 3600 s)
-                          float debit_ml_s = (id(_debit_ppe_moins).state * 1000.0) / 3600.0;  // Exemple : 4,272 l/h = 1,187 ml/s
-                          // Calcul de la durée nécessaire pour injecter la quantité (quantité en ml, débit en ml/s)
-                          float duree = (quantite_necessaire * 1000.0) / debit_ml_s;
-                          // Ajustement pour éviter des corrections trop brutales : on limite à une fraction par cycle
-                          // Utilisation du facteur de correction défini par l'utilisateur
-                          float facteur_correction = id(facteur_correction_ph).state/100;
-                          duree = duree * facteur_correction;
-                          // Limites de sécurité : entre 1 et 180 secondes
-                          duree = std::max(1.0f, std::min(duree, 180.0f));
-                          // Log pour débogage
-                          ESP_LOGI("regul_ph", "Écart: %.2f, Quantité: %.2f ml, Débit: %.3f ml/s, Facteur: %.2f, Durée: %.2f s", ecart, quantite_necessaire * 1000.0, debit_ml_s, facteur_correction, duree);
-                          id(g_tps_injection_ph_moins) = duree;
-                else:
-                  - lambda: |-
-                      id(g_tps_injection_ph_moins)=0;
+            - lambda: |-
+                id(g_tps_injection_ph_moins) = 0.0f;
 
-                      ESP_LOGI("regul_ph",
-                          "Pas d'injection: mem_ph=%.2f cible=%.2f hysteresis=%.2f filtration=%d tempo=%d",
-                          id(g_memoire_ph),
-                          id(_ph_cible).state,
-                          id(_ph_hysteresis).state,
-                          id(cde_ppe_filtration).state,
-                          id(flag_tempo_ppe_filtre));
+                const float mem_ph = id(g_memoire_ph);
+                const float ph_instant = id(ph_ezo).state;
+                const float cible = id(_ph_cible).state;
+                const float hyst = id(_ph_hysteresis).state;
+                const float seuil = cible + hyst;
+                const float debit_l_h = id(_debit_ppe_moins).state;
+                const float facteur = id(facteur_correction_ph).state / 100.0f;
 
-                      char buf[256];
-                      snprintf(buf, sizeof(buf),
-                          "ESP178 Pas d'injection pH\n"
-                          "Mem pH: %.2f\n"
-                          "Cible pH: %.2f\n"
-                          "Hysteresis: %.2f\n"
-                          "Seuil injection: %.2f\n"
-                          "Filtration: %s\n"
-                          "Tempo filtre: %s",
-                          id(g_memoire_ph),
-                          id(_ph_cible).state,
-                          id(_ph_hysteresis).state,
-                          id(_ph_cible).state + id(_ph_hysteresis).state,
-                          id(cde_ppe_filtration).state ? "ON" : "OFF",
-                          id(flag_tempo_ppe_filtre) ? "OK" : "NON");
+                const bool ph_mem_valide = !isnan(mem_ph) && mem_ph > 0.0f && mem_ph < 14.0f;
+                const bool ph_inst_valide = !isnan(ph_instant) && ph_instant > 0.0f && ph_instant < 14.0f;
+                const bool filtration_ok = id(cde_ppe_filtration).state;
+                const bool tempo_ok = id(flag_tempo_ppe_filtre);
+                const bool debit_ok = !isnan(debit_l_h) && debit_l_h > 0.0f;
+                const bool ph_trop_haut = ph_mem_valide && mem_ph > seuil;
 
-                      std::string mess = buf;
-                      id(_message_telegram)->execute(mess.c_str(),0);
-                      id(_log_fichier)->execute(mess.c_str(), 0);
+                char raison[96];
+
+                if (!ph_mem_valide) {
+                  snprintf(raison, sizeof(raison), "pH memorise invalide");
+                } else if (!filtration_ok) {
+                  snprintf(raison, sizeof(raison), "filtration arretee");
+                } else if (!tempo_ok) {
+                  snprintf(raison, sizeof(raison), "tempo filtration non atteinte");
+                } else if (!debit_ok) {
+                  snprintf(raison, sizeof(raison), "debit pompe invalide");
+                } else if (!ph_trop_haut) {
+                  snprintf(raison, sizeof(raison), "pH dans la plage");
+                } else {
+                  snprintf(raison, sizeof(raison), "injection autorisee");
+                }
+
+                const bool injection_autorisee =
+                  ph_mem_valide &&
+                  filtration_ok &&
+                  tempo_ok &&
+                  debit_ok &&
+                  ph_trop_haut;
+
+                if (injection_autorisee) {
+                  const float ecart = fabs(mem_ph - cible);
+
+                  const float volume_piscine = 43.2f;
+                  const float quantite_ref_ph = 0.2f;
+
+                  const float quantite_totale_l =
+                    (ecart / 0.1f) * quantite_ref_ph * (volume_piscine / 10.0f);
+
+                  const float quantite_cycle_l = quantite_totale_l * facteur;
+                  const float debit_l_s = debit_l_h / 3600.0f;
+
+                  float duree = quantite_cycle_l / debit_l_s;
+
+                  duree = std::max(1.0f, std::min(duree, 600.0f));
+
+                  const float volume_reel_l = debit_l_h * duree / 3600.0f;
+
+                  id(g_tps_injection_ph_moins) = duree;
+                  id(_tps_injection_ph_moins).publish_state(duree);
+                  id(_vol_injection_ph_moins).publish_state(volume_reel_l);
+
+                  ESP_LOGI("regul_ph",
+                    "Injection pH autorisee: mem=%.2f cible=%.2f seuil=%.2f ecart=%.2f facteur=%.1f%% duree=%.0fs volume=%.3fL debit=%.3fL/h",
+                    mem_ph,
+                    cible,
+                    seuil,
+                    ecart,
+                    facteur * 100.0f,
+                    duree,
+                    volume_reel_l,
+                    debit_l_h
+                  );
+
+                } else {
+                  id(g_tps_injection_ph_moins) = 0.0f;
+                  id(_tps_injection_ph_moins).publish_state(0);
+                  id(_vol_injection_ph_moins).publish_state(0);
+
+                  char ph_inst_txt[32];
+                  if (ph_inst_valide) {
+                    snprintf(ph_inst_txt, sizeof(ph_inst_txt), "%.2f", ph_instant);
+                  } else {
+                    snprintf(ph_inst_txt, sizeof(ph_inst_txt), "INVALIDE");
+                  }
+
+                  ESP_LOGI("regul_ph",
+                    "Pas injection pH: raison=%s mem=%.2f ph=%.2f cible=%.2f seuil=%.2f filtration=%d tempo=%d debit=%.3f",
+                    raison,
+                    mem_ph,
+                    ph_instant,
+                    cible,
+                    seuil,
+                    filtration_ok,
+                    tempo_ok,
+                    debit_l_h
+                  );
+
+                  char tg[384];
+                  snprintf(tg, sizeof(tg),
+                    "ESP178 pH PAS injection | raison=%s | pH=%.2f | cible=%.2f | seuil=%.2f | filt=%s | tempo=%s",
+                    raison,
+                    mem_ph,
+                    cible,
+                    seuil,
+                    filtration_ok ? "ON" : "OFF",
+                    tempo_ok ? "OK" : "NON"
+                  );
+
+                  char logbuf[1024];
+                  snprintf(logbuf, sizeof(logbuf),
+                    "ESP178 pH PAS injection | Raison=%s | pH memorise=%.2f | pH instantane=%s | Cible=%.2f | Hysteresis=%.2f | Seuil=%.2f | Filtration=%s | Tempo filtration=%s | Debit=%.3f L/h | Mode=Auto",
+                    raison,
+                    mem_ph,
+                    ph_inst_txt,
+                    cible,
+                    hyst,
+                    seuil,
+                    filtration_ok ? "ON" : "OFF",
+                    tempo_ok ? "OK" : "NON",
+                    debit_l_h
+                  );
+
+                  std::string mess_tg = tg;
+                  std::string mess_log = logbuf;
+
+                  id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                  id(_log_fichier)->execute(mess_log.c_str(), 0);
+                }
 
             - lambda: |-
-                id(_tps_injection_ph_moins).publish_state(id(g_tps_injection_ph_moins));
+                CONVERT_SECONDS(id(g_tps_injection_ph_moins), id(g_hh), id(g_mm), id(g_ss));
 
-            # Convertion et affichage de la durée d'injection pH en hh:mm
-            - lambda: |-
-                CONVERT_SECONDS(id(g_tps_injection_ph_moins), id(g_hh), id(g_mm), id(g_ss));                        
             - datetime.time.set:
                 id: duree_injection_ph
                 time: !lambda |-
-                  return {second: static_cast<uint8_t>(id(g_ss)), minute: static_cast<uint8_t>(id(g_mm)), hour: static_cast<uint8_t>(id(g_hh))};
-
-            - logger.log:
-                format: "Log tps injection: %f"
-                args: [ 'id(g_tps_injection_ph_moins)' ]
-                level: DEBUG
+                  return {
+                    second: static_cast<uint8_t>(id(g_ss)),
+                    minute: static_cast<uint8_t>(id(g_mm)),
+                    hour: static_cast<uint8_t>(id(g_hh))
+                  };
 
             - if:
                 condition:
-                  and:
-                    - lambda: 'return id(g_tps_injection_ph_moins) > 0;'
+                  lambda: 'return id(g_tps_injection_ph_moins) > 0.0f;'
                 then:
                   - lambda: |-
-                      std::string mess = "ESP178 Debut injection pH\n";
-                      mess += "Cible pH: " + std::to_string(id(_ph_cible).state) + "\n";
-                      mess += "Mesure pH: " + std::to_string(id(g_memoire_ph));
-                      id(_message_telegram)->execute(mess,id(g_tps_injection_ph_moins));                      
-                  - logger.log:
-                      format: "Ph Mesure ph: %f / pH Cible: %f"
-                      args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                      level: INFO                      
+                      const float duree = id(g_tps_injection_ph_moins);
+                      const float debit_l_h = id(_debit_ppe_moins).state;
+                      const float volume_l = debit_l_h * duree / 3600.0f;
+                      const float mem_ph = id(g_memoire_ph);
+                      const float cible = id(_ph_cible).state;
+                      const float hyst = id(_ph_hysteresis).state;
+                      const float seuil = cible + hyst;
+                      const float ecart = mem_ph - cible;
+                      const float facteur = id(facteur_correction_ph).state;
+
+                      CONVERT_SECONDS(duree, id(g_hh), id(g_mm), id(g_ss));
+
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 pH DEBUT injection | pH=%.2f | cible=%.2f | seuil=%.2f | ecart=%.2f | duree=%02d:%02d:%02d | vol=%.3f L",
+                        mem_ph,
+                        cible,
+                        seuil,
+                        ecart,
+                        id(g_hh),
+                        id(g_mm),
+                        id(g_ss),
+                        volume_l
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 pH DEBUT injection | Mode=Auto | pH memorise=%.2f | Cible=%.2f | Hysteresis=%.2f | Seuil=%.2f | Ecart=%.2f | Facteur=%.1f %% | Debit=%.3f L/h | Duree=%02d:%02d:%02d | Volume prevu=%.3f L | Filtration=ON | Tempo=OK",
+                        mem_ph,
+                        cible,
+                        hyst,
+                        seuil,
+                        ecart,
+                        facteur,
+                        debit_l_h,
+                        id(g_hh),
+                        id(g_mm),
+                        id(g_ss),
+                        volume_l
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
+
                   - switch.turn_on: cde_ppe_ph_moins
-                  - logger.log: 
-                      format: "Marche ppe Ph moins en Auto"
-                      level: INFO        
-                  - delay: !lambda "return id(g_tps_injection_ph_moins)*1000;"
-                  - switch.turn_off: cde_ppe_ph_moins
-                  - logger.log: 
-                      format: "Arret ppe Ph moins en Auto"
+
+                  - logger.log:
+                      format: "Marche pompe pH moins en Auto"
                       level: INFO
-                  # Comptabilise le nombre de litres de pH injecté
+
+                  - delay: !lambda "return id(g_tps_injection_ph_moins) * 1000;"
+
+                  - switch.turn_off: cde_ppe_ph_moins
+
+                  - logger.log:
+                      format: "Arret pompe pH moins en Auto"
+                      level: INFO
+
                   - lambda: |-
-                      float debit = id(_debit_ppe_moins).state;  // l/h
-                      float duree = id(_tps_injection_ph_moins).state;  // s
-                      float volume = debit * duree / 3600.0;  // conversion en litres
-                      // Mise à jour des compteurs
-                      id(g_conso_ph_totale) += volume;
-                      id(g_conso_ph_jour) += volume;
+                      const float debit_l_h = id(_debit_ppe_moins).state;
+                      const float duree = id(g_tps_injection_ph_moins);
+                      const float volume_l = debit_l_h * duree / 3600.0f;
+
+                      id(g_conso_ph_totale) += volume_l;
+                      id(g_conso_ph_jour) += volume_l;
+
                       id(conso_ph_totale).publish_state(id(g_conso_ph_totale));
                       id(conso_ph_jour).publish_state(id(g_conso_ph_jour));
-                      std::string mess = "Fin Injection pH-Volume: " + std::to_string(volume)+ "l";
-                      id(_message_telegram)->execute(mess.c_str(),0);
-                      id(_log_fichier)->execute(mess.c_str(), 0);
+
+                      CONVERT_SECONDS(duree, id(g_hh), id(g_mm), id(g_ss));
+
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 pH FIN injection | duree=%02d:%02d:%02d | vol=%.3f L | jour=%.3f L | total=%.3f L | pH_avant=%.2f",
+                        id(g_hh),
+                        id(g_mm),
+                        id(g_ss),
+                        volume_l,
+                        id(g_conso_ph_jour),
+                        id(g_conso_ph_totale),
+                        id(g_memoire_ph)
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 pH FIN injection | Resultat=cycle termine normalement | Duree injectee=%02d:%02d:%02d | Volume injecte=%.3f L | Conso jour=%.3f L | Conso totale=%.3f L | pH avant injection=%.2f | Cible=%.2f | Prochaine mesure apres brassage",
+                        id(g_hh),
+                        id(g_mm),
+                        id(g_ss),
+                        volume_l,
+                        id(g_conso_ph_jour),
+                        id(g_conso_ph_totale),
+                        id(g_memoire_ph),
+                        id(_ph_cible).state
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
 
                 else:
                   - switch.turn_off: cde_ppe_ph_moins
-                  - logger.log: 
-                      format: "Arret ppe Ph moins en Auto"
+                  - logger.log:
+                      format: "Pompe pH moins arretee - aucune injection Auto"
                       level: INFO
 
+
+      # ============================================================
+      # MODE MARCHE FORCEE
+      # ============================================================
       - if:
           condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Ma_f";'
-              - switch.is_on: cde_ppe_filtration
+            lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Ma_f";'
           then:
-            - switch.turn_on: cde_ppe_ph_moins
-            - logger.log: 
-                format: "Marche Forcée ppe pH"
-                level: INFO
+            - if:
+                condition:
+                  switch.is_on: cde_ppe_filtration
+                then:
+                  - switch.turn_on: cde_ppe_ph_moins
+
+                  - logger.log:
+                      format: "Marche forcee pompe pH autorisee"
+                      level: INFO
+
+                  - lambda: |-
+                      char ph_inst_txt[32];
+
+                      if (!isnan(id(ph_ezo).state)) {
+                        snprintf(ph_inst_txt, sizeof(ph_inst_txt), "%.2f", id(ph_ezo).state);
+                      } else {
+                        snprintf(ph_inst_txt, sizeof(ph_inst_txt), "INVALIDE");
+                      }
+
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 pH MARCHE forcee | pompe=ON | filt=ON | pH=%.2f | cible=%.2f | debit=%.3f L/h",
+                        id(g_memoire_ph),
+                        id(_ph_cible).state,
+                        id(_debit_ppe_moins).state
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 pH MARCHE forcee | Pompe pH=ON | Filtration=ON | pH memorise=%.2f | pH instantane=%s | Cible=%.2f | Debit=%.3f L/h",
+                        id(g_memoire_ph),
+                        ph_inst_txt,
+                        id(_ph_cible).state,
+                        id(_debit_ppe_moins).state
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+                else:
+                  - switch.turn_off: cde_ppe_ph_moins
+
+                  - logger.log:
+                      format: "Marche forcee pH refusee - filtration arretee"
+                      level: WARN
+
+                  - lambda: |-
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 pH MARCHE forcee refusee | raison=filtration arretee | pompe=OFF | pH=%.2f | cible=%.2f",
+                        id(g_memoire_ph),
+                        id(_ph_cible).state
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 pH MARCHE forcee refusee | Raison=filtration arretee | Pompe pH=OFF | pH memorise=%.2f | Cible=%.2f",
+                        id(g_memoire_ph),
+                        id(_ph_cible).state
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+
+      # ============================================================
+      # MODE ARRET FORCE
+      # ============================================================
       - if:
           condition:
-            or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "At_f";'
-              - switch.is_off: cde_ppe_filtration
+            lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "At_f";'
           then:
             - switch.turn_off: cde_ppe_ph_moins
-            - logger.log: 
-                format: "Arret Forcé ppe pH"
+
+            - logger.log:
+                format: "Arret force pompe pH"
                 level: INFO
-  # Stoppe le Script de regule pH quand la mesure devient inferieure à la consigne
-  # Cela évite de trop injecter de pH Moins
+
+            - lambda: |-
+                char ph_inst_txt[32];
+
+                if (!isnan(id(ph_ezo).state)) {
+                  snprintf(ph_inst_txt, sizeof(ph_inst_txt), "%.2f", id(ph_ezo).state);
+                } else {
+                  snprintf(ph_inst_txt, sizeof(ph_inst_txt), "INVALIDE");
+                }
+
+                char tg[384];
+                snprintf(tg, sizeof(tg),
+                  "ESP178 pH ARRET force | pompe=OFF | mode=At_f | pH=%.2f | cible=%.2f",
+                  id(g_memoire_ph),
+                  id(_ph_cible).state
+                );
+
+                char logbuf[1024];
+                snprintf(logbuf, sizeof(logbuf),
+                  "ESP178 pH ARRET force | Pompe pH=OFF | Mode=At_f | pH memorise=%.2f | pH instantane=%s | Cible=%.2f",
+                  id(g_memoire_ph),
+                  ph_inst_txt,
+                  id(_ph_cible).state
+                );
+
+                std::string mess_tg = tg;
+                std::string mess_log = logbuf;
+
+                id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+
+  # ============================================================
+  # SECURISATION REGULATION PH
+  # ============================================================
   - id: _securisation_regul_ph
     mode: single
     then:
       - if:
           condition:
-            - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Auto";'
-            - lambda: 'return id(g_memoire_ph) < id(_ph_cible).state;'
-            - script.is_running: _regul_ph
-
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Auto";'
+              - lambda: 'return id(g_memoire_ph) < id(_ph_cible).state;'
+              - script.is_running: _regul_ph
           then:
             - logger.log:
-                format: "Log mem ph: %f / pH Cible: %f"
-                args: [ 'id(g_memoire_ph)','id(_ph_cible).state' ]
-                level: DEBUG  
-            - script.stop: _regul_ph                
+                format: "Arret securise pH: mem_ph=%.2f cible=%.2f"
+                args:
+                  - 'id(g_memoire_ph)'
+                  - 'id(_ph_cible).state'
+                level: WARN
+
+            - script.stop: _regul_ph
+
             - switch.turn_off: cde_ppe_ph_moins
+
             - lambda: |-
-                float Q = id(_temps_fonctionnement_ppe_ph).state * id(_debit_ppe_moins).state / 3600;
-                std::string mess = "ESP178 Arret Sécurisé Script Injection pH\n";
-                mess += "Cible pH: " + std::to_string(id(_ph_cible).state) + "\n";
-                mess += "Mesure pH: " + std::to_string(id(g_memoire_ph)) + "\n";
-                CONVERT_SECONDS(id(g_tps_injection_ph_moins), id(g_hh), id(g_mm), id(g_ss));
-                char buf[64];
-                snprintf(buf, sizeof(buf), "Tps Injec pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
-                mess += buf;
-                snprintf(buf, sizeof(buf), "Volume inj: %.2f L\n", Q);
-                mess += buf;
-                CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
-                snprintf(buf, sizeof(buf), "Tps Fonct Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
-                mess += buf;
-                id(_message_telegram)->execute(mess,0);
-                id(_log_fichier)->execute(mess, 0);                
+                const float duree_prevue = id(g_tps_injection_ph_moins);
+                const float debit_l_h = id(_debit_ppe_moins).state;
+                const float volume_prevu_l = debit_l_h * duree_prevue / 3600.0f;
+
+                CONVERT_SECONDS(duree_prevue, id(g_hh), id(g_mm), id(g_ss));
+
+                char tg[384];
+                snprintf(tg, sizeof(tg),
+                  "ESP178 pH ARRET securise | raison=pH sous cible | pH=%.2f | cible=%.2f | pompe=OFF | vol_max=%.3f L",
+                  id(g_memoire_ph),
+                  id(_ph_cible).state,
+                  volume_prevu_l
+                );
+
+                char logbuf[1024];
+                snprintf(logbuf, sizeof(logbuf),
+                  "ESP178 pH ARRET securise | Raison=pH passe sous la cible pendant injection | Pompe pH=OFF | Mode=Auto | pH memorise=%.2f | Cible=%.2f | Hysteresis=%.2f | Duree cycle prevue=%02d:%02d:%02d | Volume prevu max=%.3f L | Debit=%.3f L/h | Action=injection stoppee pour eviter surdosage",
+                  id(g_memoire_ph),
+                  id(_ph_cible).state,
+                  id(_ph_hysteresis).state,
+                  id(g_hh),
+                  id(g_mm),
+                  id(g_ss),
+                  volume_prevu_l,
+                  debit_l_h
+                );
+
+                std::string mess_tg = tg;
+                std::string mess_log = logbuf;
+
+                id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                id(_log_fichier)->execute(mess_log.c_str(), 0);

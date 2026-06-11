@@ -58,7 +58,8 @@ ethernet:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
-    dns1: 192.168.0.254
+    dns1: !secret dns1
+    dns2: !secret dns2
     
 # Connection sonde(s) de température DS18b20
 one_wire:

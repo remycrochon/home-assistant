@@ -48,8 +48,9 @@ mqtt:
     - name: "VP2_DateTime"
       unique_id: VP2_DateTime" 
       state_topic: "home/Vp2/loop"
-      unit_of_measurement: 'ms'
+      unit_of_measurement: 's'
       value_template: "{{ value_json.dateTime | round(1) }}"
+      expire_after: 30
 
     - name: "VP2_Temp_Out"
       unique_id: "VP2_Temp_Out"

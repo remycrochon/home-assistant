@@ -1,17 +1,11 @@
 
 shell_command:
   push_to_github: /config/gitpush.sh 
-  reboot_rpi_weewx2024: >-
-    ssh -i /config/.ssh/id_ed25519
+  reboot_rpi_weewx2026: >-
+    ssh -i /config/.ssh/id_ed25519_weewx2026
     -o UserKnownHostsFile=/config/.ssh/known_hosts
+    -o StrictHostKeyChecking=accept-new
     -o BatchMode=yes
     -o ConnectTimeout=10
-    remy@192.168.0.84
-    'nohup sudo /usr/sbin/reboot >/dev/null 2>&1 &'  
-  reboot_rpi_weewx2021: >-
-    ssh -i /config/.ssh/id_ed25519_weewx2021
-    -o StrictHostKeyChecking=no
-    -o BatchMode=yes
-    -o ConnectTimeout=10
-    pi@192.168.0.62
-    'nohup sudo -n /sbin/reboot >/dev/null 2>&1 &'
+    remy@192.168.0.62
+    'nohup sudo -n /bin/systemctl reboot >/dev/null 2>&1 &'

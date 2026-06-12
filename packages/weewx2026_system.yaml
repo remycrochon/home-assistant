@@ -1,0 +1,122 @@
+mqtt:
+  sensor:
+    - name: "WeeWX2026 CPU Temp"
+      unique_id: weewx2026_cpu_temp
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.cpu_temp | float(-1) }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 Load 1min"
+      unique_id: weewx2026_load1
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.load1 | float(-1) }}"
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 RAM Utilisee"
+      unique_id: weewx2026_ram_used_percent
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.mem_used_percent | float(-1) }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 Disque Root"
+      unique_id: weewx2026_disk_root_percent
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.disk_root_percent | float(-1) }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 Disque WeeWX"
+      unique_id: weewx2026_disk_weewx_percent
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.disk_weewx_percent | float(-1) }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 Uptime"
+      unique_id: weewx2026_uptime_seconds
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.uptime_seconds | int(-1) }}"
+      unit_of_measurement: "s"
+      device_class: duration
+      expire_after: 180
+
+    - name: "WeeWX2026 Age Derniere Archive"
+      unique_id: weewx2026_last_archive_age_min
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.last_archive_age_min | float(-1) }}"
+      unit_of_measurement: "min"
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 Age Dernier Backup"
+      unique_id: weewx2026_last_backup_age_hours
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.last_backup_age_hours | float(-1) }}"
+      unit_of_measurement: "h"
+      state_class: measurement
+      expire_after: 180
+
+    - name: "WeeWX2026 Throttled Code"
+      unique_id: weewx2026_throttled_code
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ value_json.throttled }}"
+      expire_after: 180
+
+  binary_sensor:
+    - name: "WeeWX2026 Service WeeWX"
+      unique_id: weewx2026_service_weewx
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ 'ON' if value_json.weewx_active | int(0) == 1 else 'OFF' }}"
+      payload_on: "ON"
+      payload_off: "OFF"
+      device_class: running
+      expire_after: 180
+
+    - name: "WeeWX2026 Port Davis USB"
+      unique_id: weewx2026_davis_usb_present
+      state_topic: "home/weewx2026/system"
+      value_template: "{{ 'ON' if value_json.davis_usb_present | int(0) == 1 else 'OFF' }}"
+      payload_on: "ON"
+      payload_off: "OFF"
+      device_class: connectivity
+      expire_after: 180
+
+template:
+  - binary_sensor:
+      - name: "WeeWX2026 Archive en Retard"
+        unique_id: weewx2026_archive_en_retard
+        device_class: problem
+        state: >
+          {{ states('sensor.weewx2026_age_derniere_archive') | float(999) > 20 }}
+
+      - name: "WeeWX2026 Backup en Retard"
+        unique_id: weewx2026_backup_en_retard
+        device_class: problem
+        state: >
+          {{ states('sensor.weewx2026_age_dernier_backup') | float(999) > 36 }}
+
+      - name: "WeeWX2026 Disque Root Plein"
+        unique_id: weewx2026_disque_root_plein
+        device_class: problem
+        state: >
+          {{ states('sensor.weewx2026_disque_root') | float(0) > 85 }}
+
+      - name: "WeeWX2026 Disque WeeWX Plein"
+        unique_id: weewx2026_disque_weewx_plein
+        device_class: problem
+        state: >
+          {{ states('sensor.weewx2026_disque_weewx') | float(0) > 85 }}
+
+      - name: "WeeWX2026 Probleme Throttling"
+        unique_id: weewx2026_probleme_throttling
+        device_class: problem
+        state: >
+          {{ not is_state('sensor.weewx2026_throttled_code', '0x0') }}

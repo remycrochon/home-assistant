@@ -4305,59 +4305,25 @@
           piscine : {{ statut_esp_txt }}'
   mode: single
 - id: '1780841913428'
-  alias: Reboot Weewx 2024
-  description: ''
+  alias: Reboot Weewx 2026
+  description: Redemarre le Raspberry WeeWX 2026 si la communication VP2 reste coupee
+    ou sur demande manuelle.
   triggers:
   - trigger: state
+    id: perte_comm
     entity_id:
-    - sensor.weewx_2024_statut
-    from:
-    - 'on'
-    to:
-    - 'off'
+    - binary_sensor.status_communication_vantage_pro_2
+    from: 'on'
+    to: 'off'
     for:
-      hours: 0
       minutes: 5
-      seconds: 0
-  - trigger: switch.turned_on
-    target:
-      entity_id: input_boolean.reboot_weewx_2024
-    options:
-      behavior: any
-      for: 00:00:00
-  conditions: []
-  actions:
-  - action: shell_command.reboot_rpi_weewx2024
-    metadata: {}
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 2
-      milliseconds: 0
-  - action: input_boolean.turn_off
-    metadata: {}
-    target:
-      entity_id: input_boolean.reboot_weewx_2024
-    data: {}
-  - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: Weewx 2024 a été Rebooté{{-"\n"-}} {{states("sensor.date_time") }}
-      title: Etat RESEAU!!!
-  mode: single
-- id: '1780845602154'
-  alias: Reboot Weewx 2021
-  description: ''
-  triggers:
-  - trigger: switch.turned_on
-    target:
-      entity_id: input_boolean.rebootweewx
-    options:
-      behavior: any
-      for: 00:00:00
   - trigger: state
+    id: manuel
+    entity_id:
+    - input_boolean.rebootweewx2026
+    to: 'on'
+  - trigger: state
+    id: uptime
     entity_id:
     - sensor.meteo_weewx_statut
     from:
@@ -4366,40 +4332,49 @@
     - down
     for:
       hours: 0
-      minutes: 5
+      minutes: 10
       seconds: 0
-  - trigger: state
-    entity_id:
-    - binary_sensor.status_communication_vantage_pro_2
-    from:
-    - 'on'
-    to:
-    - 'off'
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-  conditions: []
+  conditions:
+  - condition: or
+    conditions:
+    - condition: trigger
+      id: manuel
+    - condition: template
+      value_template: "{{ this.attributes.last_triggered is none\n   or (now() - this.attributes.last_triggered).total_seconds()
+        > 1800 }}\n"
   actions:
-  - action: shell_command.reboot_rpi_weewx2021
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: Etat RESEAU
+      message: 'Demande reboot WeeWX 2026. Cause : {{ trigger.id }} Etat communication
+        VP2 : {{ states(''binary_sensor.status_communication_vantage_pro_2'') }} Statut
+        WeeWX : {{ states(''sensor.meteo_weewx_statut'') }} Heure : {{ now().strftime(''%d/%m/%Y
+        %H:%M:%S'') }}
+
+        '
+  - action: shell_command.reboot_rpi_weewx2026
     metadata: {}
     data: {}
-    enabled: true
+    continue_on_error: true
   - delay:
-      hours: 0
-      minutes: 0
       seconds: 2
-      milliseconds: 0
   - action: input_boolean.turn_off
     metadata: {}
     target:
-      entity_id:
-      - input_boolean.rebootweewx
+      entity_id: input_boolean.rebootweewx2026
     data: {}
   - action: telegram_bot.send_message
     metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: Weewx 2021 a été Rebooté{{-"\n"-}} {{states("sensor.date_time") }}
-      title: Etat RESEAU!!!
+      title: Etat RESEAU
+      message: 'Commande reboot WeeWX 2026 envoyee.
+
+        Cause : {{ trigger.id }}
+
+        Heure : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
+
+        '
   mode: single

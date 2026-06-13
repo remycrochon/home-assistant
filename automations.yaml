@@ -3967,6 +3967,10 @@
     event: sunset
     offset: 0
     id: coucher_soleil
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sun_elevation
+    below: input_number.seuil_bas_elevation_store_terrasse
   conditions:
   - condition: device
     device_id: 88221e2f7a125b74f30b7cf7cf12054a
@@ -4306,34 +4310,48 @@
   mode: single
 - id: '1780841913428'
   alias: Reboot Weewx 2026
-  description: Redemarre le Raspberry WeeWX 2026 si la communication VP2 reste coupee
-    ou sur demande manuelle.
+  description: Redemarre d'abord le service WeeWX 2026 si la communication VP2, le
+    service, le port USB Davis ou les archives restent en defaut. Reboot complet du
+    Raspberry uniquement si le restart service ne suffit pas.
   triggers:
   - trigger: state
-    id: perte_comm
-    entity_id:
-    - binary_sensor.status_communication_vantage_pro_2
+    id: perte_comm_mqtt
+    entity_id: binary_sensor.status_communication_vantage_pro_2
     from: 'on'
     to: 'off'
     for:
       minutes: 5
   - trigger: state
-    id: manuel
-    entity_id:
-    - input_boolean.rebootweewx2026
-    to: 'on'
-  - trigger: state
-    id: uptime
-    entity_id:
-    - sensor.meteo_weewx_statut
-    from:
-    - up
-    to:
-    - down
+    id: statut_weewx_down
+    entity_id: sensor.meteo_weewx_statut
+    from: up
+    to: down
     for:
-      hours: 0
       minutes: 10
-      seconds: 0
+  - trigger: state
+    id: service_weewx_off
+    entity_id: binary_sensor.weewx2026_service_weewx
+    from: 'on'
+    to: 'off'
+    for:
+      minutes: 3
+  - trigger: state
+    id: usb_davis_absent
+    entity_id: binary_sensor.weewx2026_port_davis_usb
+    from: 'on'
+    to: 'off'
+    for:
+      minutes: 2
+  - trigger: numeric_state
+    id: archive_en_retard
+    entity_id: sensor.weewx2026_age_derniere_archive
+    above: 15
+    for:
+      minutes: 5
+  - trigger: state
+    id: manuel
+    entity_id: input_boolean.rebootweewx2026
+    to: 'on'
   conditions:
   - condition: or
     conditions:
@@ -4344,37 +4362,125 @@
         > 1800 }}\n"
   actions:
   - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      title: Etat RESEAU
-      message: 'Demande reboot WeeWX 2026. Cause : {{ trigger.id }} Etat communication
-        VP2 : {{ states(''binary_sensor.status_communication_vantage_pro_2'') }} Statut
-        WeeWX : {{ states(''sensor.meteo_weewx_statut'') }} Heure : {{ now().strftime(''%d/%m/%Y
-        %H:%M:%S'') }}
-
-        '
-  - action: shell_command.reboot_rpi_weewx2026
-    metadata: {}
-    data: {}
     continue_on_error: true
-  - delay:
-      seconds: 2
-  - action: input_boolean.turn_off
-    metadata: {}
-    target:
-      entity_id: input_boolean.rebootweewx2026
-    data: {}
-  - action: telegram_bot.send_message
-    metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      parse_mode: plain_text
       title: Etat RESEAU
-      message: 'Commande reboot WeeWX 2026 envoyee.
+      message: 'Defaut WeeWX 2026 detecte.
 
         Cause : {{ trigger.id }}
+
+        Action : restart du service WeeWX demande.
+
+        Communication VP2 MQTT : {{ states(''binary_sensor.status_communication_vantage_pro_2'')
+        }}
+
+        Statut WeeWX : {{ states(''sensor.meteo_weewx_statut'') }}
+
+        Service WeeWX : {{ states(''binary_sensor.weewx2026_service_weewx'') }}
+
+        Port Davis USB : {{ states(''binary_sensor.weewx2026_port_davis_usb'') }}
+
+        Age derniere archive : {{ states(''sensor.weewx2026_age_derniere_archive'')
+        }} min
+
+        Uptime RPi : {{ states(''sensor.weewx2026_uptime'') }}
 
         Heure : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
 
         '
+  - action: shell_command.restart_service_weewx2026
+    continue_on_error: true
+    data: {}
+  - delay:
+      seconds: 10
+  - wait_template: "{{ is_state('binary_sensor.weewx2026_service_weewx', 'on')\n   and
+      is_state('binary_sensor.weewx2026_port_davis_usb', 'on')\n   and is_state('binary_sensor.status_communication_vantage_pro_2',
+      'on')\n   and (states('sensor.weewx2026_age_derniere_archive') | float(999))
+      < 15 }}\n"
+    timeout: 00:12:00
+    continue_on_timeout: true
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ wait.completed }}'
+      sequence:
+      - action: telegram_bot.send_message
+        continue_on_error: true
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          parse_mode: plain_text
+          title: Etat RESEAU
+          message: 'WeeWX 2026 recupere apres restart du service.
+
+            Cause initiale : {{ trigger.id }}
+
+            Communication VP2 MQTT : {{ states(''binary_sensor.status_communication_vantage_pro_2'')
+            }}
+
+            Statut WeeWX : {{ states(''sensor.meteo_weewx_statut'') }}
+
+            Service WeeWX : {{ states(''binary_sensor.weewx2026_service_weewx'') }}
+
+            Port Davis USB : {{ states(''binary_sensor.weewx2026_port_davis_usb'')
+            }}
+
+            Age derniere archive : {{ states(''sensor.weewx2026_age_derniere_archive'')
+            }} min
+
+            Heure : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
+
+            '
+    default:
+    - action: telegram_bot.send_message
+      continue_on_error: true
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        parse_mode: plain_text
+        title: Etat RESEAU
+        message: 'WeeWX 2026 toujours en defaut apres restart du service.
+
+          Action : reboot complet du Raspberry demande.
+
+          Cause initiale : {{ trigger.id }}
+
+          Communication VP2 MQTT : {{ states(''binary_sensor.status_communication_vantage_pro_2'')
+          }}
+
+          Statut WeeWX : {{ states(''sensor.meteo_weewx_statut'') }}
+
+          Service WeeWX : {{ states(''binary_sensor.weewx2026_service_weewx'') }}
+
+          Port Davis USB : {{ states(''binary_sensor.weewx2026_port_davis_usb'') }}
+
+          Age derniere archive : {{ states(''sensor.weewx2026_age_derniere_archive'')
+          }} min
+
+          Heure : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
+
+          '
+    - action: shell_command.reboot_rpi_weewx2026
+      continue_on_error: true
+      data: {}
+    - delay:
+        seconds: 2
+    - action: telegram_bot.send_message
+      continue_on_error: true
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        parse_mode: plain_text
+        title: Etat RESEAU
+        message: 'Commande reboot Raspberry WeeWX 2026 envoyee.
+
+          Cause initiale : {{ trigger.id }}
+
+          Heure : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
+
+          '
+  - action: input_boolean.turn_off
+    continue_on_error: true
+    target:
+      entity_id: input_boolean.rebootweewx2026
+    data: {}
   mode: single

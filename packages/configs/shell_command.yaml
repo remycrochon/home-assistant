@@ -9,3 +9,11 @@ shell_command:
     -o ConnectTimeout=10
     remy@192.168.0.62
     'nohup sudo -n /bin/systemctl reboot >/dev/null 2>&1 &'
+  restart_service_weewx2026: >-
+    ssh -i /config/.ssh/id_ed25519_weewx2026
+    -o UserKnownHostsFile=/config/.ssh/known_hosts
+    -o StrictHostKeyChecking=accept-new
+    -o BatchMode=yes
+    -o ConnectTimeout=10
+    remy@192.168.0.62
+    'sudo -n /bin/systemctl restart weewx'    

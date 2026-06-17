@@ -4,6 +4,19 @@ substitutions:
 
 esphome:
   name: ${device_name}
+  on_boot:
+    priority: -100
+    then:
+      - climate.control:
+          id: pid_climate
+          mode: "OFF"
+      - light.turn_off:
+          id: manual_heater
+      - lambda: |-
+          id(r1_demoulage_arme) = false;
+          id(r1_cycle_chauffe_en_cours) = false;
+          id(r1_minutes_sans_demoulage) = 0;
+          id(r1_etat).publish_state("Repos");
 
 esp32:
   board: esp32dev
@@ -11,8 +24,7 @@ esp32:
     type: esp-idf
     advanced:
       minimum_chip_revision: "3.0"
-            
-# Enable logging
+
 logger:
 
 api:
@@ -38,14 +50,47 @@ web_server:
   version: 3
 
 one_wire:
-  - platform: gpio  
+  - platform: gpio
     pin: GPIO4
     id: ow1
-#Etat de la connection
+
+globals:
+  - id: r1_demoulage_arme
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+  - id: r1_cycle_chauffe_en_cours
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+  - id: r1_minutes_sans_demoulage
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+  - id: r1_chauffe_start_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+
 binary_sensor:
   - platform: status
     name: "Status"
-    
+  - platform: template
+    name: "R1 Demoulage Arme"
+    id: r1_demoulage_arme_sensor
+    lambda: |-
+      return id(r1_demoulage_arme);
+
+  - platform: template
+    name: "R1 Chauffe En Cours"
+    id: r1_chauffe_en_cours_sensor
+    lambda: |-
+      return id(r1_cycle_chauffe_en_cours);
+
+
 number:
   - platform: template
     name: "Puissance chauffage manuel"
@@ -55,18 +100,132 @@ number:
     step: 1
     mode: box
     restore_value: true
-    initial_value: 0  # première mise sous tension
+    optimistic: true
+    initial_value: 0
     unit_of_measurement: "%"
     set_action:
-      - light.turn_on:
-          id: manual_heater
-          brightness: !lambda 'return x / 100.0;'
+      - if:
+          condition:
+            switch.is_on: chauffage_mode_manuel
+          then:
+            - climate.control:
+                id: pid_climate
+                mode: "OFF"
+            - light.turn_on:
+                id: manual_heater
+                brightness: !lambda 'return x / 100.0f;'
 
+  - platform: template
+    name: "R1 Seuil froid armement"
+    id: r1_seuil_froid_armement
+    min_value: -25
+    max_value: 0
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: -8
+    unit_of_measurement: "°C"
+
+  - platform: template
+    name: "R1 Seuil detection demoulage"
+    id: r1_seuil_detection_demoulage
+    min_value: -5
+    max_value: 20
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 2
+    unit_of_measurement: "°C"
+
+  - platform: template
+    name: "R1 Consigne PID demoulage"
+    id: r1_consigne_pid_demoulage
+    min_value: 0
+    max_value: 15
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 6
+    unit_of_measurement: "°C"
+
+  - platform: template
+    name: "R1 Duree PID demoulage"
+    id: r1_duree_pid_demoulage
+    min_value: 0.5
+    max_value: 10
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 3
+    unit_of_measurement: "min"
+
+  - platform: template
+    name: "R1 Consigne PID entretien"
+    id: r1_consigne_pid_entretien
+    min_value: 0
+    max_value: 15
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 6
+    unit_of_measurement: "°C"
+
+  - platform: template
+    name: "R1 Duree PID entretien"
+    id: r1_duree_pid_entretien
+    min_value: 0.5
+    max_value: 10
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 2
+    unit_of_measurement: "min"
+
+  - platform: template
+    name: "R1 Delai entretien sans demoulage"
+    id: r1_delai_entretien_h
+    min_value: 1
+    max_value: 24
+    step: 1
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 6
+    unit_of_measurement: "h"
+
+  - platform: template
+    name: "R1 Temperature securite max"
+    id: r1_temperature_securite_max
+    min_value: 5
+    max_value: 30
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 15
+    unit_of_measurement: "°C"
+  - platform: template
+    name: "R1 Duree maxi PID demoulage"
+    id: r1_duree_maxi_pid_demoulage
+    min_value: 3
+    max_value: 30
+    step: 1
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 12
+    unit_of_measurement: "min"
 sensor:
   - platform: dallas_temp
     one_wire_id: ow1
     name: "Temp DS18B20 Resistance"
-    address:  0xf300eca700000328
+    address: 0xf300eca700000328
     id: temp_ds18b20_r
     device_class: temperature
     state_class: "measurement"
@@ -74,7 +233,7 @@ sensor:
     accuracy_decimals: 1
     filters:
       - lambda: |-
-          if (isnan(x)) return {};  // ignore valeur NaN
+          if (isnan(x)) return {};
           return x;
 
   - platform: dallas_temp
@@ -88,9 +247,18 @@ sensor:
     accuracy_decimals: 1
     filters:
       - lambda: |-
-          if (isnan(x)) return {};  // ignore valeur NaN
-          return x; 
-# --- Capteur PID ---
+          if (isnan(x)) return {};
+          return x;
+
+  - platform: template
+    name: "R1 Minutes sans demoulage"
+    id: r1_minutes_sans_demoulage_sensor
+    unit_of_measurement: "min"
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: |-
+      return id(r1_minutes_sans_demoulage);
+
   - platform: pid
     name: "PID Sortie"
     type: HEAT
@@ -110,23 +278,79 @@ sensor:
   - platform: pid
     name: "PID Erreur"
     type: ERROR
+    
+  - platform: template
+    name: "R1 Consigne PID Active"
+    id: r1_consigne_pid_active
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    update_interval: 5s
+    lambda: |-
+      if (id(r1_cycle_chauffe_en_cours)) {
+        return id(pid_climate).target_temperature;
+      } else {
+        return 0.0f;
+      }
+text_sensor:
+  - platform: template
+    name: "R1 Etat"
+    id: r1_etat
+    update_interval: never
 
-# declenche l'Autotune
+  - platform: template
+    name: "R1 Debug Court"
+    id: r1_debug_court
+    update_interval: 10s
+    lambda: |-
+      char buffer[255];
+
+      const char *etat = id(r1_etat).state.c_str();
+
+      snprintf(buffer, sizeof(buffer),
+        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Td:%.1fC | Tr:%.1fC | Auto:%d | Manu:%d",
+        etat,
+        id(r1_demoulage_arme),
+        id(r1_cycle_chauffe_en_cours),
+        id(r1_minutes_sans_demoulage),
+        id(temp_ds18b20_d).state,
+        id(temp_ds18b20_r).state,
+        id(r1_auto_degivr).state,
+        id(chauffage_mode_manuel).state
+      );
+
+      return std::string(buffer);
+
 button:
   - platform: template
     name: "PID Climate Autotune"
     on_press:
       - climate.pid.autotune: pid_climate
 
-# Sortie PWM du chauffage
+  - platform: template
+    name: "R1 Test PID Demoulage"
+    on_press:
+      - script.execute: r1_pid_demoulage
+
+  - platform: template
+    name: "R1 Test PID Entretien"
+    on_press:
+      - script.execute: r1_pid_entretien
+
+  - platform: template
+    name: "R1 Reset compteur sans demoulage"
+    on_press:
+      - lambda: |-
+          id(r1_minutes_sans_demoulage) = 0;
+          id(r1_etat).publish_state("Repos");
+          ESP_LOGI("r1", "Compteur sans demoulage remis a zero");
+
 output:
   - platform: ledc
     pin: GPIO23
     frequency: 1000 Hz
     id: pwm_heater
     max_power: 100%
-            
-# --- Mode manuel (light dimmable) ---
+
 light:
   - platform: monochromatic
     output: pwm_heater
@@ -134,7 +358,6 @@ light:
     name: "Sortie Chauffage (Manuel)"
     restore_mode: ALWAYS_OFF
 
-# --- Sélecteur de mode ---
 switch:
   - platform: template
     name: "Mode Manuel Chauffage"
@@ -142,44 +365,283 @@ switch:
     optimistic: true
     restore_mode: ALWAYS_OFF
     turn_on_action:
-      - logger.log: "Mode manuel activé : PID désactivé"
+      - logger.log: "Mode manuel active : auto R1 et PID desactives"
+      - script.stop: r1_pid_demoulage
+      - script.stop: r1_pid_entretien
       - climate.control:
           id: pid_climate
           mode: "OFF"
+      - lambda: |-
+          id(r1_cycle_chauffe_en_cours) = false;
+          id(r1_demoulage_arme) = false;
+          id(r1_etat).publish_state("Manuel");
       - light.turn_on:
           id: manual_heater
-          brightness: !lambda 'return id(puissance_manuelle).state / 100.0;'
+          brightness: !lambda 'return id(puissance_manuelle).state / 100.0f;'
 
     turn_off_action:
-      - logger.log: "Mode manuel désactivé : PID activé"
+      - logger.log: "Mode manuel desactive : retour auto evenementiel, PID OFF"
       - light.turn_off:
           id: manual_heater
       - climate.control:
           id: pid_climate
-          mode: HEAT
+          mode: "OFF"
+      - lambda: |-
+          id(r1_cycle_chauffe_en_cours) = false;
+          id(r1_demoulage_arme) = false;
+          id(r1_etat).publish_state("Repos");
 
-# --- Lier l'ID du PID pour contrôle ---
+  - platform: template
+    name: "R1 Auto Degivrage"
+    id: r1_auto_degivr
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    turn_on_action:
+      - logger.log: "R1 auto degivrage active"
+      - light.turn_off:
+          id: manual_heater
+      - climate.control:
+          id: pid_climate
+          mode: "OFF"
+      - lambda: |-
+          id(r1_cycle_chauffe_en_cours) = false;
+          id(r1_demoulage_arme) = false;
+          id(r1_etat).publish_state("Repos");
+
+    turn_off_action:
+      - logger.log: "R1 auto degivrage desactive"
+      - script.stop: r1_pid_demoulage
+      - script.stop: r1_pid_entretien
+      - climate.control:
+          id: pid_climate
+          mode: "OFF"
+      - light.turn_off:
+          id: manual_heater
+      - lambda: |-
+          id(r1_demoulage_arme) = false;
+          id(r1_cycle_chauffe_en_cours) = false;
+          id(r1_etat).publish_state("Auto OFF");
+
+script:
+  - id: r1_pid_demoulage
+    mode: single
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: r1_auto_degivr
+              - switch.is_off: chauffage_mode_manuel
+          then:
+            - lambda: |-
+                id(r1_cycle_chauffe_en_cours) = true;
+                id(r1_minutes_sans_demoulage) = 0;
+                id(r1_chauffe_start_ms) = millis();
+                id(r1_etat).publish_state("PID demoulage");
+                ESP_LOGI("r1", "PID demoulage debut : consigne %.1f C, mini %.1f min, maxi %.1f min, arret retour froid <= %.1f C",
+                         id(r1_consigne_pid_demoulage).state,
+                         id(r1_duree_pid_demoulage).state,
+                         id(r1_duree_maxi_pid_demoulage).state,
+                         id(r1_seuil_froid_armement).state);
+
+            - light.turn_off:
+                id: manual_heater
+
+            - climate.control:
+                id: pid_climate
+                mode: HEAT
+                target_temperature: !lambda 'return id(r1_consigne_pid_demoulage).state;'
+
+            # Durée minimale de chauffe obligatoire.
+            - delay: !lambda |-
+                return (uint32_t)(id(r1_duree_pid_demoulage).state * 60000.0f);
+
+            - lambda: |-
+                ESP_LOGI("r1", "PID demoulage : duree mini atteinte, maintien jusqu'au retour froid ou timeout");
+
+            # Après la durée mini, maintien tant que le serpentin n'est pas revenu au froid.
+            - wait_until:
+                condition:
+                  or:
+                    - lambda: |-
+                        if (isnan(id(temp_ds18b20_d).state)) return false;
+                        return id(temp_ds18b20_d).state <= id(r1_seuil_froid_armement).state;
+
+                    - lambda: |-
+                        uint32_t duree_max_ms = (uint32_t)(id(r1_duree_maxi_pid_demoulage).state * 60000.0f);
+                        return (millis() - id(r1_chauffe_start_ms)) >= duree_max_ms;
+
+            - lambda: |-
+                uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;
+                ESP_LOGI("r1", "PID demoulage arret apres %u s : temp degivrage %.1f C / seuil froid %.1f C",
+                         duree_s,
+                         id(temp_ds18b20_d).state,
+                         id(r1_seuil_froid_armement).state);
+
+            - climate.control:
+                id: pid_climate
+                mode: "OFF"
+
+            - light.turn_off:
+                id: manual_heater
+
+            - lambda: |-
+                id(r1_cycle_chauffe_en_cours) = false;
+                id(r1_chauffe_start_ms) = 0;
+                id(r1_etat).publish_state("Repos");
+                ESP_LOGI("r1", "PID demoulage fin : PID OFF");
+
+  - id: r1_pid_entretien
+    mode: single
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: r1_auto_degivr
+              - switch.is_off: chauffage_mode_manuel
+          then:
+            - lambda: |-
+                id(r1_cycle_chauffe_en_cours) = true;
+                id(r1_minutes_sans_demoulage) = 0;
+                id(r1_etat).publish_state("PID entretien");
+                ESP_LOGI("r1", "PID entretien debut : consigne %.1f C pendant %.1f min",
+                         id(r1_consigne_pid_entretien).state,
+                         id(r1_duree_pid_entretien).state);
+
+            - light.turn_off:
+                id: manual_heater
+
+            - climate.control:
+                id: pid_climate
+                mode: HEAT
+                target_temperature: !lambda 'return id(r1_consigne_pid_entretien).state;'
+
+            - delay: !lambda |-
+                return (uint32_t)(id(r1_duree_pid_entretien).state * 60000.0f);
+
+            - climate.control:
+                id: pid_climate
+                mode: "OFF"
+
+            - light.turn_off:
+                id: manual_heater
+
+            - lambda: |-
+                id(r1_cycle_chauffe_en_cours) = false;
+                id(r1_etat).publish_state("Repos");
+                ESP_LOGI("r1", "PID entretien fin : PID OFF");
+
+interval:
+  - interval: 10s
+    then:
+      - lambda: |-
+          id(r1_demoulage_arme_sensor).publish_state(id(r1_demoulage_arme));
+          id(r1_chauffe_en_cours_sensor).publish_state(id(r1_cycle_chauffe_en_cours));      
+      - if:
+          condition:
+            and:
+              - switch.is_on: r1_auto_degivr
+              - switch.is_off: chauffage_mode_manuel
+              - lambda: |-
+                  return !id(r1_cycle_chauffe_en_cours);
+          then:
+            # Armement quand le serpentin est bien froid.
+            - if:
+                condition:
+                  lambda: |-
+                    if (isnan(id(temp_ds18b20_d).state)) return false;
+                    return id(temp_ds18b20_d).state <= id(r1_seuil_froid_armement).state;
+                then:
+                  - lambda: |-
+                      if (!id(r1_demoulage_arme)) {
+                        id(r1_demoulage_arme) = true;
+                        id(r1_etat).publish_state("Arme demoulage");
+                        ESP_LOGI("r1", "Demoulage arme : temp degivrage %.1f C",
+                                 id(temp_ds18b20_d).state);
+                      }
+
+            # Démoulage détecté quand le serpentin remonte après une phase froide.
+            - if:
+                condition:
+                  lambda: |-
+                    if (isnan(id(temp_ds18b20_d).state)) return false;
+                    return id(r1_demoulage_arme)
+                        && id(temp_ds18b20_d).state >= id(r1_seuil_detection_demoulage).state;
+                then:
+                  - lambda: |-
+                      id(r1_demoulage_arme) = false;
+                      id(r1_minutes_sans_demoulage) = 0;
+                      ESP_LOGI("r1", "Demoulage detecte : temp degivrage %.1f C",
+                               id(temp_ds18b20_d).state);
+                  - script.execute: r1_pid_demoulage
+
+  - interval: 1min
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: r1_auto_degivr
+              - switch.is_off: chauffage_mode_manuel
+              - lambda: |-
+                  return !id(r1_cycle_chauffe_en_cours);
+          then:
+            - lambda: |-
+                id(r1_minutes_sans_demoulage)++;
+
+            - if:
+                condition:
+                  lambda: |-
+                    int delai_min = (int)(id(r1_delai_entretien_h).state * 60.0f);
+                    return id(r1_minutes_sans_demoulage) >= delai_min;
+                then:
+                  - lambda: |-
+                      ESP_LOGI("r1", "Entretien declenche : aucun demoulage depuis %d min",
+                               id(r1_minutes_sans_demoulage));
+                  - script.execute: r1_pid_entretien
+
+  # Sécurité température : ne limite pas la puissance, mais coupe si R1 monte anormalement haut.
+  - interval: 5s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (isnan(id(temp_ds18b20_r).state)) return false;
+              return id(r1_cycle_chauffe_en_cours)
+                  && id(temp_ds18b20_r).state >= id(r1_temperature_securite_max).state;
+          then:
+            - logger.log: "SECURITE R1 : temperature max atteinte, coupure PID"
+            - script.stop: r1_pid_demoulage
+            - script.stop: r1_pid_entretien
+            - climate.control:
+                id: pid_climate
+                mode: "OFF"
+            - light.turn_off:
+                id: manual_heater
+            - lambda: |-
+                id(r1_cycle_chauffe_en_cours) = false;
+                id(r1_demoulage_arme) = false;
+                id(r1_etat).publish_state("Securite temperature");
+
 climate:
   - platform: pid
-    id: pid_climate   # 
+    id: pid_climate
     name: "Regulation PID"
     sensor: temp_ds18b20_r
-    default_target_temperature: 1°C
+    default_target_temperature: 6°C
     heat_output: pwm_heater
     control_parameters:
-      kp: 0.37040 #0.71901 #0.13143
-      ki: 0.02178 #0.02875 #0.00305
-      kd: 1.5750  #4.49541 #1.41370
+      kp: 0.37040
+      ki: 0.02178
+      kd: 1.5750
       output_averaging_samples: 5
       derivative_averaging_samples: 2
-      
+
     deadband_parameters:
       threshold_high: 0.2°C
       threshold_low: -0.2°C
+
     visual:
-      min_temperature: -3°C
-      max_temperature: 10°C
+      min_temperature: -20°C
+      max_temperature: 15°C
       temperature_step:
         target_temperature: 0.1
         current_temperature: 0.1
-

@@ -1,37 +1,3 @@
-- id: '1610184966825'
-  alias: Calcul Boolean Nuit/Jour
-  description: ''
-  triggers:
-  - value_template: '{{ states(''sensor.bh1750_illuminance'' )|float(default=0) >
-      states(''input_number.luminosite_seuil_haut'')|float(default=0) and is_state("sun.sun",
-      "above_horizon") }}'
-    id: nuit->jour
-    trigger: template
-  - value_template: '{{ states(''sensor.bh1750_illuminance'')|float(default=0) < states(''input_number.luminosite_seuil_bas'')|float(default=0)
-      and is_state("sun.sun", "below_horizon") }}'
-    id: jour->nuit
-    trigger: template
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: nuit->jour
-      sequence:
-      - target:
-          entity_id: input_boolean.nuit_jour
-        data: {}
-        action: input_boolean.turn_on
-    - conditions:
-      - condition: trigger
-        id: jour->nuit
-      sequence:
-      - target:
-          entity_id: input_boolean.nuit_jour
-        data: {}
-        action: input_boolean.turn_off
-    default: []
-  mode: single
 - id: '1610371647929'
   alias: 04 Purge base de données
   description: ''
@@ -1007,102 +973,6 @@
     entity_id: caf58cffba51ee848ade4eaa4c57a127
     domain: light
   mode: single
-- id: '1706466237260'
-  alias: Volet Automatisme Général RTS old
-  description: Ete->Ouvre et ferme sur Horaire_Hiver->Ouvre sur Horaire et ferme au
-    couché du soleil_Absent->Ouvre et ferme au levée et couchée du soleil
-  triggers:
-  - entity_id:
-    - input_boolean.nuit_jour
-    from: 'on'
-    to: 'off'
-    id: jour->nuit
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-    trigger: state
-  - at: input_datetime.horaire_ete_volet_ouv
-    id: heure_ouv_ete
-    trigger: time
-  - at: input_datetime.horaire_ete_volet_ferm
-    id: heure_ferm_ete
-    trigger: time
-  - entity_id:
-    - input_boolean.nuit_jour
-    id: nuit->jour
-    from: 'off'
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-    trigger: state
-  - at: input_datetime.horaire_hiver_volet_ouv
-    id: ouv_hiv
-    trigger: time
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Hiv
-      - condition: trigger
-        id: jour->nuit
-      sequence:
-      - data: {}
-        action: script.1706464871250
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Hiv
-      - condition: trigger
-        id:
-        - ouv_hiv
-      sequence:
-      - data: {}
-        action: script.0_0_1_ouverture_volets_rts
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Ete
-      - condition: trigger
-        id:
-        - heure_ouv_ete
-      sequence:
-      - data: {}
-        action: script.0_0_1_ouverture_volets_rts
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Auto Ete
-      - condition: trigger
-        id:
-        - heure_ferm_ete
-      sequence:
-      - data: {}
-        action: script.1706464871250
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Absent
-      - condition: trigger
-        id: jour->nuit
-      sequence:
-      - data: {}
-        action: script.0_1_0_fermeture_volets_mode_absent_rts
-    - conditions:
-      - condition: state
-        entity_id: input_select.volets
-        state: Absent
-      - condition: trigger
-        id: nuit->jour
-      sequence:
-      - data: {}
-        action: script.0_1_1_ouverture_volets_mode_absent_rts
-    default: []
-  mode: single
 - id: '1710317639852'
   alias: MP2 Défaut Status Bus VE
   description: Alarme Status Bus VE
@@ -1911,118 +1781,6 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Garage'
           title: Caméra Garage
-- id: '1738429994514'
-  alias: Volets Suivi Azimuth Soleil bureau été sur Seuils
-  description: Gestion par seuils fixes selon le soleil, la radiation solaire et la
-    température
-  triggers:
-  - minutes: /10
-    trigger: time_pattern
-  conditions:
-  - condition: state
-    entity_id: input_select.volets
-    state: Auto Pos Soleil
-  - condition: sun
-    before: sunset
-    after: sunrise
-  actions:
-  - variables:
-      orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
-        }}'
-      angle_exposition: '{{ states(''input_number.angle_exposition_volet_bureau'')
-        | float }}'
-      elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
-        float }}'
-      ouverture_min: 0
-      ouverture_max: 100
-      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
-      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
-      azimut_min: '{{ orientation_volet - angle_exposition }}'
-      azimut_max: '{{ orientation_volet + angle_exposition }}'
-      radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
-      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
-        }}'
-      temperature_ext: '{{ states(''sensor.vp2_temp_out'') | float }}'
-      temperature_seuil: '{{ states(''input_number.temperature_seuil_volets'') | float(30)
-        }}'
-      position_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% elif elevation_soleil
-        < 40 %}\n  40\n{% elif elevation_soleil < 60 %}\n  30\n{% else %}\n  10\n{%
-        endif %}"
-      fermeture_finale: '{% set pos = position_brute | float %} {% set pos = [pos,
-        ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
-        | round(0) }}'
-      position_effective: "{% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext
-        > temperature_seuil %}\n  0\n{% elif azimut_min <= azimut_soleil <= azimut_max
-        and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil
-        %}\n  {{ fermeture_finale }}\n{% elif radiation_solaire <= radiation_seuil
-        and temperature_ext <= temperature_seuil %}\n  100\n{% else %}\n  unknown\n{%
-        endif %}"
-  - data:
-      message: 'Debug volet bureau: Azimut={{ azimut_soleil }} ({{ azimut_min }} →
-        {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
-        }} > Seuil={{ radiation_seuil }}, Temp={{ temperature_ext }} > Seuil={{ temperature_seuil
-        }}, Position brute={{ position_brute }}, clampée={{ fermeture_finale }}, appliquée
-        = {{ position_effective }}, Limites : ouverture_min={{ ouverture_min }} /
-        ouverture_max={{ ouverture_max }}
-
-        '
-      level: error
-    action: system_log.write
-  - action: input_text.set_value
-    metadata: {}
-    data:
-      value: 'Azimut soleil = {{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max
-        }})
-
-        | Élévation = {{ elevation_soleil }}
-
-        | Radiation = {{ radiation_solaire }} (seuil = {{ radiation_seuil }})
-
-        | Température = {{ temperature_ext }} (seuil = {{ temperature_seuil }})
-
-        | Position brute = {{ position_brute }} → clampée = {{ fermeture_finale }}
-        → appliquée = {{ position_effective }}'
-    target:
-      entity_id: input_text.volets_debug_bureau
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{ azimut_min <= azimut_soleil <= azimut_max and\n   temperature_ext
-          > temperature_seuil }}"
-      sequence:
-      - data:
-          position: 0
-        target:
-          entity_id:
-          - cover.bureau_droit_2
-          - cover.bureau_gauche_rts
-        action: cover.set_cover_position
-    - conditions:
-      - condition: template
-        value_template: "{{ azimut_min <= azimut_soleil <= azimut_max and\n   elevation_soleil
-          > elevation_min and\n   radiation_solaire > radiation_seuil and\n   temperature_ext
-          <= temperature_seuil }}"
-      sequence:
-      - data:
-          position: '{{ fermeture_finale }}'
-        target:
-          entity_id:
-          - cover.bureau_droit_2
-          - cover.bureau_gauche_rts
-        action: cover.set_cover_position
-    - conditions:
-      - condition: template
-        value_template: "{{ radiation_solaire <= radiation_seuil and\n   temperature_ext
-          <= temperature_seuil }}"
-      sequence:
-      - data:
-          position: 100
-        target:
-          entity_id:
-          - cover.bureau_gauche_rts
-          - cover.bureau_droit_rts
-        action: cover.set_cover_position
-  mode: single
 - id: '1738578799131'
   alias: Gestion Alim Imprimante Brother
   description: ''
@@ -2178,111 +1936,6 @@
         data: {}
         target:
           entity_id: input_boolean.flag_arret_piscine_sur_soc
-  mode: single
-- id: '1751955751827'
-  alias: Volets Suivi Azimuth Soleil bureau été (progressif)
-  description: 'Fermeture progressive des volets en fonction de l''élévation du soleil,
-    de la radiation et de la température
-
-    '
-  triggers:
-  - minutes: /10
-    trigger: time_pattern
-  conditions:
-  - condition: state
-    entity_id: input_select.volets
-    state: Auto Pos Soleil
-  - condition: sun
-    before: sunset
-    after: sunrise
-  actions:
-  - variables:
-      orientation_volet: '{{ states(''input_number.orientation_volet_bureau'') | float
-        }}'
-      angle_exposition: '{{ states(''input_number.angle_exposition_volet_bureau'')
-        | float }}'
-      elevation_min: '{{ states(''input_number.elevation_mini_volets_bureaux'') |
-        float }}'
-      ouverture_min: 0
-      ouverture_max: 100
-      azimut_soleil: '{{ state_attr(''sun.sun'', ''azimuth'') | float }}'
-      elevation_soleil: '{{ state_attr(''sun.sun'', ''elevation'') | float }}'
-      azimut_min: '{{ orientation_volet - angle_exposition }}'
-      azimut_max: '{{ orientation_volet + angle_exposition }}'
-      radiation_solaire: '{{ states(''sensor.vp2_radiation'') | float }}'
-      radiation_seuil: '{{ states(''input_number.radiation_seuil_volets'') | float(0)
-        }}'
-      temperature_ext: '{{ states(''sensor.vp2_temp_out'') | float }}'
-      temperature_seuil: '{{ states(''input_number.temperature_seuil_volets'') | float(30)
-        }}'
-      fermeture_brute: "{% if elevation_soleil < elevation_min %}\n  100\n{% else
-        %}\n  {{ 100 - (((elevation_soleil - elevation_min) / (90 - elevation_min))
-        * 100) | round(0) }}\n{% endif %}"
-      fermeture_finale: '{% set pos = fermeture_brute | float %} {% set pos = [pos,
-        ouverture_max] | min %} {% set pos = [pos, ouverture_min] | max %} {{ pos
-        | round(0) }}'
-      position_effective: "{% if azimut_min <= azimut_soleil <= azimut_max and temperature_ext
-        > temperature_seuil %}\n  0\n{% elif azimut_min <= azimut_soleil <= azimut_max
-        and elevation_soleil > elevation_min and radiation_solaire > radiation_seuil
-        %}\n  {{ fermeture_finale }}\n{% elif radiation_solaire <= radiation_seuil
-        and temperature_ext <= temperature_seuil %}\n  100\n{% else %}\n  unknown\n{%
-        endif %}"
-  - data:
-      message: 'Debug volet bureau (progressif) :Azimut={{ azimut_soleil }} ({{ azimut_min
-        }} → {{ azimut_max }}), Élévation={{ elevation_soleil }}, Radiation={{ radiation_solaire
-        }} > seuil={{ radiation_seuil }}, Température={{ temperature_ext }} > seuil={{
-        temperature_seuil }}, fermeture_brute={{ fermeture_brute }}, clampée={{ fermeture_finale
-        }}, appliquée={{ position_effective }}
-
-        '
-    action: system_log.write
-  - target:
-      entity_id: input_text.volets_debug_bureau
-    data:
-      value: "Azimut={{ azimut_soleil }} ({{ azimut_min }} → {{ azimut_max }}) \n|
-        Élévation={{ elevation_soleil }}\n| Radiation={{ radiation_solaire }} (seuil={{
-        radiation_seuil }})\n| Temp={{ temperature_ext }} (seuil={{ temperature_seuil
-        }})\n| fermeture_brute={{ fermeture_brute }} → clampée={{ fermeture_finale
-        }} → appliquée={{ position_effective }}"
-    action: input_text.set_value
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and temperature_ext
-          > temperature_seuil }}'
-      sequence:
-      - data:
-          position: 0
-        target:
-          entity_id:
-          - cover.bureau_droit_2
-          - cover.bureau_gauche_rts
-        action: cover.set_cover_position
-    - conditions:
-      - condition: template
-        value_template: '{{ azimut_min <= azimut_soleil <= azimut_max and elevation_soleil
-          > elevation_min and radiation_solaire > radiation_seuil and temperature_ext
-          <= temperature_seuil }}'
-      sequence:
-      - data:
-          position: '{{ fermeture_finale }}'
-        target:
-          entity_id:
-          - cover.bureau_droit_2
-          - cover.bureau_gauche_rts
-        action: cover.set_cover_position
-    - conditions:
-      - condition: template
-        value_template: '{{ radiation_solaire <= radiation_seuil and temperature_ext
-          <= temperature_seuil }}'
-      sequence:
-      - data:
-          position: 100
-        target:
-          entity_id:
-          - cover.bureau_gauche_rts
-          - cover.bureau_droit_rts
-        action: cover.set_cover_position
   mode: single
 - id: '1753556651919'
   alias: Alarme Com LoRa ID02
@@ -3229,10 +2882,10 @@
           Override manuel={{ override_manuel }}'
   mode: single
 - id: '1774078919953'
-  alias: Volet Chambre Sud - V3 été heure réglable
-  description: 'Journée : suivi solaire V2 entre l''heure d''ouverture réglable et
-    sunset. Soir : fermeture automatique à sunset + 30 min. Matin : ouverture automatique
-    à l''heure définie par helper.
+  alias: Volet Chambre Sud - V4 été heure ouverture/fermeture réglable
+  description: 'Ouverture à heure réglable. Suivi solaire en journée. Fermeture à
+    heure réglable sauf si heure fermeture = 00:00. Si modification manuelle dans
+    la journée, suspension jusqu''à l''ouverture du lendemain.
 
     '
   triggers:
@@ -3246,19 +2899,22 @@
     entity_id:
     - input_select.mode_volets_chamb_sud
     - input_datetime.heure_ouverture_volet_sud
+    - input_datetime.heure_fermeture_volet_sud
     - input_number.orientation_volet_ch_sud
     - input_number.angle_exposition_volet_ch_sud
     - input_number.elevation_volet_ch_sud
     - input_number.radiation_seuil_volets
     - input_number.seuil_temperature_volets
     id: params
+  - trigger: state
+    entity_id: sensor.position_volet_ch_sud
+    id: position_changed
   - trigger: time
     at: input_datetime.heure_ouverture_volet_sud
     id: morning_open
-  - trigger: sun
-    event: sunset
-    offset: 00:30:00
-    id: sunset_close
+  - trigger: time
+    at: input_datetime.heure_fermeture_volet_sud
+    id: evening_close
   conditions:
   - condition: state
     entity_id: input_select.mode_volets_chamb_sud
@@ -3266,6 +2922,13 @@
   actions:
   - variables:
       morning_open_time: '{{ states(''input_datetime.heure_ouverture_volet_sud'')
+        }}'
+      evening_close_time: '{{ states(''input_datetime.heure_fermeture_volet_sud'')
+        }}'
+      fermeture_active: '{{ evening_close_time[:5] != ''00:00'' }}'
+      override_manuel: '{{ is_state(''input_boolean.volet_ch_sud_override_manuel'',
+        ''on'') }}'
+      commande_auto: '{{ is_state(''input_boolean.volet_ch_sud_commande_auto'', ''on'')
         }}'
       orientation: '{{ states(''input_number.orientation_volet_ch_sud'') | float(0)
         }}'
@@ -3305,17 +2968,51 @@
   - choose:
     - conditions:
       - condition: template
+        value_template: '{{ trigger.id == ''position_changed'' }}'
+      - condition: template
+        value_template: '{{ not commande_auto }}'
+      - condition: template
+        value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_sud''))
+          }}
+
+          '
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.volet_ch_sud_override_manuel
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_ch_sud
+        data:
+          value: 'Trigger={{ trigger.id }}
+
+            Position modifiée manuellement.
+
+            Automatisme suspendu jusqu''à l''ouverture programmée du lendemain.
+
+            Position actuelle={{ current_pos }}'
+    - conditions:
+      - condition: template
         value_template: '{{ trigger.id == ''morning_open'' }}'
       sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.volet_ch_sud_override_manuel
       - variables:
           target_pos: 100
-          reason: ouverture programmée à l'heure réglable
+          reason: ouverture programmée à l'heure réglable, reprise automatique
           delta_pos: '{{ ((current_pos | int(100)) - 100) | abs }}'
       - action: input_text.set_value
+        target:
+          entity_id: input_text.debug_volet_ch_sud
         data:
           value: 'Trigger={{ trigger.id }}
 
             Heure ouverture={{ morning_open_time[:5] }}
+
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Fermeture active={{ fermeture_active }}
 
             Cible={{ target_pos }}
 
@@ -3323,50 +3020,42 @@
 
             Delta={{ delta_pos }}
 
-            Gamma={{ gamma | round(1) }}
-
-            Azimut={{ azimuth | round(1) }}
-
-            Élévation={{ elevation | round(1) }}
-
-            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
-
-            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
-
-            Azimuth_OK={{ azimuth_ok }}
-
-            Elevation_OK={{ elevation_ok }}
-
-            Meteo_OK={{ meteo_ok }}
-
             Raison={{ reason }}'
-        target:
-          entity_id: input_text.debug_volet_ch_sud
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
         then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.volet_ch_sud_commande_auto
         - action: cover.set_cover_position
           target:
             entity_id: cover.volet_ch_sud
           data:
             position: 100
+        - delay: 00:01:00
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.volet_ch_sud_commande_auto
     - conditions:
       - condition: template
-        value_template: '{{ trigger.id == ''sunset_close'' }}'
+        value_template: '{{ trigger.id == ''evening_close'' }}'
+      - condition: template
+        value_template: '{{ fermeture_active }}'
+      - condition: template
+        value_template: '{{ not override_manuel }}'
       sequence:
       - variables:
           target_pos: 0
-          reason: fermeture programmée à sunset + 30 min
+          reason: fermeture programmée à l'heure réglable
           delta_pos: '{{ (current_pos | int(100)) | abs }}'
       - action: input_text.set_value
         target:
-          entity_id:
-          - input_text.debug_volet_ch_sud
+          entity_id: input_text.debug_volet_ch_sud
         data:
           value: 'Trigger={{ trigger.id }}
 
-            Heure ouverture={{ morning_open_time[:5] }}
+            Heure fermeture={{ evening_close_time[:5] }}
 
             Cible={{ target_pos }}
 
@@ -3374,37 +3063,35 @@
 
             Delta={{ delta_pos }}
 
-            Gamma={{ gamma | round(1) }}
-
-            Azimut={{ azimuth | round(1) }}
-
-            Élévation={{ elevation | round(1) }}
-
-            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
-
-            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
-
-            Azimuth_OK={{ azimuth_ok }}
-
-            Elevation_OK={{ elevation_ok }}
-
-            Meteo_OK={{ meteo_ok }}
-
             Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
         then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.volet_ch_sud_commande_auto
         - action: cover.set_cover_position
           target:
             entity_id: cover.volet_ch_sud
           data:
             position: 0
+        - delay: 00:01:00
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.volet_ch_sud_commande_auto
     - conditions:
       - condition: template
         value_template: '{{ trigger.id in [''start'', ''periodic'', ''params''] }}'
       - condition: template
+        value_template: '{{ not override_manuel }}'
+      - condition: template
         value_template: '{{ now() >= today_at(states(''input_datetime.heure_ouverture_volet_sud''))
+          }}
+
+          '
+      - condition: template
+        value_template: '{{ not fermeture_active or now() < today_at(states(''input_datetime.heure_fermeture_volet_sud''))
           }}
 
           '
@@ -3433,6 +3120,10 @@
 
             Heure ouverture={{ morning_open_time[:5] }}
 
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Fermeture active={{ fermeture_active }}
+
             Cible={{ target_pos }}
 
             Actuelle={{ current_pos }}
@@ -3445,9 +3136,9 @@
 
             Élévation={{ elevation | round(1) }}
 
-            Radiation={{ radiation | round(0) }} (seuil={{radiation_threshold }})
+            Radiation={{ radiation | round(0) }} (seuil={{ radiation_threshold }})
 
-            Temp={{ temperature | round(1) }} (seuil={{temperature_threshold }})
+            Temp={{ temperature | round(1) }} (seuil={{ temperature_threshold }})
 
             Azimuth_OK={{ azimuth_ok }}
 
@@ -3455,27 +3146,41 @@
 
             Meteo_OK={{ meteo_ok }}
 
+            Override manuel={{ override_manuel }}
+
             Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
         then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.volet_ch_sud_commande_auto
         - action: cover.set_cover_position
           target:
             entity_id: cover.volet_ch_sud
           data:
             position: '{{ target_pos | int(100) }}'
+        - delay: 00:01:00
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.volet_ch_sud_commande_auto
     default:
     - action: input_text.set_value
+      target:
+        entity_id: input_text.debug_volet_ch_sud
       data:
         value: 'Trigger={{ trigger.id }}
 
-          Heure ouverture={{states(''input_datetime.heure_ouverture_volet_sud'')[:5]
-          }}
+          Pas de pilotage.
 
-          Pas de pilotage : hors fenêtre active (avant heure ouverture ou après sunset).'
-      target:
-        entity_id: input_text.debug_volet_ch_sud
+          Heure ouverture={{ morning_open_time[:5] }}
+
+          Heure fermeture={{ evening_close_time[:5] }}
+
+          Fermeture active={{ fermeture_active }}
+
+          Override manuel={{ override_manuel }}'
   mode: single
 - id: '1774080403621'
   alias: Volet Chambre Nord - V4 été heure ouverture/fermeture réglable
@@ -3580,9 +3285,13 @@
         target:
           entity_id: input_text.debug_volet_ch_nord
         data:
-          value: Trigger={{ trigger.id }} Position modifiée manuellement. Automatisme
-            suspendu jusqu'à l'ouverture programmée du lendemain. Position actuelle={{
-            current_pos }}
+          value: 'Trigger={{ trigger.id }}
+
+            Position modifiée manuellement.
+
+            Automatisme suspendu jusqu''à l''ouverture programmée du lendemain.
+
+            Position actuelle={{ current_pos }}'
     - conditions:
       - condition: template
         value_template: '{{ trigger.id == ''morning_open'' }}'
@@ -3598,10 +3307,21 @@
         target:
           entity_id: input_text.debug_volet_ch_nord
         data:
-          value: Trigger={{ trigger.id }} Heure ouverture={{ morning_open_time[:5]
-            }} Heure fermeture={{ evening_close_time[:5] }} Fermeture active={{ fermeture_active
-            }} Cible={{ target_pos }} Actuelle={{ current_pos }} Delta={{ delta_pos
-            }} Raison={{ reason }}
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Fermeture active={{ fermeture_active }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
@@ -3634,9 +3354,17 @@
         target:
           entity_id: input_text.debug_volet_ch_nord
         data:
-          value: Trigger={{ trigger.id }} Heure fermeture={{ evening_close_time[:5]
-            }} Cible={{ target_pos }} Actuelle={{ current_pos }} Delta={{ delta_pos
-            }} Raison={{ reason }}
+          value: 'Trigger={{ trigger.id }}
+
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
@@ -3689,14 +3417,39 @@
         target:
           entity_id: input_text.debug_volet_ch_nord
         data:
-          value: Trigger={{ trigger.id }} Heure ouverture={{ morning_open_time[:5]
-            }} Heure fermeture={{ evening_close_time[:5] }} Fermeture active={{ fermeture_active
-            }} Cible={{ target_pos }} Actuelle={{ current_pos }} Delta={{ delta_pos
-            }} Gamma={{ gamma | round(1) }} Azimut={{ azimuth | round(1) }} Élévation={{
-            elevation | round(1) }} Radiation={{ radiation | round(0) }} (seuil={{
-            radiation_threshold }}) Temp={{ temperature | round(1) }} (seuil={{ temperature_threshold
-            }}) Azimuth_OK={{ azimuth_ok }} Elevation_OK={{ elevation_ok }} Meteo_OK={{
-            meteo_ok }} Override manuel={{ override_manuel }} Raison={{ reason }}
+          value: 'Trigger={{ trigger.id }}
+
+            Heure ouverture={{ morning_open_time[:5] }}
+
+            Heure fermeture={{ evening_close_time[:5] }}
+
+            Fermeture active={{ fermeture_active }}
+
+            Cible={{ target_pos }}
+
+            Actuelle={{ current_pos }}
+
+            Delta={{ delta_pos }}
+
+            Gamma={{ gamma | round(1) }}
+
+            Azimut={{ azimuth | round(1) }}
+
+            Élévation={{ elevation | round(1) }}
+
+            Radiation={{ radiation | round(0) }} (seuil={{ radiation_threshold }})
+
+            Temp={{ temperature | round(1) }} (seuil={{ temperature_threshold }})
+
+            Azimuth_OK={{ azimuth_ok }}
+
+            Elevation_OK={{ elevation_ok }}
+
+            Meteo_OK={{ meteo_ok }}
+
+            Override manuel={{ override_manuel }}
+
+            Raison={{ reason }}'
       - if:
         - condition: template
           value_template: '{{ delta_pos | int(0) >= 5 }}'
@@ -3718,9 +3471,17 @@
       target:
         entity_id: input_text.debug_volet_ch_nord
       data:
-        value: Trigger={{ trigger.id }} Pas de pilotage. Heure ouverture={{ morning_open_time[:5]
-          }} Heure fermeture={{ evening_close_time[:5] }} Fermeture active={{ fermeture_active
-          }} Override manuel={{ override_manuel }}
+        value: 'Trigger={{ trigger.id }}
+
+          Pas de pilotage.
+
+          Heure ouverture={{ morning_open_time[:5] }}
+
+          Heure fermeture={{ evening_close_time[:5] }}
+
+          Fermeture active={{ fermeture_active }}
+
+          Override manuel={{ override_manuel }}'
   mode: single
 - id: '1774291163691'
   alias: Volet Automatisme Général RTS V2
@@ -3951,7 +3712,7 @@
           inline_keyboard: []
   mode: single
 - id: '1774631414016'
-  alias: Ferme store si rafale de vent ou coucher soleil
+  alias: Store Terrasse
   description: ''
   triggers:
   - trigger: numeric_state
@@ -3971,6 +3732,7 @@
     entity_id:
     - sensor.sun_elevation
     below: input_number.seuil_bas_elevation_store_terrasse
+    id: Elevation
   conditions:
   - condition: device
     device_id: 88221e2f7a125b74f30b7cf7cf12054a
@@ -3981,7 +3743,9 @@
   - choose:
     - conditions:
       - condition: trigger
-        id: rafale
+        id:
+        - rafale
+        - Elevation
       sequence:
       - device_id: 88221e2f7a125b74f30b7cf7cf12054a
         domain: cover
@@ -4483,4 +4247,261 @@
     target:
       entity_id: input_boolean.rebootweewx2026
     data: {}
+  mode: single
+- id: '1781715082783'
+  alias: Rapport 23:59 Journalier Recap Energie IA V3
+  description: ''
+  triggers:
+  - trigger: time
+    id: horaire_2359
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      conso_totale: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
+        | float(0) | round(2) }}'
+      conso_reseau_tempo: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
+        | float(0) | round(2) }}'
+      bleu_hc: '{{ states(''sensor.compteur_energie_hc_bleu_jour'') | float(0) | round(2)
+        }}'
+      bleu_hp: '{{ states(''sensor.compteur_energie_hp_bleu_jour'') | float(0) | round(2)
+        }}'
+      blanc_hc: '{{ states(''sensor.compteur_energie_hc_blanc_jour'') | float(0) |
+        round(2) }}'
+      blanc_hp: '{{ states(''sensor.compteur_energie_hp_blanc_jour'') | float(0) |
+        round(2) }}'
+      rouge_hc: '{{ states(''sensor.compteur_energie_hc_rouge_jour'') | float(0) |
+        round(2) }}'
+      rouge_hp: '{{ states(''sensor.compteur_energie_hp_rouge_jour'') | float(0) |
+        round(2) }}'
+      total_hc: "{{\n  (\n    states('sensor.compteur_energie_hc_bleu_jour') | float(0)
+        +\n    states('sensor.compteur_energie_hc_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hc_rouge_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      total_hp: "{{\n  (\n    states('sensor.compteur_energie_hp_bleu_jour') | float(0)
+        +\n    states('sensor.compteur_energie_hp_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hp_rouge_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      poste_dominant: "{% set postes = {\n  'Bleu HC': states('sensor.compteur_energie_hc_bleu_jour')
+        | float(0),\n  'Bleu HP': states('sensor.compteur_energie_hp_bleu_jour') |
+        float(0),\n  'Blanc HC': states('sensor.compteur_energie_hc_blanc_jour') |
+        float(0),\n  'Blanc HP': states('sensor.compteur_energie_hp_blanc_jour') |
+        float(0),\n  'Rouge HC': states('sensor.compteur_energie_hc_rouge_jour') |
+        float(0),\n  'Rouge HP': states('sensor.compteur_energie_hp_rouge_jour') |
+        float(0)\n} %} {{ postes | dictsort(by='value') | last | first }}"
+      couleur_demain: '{{ states(''sensor.rte_tempo_prochaine_couleur'') }}'
+      cout_jour_txt: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }} €\n{% endif %}"
+      cout_jour_num: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      pv_jour_num: '{{ states(''sensor.mp2_total_energie_produite_jour'') | float(0)
+        | round(2) }}'
+      import_reseau_num: '{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'')
+        | float(0) | round(2) }}'
+      export_reseau_num: '{{ states(''sensor.mp2_energie_injectee_ds_reseau_par_jour'')
+        | float(0) | round(2) }}'
+      pv_jour_txt: "{% set v = states('sensor.mp2_total_energie_produite_jour') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      import_reseau_txt: "{% set v = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      export_reseau_txt: "{% set v = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      conso_foyer_estimee: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) +\n    states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      solaire_autoconsomme: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      taux_autonomie_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% set conso = pv + imp - exp %} {% set solaire = pv - exp %}
+        {% if conso > 0 %}\n  {{ ((solaire / conso) * 100) | round(1) }}\n{% else
+        %}\n  0\n{% endif %}"
+      taux_autoconsommation_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% if pv > 0 %}\n  {{ (((pv - exp) / pv) * 100) | round(1) }}\n{%
+        else %}\n  0\n{% endif %}"
+      taux_export_pv: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% if pv > 0 %}\n  {{ ((exp / pv) * 100) | round(1) }}\n{% else
+        %}\n  0\n{% endif %}"
+      part_import_reseau: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% set conso = pv + imp - exp %} {% if conso > 0 %}\n  {{ ((imp
+        / conso) * 100) | round(1) }}\n{% else %}\n  0\n{% endif %}"
+      bat_min_txt: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} %\n{% endif %}"
+      bat_max_txt: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} %\n{% endif %}"
+      soc_soir_txt: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(1) }} %\n{% endif %}"
+      bat_min_num: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }}\n{% endif %}"
+      bat_max_num: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }}\n{% endif %}"
+      soc_soir_num: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(1) }}\n{% endif %}"
+      previ_prod_jour: '{{ states(''input_number.mp2_memoire_estimation_production_jour'')
+        | float(0) | round(2) }}'
+      realise_prod_jour: '{{ states(''sensor.mp2_total_energie_produite_jour'') |
+        float(0) | round(2) }}'
+      ecart_prod_jour: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      ecart_prod_jour_txt: "{% set e =\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0)\n  ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_prod_pct_txt: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
+        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
+      ecart_prod_pct_num: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
+        else %}\n  n/d\n{% endif %}"
+      previ_conso_6_22: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
+        | round(2) }}'
+      realise_conso_6_22: '{{ states(''sensor.comptage_energie_conso_maison_6_22_jour_6_22'')
+        | float(0) | round(2) }}'
+      ecart_conso_6_22: "{{\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
+        \ ) | round(2)\n}}"
+      ecart_conso_6_22_txt: "{% set e =\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
+        \ ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_conso_6_22_pct_txt: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+        | float(0) %} {% set r = states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
+        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
+      ecart_conso_6_22_pct_num: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+        | float(0) %} {% set r = states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
+        | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
+        else %}\n  n/d\n{% endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: recap_energie
+    data:
+      task_name: recap energie journalier complet
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique.
+
+        Rédige un message Telegram en français, factuel, compact et utile. N''invente
+        aucune donnée. Si une donnée vaut "n/d", indique simplement qu''elle n''est
+        pas disponible. 8 lignes maximum. Commence par un emoji.
+
+        Mets en avant : - la consommation réseau Tempo du jour, - la consommation
+        foyer estimée, - la répartition heures creuses / heures pleines, - le poste
+        Tempo dominant, - le coût du jour si disponible, - la production PV si disponible,
+        - l''import/export réseau si disponibles, - l''autonomie solaire et l''autoconsommation
+        solaire, - la batterie si disponible, - une analyse très courte du prévu/réalisé
+        production, - une analyse très courte du prévu/réalisé consommation 6-22h,
+        - un conseil très court pour demain selon la couleur Tempo.
+
+        Pour l''analyse prévu/réalisé : - indique clairement si le réalisé est au-dessus,
+        en dessous ou conforme à la prévision, - utilise les écarts fournis, - reste
+        synthétique.
+
+        Données du jour : - Date : {{ date_jour }} - Consommation réseau Tempo : {{
+        conso_reseau_tempo }} kWh - Consommation foyer estimée : {{ conso_foyer_estimee
+        }} kWh - Solaire autoconsommé : {{ solaire_autoconsomme }} kWh - Autonomie
+        solaire : {{ taux_autonomie_solaire }} % - Autoconsommation solaire : {{ taux_autoconsommation_solaire
+        }} % - Export PV : {{ taux_export_pv }} % - Part import réseau : {{ part_import_reseau
+        }} % - Total HC : {{ total_hc }} kWh - Total HP : {{ total_hp }} kWh - Bleu
+        HC : {{ bleu_hc }} kWh - Bleu HP : {{ bleu_hp }} kWh - Blanc HC : {{ blanc_hc
+        }} kWh - Blanc HP : {{ blanc_hp }} kWh - Rouge HC : {{ rouge_hc }} kWh - Rouge
+        HP : {{ rouge_hp }} kWh - Poste dominant : {{ poste_dominant }} - Coût du
+        jour : {{ cout_jour_txt }} - Production PV : {{ pv_jour_txt }} - Import réseau
+        : {{ import_reseau_txt }} - Export réseau : {{ export_reseau_txt }} - Batterie
+        mini du jour : {{ bat_min_txt }} - Batterie maxi du jour : {{ bat_max_txt
+        }} - SOC actuel/soir : {{ soc_soir_txt }} - Couleur Tempo demain : {{ couleur_demain
+        }}
+
+        Analyse prévision / réalisé production : - Prévision production jour : {{
+        previ_prod_jour }} kWh - Réalisé production jour : {{ realise_prod_jour }}
+        kWh - Ecart production : {{ ecart_prod_jour_txt }} - Ecart production % :
+        {{ ecart_prod_pct_txt }}
+
+        Analyse prévision / réalisé consommation 6-22h : - Prévision consommation
+        6-22h : {{ previ_conso_6_22 }} kWh - Réalisé consommation 6-22h : {{ realise_conso_6_22
+        }} kWh - Ecart consommation 6-22h : {{ ecart_conso_6_22_txt }} - Ecart consommation
+        6-22h % : {{ ecart_conso_6_22_pct_txt }}'
+      structure:
+        titre:
+          description: Titre très court du message Telegram
+          required: true
+          selector:
+            text:
+        message:
+          description: Message Telegram complet sur 5 à 8 lignes
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  recap_energie is defined and\n  recap_energie.data
+          is defined and\n  recap_energie.data.message is defined\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "{{\n  recap_energie.data.titre\n  if recap_energie.data.titre is
+            defined\n  else 'Recap Journalier Energie'\n}}"
+          message: '{{ recap_energie.data.message }} {% if recap_energie.data.niveau
+            is defined %} {{ ''\n'' }}Niveau : {{ recap_energie.data.niveau }} {%
+            endif %}'
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Recap Journalier Energie
+        message: '{{ date_jour }} {{ ''\n'' }}Conso réseau Tempo : {{ conso_reseau_tempo
+          }} kWh {{ ''\n'' }}Conso foyer estimée : {{ conso_foyer_estimee }} kWh {{
+          ''\n'' }}HC / HP : {{ total_hc }} / {{ total_hp }} kWh {{ ''\n'' }}Poste
+          dominant : {{ poste_dominant }} {{ ''\n'' }}Coût : {{ cout_jour_txt }} {{
+          ''\n'' }}PV : {{ pv_jour_txt }} {{ ''\n'' }}Import / Export : {{ import_reseau_txt
+          }} / {{ export_reseau_txt }} {{ ''\n'' }}Autonomie / Autoconso : {{ taux_autonomie_solaire
+          }} % / {{ taux_autoconsommation_solaire }} % {{ ''\n'' }}Export PV / Part
+          import : {{ taux_export_pv }} % / {{ part_import_reseau }} % {{ ''\n'' }}Batterie
+          min / max / soir : {{ bat_min_txt }} / {{ bat_max_txt }} / {{ soc_soir_txt
+          }} {{ ''\n'' }}Prod prévue / réalisée : {{ previ_prod_jour }} / {{ realise_prod_jour
+          }} kWh (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt }}) {{ ''\n''
+          }}Conso 6-22 prévue / réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
+          }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt }})
+          {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
+  - if:
+    - condition: template
+      value_template: '{{ trigger is defined and trigger.id == ''horaire_2359'' }}'
+    then:
+    - action: notify.send_message
+      target:
+        entity_id: notify.suivi_prod
+      data:
+        message: "{{\n  [\n    now().strftime('%Y-%m-%d %H:%M:%S'),\n    conso_reseau_tempo,\n
+          \   total_hc,\n    total_hp,\n    poste_dominant | trim | replace(',', '
+          '),\n    cout_jour_num,\n    pv_jour_num,\n    import_reseau_num,\n    export_reseau_num,\n
+          \   conso_foyer_estimee,\n    solaire_autoconsomme,\n    taux_autonomie_solaire,\n
+          \   taux_autoconsommation_solaire,\n    taux_export_pv,\n    part_import_reseau,\n
+          \   bat_min_num,\n    bat_max_num,\n    soc_soir_num,\n    previ_prod_jour,\n
+          \   realise_prod_jour,\n    ecart_prod_jour,\n    ecart_prod_pct_num,\n
+          \   previ_conso_6_22,\n    realise_conso_6_22,\n    ecart_conso_6_22,\n
+          \   ecart_conso_6_22_pct_num,\n    couleur_demain\n  ] | join(', ')\n}}"
   mode: single

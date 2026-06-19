@@ -1,11 +1,82 @@
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - lambda: |-
+          id(etat_appoint_eau).publish_state("Initialisation");
+          id(securite_appoint_eau).publish_state("Initialisation");
+      - delay: 10s
+      - script.execute: _calcul_niveau_eau
+      - delay: 500ms
+      - script.execute: _securite_appoint_eau
+
+
 # Déclenchement du script regul_eau sur BP
-# Arret vanne eau en auto et si niveau Haut pendant 5S
+# Arrêt vanne eau si niveau haut ou défaut
+#
+# Logique retenue après test terrain :
+# id(lsh) = 1 => LSH recouvert / dans l'eau
+# id(lsh) = 0 => LSH découvert
+# id(lsl) = 1 => LSL recouvert / dans l'eau
+# id(lsl) = 0 => LSL découvert
+#
+# Table niveau :
+# LSH = 0 et LSL = 0 => Niveau bas
+# LSH = 0 et LSL = 1 => Niveau intermédiaire
+# LSH = 1 et LSL = 1 => Niveau haut
+# LSH = 1 et LSL = 0 => Défaut incohérent
 
 globals:
   - id: ev_eau_on_start_time
     type: uint32_t
     restore_value: no
     initial_value: '0'
+
+  - id: ev_eau_start_lsl_state
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+  - id: ev_eau_start_lsh_state
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+  - id: ev_eau_secu_niveau_declenchee
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+  - id: ev_eau_arret_securite
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+
+number:
+  - platform: template
+    name: "Tempo Secu Niveau Appoint Eau"
+    id: tempo_secu_niveau_appoint_eau
+    unit_of_measurement: "min"
+    min_value: 5
+    max_value: 60
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 15
+    mode: box
+
+  - platform: template
+    name: "Duree Maxi EV Eau"
+    id: duree_maxi_ev_eau
+    unit_of_measurement: "min"
+    min_value: 15
+    max_value: 180
+    step: 5
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    mode: box
 
 select:
   - platform: template
@@ -17,26 +88,43 @@ select:
       - Ma_f
       - At_f
     id: _Mode_Fonctionnement_regul_eau
-    on_value: 
+    on_value:
       then:
         - logger.log:
             format: "Mode Fonct Regul Eau --> %s"
             args: [ 'id(_Mode_Fonctionnement_regul_eau).current_option()' ]
-            level: INFO        
+            level: INFO
         - script.stop: _regul_eau
-        - delay: 1s            
+        - delay: 1s
+        - script.execute: _calcul_niveau_eau
+        - delay: 200ms
         - script.execute: _regul_eau
 
+
 button:
-  # Lance un Appoint d'Eau
   - platform: template
     name: "BP_Appoint Eau"
     on_press:
+      - script.execute: _calcul_niveau_eau
+      - delay: 200ms
       - script.execute: _regul_eau
 
-binary_sensor: 
-  # calcul des niveaux piscine
-  # Si LSL ou LSH recouvert alors True sinon False
+
+text_sensor:
+  - platform: template
+    name: "Etat Appoint Eau"
+    id: etat_appoint_eau
+    icon: mdi:water-pump
+    update_interval: never
+
+  - platform: template
+    name: "Securite Appoint Eau"
+    id: securite_appoint_eau
+    icon: mdi:shield-alert
+    update_interval: never
+
+
+binary_sensor:
   - platform: template
     name: "niv_haut"
     id: niv_haut
@@ -44,17 +132,21 @@ binary_sensor:
       - delayed_on: 5s
     on_press:
       then:
-        - if:
-            condition:
-              and:
-                - binary_sensor.is_on: niv_haut
-                - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
-            then:
-              - logger.log:
-                  format: "Fermeture vanne eau : Niveau haut atteint en mode Auto"
-                  level: INFO
-              - script.stop: _regul_eau
-              - switch.turn_off: cde_ev_eau
+        - lambda: |-
+            ESP_LOGI("EV_EAU", "Niveau haut atteint");
+
+            if (id(cde_ev_eau).state) {
+              std::string mess = "ESP178 Appoint Eau->Niveau haut atteint, fermeture EV eau";
+
+              id(ev_eau_arret_securite) = true;
+              id(securite_appoint_eau).publish_state(mess);
+
+              id(cde_ev_eau).turn_off();
+              id(_regul_eau).stop();
+
+              id(_message_telegram)->execute(mess, 0);
+              id(_log_fichier)->execute(mess, 0);
+            }
 
   - platform: template
     name: "niv_inter"
@@ -67,9 +159,33 @@ binary_sensor:
   - platform: template
     name: "niv_defaut"
     id: niv_defaut
+    filters:
+      - delayed_on: 5s
+    on_press:
+      then:
+        - lambda: |-
+            ESP_LOGW("EV_EAU", "Defaut niveau eau : LSH=1 et LSL=0");
+
+            if (id(cde_ev_eau).state) {
+              std::string mess = "ESP178 Defaut Appoint Eau->Etat sondes incoherent LSH=1 LSL=0, fermeture EV eau";
+
+              id(ev_eau_arret_securite) = true;
+              id(securite_appoint_eau).publish_state(mess);
+
+              id(cde_ev_eau).turn_off();
+              id(_regul_eau).stop();
+
+              id(_message_telegram)->execute(mess, 0);
+              id(_log_fichier)->execute(mess, 0);
+            }
 
   # GPIO sur module extension SX1509
-  # Niveau haut à 1 si decouvert
+  #
+  # On conserve inverted: true.
+  # Avec ton câblage actuel :
+  # id(lsh) = 1 => LSH recouvert / dans l'eau
+  # id(lsl) = 1 => LSL recouvert / dans l'eau
+
   - platform: gpio
     name: "tp_plein_lsh"
     id: lsh
@@ -80,8 +196,12 @@ binary_sensor:
         input: true
         pullup: false
       inverted: true
+    filters:
+      - delayed_on_off: 5s
+    on_state:
+      then:
+        - script.execute: _calcul_niveau_eau
 
-  # Niveau bas à 1 si decouvert
   - platform: gpio
     name: "tp_plein_lsl"
     id: lsl
@@ -94,75 +214,126 @@ binary_sensor:
       inverted: true
     filters:
       - delayed_on_off: 5s
+    on_state:
+      then:
+        - script.execute: _calcul_niveau_eau
+
 
 sensor:
-  # EV Eau
   - platform: duty_time
     id: _temps_fonctionnement_ev_eau
-    name: 'temps_ma_ev_eau'
+    name: "temps_ma_ev_eau"
     lambda: "return id(cde_ev_eau).state == true;"
     restore: true
-    filters: 
+    filters:
       - round: 0
+
 
 switch:
   - platform: gpio
     name: "cde_ev_eau"
     pin: ${GPIO_rel_ev_eau}
     id: cde_ev_eau
+
     on_turn_on:
+      - script.execute: _calcul_niveau_eau
+      - delay: 200ms
       - lambda: |-
+          bool lsh_eau = id(lsh).state;
+          bool lsl_eau = id(lsl).state;
+
+          bool niveau_haut = lsh_eau && lsl_eau;
+          bool niveau_defaut = lsh_eau && !lsl_eau;
+
+          if (niveau_defaut) {
+            std::string mess = "ESP178 Defaut Appoint Eau->Ouverture EV interdite : sondes incoherentes LSH=1 LSL=0";
+
+            id(ev_eau_arret_securite) = true;
+            id(securite_appoint_eau).publish_state(mess);
+
+            id(cde_ev_eau).turn_off();
+            id(_regul_eau).stop();
+
+            id(_message_telegram)->execute(mess, 0);
+            id(_log_fichier)->execute(mess, 0);
+            return;
+          }
+
+          if (niveau_haut) {
+            std::string mess = "ESP178 Appoint Eau->Ouverture EV interdite : niveau haut deja atteint";
+
+            id(ev_eau_arret_securite) = true;
+            id(securite_appoint_eau).publish_state(mess);
+
+            id(cde_ev_eau).turn_off();
+            id(_regul_eau).stop();
+
+            id(_message_telegram)->execute(mess, 0);
+            id(_log_fichier)->execute(mess, 0);
+            return;
+          }
+
           id(ev_eau_on_start_time) = millis() / 1000;
-          ESP_LOGI("EV_EAU", "Vanne ouverte, temps initialisé à %u secondes", id(ev_eau_on_start_time));
+
+          id(ev_eau_start_lsl_state) = id(lsl).state;
+          id(ev_eau_start_lsh_state) = id(lsh).state;
+
+          id(ev_eau_secu_niveau_declenchee) = false;
+          id(ev_eau_arret_securite) = false;
+
+          id(etat_appoint_eau).publish_state("EV eau ouverte - remplissage en cours");
+          id(securite_appoint_eau).publish_state("Surveillance active");
+
+          ESP_LOGI("EV_EAU",
+                   "Vanne ouverte. Start=%u s, LSH=%d, LSL=%d",
+                   id(ev_eau_on_start_time),
+                   id(ev_eau_start_lsh_state),
+                   id(ev_eau_start_lsl_state));
+
     on_turn_off:
       - lambda: |-
           id(ev_eau_on_start_time) = 0;
-          ESP_LOGI("EV_EAU", "Vanne fermée, temps réinitialisé");
+          id(ev_eau_start_lsl_state) = false;
+          id(ev_eau_start_lsh_state) = false;
+          id(ev_eau_secu_niveau_declenchee) = false;
+
+          id(etat_appoint_eau).publish_state("EV eau fermee");
+
+          if (!id(ev_eau_arret_securite)) {
+            id(securite_appoint_eau).publish_state("OK - EV fermee");
+          } else {
+            id(ev_eau_arret_securite) = false;
+          }
+
+          ESP_LOGI("EV_EAU", "Vanne fermee, temps reinitialise");
+
 
 interval:
   - interval: 60s
-    then:      
+    then:
       - script.execute: _calcul_niveau_eau
+
   - interval: 60s
     then:
       - lambda: |-
-          // Reset le compteur à 00:00:00      
           auto now = id(sntp_time).now();
-          if (now.hour == 0 && now.minute == 0 && now.second == 0) {
-            id(_temps_fonctionnement_ev_eau).reset();            
-          }
-  ## Sécurisation de l'ouverture EV EAU si > à 1heure                  
-  - interval: 60s
-    then:
-      - lambda: |-
-          if (id(cde_ev_eau).state) {
-            if (id(ev_eau_on_start_time) == 0) {
-              ESP_LOGI("SECURITE", "Temps de démarrage de la vanne non initialisé !");
-              return;
-            }
-            uint32_t now = millis() / 1000;
-            uint32_t duration = now - id(ev_eau_on_start_time);
-            if (duration > 3600) {  // 3600 secondes = 1h
-              ESP_LOGI("SECURITE", "Vanne EV eau ouverte depuis plus de 1h, fermeture forcée.");
-              id(cde_ev_eau).turn_off();
-              id(_regul_eau).stop();
-              std::string mess = "ESP178 Defaut->Vanne Eau ouverte depuis " +
-                                std::to_string(duration / 3600) + "h " +
-                                std::to_string((duration % 3600) / 60) + "min " +
-                                std::to_string(duration % 60) + "s";
-              id(_message_telegram)->execute(mess, duration);
-              id(_log_fichier)->execute(mess,duration);             
-            }
+          if (now.hour == 0 && now.minute == 0) {
+            id(_temps_fonctionnement_ev_eau).reset();
           }
 
+  - interval: 60s
+    then:
+      - script.execute: _securite_appoint_eau
+
+
 script:
-  # Regulation du niveau d'eau piscine
-  # Déclenché par BP Appoint Eau 
-  # ou 240s après ouverture volet
-  # Regulation inhibée le temps de réparer le moteur
   - id: _regul_eau
     mode: single
     then:
+      - script.execute: _calcul_niveau_eau
+      - delay: 200ms
+
+      # Mode Auto
       - if:
           condition:
             lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
@@ -171,24 +342,20 @@ script:
                 condition:
                   and:
                     - binary_sensor.is_off: niv_defaut
+                    - binary_sensor.is_off: niv_haut
                     - binary_sensor.is_on: volet_ouvert
-                    - or:
-                        - binary_sensor.is_on: niv_bas
-                        - binary_sensor.is_on: niv_inter
                 then:
                   - lambda: |-
                       uint32_t now = millis() / 1000;
+
                       if (id(volet_ferme_off_time) != 0 && (now - id(volet_ferme_off_time)) >= 240) {
                         if (!id(cde_ev_eau).state) {
-                          ESP_LOGI("EV_EAU", "Ouverture vanne eau Mode Auto après temporisation de 240s");
+                          ESP_LOGI("EV_EAU", "Ouverture vanne eau Mode Auto apres temporisation de 240s");
                           id(cde_ev_eau).turn_on();
                         }
+                      } else {
+                        ESP_LOGI("EV_EAU", "Tempo volet non terminee : ouverture EV eau interdite");
                       }
-                  # Lignes du dessous à spprimer quand volet réparé    
-                  - logger.log:
-                      format: "Ouverture Forcée vanne eau Mode Auto"
-                      level: INFO
-                  - switch.turn_on: cde_ev_eau
 
                 else:
                   - logger.log:
@@ -196,43 +363,169 @@ script:
                       level: INFO
                   - switch.turn_off: cde_ev_eau
 
-
+      # Mode marche forcée
+      # Les sécurités restent actives.
       - if:
           condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
-          then: 
-            - logger.log: 
-                format: "Ouverture vanne eau Mode Ma Forçé"
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
+          then:
+            - logger.log:
+                format: "Ouverture vanne eau Mode Ma Force"
                 level: DEBUG
             - switch.turn_on: cde_ev_eau
 
+      # Mode arrêt forcé
       - if:
           condition:
-            or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
           then:
-            - logger.log: 
-                format: "Fermeture vanne eau Mode At Forçé"
+            - logger.log:
+                format: "Fermeture vanne eau Mode At Force"
                 level: DEBUG
             - switch.turn_off: cde_ev_eau
 
-  # Calcul des niveaux d'eau en fonction des sondes de niveaux
-  # si niveau haut et niveau bas => niveau haut
+
   - id: _calcul_niveau_eau
+    mode: single
     then:
       - lambda: |-
-          bool lsh_on = id(lsh).state;
-          bool lsl_on = id(lsl).state;
+          // États directement exploitables :
+          // true  = sonde recouverte / dans l'eau
+          // false = sonde découverte
+          bool lsh_eau = id(lsh).state;
+          bool lsl_eau = id(lsl).state;
 
-          // Niveau haut : les deux sondes actives
-          id(niv_haut).publish_state(lsh_on && lsl_on);
+          bool niveau_haut =   lsh_eau &&  lsl_eau;
+          bool niveau_inter = !lsh_eau &&  lsl_eau;
+          bool niveau_bas =   !lsh_eau && !lsl_eau;
+          bool niveau_defaut = lsh_eau && !lsl_eau;
 
-          // Niveau intermédiaire : seule la sonde basse active
-          id(niv_inter).publish_state(!lsh_on && lsl_on);
+          id(niv_haut).publish_state(niveau_haut);
+          id(niv_inter).publish_state(niveau_inter);
+          id(niv_bas).publish_state(niveau_bas);
+          id(niv_defaut).publish_state(niveau_defaut);
 
-          // Niveau bas : aucune sonde active
-          id(niv_bas).publish_state(!lsh_on && !lsl_on);
+          if (niveau_haut) {
+            id(etat_appoint_eau).publish_state("Niveau haut");
+          } else if (niveau_inter) {
+            id(etat_appoint_eau).publish_state("Niveau intermediaire");
+          } else if (niveau_bas) {
+            id(etat_appoint_eau).publish_state("Niveau bas");
+          } else if (niveau_defaut) {
+            id(etat_appoint_eau).publish_state("Defaut sondes niveau");
+          }
 
-          // Défaut : sonde haute active, sonde basse inactive
-          id(niv_defaut).publish_state(lsh_on && !lsl_on);
+          ESP_LOGI("NIVEAU_EAU",
+                   "LSH=%d LSL=%d => haut=%d inter=%d bas=%d defaut=%d",
+                   lsh_eau,
+                   lsl_eau,
+                   niveau_haut,
+                   niveau_inter,
+                   niveau_bas,
+                   niveau_defaut);
+
+
+  - id: _securite_appoint_eau
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(cde_ev_eau).state) {
+            id(securite_appoint_eau).publish_state("OK - EV fermee");
+            return;
+          }
+
+          bool lsh_eau = id(lsh).state;
+          bool lsl_eau = id(lsl).state;
+
+          bool niveau_haut =   lsh_eau &&  lsl_eau;
+          bool niveau_bas =   !lsh_eau && !lsl_eau;
+          bool niveau_defaut = lsh_eau && !lsl_eau;
+
+          auto fermer_securite = [&](const std::string &mess, uint32_t duration) {
+            ESP_LOGW("SECURITE_EAU", "%s", mess.c_str());
+
+            id(ev_eau_arret_securite) = true;
+            id(securite_appoint_eau).publish_state(mess);
+
+            id(cde_ev_eau).turn_off();
+            id(_regul_eau).stop();
+
+            id(_message_telegram)->execute(mess, duration);
+            id(_log_fichier)->execute(mess, duration);
+          };
+
+          if (id(ev_eau_on_start_time) == 0) {
+            std::string mess = "ESP178 Defaut Appoint Eau->EV ouverte mais temps de depart non initialise, fermeture securite";
+            fermer_securite(mess, 0);
+            return;
+          }
+
+          uint32_t now = millis() / 1000;
+          uint32_t duration = now - id(ev_eau_on_start_time);
+
+          uint32_t tempo_niveau_s = (uint32_t)(id(tempo_secu_niveau_appoint_eau).state * 60.0f);
+          uint32_t duree_max_s = (uint32_t)(id(duree_maxi_ev_eau).state * 60.0f);
+
+          // Sécurité 1 : état incohérent
+          // LSH dans l'eau alors que LSL est découvert.
+          if (niveau_defaut) {
+            std::string mess = "ESP178 Defaut Appoint Eau->Sondes incoherentes LSH=1 LSL=0 pendant remplissage, fermeture EV eau";
+            fermer_securite(mess, duration);
+            return;
+          }
+
+          // Sécurité 2 : niveau haut atteint
+          // Active aussi en marche forcée.
+          if (niveau_haut) {
+            std::string mess = "ESP178 Appoint Eau->Niveau haut atteint, fermeture EV eau";
+            fermer_securite(mess, duration);
+            return;
+          }
+
+          // Sécurité 3 : EV ouverte mais LSL reste découvert trop longtemps
+          // Cas typiques :
+          // - capteur LSL HS ou débranché
+          // - arrivée d'eau fermée
+          // - niveau qui ne monte pas
+          // - fuite
+          //
+          // Elle s'applique uniquement si on a démarré niveau bas,
+          // donc avec LSL découvert au départ.
+          if (!id(ev_eau_secu_niveau_declenchee) &&
+              duration >= tempo_niveau_s &&
+              id(ev_eau_start_lsl_state) == false &&
+              lsl_eau == false &&
+              niveau_bas) {
+
+            id(ev_eau_secu_niveau_declenchee) = true;
+
+            std::string mess = "ESP178 Defaut Appoint Eau->EV ouverte depuis " +
+                               std::to_string(duration / 60) +
+                               "min et LSL toujours decouvert. Niveau ne monte pas ou capteur/arrivee eau en defaut. Fermeture EV eau";
+
+            fermer_securite(mess, duration);
+            return;
+          }
+
+          // Sécurité 4 : durée maxi absolue d'ouverture
+          if (duration >= duree_max_s) {
+            std::string mess = "ESP178 Defaut Appoint Eau->Vanne eau ouverte depuis " +
+                               std::to_string(duration / 3600) + "h " +
+                               std::to_string((duration % 3600) / 60) + "min " +
+                               std::to_string(duration % 60) +
+                               "s, fermeture forcee";
+
+            fermer_securite(mess, duration);
+            return;
+          }
+
+          id(securite_appoint_eau).publish_state("Surveillance active");
+
+          ESP_LOGI("SECURITE_EAU",
+                   "Surveillance OK : EV ouverte depuis %u s | LSH=%d LSL=%d | bas=%d haut=%d defaut=%d",
+                   duration,
+                   lsh_eau,
+                   lsl_eau,
+                   niveau_bas,
+                   niveau_haut,
+                   niveau_defaut);

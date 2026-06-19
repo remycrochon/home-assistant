@@ -64,27 +64,39 @@ binary_sensor:
   - platform: template
     name: "Volet Ouvert"
     id: volet_ouvert
-    lambda: 'return id(volet_ouvert_etor).state ;'
-    on_state:
+    lambda: 'return id(volet_ouvert_etor).state;'
+    filters:
+      - delayed_on_off: 2s
+
+    on_press:
       then:
+        - lambda: |-
+            id(volet_ferme_off_time) = millis() / 1000;
+            ESP_LOGI("VOLET", "Volet ouvert, temporisation appoint eau demarree a %u secondes", id(volet_ferme_off_time));
+
+        - delay: 240s
+
         - if:
             condition:
-              - binary_sensor.is_on: volet_ouvert
-
+              and:
+                - binary_sensor.is_on: volet_ouvert
+                - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
             then:
+              - script.execute: _calcul_niveau_eau
+              - delay: 200ms
+              - script.execute: _regul_eau
               - lambda: |-
-                  id(volet_ferme_off_time) = millis() / 1000;
-                  ESP_LOGI("VOLET", "Volet ouvert, temporisation démarrée à %u secondes", id(volet_ferme_off_time));
-              - delay: 60s
-              - if:
-                  condition:
-                    and:
-                      - binary_sensor.is_on: volet_ouvert
-                      - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
-                  then:
-                    - script.execute: _regul_eau
-                    - lambda: |-
-                        ESP_LOGI("REGUL EAU", "Lancement Régulation Appoint Eau");
+                  ESP_LOGI("REGUL_EAU", "Lancement Regulation Appoint Eau apres ouverture volet et temporisation 240s");
+
+            else:
+              - lambda: |-
+                  ESP_LOGI("REGUL_EAU", "Appoint eau non lance : volet referme ou mode appoint eau different de Auto");
+
+    on_release:
+      then:
+        - lambda: |-
+            id(volet_ferme_off_time) = 0;
+            ESP_LOGI("VOLET", "Volet non ouvert, temporisation appoint eau annulee");
 
   - platform: template
     name: "Volet Ferme"

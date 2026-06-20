@@ -60,21 +60,6 @@ button:
     on_press:
       - script.execute: _regul_chlore
 
-  - platform: template
-    name: "BP_RAZ_Tps_Galet_Chlore"
-    on_press:
-      - sensor.duty_time.reset: _temps_galet_chlore
-
-binary_sensor:
-  # Etat galets Chlore
-  # Si Tps > à temps max alors = True
-  - platform: template
-    name: "Etat_Galets_Chlore"
-    id: _etat_galets_chlore
-    icon: mdi:biohazard
-    lambda: |-
-      return id(_temps_galet_chlore).state / 3600.0 > id(_tps_max_galet_chlore).state;
-
 datetime:
   - platform: template
     id: heure_injection_chlore
@@ -134,18 +119,6 @@ number:
     mode: box
     unit_of_measurement: "%"
     icon: mdi:percent
-
-  # Tps Max Galet Chlore
-  - platform: template
-    name: "tps_Max_galet_Chlore"
-    id: _tps_max_galet_chlore
-    optimistic: true
-    restore_value: true
-    mode: box
-    min_value: 0
-    max_value: 1000
-    unit_of_measurement: "h"
-    step: 1
 
   # Etalonnage du 17/05/2025: 4.957 l/h
   - platform: template
@@ -312,10 +285,6 @@ interval:
   - interval: 5s
     then:
       - script.execute: _memorisation_orp
-
-  - interval: 1h
-    then:
-      - script.execute: _fonction_galet_chlore
 
 script:
   # Si la pompe tourne depuis au moins "tempo_recirculation" on raffraichit la memoire de ORP
@@ -488,22 +457,3 @@ script:
                 format: "Arret Forcé ppe Chlore"
                 level: INFO
 
-  # Log état galets Chlore en heure
-  - id: _fonction_galet_chlore
-    then:
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Volume";'
-              - lambda: 'return id(_etat_galets_chlore).state == true;'
-          then:
-            - logger.log:
-                format: "Galets Chlore Dépassé"
-                level: INFO
-            - lambda: |-
-                std::string mess = "ESP178 Tps Utilisation Galets Chlore Atteint";
-                id(_message_telegram)->execute(mess.c_str(), 0);
-                id(_log_fichier)->execute(mess.c_str(), 0);
-          else:
-            - lambda: |-
-                id(_etat_galets_chlore).publish_state(false);

@@ -346,6 +346,67 @@ script:
                     - binary_sensor.is_on: volet_ouvert
                 then:
                   - lambda: |-
+                      if (!id(cde_ev_eau).state) {
+                        ESP_LOGI("EV_EAU", "Ouverture vanne eau Mode Auto : conditions OK");
+                        id(cde_ev_eau).turn_on();
+
+                        std::string mess = "ESP178 Appoint Eau->Ouverture EV eau Mode Auto";
+                        id(_log_fichier)->execute(mess, 0);
+                      } else {
+                        ESP_LOGI("EV_EAU", "EV eau deja ouverte");
+                      }
+
+                else:
+                  - lambda: |-
+                      ESP_LOGI("EV_EAU",
+                               "Ouverture EV eau refusee : defaut=%d haut=%d volet_ouvert=%d",
+                               id(niv_defaut).state,
+                               id(niv_haut).state,
+                               id(volet_ouvert).state);
+
+                      id(securite_appoint_eau).publish_state("Ouverture refusee - conditions non remplies");
+
+                  - switch.turn_off: cde_ev_eau
+
+      # Mode marche forcée
+      # Les sécurités restent actives.
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
+          then:
+            - logger.log:
+                format: "Ouverture vanne eau Mode Ma Force"
+                level: DEBUG
+            - switch.turn_on: cde_ev_eau
+
+      # Mode arrêt forcé
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
+          then:
+            - logger.log:
+                format: "Fermeture vanne eau Mode At Force"
+                level: DEBUG
+            - switch.turn_off: cde_ev_eau
+  - id: _regul_eau_old
+    mode: single
+    then:
+      - script.execute: _calcul_niveau_eau
+      - delay: 200ms
+
+      # Mode Auto
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
+          then:
+            - if:
+                condition:
+                  and:
+                    - binary_sensor.is_off: niv_defaut
+                    - binary_sensor.is_off: niv_haut
+                    - binary_sensor.is_on: volet_ouvert
+                then:
+                  - lambda: |-
                       uint32_t now = millis() / 1000;
 
                       if (id(volet_ferme_off_time) != 0 && (now - id(volet_ferme_off_time)) >= 240) {

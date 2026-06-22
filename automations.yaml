@@ -11,39 +11,6 @@
       repack: true
     action: recorder.purge
   mode: single
-- id: '1617199790692'
-  alias: Notification alarme niveau bas
-  description: ' '
-  triggers:
-  - entity_id:
-    - binary_sensor.esp178_piscine_niv_bas
-    from: 'on'
-    to: 'off'
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    trigger: state
-  conditions: []
-  actions:
-  - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      title: ALARME
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: Niveau bas Piscine
-  - action: select.select_option
-    data:
-      option: At_f
-    target:
-      entity_id:
-      - select.esp178_piscine_mode_fonct_appoint_eau
-  - action: switch.turn_off
-    metadata: {}
-    data: {}
-    target:
-      entity_id: switch.esp178_piscine_cde_ev_eau
-  mode: single
 - id: '1629296468909'
   alias: Robot AMX435 Surveillance Pluviometrie
   description: ''
@@ -1068,19 +1035,22 @@
     to:
     - 'off'
     id: p_garage
-  conditions:
-  - condition: sun
-    before: sunrise
-    after: sunset
-  - condition: numeric_state
-    entity_id: sensor.bh1750_illuminance
-    below: 10
+  - trigger: time_pattern
+    minutes: /30
+    id: 30mn
+  conditions: []
   actions:
   - choose:
     - conditions:
       - condition: trigger
         id:
         - Detecteur porte
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.bh1750_illuminance
+        below: 10
       sequence:
       - type: turn_on
         device_id: c7b28db8c025b2f0bd975382bc4011f0
@@ -1108,6 +1078,12 @@
         id:
         - FM Detection Cu
         - FM Detection Gg
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.bh1750_illuminance
+        below: 10
       sequence:
       - type: turn_on
         device_id: c7b28db8c025b2f0bd975382bc4011f0
@@ -1135,6 +1111,12 @@
       - condition: trigger
         id:
         - p_garage
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.bh1750_illuminance
+        below: 10
       sequence:
       - type: turn_on
         device_id: f15eea59fe7ba768c177c779594e0add
@@ -1145,6 +1127,22 @@
           minutes: 2
           seconds: 0
           milliseconds: 0
+      - type: turn_off
+        device_id: f15eea59fe7ba768c177c779594e0add
+        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id:
+        - 30mn
+      - condition: sun
+        before: sunset
+        after: sunrise
+      sequence:
+      - type: turn_off
+        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        entity_id: ba339bcc22bbcb00636e4b664078d906
+        domain: switch
       - type: turn_off
         device_id: f15eea59fe7ba768c177c779594e0add
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
@@ -1251,30 +1249,6 @@
       - action: script.activation_camera
         metadata: {}
         data: {}
-  mode: single
-- id: '1724083468200'
-  alias: Notification Niveau Haut
-  description: ' '
-  triggers:
-  - entity_id:
-    - binary_sensor.esp178_piscine_niv_haut
-    from: 'off'
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-    trigger: state
-  conditions: []
-  actions:
-  - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: '{{states("sensor.date_time") }}{{-"\n"-}}
-
-        Niveau Haut Piscine Atteint'
-      title: Avertissement!
   mode: single
 - id: '1726147313541'
   alias: Robot AMX435 Notif Erreur

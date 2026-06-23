@@ -6,7 +6,7 @@ substitutions:
   name_e1: esp182lorae1
   name_hub: esp181lorahub
   adress_ip: 192.168.0.182
-  duree_sommeil: "120s"
+  duree_sommeil: "900s"
   duree_reveil: "10s"  
 
 esphome:
@@ -32,7 +32,7 @@ esp32:
 # Enable logging
 logger:
   hardware_uart: UART0
-  level: VERBOSE
+  level: INFO
 
 api:
 

@@ -191,15 +191,6 @@ sensor:
     state_class: measurement
     icon: mdi:clock-start
 
-  - platform: duty_time
-    id: _temps_galet_chlore
-    name: "temps_galet_chlore"
-    sensor: ppe_filt_en_fonctionnement
-    restore: true
-    icon: mdi:clock-start
-    filters:
-      - round: 0
-
   # Ppe Chlore
   - platform: duty_time
     id: _temps_fonctionnement_ppe_chlore

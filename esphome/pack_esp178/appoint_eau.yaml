@@ -52,6 +52,20 @@ globals:
     restore_value: no
     initial_value: 'false'
 
+  - id: appoint_eau_auto_2_last_yday
+    type: int
+    restore_value: no
+    initial_value: '-1'
+
+datetime:
+  - platform: template
+    name: "Heure Appoint Eau Auto 2"
+    id: heure_appoint_eau_auto_2
+    type: time
+    icon: mdi:clock-time-five-outline
+    optimistic: true
+    restore_value: true
+    initial_value: "17:00:00"
 
 number:
   - platform: template
@@ -325,6 +339,38 @@ interval:
     then:
       - script.execute: _securite_appoint_eau
 
+  - interval: 30s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              auto now = id(sntp_time).now();
+
+              if (!now.is_valid()) {
+                return false;
+              }
+
+              int h = id(heure_appoint_eau_auto_2).hour;
+              int m = id(heure_appoint_eau_auto_2).minute;
+              int s = id(heure_appoint_eau_auto_2).second;
+
+              int now_s = now.hour * 3600 + now.minute * 60 + now.second;
+              int target_s = h * 3600 + m * 60 + s;
+
+              // Fenetre de 90 secondes pour ne pas rater le declenchement.
+              // Protection par jour pour eviter plusieurs lancements.
+              if (now_s >= target_s &&
+                  now_s < target_s + 90 &&
+                  id(appoint_eau_auto_2_last_yday) != now.day_of_year) {
+
+                id(appoint_eau_auto_2_last_yday) = now.day_of_year;
+                return true;
+              }
+
+              return false;
+
+          then:
+            - script.execute: _appoint_eau_auto_2
 
 script:
   - id: _regul_eau
@@ -367,6 +413,49 @@ script:
                       id(securite_appoint_eau).publish_state("Ouverture refusee - conditions non remplies");
 
                   - switch.turn_off: cde_ev_eau
+                  
+  - id: _appoint_eau_auto_2
+    mode: single
+    then:
+      - script.execute: _calcul_niveau_eau
+      - delay: 200ms
+
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
+              - binary_sensor.is_on: volet_ouvert
+              - binary_sensor.is_off: niv_defaut
+              - binary_sensor.is_off: niv_haut
+
+          then:
+            - lambda: |-
+                std::string mess = "ESP178 Appoint Eau->Declenchement appoint auto 2 : mode Auto, volet ouvert, conditions OK";
+
+                ESP_LOGI("EV_EAU", "%s", mess.c_str());
+
+                id(securite_appoint_eau).publish_state("Appoint auto 2 - conditions OK");
+                id(_log_fichier)->execute(mess, 0);
+
+            - script.execute: _regul_eau
+
+          else:
+            - lambda: |-
+                std::string mode = id(_Mode_Fonctionnement_regul_eau).current_option();
+
+                std::string mess = "ESP178 Appoint Eau->Appoint auto 2 ignore : mode=" +
+                                   mode +
+                                   " volet_ouvert=" +
+                                   std::to_string(id(volet_ouvert).state) +
+                                   " niv_haut=" +
+                                   std::to_string(id(niv_haut).state) +
+                                   " niv_defaut=" +
+                                   std::to_string(id(niv_defaut).state);
+
+                ESP_LOGI("EV_EAU", "%s", mess.c_str());
+
+                id(securite_appoint_eau).publish_state("Appoint auto 2 ignore - conditions non remplies");
+                id(_log_fichier)->execute(mess, 0);
 
       # Mode marche forcée
       # Les sécurités restent actives.

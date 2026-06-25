@@ -1,13 +1,13 @@
 
 # Enregistrement Base de Données externe MySql
 # https://www.home-assistant.io/integrations/recorder/
-
 recorder:
   db_url: !secret db_mysql
   auto_purge: true
   auto_repack: true
-  commit_interval: 15
+  commit_interval: 30
   purge_keep_days: 10
+
   include:
     domains:
       - binary_sensor
@@ -15,22 +15,19 @@ recorder:
       - input_datetime
       - input_number
       - input_select
-      - input_text
-      - number      
+      - number
       - sensor
       - switch
-      - button
       - light
       - utility_meter
       - vacuum
       - sun
       - device_tracker
       - weather
-      - group   
       - person
       - climate
       - lawn_mower
-      
+
   exclude:
     domains:
       - camera
@@ -52,4 +49,10 @@ recorder:
       - image
       - time
       - text
+      - button
       - group
+
+    entities:
+      - sensor.temps_de_fonctionnement_vmc_n0
+      - sensor.btc_mm_6h
+      - sensor.pc_bureau_uptime_secondes

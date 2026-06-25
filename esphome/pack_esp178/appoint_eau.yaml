@@ -404,15 +404,44 @@ script:
 
                 else:
                   - lambda: |-
-                      ESP_LOGI("EV_EAU",
-                               "Ouverture EV eau refusee : defaut=%d haut=%d volet_ouvert=%d",
-                               id(niv_defaut).state,
-                               id(niv_haut).state,
-                               id(volet_ouvert).state);
+                      std::string mess = "ESP178 Appoint Eau->Ouverture EV eau refusee Mode Auto : defaut=" +
+                                         std::to_string(id(niv_defaut).state) +
+                                         " haut=" +
+                                         std::to_string(id(niv_haut).state) +
+                                         " volet_ouvert=" +
+                                         std::to_string(id(volet_ouvert).state);
+
+                      ESP_LOGI("EV_EAU", "%s", mess.c_str());
 
                       id(securite_appoint_eau).publish_state("Ouverture refusee - conditions non remplies");
+                      id(_log_fichier)->execute(mess, 0);
 
                   - switch.turn_off: cde_ev_eau
+
+      # Mode marche forcée
+      # Les sécurités restent actives via on_turn_on et _securite_appoint_eau.
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
+          then:
+            - lambda: |-
+                std::string mess = "ESP178 Appoint Eau->Ouverture EV eau Mode Marche Forcee";
+                ESP_LOGI("EV_EAU", "%s", mess.c_str());
+                id(_log_fichier)->execute(mess, 0);
+
+            - switch.turn_on: cde_ev_eau
+
+      # Mode arrêt forcé
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
+          then:
+            - lambda: |-
+                std::string mess = "ESP178 Appoint Eau->Fermeture EV eau Mode Arret Force";
+                ESP_LOGI("EV_EAU", "%s", mess.c_str());
+                id(_log_fichier)->execute(mess, 0);
+
+            - switch.turn_off: cde_ev_eau
                   
   - id: _appoint_eau_auto_2
     mode: single
@@ -457,83 +486,53 @@ script:
                 id(securite_appoint_eau).publish_state("Appoint auto 2 ignore - conditions non remplies");
                 id(_log_fichier)->execute(mess, 0);
 
-      # Mode marche forcée
-      # Les sécurités restent actives.
-      - if:
-          condition:
-            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
-          then:
-            - logger.log:
-                format: "Ouverture vanne eau Mode Ma Force"
-                level: DEBUG
-            - switch.turn_on: cde_ev_eau
-
-      # Mode arrêt forcé
-      - if:
-          condition:
-            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
-          then:
-            - logger.log:
-                format: "Fermeture vanne eau Mode At Force"
-                level: DEBUG
-            - switch.turn_off: cde_ev_eau
-  - id: _regul_eau_old
-    mode: single
+  - id: _appoint_eau_apres_ouverture_volet
+    mode: restart
     then:
+      - delay: 240s
+
       - script.execute: _calcul_niveau_eau
       - delay: 200ms
 
-      # Mode Auto
       - if:
           condition:
-            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
+            and:
+              - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
+              - binary_sensor.is_on: volet_ouvert
+              - binary_sensor.is_off: niv_defaut
+              - binary_sensor.is_off: niv_haut
+
           then:
-            - if:
-                condition:
-                  and:
-                    - binary_sensor.is_off: niv_defaut
-                    - binary_sensor.is_off: niv_haut
-                    - binary_sensor.is_on: volet_ouvert
-                then:
-                  - lambda: |-
-                      uint32_t now = millis() / 1000;
+            - lambda: |-
+                std::string mess = "ESP178 Appoint Eau->Apres ouverture volet : conditions OK, lancement appoint auto";
+                ESP_LOGI("EV_EAU", "%s", mess.c_str());
 
-                      if (id(volet_ferme_off_time) != 0 && (now - id(volet_ferme_off_time)) >= 240) {
-                        if (!id(cde_ev_eau).state) {
-                          ESP_LOGI("EV_EAU", "Ouverture vanne eau Mode Auto apres temporisation de 240s");
-                          id(cde_ev_eau).turn_on();
-                        }
-                      } else {
-                        ESP_LOGI("EV_EAU", "Tempo volet non terminee : ouverture EV eau interdite");
-                      }
+                id(securite_appoint_eau).publish_state("Apres ouverture volet - conditions OK");
+                id(_log_fichier)->execute(mess, 0);
 
-                else:
-                  - logger.log:
-                      format: "Conditions non remplies pour ouverture vanne eau Mode Auto"
-                      level: INFO
-                  - switch.turn_off: cde_ev_eau
+            - script.execute: _regul_eau
 
-      # Mode marche forcée
-      # Les sécurités restent actives.
-      - if:
-          condition:
-            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Ma_f";'
-          then:
-            - logger.log:
-                format: "Ouverture vanne eau Mode Ma Force"
-                level: DEBUG
-            - switch.turn_on: cde_ev_eau
+          else:
+            - lambda: |-
+                std::string mode = id(_Mode_Fonctionnement_regul_eau).current_option();
 
-      # Mode arrêt forcé
-      - if:
-          condition:
-            lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "At_f";'
-          then:
-            - logger.log:
-                format: "Fermeture vanne eau Mode At Force"
-                level: DEBUG
-            - switch.turn_off: cde_ev_eau
+                std::string mess = "ESP178 Appoint Eau->Apres ouverture volet ignore : mode=" +
+                                   mode +
+                                   " volet_ouvert=" +
+                                   std::to_string(id(volet_ouvert).state) +
+                                   " niv_haut=" +
+                                   std::to_string(id(niv_haut).state) +
+                                   " niv_defaut=" +
+                                   std::to_string(id(niv_defaut).state) +
+                                   " niv_bas=" +
+                                   std::to_string(id(niv_bas).state) +
+                                   " niv_inter=" +
+                                   std::to_string(id(niv_inter).state);
 
+                ESP_LOGI("EV_EAU", "%s", mess.c_str());
+
+                id(securite_appoint_eau).publish_state("Apres ouverture volet ignore - conditions non remplies");
+                id(_log_fichier)->execute(mess, 0);
 
   - id: _calcul_niveau_eau
     mode: single

@@ -372,18 +372,6 @@ ecs_off_off:
   mode: single
   icon: mdi:window-shutter
   description: ''
-ssh_command:
-  alias: ssh_command
-  sequence:
-  - action: python_script.ssh_command
-    metadata: {}
-    data:
-      file: /homeassistant/python_scripts/ssh_command.py
-      host: 192.168.0.84
-      user: remy
-      pass: 56835683
-      command: ls -la
-  description: ''
 activation_camera:
   sequence:
   - action: telegram_bot.send_message
@@ -436,7 +424,7 @@ activation_camera_2:
       - switch.cuisine_recordings
       - switch.garage_ext_recordings
     data: {}
-  alias: Activation caméra
+  alias: Activation caméras
   description: ''
 envoyer_message_log_esp178:
   alias: Envoyer un message log depuis ESP178

@@ -55,7 +55,7 @@ sensor:
     address: 0x3649465609646128
     name: "Temp Trés Haut"
     id: temp_th
-    update_interval: 10s
+    update_interval: 120s
     device_class: temperature
     accuracy_decimals: 2
 
@@ -63,7 +63,7 @@ sensor:
     address: 0xc0ae154809646128
     name: "Temp Haut"
     id: temp_h
-    update_interval: 10s
+    update_interval: 120s
     device_class: temperature
     accuracy_decimals: 2
 
@@ -71,7 +71,7 @@ sensor:
     address: 0xab48885709646128
     name: "temp_ecs"
     id: temp_m
-    update_interval: 10s
+    update_interval: 120s
     device_class: temperature
     accuracy_decimals: 2
     filters: 
@@ -81,7 +81,7 @@ sensor:
     address: 0x82012111efe81d28
     name: "Temp Bas"
     id: temp_b
-    update_interval: 10s
+    update_interval: 120s
     device_class: temperature
     accuracy_decimals: 2
     
@@ -89,7 +89,7 @@ sensor:
     address: 0x61b6945709646128
     name: "Temp Trés Bas"
     id: temp_tb
-    update_interval: 10s
+    update_interval: 120s
     device_class: temperature
     accuracy_decimals: 2
 
@@ -97,7 +97,7 @@ sensor:
     address: 0x94000000855c4e28
     name: "Temp Sortie Régulateur"
     id: temp_s_regule
-    update_interval: 10s
+    update_interval: 60s
     device_class: temperature
     accuracy_decimals: 2
 

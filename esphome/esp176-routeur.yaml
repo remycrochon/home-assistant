@@ -24,7 +24,7 @@ substitutions:
   GPIO_ZC_pin: "GPIO34"
 
 packages:
-  jsk: !include pack_esp176/jsk.yaml
+  jsk: !include pack_esp176/reseau_victron_ecs.yaml
   table_pu: !include pack_esp176/table_pu.yaml
 
 esphome:

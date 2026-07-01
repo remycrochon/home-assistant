@@ -1,35 +1,45 @@
 # Pour memoire:
 #   - Conso au boot: ~ 105mA
 #   - Conso sans WiFi: ~40 mA
-#   - Cons en veille: 4.1 mA
+#   - Conso en veille: 4.1 mA
+
 substitutions:
   name_e1: esp182lorae1
   name_hub: esp181lorahub
   adress_ip: 192.168.0.182
-  duree_sommeil: "900s"
-  duree_reveil: "10s"  
 
+  # Sommeil normal : 15 min
+  duree_sommeil: "600s"
+
+  # Butée max d'éveil.
+  # L'ESP se rendormira avant via deep_sleep.enter si tout se passe bien.
+  duree_reveil: "20s"
+  # Mode actif / WiFi / test : fréquence d'émission LoRa
+  # Mets 15s ou 30s pour tester, 60s ensuite.
+  periode_emission_wifi: "15s"
+  
 esphome:
   name: ${name_e1}
-  # Executer au reveil de l'ESP 
+
+  # Exécuté quand tout est initialisé.
+  # Ancienne valeur 800 = trop tôt pour Dallas / Packet Transport.
   on_boot:
-    priority: 800
+    priority: -100
     then:
+      - delay: 2s
       - script.execute: maj_data
 
-  # Executer à l'endormissement de l'ESP
-  on_shutdown: 
+  on_shutdown:
     then:
       - switch.turn_off: led
-      - sx127x.set_mode_sleep # On endort LoRa
-        
+      - sx127x.set_mode_sleep
+
 esp32:
   board: esp32-c3-devkitm-1
   cpu_frequency: 160MHZ
   framework:
     type: esp-idf
 
-# Enable logging
 logger:
   hardware_uart: UART0
   level: INFO
@@ -65,8 +75,8 @@ spi:
 sx127x:
   data_rate: 1Mhz
   dio0_pin: GPIO05
-  cs_pin: GPIO07 
-  rst_pin: GPIO03 
+  cs_pin: GPIO07
+  rst_pin: GPIO03
   pa_pin: BOOST
   pa_power: 8
   bandwidth: 125_0kHz
@@ -78,23 +88,19 @@ sx127x:
   spreading_factor: 7
   preamble_size: 8
   coding_rate: CR_4_6
-  #on_packet:
-  #  then:
-  #    - lambda: |-
-  #        ESP_LOGD("lambda", "packet %s", format_hex(x).c_str());
-  #        ESP_LOGD("lambda", "rssi %.2f", rssi);
-  #        ESP_LOGD("lambda", "snr %.2f", snr);
 
 packet_transport:
   platform: sx127x
   id: pt
-  #update_interval: 15s
+
+  # Important : pas d'envoi périodique automatique.
+  # On force l'envoi uniquement après lecture capteur valide.
+  update_interval: never
+
   encryption: !secret encryption_key
   rolling_code_enable: false
-  providers:
-    - name: ${name_e1}
-      encryption: !secret encryption_key
-  sensors: 
+
+  sensors:
     - id: ${name_e1}_temperature
     - id: ${name_e1}_compteur
 
@@ -111,93 +117,161 @@ globals:
 
 sensor:
   - platform: dallas_temp
+    name: ${name_e1}_temperature_raw
+    id: temp_dallas_raw
+    internal: true
+    accuracy_decimals: 2
+    update_interval: never
+    filters:
+      - filter_out: nan
+
+  - platform: template
     name: ${name_e1}_temperature
     id: ${name_e1}_temperature
+    device_class: temperature
+    unit_of_measurement: "°C"
+    state_class: measurement
     accuracy_decimals: 2
-    update_interval: 60min
+    update_interval: never
 
   - platform: template
     name: ${name_e1}_compteur
     id: ${name_e1}_compteur
     unit_of_measurement: "count"
+    accuracy_decimals: 0
     update_interval: never
-    lambda: |-
-      return id(compteur);
-
+    
 binary_sensor:
   - platform: gpio
     name: Sleep Ent
-    pin: 
+    pin:
       number: GPIO0
       inverted: true
       mode:
         input: true
         pullup: true
     id: sleep_ent
-    internal: False
-
+    internal: false
+    filters:
+      - delayed_on: 500ms
+      - delayed_off: 500ms
 switch:
   - platform: gpio
     id: led
     name: led
     pin:
       number: GPIO20
-      inverted: False
+      inverted: false
     restore_mode: ALWAYS_OFF
 
   - platform: restart
     name: "Restart"
 
-
-# Mode "On endort l'ESP"
 deep_sleep:
   id: sleep_xmin
-  run_duration: ${duree_reveil} # Butée Max
-  sleep_duration: ${duree_sommeil} 
+  run_duration: ${duree_reveil}
+  sleep_duration: ${duree_sommeil}
 
-# Intervalle pour gérer l'envoi des mesures et deep sleep dynamique
+# Intervalle uniquement pour le mode normal/test.
+# En mode sleep, seul on_boot déclenche l'envoi.
 interval:
-  - interval: 10s
+  - interval: ${periode_emission_wifi}
     then:
-      - script.execute: maj_data
+      - if:
+          condition:
+            binary_sensor.is_off: sleep_ent
+          then:
+            - script.execute: maj_data
 
 script:
-  # Envoi LoRa en fonction du mode Nomal ou Sleep sélectionné par Input_number.mode_test_esp182 dans home Assistant
+  # Mode sleep si Sleep Ent = ON.
+  # Mode actif/test si Sleep Ent = OFF.
   - id: maj_data
+    mode: single
     then:
-     - delay: 1s # Le temps de lire le GPIO
-     - if:
+      - delay: 1s
+
+      - if:
           condition:
             binary_sensor.is_on: sleep_ent
-          # Mode Sleep
-          then: 
+
+          # ======================================================
+          # MODE SLEEP
+          # ======================================================
+          then:
+            - logger.log: "Mode sleep: WiFi OFF, lecture capteur, envoi LoRa puis sommeil"
+
             - switch.turn_on: led
             - delay: 200ms
             - switch.turn_off: led
-            - logger.log: "Mode sleep: WiFi OFF, envoi LoRa puis sommeil"
+
             - wifi.disable
-            - script.execute: lecture_capteur
-            - delay: 2s
-            - deep_sleep.enter: sleep_xmin
-          # Mode Normal
-          else:
-            - switch.turn_on: led
-            - delay: 200ms
-            - switch.turn_off: led            
-            - logger.log: "Mode actif: WiFi actif, envoi temp toutes les 10s"
-            - wifi.enable # Active le WIFI
-            - deep_sleep.prevent: sleep_xmin # Empeche la mise en veille
+
             - script.execute: lecture_capteur
 
-  # Mise à jour des capteurs avant envoi par LoRa
+            # Petite marge pour finir l'envoi LoRa avant sommeil.
+            - delay: 2s
+
+            - deep_sleep.enter: sleep_xmin
+
+          # ======================================================
+          # MODE NORMAL / TEST
+          # ======================================================
+          else:
+            - logger.log: "Mode actif: WiFi actif, deep sleep bloque, envoi LoRa toutes les 60s"
+
+            - deep_sleep.prevent: sleep_xmin
+            - wifi.enable
+
+            - switch.turn_on: led
+            - delay: 200ms
+            - switch.turn_off: led
+
+            - script.execute: lecture_capteur
+
+  # Lecture DS18B20 puis envoi LoRa.
   - id: lecture_capteur
-    then: 
-      # Force la lecture du capteur avant de publier
-      - component.update: ${name_e1}_temperature
-      - lambda: |-
-          // Incrémente le compteur et le limite à 99
-          id(compteur) = (id(compteur) + 1) % 100;
-          id(${name_e1}_compteur).publish_state(id(compteur));
-      - delay: 1s   # petit délai pour que la lecture se fasse
-      - component.update: pt # Mise à Jour LoRa
-      
+    mode: single
+    then:
+      - logger.log: "Lecture DS18B20 demandee"
+
+      # Lance la conversion Dallas brute, non envoyée directement en LoRa
+      - component.update: temp_dallas_raw
+
+      # Attente DS18B20
+      - delay: 1500ms
+
+      - if:
+          condition:
+            lambda: |-
+              return !isnan(id(temp_dallas_raw).state);
+
+          then:
+            - lambda: |-
+                id(compteur) = (id(compteur) + 1) % 100;
+
+                // Publication des deux capteurs LoRa dans la même lambda.
+                // Ainsi packet_transport les voit valides ensemble.
+                id(${name_e1}_temperature).publish_state(id(temp_dallas_raw).state);
+                id(${name_e1}_compteur).publish_state(id(compteur));
+
+                ESP_LOGI(
+                  "LORA_E1",
+                  "Mesure LoRa valide: temp=%.2f °C, compteur=%d",
+                  id(temp_dallas_raw).state,
+                  id(compteur)
+                );
+
+            # Laisse packet_transport envoyer la trame déclenchée par les publish_state
+            - delay: 1500ms
+
+            # Optionnel : force une trame complète finale.
+            # Tu peux le laisser au début du test, puis le supprimer si tu veux moins de paquets.
+            - component.update: pt
+
+            - delay: 1500ms
+
+            - logger.log: "Trame LoRa E1 envoyee"
+
+          else:
+            - logger.log: "DS18B20 invalide / nan: pas d'envoi LoRa"

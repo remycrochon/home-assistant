@@ -8,7 +8,10 @@ esphome:
 esp32:
   board: esp32dev
   framework:
-    type: arduino
+    type: esp-idf
+    advanced:
+      minimum_chip_revision: "3.1"
+      sram1_as_iram: true
 
 wifi:
   networks:
@@ -100,99 +103,193 @@ sensor:
     update_interval: 60s
     device_class: temperature
     accuracy_decimals: 2
-
+    
+  - platform: dallas_temp
+    address: 0x3000000085883228
+    name: "Temp Eau Froide ECS"
+    id: temp_ef
+    update_interval: 120s
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 2
+    
   - platform: template
-    name: "Ballon volume eau chaude"
+    name: "Ballon litres équivalents 40°C"
     id: ballon_volume_chaud
     unit_of_measurement: "L"
     icon: "mdi:water-thermometer"
+    state_class: measurement
     accuracy_decimals: 0
-    update_interval: 10s
+    update_interval: 120s
     lambda: |-
-      // Paramètres physiques
-      const float V_TOTAL = 200.0f;   // volume total du ballon en litres
-      const float T_SEUIL = 40.0f;    // température mini eau "utile"
-      const float K = 4.0f;           // raideur de la transition hyperbolique (2 à 6)
+      // ==========================================================
+      // Litres équivalents à 40°C
+      // + debug détaillé publié dans text_sensor Debug ECS
+      // ==========================================================
 
-      // Récupération des 5 sondes (du haut vers le bas)
-      float T[5] = {
+      const float V_TOTAL = 200.0f;          // Volume physique ballon
+      const float T_CIBLE = 40.0f;           // Température utile
+      const float T_FROIDE_SECOURS = 15.0f;  // Valeur secours eau froide
+
+      const int SEGMENTS = 4;
+      const float V_SEG = V_TOTAL / SEGMENTS;
+
+      float T_RAW[5] = {
         id(temp_th).state,  // Très haut
         id(temp_h).state,   // Haut
         id(temp_m).state,   // Milieu
-        id(temp_b).state,   // Bas (résistance)
+        id(temp_b).state,   // Bas
         id(temp_tb).state   // Très bas
       };
 
-      bool all_ok = true;
+      float T[5] = {
+        T_RAW[0],
+        T_RAW[1],
+        T_RAW[2],
+        T_RAW[3],
+        T_RAW[4]
+      };
+
+      // Vérification des 5 sondes ballon
       for (int i = 0; i < 5; i++) {
         if (isnan(T[i])) {
-          all_ok = false;
+          char dbg[512];
+          snprintf(dbg, sizeof(dbg),
+            "ERREUR ECS\n"
+            "Sonde ballon manquante\n"
+            "TH: %.2f°C\n"
+            "H : %.2f°C\n"
+            "M : %.2f°C\n"
+            "B : %.2f°C\n"
+            "TB: %.2f°C\n"
+            "Dernier volume valide: %.0f L",
+            T_RAW[0], T_RAW[1], T_RAW[2], T_RAW[3], T_RAW[4],
+            id(last_volume_chaud)
+          );
+          id(debug_ecs).publish_state(std::string(dbg));
+
+          ESP_LOGW("ecs", "Lecture DS18B20 ballon manquante -> conservation last_volume_chaud = %.0f L", id(last_volume_chaud));
+          return id(last_volume_chaud);
         }
       }
 
-      // Si une sonde est indispo → on garde le dernier volume valide
-      if (!all_ok) {
-        ESP_LOGW("ecs", "Lecture DS18B20 manquante → on garde last_volume_chaud = %.0f L", id(last_volume_chaud));
+      // Température eau froide mesurée
+      float T_FROIDE_RAW = id(temp_ef).state;
+      float T_FROIDE = T_FROIDE_RAW;
+      const char* mode_ef = "mesuree";
+
+      // Garde-fou eau froide
+      if (isnan(T_FROIDE) || T_FROIDE < 5.0f || T_FROIDE > 25.0f) {
+        ESP_LOGW("ecs", "Temp EF incoherente %.2f°C -> utilisation secours %.1f°C", T_FROIDE, T_FROIDE_SECOURS);
+        T_FROIDE = T_FROIDE_SECOURS;
+        mode_ef = "secours";
+      }
+
+      if (T_FROIDE >= T_CIBLE - 1.0f) {
+        char dbg[512];
+        snprintf(dbg, sizeof(dbg),
+          "ERREUR ECS\n"
+          "Temp EF trop proche de la cible\n"
+          "EF brute: %.2f°C\n"
+          "EF utilisee: %.2f°C\n"
+          "T cible: %.1f°C\n"
+          "Dernier volume valide: %.0f L",
+          T_FROIDE_RAW,
+          T_FROIDE,
+          T_CIBLE,
+          id(last_volume_chaud)
+        );
+        id(debug_ecs).publish_state(std::string(dbg));
+
+        ESP_LOGW("ecs", "Temp EF trop proche de T_CIBLE -> conservation last_volume_chaud = %.0f L", id(last_volume_chaud));
         return id(last_volume_chaud);
       }
 
-      // 🔧 Correction monotone :
-      // on impose que T[0] >= T[1] >= T[2] >= T[3] >= T[4]
+      // Correction monotone :
+      // Très Haut >= Haut >= Milieu >= Bas >= Très Bas
+      int corrections = 0;
       for (int i = 1; i < 5; i++) {
-        if (T[i] > T[i-1]) {
-          T[i] = T[i-1];
+        if (T[i] > T[i - 1]) {
+          T[i] = T[i - 1];
+          corrections++;
         }
       }
 
-      const int   SEGMENTS = 4;                  // 5 sondes → 4 segments verticaux
-      const float V_SEG    = V_TOTAL / SEGMENTS; // volume par segment
-      float volume = 0.0f;
+      float litres_eq_40 = 0.0f;
+      float seg_litres[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
       for (int i = 0; i < SEGMENTS; i++) {
-        float Th = T[i];       // température en haut du segment
-        float Tb = T[i+1];     // température en bas du segment
-        float f  = 0.0f;       // fraction d'eau chaude dans le segment (0..1)
+        float Th = T[i];
+        float Tb = T[i + 1];
 
-        if (Th >= T_SEUIL && Tb >= T_SEUIL) {
-          // Segment entièrement au-dessus du seuil
-          f = 1.0f;
-        } else if (Th < T_SEUIL && Tb < T_SEUIL) {
-          // Segment entièrement en dessous du seuil
-          f = 0.0f;
-        } else {
-          // Zone de transition : on interpole + correction hyperbolique
-          float denom = Th - Tb;
-
-          if (fabs(denom) < 0.01f) {
-            // Gradient quasi nul → on considère homogène
-            f = (Th >= T_SEUIL) ? 1.0f : 0.0f;
-          } else {
-            // interpolation linéaire de la position de T_SEUIL entre Th et Tb
-            float f_lin = (Th - T_SEUIL) / denom;
-            if (f_lin < 0.0f) f_lin = 0.0f;
-            if (f_lin > 1.0f) f_lin = 1.0f;
-
-            // Application d'une sigmoïde hyperbolique autour de 0.5
-            float x   = f_lin - 0.5f;      // recentrage en 0
-            float num = tanh(K * x);
-            float den = tanh(K * 0.5f);    // normalisation pour garder [0,1]
-            float f_hyp = 0.5f * (num / den + 1.0f);
-
-            f = f_hyp;
-          }
+        // Segment entièrement sous la température utile
+        if (Th < T_CIBLE && Tb < T_CIBLE) {
+          seg_litres[i] = 0.0f;
+          continue;
         }
 
-        // Sécurité bornes
-        if (f < 0.0f) f = 0.0f;
-        if (f > 1.0f) f = 1.0f;
+        // Segment entièrement au-dessus de la température utile
+        if (Th >= T_CIBLE && Tb >= T_CIBLE) {
+          float T_moy = (Th + Tb) / 2.0f;
+          float facteur = (T_moy - T_FROIDE) / (T_CIBLE - T_FROIDE);
 
-        volume += f * V_SEG;
+          if (facteur < 0.0f) facteur = 0.0f;
+
+          seg_litres[i] = V_SEG * facteur;
+          litres_eq_40 += seg_litres[i];
+          continue;
+        }
+
+        // Segment traversant le seuil 40°C
+        float denom = Th - Tb;
+
+        if (fabs(denom) < 0.01f) {
+          seg_litres[i] = 0.0f;
+          continue;
+        }
+
+        float fraction_chaude = (Th - T_CIBLE) / denom;
+
+        if (fraction_chaude < 0.0f) fraction_chaude = 0.0f;
+        if (fraction_chaude > 1.0f) fraction_chaude = 1.0f;
+
+        float volume_chaud = V_SEG * fraction_chaude;
+        float T_moy_chaude = (Th + T_CIBLE) / 2.0f;
+
+        float facteur = (T_moy_chaude - T_FROIDE) / (T_CIBLE - T_FROIDE);
+
+        if (facteur < 0.0f) facteur = 0.0f;
+
+        seg_litres[i] = volume_chaud * facteur;
+        litres_eq_40 += seg_litres[i];
       }
 
-      // On mémorise le dernier volume valide
-      id(last_volume_chaud) = volume;
-      return volume;
+      id(last_volume_chaud) = litres_eq_40;
 
+      // Debug court compatible Home Assistant
+      char dbg[240];
+      snprintf(dbg, sizeof(dbg),
+        "ECS %.0fL | EF %.1f->%.1f %s | T %.1f/%.1f/%.1f/%.1f/%.1f | S %.0f/%.0f/%.0f/%.0f | C%d",
+        litres_eq_40,
+        T_FROIDE_RAW,
+        T_FROIDE,
+        mode_ef,
+        T[0], T[1], T[2], T[3], T[4],
+        seg_litres[0], seg_litres[1], seg_litres[2], seg_litres[3],
+        corrections
+      );
+
+      id(debug_ecs).publish_state(std::string(dbg));
+
+      return litres_eq_40;    
+
+    
+text_sensor:
+  - platform: template
+    name: "Debug ECS"
+    id: debug_ecs
+    icon: "mdi:text-box-outline"
+    update_interval: never
 binary_sensor:
   - platform: status
     name: "Status"

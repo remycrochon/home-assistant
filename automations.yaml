@@ -3630,7 +3630,7 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 15
+      seconds: 1
     id: rafale
   - trigger: sun
     event: sunset
@@ -3641,6 +3641,16 @@
     - sensor.sun_elevation
     below: input_number.seuil_bas_elevation_store_terrasse
     id: Elevation
+  - trigger: cover.shade_opened
+    target:
+      area_id: terrasse
+    options:
+      behavior: each
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 5
+    id: store_ouvert
   conditions:
   - condition: device
     device_id: 88221e2f7a125b74f30b7cf7cf12054a
@@ -3653,7 +3663,10 @@
       - condition: trigger
         id:
         - rafale
-        - Elevation
+        - store_ouvert
+      - condition: numeric_state
+        entity_id: sensor.vp2_rafale
+        above: input_number.seuil_haut_rafale_de_vent
       sequence:
       - device_id: 88221e2f7a125b74f30b7cf7cf12054a
         domain: cover
@@ -3670,7 +3683,9 @@
             }} m/s'
     - conditions:
       - condition: trigger
-        id: coucher_soleil
+        id:
+        - coucher_soleil
+        - Elevation
       sequence:
       - device_id: 88221e2f7a125b74f30b7cf7cf12054a
         domain: cover

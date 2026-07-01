@@ -4,7 +4,6 @@ substitutions:
   name_e2: esp183lorae2
   name_hub: esp181lorahub
 
-
 esphome:
   name: ${name_hub}
   
@@ -15,7 +14,6 @@ esp32:
   framework:
     type: esp-idf
 
-# Enable logging
 logger:
   hardware_uart: UART0
   level: DEBUG
@@ -41,22 +39,67 @@ wifi:
     gateway: 192.168.0.254
     subnet: 255.255.255.0
     dns1: 192.168.0.254
-    #dns1: !secret dns1
     dns2: !secret dns2
 
-#web_server:
-#  port: 80
+# web_server:
+#   port: 80
 
 spi:
-  clk_pin: GPIO04 #04
-  mosi_pin: GPIO06 #07
-  miso_pin: GPIO01 #02
+  clk_pin: GPIO04
+  mosi_pin: GPIO06
+  miso_pin: GPIO01
+
+globals:
+  - id: e1_rx_packets
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+  - id: e1_temp_updates
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+  - id: e1_cpt_updates
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+  - id: e1_temp_nan
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+  - id: e1_cpt_nan
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+  - id: e1_last_rssi
+    type: float
+    restore_value: no
+    initial_value: 'NAN'
+
+  - id: e1_last_snr
+    type: float
+    restore_value: no
+    initial_value: 'NAN'
+
+  - id: e1_last_temp
+    type: float
+    restore_value: no
+    initial_value: 'NAN'
+
+  - id: e1_last_cpt
+    type: float
+    restore_value: no
+    initial_value: 'NAN'
 
 sx127x:
   data_rate: 1Mhz
-  dio0_pin: GPIO05 #03
-  cs_pin: GPIO07 #010
-  rst_pin: GPIO03 #08  
+  dio0_pin: GPIO05
+  cs_pin: GPIO07
+  rst_pin: GPIO03
   pa_pin: BOOST
   pa_power: 8
   bandwidth: 125_0kHz
@@ -68,34 +111,80 @@ sx127x:
   spreading_factor: 7
   preamble_size: 8
   coding_rate: CR_4_6
+
   on_packet:
     then:
       - sensor.template.publish:
           id: lora_rssi
           state: !lambda 'return rssi;'
+
+      - sensor.template.publish:
+          id: lora_snr
+          state: !lambda 'return snr;'
+
       - lambda: |-
           ESP_LOGD("lambda", "packet %s", format_hex(x).c_str());
           ESP_LOGD("lambda", "rssi %.2f", rssi);
           ESP_LOGD("lambda", "snr %.2f", snr);
 
+          std::string payload(reinterpret_cast<const char*>(x.data()), x.size());
+
+          // On ne met à jour le debug E1 que si le paquet contient le nom de l'émetteur E1.
+          if (payload.find("${name_e1}") != std::string::npos) {
+            id(e1_rx_packets)++;
+            id(e1_last_rssi) = rssi;
+            id(e1_last_snr) = snr;
+
+            char temp_txt[24];
+            char cpt_txt[24];
+
+            if (isnan(id(e1_last_temp))) {
+              snprintf(temp_txt, sizeof(temp_txt), "nan");
+            } else {
+              snprintf(temp_txt, sizeof(temp_txt), "%.2f", id(e1_last_temp));
+            }
+
+            if (isnan(id(e1_last_cpt))) {
+              snprintf(cpt_txt, sizeof(cpt_txt), "nan");
+            } else {
+              snprintf(cpt_txt, sizeof(cpt_txt), "%.0f", id(e1_last_cpt));
+            }
+
+            char msg[260];
+            snprintf(
+              msg,
+              sizeof(msg),
+              "PKT E1=%d | RSSI=%.1f dBm | SNR=%.2f | Temp=%s | Cpt=%s | MajTemp=%d | MajCpt=%d | NanTemp=%d | NanCpt=%d",
+              id(e1_rx_packets),
+              id(e1_last_rssi),
+              id(e1_last_snr),
+              temp_txt,
+              cpt_txt,
+              id(e1_temp_updates),
+              id(e1_cpt_updates),
+              id(e1_temp_nan),
+              id(e1_cpt_nan)
+            );
+
+            id(debug_lora_e1).publish_state(msg);
+          }
+
 packet_transport:
   platform: sx127x
-  update_interval: 10s
-  encryption: !secret encryption_key
+  id: pt
   rolling_code_enable: false
   providers:
     - name: ${name_e1}
       encryption: !secret encryption_key
+
     - name: ${name_e2}
-      encryption: !secret encryption_key      
-  sensors: 
-    - id: temperature_${name_e1}
-    - id: compteur_${name_e1}
-    - id: contact_${name_e2}
-    - id: compteur_${name_e2}
+      encryption: !secret encryption_key
 
 sensor:
-  # Capteurs venant de lorae1
+  # ============================================================
+  # Capteurs venant de LoRa E1
+  # ============================================================
+
   - platform: packet_transport
     provider: ${name_e1}
     name: temperature_${name_e1}
@@ -103,7 +192,55 @@ sensor:
     id: temperature_${name_e1}
     remote_id: ${name_e1}_temperature
     device_class: temperature
+    unit_of_measurement: "°C"
+    state_class: measurement
     accuracy_decimals: 2
+
+    on_raw_value:
+      then:
+        - lambda: |-
+            id(e1_last_temp) = x;
+            id(e1_temp_updates)++;
+
+            if (isnan(x)) {
+              id(e1_temp_nan)++;
+            }
+
+            char temp_txt[24];
+            char cpt_txt[24];
+
+            if (isnan(id(e1_last_temp))) {
+              snprintf(temp_txt, sizeof(temp_txt), "nan");
+            } else {
+              snprintf(temp_txt, sizeof(temp_txt), "%.2f", id(e1_last_temp));
+            }
+
+            if (isnan(id(e1_last_cpt))) {
+              snprintf(cpt_txt, sizeof(cpt_txt), "nan");
+            } else {
+              snprintf(cpt_txt, sizeof(cpt_txt), "%.0f", id(e1_last_cpt));
+            }
+
+            char msg[260];
+            snprintf(
+              msg,
+              sizeof(msg),
+              "TEMP E1 | RSSI=%.1f dBm | SNR=%.2f | Temp=%s | Cpt=%s | MajTemp=%d | MajCpt=%d | NanTemp=%d | NanCpt=%d | PKT=%d",
+              id(e1_last_rssi),
+              id(e1_last_snr),
+              temp_txt,
+              cpt_txt,
+              id(e1_temp_updates),
+              id(e1_cpt_updates),
+              id(e1_temp_nan),
+              id(e1_cpt_nan),
+              id(e1_rx_packets)
+            );
+
+            id(debug_lora_e1).publish_state(msg);
+
+    filters:
+      - filter_out: nan
 
   - platform: packet_transport
     provider: ${name_e1}
@@ -111,26 +248,81 @@ sensor:
     internal: false
     id: compteur_${name_e1}
     remote_id: ${name_e1}_compteur
-    device_class: frequency
+    unit_of_measurement: "count"
+    accuracy_decimals: 0
 
-  # Capteurs venant de lorae2
+    on_raw_value:
+      then:
+        - lambda: |-
+            id(e1_last_cpt) = x;
+            id(e1_cpt_updates)++;
+
+            if (isnan(x)) {
+              id(e1_cpt_nan)++;
+            }
+
+            char temp_txt[24];
+            char cpt_txt[24];
+
+            if (isnan(id(e1_last_temp))) {
+              snprintf(temp_txt, sizeof(temp_txt), "nan");
+            } else {
+              snprintf(temp_txt, sizeof(temp_txt), "%.2f", id(e1_last_temp));
+            }
+
+            if (isnan(id(e1_last_cpt))) {
+              snprintf(cpt_txt, sizeof(cpt_txt), "nan");
+            } else {
+              snprintf(cpt_txt, sizeof(cpt_txt), "%.0f", id(e1_last_cpt));
+            }
+
+            char msg[260];
+            snprintf(
+              msg,
+              sizeof(msg),
+              "CPT E1 | RSSI=%.1f dBm | SNR=%.2f | Temp=%s | Cpt=%s | MajTemp=%d | MajCpt=%d | NanTemp=%d | NanCpt=%d | PKT=%d",
+              id(e1_last_rssi),
+              id(e1_last_snr),
+              temp_txt,
+              cpt_txt,
+              id(e1_temp_updates),
+              id(e1_cpt_updates),
+              id(e1_temp_nan),
+              id(e1_cpt_nan),
+              id(e1_rx_packets)
+            );
+
+            id(debug_lora_e1).publish_state(msg);
+
+    filters:
+      - filter_out: nan
+
+  # ============================================================
+  # Capteurs venant de LoRa E2
+  # ============================================================
+
   - platform: packet_transport
     provider: ${name_e2}
     name: contact_${name_e2}
     internal: false
     id: contact_${name_e2}
     remote_id: ${name_e2}_contact
-    #device_class: opening
 
   - platform: packet_transport
     provider: ${name_e2}
     name: compteur_${name_e2}
-    internal: false    
+    internal: false
     id: compteur_${name_e2}
     remote_id: ${name_e2}_compteur
-    device_class: frequency    
+    unit_of_measurement: "count"
+    accuracy_decimals: 0
+    filters:
+      - filter_out: nan
 
-  # Capteur pour RSSI
+  # ============================================================
+  # Debug radio local hub
+  # ============================================================
+
   - platform: template
     name: "LoRa RSSI"
     id: lora_rssi
@@ -138,11 +330,26 @@ sensor:
     device_class: signal_strength
     state_class: measurement
     accuracy_decimals: 1
-    update_interval: 60s
+    update_interval: never
+
+  - platform: template
+    name: "LoRa SNR"
+    id: lora_snr
+    unit_of_measurement: "dB"
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: never
+
+text_sensor:
+  - platform: template
+    name: "Debug LoRa E1"
+    id: debug_lora_e1
+    icon: mdi:radio-tower
+    update_interval: never
 
 binary_sensor:
   - platform: status
-    name: "Status"    
+    name: "Status"
 
 switch:
   - platform: restart

@@ -78,6 +78,7 @@ globals:
 binary_sensor:
   - platform: status
     name: "Status"
+
   - platform: template
     name: "R1 Demoulage Arme"
     id: r1_demoulage_arme_sensor
@@ -89,7 +90,6 @@ binary_sensor:
     id: r1_chauffe_en_cours_sensor
     lambda: |-
       return id(r1_cycle_chauffe_en_cours);
-
 
 number:
   - platform: template
@@ -172,20 +172,44 @@ number:
     mode: box
     restore_value: true
     optimistic: true
-    initial_value: 6
+    initial_value: 10
     unit_of_measurement: "°C"
 
   - platform: template
     name: "R1 Duree PID entretien"
     id: r1_duree_pid_entretien
     min_value: 0.5
-    max_value: 30
+    max_value: 60
     step: 0.5
     mode: box
     restore_value: true
     optimistic: true
-    initial_value: 2
+    initial_value: 20
     unit_of_measurement: "min"
+
+  - platform: template
+    name: "R1 Duree maxi PID entretien"
+    id: r1_duree_maxi_pid_entretien
+    min_value: 5
+    max_value: 60
+    step: 1
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 40
+    unit_of_measurement: "min"
+
+  - platform: template
+    name: "R1 Seuil securite bac entretien"
+    id: r1_seuil_securite_bac_entretien
+    min_value: -10
+    max_value: 5
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: -1
+    unit_of_measurement: "°C"
 
   - platform: template
     name: "R1 Delai entretien sans demoulage"
@@ -196,7 +220,7 @@ number:
     mode: box
     restore_value: true
     optimistic: true
-    initial_value: 6
+    initial_value: 2
     unit_of_measurement: "h"
 
   - platform: template
@@ -210,7 +234,7 @@ number:
     optimistic: true
     initial_value: 15
     unit_of_measurement: "°C"
-    
+
   - platform: template
     name: "R1 Duree maxi PID demoulage"
     id: r1_duree_maxi_pid_demoulage
@@ -220,8 +244,9 @@ number:
     mode: box
     restore_value: true
     optimistic: true
-    initial_value: 12
+    initial_value: 6
     unit_of_measurement: "min"
+
 sensor:
   - platform: dallas_temp
     one_wire_id: ow1
@@ -251,6 +276,14 @@ sensor:
           if (isnan(x)) return {};
           return x;
 
+  # Température bac lue depuis l'ESP179 via Home Assistant.
+  # Elle sert uniquement à sécuriser / prolonger l'entretien R1.
+  - platform: homeassistant
+    name: "Temp Bac Frigo ESP179"
+    id: temp_bac_frigo_esp179
+    entity_id: sensor.cuisine_esp179_test_ventilo_frigo_temp_ds18b20_bac_frigo_test
+    internal: false
+
   - platform: template
     name: "R1 Minutes sans demoulage"
     id: r1_minutes_sans_demoulage_sensor
@@ -279,7 +312,7 @@ sensor:
   - platform: pid
     name: "PID Erreur"
     type: ERROR
-    
+
   - platform: template
     name: "R1 Consigne PID Active"
     id: r1_consigne_pid_active
@@ -292,6 +325,7 @@ sensor:
       } else {
         return 0.0f;
       }
+
 text_sensor:
   - platform: template
     name: "R1 Etat"
@@ -303,18 +337,19 @@ text_sensor:
     id: r1_debug_court
     update_interval: 10s
     lambda: |-
-      char buffer[255];
+      char buffer[300];
 
       const char *etat = id(r1_etat).state.c_str();
 
       snprintf(buffer, sizeof(buffer),
-        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Td:%.1fC | Tr:%.1fC | Auto:%d | Manu:%d",
+        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Td:%.1fC | Tr:%.1fC | Bac:%.1fC | Auto:%d | Manu:%d",
         etat,
         id(r1_demoulage_arme),
         id(r1_cycle_chauffe_en_cours),
         id(r1_minutes_sans_demoulage),
         id(temp_ds18b20_d).state,
         id(temp_ds18b20_r).state,
+        id(temp_bac_frigo_esp179).state,
         id(r1_auto_degivr).state,
         id(chauffage_mode_manuel).state
       );
@@ -452,14 +487,12 @@ script:
                 mode: HEAT
                 target_temperature: !lambda 'return id(r1_consigne_pid_demoulage).state;'
 
-            # Durée minimale de chauffe obligatoire.
             - delay: !lambda |-
                 return (uint32_t)(id(r1_duree_pid_demoulage).state * 60000.0f);
 
             - lambda: |-
                 ESP_LOGI("r1", "PID demoulage : duree mini atteinte, maintien jusqu'au retour froid ou timeout");
 
-            # Après la durée mini, maintien tant que le serpentin n'est pas revenu au froid.
             - wait_until:
                 condition:
                   or:
@@ -503,10 +536,13 @@ script:
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = true;
                 id(r1_minutes_sans_demoulage) = 0;
+                id(r1_chauffe_start_ms) = millis();
                 id(r1_etat).publish_state("PID entretien");
-                ESP_LOGI("r1", "PID entretien debut : consigne %.1f C pendant %.1f min",
+                ESP_LOGI("r1", "PID entretien debut : consigne %.1f C, duree mini %.1f min, duree maxi %.1f min, seuil bac %.1f C",
                          id(r1_consigne_pid_entretien).state,
-                         id(r1_duree_pid_entretien).state);
+                         id(r1_duree_pid_entretien).state,
+                         id(r1_duree_maxi_pid_entretien).state,
+                         id(r1_seuil_securite_bac_entretien).state);
 
             - light.turn_off:
                 id: manual_heater
@@ -516,8 +552,59 @@ script:
                 mode: HEAT
                 target_temperature: !lambda 'return id(r1_consigne_pid_entretien).state;'
 
-            - delay: !lambda |-
-                return (uint32_t)(id(r1_duree_pid_entretien).state * 60000.0f);
+            # Phase 1 : chauffe au moins la duree entretien, sauf si le bac devient trop chaud.
+            - wait_until:
+                condition:
+                  or:
+                    - lambda: |-
+                        if (isnan(id(temp_bac_frigo_esp179).state)) return false;
+                        return id(temp_bac_frigo_esp179).state >= id(r1_seuil_securite_bac_entretien).state;
+
+                    - lambda: |-
+                        uint32_t duree_min_ms = (uint32_t)(id(r1_duree_pid_entretien).state * 60000.0f);
+                        return (millis() - id(r1_chauffe_start_ms)) >= duree_min_ms;
+
+            - lambda: |-
+                uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;
+                ESP_LOGI("r1", "PID entretien phase mini fin apres %u s : bac %.1f C / seuil %.1f C",
+                         duree_s,
+                         id(temp_bac_frigo_esp179).state,
+                         id(r1_seuil_securite_bac_entretien).state);
+
+            # Phase 2 : si le bac est encore assez froid, on prolonge jusqu'au seuil bac ou duree maxi.
+            - if:
+                condition:
+                  lambda: |-
+                    if (isnan(id(temp_bac_frigo_esp179).state)) {
+                      ESP_LOGW("r1", "PID entretien : temp bac inconnue, pas de prolongation");
+                      return false;
+                    }
+                    return id(temp_bac_frigo_esp179).state < id(r1_seuil_securite_bac_entretien).state;
+                then:
+                  - lambda: |-
+                      ESP_LOGI("r1", "PID entretien : prolongation active tant que bac < %.1f C ou jusqu'a %.1f min",
+                               id(r1_seuil_securite_bac_entretien).state,
+                               id(r1_duree_maxi_pid_entretien).state);
+
+                  - wait_until:
+                      condition:
+                        or:
+                          - lambda: |-
+                              if (isnan(id(temp_bac_frigo_esp179).state)) return true;
+                              return id(temp_bac_frigo_esp179).state >= id(r1_seuil_securite_bac_entretien).state;
+
+                          - lambda: |-
+                              uint32_t duree_max_ms = (uint32_t)(id(r1_duree_maxi_pid_entretien).state * 60000.0f);
+                              return (millis() - id(r1_chauffe_start_ms)) >= duree_max_ms;
+
+            - lambda: |-
+                uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;
+                ESP_LOGI("r1", "PID entretien arret apres %u s : bac %.1f C / seuil %.1f C / temp R %.1f C / temp D %.1f C",
+                         duree_s,
+                         id(temp_bac_frigo_esp179).state,
+                         id(r1_seuil_securite_bac_entretien).state,
+                         id(temp_ds18b20_r).state,
+                         id(temp_ds18b20_d).state);
 
             - climate.control:
                 id: pid_climate
@@ -528,6 +615,7 @@ script:
 
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = false;
+                id(r1_chauffe_start_ms) = 0;
                 id(r1_etat).publish_state("Repos");
                 ESP_LOGI("r1", "PID entretien fin : PID OFF");
 
@@ -536,7 +624,7 @@ interval:
     then:
       - lambda: |-
           id(r1_demoulage_arme_sensor).publish_state(id(r1_demoulage_arme));
-          id(r1_chauffe_en_cours_sensor).publish_state(id(r1_cycle_chauffe_en_cours));      
+          id(r1_chauffe_en_cours_sensor).publish_state(id(r1_cycle_chauffe_en_cours));
       - if:
           condition:
             and:
@@ -545,7 +633,6 @@ interval:
               - lambda: |-
                   return !id(r1_cycle_chauffe_en_cours);
           then:
-            # Armement quand le serpentin est bien froid.
             - if:
                 condition:
                   lambda: |-
@@ -560,7 +647,6 @@ interval:
                                  id(temp_ds18b20_d).state);
                       }
 
-            # Démoulage détecté quand le serpentin remonte après une phase froide.
             - if:
                 condition:
                   lambda: |-
@@ -599,7 +685,6 @@ interval:
                                id(r1_minutes_sans_demoulage));
                   - script.execute: r1_pid_entretien
 
-  # Sécurité température : ne limite pas la puissance, mais coupe si R1 monte anormalement haut.
   - interval: 5s
     then:
       - if:
@@ -620,6 +705,7 @@ interval:
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = false;
                 id(r1_demoulage_arme) = false;
+                id(r1_chauffe_start_ms) = 0;
                 id(r1_etat).publish_state("Securite temperature");
 
 climate:

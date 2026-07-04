@@ -259,7 +259,7 @@ openhasp:
       - obj: "p4b70" # Temp ECS
         properties:
           "text": >
-            {% set volume = states('sensor.esp139_ecs_ballon_volume_eau_chaude')|int(0) %}
+            {% set volume = states('sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc')|int(0) %}
             VOL={{ volume |round(0)}} L
       
 ############### Page 5 Elec ###############

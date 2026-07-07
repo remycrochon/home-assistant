@@ -321,7 +321,7 @@ number:
     restore_value: true
     mode: box
     min_value: 0
-    max_value: 200
+    max_value: 600
     unit_of_measurement: "L"
     step: 1
     icon: mdi:arrow-collapse-vertical
@@ -492,7 +492,7 @@ sensor:
 
   - platform: homeassistant
     entity_id: sensor.ecocompteur_clim
-    id: pu_clim
+    id: pu_clim1
     internal: true
     filters:
       - sliding_window_moving_average:
@@ -831,13 +831,13 @@ script:
           // 🔸 Branche HP : régulation sur production PV / batteries
           if (is_hp) {
             if (id(etatbus_ve).state == "Bulk" || id(etatbus_ve).state == "bulk") {  // Bulk
-              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state - id(res_pubatt).state;
+            pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_pac).state - id(res_pubatt).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(res_pubatt).state);
               id(regul) = "HP Reg. (Bulk)";
             }
             else if (id(etatbus_ve).state == "Absorption" || id(etatbus_ve).state == "absorption" || id(etatbus_ve).state == "Float"|| id(etatbus_ve).state == "float") { // Absorption / Float
-              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_clim).state - id(pu_pac).state + id(pu_batteries).state;
+              pdispo = id(pu_prod).state - id(conso_maison).state - id(pu_pac).state + id(pu_batteries).state;
               if (pdispo < 0.0f) pdispo = 0.0f;
               id(cons_batt_cours).publish_state(id(pu_batteries).state * -1);
               id(regul) = "HP Reg. (Abs/Float)";
@@ -849,10 +849,9 @@ script:
             }
 
             ESP_LOGI("regul",
-                     "HP → Prod=%.0fW | Conso=%.0fW | Clim=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW | Mode=%s",
+                     "HP → Prod=%.0fW | Conso=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW | Mode=%s",
                      id(pu_prod).state,
                      id(conso_maison).state,
-                     id(pu_clim).state,
                      id(pu_pac).state,
                      id(pu_batteries).state,
                      pdispo,
@@ -863,25 +862,23 @@ script:
             const float RESEAU_CIBLE_HC = 6000.0f;  // puissance max visée sur réseau
 
             float conso = id(conso_maison).state;
-            float clim  = id(pu_clim).state;
             float pac   = id(pu_pac).state;
             float batt  = id(pu_batteries).state;   // >0 décharge, <0 charge
 
             if (std::isnan(conso)) conso = 0;
-            if (std::isnan(clim))  clim  = 0;
             if (std::isnan(pac))   pac   = 0;
             if (std::isnan(batt))  batt  = 0;
 
             // p_dispo = cible - conso_maison - pu_clim - pu_pac - pu_batteries
-            pdispo = RESEAU_CIBLE_HC - conso - clim - pac - batt;
+            pdispo = RESEAU_CIBLE_HC - conso - pac - batt;
             if (pdispo < 0.0f) pdispo = 0.0f;
 
             id(regul) = "HC Chauffe ECS";
             id(cons_batt_cours).publish_state(batt);
 
             ESP_LOGI("regul",
-                     "HC → Cible=%.0fW | Conso=%.0fW | Clim=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW",
-                     RESEAU_CIBLE_HC, conso, clim, pac, batt, pdispo);
+                     "HC → Cible=%.0fW | Conso=%.0fW | PAC=%.0fW | Batt=%.0fW | p_dispo=%.0fW",
+                     RESEAU_CIBLE_HC, conso, pac, batt, pdispo);
           }
 
           // 🔹 Limitation pdispo par pmax

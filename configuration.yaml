@@ -27,3 +27,12 @@ scene: !include scenes.yaml
 #daikin_residential:
 #  email: !secret daikin_user
 #  password: !secret daikin_pwd
+zha:
+  zigpy_config:
+    ota:
+      extra_providers:
+        - type: advanced
+          path: /config/zigpy_ota
+          warning: I understand I can *destroy* my devices by enabling OTA updates from
+            files. Some OTA updates can be mistakenly applied to the wrong
+            device, breaking it. I am consciously using this at my own risk.

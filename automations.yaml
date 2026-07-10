@@ -1158,64 +1158,24 @@
     input:
       notify_device:
       - e3e6d517ff15af6c0ac17f0455a06420
-      include_time: time_enabled
-      time: 08:00:00
-      notify_title: Notification Batterie basse <30%
-      include_easy_notify: enable_easy_notify
-      include_custom_actions: disabled_custom_actions
-      custom_actions:
-      - action: notify.persistent_notification
-        metadata: {}
-        data:
-          message: 'les appareils suivant ont moins de 30% de     batterie:{{-"\n"-}}{{all_sensors|replace('',
-            '', ''\n'')| replace(''!'', ''.'') }}  '
-          title: Probleme Batterie !!!
-      action_button_to_do: '"{{all_sensors}}"'
-      sensor_selection: enable_battery_sensors_custom_group
-      button_entity: input_button.button_aide_batterie_basse
       include_button: enable_button_trigger
-      battery_level: 20
-      include_persistent_notification: enable_persistent_notification
+      button_entity: input_button.button_aide_batterie_basse
+      include_time: time_disabled
+      time: 08:00:00
+      sensor_selection: enable_battery_sensors_custom_group
       custom_group:
-        entity_id:
-        - sensor.bureau_power
-        - sensor.cave_power
-        - sensor.chamb_parents_power
-        - sensor.batteries_chambre_ssol_zb
-        - sensor.detecteur_petite_porte_sous_sol_power
-        - sensor.detecteur_porte_frigo_power
-        - sensor.batterie_sdb
-        - sensor.detecteur_porte_cellier_power
-        - sensor.power_terrasse2
-        - sensor.bp1_sonof_4d594222_power
-        - sensor.climate_escalier_sous_sol_batterie
-        - sensor.detecteur_porte_entree_batterie
-        - sensor.garage_batterie
-        - sensor.lywsd03mmc_salon_batterie
-        - sensor.detecteur_presence_2025_03_battery
-        - sensor.tze200_3towulqd_ts0601_batterie
-        - sensor.detecteur_porte_frigo_batterie
-        - sensor.chambre_nord_batterie
-        - sensor.cellier_batterie
-        - sensor.detecteur_de_fumee_bureau_batterie
-        - sensor.detecteur_de_fumee_couloir_bureau_batterie
-        - sensor.chambre_sud_batterie
-      custom_group_battery_level: 30
-      exclude_sensors:
-        entity_id:
-        - sensor.alecto_8a_01_battery_numeric
-        - sensor.alecto_ca_01_battery_numeric
-        - sensor.alecto_ws1700_0b_01_battery_numeric
-        - sensor.alecto_ws1700_34_01_battery_numeric
-        - sensor.am435x_awd_batterie
-        - sensor.mp2_dess_cible_soc_par_mqtt
-        - sensor.s6_pro_batterie
-        - sensor.px5_battery_level
-        - sensor.tablette_battery_level
-        - sensor.mp2_soc_theorique_par_mqtt
-        - sensor.myups_charge_de_la_batterie
-        - sensor.iphoneremy_battery_level
-      notify_okay_message: Super! toutes les batteries sont okay :)
+        label_id: batterie_a_surveiller
+      custom_group_battery_level: 20
+      include_easy_notify: enable_easy_okay_notify
+      notify_title: Notification Batterie basse <20%
+      notify_message: all_sensors
+      notify_okay_message: Super! toutes les batteries sont >= 20% :)
+      include_persistent_notification: enable_persistent_okay_notification
+      persistent_sensor_selection: enable_battery_sensors_custom_group
+      persistent_notify_message: sensors
+      persistent_notify_title: Batteries basses <60%
+      persistent_notify_okay_message: Super! toutes les batteries sont OK :)
+      persistent_notify_id: batteries_basses
 - id: '1722434877942'
   alias: Camera Activation-Désactivation detection
   description: Activation detection entre 5:30 et 23:30

@@ -991,6 +991,7 @@
       hours: 0
       minutes: 0
       seconds: 2
+    enabled: false
   - trigger: state
     entity_id:
     - binary_sensor.garage_ext_person_occupancy
@@ -1003,6 +1004,7 @@
       hours: 0
       minutes: 0
       seconds: 2
+    enabled: false
   - trigger: state
     entity_id:
     - binary_sensor.cuisine_person_occupancy
@@ -1015,6 +1017,7 @@
       hours: 0
       minutes: 0
       seconds: 30
+    enabled: false
   - trigger: state
     entity_id:
     - binary_sensor.garage_ext_person_occupancy
@@ -1027,6 +1030,7 @@
     - 'on'
     to:
     - 'off'
+    enabled: false
   - trigger: state
     entity_id:
     - binary_sensor.porte_garage_fermee

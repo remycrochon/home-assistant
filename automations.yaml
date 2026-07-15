@@ -1164,7 +1164,7 @@
       - e3e6d517ff15af6c0ac17f0455a06420
       include_button: enable_button_trigger
       button_entity: input_button.button_aide_batterie_basse
-      include_time: time_disabled
+      include_time: time_enabled
       time: 08:00:00
       sensor_selection: enable_battery_sensors_custom_group
       custom_group:

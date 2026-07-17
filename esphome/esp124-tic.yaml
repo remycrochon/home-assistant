@@ -30,12 +30,9 @@ wifi:
     dns1: !secret dns1
     dns2: !secret dns2
     
-mqtt:
-  broker: 192.168.0.204
-  port: 1883
-  username: !secret mqtt_pve_name
-  password: !secret mqtt_pve_pw
-  topic_prefix: esp124-tic
+packages:
+  - !include packages/mqtt_pve.yaml
+    
 # Enable logging
 logger:
 #  baud_rate: 0

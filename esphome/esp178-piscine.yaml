@@ -45,6 +45,9 @@ packages:
   mesure_elec: !include pack_esp178/mesure_elec.yaml
   mesure_pression: !include pack_esp178/mesure_pression.yaml
 
+  # mqtt_pve: !include packages/mqtt_pve.yaml
+
+  
 esphome:
   name: ${device_name}
   
@@ -133,7 +136,9 @@ ota:
 web_server:
   port: 80
   version: 3 # sinon 2
-
+  
+debug:
+  
 time:
   - platform: sntp
     id: sntp_time
@@ -599,7 +604,10 @@ text_sensor:
     id: aff_heure_filtration
     name: "affich_heure_filtration"
     icon: mdi:timer
-
+  - platform: debug
+    reset_reason:
+      name: "ESP178 Raison du redémarrage"
+      entity_category: diagnostic
 # Déclaration des switches: cde des relais
 switch:
   - platform: gpio

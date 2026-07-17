@@ -25,6 +25,9 @@ esp32:
     advanced:
       minimum_chip_revision: "3.0"
 
+packages:
+  - !include packages/mqtt_pve.yaml
+      
 logger:
 
 api:

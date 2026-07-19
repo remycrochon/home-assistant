@@ -8,15 +8,13 @@ esphome:
   name: ${device_name}
   project:
     name: "rem81.esp124-TIC"
-    version: "1.0.1"
-  platformio_options:
-    lib_deps: NeoPixelBus@2.6.0
+    version: "1.1.0"
       
 esp32:
   board: mhetesp32minikit
   framework:
-    type: arduino
-    
+    type: esp-idf
+        
 wifi:
   networks:
     - ssid: !secret wifi
@@ -82,11 +80,12 @@ light:
         from: 0
         to: 0
 
-  - platform: neopixelbus
-    num_leds: 1
+  - platform: esp32_rmt_led_strip
     pin: GPIO18
+    num_leds: 1
+    chipset: WS2812
+    rgb_order: GRB
     name: "RGB strip"
-    variant: ws2812
     id: rgb_led
     default_transition_length: 0s  
 
@@ -315,13 +314,18 @@ sensor:
 ############### TEMPLATE  ######################"
 # Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
   - platform: template
-    name: "Linky P/PCoup"
+    name: "Linky P-PCoup"
     id: p100
     icon: mdi:flash
     unit_of_measurement: "%"
     accuracy_decimals: 0
     lambda: |-
-      return ((id(papp).state/1000)/id(pcoup).state*100);
+      if (isnan(id(papp).state) ||
+          isnan(id(pcoup).state) ||
+          id(pcoup).state <= 0) {
+        return NAN;
+      }
+      return (id(papp).state / 1000.0f) / id(pcoup).state * 100.0f;
 
 # Lecture dans HA de la conso du jour
   - platform: homeassistant

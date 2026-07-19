@@ -951,23 +951,16 @@
     input:
       remote: d77c1d0ca21349e462286aedbcc553cf
       one_to_one:
-      - action: switch.toggle
+      - action: cover.toggle
         metadata: {}
-        data: {}
         target:
-          entity_id: switch.multiprise_ldl_2024_12_commutateur
+          entity_id: cover.groupe_bureau
+        data: {}
       slide_on_two: []
-      slide_on_one:
-      - target:
-          entity_id: switch.lumiere_salon
-        data: {}
-        action: switch.toggle
-      cube_flip_1:
-      - action: switch.toggle
-        metadata: {}
-        data: {}
-        target:
-          entity_id: switch.tc6_bp1
+      slide_on_one: []
+      cube_flip_1: []
+      knock_any_side: false
+      two_to_two: []
 - id: '1711609776550'
   alias: Spot Ext Cuisine detecteur exterieur
   description: ''
@@ -1171,15 +1164,16 @@
         label_id: batterie_a_surveiller
       custom_group_battery_level: 20
       include_easy_notify: enable_easy_okay_notify
-      notify_title: Notification Batterie basse <20%
+      notify_title: 'Surveillance Charge Batteries '
       notify_message: all_sensors
-      notify_okay_message: Super! toutes les batteries sont >= 20% :)
+      notify_okay_message: Super! toutes les batteries sont OK :)
       include_persistent_notification: enable_persistent_okay_notification
       persistent_sensor_selection: enable_battery_sensors_custom_group
       persistent_notify_message: sensors
-      persistent_notify_title: Batteries basses <60%
+      persistent_notify_title: 'Surveillance Charge Batteries '
       persistent_notify_okay_message: Super! toutes les batteries sont OK :)
       persistent_notify_id: batteries_basses
+      dashboard_notify_okay_message: Super! toutes les batteries sont OK :)
 - id: '1722434877942'
   alias: Camera Activation-Désactivation detection
   description: Activation detection entre 5:30 et 23:30

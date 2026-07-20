@@ -951,7 +951,7 @@
     input:
       remote: d77c1d0ca21349e462286aedbcc553cf
       one_to_one:
-      - action: cover.toggle
+      - action: cover.open_cover
         metadata: {}
         target:
           entity_id: cover.groupe_bureau
@@ -960,7 +960,12 @@
       slide_on_one: []
       cube_flip_1: []
       knock_any_side: false
-      two_to_two: []
+      two_to_two:
+      - action: cover.close_cover
+        metadata: {}
+        target:
+          entity_id: cover.groupe_bureau
+        data: {}
 - id: '1711609776550'
   alias: Spot Ext Cuisine detecteur exterieur
   description: ''

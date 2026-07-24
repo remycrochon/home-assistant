@@ -1784,8 +1784,8 @@
   mode: single
 - id: '1746555411905'
   alias: Gestion de la pompe piscine selon le SoC batterie
-  description: 'Coupe la pompe si SoC < 23 % pendant 1 min, rétablissement si SoC
-    > 30 %
+  description: 'Coupe la pompe si SoC < 20% pendant 1 min, rétablissement si SoC >
+    23 %
 
     '
   triggers:
@@ -1801,7 +1801,7 @@
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_affiche
-        below: 23
+        below: 20
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc
         state: 'off'
@@ -1825,7 +1825,7 @@
     - conditions:
       - condition: numeric_state
         entity_id: sensor.mp2_soc_affiche
-        above: 30
+        above: 23
       - condition: state
         entity_id: input_boolean.flag_arret_piscine_sur_soc
         state: 'on'
@@ -1839,37 +1839,6 @@
         target:
           entity_id: input_boolean.flag_arret_piscine_sur_soc
   mode: single
-- id: '1753556651919'
-  alias: Alarme Com LoRa ID02
-  description: Blue Print
-  use_blueprint:
-    path: pavax/nagging_alert_notification.yaml
-    input:
-      condition_entity_state: 'on'
-      sensor_entity: binary_sensor.status_com_lora_e1
-      alert_state: 'off'
-      alert_action:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}LoRa ID01 OFF Ligne'
-          title: LoRa ID01 NOK!!
-      resolved_action:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}
-
-            LoRa ID01 OnLine'
-          title: LoRa ID01 OK!!
-      notify_device: e3e6d517ff15af6c0ac17f0455a06420
-      repeat_delay: 300
-      max_alerts: 2
-      initial_delay: 60
-      notify_message: ' '
-      resolved_message: ' '
 - id: '1761200992923'
   alias: Choix Alimentation ECS
   description: ''

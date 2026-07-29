@@ -1,3 +1,4 @@
+# modifié le 28-07-2026
 globals:
   - id: g_memoire_ph
     type: float
@@ -134,16 +135,18 @@ number:
     step: 0.001
 
   - platform: template
-    name: "durée_injection_phmoins"
-    id: duree_inject_phmoins
+    name: "Duree maximale injection pH moins"
+    id: duree_max_injection_phmoins
     optimistic: true
     restore_value: true
+    initial_value: 380
     mode: box
-    min_value: 0
-    max_value: 120
+    min_value: 60
+    max_value: 600
     unit_of_measurement: "s"
     step: 1
-    icon: mdi:clock
+    icon: mdi:timer-alert-outline
+    entity_category: config
 
 
 sensor:
@@ -361,7 +364,13 @@ script:
 
                   float duree = quantite_cycle_l / debit_l_s;
 
-                  duree = std::max(1.0f, std::min(duree, 600.0f));
+                  const float duree_max_config_s = id(duree_max_injection_phmoins).state;
+                  const float duree_max_s =
+                    (!isnan(duree_max_config_s) && duree_max_config_s >= 60.0f)
+                      ? duree_max_config_s
+                      : 380.0f;
+
+                  duree = std::max(1.0f, std::min(duree, duree_max_s));
 
                   const float volume_reel_l = debit_l_h * duree / 3600.0f;
 
@@ -745,3 +754,4 @@ script:
 
                 id(_message_telegram)->execute(mess_tg.c_str(), 0);
                 id(_log_fichier)->execute(mess_log.c_str(), 0);
+

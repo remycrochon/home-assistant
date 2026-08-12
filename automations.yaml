@@ -1055,11 +1055,11 @@
         below: 10
       sequence:
       - type: turn_on
-        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        device_id: a939d1de792053628b54c898fa8e9f4e
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
       - type: turn_on
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
       - delay:
@@ -1068,11 +1068,11 @@
           seconds: 0
           milliseconds: 0
       - type: turn_off
-        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        device_id: a939d1de792053628b54c898fa8e9f4e
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
       - type: turn_off
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
     - conditions:
@@ -1088,11 +1088,11 @@
         below: 10
       sequence:
       - type: turn_on
-        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        device_id: a939d1de792053628b54c898fa8e9f4e
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
       - type: turn_on
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
     - conditions:
@@ -1102,11 +1102,11 @@
         - FD Detection Gge
       sequence:
       - type: turn_off
-        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        device_id: a939d1de792053628b54c898fa8e9f4e
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
       - type: turn_off
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
     - conditions:
@@ -1121,7 +1121,7 @@
         below: 10
       sequence:
       - type: turn_on
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
       - delay:
@@ -1130,7 +1130,7 @@
           seconds: 0
           milliseconds: 0
       - type: turn_off
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
     - conditions:
@@ -1142,11 +1142,11 @@
         after: sunrise
       sequence:
       - type: turn_off
-        device_id: c7b28db8c025b2f0bd975382bc4011f0
+        device_id: a939d1de792053628b54c898fa8e9f4e
         entity_id: ba339bcc22bbcb00636e4b664078d906
         domain: switch
       - type: turn_off
-        device_id: f15eea59fe7ba768c177c779594e0add
+        device_id: 8f5cd5102581a6e5afffc308114744db
         entity_id: 766ea3d6bc5e9fd960985d552c4a242d
         domain: switch
   mode: single
@@ -1769,8 +1769,8 @@
   conditions: []
   actions:
   - type: turn_on
-    device_id: d895e168f56c5b089b39c806fd2ce04b
-    entity_id: 1a2c179a98b26f9d3603fa6f7978b684
+    device_id: 51a4338a8b776ee1c0240c4a9e57b744
+    entity_id: dec5bf3d35ba38e8a96d56690beb7336
     domain: switch
   - delay:
       hours: 0
@@ -1778,8 +1778,8 @@
       seconds: 10
       milliseconds: 0
   - type: turn_off
-    device_id: d895e168f56c5b089b39c806fd2ce04b
-    entity_id: 1a2c179a98b26f9d3603fa6f7978b684
+    device_id: 51a4338a8b776ee1c0240c4a9e57b744
+    entity_id: dec5bf3d35ba38e8a96d56690beb7336
     domain: switch
   mode: single
 - id: '1746555411905'
@@ -1890,7 +1890,7 @@
   conditions: []
   actions:
   - type: turn_on
-    device_id: d895e168f56c5b089b39c806fd2ce04b
+    device_id: 51a4338a8b776ee1c0240c4a9e57b744
     entity_id: 371d3e5b732a9d86674c59171c732157
     domain: light
   - delay:
@@ -1982,7 +1982,7 @@
       after: sunset
     then:
     - type: turn_on
-      device_id: 9abdcc29fb6b89797b09f79661a5081a
+      device_id: dc80ce5b211af833cbb7c536fa80a392
       entity_id: 328ac7c86c891be87f12bcefad0e0b01
       domain: switch
     - delay:
@@ -1991,18 +1991,14 @@
         seconds: 0
         milliseconds: 0
     - type: turn_off
-      device_id: 9abdcc29fb6b89797b09f79661a5081a
+      device_id: dc80ce5b211af833cbb7c536fa80a392
       entity_id: 328ac7c86c891be87f12bcefad0e0b01
       domain: switch
-      metadata:
-        secondary: false
     else:
     - type: turn_off
-      device_id: 9abdcc29fb6b89797b09f79661a5081a
+      device_id: dc80ce5b211af833cbb7c536fa80a392
       entity_id: 328ac7c86c891be87f12bcefad0e0b01
       domain: switch
-      metadata:
-        secondary: false
   mode: restart
 - id: '1768665992129'
   alias: Comptage Conso 6-22 Maison
@@ -3585,7 +3581,7 @@
     id: store_ouvert
   conditions:
   - condition: device
-    device_id: 88221e2f7a125b74f30b7cf7cf12054a
+    device_id: ef0f7c444917511e33f2d714b0487694
     domain: cover
     entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
     type: is_open
@@ -3600,7 +3596,7 @@
         entity_id: sensor.vp2_rafale
         above: input_number.seuil_haut_rafale_de_vent
       sequence:
-      - device_id: 88221e2f7a125b74f30b7cf7cf12054a
+      - device_id: ef0f7c444917511e33f2d714b0487694
         domain: cover
         entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
         type: close
@@ -3619,7 +3615,7 @@
         - coucher_soleil
         - Elevation
       sequence:
-      - device_id: 88221e2f7a125b74f30b7cf7cf12054a
+      - device_id: ef0f7c444917511e33f2d714b0487694
         domain: cover
         entity_id: 2ed19b78c63a3e958c77d621e0e2c7ef
         type: close

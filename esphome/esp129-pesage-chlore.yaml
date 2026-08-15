@@ -8,8 +8,8 @@ esphome:
 esp8266:
   board: d1_mini
   framework:
-    version: recommended  
-    
+    version: recommended
+
 # Enable Home Assistant API
 api:
 
@@ -30,7 +30,7 @@ wifi:
     subnet: 255.255.255.0
     dns1: !secret dns1
     dns2: !secret dns2
- 
+
 logger:
   baud_rate: 0  # Disable UART logger if using UART0 (pins 1,3)
 
@@ -53,23 +53,33 @@ sensor:
     name: "Uptime"
 
   - platform: hx711
-    name: "poids chlore brut"
-    id: poids_chlore_brut
+    name: "poids chlore brut instantané"
+    id: poids_chlore_brut_instant
     dout_pin: D1 # DT
     clk_pin: D0 # SCK
     gain: 128
+    update_interval: 1s
+    accuracy_decimals: 1
+    internal: true   # capteur technique, pas besoin de l'exposer dans HA
+    filters:
+      - calibrate_linear:
+          - -262000 -> 0
+          - 174400 -> 15.5
+    unit_of_measurement: kg
+
+  - platform: template
+    name: "poids chlore brut"
+    id: poids_chlore_brut
     update_interval: 10s
     accuracy_decimals: 1
-  #  moyenne sur 15*10s-Affichage toutes les 5*10s avec un Update_interval à 10s en mode étalonnage
-  # L'offset correspond au poids du bidon vide
+    lambda: |-
+      return id(poids_chlore_brut_instant).state;
+    # moyenne sur 15*10s - Affichage toutes les 5*10s avec un update_interval à 10s en mode étalonnage
     filters:
       - sliding_window_moving_average:
           window_size: 15
           send_every: 5
           send_first_at: 1
-      - calibrate_linear:
-          - -262000 -> 0
-          - 174400 -> 15.5
     unit_of_measurement: kg
     icon: mdi:scale
 
@@ -82,10 +92,21 @@ sensor:
     unit_of_measurement: kg
     icon: mdi:scale
 
+button:
+  - platform: template
+    name: "Tare poids chlore"
+    id: bp_tare_chlore
+    icon: mdi:scale-balance
+    on_press:
+      then:
+        - number.set:
+            id: offset_poids_chlore
+            value: !lambda 'return id(poids_chlore_brut_instant).state * 1000.0;'
+
 switch:
   - platform: restart
     name: "Restart"
 
 binary_sensor:
   - platform: status
-    name: "Status"    
+    name: "Status"

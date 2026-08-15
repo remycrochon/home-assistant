@@ -27,7 +27,7 @@ esp32:
 
 packages:
   - !include packages/mqtt_pve.yaml
-      
+
 logger:
 
 api:
@@ -76,6 +76,13 @@ globals:
   - id: r1_chauffe_start_ms
     type: uint32_t
     restore_value: no
+    initial_value: "0"
+
+  # Compteur persistant du nombre de cycles de demoulage effectivement executes
+  # (survit aux redemarrages/coupures).
+  - id: r1_compteur_demoulage
+    type: int
+    restore_value: yes
     initial_value: "0"
 
 binary_sensor:
@@ -154,16 +161,19 @@ number:
     initial_value: 6
     unit_of_measurement: "°C"
 
+  # Parametre unique, partage par les deux cycles (demoulage et entretien) :
+  # duree de chauffe garantie avant toute verification des conditions de sortie
+  # (seuil froid pour le demoulage, securite bac pour l'entretien).
   - platform: template
-    name: "R1 Duree PID demoulage"
-    id: r1_duree_pid_demoulage
+    name: "R1 Duree minimale chauffe"
+    id: r1_duree_min_chauffe
     min_value: 0.5
-    max_value: 10
+    max_value: 15
     step: 0.5
     mode: box
     restore_value: true
     optimistic: true
-    initial_value: 3
+    initial_value: 5
     unit_of_measurement: "min"
 
   - platform: template
@@ -177,18 +187,6 @@ number:
     optimistic: true
     initial_value: 10
     unit_of_measurement: "°C"
-
-  - platform: template
-    name: "R1 Duree PID entretien"
-    id: r1_duree_pid_entretien
-    min_value: 0.5
-    max_value: 60
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 20
-    unit_of_measurement: "min"
 
   - platform: template
     name: "R1 Duree maxi PID entretien"
@@ -296,6 +294,18 @@ sensor:
     lambda: |-
       return id(r1_minutes_sans_demoulage);
 
+  # Nombre total de cycles de demoulage executes depuis le dernier reset
+  # (persiste aux redemarrages).
+  - platform: template
+    name: "R1 Compteur Demoulage"
+    id: r1_compteur_demoulage_sensor
+    icon: "mdi:counter"
+    accuracy_decimals: 0
+    state_class: "total_increasing"
+    update_interval: 60s
+    lambda: |-
+      return id(r1_compteur_demoulage);
+
   - platform: pid
     name: "PID Sortie"
     type: HEAT
@@ -345,11 +355,12 @@ text_sensor:
       const char *etat = id(r1_etat).state.c_str();
 
       snprintf(buffer, sizeof(buffer),
-        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Td:%.1fC | Tr:%.1fC | Bac:%.1fC | Auto:%d | Manu:%d",
+        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC | Auto:%d | Manu:%d",
         etat,
         id(r1_demoulage_arme),
         id(r1_cycle_chauffe_en_cours),
         id(r1_minutes_sans_demoulage),
+        id(r1_compteur_demoulage),
         id(temp_ds18b20_d).state,
         id(temp_ds18b20_r).state,
         id(temp_bac_frigo_esp179).state,
@@ -382,6 +393,13 @@ button:
           id(r1_minutes_sans_demoulage) = 0;
           id(r1_etat).publish_state("Repos");
           ESP_LOGI("r1", "Compteur sans demoulage remis a zero");
+
+  - platform: template
+    name: "R1 Reset compteur demoulage"
+    on_press:
+      - lambda: |-
+          id(r1_compteur_demoulage) = 0;
+          ESP_LOGI("r1", "Compteur demoulage remis a zero");
 
 output:
   - platform: ledc
@@ -475,10 +493,12 @@ script:
                 id(r1_cycle_chauffe_en_cours) = true;
                 id(r1_minutes_sans_demoulage) = 0;
                 id(r1_chauffe_start_ms) = millis();
+                id(r1_compteur_demoulage)++;
                 id(r1_etat).publish_state("PID demoulage");
-                ESP_LOGI("r1", "PID demoulage debut : consigne %.1f C, mini %.1f min, maxi %.1f min, arret retour froid <= %.1f C",
+                ESP_LOGI("r1", "PID demoulage #%d debut : consigne %.1f C, duree min chauffe %.1f min, maxi %.1f min, arret retour froid <= %.1f C",
+                         id(r1_compteur_demoulage),
                          id(r1_consigne_pid_demoulage).state,
-                         id(r1_duree_pid_demoulage).state,
+                         id(r1_duree_min_chauffe).state,
                          id(r1_duree_maxi_pid_demoulage).state,
                          id(r1_seuil_froid_armement).state);
 
@@ -490,11 +510,12 @@ script:
                 mode: HEAT
                 target_temperature: !lambda 'return id(r1_consigne_pid_demoulage).state;'
 
+            # Duree minimale garantie : aucune condition de sortie verifiee avant ce delai.
             - delay: !lambda |-
-                return (uint32_t)(id(r1_duree_pid_demoulage).state * 60000.0f);
+                return (uint32_t)(id(r1_duree_min_chauffe).state * 60000.0f);
 
             - lambda: |-
-                ESP_LOGI("r1", "PID demoulage : duree mini atteinte, maintien jusqu'au retour froid ou timeout");
+                ESP_LOGI("r1", "PID demoulage : duree min chauffe atteinte, maintien jusqu'au retour froid ou timeout");
 
             - wait_until:
                 condition:
@@ -541,9 +562,9 @@ script:
                 id(r1_minutes_sans_demoulage) = 0;
                 id(r1_chauffe_start_ms) = millis();
                 id(r1_etat).publish_state("PID entretien");
-                ESP_LOGI("r1", "PID entretien debut : consigne %.1f C, duree mini %.1f min, duree maxi %.1f min, seuil bac %.1f C",
+                ESP_LOGI("r1", "PID entretien debut : consigne %.1f C, duree min chauffe %.1f min, duree maxi %.1f min, seuil bac %.1f C",
                          id(r1_consigne_pid_entretien).state,
-                         id(r1_duree_pid_entretien).state,
+                         id(r1_duree_min_chauffe).state,
                          id(r1_duree_maxi_pid_entretien).state,
                          id(r1_seuil_securite_bac_entretien).state);
 
@@ -555,7 +576,14 @@ script:
                 mode: HEAT
                 target_temperature: !lambda 'return id(r1_consigne_pid_entretien).state;'
 
-            # Phase 1 : chauffe au moins la duree entretien, sauf si le bac devient trop chaud.
+            # Duree minimale garantie (meme parametre que le demoulage) :
+            # la securite bac n'est pas verifiee avant ce delai.
+            - delay: !lambda |-
+                return (uint32_t)(id(r1_duree_min_chauffe).state * 60000.0f);
+
+            - lambda: |-
+                ESP_LOGI("r1", "PID entretien : duree min chauffe atteinte, maintien jusqu'au seuil bac ou timeout");
+
             - wait_until:
                 condition:
                   or:
@@ -564,41 +592,8 @@ script:
                         return id(temp_bac_frigo_esp179).state >= id(r1_seuil_securite_bac_entretien).state;
 
                     - lambda: |-
-                        uint32_t duree_min_ms = (uint32_t)(id(r1_duree_pid_entretien).state * 60000.0f);
-                        return (millis() - id(r1_chauffe_start_ms)) >= duree_min_ms;
-
-            - lambda: |-
-                uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;
-                ESP_LOGI("r1", "PID entretien phase mini fin apres %u s : bac %.1f C / seuil %.1f C",
-                         duree_s,
-                         id(temp_bac_frigo_esp179).state,
-                         id(r1_seuil_securite_bac_entretien).state);
-
-            # Phase 2 : si le bac est encore assez froid, on prolonge jusqu'au seuil bac ou duree maxi.
-            - if:
-                condition:
-                  lambda: |-
-                    if (isnan(id(temp_bac_frigo_esp179).state)) {
-                      ESP_LOGW("r1", "PID entretien : temp bac inconnue, pas de prolongation");
-                      return false;
-                    }
-                    return id(temp_bac_frigo_esp179).state < id(r1_seuil_securite_bac_entretien).state;
-                then:
-                  - lambda: |-
-                      ESP_LOGI("r1", "PID entretien : prolongation active tant que bac < %.1f C ou jusqu'a %.1f min",
-                               id(r1_seuil_securite_bac_entretien).state,
-                               id(r1_duree_maxi_pid_entretien).state);
-
-                  - wait_until:
-                      condition:
-                        or:
-                          - lambda: |-
-                              if (isnan(id(temp_bac_frigo_esp179).state)) return true;
-                              return id(temp_bac_frigo_esp179).state >= id(r1_seuil_securite_bac_entretien).state;
-
-                          - lambda: |-
-                              uint32_t duree_max_ms = (uint32_t)(id(r1_duree_maxi_pid_entretien).state * 60000.0f);
-                              return (millis() - id(r1_chauffe_start_ms)) >= duree_max_ms;
+                        uint32_t duree_max_ms = (uint32_t)(id(r1_duree_maxi_pid_entretien).state * 60000.0f);
+                        return (millis() - id(r1_chauffe_start_ms)) >= duree_max_ms;
 
             - lambda: |-
                 uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;

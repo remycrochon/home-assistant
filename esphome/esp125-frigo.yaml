@@ -85,6 +85,13 @@ globals:
     restore_value: yes
     initial_value: "0"
 
+  # Compteur persistant du nombre de cycles d'entretien sans demoulage effectivement executes
+  # (survit aux redemarrages/coupures).
+  - id: r1_compteur_entretien
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
 binary_sensor:
   - platform: status
     name: "Status"
@@ -306,6 +313,18 @@ sensor:
     lambda: |-
       return id(r1_compteur_demoulage);
 
+  # Nombre total de cycles d'entretien (sans demoulage) executes depuis le dernier reset
+  # (persiste aux redemarrages).
+  - platform: template
+    name: "R1 Compteur Entretien"
+    id: r1_compteur_entretien_sensor
+    icon: "mdi:counter"
+    accuracy_decimals: 0
+    state_class: "total_increasing"
+    update_interval: 60s
+    lambda: |-
+      return id(r1_compteur_entretien);
+
   - platform: pid
     name: "PID Sortie"
     type: HEAT
@@ -355,12 +374,13 @@ text_sensor:
       const char *etat = id(r1_etat).state.c_str();
 
       snprintf(buffer, sizeof(buffer),
-        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC | Auto:%d | Manu:%d",
+        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Entretiens:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC | Auto:%d | Manu:%d",
         etat,
         id(r1_demoulage_arme),
         id(r1_cycle_chauffe_en_cours),
         id(r1_minutes_sans_demoulage),
         id(r1_compteur_demoulage),
+        id(r1_compteur_entretien),
         id(temp_ds18b20_d).state,
         id(temp_ds18b20_r).state,
         id(temp_bac_frigo_esp179).state,
@@ -400,6 +420,13 @@ button:
       - lambda: |-
           id(r1_compteur_demoulage) = 0;
           ESP_LOGI("r1", "Compteur demoulage remis a zero");
+
+  - platform: template
+    name: "R1 Reset compteur entretien"
+    on_press:
+      - lambda: |-
+          id(r1_compteur_entretien) = 0;
+          ESP_LOGI("r1", "Compteur entretien remis a zero");
 
 output:
   - platform: ledc
@@ -561,8 +588,10 @@ script:
                 id(r1_cycle_chauffe_en_cours) = true;
                 id(r1_minutes_sans_demoulage) = 0;
                 id(r1_chauffe_start_ms) = millis();
+                id(r1_compteur_entretien)++;
                 id(r1_etat).publish_state("PID entretien");
-                ESP_LOGI("r1", "PID entretien debut : consigne %.1f C, duree min chauffe %.1f min, duree maxi %.1f min, seuil bac %.1f C",
+                ESP_LOGI("r1", "PID entretien #%d debut : consigne %.1f C, duree min chauffe %.1f min, duree maxi %.1f min, seuil bac %.1f C",
+                         id(r1_compteur_entretien),
                          id(r1_consigne_pid_entretien).state,
                          id(r1_duree_min_chauffe).state,
                          id(r1_duree_maxi_pid_entretien).state,

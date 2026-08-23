@@ -2238,7 +2238,7 @@
         != ''n/d'' else ''n/d'' }}, {{ couleur_demain }}'
   mode: single
 - id: '1774000425673'
-  alias: Rapport 22:00 DESS IA
+  alias: Rapport 22:00 DESS IA V2
   description: ''
   triggers:
   - trigger: time
@@ -2258,73 +2258,45 @@
         ''on'') else 0 }}'
       forcage_actif_txt: '{{ ''actif'' if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
         ''on'') else ''inactif'' }}'
-      niveau_forcage: "{% if is_state('input_boolean.forcage_charge_pgm_mp1_100',
-        'on') %}\n  {{ states('input_number.mp2_niveau_forcage_cp1') | float(0) |
-        round(0) }}\n{% else %}\n  n/d\n{% endif %}"
-      ecart_soc_cible_txt: '{% set cible = states(''sensor.mp2_dess_cible_soc_par_mqtt'')
-        | float(0) %} {% set actuel = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
-        | float(0) %} {{ ''%+.1f'' | format((actuel - cible) | round(1)) }} %'
-      ecart_soc_forcage_txt: "{% if is_state('input_boolean.forcage_charge_pgm_mp1_100',
-        'on') %}\n  {% set forcage = states('input_number.mp2_niveau_forcage_cp1')
-        | float(0) %}\n  {% set actuel = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        | float(0) %}\n  {{ '%+.1f' | format((actuel - forcage) | round(1)) }} %\n{%
-        else %}\n  n/d\n{% endif %}"
+      niveau_forcage_num: '{{ states(''input_number.mp2_niveau_forcage_cp1'') | float(0)
+        | round(0) }}'
+      niveau_forcage: '{{ niveau_forcage_num if forcage_actif_num == 1 else ''n/d''
+        }}'
+      ecart_soc_cible_txt: '{{ ''%+.1f'' | format((soc_actuel | float - soc_cible
+        | float) | round(1)) }} %'
+      ecart_soc_forcage_txt: "{% if forcage_actif_num == 1 %}\n  {{ '%+.1f' | format((soc_actuel
+        | float - niveau_forcage_num | float) | round(1)) }} %\n{% else %}\n  n/d\n{%
+        endif %}"
       perte_nuit_estimee_pct: 27
-      soc_prevu_0545_sans_charge: '{% set soc = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
-        | float(0) %} {% set perte = 27 %} {{ [soc - perte, 0] | max | round(1) }}'
-      besoin_corrige_pct_txt: '{% set cible = states(''sensor.mp2_dess_cible_soc_par_mqtt'')
-        | float(0) %} {% set soc = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
-        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
-        %} {{ [cible - soc_fin, 0] | max | round(1) }}'
+      soc_prevu_0545_sans_charge: '{{ [soc_actuel | float - perte_nuit_estimee_pct,
+        0] | max | round(1) }}'
+      besoin_corrige_pct_txt: '{{ [soc_cible | float - soc_prevu_0545_sans_charge
+        | float, 0] | max | round(1) }}'
+      cap_ah_mesure: '{{ states(''sensor.capacite_batterie_estimee_par_nr'') | float(300)
+        | round(0) }}'
+      i_avg_estime: 40
+      duree_charge_min: "{% set need_pct = besoin_corrige_pct_txt | float(0) %}\n{%
+        if need_pct <= 0 %}\n  0\n{% else %}\n  {% set ah_needed = (need_pct / 100)
+        * (cap_ah_mesure | float) %}\n  {% set bulk_min = (ah_needed / i_avg_estime)
+        * 60 if i_avg_estime > 0 else 0 %}\n  {% set abs_min = 60 if (soc_cible |
+        float) >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min)
+        | round(0, 'ceil')) %}\n  {% if ns.need < 15 %}{% set ns.need = 15 %}{% endif
+        %}\n  {% if ns.need > 480 %}{% set ns.need = 480 %}{% endif %}\n  {{ ns.need
+        | int }}\n{% endif %}"
+      duree_charge_previ_min_txt: '{{ duree_charge_min | int }}'
       heure_fin_charge_txt: 05:45
-      duree_charge_previ_min_txt: "{% set cap_ah = 300 %} {% set i_avg = 40 %} {%
-        set abs_min_default = 60 %} {% set min_win = 15 %} {% set max_win = 8 * 60
-        %} {% set cible = states('sensor.mp2_dess_cible_soc_par_mqtt') | float(0)
-        %} {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
-        %} {% set need_pct = [cible - soc_fin, 0] | max %} {% if need_pct <= 0 %}\n
-        \ 0\n{% else %}\n  {% set ah_needed = (need_pct / 100) * cap_ah %}\n  {% set
-        bulk_min = (ah_needed / i_avg) * 60 if i_avg > 0 else 0 %}\n  {% set abs_min
-        = abs_min_default if cible >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min
-        + abs_min) | round(0, 'ceil')) %}\n  {% if ns.need < min_win %}{% set ns.need
-        = min_win %}{% endif %}\n  {% if ns.need > max_win %}{% set ns.need = max_win
-        %}{% endif %}\n  {{ ns.need | int }}\n{% endif %}"
-      heure_debut_charge_previ_txt: "{% set step = 5 %} {% set start_floor = 22 *
-        60 %} {% set end_fixed = 5 * 60 + 45 %} {% set cap_ah = 300 %} {% set i_avg
-        = 40 %} {% set abs_min_default = 60 %} {% set min_win = 15 %} {% set max_win
-        = 8 * 60 %} {% set cible = states('sensor.mp2_dess_cible_soc_par_mqtt') |
-        float(0) %} {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
-        %} {% set need_pct = [cible - soc_fin, 0] | max %} {% if need_pct <= 0 %}\n
-        \ n/d\n{% else %}\n  {% set ah_needed = (need_pct / 100) * cap_ah %}\n  {%
-        set bulk_min = (ah_needed / i_avg) * 60 if i_avg > 0 else 0 %}\n  {% set abs_min
-        = abs_min_default if cible >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min
-        + abs_min) | round(0, 'ceil')) %}\n  {% if ns.need < min_win %}{% set ns.need
-        = min_win %}{% endif %}\n  {% if ns.need > max_win %}{% set ns.need = max_win
-        %}{% endif %}\n  {% set ns.start = (((end_fixed - ns.need) // step) * step)
-        | int %}\n  {% if ns.start < 0 %}{% set ns.start = ns.start + 1440 %}{% endif
-        %}\n  {% if not (ns.start >= start_floor or ns.start < end_fixed) %}\n    {%
-        set ns.start = start_floor %}\n  {% endif %}\n  {{ '%02d:%02d' | format((ns.start
-        // 60) | int, (ns.start % 60) | int) }}\n{% endif %}"
-      synthese_charge_previ_txt: "{% set step = 5 %} {% set start_floor = 22 * 60
-        %} {% set end_fixed = 5 * 60 + 45 %} {% set cap_ah = 300 %} {% set i_avg =
-        40 %} {% set abs_min_default = 60 %} {% set min_win = 15 %} {% set max_win
-        = 8 * 60 %} {% set cible = states('sensor.mp2_dess_cible_soc_par_mqtt') |
-        float(0) %} {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        | float(0) %} {% set perte = 27 %} {% set soc_fin = [soc - perte, 0] | max
-        %} {% set need_pct = [cible - soc_fin, 0] | max %} {% if need_pct <= 0 %}\n
-        \ pas de charge prévisionnelle nécessaire\n{% else %}\n  {% set ah_needed
-        = (need_pct / 100) * cap_ah %}\n  {% set bulk_min = (ah_needed / i_avg) *
-        60 if i_avg > 0 else 0 %}\n  {% set abs_min = abs_min_default if cible >=
-        95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min) | round(0,
-        'ceil')) %}\n  {% if ns.need < min_win %}{% set ns.need = min_win %}{% endif
-        %}\n  {% if ns.need > max_win %}{% set ns.need = max_win %}{% endif %}\n  {%
-        set ns.start = (((end_fixed - ns.need) // step) * step) | int %}\n  {% if
-        ns.start < 0 %}{% set ns.start = ns.start + 1440 %}{% endif %}\n  {% if not
-        (ns.start >= start_floor or ns.start < end_fixed) %}\n    {% set ns.start
-        = start_floor %}\n  {% endif %}\n  début estimé {{ '%02d:%02d' | format((ns.start
-        // 60) | int, (ns.start % 60) | int) }}, fin 05:45, durée ~{{ ns.need | int
-        }} min\n{% endif %}"
+      heure_debut_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  n/d\n{%
+        else %}\n  {% set step = 5 %}\n  {% set start_floor = 22 * 60 %}\n  {% set
+        end_fixed = 5 * 60 + 45 %}\n  {% set ns = namespace(start=(((end_fixed - (duree_charge_min
+        | int)) // step) * step) | int) %}\n  {% if ns.start < 0 %}{% set ns.start
+        = ns.start + 1440 %}{% endif %}\n  {% if not (ns.start >= start_floor or ns.start
+        < end_fixed) %}\n    {% set ns.start = start_floor %}\n  {% endif %}\n  {{
+        '%02d:%02d' | format((ns.start // 60) | int, (ns.start % 60) | int) }}\n{%
+        endif %}"
+      synthese_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  pas de
+        charge prévisionnelle nécessaire\n{% else %}\n  début estimé {{ heure_debut_charge_previ_txt
+        }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
+        endif %}"
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_dess_ia
@@ -2358,7 +2330,8 @@
         }} % - Heure prévisionnelle de début de charge : {{ heure_debut_charge_previ_txt
         }} - Heure prévisionnelle de fin de charge : {{ heure_fin_charge_txt }} -
         Durée prévisionnelle de charge : {{ duree_charge_previ_min_txt }} min - Synthèse
-        prévisionnelle : {{ synthese_charge_previ_txt }}'
+        prévisionnelle : {{ synthese_charge_previ_txt }} - Capacité batterie utilisée
+        pour le calcul : {{ cap_ah_mesure }} Ah'
   - choose:
     - conditions:
       - condition: template
@@ -2403,15 +2376,14 @@
       milliseconds: 0
   - action: input_number.set_value
     data:
-      value: '{% set a = states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
-        | float(0) | round(1) %} {{ a }}'
+      value: '{{ previ_prod_demain }}'
     target:
       entity_id:
       - input_number.mp2_memoire_estimation_production_jour
   - action: input_number.set_value
     data:
-      value: '{% set a = states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
-        | round(1) %} {{ a }}'
+      value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) | round(1)
+        }}'
     target:
       entity_id:
       - input_number.mp2_memoire_estimation_conso_jour
@@ -4219,4 +4191,155 @@
           \   realise_prod_jour,\n    ecart_prod_jour,\n    ecart_prod_pct_num,\n
           \   previ_conso_6_22,\n    realise_conso_6_22,\n    ecart_conso_6_22,\n
           \   ecart_conso_6_22_pct_num,\n    couleur_demain\n  ] | join(', ')\n}}"
+  mode: single
+- id: '1787411767535'
+  alias: Rapport 22:00 DESS IA
+  description: ''
+  triggers:
+  - trigger: time
+    at: '22:00:00'
+    id: '22:00'
+  conditions: []
+  actions:
+  - variables:
+      date_snapshot: '{{ states(''sensor.date_time'') }}'
+      previ_prod_demain: '{{ states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
+        | float(0) | round(1) }}'
+      soc_cible: '{{ states(''sensor.mp2_dess_cible_soc_par_mqtt'') | float(0) | round(0)
+        }}'
+      soc_actuel: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) }}'
+      forcage_actif_num: '{{ 1 if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
+        ''on'') else 0 }}'
+      forcage_actif_txt: '{{ ''actif'' if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
+        ''on'') else ''inactif'' }}'
+      niveau_forcage_num: '{{ states(''input_number.mp2_niveau_forcage_cp1'') | float(0)
+        | round(0) }}'
+      niveau_forcage: '{{ niveau_forcage_num if forcage_actif_num == 1 else ''n/d''
+        }}'
+      ecart_soc_cible_txt: '{{ ''%+.1f'' | format((soc_actuel | float - soc_cible
+        | float) | round(1)) }} %'
+      ecart_soc_forcage_txt: "{% if forcage_actif_num == 1 %}\n  {{ '%+.1f' | format((soc_actuel
+        | float - niveau_forcage_num | float) | round(1)) }} %\n{% else %}\n  n/d\n{%
+        endif %}"
+      perte_nuit_estimee_pct: 27
+      soc_prevu_0545_sans_charge: '{{ [soc_actuel | float - perte_nuit_estimee_pct,
+        0] | max | round(1) }}'
+      besoin_corrige_pct_txt: '{{ [soc_cible | float - soc_prevu_0545_sans_charge
+        | float, 0] | max | round(1) }}'
+      cap_ah_mesure: '{{ states(''sensor.capacite_batterie_estimee_par_nr'') | float(300)
+        | round(0) }}'
+      i_avg_estime: 40
+      duree_charge_min: "{% set need_pct = besoin_corrige_pct_txt | float(0) %}\n{%
+        if need_pct <= 0 %}\n  0\n{% else %}\n  {% set ah_needed = (need_pct / 100)
+        * (cap_ah_mesure | float) %}\n  {% set bulk_min = (ah_needed / i_avg_estime)
+        * 60 if i_avg_estime > 0 else 0 %}\n  {% set abs_min = 60 if (soc_cible |
+        float) >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min)
+        | round(0, 'ceil')) %}\n  {% if ns.need < 15 %}{% set ns.need = 15 %}{% endif
+        %}\n  {% if ns.need > 480 %}{% set ns.need = 480 %}{% endif %}\n  {{ ns.need
+        | int }}\n{% endif %}"
+      duree_charge_previ_min_txt: '{{ duree_charge_min | int }}'
+      heure_fin_charge_txt: 05:45
+      heure_debut_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  n/d\n{%
+        else %}\n  {% set step = 5 %}\n  {% set start_floor = 22 * 60 %}\n  {% set
+        end_fixed = 5 * 60 + 45 %}\n  {% set ns = namespace(start=(((end_fixed - (duree_charge_min
+        | int)) // step) * step) | int) %}\n  {% if ns.start < 0 %}{% set ns.start
+        = ns.start + 1440 %}{% endif %}\n  {% if not (ns.start >= start_floor or ns.start
+        < end_fixed) %}\n    {% set ns.start = start_floor %}\n  {% endif %}\n  {{
+        '%02d:%02d' | format((ns.start // 60) | int, (ns.start % 60) | int) }}\n{%
+        endif %}"
+      synthese_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  pas de
+        charge prévisionnelle nécessaire\n{% else %}\n  début estimé {{ heure_debut_charge_previ_txt
+        }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
+        endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: rapport_dess_ia
+    data:
+      task_name: rapport dess 22h
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique.
+
+        Rédige un message Telegram en français. Sois factuel, compact et utile. N''invente
+        aucune donnée. 6 lignes maximum. Commence par un emoji.
+
+        Analyse uniquement la situation DESS à 22:00.
+
+        Tu dois : - indiquer si le forçage DESS est actif ou non, - si le forçage
+        est actif, mentionner le niveau de forçage demandé, - comparer le SOC actuel
+        au SOC cible, - si le forçage est actif, comparer aussi le SOC actuel au niveau
+        de forçage, - rappeler la prévision de production demain, - estimer le SOC
+        à 05:45 sans charge en tenant compte d''une baisse nocturne historique, -
+        indiquer l''heure prévisionnelle de début de charge pour finir à 05:45, -
+        préciser que cette estimation repose sur une baisse nocturne moyenne de 27
+        %, - conclure par une remarque très courte sur la cohérence de la situation.
+
+        Données : - Horodatage : {{ date_snapshot }} - Prévision production demain
+        : {{ previ_prod_demain }} kWh - Forçage DESS : {{ forcage_actif_txt }} - Forçage
+        DESS (0/1) : {{ forcage_actif_num }} - Niveau de forçage demandé : {{ niveau_forcage
+        }} - SOC cible : {{ soc_cible }} % - SOC actuel : {{ soc_actuel }} % - Ecart
+        SOC actuel - SOC cible : {{ ecart_soc_cible_txt }} - Ecart SOC actuel - niveau
+        de forçage : {{ ecart_soc_forcage_txt }} - Baisse nocturne historique estimée
+        22:00->05:45 : {{ perte_nuit_estimee_pct }} % - SOC prévu à 05:45 sans charge
+        : {{ soc_prevu_0545_sans_charge }} % - Besoin corrigé de charge : {{ besoin_corrige_pct_txt
+        }} % - Heure prévisionnelle de début de charge : {{ heure_debut_charge_previ_txt
+        }} - Heure prévisionnelle de fin de charge : {{ heure_fin_charge_txt }} -
+        Durée prévisionnelle de charge : {{ duree_charge_previ_min_txt }} min - Synthèse
+        prévisionnelle : {{ synthese_charge_previ_txt }} - Capacité batterie utilisée
+        pour le calcul : {{ cap_ah_mesure }} Ah'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  rapport_dess_ia is defined and\n  rapport_dess_ia.data
+          is defined and\n  (rapport_dess_ia.data | string | trim | length) > 0\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Rapport DESS 22h
+          message: '{{ rapport_dess_ia.data }}'
+    default:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport DESS 22h
+        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Prévi demain = {{ previ_prod_demain
+          }} kWh{{-\"\\n\"-}}\n    Forçage DESS = {{ forcage_actif_txt }}{% if forcage_actif_num
+          == 1 %} / Niveau = {{ niveau_forcage }} %{% endif %}{{-\"\\n\"-}}\n    SOC
+          cible = {{ soc_cible }} % / Actuel = {{ soc_actuel }} %{{-\"\\n\"-}}\n    Ecart
+          SOC-cible = {{ ecart_soc_cible_txt }}{% if forcage_actif_num == 1 %} / Ecart
+          SOC-forçage = {{ ecart_soc_forcage_txt }}{% endif %}{{-\"\\n\"-}}\n    SOC
+          prévu à 05:45 sans charge = {{ soc_prevu_0545_sans_charge }} %{{-\"\\n\"-}}\n
+          \   Charge prévisionnelle = {{ synthese_charge_previ_txt }}\n"
+  - action: notify.send_message
+    target:
+      entity_id: notify.suivi_dess
+    data:
+      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ previ_prod_demain
+        }}, {{ forcage_actif_num }}, {{ niveau_forcage if forcage_actif_num == 1 else
+        '''' }}, {{ soc_cible }}, {{ soc_actuel }}, {{ ecart_soc_cible_txt | replace(''
+        %'','''') }}, {{ ecart_soc_forcage_txt | replace('' %'','''') if forcage_actif_num
+        == 1 else '''' }}, {{ perte_nuit_estimee_pct }}, {{ soc_prevu_0545_sans_charge
+        }}, {{ besoin_corrige_pct_txt }}, {{ heure_debut_charge_previ_txt }}, {{ heure_fin_charge_txt
+        }}, {{ duree_charge_previ_min_txt }}'
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: input_number.set_value
+    data:
+      value: '{{ previ_prod_demain }}'
+    target:
+      entity_id:
+      - input_number.mp2_memoire_estimation_production_jour
+  - action: input_number.set_value
+    data:
+      value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) | round(1)
+        }}'
+    target:
+      entity_id:
+      - input_number.mp2_memoire_estimation_conso_jour
   mode: single

@@ -21,6 +21,7 @@ mqtt:
       state_topic: "mp2/multiplus2/valide_cp"
 
     - name: "Capacité Batterie Estimée par NR"
+      unique_id: capacite_estimees_par_nr
       state_topic: "mp2/batteries/capacity_est_ah"
       unit_of_measurement: "Ah"
       icon: mdi:battery-charging-outline

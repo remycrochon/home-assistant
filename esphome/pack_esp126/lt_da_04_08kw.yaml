@@ -205,7 +205,7 @@ sensor:
 
   # {0x62,9,105,2,-1,"Capteur de débit (l/min)"}
   - <<: *altherma_base
-    name: "Capteur de débit (l/min)"
+    name: "Capteur de débit (l-min)"
     register: 0x62
     offset: 9
     convid: 105
@@ -264,7 +264,7 @@ binary_sensor:
 
   # {0x60,2,303,1,-1,"Thermostat ON/OFF Int"}
   - <<: *binary
-    name: "Thermostat ON/OFF Int"
+    name: "Thermostat ON-OFF Int"
     register: 0x60
     offset: 2
     convid: 303
@@ -298,7 +298,7 @@ binary_sensor:
 
   # {0x62,8,302,1,-1,"Fonctionnement de pompe de circulation"}
   - <<: *binary
-    name: "Pompe de circulation (ON/OFF)"
+    name: "Pompe de circulation (ON-OFF)"
     register: 0x62
     offset: 8
     convid: 302

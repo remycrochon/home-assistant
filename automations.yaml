@@ -227,7 +227,8 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}{{-"\n"-}}
 
-            T° Haute = {{states("sensor.temp_congelo_garage")|float(0)|round(2) }}°C'
+            T° Haute = {{states("sensor.congelo_aquara_4_temperature_congelo_aquara_4")|float(0)|round(2)
+            }}°C'
           title: Congelateur
       resolved_action:
       - action: telegram_bot.send_message
@@ -236,11 +237,12 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}{{-"\n"-}}
 
-            T° OK = {{states("sensor.temp_congelo_garage")|float(0)|round(2) }}°C'
+            T° OK = {{states("sensor.congelo_aquara_4_temperature_congelo_aquara_4")|float(0)|round(2)
+            }}°C'
           title: Congelateur
       notify_message: ' '
       notify_device: e3e6d517ff15af6c0ac17f0455a06420
-      repeat_delay: 300
+      repeat_delay: 600
       resolved_message: ' '
       initial_delay: 300
       max_alerts: 5

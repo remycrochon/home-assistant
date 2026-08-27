@@ -1176,7 +1176,7 @@
       notify_okay_message: Super! toutes les batteries sont OK :)
       include_persistent_notification: enable_persistent_okay_notification
       persistent_sensor_selection: enable_battery_sensors_custom_group
-      persistent_notify_message: sensors
+      persistent_notify_message: all_sensors
       persistent_notify_title: 'Surveillance Charge Batteries '
       persistent_notify_okay_message: Super! toutes les batteries sont OK :)
       persistent_notify_id: batteries_basses
@@ -4344,4 +4344,20 @@
     target:
       entity_id:
       - input_number.mp2_memoire_estimation_conso_jour
+  mode: single
+- id: '1787763504633'
+  alias: Alerte utilisation disque Frigate recordings
+  description: Surveillance disque Frigate recordings
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.lxc_frigate_120_frigate_recordings_utilisation
+    above: 85
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: ⚠️ Disque Frigate
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Disque Frigate presque plein
+        : {{ states(''sensor.lxc_frigate_120_frigate_recordings_utilisation'') }}%'
   mode: single

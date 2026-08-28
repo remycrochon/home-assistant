@@ -2002,243 +2002,6 @@
       entity_id: 328ac7c86c891be87f12bcefad0e0b01
       domain: switch
   mode: restart
-- id: '1768665992129'
-  alias: Comptage Conso 6-22 Maison
-  description: ''
-  triggers:
-  - trigger: time
-    at: 06:00:00
-    variables:
-      tariff: jour_6_22
-    id: '6'
-  - trigger: time
-    at: '22:00:00'
-    variables:
-      tariff: hors_jour
-    id: '22'
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - '6'
-      sequence:
-      - action: select.select_option
-        metadata: {}
-        data:
-          option: jour_6_22
-        target:
-          entity_id: select.comptage_energie_conso_maison_6_22
-    - conditions:
-      - condition: trigger
-        id:
-        - '22'
-      sequence:
-      - action: select.select_option
-        metadata: {}
-        data:
-          option: hours_jour
-        target:
-          entity_id: select.comptage_energie_conso_maison_6_22
-  mode: single
-- id: '1773999155732'
-  alias: Rapport 23:59 Journalier Recap Energie IA V2
-  description: ''
-  triggers:
-  - trigger: time
-    at: '23:59:00'
-  conditions: []
-  actions:
-  - variables:
-      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
-      conso_totale: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
-        | float(0) | round(2) }}'
-      bleu_hc: '{{ states(''sensor.compteur_energie_hc_bleu_jour'') | float(0) | round(2)
-        }}'
-      bleu_hp: '{{ states(''sensor.compteur_energie_hp_bleu_jour'') | float(0) | round(2)
-        }}'
-      blanc_hc: '{{ states(''sensor.compteur_energie_hc_blanc_jour'') | float(0) |
-        round(2) }}'
-      blanc_hp: '{{ states(''sensor.compteur_energie_hp_blanc_jour'') | float(0) |
-        round(2) }}'
-      rouge_hc: '{{ states(''sensor.compteur_energie_hc_rouge_jour'') | float(0) |
-        round(2) }}'
-      rouge_hp: '{{ states(''sensor.compteur_energie_hp_rouge_jour'') | float(0) |
-        round(2) }}'
-      total_hc: "{{\n  (\n    states('sensor.compteur_energie_hc_bleu_jour') | float(0)
-        +\n    states('sensor.compteur_energie_hc_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hc_rouge_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      total_hp: "{{\n  (\n    states('sensor.compteur_energie_hp_bleu_jour') | float(0)
-        +\n    states('sensor.compteur_energie_hp_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hp_rouge_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      poste_dominant: "{% set postes = {\n  'Bleu HC': states('sensor.compteur_energie_hc_bleu_jour')
-        | float(0),\n  'Bleu HP': states('sensor.compteur_energie_hp_bleu_jour') |
-        float(0),\n  'Blanc HC': states('sensor.compteur_energie_hc_blanc_jour') |
-        float(0),\n  'Blanc HP': states('sensor.compteur_energie_hp_blanc_jour') |
-        float(0),\n  'Rouge HC': states('sensor.compteur_energie_hc_rouge_jour') |
-        float(0),\n  'Rouge HP': states('sensor.compteur_energie_hp_rouge_jour') |
-        float(0)\n} %} {{ postes | dictsort(by='value') | last | first }}"
-      couleur_demain: '{{ states(''sensor.rte_tempo_prochaine_couleur'') }}'
-      cout_jour_txt: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
-        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
-        %}\n  {{ (v | float(0)) | round(2) }} €\n{% endif %}"
-      pv_jour_txt: "{% set v = states('sensor.mp2_total_energie_produite_jour') %}
-        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
-        %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      import_reseau_txt: "{% set v = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      export_reseau_txt: "{% set v = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      bat_min_txt: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
-        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
-        | round(1) }} %\n{% endif %}"
-      bat_max_txt: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
-        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
-        | round(1) }} %\n{% endif %}"
-      soc_soir_txt: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(1) }} %\n{% endif %}"
-      previ_prod_jour: '{{ states(''input_number.mp2_memoire_estimation_production_jour'')
-        | float(0) | round(2) }}'
-      realise_prod_jour: '{{ states(''sensor.mp2_total_energie_produite_jour'') |
-        float(0) | round(2) }}'
-      ecart_prod_jour: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      ecart_prod_jour_txt: "{% set e =\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0)\n  ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
-      ecart_prod_pct_txt: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
-        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
-      previ_conso_6_22: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
-        | round(2) }}'
-      realise_conso_6_22: '{{ states(''sensor.comptage_energie_conso_maison_6_22_jour_6_22'')
-        | float(0) | round(2) }}'
-      ecart_conso_6_22: "{{\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
-        \ ) | round(2)\n}}"
-      ecart_conso_6_22_txt: "{% set e =\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
-        \ ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
-      ecart_conso_6_22_pct_txt: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
-        | float(0) %} {% set r = states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
-        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
-  - action: ai_task.generate_data
-    continue_on_error: true
-    response_variable: recap_energie
-    data:
-      task_name: recap energie journalier complet
-      entity_id: ai_task.google_ai_task
-      instructions: 'Tu es un assistant énergie domestique.
-
-        Rédige un message Telegram en français, factuel, compact et utile. N''invente
-        aucune donnée. Si une donnée vaut "n/d", indique simplement qu''elle n''est
-        pas disponible. 8 lignes maximum. Commence par un emoji.
-
-        Mets en avant : - la consommation totale du jour, - la répartition heures
-        creuses / heures pleines, - le poste Tempo dominant, - le coût du jour si
-        disponible, - la production PV si disponible, - l''import/export réseau si
-        disponibles, - la batterie si disponible, - une analyse très courte du prévu/réalisé
-        production, - une analyse très courte du prévu/réalisé consommation 6-22h,
-        - un conseil très court pour demain selon la couleur Tempo.
-
-        Pour l''analyse prévu/réalisé : - indique clairement si le réalisé est au-dessus,
-        en dessous ou conforme à la prévision, - utilise les écarts fournis, - reste
-        synthétique.
-
-        Données du jour : - Date : {{ date_jour }} - Consommation totale : {{ conso_totale
-        }} kWh - Total HC : {{ total_hc }} kWh - Total HP : {{ total_hp }} kWh - Bleu
-        HC : {{ bleu_hc }} kWh - Bleu HP : {{ bleu_hp }} kWh - Blanc HC : {{ blanc_hc
-        }} kWh - Blanc HP : {{ blanc_hp }} kWh - Rouge HC : {{ rouge_hc }} kWh - Rouge
-        HP : {{ rouge_hp }} kWh - Poste dominant : {{ poste_dominant }} - Coût du
-        jour : {{ cout_jour_txt }} - Production PV : {{ pv_jour_txt }} - Import réseau
-        : {{ import_reseau_txt }} - Export réseau : {{ export_reseau_txt }} - Batterie
-        mini du jour : {{ bat_min_txt }} - Batterie maxi du jour : {{ bat_max_txt
-        }} - SOC actuel/soir : {{ soc_soir_txt }} - Couleur Tempo demain : {{ couleur_demain
-        }}
-
-        Analyse prévision / réalisé production : - Prévision production jour : {{
-        previ_prod_jour }} kWh - Réalisé production jour : {{ realise_prod_jour }}
-        kWh - Ecart production : {{ ecart_prod_jour_txt }} - Ecart production % :
-        {{ ecart_prod_pct_txt }}
-
-        Analyse prévision / réalisé consommation 6-22h : - Prévision consommation
-        6-22h : {{ previ_conso_6_22 }} kWh - Réalisé consommation 6-22h : {{ realise_conso_6_22
-        }} kWh - Ecart consommation 6-22h : {{ ecart_conso_6_22_txt }} - Ecart consommation
-        6-22h % : {{ ecart_conso_6_22_pct_txt }}'
-      structure:
-        titre:
-          description: Titre très court du message Telegram
-          required: true
-          selector:
-            text:
-        message:
-          description: Message Telegram complet sur 5 à 8 lignes
-          required: true
-          selector:
-            text:
-        niveau:
-          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
-          required: true
-          selector:
-            text:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{\n  recap_energie is defined and\n  recap_energie.data
-          is defined and\n  recap_energie.data.message is defined\n}}"
-      sequence:
-      - action: telegram_bot.send_message
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: "{{\n  recap_energie.data.titre\n  if recap_energie.data.titre is
-            defined\n  else 'Recap Journalier Energie'\n}}"
-          message: '{{ recap_energie.data.message }} {% if recap_energie.data.niveau
-            is defined %} {{ ''\n'' }}Niveau : {{ recap_energie.data.niveau }} {%
-            endif %}'
-    default:
-    - action: telegram_bot.send_message
-      data:
-        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-        title: Recap Journalier Energie
-        message: '{{ date_jour }} {{ ''\n'' }}Conso totale : {{ conso_totale }} kWh
-          {{ ''\n'' }}HC / HP : {{ total_hc }} / {{ total_hp }} kWh {{ ''\n'' }}Poste
-          dominant : {{ poste_dominant }} {{ ''\n'' }}Coût : {{ cout_jour_txt }} {{
-          ''\n'' }}PV : {{ pv_jour_txt }} {{ ''\n'' }}Import / Export : {{ import_reseau_txt
-          }} / {{ export_reseau_txt }} {{ ''\n'' }}Batterie min / max / soir : {{
-          bat_min_txt }} / {{ bat_max_txt }} / {{ soc_soir_txt }} {{ ''\n'' }}Prod
-          prévue / réalisée : {{ previ_prod_jour }} / {{ realise_prod_jour }} kWh
-          (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt }}) {{ ''\n'' }}Conso
-          6-22 prévue / réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
-          }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt }})
-          {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
-  - action: notify.send_message
-    target:
-      entity_id: notify.suivi_prod
-    data:
-      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ conso_totale }}, {{
-        total_hc }}, {{ total_hp }}, {{ poste_dominant | replace('','', '' '') }},
-        {{ cout_jour_txt | replace('' €'', '''') | replace('','', ''.'') if cout_jour_txt
-        != ''n/d'' else ''n/d'' }}, {{ pv_jour_txt | replace('' kWh'', '''') | replace('','',
-        ''.'') if pv_jour_txt != ''n/d'' else ''n/d'' }}, {{ import_reseau_txt | replace(''
-        kWh'', '''') | replace('','', ''.'') if import_reseau_txt != ''n/d'' else
-        ''n/d'' }}, {{ export_reseau_txt | replace('' kWh'', '''') | replace('','',
-        ''.'') if export_reseau_txt != ''n/d'' else ''n/d'' }}, {{ bat_min_txt | replace(''
-        %'', '''') if bat_min_txt != ''n/d'' else ''n/d'' }}, {{ bat_max_txt | replace(''
-        %'', '''') if bat_max_txt != ''n/d'' else ''n/d'' }}, {{ soc_soir_txt | replace(''
-        %'', '''') if soc_soir_txt != ''n/d'' else ''n/d'' }}, {{ previ_prod_jour
-        }}, {{ realise_prod_jour }}, {{ ecart_prod_jour }}, {{ ecart_prod_pct_txt
-        | replace('' %'', '''') if ecart_prod_pct_txt != ''n/d'' else ''n/d'' }},
-        {{ previ_conso_6_22 }}, {{ realise_conso_6_22 }}, {{ ecart_conso_6_22 }},
-        {{ ecart_conso_6_22_pct_txt | replace('' %'', '''') if ecart_conso_6_22_pct_txt
-        != ''n/d'' else ''n/d'' }}, {{ couleur_demain }}'
-  mode: single
 - id: '1774000425673'
   alias: Rapport 22:00 DESS IA V2
   description: ''
@@ -3937,263 +3700,6 @@
       entity_id: input_boolean.rebootweewx2026
     data: {}
   mode: single
-- id: '1781715082783'
-  alias: Rapport 23:59 Journalier Recap Energie IA V3
-  description: ''
-  triggers:
-  - trigger: time
-    id: horaire_2359
-    at: '23:59:00'
-  conditions: []
-  actions:
-  - variables:
-      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
-      conso_totale: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
-        | float(0) | round(2) }}'
-      conso_reseau_tempo: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
-        | float(0) | round(2) }}'
-      bleu_hc: '{{ states(''sensor.compteur_energie_hc_bleu_jour'') | float(0) | round(2)
-        }}'
-      bleu_hp: '{{ states(''sensor.compteur_energie_hp_bleu_jour'') | float(0) | round(2)
-        }}'
-      blanc_hc: '{{ states(''sensor.compteur_energie_hc_blanc_jour'') | float(0) |
-        round(2) }}'
-      blanc_hp: '{{ states(''sensor.compteur_energie_hp_blanc_jour'') | float(0) |
-        round(2) }}'
-      rouge_hc: '{{ states(''sensor.compteur_energie_hc_rouge_jour'') | float(0) |
-        round(2) }}'
-      rouge_hp: '{{ states(''sensor.compteur_energie_hp_rouge_jour'') | float(0) |
-        round(2) }}'
-      total_hc: "{{\n  (\n    states('sensor.compteur_energie_hc_bleu_jour') | float(0)
-        +\n    states('sensor.compteur_energie_hc_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hc_rouge_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      total_hp: "{{\n  (\n    states('sensor.compteur_energie_hp_bleu_jour') | float(0)
-        +\n    states('sensor.compteur_energie_hp_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hp_rouge_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      poste_dominant: "{% set postes = {\n  'Bleu HC': states('sensor.compteur_energie_hc_bleu_jour')
-        | float(0),\n  'Bleu HP': states('sensor.compteur_energie_hp_bleu_jour') |
-        float(0),\n  'Blanc HC': states('sensor.compteur_energie_hc_blanc_jour') |
-        float(0),\n  'Blanc HP': states('sensor.compteur_energie_hp_blanc_jour') |
-        float(0),\n  'Rouge HC': states('sensor.compteur_energie_hc_rouge_jour') |
-        float(0),\n  'Rouge HP': states('sensor.compteur_energie_hp_rouge_jour') |
-        float(0)\n} %} {{ postes | dictsort(by='value') | last | first }}"
-      couleur_demain: '{{ states(''sensor.rte_tempo_prochaine_couleur'') }}'
-      cout_jour_txt: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
-        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
-        %}\n  {{ (v | float(0)) | round(2) }} €\n{% endif %}"
-      cout_jour_num: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
-        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
-        %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
-      pv_jour_num: '{{ states(''sensor.mp2_total_energie_produite_jour'') | float(0)
-        | round(2) }}'
-      import_reseau_num: '{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'')
-        | float(0) | round(2) }}'
-      export_reseau_num: '{{ states(''sensor.mp2_energie_injectee_ds_reseau_par_jour'')
-        | float(0) | round(2) }}'
-      pv_jour_txt: "{% set v = states('sensor.mp2_total_energie_produite_jour') %}
-        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
-        %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      import_reseau_txt: "{% set v = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      export_reseau_txt: "{% set v = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      conso_foyer_estimee: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) +\n    states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
-        | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      solaire_autoconsomme: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      taux_autonomie_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
-        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        | float(0) %} {% set conso = pv + imp - exp %} {% set solaire = pv - exp %}
-        {% if conso > 0 %}\n  {{ ((solaire / conso) * 100) | round(1) }}\n{% else
-        %}\n  0\n{% endif %}"
-      taux_autoconsommation_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        | float(0) %} {% if pv > 0 %}\n  {{ (((pv - exp) / pv) * 100) | round(1) }}\n{%
-        else %}\n  0\n{% endif %}"
-      taux_export_pv: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        | float(0) %} {% if pv > 0 %}\n  {{ ((exp / pv) * 100) | round(1) }}\n{% else
-        %}\n  0\n{% endif %}"
-      part_import_reseau: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
-        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
-        | float(0) %} {% set conso = pv + imp - exp %} {% if conso > 0 %}\n  {{ ((imp
-        / conso) * 100) | round(1) }}\n{% else %}\n  0\n{% endif %}"
-      bat_min_txt: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
-        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
-        | round(1) }} %\n{% endif %}"
-      bat_max_txt: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
-        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
-        | round(1) }} %\n{% endif %}"
-      soc_soir_txt: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(1) }} %\n{% endif %}"
-      bat_min_num: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
-        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
-        | round(1) }}\n{% endif %}"
-      bat_max_num: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
-        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
-        | round(1) }}\n{% endif %}"
-      soc_soir_num: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
-        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(1) }}\n{% endif %}"
-      previ_prod_jour: '{{ states(''input_number.mp2_memoire_estimation_production_jour'')
-        | float(0) | round(2) }}'
-      realise_prod_jour: '{{ states(''sensor.mp2_total_energie_produite_jour'') |
-        float(0) | round(2) }}'
-      ecart_prod_jour: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0)\n  ) | round(2)\n}}"
-      ecart_prod_jour_txt: "{% set e =\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0)\n  ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
-      ecart_prod_pct_txt: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
-        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
-      ecart_prod_pct_num: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
-        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
-        else %}\n  n/d\n{% endif %}"
-      previ_conso_6_22: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
-        | round(2) }}'
-      realise_conso_6_22: '{{ states(''sensor.comptage_energie_conso_maison_6_22_jour_6_22'')
-        | float(0) | round(2) }}'
-      ecart_conso_6_22: "{{\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
-        \ ) | round(2)\n}}"
-      ecart_conso_6_22_txt: "{% set e =\n  (\n    states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
-        \ ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
-      ecart_conso_6_22_pct_txt: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
-        | float(0) %} {% set r = states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
-        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
-      ecart_conso_6_22_pct_num: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
-        | float(0) %} {% set r = states('sensor.comptage_energie_conso_maison_6_22_jour_6_22')
-        | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
-        else %}\n  n/d\n{% endif %}"
-  - action: ai_task.generate_data
-    continue_on_error: true
-    response_variable: recap_energie
-    data:
-      task_name: recap energie journalier complet
-      entity_id: ai_task.google_ai_task
-      instructions: 'Tu es un assistant énergie domestique.
-
-        Rédige un message Telegram en français, factuel, compact et utile. N''invente
-        aucune donnée. Si une donnée vaut "n/d", indique simplement qu''elle n''est
-        pas disponible. 8 lignes maximum. Commence par un emoji.
-
-        Mets en avant : - la consommation réseau Tempo du jour, - la consommation
-        foyer estimée, - la répartition heures creuses / heures pleines, - le poste
-        Tempo dominant, - le coût du jour si disponible, - la production PV si disponible,
-        - l''import/export réseau si disponibles, - l''autonomie solaire et l''autoconsommation
-        solaire, - la batterie si disponible, - une analyse très courte du prévu/réalisé
-        production, - une analyse très courte du prévu/réalisé consommation 6-22h,
-        - un conseil très court pour demain selon la couleur Tempo.
-
-        Pour l''analyse prévu/réalisé : - indique clairement si le réalisé est au-dessus,
-        en dessous ou conforme à la prévision, - utilise les écarts fournis, - reste
-        synthétique.
-
-        Données du jour : - Date : {{ date_jour }} - Consommation réseau Tempo : {{
-        conso_reseau_tempo }} kWh - Consommation foyer estimée : {{ conso_foyer_estimee
-        }} kWh - Solaire autoconsommé : {{ solaire_autoconsomme }} kWh - Autonomie
-        solaire : {{ taux_autonomie_solaire }} % - Autoconsommation solaire : {{ taux_autoconsommation_solaire
-        }} % - Export PV : {{ taux_export_pv }} % - Part import réseau : {{ part_import_reseau
-        }} % - Total HC : {{ total_hc }} kWh - Total HP : {{ total_hp }} kWh - Bleu
-        HC : {{ bleu_hc }} kWh - Bleu HP : {{ bleu_hp }} kWh - Blanc HC : {{ blanc_hc
-        }} kWh - Blanc HP : {{ blanc_hp }} kWh - Rouge HC : {{ rouge_hc }} kWh - Rouge
-        HP : {{ rouge_hp }} kWh - Poste dominant : {{ poste_dominant }} - Coût du
-        jour : {{ cout_jour_txt }} - Production PV : {{ pv_jour_txt }} - Import réseau
-        : {{ import_reseau_txt }} - Export réseau : {{ export_reseau_txt }} - Batterie
-        mini du jour : {{ bat_min_txt }} - Batterie maxi du jour : {{ bat_max_txt
-        }} - SOC actuel/soir : {{ soc_soir_txt }} - Couleur Tempo demain : {{ couleur_demain
-        }}
-
-        Analyse prévision / réalisé production : - Prévision production jour : {{
-        previ_prod_jour }} kWh - Réalisé production jour : {{ realise_prod_jour }}
-        kWh - Ecart production : {{ ecart_prod_jour_txt }} - Ecart production % :
-        {{ ecart_prod_pct_txt }}
-
-        Analyse prévision / réalisé consommation 6-22h : - Prévision consommation
-        6-22h : {{ previ_conso_6_22 }} kWh - Réalisé consommation 6-22h : {{ realise_conso_6_22
-        }} kWh - Ecart consommation 6-22h : {{ ecart_conso_6_22_txt }} - Ecart consommation
-        6-22h % : {{ ecart_conso_6_22_pct_txt }}'
-      structure:
-        titre:
-          description: Titre très court du message Telegram
-          required: true
-          selector:
-            text:
-        message:
-          description: Message Telegram complet sur 5 à 8 lignes
-          required: true
-          selector:
-            text:
-        niveau:
-          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
-          required: true
-          selector:
-            text:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{\n  recap_energie is defined and\n  recap_energie.data
-          is defined and\n  recap_energie.data.message is defined\n}}"
-      sequence:
-      - action: telegram_bot.send_message
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: "{{\n  recap_energie.data.titre\n  if recap_energie.data.titre is
-            defined\n  else 'Recap Journalier Energie'\n}}"
-          message: '{{ recap_energie.data.message }} {% if recap_energie.data.niveau
-            is defined %} {{ ''\n'' }}Niveau : {{ recap_energie.data.niveau }} {%
-            endif %}'
-    default:
-    - action: telegram_bot.send_message
-      data:
-        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-        title: Recap Journalier Energie
-        message: '{{ date_jour }} {{ ''\n'' }}Conso réseau Tempo : {{ conso_reseau_tempo
-          }} kWh {{ ''\n'' }}Conso foyer estimée : {{ conso_foyer_estimee }} kWh {{
-          ''\n'' }}HC / HP : {{ total_hc }} / {{ total_hp }} kWh {{ ''\n'' }}Poste
-          dominant : {{ poste_dominant }} {{ ''\n'' }}Coût : {{ cout_jour_txt }} {{
-          ''\n'' }}PV : {{ pv_jour_txt }} {{ ''\n'' }}Import / Export : {{ import_reseau_txt
-          }} / {{ export_reseau_txt }} {{ ''\n'' }}Autonomie / Autoconso : {{ taux_autonomie_solaire
-          }} % / {{ taux_autoconsommation_solaire }} % {{ ''\n'' }}Export PV / Part
-          import : {{ taux_export_pv }} % / {{ part_import_reseau }} % {{ ''\n'' }}Batterie
-          min / max / soir : {{ bat_min_txt }} / {{ bat_max_txt }} / {{ soc_soir_txt
-          }} {{ ''\n'' }}Prod prévue / réalisée : {{ previ_prod_jour }} / {{ realise_prod_jour
-          }} kWh (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt }}) {{ ''\n''
-          }}Conso 6-22 prévue / réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
-          }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt }})
-          {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
-  - if:
-    - condition: template
-      value_template: '{{ trigger is defined and trigger.id == ''horaire_2359'' }}'
-    then:
-    - action: notify.send_message
-      target:
-        entity_id: notify.suivi_prod
-      data:
-        message: "{{\n  [\n    now().strftime('%Y-%m-%d %H:%M:%S'),\n    conso_reseau_tempo,\n
-          \   total_hc,\n    total_hp,\n    poste_dominant | trim | replace(',', '
-          '),\n    cout_jour_num,\n    pv_jour_num,\n    import_reseau_num,\n    export_reseau_num,\n
-          \   conso_foyer_estimee,\n    solaire_autoconsomme,\n    taux_autonomie_solaire,\n
-          \   taux_autoconsommation_solaire,\n    taux_export_pv,\n    part_import_reseau,\n
-          \   bat_min_num,\n    bat_max_num,\n    soc_soir_num,\n    previ_prod_jour,\n
-          \   realise_prod_jour,\n    ecart_prod_jour,\n    ecart_prod_pct_num,\n
-          \   previ_conso_6_22,\n    realise_conso_6_22,\n    ecart_conso_6_22,\n
-          \   ecart_conso_6_22_pct_num,\n    couleur_demain\n  ] | join(', ')\n}}"
-  mode: single
 - id: '1787411767535'
   alias: Rapport 22:00 DESS IA
   description: ''
@@ -4360,4 +3866,626 @@
       title: ⚠️ Disque Frigate
       message: '{{states("sensor.date_time") }}{{-"\n"-}}Disque Frigate presque plein
         : {{ states(''sensor.lxc_frigate_120_frigate_recordings_utilisation'') }}%'
+  mode: single
+- id: '1787807120062'
+  alias: Rapport 23:59 Journalier Recap Energie IA V4
+  description: ''
+  triggers:
+  - trigger: time
+    id: horaire_2359
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      conso_totale: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
+        | float(0) | round(2) }}'
+      conso_reseau_tempo: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
+        | float(0) | round(2) }}'
+      bleu_hc: '{{ states(''sensor.compteur_energie_hc_bleu_jour'') | float(0) | round(2)
+        }}'
+      bleu_hp: '{{ states(''sensor.compteur_energie_hp_bleu_jour'') | float(0) | round(2)
+        }}'
+      blanc_hc: '{{ states(''sensor.compteur_energie_hc_blanc_jour'') | float(0) |
+        round(2) }}'
+      blanc_hp: '{{ states(''sensor.compteur_energie_hp_blanc_jour'') | float(0) |
+        round(2) }}'
+      rouge_hc: '{{ states(''sensor.compteur_energie_hc_rouge_jour'') | float(0) |
+        round(2) }}'
+      rouge_hp: '{{ states(''sensor.compteur_energie_hp_rouge_jour'') | float(0) |
+        round(2) }}'
+      total_hc: "{{\n  (\n    states('sensor.compteur_energie_hc_bleu_jour') | float(0)
+        +\n    states('sensor.compteur_energie_hc_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hc_rouge_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      total_hp: "{{\n  (\n    states('sensor.compteur_energie_hp_bleu_jour') | float(0)
+        +\n    states('sensor.compteur_energie_hp_blanc_jour') | float(0) +\n    states('sensor.compteur_energie_hp_rouge_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      poste_dominant: "{% set postes = {\n  'Bleu HC': states('sensor.compteur_energie_hc_bleu_jour')
+        | float(0),\n  'Bleu HP': states('sensor.compteur_energie_hp_bleu_jour') |
+        float(0),\n  'Blanc HC': states('sensor.compteur_energie_hc_blanc_jour') |
+        float(0),\n  'Blanc HP': states('sensor.compteur_energie_hp_blanc_jour') |
+        float(0),\n  'Rouge HC': states('sensor.compteur_energie_hc_rouge_jour') |
+        float(0),\n  'Rouge HP': states('sensor.compteur_energie_hp_rouge_jour') |
+        float(0)\n} %} {{ postes | dictsort(by='value') | last | first }}"
+      couleur_demain: '{{ states(''sensor.rte_tempo_prochaine_couleur'') }}'
+      cout_jour_txt: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }} €\n{% endif %}"
+      cout_jour_num: "{% set v = states('sensor.cout_energie_hc_hp_tous_tarifs') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      pv_jour_num: '{{ states(''sensor.mp2_total_energie_produite_jour'') | float(0)
+        | round(2) }}'
+      import_reseau_num: '{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'')
+        | float(0) | round(2) }}'
+      export_reseau_num: '{{ states(''sensor.mp2_energie_injectee_ds_reseau_par_jour'')
+        | float(0) | round(2) }}'
+      pv_jour_txt: "{% set v = states('sensor.mp2_total_energie_produite_jour') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      import_reseau_txt: "{% set v = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      export_reseau_txt: "{% set v = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      conso_foyer_estimee: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) +\n    states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      solaire_autoconsomme: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      taux_autonomie_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% set conso = pv + imp - exp %} {% set solaire = pv - exp %}
+        {% if conso > 0 %}\n  {{ ((solaire / conso) * 100) | round(1) }}\n{% else
+        %}\n  0\n{% endif %}"
+      taux_autoconsommation_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% if pv > 0 %}\n  {{ (((pv - exp) / pv) * 100) | round(1) }}\n{%
+        else %}\n  0\n{% endif %}"
+      taux_export_pv: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% if pv > 0 %}\n  {{ ((exp / pv) * 100) | round(1) }}\n{% else
+        %}\n  0\n{% endif %}"
+      part_import_reseau: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
+        | float(0) %} {% set conso = pv + imp - exp %} {% if conso > 0 %}\n  {{ ((imp
+        / conso) * 100) | round(1) }}\n{% else %}\n  0\n{% endif %}"
+      bat_min_txt: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} %\n{% endif %}"
+      bat_max_txt: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} %\n{% endif %}"
+      soc_soir_txt: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(1) }} %\n{% endif %}"
+      bat_min_num: "{% set v = states('sensor.soc_mini') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }}\n{% endif %}"
+      bat_max_num: "{% set v = states('sensor.soc_maxi') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }}\n{% endif %}"
+      soc_soir_num: "{% set v = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(1) }}\n{% endif %}"
+      previ_prod_jour: '{{ states(''input_number.mp2_memoire_estimation_production_jour'')
+        | float(0) | round(2) }}'
+      realise_prod_jour: '{{ states(''sensor.mp2_total_energie_produite_jour'') |
+        float(0) | round(2) }}'
+      ecart_prod_jour: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0)\n  ) | round(2)\n}}"
+      ecart_prod_jour_txt: "{% set e =\n  (\n    states('sensor.mp2_total_energie_produite_jour')
+        | float(0) -\n    states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0)\n  ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_prod_pct_txt: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
+        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
+      ecart_prod_pct_num: "{% set p = states('input_number.mp2_memoire_estimation_production_jour')
+        | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
+        | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
+        else %}\n  n/d\n{% endif %}"
+      previ_conso_6_22: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
+        | round(2) }}'
+      realise_conso_6_22: '{{ states(''sensor.mp2_dess_consommation_6h_22h_vrm'')
+        | float(0) | round(2) }}'
+      ecart_conso_6_22: "{{\n  (\n    states('sensor.mp2_dess_consommation_6h_22h_vrm')
+        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
+        \ ) | round(2)\n}}"
+      ecart_conso_6_22_txt: "{% set e =\n  (\n    states('sensor.mp2_dess_consommation_6h_22h_vrm')
+        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
+        \ ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_conso_6_22_pct_txt: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+        | float(0) %} {% set r = states('sensor.mp2_dess_consommation_6h_22h_vrm')
+        | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
+        round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
+      ecart_conso_6_22_pct_num: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+        | float(0) %} {% set r = states('sensor.mp2_dess_consommation_6h_22h_vrm')
+        | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
+        else %}\n  n/d\n{% endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: recap_energie
+    data:
+      task_name: recap energie journalier complet
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique. Tu ne dois JAMAIS produire
+        de chiffres, pourcentages ou unités (kWh, %, €, V, A) : toutes les valeurs
+        numériques seront ajoutées séparément par le système. Rédige uniquement des
+        commentaires qualitatifs très courts, en français, sans emoji, sans jamais
+        réutiliser, arrondir ou paraphraser un nombre fourni en contexte.
+
+        Contexte du jour (pour information seulement, ne recopie aucune de ces valeurs
+        dans tes réponses) : - Poste Tempo dominant : {{ poste_dominant }} - Couleur
+        Tempo demain : {{ couleur_demain }} - Production prévue {{ previ_prod_jour
+        }} kWh vs réalisée {{ realise_prod_jour }} kWh (écart {{ ecart_prod_pct_txt
+        }}) - Consommation 6-22h prévue {{ previ_conso_6_22 }} kWh vs réalisée {{
+        realise_conso_6_22 }} kWh (écart {{ ecart_conso_6_22_pct_txt }}) - Autonomie
+        solaire {{ taux_autonomie_solaire }} %, autoconsommation {{ taux_autoconsommation_solaire
+        }} % - Batterie mini/maxi du jour {{ bat_min_txt }} / {{ bat_max_txt }}
+
+        Pour chaque champ demandé, rédige une seule phrase courte (maximum 12 mots),
+        sans aucun chiffre, uniquement une appréciation qualitative. Exemples de style
+        attendu (ne pas recopier tel quel) : "Production nettement supérieure aux
+        prévisions du jour." ou "Consommation maîtrisée malgré les températures basses."'
+      structure:
+        titre:
+          description: Titre très court du message Telegram, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        analyse_production:
+          description: Une phrase qualitative courte comparant la production prévue
+            et réalisée, sans aucun chiffre ni unité
+          required: true
+          selector:
+            text:
+        analyse_consommation:
+          description: Une phrase qualitative courte comparant la consommation 6-22h
+            prévue et réalisée, sans aucun chiffre ni unité
+          required: true
+          selector:
+            text:
+        conseil_demain:
+          description: Un conseil très court pour demain selon la couleur Tempo, sans
+            aucun chiffre
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  recap_energie is defined and\n  recap_energie.data
+          is defined and\n  recap_energie.data.titre is defined and\n  recap_energie.data.analyse_production
+          is defined and\n  recap_energie.data.analyse_consommation is defined\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: '{{ recap_energie.data.titre }}'
+          message: "\U0001F4CA {{ date_jour }}\n\nConso réseau Tempo : {{ conso_reseau_tempo
+            }} kWh\nConso foyer estimée : {{ conso_foyer_estimee }} kWh\nHC / HP :
+            {{ total_hc }} / {{ total_hp }} kWh (poste dominant : {{ poste_dominant
+            }})\nCoût du jour : {{ cout_jour_txt }}\n\nPV : {{ pv_jour_txt }} — Import/Export
+            : {{ import_reseau_txt }} / {{ export_reseau_txt }}\nAutonomie / Autoconso
+            solaire : {{ taux_autonomie_solaire }} % / {{ taux_autoconsommation_solaire
+            }} %\nBatterie min/max/soir : {{ bat_min_txt }} / {{ bat_max_txt }} /
+            {{ soc_soir_txt }}\n\nProd prévue/réalisée : {{ previ_prod_jour }} / {{
+            realise_prod_jour }} kWh (écart {{ ecart_prod_pct_txt }})\n{{ recap_energie.data.analyse_production
+            }}\n\nConso 6-22h prévue/réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
+            }} kWh (écart {{ ecart_conso_6_22_pct_txt }})\n{{ recap_energie.data.analyse_consommation
+            }}\n\nTempo demain : {{ couleur_demain }} — {{ recap_energie.data.conseil_demain
+            }}\n\nNiveau : {{ recap_energie.data.niveau if recap_energie.data.niveau
+            is defined else 'INFO' }}"
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Recap Journalier Energie
+        message: '{{ date_jour }} {{ ''\n'' }}Conso réseau Tempo : {{ conso_reseau_tempo
+          }} kWh {{ ''\n'' }}Conso foyer estimée : {{ conso_foyer_estimee }} kWh {{
+          ''\n'' }}HC / HP : {{ total_hc }} / {{ total_hp }} kWh {{ ''\n'' }}Poste
+          dominant : {{ poste_dominant }} {{ ''\n'' }}Coût : {{ cout_jour_txt }} {{
+          ''\n'' }}PV : {{ pv_jour_txt }} {{ ''\n'' }}Import / Export : {{ import_reseau_txt
+          }} / {{ export_reseau_txt }} {{ ''\n'' }}Autonomie / Autoconso : {{ taux_autonomie_solaire
+          }} % / {{ taux_autoconsommation_solaire }} % {{ ''\n'' }}Export PV / Part
+          import : {{ taux_export_pv }} % / {{ part_import_reseau }} % {{ ''\n'' }}Batterie
+          min / max / soir : {{ bat_min_txt }} / {{ bat_max_txt }} / {{ soc_soir_txt
+          }} {{ ''\n'' }}Prod prévue / réalisée : {{ previ_prod_jour }} / {{ realise_prod_jour
+          }} kWh (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt }}) {{ ''\n''
+          }}Conso 6-22 prévue / réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
+          }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt }})
+          {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
+  - if:
+    - condition: template
+      value_template: '{{ trigger is defined and trigger.id == ''horaire_2359'' }}'
+    then:
+    - action: notify.send_message
+      target:
+        entity_id: notify.suivi_prod
+      data:
+        message: "{{\n  [\n    now().strftime('%Y-%m-%d %H:%M:%S'),\n    conso_reseau_tempo,\n
+          \   total_hc,\n    total_hp,\n    poste_dominant | trim | replace(',', '
+          '),\n    cout_jour_num,\n    pv_jour_num,\n    import_reseau_num,\n    export_reseau_num,\n
+          \   conso_foyer_estimee,\n    solaire_autoconsomme,\n    taux_autonomie_solaire,\n
+          \   taux_autoconsommation_solaire,\n    taux_export_pv,\n    part_import_reseau,\n
+          \   bat_min_num,\n    bat_max_num,\n    soc_soir_num,\n    previ_prod_jour,\n
+          \   realise_prod_jour,\n    ecart_prod_jour,\n    ecart_prod_pct_num,\n
+          \   previ_conso_6_22,\n    realise_conso_6_22,\n    ecart_conso_6_22,\n
+          \   ecart_conso_6_22_pct_num,\n    couleur_demain\n  ] | join(', ')\n}}"
+  mode: single
+- id: '1787809671391'
+  alias: Rapport 22:00 DESS IA V3
+  description: ''
+  triggers:
+  - trigger: time
+    at: '22:00:00'
+    id: '22:00'
+  conditions: []
+  actions:
+  - variables:
+      date_snapshot: '{{ states(''sensor.date_time'') }}'
+      previ_prod_demain: '{{ states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
+        | float(0) | round(1) }}'
+      soc_cible: '{{ states(''sensor.mp2_dess_cible_soc_par_mqtt'') | float(0) | round(0)
+        }}'
+      soc_actuel: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) }}'
+      forcage_actif_num: '{{ 1 if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
+        ''on'') else 0 }}'
+      forcage_actif_txt: '{{ ''actif'' if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
+        ''on'') else ''inactif'' }}'
+      niveau_forcage_num: '{{ states(''input_number.mp2_niveau_forcage_cp1'') | float(0)
+        | round(0) }}'
+      niveau_forcage: '{{ niveau_forcage_num if forcage_actif_num == 1 else ''n/d''
+        }}'
+      ecart_soc_cible_txt: '{{ ''%+.1f'' | format((soc_actuel | float - soc_cible
+        | float) | round(1)) }} %'
+      ecart_soc_forcage_txt: "{% if forcage_actif_num == 1 %}\n  {{ '%+.1f' | format((soc_actuel
+        | float - niveau_forcage_num | float) | round(1)) }} %\n{% else %}\n  n/d\n{%
+        endif %}"
+      perte_nuit_estimee_pct: 28
+      soc_prevu_0545_sans_charge: '{{ [soc_actuel | float - perte_nuit_estimee_pct,
+        0] | max | round(1) }}'
+      besoin_corrige_pct_txt: '{{ [soc_cible | float - soc_prevu_0545_sans_charge
+        | float, 0] | max | round(1) }}'
+      cap_ah_mesure: '{{ states(''sensor.capacite_batterie_estimee_par_nr'') | float(300)
+        | round(0) }}'
+      i_avg_estime: 40
+      duree_charge_min: "{% set need_pct = besoin_corrige_pct_txt | float(0) %}\n{%
+        if need_pct <= 0 %}\n  0\n{% else %}\n  {% set ah_needed = (need_pct / 100)
+        * (cap_ah_mesure | float) %}\n  {% set bulk_min = (ah_needed / i_avg_estime)
+        * 60 if i_avg_estime > 0 else 0 %}\n  {% set abs_min = 60 if (soc_cible |
+        float) >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min)
+        | round(0, 'ceil')) %}\n  {% if ns.need < 15 %}{% set ns.need = 15 %}{% endif
+        %}\n  {% if ns.need > 480 %}{% set ns.need = 480 %}{% endif %}\n  {{ ns.need
+        | int }}\n{% endif %}"
+      duree_charge_previ_min_txt: '{{ duree_charge_min | int }}'
+      heure_fin_charge_txt: 05:45
+      heure_debut_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  n/d\n{%
+        else %}\n  {% set step = 5 %}\n  {% set start_floor = 22 * 60 %}\n  {% set
+        end_fixed = 5 * 60 + 45 %}\n  {% set ns = namespace(start=(((end_fixed - (duree_charge_min
+        | int)) // step) * step) | int) %}\n  {% if ns.start < 0 %}{% set ns.start
+        = ns.start + 1440 %}{% endif %}\n  {% if not (ns.start >= start_floor or ns.start
+        < end_fixed) %}\n    {% set ns.start = start_floor %}\n  {% endif %}\n  {{
+        '%02d:%02d' | format((ns.start // 60) | int, (ns.start % 60) | int) }}\n{%
+        endif %}"
+      synthese_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  pas de
+        charge prévisionnelle nécessaire\n{% else %}\n  début estimé {{ heure_debut_charge_previ_txt
+        }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
+        endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: rapport_dess_ia
+    data:
+      task_name: rapport dess 22h
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique. Tu ne dois JAMAIS produire
+        de chiffres, pourcentages, unités ou horaires (%, kWh, Ah, min, hh:mm) : toutes
+        les valeurs numériques sont déjà connues et affichées séparément par le système.
+        Ton seul travail est de juger si la situation DESS de ce soir est cohérente
+        ou mérite une vigilance, et de le dire en une phrase très courte (maximum
+        15 mots), sans jamais réutiliser ou paraphraser un nombre fourni ci-dessous.
+
+        Contexte du jour (pour information seulement, ne recopie aucune valeur) :
+        - Forçage DESS : {{ forcage_actif_txt }} - Niveau de forçage demandé : {{
+        niveau_forcage }} - SOC cible : {{ soc_cible }} %, SOC actuel : {{ soc_actuel
+        }} % - Ecart SOC actuel / SOC cible : {{ ecart_soc_cible_txt }} - Ecart SOC
+        actuel / niveau de forçage : {{ ecart_soc_forcage_txt }} - Prévision production
+        demain : {{ previ_prod_demain }} kWh - SOC prévu à 05:45 sans charge : {{
+        soc_prevu_0545_sans_charge }} % - Synthèse charge prévisionnelle : {{ synthese_charge_previ_txt
+        }}
+
+        Exemples de style attendu pour la remarque (ne pas recopier tel quel) : "Situation
+        cohérente, aucune vigilance particulière ce soir." ou "Écart notable au SOC
+        cible, à surveiller demain matin." ou "Forçage actif mais production de demain
+        incertaine, à reconfirmer."'
+      structure:
+        titre:
+          description: Titre très court du message Telegram, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_coherence:
+          description: Une phrase courte jugeant si la situation DESS du soir est
+            cohérente ou mérite une vigilance, sans aucun chiffre ni unité
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  rapport_dess_ia is defined and\n  rapport_dess_ia.data
+          is defined and\n  rapport_dess_ia.data.titre is defined and\n  rapport_dess_ia.data.commentaire_coherence
+          is defined\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: '{{ rapport_dess_ia.data.titre }}'
+          message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Prévi demain = {{ previ_prod_demain
+            }} kWh{{-\"\\n\"-}}\n    Forçage DESS = {{ forcage_actif_txt }}{% if forcage_actif_num
+            == 1 %} / Niveau = {{ niveau_forcage }} %{% endif %}{{-\"\\n\"-}}\n    SOC
+            cible = {{ soc_cible }} % / Actuel = {{ soc_actuel }} %{{-\"\\n\"-}}\n
+            \   Ecart SOC-cible = {{ ecart_soc_cible_txt }}{% if forcage_actif_num
+            == 1 %} / Ecart SOC-forçage = {{ ecart_soc_forcage_txt }}{% endif %}{{-\"\\n\"-}}\n
+            \   SOC prévu à 05:45 sans charge = {{ soc_prevu_0545_sans_charge }} %{{-\"\\n\"-}}\n
+            \   Charge prévisionnelle = {{ synthese_charge_previ_txt }}{{-\"\\n\"-}}\n
+            \   {{ rapport_dess_ia.data.commentaire_coherence }}{{-\"\\n\"-}}\n    Niveau
+            = {{ rapport_dess_ia.data.niveau if rapport_dess_ia.data.niveau is defined
+            else 'INFO' }}\n"
+    default:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport DESS 22h
+        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Prévi demain = {{ previ_prod_demain
+          }} kWh{{-\"\\n\"-}}\n    Forçage DESS = {{ forcage_actif_txt }}{% if forcage_actif_num
+          == 1 %} / Niveau = {{ niveau_forcage }} %{% endif %}{{-\"\\n\"-}}\n    SOC
+          cible = {{ soc_cible }} % / Actuel = {{ soc_actuel }} %{{-\"\\n\"-}}\n    Ecart
+          SOC-cible = {{ ecart_soc_cible_txt }}{% if forcage_actif_num == 1 %} / Ecart
+          SOC-forçage = {{ ecart_soc_forcage_txt }}{% endif %}{{-\"\\n\"-}}\n    SOC
+          prévu à 05:45 sans charge = {{ soc_prevu_0545_sans_charge }} %{{-\"\\n\"-}}\n
+          \   Charge prévisionnelle = {{ synthese_charge_previ_txt }}\n"
+  - action: notify.send_message
+    target:
+      entity_id: notify.suivi_dess
+    data:
+      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ previ_prod_demain
+        }}, {{ forcage_actif_num }}, {{ niveau_forcage if forcage_actif_num == 1 else
+        '''' }}, {{ soc_cible }}, {{ soc_actuel }}, {{ ecart_soc_cible_txt | replace(''
+        %'','''') }}, {{ ecart_soc_forcage_txt | replace('' %'','''') if forcage_actif_num
+        == 1 else '''' }}, {{ perte_nuit_estimee_pct }}, {{ soc_prevu_0545_sans_charge
+        }}, {{ besoin_corrige_pct_txt }}, {{ heure_debut_charge_previ_txt }}, {{ heure_fin_charge_txt
+        }}, {{ duree_charge_previ_min_txt }}'
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: input_number.set_value
+    data:
+      value: '{{ previ_prod_demain }}'
+    target:
+      entity_id:
+      - input_number.mp2_memoire_estimation_production_jour
+  - action: input_number.set_value
+    data:
+      value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) | round(1)
+        }}'
+    target:
+      entity_id:
+      - input_number.mp2_memoire_estimation_conso_jour
+  mode: single
+- id: '1787810093290'
+  alias: Rapport Piscine Journalier IA V3
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:45:00'
+  conditions: []
+  actions:
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      temp_eau: '{{ states(''sensor.esp178_piscine_temperature_eau'') | float(0) }}'
+      temp_eau_txt: "{% set v = states('sensor.esp178_piscine_temperature_eau') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(1) }} °C\n{% endif %}"
+      temp_ext_txt: "{% set v = states('sensor.vp2_temp_out') %} {% if v in ['unknown',
+        'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n  {{ (v | float(0))
+        | round(1) }} °C\n{% endif %}"
+      ph_mesure: '{{ states(''sensor.esp178_piscine_ph_ezo_filtre'') | float(0) }}'
+      ph_cible: '{{ states(''number.esp178_piscine_ph_cible'') | float(7.2) }}'
+      ph_txt: "{% set v = states('sensor.esp178_piscine_ph_ezo_filtre') %} {% if v
+        in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n
+        \ {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      ph_cible_txt: '{{ ph_cible | round(2) }}'
+      ecart_ph_txt: '{{ (ph_mesure - ph_cible) | round(2) }}'
+      orp_mesure: '{{ states(''sensor.esp178_piscine_orp_ezo_filtre'') | float(0)
+        }}'
+      orp_cible: '{{ states(''number.esp178_piscine_consigne_orp'') | float(700) }}'
+      orp_txt: "{% set v = states('sensor.esp178_piscine_orp_ezo_filtre') %} {% if
+        v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else %}\n
+        \ {{ (v | float(0)) | round(0) }} mV\n{% endif %}"
+      orp_cible_txt: '{{ orp_cible | round(0) }}'
+      ecart_orp_txt: '{{ (orp_mesure - orp_cible) | round(0) }}'
+      chlore_libre_txt: "{% set v = states('sensor.my_sampling_point_pl_chlorine_free')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} ppm\n{% endif %}"
+      pression_filtre: '{{ states(''sensor.esp178_piscine_pression_filtre'') | float(0)
+        }}'
+      pression_filtre_txt: "{% set v = states('sensor.esp178_piscine_pression_filtre')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} bar\n{% endif %}"
+      mode_filtration_txt: '{{ states(''select.esp178_piscine_mode_fonctionnement_filtration'')
+        }}'
+      temps_filtration_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      energie_jour: '{{ states(''sensor.compteur_energie_piscine_jour_hp_hc'') | float(0)
+        }}'
+      energie_jour_txt: "{% set v = states('sensor.compteur_energie_piscine_jour_hp_hc')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
+      conso_ph_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_ph_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ v }}\n{% endif %}"
+      conso_chl_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_chl_jour')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      poids_chlore_txt: "{% set v = states('sensor.esp129_pesage_chlore_poids_chlore')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      appoint_eau_jour_txt: "{% set v = states('sensor.esp173_cpt_eau_piscine') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+      niveau_txt: "{% if is_state('binary_sensor.esp178_piscine_niv_defaut', 'on')
+        %}\n  défaut niveau\n{% elif is_state('binary_sensor.esp178_piscine_niv_bas',
+        'on') %}\n  niveau bas\n{% elif is_state('binary_sensor.esp178_piscine_niv_inter',
+        'on') %}\n  niveau intermédiaire\n{% elif is_state('binary_sensor.esp178_piscine_niv_haut',
+        'on') %}\n  niveau haut\n{% else %}\n  niveau inconnu\n{% endif %}"
+      volet_txt: "{% if is_state('binary_sensor.esp178_piscine_volet_ferme', 'on')
+        %}\n  fermé\n{% elif is_state('binary_sensor.esp178_piscine_volet_ouvert',
+        'on') %}\n  ouvert\n{% else %}\n  intermédiaire / inconnu\n{% endif %}"
+      statut_esp_txt: "{% if is_state('binary_sensor.esp178_piscine_status', 'on')
+        %}\n  connecté\n{% else %}\n  hors ligne\n{% endif %}"
+      pompe_filtre_txt: "{% if is_state('switch.esp178_piscine_cde_pompe_filtration',
+        'on') %}\n  en marche\n{% else %}\n  arrêtée\n{% endif %}"
+      mode_ph_txt: '{{ states(''select.esp178_piscine_mode_fonctionnement_regul_ph'')
+        }}'
+      mode_chlore_txt: '{{ states(''select.esp178_piscine_mode_fonct_regul_chlore'')
+        }}'
+      appoint_mode_txt: '{{ states(''select.esp178_piscine_mode_fonct_appoint_eau'')
+        }}'
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: recap_piscine
+    data:
+      task_name: recap piscine journalier v3
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant de suivi piscine. Tu ne dois JAMAIS produire
+        de chiffres, pourcentages ou unités (°C, ppm, bar, mV, kWh) : toutes les valeurs
+        numériques sont déjà connues et affichées séparément par le système. Ton travail
+        consiste uniquement à interpréter la situation en phrases courtes, qualitatives,
+        en français, sans jamais réutiliser ou paraphraser un nombre fourni ci-dessous.
+
+        Contexte du jour (pour information seulement, ne recopie aucune valeur) :
+        - pH mesuré {{ ph_txt }} vs cible {{ ph_cible_txt }} (écart {{ ecart_ph_txt
+        }}) - ORP mesuré {{ orp_txt }} vs consigne {{ orp_cible_txt }} mV (écart {{
+        ecart_orp_txt }} mV) - Chlore libre : {{ chlore_libre_txt }} - Pression filtre
+        : {{ pression_filtre_txt }} - Mode filtration : {{ mode_filtration_txt }},
+        pompe {{ pompe_filtre_txt }}, temps du jour {{ temps_filtration_txt }} - Energie
+        piscine du jour : {{ energie_jour_txt }} - Consommation pH/chlore du jour
+        : {{ conso_ph_jour_txt }} / {{ conso_chl_jour_txt }} - Stock chlore restant
+        : {{ poids_chlore_txt }} - Appoint eau du jour : {{ appoint_eau_jour_txt }},
+        niveau : {{ niveau_txt }}, volet : {{ volet_txt }} - Etat ESP piscine : {{
+        statut_esp_txt }}
+
+        Pour chaque champ demandé, rédige une phrase courte (maximum 15 mots), sans
+        aucun chiffre ni unité, uniquement une appréciation qualitative. Exemples
+        de style attendu (ne pas recopier tel quel) : "pH correct, proche de la cible"
+        ou "ORP un peu bas, à surveiller" ou "Pression filtre normale, rien à signaler"
+        ou "Stock de chlore suffisant pour l''instant".'
+      structure:
+        titre:
+          description: Titre court du message, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        synthese_globale:
+          description: Une phrase de synthèse globale sur l'état de la piscine ce
+            jour, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_qualite_eau:
+          description: Une à deux phrases qualitatives sur le pH, l'ORP et le chlore
+            libre par rapport à leurs cibles, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_filtration:
+          description: Une phrase qualitative sur la filtration, la pression filtre
+            et l'énergie du jour, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_anomalies:
+          description: Une phrase signalant une éventuelle anomalie sur l'appoint
+            d'eau, le niveau, le volet ou l'ESP piscine, ou confirmant que tout est
+            normal, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        recommandation:
+          description: Une courte recommandation si utile, ou une phrase confirmant
+            qu'aucune action n'est nécessaire, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  recap_piscine is defined and\n  recap_piscine.data
+          is defined and\n  recap_piscine.data.titre is defined and\n  recap_piscine.data.synthese_globale
+          is defined and\n  recap_piscine.data.commentaire_qualite_eau is defined\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: '{{ recap_piscine.data.titre }}'
+          message: "\U0001F3CA {{ date_jour }}\n\n{{ recap_piscine.data.synthese_globale
+            }}\n\nEau / Ext : {{ temp_eau_txt }} / {{ temp_ext_txt }}\npH : {{ ph_txt
+            }} (cible {{ ph_cible_txt }}, écart {{ ecart_ph_txt }})\nORP : {{ orp_txt
+            }} (cible {{ orp_cible_txt }} mV, écart {{ ecart_orp_txt }} mV)\nChlore
+            libre : {{ chlore_libre_txt }}\n{{ recap_piscine.data.commentaire_qualite_eau
+            }}\n\nPression filtre : {{ pression_filtre_txt }}\nFiltration : mode {{
+            mode_filtration_txt }}, pompe {{ pompe_filtre_txt }}, temps {{ temps_filtration_txt
+            }}, énergie {{ energie_jour_txt }}\n{{ recap_piscine.data.commentaire_filtration
+            }}\n\npH : consommation du jour {{ conso_ph_jour_txt }}\n\nChlore : consommation
+            du jour {{ conso_chl_jour_txt }} | stock restant {{ poids_chlore_txt }}\n\nAppoint
+            eau : {{ appoint_eau_jour_txt }} | Niveau : {{ niveau_txt }} | Volet :
+            {{ volet_txt }}\nESP piscine : {{ statut_esp_txt }}\n{{ recap_piscine.data.commentaire_anomalies
+            }}\n\n{{ recap_piscine.data.recommandation }}\n\nNiveau : {{ recap_piscine.data.niveau
+            if recap_piscine.data.niveau is defined else 'INFO' }}"
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport Piscine
+        message: '{{ date_jour }} {{ ''\n'' }}Eau / Ext : {{ temp_eau_txt }} / {{
+          temp_ext_txt }} {{ ''\n'' }}pH : {{ ph_txt }} (cible {{ ph_cible_txt }},
+          écart {{ ecart_ph_txt }}) {{ ''\n'' }}ORP : {{ orp_txt }} (cible {{ orp_cible_txt
+          }} mV, écart {{ ecart_orp_txt }} mV) {{ ''\n'' }}Chlore libre : {{ chlore_libre_txt
+          }} | Pression filtre : {{ pression_filtre_txt }} {{ ''\n'' }}Filtration
+          : mode {{ mode_filtration_txt }}, pompe {{ pompe_filtre_txt }}, temps {{
+          temps_filtration_txt }}, énergie {{ energie_jour_txt }} {{ ''\n'' }}pH :
+          consommation du jour {{ conso_ph_jour_txt }} {{ ''\n'' }}Chlore : consommation
+          du jour {{ conso_chl_jour_txt }} | stock restant {{ poids_chlore_txt }}
+          {{ ''\n'' }}Appoint eau : {{ appoint_eau_jour_txt }} | Niveau : {{ niveau_txt
+          }} | Volet : {{ volet_txt }} {{ ''\n'' }}ESP piscine : {{ statut_esp_txt
+          }}'
   mode: single

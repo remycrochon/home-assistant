@@ -275,11 +275,11 @@ openhasp:
             {% endif %}
       - obj: "p5b25" # Grid Conso
         properties:
-          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|int(0) }} kWh"
+          "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|float(0)|round(1) }} kWh"
             
       - obj: "p5b26" # Grid Inject
         properties:
-          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|int(0) }} kWh"
+          "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|float(0)|round(1) }} kWh"
       
       ##################### Solaire
       - obj: "p5b34" # Puissance production
@@ -293,11 +293,11 @@ openhasp:
             {% endif %}
       - obj: "p5b35" # Production
         properties:
-          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|int(0) }} kWh"
+          "text": "{{ states('sensor.mp2_total_energie_produite_jour')|float(0)|round(1) }} kWh"
             
       - obj: "p5b36" # Prévision
         properties:
-          "text": "{{ states('input_number.mp2_memoire_estimation_production_jour')|int(0) }} kWh"
+          "text": "{{ states('input_number.mp2_memoire_estimation_production_jour')|float(0)|round(1) }} kWh"
 
       ############# Batteries
       - obj: "p5b44" # Charge/Décharge
@@ -339,10 +339,10 @@ openhasp:
             {% endif %}
       - obj: "p5b56" # Conso
         properties:
-          "text": "{{ states('sensor.mp2_dess_consommation_h6_22h_vrm')|int(0) }} kWh"
+          "text": "{{ states('sensor.mp2_dess_consommation_6h_22h_vrm')|float(0)|round(1) }} kWh"
       - obj: "p5b57" # PREVI
         properties:
-          "text": "{{ states('sensor.victron_remote_monitoring_consommation_d_energie_estimee_aujourd_hui')|int(0) }} kWh"
+          "text": "{{ states('sensor.mp2_dess_previ_prod_6_22_j1')|float(0)|round(1) }} kWh"
 
 ############### Page 6 ###############
       ############### PORTE GARAGE

@@ -3991,21 +3991,21 @@
         | float(0) %} {% set r = states('sensor.mp2_total_energie_produite_jour')
         | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
         else %}\n  n/d\n{% endif %}"
-      previ_conso_6_22: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
-        | round(2) }}'
+      previ_conso_6_22: '{{ states(''input_number.previ_conso_6_22h_snapshot_du_jour'')
+        | float(0) | round(2) }}'
       realise_conso_6_22: '{{ states(''sensor.mp2_dess_consommation_6h_22h_vrm'')
         | float(0) | round(2) }}'
       ecart_conso_6_22: "{{\n  (\n    states('sensor.mp2_dess_consommation_6h_22h_vrm')
-        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
-        \ ) | round(2)\n}}"
+        | float(0) -\n    states('input_number.previ_conso_6_22h_snapshot_du_jour')
+        | float(0)\n  ) | round(2)\n}}"
       ecart_conso_6_22_txt: "{% set e =\n  (\n    states('sensor.mp2_dess_consommation_6h_22h_vrm')
-        | float(0) -\n    states('sensor.mp2_dess_previ_conso_6_22_j1') | float(0)\n
-        \ ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
-      ecart_conso_6_22_pct_txt: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+        | float(0) -\n    states('input_number.previ_conso_6_22h_snapshot_du_jour')
+        | float(0)\n  ) | round(2)\n%} {{ '%+.2f' | format(e) }} kWh"
+      ecart_conso_6_22_pct_txt: "{% set p = states('input_number.previ_conso_6_22h_snapshot_du_jour')
         | float(0) %} {% set r = states('sensor.mp2_dess_consommation_6h_22h_vrm')
         | float(0) %} {% if p > 0 %}\n  {{ '%+.1f' | format(((r - p) / p * 100) |
         round(1)) }} %\n{% else %}\n  n/d\n{% endif %}"
-      ecart_conso_6_22_pct_num: "{% set p = states('sensor.mp2_dess_previ_conso_6_22_j1')
+      ecart_conso_6_22_pct_num: "{% set p = states('input_number.previ_conso_6_22h_snapshot_du_jour')
         | float(0) %} {% set r = states('sensor.mp2_dess_consommation_6h_22h_vrm')
         | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
         else %}\n  n/d\n{% endif %}"
@@ -4488,4 +4488,16 @@
           {{ ''\n'' }}Appoint eau : {{ appoint_eau_jour_txt }} | Niveau : {{ niveau_txt
           }} | Volet : {{ volet_txt }} {{ ''\n'' }}ESP piscine : {{ statut_esp_txt
           }}'
+  mode: single
+- id: '1787897164923'
+  alias: Snapshot prévi conso 6-22h du jour
+  triggers:
+  - at: 06:00:00
+    trigger: time
+  actions:
+  - target:
+      entity_id: input_number.previ_conso_6_22h_snapshot_du_jour
+    data:
+      value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) }}'
+    action: input_number.set_value
   mode: single

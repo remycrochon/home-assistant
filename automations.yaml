@@ -909,7 +909,8 @@
   mode: single
 - id: '1710317639852'
   alias: MP2 Défaut Status Bus VE
-  description: Alarme Status Bus VE
+  description: Alarme Status Bus VE — notification immédiate (5s) et notification
+    d'indisponibilité prolongée (5 min), sans action automatique (reboot supprimé).
   triggers:
   - trigger: state
     entity_id:
@@ -917,33 +918,60 @@
     to: unavailable
     for:
       seconds: 5
+    id: alerte_immediate
   - trigger: state
     entity_id:
     - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
     to: unknown
     for:
       seconds: 5
+    id: alerte_immediate
   - trigger: state
     entity_id:
     - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
     for:
       minutes: 2
+    id: alerte_immediate
+  - trigger: state
+    entity_id:
+    - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state
+    to: unavailable
+    for:
+      minutes: 5
+    id: alerte_prolongee
   conditions:
   - condition: template
     value_template: '{% set st = states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
       %}  {{ st in [''unknown'',''unavailable''] or st not in [''Float'',''Bulk'',''Absorption'',''Passthrough'',''Inverting'',''float'',''bulk'',''absorption'',''passthrough'',''inverting'']
       }}'
   actions:
-  - action: telegram_bot.send_message
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      title: ALARME!! DISFONCTIONNEMENT BUS VE
-      message: '{{ states(''sensor.date_time'') }}{{-"\n"-}}
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: alerte_immediate
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: ALARME!! DISFONCTIONNEMENT BUS VE
+          message: '{{ states(''sensor.date_time'') }}{{-"\n"-}}
 
-        MP2-Status Bus VE -> {{ states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
-        }}
+            MP2-Status Bus VE -> {{ states(''sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state'')
+            }}
 
-        Etats attendus: Float/float/Bulk/bulk/Absorption/absorption/Passthrough/passthrough/Inverting/inverting'
+            Etats attendus: Float/float/Bulk/bulk/Absorption/absorption/Passthrough/passthrough/Inverting/inverting'
+    - conditions:
+      - condition: trigger
+        id: alerte_prolongee
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "\U0001F6A8 Onduleur indisponible depuis 5 min"
+          message: Status Bus VE toujours indisponible depuis 5 minutes. Intervention
+            manuelle nécessaire (aucun reboot automatique n'est déclenché).
+        note: Notification uniquement — le reboot automatique du Cerbo a été retiré
+          à la demande de l'utilisateur.
   mode: single
 - id: '1711527591458'
   alias: Aqara Magic Cube

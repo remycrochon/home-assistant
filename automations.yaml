@@ -1313,14 +1313,6 @@
       evaluate_payload: false
       qos: '0'
       retain: false
-      topic: ha/mp2/cp/validdess
-      payload: '"{{ states(''input_boolean.mp2_validation_dess_victron'') }}"'
-  - action: mqtt.publish
-    metadata: {}
-    data:
-      evaluate_payload: false
-      qos: '0'
-      retain: false
       topic: ha/mp2/cp/tempo_j1
       payload: '"{{ states(''sensor.rte_tempo_prochaine_couleur'') }}"'
   - action: mqtt.publish
@@ -4322,6 +4314,14 @@
     target:
       entity_id:
       - input_number.mp2_memoire_estimation_conso_jour
+  - action: input_text.set_value
+    data:
+      value: '{{ {''sa'': soc_actuel, ''sc'': soc_cible, ''sp'': soc_prevu_0545_sans_charge,
+        ''bp'': besoin_corrige_pct_txt, ''hd'': heure_debut_charge_previ_txt, ''dm'':
+        duree_charge_previ_min_txt, ''fa'': forcage_actif_txt, ''nf'': niveau_forcage,
+        ''pd'': previ_prod_demain} | tojson }}'
+    target:
+      entity_id: input_text.mp2_dess_snapshot_22h
   mode: single
 - id: '1787810093290'
   alias: Rapport Piscine Journalier IA V3
@@ -4529,3 +4529,135 @@
       value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) }}'
     action: input_number.set_value
   mode: single
+- id: '1788108766731'
+  alias: Rapport 06:00 DESS IA - Bilan nuit
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:00:00
+    id: 06:00
+  conditions: []
+  actions:
+  - variables:
+      date_snapshot: '{{ states(''sensor.date_time'') }}'
+      snap: '{{ states(''input_text.mp2_dess_snapshot_22h'') | from_json }}'
+      soc_actuel_6h: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) }}'
+      soc_actuel_22h: '{{ snap.sa | float(0) | round(1) }}'
+      soc_cible_22h: '{{ snap.sc | float(0) | round(0) }}'
+      soc_prevu_0545_sans_charge: '{{ snap.sp | float(0) | round(1) }}'
+      besoin_corrige_pct: '{{ snap.bp | float(0) | round(1) }}'
+      heure_debut_previ: '{{ snap.hd }}'
+      duree_previ_min: '{{ snap.dm }}'
+      forcage_etait_actif: '{{ snap.fa }}'
+      niveau_forcage_previ: '{{ snap.nf }}'
+      previ_prod_demain_22h: '{{ snap.pd }}'
+      gain_soc_nuit: '{{ (soc_actuel_6h - soc_actuel_22h) | round(1) }}'
+      ecart_vs_cible_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_cible_22h) |
+        round(1)) }} %'
+      ecart_vs_previ_sans_charge_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_prevu_0545_sans_charge)
+        | round(1)) }} %'
+      charge_a_eu_lieu: '{{ ''oui'' if gain_soc_nuit > (besoin_corrige_pct * 0.5)
+        else ''non ou partielle'' }}'
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: rapport_bilan_ia
+    data:
+      task_name: rapport bilan nuit 6h
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant énergie domestique. Tu ne dois JAMAIS produire
+        de chiffres, pourcentages, unités ou horaires : toutes les valeurs numériques
+        sont déjà affichées séparément. Ton seul travail est de juger si la nuit s''est
+        déroulée conformément à la prévision faite hier à 22h, et de le dire en une
+        phrase très courte (maximum 15 mots), sans jamais réutiliser ou paraphraser
+        un nombre fourni ci-dessous.
+
+        Contexte (pour information seulement, ne recopie aucune valeur) : - SOC cible
+        fixé hier soir : {{ soc_cible_22h }} % - SOC atteint ce matin : {{ soc_actuel_6h
+        }} % - Ecart au SOC cible : {{ ecart_vs_cible_txt }} - SOC prévu sans charge
+        (si rien n''avait chargé) : {{ soc_prevu_0545_sans_charge }} % - Ecart au
+        SOC "sans charge" : {{ ecart_vs_previ_sans_charge_txt }} - Une charge était-elle
+        jugée nécessaire hier soir : {{ ''oui'' if besoin_corrige_pct > 0 else ''non''
+        }} - Charge estimée avoir eu lieu cette nuit : {{ charge_a_eu_lieu }} - Forçage
+        actif hier soir : {{ forcage_etait_actif }}
+
+        Exemples de style attendu (ne pas recopier tel quel) : "Nuit conforme à la
+        prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."
+        ou "Charge plus importante que prévu, à vérifier."'
+      structure:
+        titre:
+          description: Titre très court du message Telegram, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_bilan:
+          description: Une phrase courte jugeant si la nuit s'est déroulée conformément
+            à la prévision de 22h, sans aucun chiffre ni unité
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{\n  rapport_bilan_ia is defined and\n  rapport_bilan_ia.data
+          is defined and\n  rapport_bilan_ia.data.titre is defined and\n  rapport_bilan_ia.data.commentaire_bilan
+          is defined\n}}"
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: '{{ rapport_bilan_ia.data.titre }}'
+          message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Hier 22h : cible {{
+            soc_cible_22h }} % / SOC {{ soc_actuel_22h }} %{{-\"\\n\"-}}\n    Ce matin
+            : SOC {{ soc_actuel_6h }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt
+            }}{{-\"\\n\"-}}\n    Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt
+            }}{{-\"\\n\"-}}\n    Charge prévue hier = {{ heure_debut_previ }} → durée
+            ~{{ duree_previ_min }} min{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
+            }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
+            is defined else 'INFO' }}\n"
+    default:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport 06h Bilan nuit
+        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Hier 22h : cible {{ soc_cible_22h
+          }} % / SOC {{ soc_actuel_22h }} %{{-\"\\n\"-}}\n    Ce matin : SOC {{ soc_actuel_6h
+          }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt }}{{-\"\\n\"-}}\n
+          \   Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt }}{{-\"\\n\"-}}\n
+          \   Charge prévue hier = {{ heure_debut_previ }} → durée ~{{ duree_previ_min
+          }} min\n"
+  mode: single
+- id: '1788110290374'
+  alias: ESP129 - Auto-correction tare chlore après reboot
+  description: Si l'ESP129 redémarre et ne restaure pas la tare depuis la flash, l'offset
+    repart sur sa valeur YAML par défaut (-10000 g), ce qui fausse le poids de chlore
+    de +11,3 kg pendant des heures (incident du 29/08/2026). Cette automatisation
+    détecte ce retour à la valeur par défaut et corrige immédiatement l'offset avec
+    la dernière tare connue, puis notifie Remy.
+  triggers:
+  - trigger: state
+    entity_id: number.esp129_pesage_chlore_offset_poids_chlore
+    to: '-10000.0'
+  actions:
+  - action: number.set_value
+    target:
+      entity_id: number.esp129_pesage_chlore_offset_poids_chlore
+    data:
+      value: 1284.504
+    note: Dernière tare connue et valide, restaurée le 30/08/2026 après l'incident
+      du 29/08.
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: ESP129 - Pesage chlore
+      message: '⚠️ L''offset de tare est revenu à sa valeur par défaut (-10000 g)
+        après un reboot de l''ESP129 (probable échec de restauration flash). Correction
+        automatique appliquée : offset remis à 1284,504 g. Vérifie que le poids affiché
+        est cohérent.'

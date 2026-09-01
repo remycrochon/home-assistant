@@ -200,7 +200,39 @@ openhasp:
       ###############
       - obj: "p4b10" # Regule
         properties:
-          "text": "Reg: {{ states('sensor.esp176_routeur_mode_regulation') }}"      
+          "text": "Reg: {{ states('sensor.esp176_routeur_mode_regulation') }}"
+          "text_color": >
+            {% set etat = states('sensor.esp176_routeur_mode_regulation') %}
+            {% if etat == 'Auto' %}
+            #00ff00
+            {% elif etat == 'Manuel' %}
+            #ff9800
+            {% else %}
+            #ff0000
+            {% endif %}
+
+      - obj: "p4b80" # Bus Ve
+        properties:
+          "text": >
+            {% set etat = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state') %}
+            {{ 'Bus Ve= ' ~ etat }}
+          "text_color": >
+            {% set etat = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state') %}
+            {{ '#ff0000' if etat in ['off','unavailable'] else '#00ff00' }}
+
+      - obj: "p4b90" # SOC
+        properties:
+          "text": "SOC= {{ states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')|float(0)|round(0) }} %"
+          "text_color": >
+            {% set soc = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc')|float(0) %}
+            {% if soc < 21 %}
+            #ff0000
+            {% elif soc < 40 %}
+            #ff9800
+            {% else %}
+            #00ff00
+            {% endif %}
+
       - obj: "p4b20" # Prod
         properties:
           "text": >
@@ -228,6 +260,17 @@ openhasp:
             {% else %}
               C={{ count |round(0)}} W
             {% endif %}
+
+      - obj: "p4b100" # PAC
+        properties:
+          "text": >
+            {% set count = states('sensor.ecocompteur_pac')|int(0) %}
+            {% if count >= 1000 %}
+              PAC={{ (count/1000) |round(2)}} kW
+            {% else %}
+              PAC={{ count |round(0)}} W
+            {% endif %}
+
       - obj: "p4b30" # P Dispo
         properties:
           "text": >
@@ -261,6 +304,13 @@ openhasp:
           "text": >
             {% set volume = states('sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc')|int(0) %}
             VOL={{ volume |round(0)}} L
+
+      - obj: "p4b110" # Ballon ECS chaud/OK
+        properties:
+          "text": >
+            {{ 'Ballon chaud' if is_state('binary_sensor.sous_sol_esp176_routeur_ecs_ballon_chaud_thermostat_coupe','on') else 'Ballon OK' }}
+          "text_color": >
+            {{ '#ff9800' if is_state('binary_sensor.sous_sol_esp176_routeur_ecs_ballon_chaud_thermostat_coupe','on') else '#00ff00' }}
       
 ############### Page 5 Elec ###############
       ############### Réseau
@@ -590,3 +640,24 @@ openhasp:
         properties:
           "text": >
             {{state_attr('cover.groupe_tous_volets','current_position')|int(0) |round(0)}}%   
+
+############### Page 7 Piscine ###############
+      - obj: "p7b21" # Température eau
+        properties:
+          "text": "{{ states('sensor.esp178_piscine_temperature_eau')|float(0)|round(1) }} C°"
+
+      - obj: "p7b31" # pH
+        properties:
+          "text": "{{ states('sensor.esp178_piscine_ph_ezo')|float(0)|round(2) }} pH"
+
+      - obj: "p7b41" # ORP
+        properties:
+          "text": "{{ states('sensor.esp178_piscine_orp_ezo')|float(0)|round(1) }} mV"
+
+      - obj: "p7b51" # Poids chlore
+        properties:
+          "text": "{{ states('sensor.esp129_pesage_chlore_poids_chlore')|float(0)|round(1) }} Kg"
+
+      - obj: "p7b61" # Puissance
+        properties:
+          "text": "{{ states('sensor.esp178_piscine_pzem_pisc_puissance')|float(0)|round(1) }} W"

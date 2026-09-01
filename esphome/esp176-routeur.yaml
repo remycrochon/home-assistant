@@ -232,7 +232,18 @@ binary_sensor:
   - platform: template
     name: "Seuil SOC Ok"
     id: seuil_soc_ok
-  
+    
+  - platform: template
+    name: "ECS Ballon Chaud (Thermostat Coupé)"
+    id: ballon_chaud_deduit
+    device_class: heat
+    lambda: |-
+      // Triac actif (>5%) mais quasi aucune puissance réellement consommée par l'ECS
+      return (id(afstriac).state > 5.0f) && (id(puecs).state < 15.0f);
+    filters:
+      - delayed_on: 3min   # confirme l'état avant de le déclarer (évite les à-coups)
+      - delayed_off: 30s  
+        
 # Input Number
 number:
   # seuil SOC validation routeur
@@ -454,6 +465,7 @@ sensor:
       - sliding_window_moving_average:
           window_size: 5
           send_every: 1
+
   - platform: homeassistant
     entity_id: sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1
     id: conso_maison
@@ -526,7 +538,7 @@ sensor:
   # Volume d'eau chaude dispo (en L) mesuré par ESP126
   - platform: homeassistant
     id: volume_ecs_ha
-    entity_id: sensor.esp139_ecs_ballon_volume_eau_chaude
+    entity_id: sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc
     name: "Volume ECS HA"
 
 # déclaration des "text_sensors"

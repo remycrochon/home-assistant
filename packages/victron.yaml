@@ -82,6 +82,14 @@ mqtt:
       unit_of_measurement: "kWh"
       device_class: energy
       state_class: measurement
+  
+    - name: "Calcul Capa Batteries - Phase"
+      unique_id: capa_batteries_debug_phase
+      state_topic: "mp2/batteries/capacity_debug"
+      value_template: "{{ value_json.state }}"
+      json_attributes_topic: "mp2/batteries/capacity_debug"
+      icon: mdi:battery-sync
+
 # Victron
 #modbus:
 #  - name: cerbo

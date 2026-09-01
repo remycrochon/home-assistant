@@ -4205,6 +4205,7 @@
         charge prévisionnelle nécessaire\n{% else %}\n  début estimé {{ heure_debut_charge_previ_txt
         }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
         endif %}"
+      linky_kwh_22h: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_dess_ia
@@ -4319,7 +4320,7 @@
       value: '{{ {''sa'': soc_actuel, ''sc'': soc_cible, ''sp'': soc_prevu_0545_sans_charge,
         ''bp'': besoin_corrige_pct_txt, ''hd'': heure_debut_charge_previ_txt, ''dm'':
         duree_charge_previ_min_txt, ''fa'': forcage_actif_txt, ''nf'': niveau_forcage,
-        ''pd'': previ_prod_demain} | tojson }}'
+        ''pd'': previ_prod_demain, ''lk'': linky_kwh_22h} | tojson }}'
     target:
       entity_id: input_text.mp2_dess_snapshot_22h
   mode: single
@@ -4552,13 +4553,16 @@
       forcage_etait_actif: '{{ snap.fa }}'
       niveau_forcage_previ: '{{ snap.nf }}'
       previ_prod_demain_22h: '{{ snap.pd }}'
-      gain_soc_nuit: '{{ (soc_actuel_6h - soc_actuel_22h) | round(1) }}'
+      gain_soc_nuit: '{{ (soc_actuel_6h - soc_prevu_0545_sans_charge) | round(1) }}'
       ecart_vs_cible_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_cible_22h) |
         round(1)) }} %'
       ecart_vs_previ_sans_charge_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_prevu_0545_sans_charge)
         | round(1)) }} %'
       charge_a_eu_lieu: '{{ ''oui'' if gain_soc_nuit > (besoin_corrige_pct * 0.5)
         else ''non ou partielle'' }}'
+      linky_kwh_22h: '{{ snap.lk | float(0) | round(2) }}'
+      linky_kwh_6h: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
+      conso_nuit_kwh: '{{ (linky_kwh_6h - linky_kwh_22h) | round(2) }}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_bilan_ia
@@ -4579,7 +4583,8 @@
         SOC "sans charge" : {{ ecart_vs_previ_sans_charge_txt }} - Une charge était-elle
         jugée nécessaire hier soir : {{ ''oui'' if besoin_corrige_pct > 0 else ''non''
         }} - Charge estimée avoir eu lieu cette nuit : {{ charge_a_eu_lieu }} - Forçage
-        actif hier soir : {{ forcage_etait_actif }}
+        actif hier soir : {{ forcage_etait_actif }} - Consommation réseau pendant
+        la nuit : {{ conso_nuit_kwh }} kWh
 
         Exemples de style attendu (ne pas recopier tel quel) : "Nuit conforme à la
         prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."
@@ -4618,8 +4623,9 @@
             : SOC {{ soc_actuel_6h }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt
             }}{{-\"\\n\"-}}\n    Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt
             }}{{-\"\\n\"-}}\n    Charge prévue hier = {{ heure_debut_previ }} → durée
-            ~{{ duree_previ_min }} min{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
-            }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
+            ~{{ duree_previ_min }} min{{-\"\\n\"-}}\n    Conso réseau nuit = {{ conso_nuit_kwh
+            }} kWh{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan }}{{-\"\\n\"-}}\n
+            \   Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
             is defined else 'INFO' }}\n"
     default:
     - action: telegram_bot.send_message
@@ -4632,7 +4638,7 @@
           }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt }}{{-\"\\n\"-}}\n
           \   Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt }}{{-\"\\n\"-}}\n
           \   Charge prévue hier = {{ heure_debut_previ }} → durée ~{{ duree_previ_min
-          }} min\n"
+          }} min{{-\"\\n\"-}}\n    Conso réseau nuit = {{ conso_nuit_kwh }} kWh\n"
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot
@@ -4661,3 +4667,29 @@
         après un reboot de l''ESP129 (probable échec de restauration flash). Correction
         automatique appliquée : offset remis à 1284,504 g. Vérifie que le poids affiché
         est cohérent.'
+- id: '1788193581217'
+  alias: Nouvelle capacité batterie mesurée
+  description: Notifie via Telegram quand le flow Node-RED 'Calcul Capa Batteries'
+    termine un cycle de mesure (passage à l'état DONE), avec la valeur mesurée et
+    la date.
+  triggers:
+  - trigger: state
+    entity_id: sensor.calcul_capa_batteries_phase
+    to: DONE
+  conditions: []
+  actions:
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: "\U0001F50B Nouvelle mesure de capacité batterie"
+      message: 'Capacité mesurée : {{ state_attr(''sensor.calcul_capa_batteries_phase'',
+        ''last_result_ah47'') }} Ah
+
+        Mesure effectuée le : {{ state_attr(''sensor.calcul_capa_batteries_phase'',
+        ''last_result_ts'') }}
+
+        Notification envoyée le : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
+
+
+        Valeur actuelle dans le SmartShunt : 214 Ah — à ajuster si écart significatif.'
+  mode: single

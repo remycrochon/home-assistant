@@ -219,29 +219,30 @@ sensor:
 #  - platform: season  
 template:
   - sensor:
-    - unit_of_measurement: °
+    - unique_id: sun_elevation
       default_entity_id: sensor.sun_elevation
+      unit_of_measurement: "°"
       name: elevation soleil
-      state: '{{''%+.1f''|format(state_attr(''sun.sun'', ''elevation''))}}'
+      state: "{{'%+.1f'|format(state_attr('sun.sun', 'elevation'))}}"
 
-    - unit_of_measurement: °
+    - unique_id: sun_azimuth
       default_entity_id: sensor.sun_azimuth
+      unit_of_measurement: "°"
       name: azimut soleil
-      state: '{{''%+.1f''|format(state_attr(''sun.sun'', ''azimuth''))}}'
+      state: "{{'%+.1f'|format(state_attr('sun.sun', 'azimuth'))}}"
 
-
-# calcul de l'heure lever et coucher du soleil
-    - default_entity_id: sensor.heure_leve_soleil
+    # calcul de l'heure lever et coucher du soleil
+    - unique_id: heure_leve_soleil
+      default_entity_id: sensor.heure_leve_soleil
       icon: mdi:weather-sunset-up
       name: heure_leve_soleil
-      state: '{{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom(''%H
-        %M'')}}'
+      state: "{{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom('%H %M')}}"
 
-    - default_entity_id: sensor.heure_couche_soleil
+    - unique_id: heure_couche_soleil
+      default_entity_id: sensor.heure_couche_soleil
       icon: mdi:weather-sunset-down
       name: heure_couche_soleil
-      state: '{{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom(''
-        %H %M'')}}'
+      state: "{{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom('%H %M')}}"
 
 # Prevision Pluie
 #      h_arrivee_pluie:

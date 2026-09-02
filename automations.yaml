@@ -4586,6 +4586,12 @@
         actif hier soir : {{ forcage_etait_actif }} - Consommation réseau pendant
         la nuit : {{ conso_nuit_kwh }} kWh
 
+        Si aucune charge n''était jugée nécessaire hier soir ET que l''écart au SOC
+        "sans charge" dépasse 5 points en valeur absolue, signale explicitement que
+        la décharge nocturne a été significativement différente du modèle habituel
+        (plus forte ou plus faible que prévu), même si la cible est atteinte — ne
+        conclus jamais "conforme" dans ce cas.
+
         Exemples de style attendu (ne pas recopier tel quel) : "Nuit conforme à la
         prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."
         ou "Charge plus importante que prévu, à vérifier."'
@@ -4622,10 +4628,11 @@
             soc_cible_22h }} % / SOC {{ soc_actuel_22h }} %{{-\"\\n\"-}}\n    Ce matin
             : SOC {{ soc_actuel_6h }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt
             }}{{-\"\\n\"-}}\n    Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt
-            }}{{-\"\\n\"-}}\n    Charge prévue hier = {{ heure_debut_previ }} → durée
-            ~{{ duree_previ_min }} min{{-\"\\n\"-}}\n    Conso réseau nuit = {{ conso_nuit_kwh
-            }} kWh{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan }}{{-\"\\n\"-}}\n
-            \   Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
+            }}{{-\"\\n\"-}}\n    {% if besoin_corrige_pct > 0 %}Charge prévue hier
+            = {{ heure_debut_previ }} → durée ~{{ duree_previ_min }} min{% else %}Aucune
+            charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Conso réseau
+            nuit = {{ conso_nuit_kwh }} kWh{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
+            }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
             is defined else 'INFO' }}\n"
     default:
     - action: telegram_bot.send_message
@@ -4637,8 +4644,10 @@
           }} % / SOC {{ soc_actuel_22h }} %{{-\"\\n\"-}}\n    Ce matin : SOC {{ soc_actuel_6h
           }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt }}{{-\"\\n\"-}}\n
           \   Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt }}{{-\"\\n\"-}}\n
-          \   Charge prévue hier = {{ heure_debut_previ }} → durée ~{{ duree_previ_min
-          }} min{{-\"\\n\"-}}\n    Conso réseau nuit = {{ conso_nuit_kwh }} kWh\n"
+          \   {% if besoin_corrige_pct > 0 %}Charge prévue hier = {{ heure_debut_previ
+          }} → durée ~{{ duree_previ_min }} min{% else %}Aucune charge nécessaire
+          hier soir{% endif %}{{-\"\\n\"-}}\n    Conso réseau nuit = {{ conso_nuit_kwh
+          }} kWh\n"
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot
@@ -4693,3 +4702,40 @@
 
         Valeur actuelle dans le SmartShunt : 214 Ah — à ajuster si écart significatif.'
   mode: single
+- id: '1788272994046'
+  alias: Blueprint Notification Congelo Garage Off
+  description: Surveillance de la prise du congélateur garage (off ou indisponible)
+  use_blueprint:
+    path: pavax/nagging_alert_notification.yaml
+    input:
+      condition_entity_state: 'on'
+      sensor_entity: binary_sensor.congelo_garage_probleme
+      alert_state: 'on'
+      alert_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Congélateur garage : prise OFF ou indisponible
+
+            (état = {{ states("switch.congelo_garage") }})'
+          title: Congélateur Garage
+      resolved_action:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{states("sensor.date_time") }}{{-"\n"-}}
+
+            Congélateur garage : prise OK
+
+            (état = {{ states("switch.congelo_garage") }})'
+          title: Congélateur Garage
+      notify_message: ' '
+      notify_device: e3e6d517ff15af6c0ac17f0455a06420
+      repeat_delay: 600
+      resolved_message: ' '
+      initial_delay: 300
+      max_alerts: 5

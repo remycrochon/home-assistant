@@ -1,6 +1,6 @@
 blueprint:
   name: Low Battery Notifications & Actions
-  description: "# \U0001FAAB Low Battery Notifications & Actions\n**Version: 3.4**\n\n\U0001F680
+  description: "# \U0001FAAB Low Battery Notifications & Actions\n**Version: 3.5**\n\n\U0001F680
     Stay Charged, Stay Smart! Let's automate and take charge of your battery maintenance!\U0001F50B⚡\n\n**If
     you like my blueprints, and would like to show your support or just say thank
     you?** [Click Here](https://www.paypal.com/donate/?hosted_button_id=WAZS3QSDTPGA8)
@@ -61,9 +61,9 @@ blueprint:
                 value: enable_button_trigger
               - label: Dont use a button trigger
                 value: disable_button_trigger
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         button_entity:
           name: Button Helper
           description: 'Input your button helper.
@@ -92,9 +92,9 @@ blueprint:
                 value: time_enabled
               - label: Disable the time options
                 value: time_disabled
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         time:
           name: Time
           description: 'Set the time you would like to run the automation.
@@ -136,8 +136,8 @@ blueprint:
                 value: sat
               - label: Sunday
                 value: sun
-              sort: false
               custom_value: false
+              sort: false
     battery_settings:
       name: Battery Settings
       icon: mdi:battery-alert-variant-outline
@@ -180,8 +180,8 @@ blueprint:
               - label: Entity ID
                 value: entity_id
               multiple: true
-              sort: false
               custom_value: false
+              sort: false
         battery_level:
           name: Battery Low Warning Level
           description: 'Set the battery low warning percentage to identify all batteries
@@ -230,9 +230,9 @@ blueprint:
                 value: hidden_enabled
               - label: Disable - Hidden battery sensors will be included
                 value: hidden_disabled
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         custom_group:
           name: Battery Sensors - Custom Group (Optional)
           description: 'You can select a custom group of battery sensors to be include
@@ -302,9 +302,9 @@ blueprint:
                 value: enable_easy_okay_notify
               - label: Disable Device Notification
                 value: disabled_easy_notify
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         sensor_selection:
           name: Sensor Selection
           description: 'Select which battery sensors you''d like to include in your
@@ -322,9 +322,9 @@ blueprint:
               - label: Use All Battery Sensors Minus Excluded Battery Sensors + Custom
                   Group
                 value: enable_all_and_custom_group_sensors
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         notify_device:
           name: Devices Notified (Optional)
           description: 'If you''ve enabled device notifications above, please select
@@ -378,9 +378,9 @@ blueprint:
                 value: sensors
               - label: 3 - Unavailable or Unknown Sensors
                 value: unavailable_sensors
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         notify_okay_message:
           name: Okay Confirmation Message
           description: 'Enter in the notification message you would like to receive
@@ -439,9 +439,9 @@ blueprint:
                 value: time-sensitive
               - label: Quiet Notifications Without Waking Screen
                 value: passive
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         notify_sound:
           name: Notification Sound - iOS Only
           description: 'The Home Assistant app for iOS includes built-in notification
@@ -497,8 +497,8 @@ blueprint:
                 value: channel
               - label: Icon
                 value: icon
-              sort: false
               custom_value: false
+              sort: false
         notify_channel:
           name: Notification Channel - Android Only
           description: 'If you have chosen to use a notification channel, simply enter
@@ -575,9 +575,9 @@ blueprint:
                 value: enable_to_do_list_button_and_clear
               - label: Disable Action Buttons
                 value: disabled_notify_action_buttons
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         to_do_list:
           name: Easy Notify Action Buttons - To-Do List Selection
           description: 'Choose the To-Do list where you''d like to add your task.
@@ -693,9 +693,9 @@ blueprint:
                 value: enable_persistent_okay_notification
               - label: Disable UI Notification
                 value: disabled_persistent_notification
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         persistent_sensor_selection:
           name: Sensor Selection
           description: 'Select which battery sensors you''d like to include in your
@@ -713,9 +713,9 @@ blueprint:
               - label: Use All Battery Sensors Minus Excluded Battery Sensors + Custom
                   Group
                 value: enable_all_and_custom_group_sensors
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         persistent_notify_title:
           name: Title
           description: 'Enter in the notification title of your message.
@@ -757,9 +757,9 @@ blueprint:
                 value: sensors
               - label: 3 - Unavailable or Unknown Sensors
                 value: unavailable_sensors
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         persistent_notify_okay_message:
           name: Okay Confirmation Message
           description: 'Enter in the notification message you would like to receive
@@ -815,9 +815,9 @@ blueprint:
                 value: enable_dashboard_okay_notification
               - label: Disable Dashboard Notification
                 value: disabled_dashboard_notification
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         dashboard_notification_text_helper:
           name: Dashboard Notification - Text Helper
           description: 'Select the **Text Helper** that will store the notification
@@ -853,9 +853,9 @@ blueprint:
               - label: Use All Battery Sensors Minus Excluded Battery Sensors + Custom
                   Group
                 value: enable_all_and_custom_group_sensors
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         dashboard_notify_message:
           name: Message
           description: 'Choose one of the three preset messages from the dropdown
@@ -887,9 +887,9 @@ blueprint:
                 value: sensors
               - label: 3 - Unavailable or Unknown Sensors
                 value: unavailable_sensors
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         dashboard_notify_okay_message:
           name: Okay Confirmation Message
           description: 'Enter in the notification message you would like to receive
@@ -922,9 +922,9 @@ blueprint:
                 value: enable_custom_actions
               - label: Disable Custom Actions
                 value: disabled_custom_actions
-              sort: false
               multiple: false
               custom_value: false
+              sort: false
         custom_actions:
           name: Custom Actions
           description: 'Add your own custom actions to run when the automation is
@@ -937,36 +937,38 @@ blueprint:
 
             **All Battery Sensors Minus Excluded**
 
-            1 - Use "{{all_sensors}}" for - Battery Low % Level + Low Battery Level
-            + Unavailable + Unknown.
+            1 - Use `"{{all_sensors | default("")}}"` for - Battery Low % Level +
+            Low Battery Level + Unavailable + Unknown.
 
-            2 - Use "{{sensors}}" for - Battery Low % Level & Low Battery Level.
+            2 - Use `"{{sensors | default("")}}"` for - Battery Low % Level & Low
+            Battery Level.
 
-            3 - Use "{{unavailable_sensors}}" for - Unavailable or Unknown Sensors.
+            3 - Use `"{{unavailable_sensors | default("")}}"` for - Unavailable or
+            Unknown Sensors.
 
-            4 - Use "{{sensors_names}}" for - Battery Low % Level & Low Battery Level
-            - Sensor friendly name only.
+            4 - Use `"{{sensors_names | default("")}}"` for - Battery Low % Level
+            & Low Battery Level - Sensor friendly name only.
 
-            5 - Use "{{unavailable_sensors_names}}" for - Unavailable or Unknown Sensors
-            - Sensor friendly name only.
+            5 - Use `"{{unavailable_sensors_names | default("")}}"` for - Unavailable
+            or Unknown Sensors - Sensor friendly name only.
 
 
             **Battery Sensors - Custom Group**
 
-            1 - Use "{{all_sensors_custom_group}}" for - Battery Low % Level + Low
-            Battery Level + Unavailable + Unknown.
+            1 - Use `"{{all_sensors_custom_group | default("")}}"` for - Battery Low
+            % Level + Low Battery Level + Unavailable + Unknown.
 
-            2 - Use "{{sensors_custom_group}}" for - Battery Low % Level & Low Battery
-            Level.
+            2 - Use `"{{sensors_custom_group | default("")}}"` for - Battery Low %
+            Level & Low Battery Level.
 
-            3 - Use "{{unavailable_sensors_custom_group}}" for - Unavailable or Unknown
-            Sensors.
+            3 - Use `"{{unavailable_sensors_custom_group | default("")}}"` for - Unavailable
+            or Unknown Sensors.
 
-            4 - Use "{{sensors_names_custom_group}}" for - Battery Low % Level & Low
-            Battery Level - Sensor friendly name only.
+            4 - Use `"{{sensors_names_custom_group | default("")}}"` for - Battery
+            Low % Level & Low Battery Level - Sensor friendly name only.
 
-            5 - Use "{{unavailable_sensors_names_custom_group}}" for - Unavailable
-            or Unknown Sensors - Sensor friendly name only.
+            5 - Use `"{{unavailable_sensors_names_custom_group | default("")}}"` for
+            - Unavailable or Unknown Sensors - Sensor friendly name only.
 
 
             For more information on how to use these sensors in your actions [Click

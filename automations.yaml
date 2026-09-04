@@ -244,7 +244,7 @@
       notify_device: e3e6d517ff15af6c0ac17f0455a06420
       repeat_delay: 600
       resolved_message: ' '
-      initial_delay: 300
+      initial_delay: 600
       max_alerts: 5
 - id: '1634621594490'
   alias: Blueprint Notification Def Com VP2
@@ -4218,6 +4218,13 @@
         Ton seul travail est de juger si la situation DESS de ce soir est cohérente
         ou mérite une vigilance, et de le dire en une phrase très courte (maximum
         15 mots), sans jamais réutiliser ou paraphraser un nombre fourni ci-dessous.
+        Règle importante d''interprétation : la SOC cible est un PLANCHER minimum
+        requis pour couvrir le déficit prévu du lendemain, pas une valeur symétrique
+        à atteindre. Un SOC actuel largement SUPÉRIEUR à la cible (batterie plus pleine
+        que nécessaire, typiquement après une belle journée de production) est un
+        cas NORMAL et ne justifie AUCUNE vigilance ni alerte, même si l''écart est
+        important. Seul un SOC actuel INFÉRIEUR ou proche de la cible constitue un
+        signal réel à signaler.
 
         Contexte du jour (pour information seulement, ne recopie aucune valeur) :
         - Forçage DESS : {{ forcage_actif_txt }} - Niveau de forçage demandé : {{
@@ -4229,9 +4236,10 @@
         }}
 
         Exemples de style attendu pour la remarque (ne pas recopier tel quel) : "Situation
-        cohérente, aucune vigilance particulière ce soir." ou "Écart notable au SOC
-        cible, à surveiller demain matin." ou "Forçage actif mais production de demain
-        incertaine, à reconfirmer."'
+        cohérente, aucune vigilance particulière ce soir." ou "Réserve confortable
+        ce soir, aucune action nécessaire." (cas SOC largement au-dessus de la cible)
+        ou "SOC proche de la cible, charge prévue à surveiller." (cas SOC proche ou
+        sous la cible) ou "Forçage actif mais production de demain incertaine, à reconfirmer."'
       structure:
         titre:
           description: Titre très court du message Telegram, sans aucun chiffre

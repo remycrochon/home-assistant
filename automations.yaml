@@ -4566,11 +4566,13 @@
         round(1)) }} %'
       ecart_vs_previ_sans_charge_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_prevu_0545_sans_charge)
         | round(1)) }} %'
-      charge_a_eu_lieu: '{{ ''oui'' if gain_soc_nuit > (besoin_corrige_pct * 0.5)
-        else ''non ou partielle'' }}'
+      charge_a_eu_lieu: '{{ ''oui'' if gain_soc_nuit > ([besoin_corrige_pct * 0.5,
+        1.0] | max) else ''non ou partielle'' }}'
       linky_kwh_22h: '{{ snap.lk | float(0) | round(2) }}'
       linky_kwh_6h: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
       conso_nuit_kwh: '{{ (linky_kwh_6h - linky_kwh_22h) | round(2) }}'
+      decharge_anormale: '{{ (besoin_corrige_pct <= 0) and ((soc_actuel_6h - soc_prevu_0545_sans_charge)
+        | abs > 5) }}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_bilan_ia
@@ -4594,11 +4596,18 @@
         actif hier soir : {{ forcage_etait_actif }} - Consommation réseau pendant
         la nuit : {{ conso_nuit_kwh }} kWh
 
-        Si aucune charge n''était jugée nécessaire hier soir ET que l''écart au SOC
-        "sans charge" dépasse 5 points en valeur absolue, signale explicitement que
-        la décharge nocturne a été significativement différente du modèle habituel
-        (plus forte ou plus faible que prévu), même si la cible est atteinte — ne
-        conclus jamais "conforme" dans ce cas.
+        - Détection système d''une décharge nocturne anormale (calcul déjà fait, ne
+        recalcule rien toi-même) : {{ ''OUI'' if decharge_anormale else ''NON'' }}
+
+        Fie-toi UNIQUEMENT au champ "Détection système d''une décharge nocturne anormale"
+        ci-dessus pour juger d''une anomalie de décharge — ne calcule ou n''estime
+        jamais toi-même un écart ou un seuil à partir des autres pourcentages fournis.
+        Si ce champ vaut OUI, signale explicitement que la décharge nocturne a été
+        significativement différente du modèle habituel, même si la cible est atteinte
+        — ne conclus jamais "conforme" dans ce cas. Si ce champ vaut NON, ne mentionne
+        aucune anomalie de décharge, même si l''écart au SOC cible (différent du SOC
+        "sans charge") est très élevé — un grand écart au SOC cible seul n''est jamais
+        un signal d''anomalie.
 
         Exemples de style attendu (ne pas recopier tel quel) : "Nuit conforme à la
         prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."

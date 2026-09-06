@@ -618,23 +618,91 @@
       max_alerts: 5
 - id: '1671811895133'
   alias: Spots Exterieurs Terrasse Couverte
-  description: ''
+  description: Pilotage des spots terrasse couverte. Le mode (input_select.mode_spot_terrasse)
+    permet de forcer l'arrêt ou la marche permanente, en plus du fonctionnement automatique
+    (bouton/détection de mouvement).
   triggers:
   - device_id: 191305ef12c4538ae3dc593438f5e19d
     domain: zha
-    type: remote_button_short_press
+    id: toggle_evt
     subtype: button
     trigger: device
-  - event_type: motioneye.motion_detected
-    event_data:
+    type: remote_button_short_press
+  - event_data:
       device_id: ae78c8213b3a95e1ef3d7ac161697e42
+    event_type: motioneye.motion_detected
+    id: toggle_evt
     trigger: event
+  - entity_id: input_select.mode_spot_terrasse
+    id: mode_arret
+    to: Arrêt
+    trigger: state
+  - entity_id: input_select.mode_spot_terrasse
+    id: mode_force
+    to: Forcé
+    trigger: state
+  - trigger: state
+    entity_id: input_select.mode_spot_terrasse
+    to: Auto
+    id: mode_auto
   conditions: []
   actions:
-  - type: toggle
-    device_id: 216e88150c3bb7fa0e5a68ac407485f9
-    entity_id: switch.spots_ext_sud
-    domain: switch
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - toggle_evt
+      - condition: state
+        entity_id: input_select.mode_spot_terrasse
+        state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - action: switch.toggle
+        target:
+          entity_id: switch.spots_ext_sud
+    - conditions:
+      - condition: trigger
+        id:
+        - toggle_evt
+      - condition: state
+        entity_id: input_select.mode_spot_terrasse
+        state: Auto
+      - condition: sun
+        before: sunset
+        after: sunrise
+      - condition: state
+        entity_id: switch.spots_ext_sud
+        state: 'on'
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.spots_ext_sud
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_arret
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.spots_ext_sud
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_force
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.spots_ext_sud
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_auto
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.spots_ext_sud
   mode: single
 - id: '1678531257946'
   alias: Surveillance Puissance Onduleur Bureau la nuit
@@ -997,15 +1065,14 @@
           entity_id: cover.groupe_bureau
         data: {}
 - id: '1711609776550'
-  alias: Spot Ext Cuisine detecteur exterieur
-  description: ''
+  alias: Spot Cuisine - Détection + Mode (Auto/Arrêt/Forcé)
+  description: Pilotage du spot extérieur cuisine. Le mode (input_select.mode_spot_cuisine)
+    permet de forcer l'arrêt ou la marche permanente, en plus du fonctionnement automatique
+    par détection.
   triggers:
-  - type: opened
-    device_id: 193f4cea2f12db0ab1a4d044df803df3
-    entity_id: b182f27a8204167b3f3b1893ec2d2196
-    domain: binary_sensor
-    trigger: device
-    enabled: true
+  - trigger: state
+    entity_id: binary_sensor.detecteur_porte_entree_ouverture
+    to: 'on'
     id: Detecteur porte
   - trigger: state
     entity_id:
@@ -1015,19 +1082,6 @@
     to:
     - 'on'
     id: FM Detection Cu
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 2
-    enabled: false
-  - trigger: state
-    entity_id:
-    - binary_sensor.garage_ext_person_occupancy
-    from:
-    - 'off'
-    to:
-    - 'on'
-    id: FM Detection Gg
     for:
       hours: 0
       minutes: 0
@@ -1046,30 +1100,21 @@
       minutes: 0
       seconds: 30
     enabled: false
-  - trigger: state
-    entity_id:
-    - binary_sensor.garage_ext_person_occupancy
-    id: FD Detection Gge
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 30
-    from:
-    - 'on'
-    to:
-    - 'off'
-    enabled: false
-  - trigger: state
-    entity_id:
-    - binary_sensor.porte_garage_fermee
-    from:
-    - 'on'
-    to:
-    - 'off'
-    id: p_garage
   - trigger: time_pattern
     minutes: /30
     id: 30mn
+  - trigger: state
+    entity_id: input_select.mode_spot_cuisine
+    to: Arrêt
+    id: mode_arret
+  - trigger: state
+    entity_id: input_select.mode_spot_cuisine
+    to: Forcé
+    id: mode_force
+  - trigger: state
+    entity_id: input_select.mode_spot_cuisine
+    to: Auto
+    id: mode_auto
   conditions: []
   actions:
   - choose:
@@ -1077,6 +1122,9 @@
       - condition: trigger
         id:
         - Detecteur porte
+      - condition: state
+        entity_id: input_select.mode_spot_cuisine
+        state: Auto
       - condition: sun
         before: sunrise
         after: sunset
@@ -1084,32 +1132,24 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - type: turn_on
-        device_id: a939d1de792053628b54c898fa8e9f4e
-        entity_id: ba339bcc22bbcb00636e4b664078d906
-        domain: switch
-      - type: turn_on
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
       - delay:
           hours: 0
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - type: turn_off
-        device_id: a939d1de792053628b54c898fa8e9f4e
-        entity_id: ba339bcc22bbcb00636e4b664078d906
-        domain: switch
-      - type: turn_off
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
     - conditions:
       - condition: trigger
         id:
         - FM Detection Cu
-        - FM Detection Gg
+      - condition: state
+        entity_id: input_select.mode_spot_cuisine
+        state: Auto
       - condition: sun
         before: sunrise
         after: sunset
@@ -1117,69 +1157,59 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - type: turn_on
-        device_id: a939d1de792053628b54c898fa8e9f4e
-        entity_id: ba339bcc22bbcb00636e4b664078d906
-        domain: switch
-      - type: turn_on
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
     - conditions:
       - condition: trigger
         id:
         - FD Detection Cu
-        - FD Detection Gge
+      - condition: state
+        entity_id: input_select.mode_spot_cuisine
+        state: Auto
       sequence:
-      - type: turn_off
-        device_id: a939d1de792053628b54c898fa8e9f4e
-        entity_id: ba339bcc22bbcb00636e4b664078d906
-        domain: switch
-      - type: turn_off
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
-    - conditions:
-      - condition: trigger
-        id:
-        - p_garage
-      - condition: sun
-        before: sunrise
-        after: sunset
-      - condition: numeric_state
-        entity_id: sensor.bh1750_illuminance
-        below: 10
-      sequence:
-      - type: turn_on
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
-      - delay:
-          hours: 0
-          minutes: 2
-          seconds: 0
-          milliseconds: 0
-      - type: turn_off
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
     - conditions:
       - condition: trigger
         id:
         - 30mn
+      - condition: state
+        entity_id: input_select.mode_spot_cuisine
+        state: Auto
       - condition: sun
         before: sunset
         after: sunrise
       sequence:
-      - type: turn_off
-        device_id: a939d1de792053628b54c898fa8e9f4e
-        entity_id: ba339bcc22bbcb00636e4b664078d906
-        domain: switch
-      - type: turn_off
-        device_id: 8f5cd5102581a6e5afffc308114744db
-        entity_id: 766ea3d6bc5e9fd960985d552c4a242d
-        domain: switch
-  mode: single
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_arret
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_force
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_auto
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp175_cde_spot_ext_cuisine
+  mode: restart
   trace:
     stored_traces: 50
 - id: '1711979815836'
@@ -1990,37 +2020,90 @@
       resolved_message: ' '
 - id: '1765795366962'
   alias: Spot exterieur Sous Sol
-  description: ''
+  description: Pilotage du spot extérieur sous-sol. Le mode (input_select.mode_spot_sous_sol)
+    permet de forcer l'arrêt ou la marche permanente, en plus du fonctionnement automatique
+    par ouverture de porte.
   triggers:
   - trigger: state
     entity_id:
     - binary_sensor.porte_ssol_fermee
     - binary_sensor.porte_ssol_ouverte
+    id: porte_ssol
+  - trigger: state
+    entity_id: input_select.mode_spot_sous_sol
+    to: Arrêt
+    id: mode_arret
+  - trigger: state
+    entity_id: input_select.mode_spot_sous_sol
+    to: Forcé
+    id: mode_force
+  - trigger: state
+    entity_id: input_select.mode_spot_sous_sol
+    to: Auto
+    id: mode_auto
   conditions: []
   actions:
-  - if:
-    - condition: sun
-      before: sunrise
-      after: sunset
-    then:
-    - type: turn_on
-      device_id: dc80ce5b211af833cbb7c536fa80a392
-      entity_id: 328ac7c86c891be87f12bcefad0e0b01
-      domain: switch
-    - delay:
-        hours: 0
-        minutes: 3
-        seconds: 0
-        milliseconds: 0
-    - type: turn_off
-      device_id: dc80ce5b211af833cbb7c536fa80a392
-      entity_id: 328ac7c86c891be87f12bcefad0e0b01
-      domain: switch
-    else:
-    - type: turn_off
-      device_id: dc80ce5b211af833cbb7c536fa80a392
-      entity_id: 328ac7c86c891be87f12bcefad0e0b01
-      domain: switch
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - porte_ssol
+      - condition: state
+        entity_id: input_select.mode_spot_sous_sol
+        state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp136_spot_sous_sol_r1
+      - delay:
+          hours: 0
+          minutes: 3
+          seconds: 0
+          milliseconds: 0
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp136_spot_sous_sol_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - porte_ssol
+      - condition: state
+        entity_id: input_select.mode_spot_sous_sol
+        state: Auto
+      - condition: sun
+        before: sunset
+        after: sunrise
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp136_spot_sous_sol_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_arret
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp136_spot_sous_sol_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_force
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp136_spot_sous_sol_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_auto
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp136_spot_sous_sol_r1
   mode: restart
 - id: '1774000425673'
   alias: Rapport 22:00 DESS IA V2
@@ -4756,3 +4839,184 @@
       resolved_message: ' '
       initial_delay: 300
       max_alerts: 5
+- id: '1788622034535'
+  alias: Spot Garage - Détection + Mode (Auto/Arrêt/Forcé)
+  description: Pilotage du spot extérieur garage. Le mode (input_select.mode_spot_garage)
+    permet de forcer l'arrêt ou la marche permanente, en plus du fonctionnement automatique
+    par détection.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.detecteur_porte_entree_ouverture
+    to: 'on'
+    id: Detecteur porte
+  - trigger: state
+    entity_id:
+    - binary_sensor.garage_ext_person_occupancy
+    from:
+    - 'off'
+    to:
+    - 'on'
+    id: FM Detection Gg
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+    enabled: false
+  - trigger: state
+    entity_id:
+    - binary_sensor.garage_ext_person_occupancy
+    id: FD Detection Gge
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    from:
+    - 'on'
+    to:
+    - 'off'
+    enabled: false
+  - trigger: state
+    entity_id:
+    - binary_sensor.porte_garage_fermee
+    from:
+    - 'on'
+    to:
+    - 'off'
+    id: p_garage
+  - trigger: time_pattern
+    minutes: /30
+    id: 30mn
+  - trigger: state
+    entity_id: input_select.mode_spot_garage
+    to: Arrêt
+    id: mode_arret
+  - trigger: state
+    entity_id: input_select.mode_spot_garage
+    to: Forcé
+    id: mode_force
+  - trigger: state
+    entity_id: input_select.mode_spot_garage
+    to: Auto
+    id: mode_auto
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Detecteur porte
+      - condition: state
+        entity_id: input_select.mode_spot_garage
+        state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.bh1750_illuminance
+        below: 10
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+      - delay:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - FM Detection Gg
+      - condition: state
+        entity_id: input_select.mode_spot_garage
+        state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.bh1750_illuminance
+        below: 10
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - FD Detection Gge
+      - condition: state
+        entity_id: input_select.mode_spot_garage
+        state: Auto
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - p_garage
+      - condition: state
+        entity_id: input_select.mode_spot_garage
+        state: Auto
+      - condition: sun
+        before: sunrise
+        after: sunset
+      - condition: numeric_state
+        entity_id: sensor.bh1750_illuminance
+        below: 10
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+      - delay:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - 30mn
+      - condition: state
+        entity_id: input_select.mode_spot_garage
+        state: Auto
+      - condition: sun
+        before: sunset
+        after: sunrise
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_arret
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_force
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+    - conditions:
+      - condition: trigger
+        id:
+        - mode_auto
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.esp122_spot_terrasse_r1
+  mode: restart
+  trace:
+    stored_traces: 50

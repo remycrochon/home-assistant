@@ -18,7 +18,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Hors Gel --> %s"
-            args: [ 'id(_Mode_Fonctionnement_hg).current_option()' ]
+            args: [ 'id(_Mode_Fonctionnement_hg).current_option().c_str()' ]
             level: INFO
 number:
   # Seuil 1 Temp Hors gel

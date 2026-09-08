@@ -4414,6 +4414,11 @@
         ''pd'': previ_prod_demain, ''lk'': linky_kwh_22h} | tojson }}'
     target:
       entity_id: input_text.mp2_dess_snapshot_22h
+  - action: input_text.set_value
+    data:
+      value: '{}'
+    target:
+      entity_id: input_text.dess_charge_reelle_log_debut_fin
   mode: single
 - id: '1787810093290'
   alias: Rapport Piscine Journalier IA V3
@@ -4656,6 +4661,13 @@
       conso_nuit_kwh: '{{ (linky_kwh_6h - linky_kwh_22h) | round(2) }}'
       decharge_anormale: '{{ (besoin_corrige_pct <= 0) and ((soc_actuel_6h - soc_prevu_0545_sans_charge)
         | abs > 5) }}'
+      charge_reelle_txt: '{% set log = (states(''input_text.dess_charge_reelle_log_debut_fin'')
+        | from_json) if states(''input_text.dess_charge_reelle_log_debut_fin'') not
+        in [''unknown'',''unavailable'',''''] else {} %}{% if log.hd is defined and
+        log.hf is defined %}OUI : début {{ log.hd }} (SOC {{ log.sd }} %) → fin {{
+        log.hf }} (SOC {{ log.sf }} %), ~{{ ((log.lf | float(0)) - (log.ld | float(0)))
+        | round(2) }} kWh soutirés du réseau{% else %}NON (aucune charge programmée
+        déclenchée cette nuit){% endif %}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_bilan_ia
@@ -4676,8 +4688,8 @@
         SOC "sans charge" : {{ ecart_vs_previ_sans_charge_txt }} - Une charge était-elle
         jugée nécessaire hier soir : {{ ''oui'' if besoin_corrige_pct > 0 else ''non''
         }} - Charge estimée avoir eu lieu cette nuit : {{ charge_a_eu_lieu }} - Forçage
-        actif hier soir : {{ forcage_etait_actif }} - Consommation réseau pendant
-        la nuit : {{ conso_nuit_kwh }} kWh
+        actif hier soir : {{ forcage_etait_actif }} - Charge réseau cette nuit (détail
+        précis) : {{ charge_reelle_txt }}
 
         - Détection système d''une décharge nocturne anormale (calcul déjà fait, ne
         recalcule rien toi-même) : {{ ''OUI'' if decharge_anormale else ''NON'' }}
@@ -4730,8 +4742,8 @@
             }}{{-\"\\n\"-}}\n    Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt
             }}{{-\"\\n\"-}}\n    {% if besoin_corrige_pct > 0 %}Charge prévue hier
             = {{ heure_debut_previ }} → durée ~{{ duree_previ_min }} min{% else %}Aucune
-            charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Conso réseau
-            nuit = {{ conso_nuit_kwh }} kWh{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
+            charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau
+            = {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
             }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
             is defined else 'INFO' }}\n"
     default:
@@ -4746,8 +4758,8 @@
           \   Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt }}{{-\"\\n\"-}}\n
           \   {% if besoin_corrige_pct > 0 %}Charge prévue hier = {{ heure_debut_previ
           }} → durée ~{{ duree_previ_min }} min{% else %}Aucune charge nécessaire
-          hier soir{% endif %}{{-\"\\n\"-}}\n    Conso réseau nuit = {{ conso_nuit_kwh
-          }} kWh\n"
+          hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau = {{ charge_reelle_txt
+          }}\n"
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot
@@ -4792,10 +4804,12 @@
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       title: "\U0001F50B Nouvelle mesure de capacité batterie"
       message: 'Capacité mesurée : {{ state_attr(''sensor.calcul_capa_batteries_phase'',
-        ''last_result_ah47'') }} Ah
+        ''result_ah47'') or state_attr(''sensor.calcul_capa_batteries_phase'', ''last_result_ah47'')
+        }} Ah
 
         Mesure effectuée le : {{ state_attr(''sensor.calcul_capa_batteries_phase'',
-        ''last_result_ts'') }}
+        ''result_ts'') or state_attr(''sensor.calcul_capa_batteries_phase'', ''last_result_ts'')
+        }}
 
         Notification envoyée le : {{ now().strftime(''%d/%m/%Y %H:%M:%S'') }}
 
@@ -5020,3 +5034,55 @@
   mode: restart
   trace:
     stored_traces: 50
+- id: new
+  alias: Suivi charge réseau CP1 - début/fin réels
+  description: Capture heure/SOC/relevé Linky réels au début et à la fin de la charge
+    programmée CP1, pour un rapport précis à 6h
+  triggers:
+  - trigger: state
+    entity_id: switch.victron_mqtt_c0619ab1db0d_system_0_system_ess_schedule_charge_0_enabled
+    to: 'on'
+    id: debut
+  - trigger: state
+    entity_id: switch.victron_mqtt_c0619ab1db0d_system_0_system_ess_schedule_charge_0_enabled
+    to: 'off'
+    id: fin
+  conditions: []
+  actions:
+  - variables:
+      log_existant: '{{ (states(''input_text.dess_charge_reelle_log_debut_fin'') |
+        from_json) if states(''input_text.dess_charge_reelle_log_debut_fin'') not
+        in [''unknown'',''unavailable'',''''] else {} }}'
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: debut
+      sequence:
+      - variables:
+          heure_debut: '{{ now().strftime(''%H:%M'') }}'
+          soc_debut: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+            | float(0) | round(1) }}'
+          linky_debut: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2)
+            }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.dess_charge_reelle_log_debut_fin
+        data:
+          value: '{{ dict(log_existant, hd=heure_debut, sd=soc_debut, ld=linky_debut)
+            | tojson }}'
+    - conditions:
+      - condition: trigger
+        id: fin
+      sequence:
+      - variables:
+          heure_fin: '{{ now().strftime(''%H:%M'') }}'
+          soc_fin: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+            | float(0) | round(1) }}'
+          linky_fin: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.dess_charge_reelle_log_debut_fin
+        data:
+          value: '{{ dict(log_existant, hf=heure_fin, sf=soc_fin, lf=linky_fin) |
+            tojson }}'
+  mode: queued

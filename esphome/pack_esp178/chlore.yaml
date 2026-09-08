@@ -44,13 +44,23 @@ select:
             format: "Mode Fonct Regul chlore --> %s"
             args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()' ]
             level: INFO
+
+        - script.stop: _regul_chlore
+        - switch.turn_off: cde_ppe_chlore
+
+        - lambda: |-
+            id(g_tps_injection_chlore) = 0.0f;
+            id(g_volume_chlore) = 0.0f;
+
+        - lambda: |-
+            id(_tps_injection_chlore).publish_state(0);
+
         - if:
             condition:
               or:
                 - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Ma_f";'
                 - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "At_f";'
             then:
-              - script.stop: _regul_chlore
               - delay: 1s
               - script.execute: _regul_chlore
 
@@ -301,150 +311,322 @@ script:
     mode: single
     then:
       - logger.log:
-          format: "Script Injection Chlore"
+          format: "Regul Chlore: mode=%s mem_orp=%.2f orp=%.2f consigne=%.1f filtration=%d debit=%.3f"
+          args:
+            - 'id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()'
+            - 'id(g_memoire_orp)'
+            - 'id(orp_ezo).state'
+            - 'id(consigne_orp).state'
+            - 'id(cde_ppe_filtration).state'
+            - 'id(_debit_ppe_chlore).state'
           level: INFO
 
-      - if:
-          condition:
-            and:
-              - switch.is_on: cde_ppe_filtration
-              - or:
-                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Volume";'
-                  - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto ORP";'
-          then:
-            - lambda: |-
-                float temps = 0.0f;
-                float volume = 0.0f;
-
-                if (id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Volume") {
-                  float q = id(_volume_chlore_cible).state;      // litres
-                  float de = id(_debit_ppe_chlore).state;        // l/h
-
-                  if (q > 0.0f && de > 0.0f) {
-                    temps = std::min((q / de) * 3600.0f, 3600.0f);   // max 1h
-                    volume = q;
-                  }
-
-                  ESP_LOGI("Dosage Chlore",
-                           "Mode Auto Volume -> Quantite: %.3f L, Debit: %.3f L/h, Temps: %.1f s",
-                           q, de, temps);
-
-                } else if (id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto ORP") {
-                  float consigne = id(consigne_orp).state;
-                  float mesure = id(orp_ezo).state;
-                  float erreur = consigne - mesure;
-                  float k = id(facteur_correction_orp).state / 100.0f;
-                  float temps_max = 600.0f;  // max 10 min
-                  float debit = id(_debit_ppe_chlore).state;
-
-                  if (erreur > 0.0f) {
-                    temps = std::min(k * erreur, temps_max);
-                  }
-
-                  if (debit > 0.0f && temps > 0.0f) {
-                    volume = debit * temps / 3600.0f;
-                  }
-
-                  ESP_LOGI("Dosage Chlore",
-                           "Mode Auto ORP -> ORP: %.1f mV, Cible: %.1f mV, Erreur: %.1f, Temps: %.1f s, Volume estime: %.3f L",
-                           mesure, consigne, erreur, temps, volume);
-                }
-
-                id(g_volume_chlore) = volume;
-                id(g_tps_injection_chlore) = temps;
-                id(_tps_injection_chlore).publish_state(temps);
-
-            - lambda: |-
-                CONVERT_SECONDS(id(g_tps_injection_chlore), id(g_hh), id(g_mm), id(g_ss));
-
-            - datetime.time.set:
-                id: duree_injection_chlore
-                time: !lambda |-
-                  return {
-                    second: static_cast<uint8_t>(id(g_ss)),
-                    minute: static_cast<uint8_t>(id(g_mm)),
-                    hour: static_cast<uint8_t>(id(g_hh))
-                  };
-
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_tps_injection_chlore).state > 0;'
-              - switch.is_on: cde_ppe_filtration
-          then:
-            - switch.turn_on: cde_ppe_chlore
-
-            - logger.log:
-                format: "Marche ppe Chlore en %s"
-                args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()' ]
-                level: INFO
-
-            - lambda: |-
-                std::string mess = "ESP178 Temps inj Chlore\n";
-                mess += "Mode: " + id(_Mode_Fonctionnement_regul_chlore).current_option() + "\n";
-                mess += "Volume prevu: " + to_string(id(g_volume_chlore)) + " l\n";
-                mess += "Poids Bidon Chlore: " + to_string(id(_poids_chlore).state) + " kg";
-                id(_message_telegram)->execute(mess.c_str(), id(g_tps_injection_chlore));
-                id(_log_fichier)->execute(mess.c_str(), id(g_tps_injection_chlore));
-
-            - delay: !lambda |-
-                return (uint32_t)(id(g_tps_injection_chlore) * 1000.0f);
-
-            - switch.turn_off: cde_ppe_chlore
-
-            - logger.log:
-                format: "Arrêt ppe Chlore en %s"
-                args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()' ]
-                level: INFO
-
-            - lambda: |-
-                float debit = id(_debit_ppe_chlore).state;
-                float duree = id(_tps_injection_chlore).state;
-                float volume = 0.0f;
-
-                if (debit > 0.0f && duree > 0.0f) {
-                  volume = debit * duree / 3600.0f;
-                }
-
-                id(g_conso_chl_totale) += volume;
-                id(g_conso_chl_jour) += volume;
-                id(conso_chl_totale).publish_state(id(g_conso_chl_totale));
-                id(conso_chl_jour).publish_state(id(g_conso_chl_jour));
-
-                std::string mess = "Fin Injection Chlore - Volume: " + to_string(volume) + " l\n";
-                mess += "Poids Bidon Chlore: " + to_string(id(_poids_chlore).state) + " kg";
-                id(_message_telegram)->execute(mess.c_str(), 0);
-                id(_log_fichier)->execute(mess.c_str(), 0);
-
-          else:
-            - switch.turn_off: cde_ppe_chlore
-            - lambda: |-
-                id(g_tps_injection_chlore) = 0.0f;
-                id(g_volume_chlore) = 0.0f;
-                id(_tps_injection_chlore).publish_state(0);
-            - logger.log:
-                format: "Pas d'injection chlore (condition non remplie)"
-                level: INFO
-
-      - if:
-          condition:
-            and:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Ma_f";'
-              - switch.is_on: cde_ppe_filtration
-          then:
-            - switch.turn_on: cde_ppe_chlore
-            - logger.log:
-                format: "Marche Forcée ppe Chlore"
-                level: INFO
-
+      # ============================================================
+      # MODE AUTO VOLUME / AUTO ORP
+      # ============================================================
       - if:
           condition:
             or:
-              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "At_f";'
-              - switch.is_off: cde_ppe_filtration
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Volume";'
+              - lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto ORP";'
+          then:
+            - if:
+                condition:
+                  switch.is_on: cde_ppe_filtration
+                then:
+                  - lambda: |-
+                      float temps = 0.0f;
+                      float volume = 0.0f;
+
+                      if (id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto Volume") {
+                        float q = id(_volume_chlore_cible).state;      // litres
+                        float de = id(_debit_ppe_chlore).state;        // l/h
+
+                        if (q > 0.0f && de > 0.0f) {
+                          temps = std::min((q / de) * 3600.0f, 3600.0f);   // max 1h
+                          volume = q;
+                        }
+
+                        ESP_LOGI("Dosage Chlore",
+                                 "Mode Auto Volume -> Quantite: %.3f L, Debit: %.3f L/h, Temps: %.1f s",
+                                 q, de, temps);
+
+                      } else if (id(_Mode_Fonctionnement_regul_chlore).current_option() == "Auto ORP") {
+                        float consigne = id(consigne_orp).state;
+                        float mesure = id(orp_ezo).state;
+                        float erreur = consigne - mesure;
+                        float k = id(facteur_correction_orp).state / 100.0f;
+                        float temps_max = 600.0f;  // max 10 min
+                        float debit = id(_debit_ppe_chlore).state;
+
+                        if (erreur > 0.0f) {
+                          temps = std::min(k * erreur, temps_max);
+                        }
+
+                        if (debit > 0.0f && temps > 0.0f) {
+                          volume = debit * temps / 3600.0f;
+                        }
+
+                        ESP_LOGI("Dosage Chlore",
+                                 "Mode Auto ORP -> ORP: %.1f mV, Cible: %.1f mV, Erreur: %.1f, Temps: %.1f s, Volume estime: %.3f L",
+                                 mesure, consigne, erreur, temps, volume);
+                      }
+
+                      id(g_volume_chlore) = volume;
+                      id(g_tps_injection_chlore) = temps;
+                      id(_tps_injection_chlore).publish_state(temps);
+
+                  - lambda: |-
+                      CONVERT_SECONDS(id(g_tps_injection_chlore), id(g_hh), id(g_mm), id(g_ss));
+
+                  - datetime.time.set:
+                      id: duree_injection_chlore
+                      time: !lambda |-
+                        return {
+                          second: static_cast<uint8_t>(id(g_ss)),
+                          minute: static_cast<uint8_t>(id(g_mm)),
+                          hour: static_cast<uint8_t>(id(g_hh))
+                        };
+
+                  - if:
+                      condition:
+                        lambda: 'return id(g_tps_injection_chlore) > 0.0f;'
+                      then:
+                        - switch.turn_on: cde_ppe_chlore
+
+                        - logger.log:
+                            format: "Marche ppe Chlore en %s"
+                            args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()' ]
+                            level: INFO
+
+                        - lambda: |-
+                            char tg[384];
+                            snprintf(tg, sizeof(tg),
+                              "ESP178 Chlore DEBUT injection | mode=%s | volume prevu=%.3f L | poids bidon=%.2f kg",
+                              id(_Mode_Fonctionnement_regul_chlore).current_option().c_str(),
+                              id(g_volume_chlore),
+                              id(_poids_chlore).state
+                            );
+
+                            char logbuf[1024];
+                            snprintf(logbuf, sizeof(logbuf),
+                              "ESP178 Chlore DEBUT injection | Mode=%s | Volume prevu=%.3f L | Temps prevu=%.1f s | Poids bidon=%.2f kg",
+                              id(_Mode_Fonctionnement_regul_chlore).current_option().c_str(),
+                              id(g_volume_chlore),
+                              id(g_tps_injection_chlore),
+                              id(_poids_chlore).state
+                            );
+
+                            std::string mess_tg = tg;
+                            std::string mess_log = logbuf;
+
+                            id(_message_telegram)->execute(mess_tg.c_str(), (int)id(g_tps_injection_chlore));
+                            id(_log_fichier)->execute(mess_log.c_str(), (int)id(g_tps_injection_chlore));
+
+                        - delay: !lambda |-
+                            return (uint32_t)(id(g_tps_injection_chlore) * 1000.0f);
+
+                        - switch.turn_off: cde_ppe_chlore
+
+                        - logger.log:
+                            format: "Arrêt ppe Chlore en %s"
+                            args: [ 'id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()' ]
+                            level: INFO
+
+                        - lambda: |-
+                            float debit = id(_debit_ppe_chlore).state;
+                            float duree = id(_tps_injection_chlore).state;
+                            float volume = 0.0f;
+
+                            if (debit > 0.0f && duree > 0.0f) {
+                              volume = debit * duree / 3600.0f;
+                            }
+
+                            id(g_conso_chl_totale) += volume;
+                            id(g_conso_chl_jour) += volume;
+                            id(conso_chl_totale).publish_state(id(g_conso_chl_totale));
+                            id(conso_chl_jour).publish_state(id(g_conso_chl_jour));
+
+                            char tg[384];
+                            snprintf(tg, sizeof(tg),
+                              "ESP178 Chlore FIN injection | volume=%.3f L | jour=%.3f L | total=%.3f L | poids bidon=%.2f kg",
+                              volume,
+                              id(g_conso_chl_jour),
+                              id(g_conso_chl_totale),
+                              id(_poids_chlore).state
+                            );
+
+                            char logbuf[1024];
+                            snprintf(logbuf, sizeof(logbuf),
+                              "ESP178 Chlore FIN injection | Resultat=cycle termine normalement | Volume injecte=%.3f L | Conso jour=%.3f L | Conso totale=%.3f L | Poids bidon=%.2f kg",
+                              volume,
+                              id(g_conso_chl_jour),
+                              id(g_conso_chl_totale),
+                              id(_poids_chlore).state
+                            );
+
+                            std::string mess_tg = tg;
+                            std::string mess_log = logbuf;
+
+                            id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                            id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+                      else:
+                        - switch.turn_off: cde_ppe_chlore
+
+                        - lambda: |-
+                            id(g_tps_injection_chlore) = 0.0f;
+                            id(g_volume_chlore) = 0.0f;
+                            id(_tps_injection_chlore).publish_state(0);
+
+                        - logger.log:
+                            format: "Pas d'injection chlore (temps calcule nul)"
+                            level: INFO
+
+                        - lambda: |-
+                            char tg[384];
+                            snprintf(tg, sizeof(tg),
+                              "ESP178 Chlore PAS injection | raison=temps calcule nul | mode=%s | orp=%.1f mV | consigne=%.1f mV",
+                              id(_Mode_Fonctionnement_regul_chlore).current_option().c_str(),
+                              id(orp_ezo).state,
+                              id(consigne_orp).state
+                            );
+
+                            char logbuf[1024];
+                            snprintf(logbuf, sizeof(logbuf),
+                              "ESP178 Chlore PAS injection | Raison=temps calcule nul (volume/erreur ORP nul ou negatif) | Mode=%s | ORP=%.1f mV | Consigne=%.1f mV | Volume cible=%.3f L | Debit=%.3f L/h",
+                              id(_Mode_Fonctionnement_regul_chlore).current_option().c_str(),
+                              id(orp_ezo).state,
+                              id(consigne_orp).state,
+                              id(_volume_chlore_cible).state,
+                              id(_debit_ppe_chlore).state
+                            );
+
+                            std::string mess_tg = tg;
+                            std::string mess_log = logbuf;
+
+                            id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                            id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+                else:
+                  - switch.turn_off: cde_ppe_chlore
+
+                  - lambda: |-
+                      id(g_tps_injection_chlore) = 0.0f;
+                      id(g_volume_chlore) = 0.0f;
+                      id(_tps_injection_chlore).publish_state(0);
+
+                  - logger.log:
+                      format: "Pas d'injection chlore - filtration arretee"
+                      level: INFO
+
+                  - lambda: |-
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 Chlore PAS injection | raison=filtration arretee | mode=%s | pompe=OFF",
+                        id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 Chlore PAS injection | Raison=filtration arretee | Pompe chlore=OFF | Mode=%s",
+                        id(_Mode_Fonctionnement_regul_chlore).current_option().c_str()
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+      # ============================================================
+      # MODE MARCHE FORCEE
+      # ============================================================
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "Ma_f";'
+          then:
+            - if:
+                condition:
+                  switch.is_on: cde_ppe_filtration
+                then:
+                  - switch.turn_on: cde_ppe_chlore
+
+                  - logger.log:
+                      format: "Marche Forcée ppe Chlore"
+                      level: INFO
+
+                  - lambda: |-
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 Chlore MARCHE forcee | pompe=ON | filt=ON | poids bidon=%.2f kg",
+                        id(_poids_chlore).state
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 Chlore MARCHE forcee | Pompe chlore=ON | Filtration=ON | Poids bidon=%.2f kg",
+                        id(_poids_chlore).state
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+                else:
+                  - switch.turn_off: cde_ppe_chlore
+
+                  - logger.log:
+                      format: "Marche forcee chlore refusee - filtration arretee"
+                      level: WARN
+
+                  - lambda: |-
+                      char tg[384];
+                      snprintf(tg, sizeof(tg),
+                        "ESP178 Chlore MARCHE forcee refusee | raison=filtration arretee | pompe=OFF"
+                      );
+
+                      char logbuf[1024];
+                      snprintf(logbuf, sizeof(logbuf),
+                        "ESP178 Chlore MARCHE forcee refusee | Raison=filtration arretee | Pompe chlore=OFF"
+                      );
+
+                      std::string mess_tg = tg;
+                      std::string mess_log = logbuf;
+
+                      id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                      id(_log_fichier)->execute(mess_log.c_str(), 0);
+
+      # ============================================================
+      # MODE ARRET FORCE
+      # ============================================================
+      - if:
+          condition:
+            lambda: 'return id(_Mode_Fonctionnement_regul_chlore).current_option() == "At_f";'
           then:
             - switch.turn_off: cde_ppe_chlore
+
             - logger.log:
                 format: "Arret Forcé ppe Chlore"
                 level: INFO
 
+            - lambda: |-
+                char tg[384];
+                snprintf(tg, sizeof(tg),
+                  "ESP178 Chlore ARRET force | pompe=OFF | mode=At_f | poids bidon=%.2f kg",
+                  id(_poids_chlore).state
+                );
+
+                char logbuf[1024];
+                snprintf(logbuf, sizeof(logbuf),
+                  "ESP178 Chlore ARRET force | Pompe chlore=OFF | Mode=At_f | Poids bidon=%.2f kg",
+                  id(_poids_chlore).state
+                );
+
+                std::string mess_tg = tg;
+                std::string mess_log = logbuf;
+
+                id(_message_telegram)->execute(mess_tg.c_str(), 0);
+                id(_log_fichier)->execute(mess_log.c_str(), 0);

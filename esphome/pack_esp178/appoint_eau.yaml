@@ -106,7 +106,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Regul Eau --> %s"
-            args: [ 'id(_Mode_Fonctionnement_regul_eau).current_option()' ]
+            args: [ 'id(_Mode_Fonctionnement_regul_eau).current_option().c_str()' ]
             level: INFO
         - script.stop: _regul_eau
         - delay: 1s
@@ -300,7 +300,7 @@ switch:
 
           ESP_LOGI("EV_EAU",
                    "Vanne ouverte. Start=%u s, LSH=%d, LSL=%d",
-                   id(ev_eau_on_start_time),
+                   (unsigned int)id(ev_eau_on_start_time),
                    id(ev_eau_start_lsh_state),
                    id(ev_eau_start_lsl_state));
 
@@ -672,7 +672,7 @@ script:
 
           ESP_LOGI("SECURITE_EAU",
                    "Surveillance OK : EV ouverte depuis %u s | LSH=%d LSL=%d | bas=%d haut=%d defaut=%d",
-                   duration,
+                   (unsigned int)duration,
                    lsh_eau,
                    lsl_eau,
                    niveau_bas,

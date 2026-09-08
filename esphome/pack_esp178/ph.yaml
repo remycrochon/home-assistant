@@ -37,17 +37,10 @@ select:
             format: "Mode Fonct Regul pH --> %s"
             args: [ 'id(_Mode_Fonctionnement_regul_ph).current_option().c_str()' ]
             level: INFO
-
-        - if:
-            condition:
-              or:
-                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "Ma_f";'
-                - lambda: 'return id(_Mode_Fonctionnement_regul_ph).current_option() == "At_f";'
-            then:
-              - script.stop: _regul_ph
-              - delay: 1s
-              - script.execute: _regul_ph
-
+        - script.stop: _regul_ph
+        - switch.turn_off: cde_ppe_ph_moins
+        - delay: 1s
+        - script.execute: _regul_ph
 
 button:
   - platform: template

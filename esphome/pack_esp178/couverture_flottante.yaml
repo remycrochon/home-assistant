@@ -26,7 +26,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Volet --> %s"
-            args: [ 'id(_Mode_Fonctionnement_volet).current_option()' ]
+            args: [ 'id(_Mode_Fonctionnement_volet).current_option().c_str()' ]
             level: INFO
 
 binary_sensor: 
@@ -370,11 +370,11 @@ script:
                 if (haut && inter) mess += "Haut + Intermediaire\n";
                 else if (haut)    mess += "Haut\n";
                 else if (inter)   mess += "Intermediaire\n";
-                  mess += "Mode: ";
-                  mess += id(_Mode_Fonctionnement_volet).current_option();
-                  mess += "\n";
-                  id(_message_telegram)->execute(mess,0);
-                  id(_log_fichier)->execute(mess, 0);
+                mess += "Mode: ";
+                mess += id(_Mode_Fonctionnement_volet).current_option();
+                mess += "\n";
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);
 
             - switch.turn_on: cde_eclairage
             - delay: 20s
@@ -384,15 +384,13 @@ script:
             - lambda: |-
                 bool def = id(niv_defaut).state;
                 std::string mess = "Fermeture Volet Piscine BLOQUEE\n";
-                if (def) mess += "Raison: Niveau en defaut";
-                else
-                  std::string mess;
-                  mess += "Raison: aucun niveau actif (Bas)\n";
-                  mess += "Mode: ";
-                  mess += id(_Mode_Fonctionnement_volet).current_option();
-                  mess += "\n";
-                  id(_message_telegram)->execute(mess,0);
-                  id(_log_fichier)->execute(mess, 0);
+                if (def) mess += "Raison: Niveau en defaut\n";
+                else mess += "Raison: aucun niveau actif (Bas)\n";
+                mess += "Mode: ";
+                mess += id(_Mode_Fonctionnement_volet).current_option();
+                mess += "\n";
+                id(_message_telegram)->execute(mess,0);
+                id(_log_fichier)->execute(mess, 0);
 
   - id: script_stop_volet
     mode: single

@@ -364,11 +364,11 @@ select:
         - script.execute: _fonctionnement_filtration        
         - logger.log:
             format: "Mode Fonct Filtration --> %s"
-            args: [ 'id(_Mode_Fonctionnement_filtration).current_option()' ]
+            args: [ 'id(_Mode_Fonctionnement_filtration).current_option().c_str()' ]
             level: INFO
         - lambda: |-
             char buf[64];
-            snprintf(buf, sizeof(buf), "Mode Fonct Filtration --> %s", id(_Mode_Fonctionnement_filtration).current_option());
+            snprintf(buf, sizeof(buf), "Mode Fonct Filtration --> %s", id(_Mode_Fonctionnement_filtration).current_option().c_str());
             id(_message_telegram)->execute(std::string(buf),0);
             id(_log_fichier)->execute(std::string(buf),0);
 

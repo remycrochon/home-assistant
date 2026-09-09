@@ -49,18 +49,6 @@ input_number:
       unit_of_measurement: "Lux"
       icon: mdi:weather-sunny 
 
-template:
-  - binary_sensor:
-    - default_entity_id: binary_sensor.porte_garage_non_fermee
-      state: "{% if is_state('binary_sensor.porte_garage_fermee', 'on') %}\n  off\n{%
-        else %}\n  on\n{% endif %}"
-      name: porte_garage_non_fermee
-
-    - default_entity_id: binary_sensor.porte_ssol_non_fermee
-      state: "{% if is_state('binary_sensor.porte_ssol_fermee', 'on') %}\n  off\n{%
-        else %}\n  on\n{% endif %}"
-      name: porte_ssol_non_fermee
-
 cover:
 # Volets Proportionnels
 # Porte Sous Sol

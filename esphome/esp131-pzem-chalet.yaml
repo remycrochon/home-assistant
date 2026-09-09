@@ -82,19 +82,6 @@ sensor:
       unit_of_measurement: "W"
     update_interval: 30s
 
-  - platform: energy_statistics
-    total: puissance
-    energy_today:
-      name: "${friendly_name} Energie Jour"
-    energy_yesterday:
-      name: "${friendly_name} Energie Hier"
-    energy_week:
-      name: "${friendly_name} Energie Semaine"
-    energy_month:
-      name: "${friendly_name} Energie Mois"
-    energy_year:
-      name: "${friendly_name} Energie Annnée"
-
 switch:
   - platform: gpio
     name: "${friendly_name} ventilo"

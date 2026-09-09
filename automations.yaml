@@ -398,15 +398,7 @@
           option: hc
         target:
           entity_id:
-          - select.compteur_energie_pac
           - select.compteur_energie_autres_jour
-          - select.compteur_energie_onduleur_jour
-          - select.compteur_energie_vmc_jour
-          - select.compteur_energie_sdb_jour
-          - select.compteur_energie_wc_jour
-          - select.compteur_energie_cuisine_jour
-          - select.compteur_energie_mal_jour
-          - sensor.compteur_energie_piscine_jour_hp_hc
         action: select.select_option
     - conditions:
       - condition: or
@@ -425,15 +417,7 @@
           option: hp
         target:
           entity_id:
-          - select.compteur_energie_pac
           - select.compteur_energie_autres_jour
-          - select.compteur_energie_onduleur_jour
-          - select.compteur_energie_vmc_jour
-          - select.compteur_energie_sdb_jour
-          - select.compteur_energie_wc_jour
-          - select.compteur_energie_cuisine_jour
-          - select.compteur_energie_mal_jour
-          - sensor.compteur_energie_piscine_jour_hp_hc
         action: select.select_option
     default: []
   mode: single
@@ -4464,7 +4448,7 @@
         }}'
       temps_filtration_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ v }}\n{% endif %}"
+        else %}\n  {{ v | round(2)}}\n{% endif %}"
       energie_jour: '{{ states(''sensor.compteur_energie_piscine_jour_hp_hc'') | float(0)
         }}'
       energie_jour_txt: "{% set v = states('sensor.compteur_energie_piscine_jour_hp_hc')

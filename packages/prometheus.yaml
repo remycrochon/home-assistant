@@ -1,12 +1,21 @@
 rest:
   # ============ CROWDSEC ============
-  # --- Réactifs (60s) ---
-  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_active_decisions)"
+  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_active_decisions{origin=%22crowdsec%22})"
     method: GET
     scan_interval: 60
     sensor:
       - name: "CrowdSec Bans Actifs"
         unique_id: "crowdsec_bans_actifs"
+        value_template: >-
+          {{ value_json.data.result[0].value[1] | default(0) | int }}
+        state_class: measurement
+
+  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_active_decisions{origin=%22CAPI%22})"
+    method: GET
+    scan_interval: 300
+    sensor:
+      - name: "CrowdSec Bans Blocklist Communautaire"
+        unique_id: "crowdsec_bans_blocklist_communautaire"
         value_template: >-
           {{ value_json.data.result[0].value[1] | default(0) | int }}
         state_class: measurement
@@ -126,7 +135,25 @@ rest:
         unique_id: "fail2ban_domo_bans_actifs"
         value_template: "{{ value_json.data.result[0].value[1] | default(0) | int }}"
         state_class: measurement
+  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_active_decisions{origin=%22crowdsec%22})"
+    method: GET
+    scan_interval: 60
+    sensor:
+      - name: "CrowdSec Bans Actifs"
+        unique_id: "crowdsec_bans_actifs"
+        value_template: >-
+          {{ value_json.data.result[0].value[1] | default(0) | int }}
+        state_class: measurement
 
+  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_active_decisions{origin=%22CAPI%22})"
+    method: GET
+    scan_interval: 300
+    sensor:
+      - name: "CrowdSec Bans Blocklist Communautaire"
+        unique_id: "crowdsec_bans_blocklist_communautaire"
+        value_template: >-
+          {{ value_json.data.result[0].value[1] | default(0) | int }}
+        state_class: measurement
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_banned_current{jail=%22npm-immich%22}"
     method: GET
     scan_interval: 60

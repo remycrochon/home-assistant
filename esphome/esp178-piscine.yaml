@@ -157,32 +157,32 @@ time:
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_ph
           - lambda: |-
               id(g_conso_ph_jour) = 0.0;
-              id(conso_ph_jour).publish_state(0.0);   
+              id(conso_ph_jour).publish_state(0.0);
           - sensor.duty_time.reset: _temps_fonctionnement_ppe_chlore
           - lambda: |-
               id(g_conso_chl_jour) = 0.0;
               id(conso_chl_jour).publish_state(0.0);
           - sensor.duty_time.reset: _temps_fonctionnement_ev_eau
 
-      # Notification du rapport journalier sur Telegram Filtration
+      # Rapport journalier Filtration - Telegram désactivé (repris dans le rapport IA HA 21:45), log fichier conservé
       - seconds: 00
         minutes: 59
         hours: 23
         then:
           - lambda: |-
               std::string mess = "ESP178 Temps Fonctionnement filtration";
-              id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_piscine_jour).state);
+              // id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_piscine_jour).state);
               id(_log_fichier)->execute(mess,id(_temps_fonctionnement_ppe_piscine_jour).state);
-          - lambda: |-          
+          - lambda: |-
               std::string mess = "ESP178 Tps Fonct ppe pH";
-              id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_ph).state);
+              // id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_ph).state);
               id(_log_fichier)->execute(mess,id(_temps_fonctionnement_ppe_ph).state);
-          - lambda: |-          
+          - lambda: |-
               std::string mess = "ESP178 Tps Fonct ppe Chl";
-              id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
+              // id(_message_telegram)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
               id(_log_fichier)->execute(mess,id(_temps_fonctionnement_ppe_chlore).state);
 
-        # Notification du rapport journalier sur Telegram Ph
+      # Rapport journalier pH - Telegram désactivé, log fichier conservé
       - seconds: 05
         minutes: 59
         hours: 23
@@ -195,10 +195,10 @@ time:
               snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
               mess += buf1;
 
-              id(_message_telegram)->execute(mess,0);
+              // id(_message_telegram)->execute(mess,0);
               id(_log_fichier)->execute(mess, 0);
 
-      # Notification du rapport journalier sur Telegram Chlore
+      # Rapport journalier Chlore - Telegram désactivé, log fichier conservé
       - seconds: 40
         minutes: 59
         hours: 23
@@ -209,9 +209,8 @@ time:
               char buf1[32];
               snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
               mess += buf1;
-              id(_message_telegram)->execute(mess,0);
+              // id(_message_telegram)->execute(mess,0);
               id(_log_fichier)->execute(mess, 0);
-
 
 
 # Connection Bus i2c (Afficheur, EZO,...)

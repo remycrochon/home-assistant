@@ -1280,11 +1280,13 @@
   - action: telegram_bot.send_message
     metadata: {}
     data:
-      message: '{{states("sensor.date_time")}} {% set er=states(''sensor.am435x_awd_error'')%}     {%
-        if er=="no_error" %}       Pas de Probleme     {%- else -%}       Probleme={{er}}     {%-
-        endif%}  '
+      message: '{{ states(''sensor.date_time'') }}
+
+        {% if states(''sensor.am435x_awd_error'') == ''no_error'' %}Pas de Probleme{%
+        else %}Probleme={{ states(''sensor.am435x_awd_error'') }}{% endif %}'
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       title: Robot notification
+      parse_mode: plain_text
   mode: single
   trace:
     stored_traces: 10
@@ -1767,6 +1769,122 @@
         {{ states(''sensor.am435x_awd_nombre_de_collisions'')|round(0)}}, {{ states(''sensor.am435x_awd_duree_d_utilisation_des_lames'')|round(0)}}'
     target:
       entity_id: notify.statistique_am435x
+  - variables:
+      date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
+      erreur_actuelle: '{{ states(''sensor.am435x_awd_error'') }}'
+      erreur_txt: "{% if states('sensor.am435x_awd_error') == 'no_error' %}\n  Aucune
+        erreur en cours\n{% else %}\n  Erreur en cours : {{ states('sensor.am435x_awd_error')
+        }}\n{% endif %}"
+      batterie_txt: "{% set v = states('sensor.am435x_awd_batterie') %}{% if v in
+        ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n  {{ v|float(0)|round(0)
+        }} %\n{% endif %}"
+      zone_txt: '{{ states(''sensor.am435x_awd_aire_de_travail'') }}'
+      mode_txt: '{{ states(''sensor.am435x_awd_mode'') }}'
+      distance_jour_txt: "{% set v = states('sensor.amx435x_distance_jour') %}{% if
+        v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n  {{
+        v|float(0)|round(2) }} km\n{% endif %}"
+      temps_tonte_jour_txt: "{% set v = states('sensor.amx435x_temps_tonte_jour')
+        %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
+        %}\n  {% set total = (v|float(0)*3600)|int %}{{ '%02d:%02d' % (total // 3600,
+        (total % 3600) // 60) }}\n{% endif %}"
+      collisions_jour_txt: "{% set v = states('sensor.amx435x_collisions_jour') %}{%
+        if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n
+        \ {{ v|float(0)|round(0)|int }}\n{% endif %}"
+      cycles_charge_jour_txt: "{% set v = states('sensor.amx435x_cycles_charge_jour')
+        %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
+        %}\n  {{ v|float(0)|round(0)|int }}\n{% endif %}"
+  - action: ai_task.generate_data
+    continue_on_error: true
+    response_variable: recap_robot
+    data:
+      task_name: recap robot am435x journalier
+      entity_id: ai_task.google_ai_task
+      instructions: 'Tu es un assistant de suivi pour une tondeuse robot automower.
+        Tu ne dois JAMAIS produire de chiffres, pourcentages ou unités : toutes les
+        valeurs numériques sont déjà connues et affichées séparément par le système.
+        Ton travail consiste uniquement à interpréter la situation en phrases courtes,
+        qualitatives, en français, sans jamais réutiliser ou paraphraser un nombre
+        fourni ci-dessous.
+
+        Contexte du jour (pour information seulement, ne recopie aucune valeur) :
+        - Statut erreur : {{ erreur_txt }} - Batterie actuelle : {{ batterie_txt }}
+        - Zone de travail actuelle : {{ zone_txt }} - Mode actuel : {{ mode_txt }}
+        - Temps de tonte du jour : {{ temps_tonte_jour_txt }} - Distance parcourue
+        du jour : {{ distance_jour_txt }} - Collisions du jour : {{ collisions_jour_txt
+        }} - Cycles de charge du jour : {{ cycles_charge_jour_txt }}
+
+        Pour chaque champ demandé, rédige une phrase courte (maximum 15 mots), sans
+        aucun chiffre ni unité, uniquement une appréciation qualitative. Exemples
+        de style attendu (ne pas recopier tel quel) : "Journée de tonte normale, rien
+        à signaler" ou "Nombre de collisions un peu élevé aujourd''hui" ou "Batterie
+        en bon état".'
+      structure:
+        titre:
+          description: Titre court du message, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        synthese_globale:
+          description: Une phrase de synthèse globale sur la journée du robot, sans
+            aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_activite:
+          description: Une phrase qualitative sur l'activité de tonte et la charge
+            du jour, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        commentaire_anomalies:
+          description: Une phrase signalant une éventuelle anomalie (erreur, collisions
+            élevées) ou confirmant que tout est normal, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        recommandation:
+          description: Une courte recommandation si utile, ou une phrase confirmant
+            qu'aucune action n'est nécessaire, sans aucun chiffre
+          required: true
+          selector:
+            text:
+        niveau:
+          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+          required: true
+          selector:
+            text:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ recap_robot is defined and recap_robot.data is defined
+          and recap_robot.data.titre is defined and recap_robot.data.synthese_globale
+          is defined }}'
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: '{{ recap_robot.data.titre }}'
+          message: "\U0001F916 {{ date_jour }}\n\n{{ recap_robot.data.synthese_globale
+            }}\n\n⚙️ Statut\nErreur : {{ erreur_txt }}\nMode : {{ mode_txt }}\nZone
+            : {{ zone_txt }}\nBatterie : {{ batterie_txt }}\n{{ recap_robot.data.commentaire_anomalies
+            }}\n\n\U0001F331 Activité du jour\nTemps de tonte : {{ temps_tonte_jour_txt
+            }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
+            }}\nCycles de charge : {{ cycles_charge_jour_txt }}\n{{ recap_robot.data.commentaire_activite
+            }}\n\n✅ Recommandation\n{{ recap_robot.data.recommandation }}\n\nNiveau
+            : {{ recap_robot.data.niveau if recap_robot.data.niveau is defined else
+            'INFO' }}"
+          parse_mode: plain_text
+    default:
+    - action: telegram_bot.send_message
+      data:
+        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        title: Rapport Robot am435x
+        message: "\U0001F916 {{ date_jour }}\n\n⚙️ Statut\nErreur : {{ erreur_txt
+          }}\nMode : {{ mode_txt }}\nZone : {{ zone_txt }}\nBatterie : {{ batterie_txt
+          }}\n\n\U0001F331 Activité du jour\nTemps de tonte : {{ temps_tonte_jour_txt
+          }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
+          }}\nCycles de charge : {{ cycles_charge_jour_txt }}"
+        parse_mode: plain_text
   mode: single
 - id: '1741796346707'
   alias: Rechargement Auto Automower Husqvarna
@@ -4448,7 +4566,16 @@
         }}'
       temps_filtration_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_piscine_jour')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ v | round(2)}}\n{% endif %}"
+        else %}\n  {% set total = ((v | float(0)) * 3600) | int %}{{ '%02d:%02d:%02d'
+        % (total // 3600, (total % 3600) // 60, total % 60) }}\n{% endif %}"
+      temps_ppe_ph_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_ph')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {% set total = (v | float(0)) | int %}{{ '%02d:%02d:%02d' % (total
+        // 3600, (total % 3600) // 60, total % 60) }}\n{% endif %}"
+      temps_ppe_chl_txt: "{% set v = states('sensor.esp178_piscine_temps_ma_ppe_chlore')
+        %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
+        else %}\n  {% set total = ((v | float(0)) * 60) | int %}{{ '%02d:%02d:%02d'
+        % (total // 3600, (total % 3600) // 60, total % 60) }}\n{% endif %}"
       energie_jour: '{{ states(''sensor.compteur_energie_piscine_jour_hp_hc'') | float(0)
         }}'
       energie_jour_txt: "{% set v = states('sensor.compteur_energie_piscine_jour_hp_hc')
@@ -4456,16 +4583,16 @@
         else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
       conso_ph_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_ph_jour')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ v }}\n{% endif %}"
+        else %}\n  {{ (v | float(0)) | round(2) }} L\n{% endif %}"
       conso_chl_jour_txt: "{% set v = states('sensor.esp178_piscine_conso_chl_jour')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+        else %}\n  {{ (v | float(0)) | round(2) }} L\n{% endif %}"
       poids_chlore_txt: "{% set v = states('sensor.esp129_pesage_chlore_poids_chlore')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
-        else %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+        else %}\n  {{ (v | float(0)) | round(2) }} kg\n{% endif %}"
       appoint_eau_jour_txt: "{% set v = states('sensor.esp173_cpt_eau_piscine') %}
         {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
-        %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
+        %}\n  {{ (v | float(0)) | round(2) }} L\n{% endif %}"
       niveau_txt: "{% if is_state('binary_sensor.esp178_piscine_niv_defaut', 'on')
         %}\n  défaut niveau\n{% elif is_state('binary_sensor.esp178_piscine_niv_bas',
         'on') %}\n  niveau bas\n{% elif is_state('binary_sensor.esp178_piscine_niv_inter',
@@ -4484,6 +4611,15 @@
         }}'
       appoint_mode_txt: '{{ states(''select.esp178_piscine_mode_fonct_appoint_eau'')
         }}'
+      mode_volet_txt: '{{ states(''select.esp178_piscine_mode_fonctionnement_volet'')
+        }}'
+      mode_hors_gel_txt: '{{ states(''select.esp178_piscine_mode_hors_gel'') }}'
+      cya_txt: "{% set v = states('sensor.my_sampling_point_pl_cyanuric_acid') %}
+        {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(1) }} mg/l\n{% endif %}"
+      tac_txt: "{% set v = states('sensor.my_sampling_point_pl_alkalinity') %} {%
+        if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
+        %}\n  {{ (v | float(0)) | round(1) }} mg/l\n{% endif %}"
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: recap_piscine
@@ -4567,36 +4703,47 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           title: '{{ recap_piscine.data.titre }}'
           message: "\U0001F3CA {{ date_jour }}\n\n{{ recap_piscine.data.synthese_globale
-            }}\n\nEau / Ext : {{ temp_eau_txt }} / {{ temp_ext_txt }}\npH : {{ ph_txt
-            }} (cible {{ ph_cible_txt }}, écart {{ ecart_ph_txt }})\nORP : {{ orp_txt
-            }} (cible {{ orp_cible_txt }} mV, écart {{ ecart_orp_txt }} mV)\nChlore
-            libre : {{ chlore_libre_txt }}\n{{ recap_piscine.data.commentaire_qualite_eau
-            }}\n\nPression filtre : {{ pression_filtre_txt }}\nFiltration : mode {{
-            mode_filtration_txt }}, pompe {{ pompe_filtre_txt }}, temps {{ temps_filtration_txt
-            }}, énergie {{ energie_jour_txt }}\n{{ recap_piscine.data.commentaire_filtration
-            }}\n\npH : consommation du jour {{ conso_ph_jour_txt }}\n\nChlore : consommation
-            du jour {{ conso_chl_jour_txt }} | stock restant {{ poids_chlore_txt }}\n\nAppoint
-            eau : {{ appoint_eau_jour_txt }} | Niveau : {{ niveau_txt }} | Volet :
-            {{ volet_txt }}\nESP piscine : {{ statut_esp_txt }}\n{{ recap_piscine.data.commentaire_anomalies
-            }}\n\n{{ recap_piscine.data.recommandation }}\n\nNiveau : {{ recap_piscine.data.niveau
-            if recap_piscine.data.niveau is defined else 'INFO' }}"
+            }}\n\n\U0001F504 Filtration\nMode {{ mode_filtration_txt }}, pompe {{
+            pompe_filtre_txt }}\nTemps filtration : {{ temps_filtration_txt }}\nPression
+            filtre : {{ pression_filtre_txt }}\nÉnergie jour : {{ energie_jour_txt
+            }}\n{{ recap_piscine.data.commentaire_filtration }}\n\n⚗️ pH\nMode : {{
+            mode_ph_txt }}\nMesuré : {{ ph_txt }} (cible {{ ph_cible_txt }}, écart
+            {{ ecart_ph_txt }})\nTps pompe pH : {{ temps_ppe_ph_txt }}\nConsommation
+            du jour : {{ conso_ph_jour_txt }}\n\n\U0001F9EA Chlore\nMode : {{ mode_chlore_txt
+            }}\nORP : {{ orp_txt }} (cible {{ orp_cible_txt }} mV, écart {{ ecart_orp_txt
+            }} mV)\nChlore libre : {{ chlore_libre_txt }}\nTps pompe Chlore : {{ temps_ppe_chl_txt
+            }}\nConsommation du jour : {{ conso_chl_jour_txt }}\nStock restant : {{
+            poids_chlore_txt }}\n{{ recap_piscine.data.commentaire_qualite_eau }}\n\n\U0001F4A7
+            Eau\nMode appoint : {{ appoint_mode_txt }}\nMode volet : {{ mode_volet_txt
+            }}\nTempérature Eau / Ext : {{ temp_eau_txt }} / {{ temp_ext_txt }}\nAppoint
+            : {{ appoint_eau_jour_txt }}\nNiveau : {{ niveau_txt }}\nVolet : {{ volet_txt
+            }}\n\n❄️ Protection hors gel\nMode : {{ mode_hors_gel_txt }}\n\n\U0001F9FE
+            Autres\nAcide cyanurique : {{ cya_txt }}\nTAC (alcalinité) : {{ tac_txt
+            }}\n\n\U0001F4E1 Système\nESP piscine : {{ statut_esp_txt }}\n{{ recap_piscine.data.commentaire_anomalies
+            }}\n\n✅ Recommandation\n{{ recap_piscine.data.recommandation }}\n\nNiveau
+            : {{ recap_piscine.data.niveau if recap_piscine.data.niveau is defined
+            else 'INFO' }}"
     default:
     - action: telegram_bot.send_message
       data:
         config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
         title: Rapport Piscine
-        message: '{{ date_jour }} {{ ''\n'' }}Eau / Ext : {{ temp_eau_txt }} / {{
-          temp_ext_txt }} {{ ''\n'' }}pH : {{ ph_txt }} (cible {{ ph_cible_txt }},
-          écart {{ ecart_ph_txt }}) {{ ''\n'' }}ORP : {{ orp_txt }} (cible {{ orp_cible_txt
-          }} mV, écart {{ ecart_orp_txt }} mV) {{ ''\n'' }}Chlore libre : {{ chlore_libre_txt
-          }} | Pression filtre : {{ pression_filtre_txt }} {{ ''\n'' }}Filtration
-          : mode {{ mode_filtration_txt }}, pompe {{ pompe_filtre_txt }}, temps {{
-          temps_filtration_txt }}, énergie {{ energie_jour_txt }} {{ ''\n'' }}pH :
-          consommation du jour {{ conso_ph_jour_txt }} {{ ''\n'' }}Chlore : consommation
-          du jour {{ conso_chl_jour_txt }} | stock restant {{ poids_chlore_txt }}
-          {{ ''\n'' }}Appoint eau : {{ appoint_eau_jour_txt }} | Niveau : {{ niveau_txt
-          }} | Volet : {{ volet_txt }} {{ ''\n'' }}ESP piscine : {{ statut_esp_txt
-          }}'
+        message: "{{ date_jour }}\n\n\U0001F504 Filtration\nMode {{ mode_filtration_txt
+          }}, pompe {{ pompe_filtre_txt }}\nTemps filtration : {{ temps_filtration_txt
+          }}\nPression filtre : {{ pression_filtre_txt }}\nÉnergie jour : {{ energie_jour_txt
+          }}\n\n⚗️ pH\nMode : {{ mode_ph_txt }}\nMesuré : {{ ph_txt }} (cible {{ ph_cible_txt
+          }}, écart {{ ecart_ph_txt }})\nTps pompe pH : {{ temps_ppe_ph_txt }}\nConsommation
+          du jour : {{ conso_ph_jour_txt }}\n\n\U0001F9EA Chlore\nMode : {{ mode_chlore_txt
+          }}\nORP : {{ orp_txt }} (cible {{ orp_cible_txt }} mV, écart {{ ecart_orp_txt
+          }} mV)\nChlore libre : {{ chlore_libre_txt }}\nTps pompe Chlore : {{ temps_ppe_chl_txt
+          }}\nConsommation du jour : {{ conso_chl_jour_txt }}\nStock restant : {{
+          poids_chlore_txt }}\n\n\U0001F4A7 Eau\nMode appoint : {{ appoint_mode_txt
+          }}\nMode volet : {{ mode_volet_txt }}\nTempérature Eau / Ext : {{ temp_eau_txt
+          }} / {{ temp_ext_txt }}\nAppoint : {{ appoint_eau_jour_txt }}\nNiveau :
+          {{ niveau_txt }}\nVolet : {{ volet_txt }}\n\n❄️ Protection hors gel\nMode
+          : {{ mode_hors_gel_txt }}\n\n\U0001F9FE Autres\nAcide cyanurique : {{ cya_txt
+          }}\nTAC (alcalinité) : {{ tac_txt }}\n\n\U0001F4E1 Système\nESP piscine
+          : {{ statut_esp_txt }}"
   mode: single
 - id: '1787897164923'
   alias: Snapshot prévi conso 6-22h du jour
@@ -5070,3 +5217,52 @@
           value: '{{ dict(log_existant, hf=heure_fin, sf=soc_fin, lf=linky_fin) |
             tojson }}'
   mode: queued
+- id: '1789141915493'
+  alias: Piscine ESP178 Disponibilité
+  description: Alerte Telegram si l'ESP178 Piscine est indisponible depuis 5 minutes,
+    et notification de retour à la normale
+  triggers:
+  - entity_id:
+    - binary_sensor.esp178_piscine_status
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    to:
+    - 'off'
+    trigger: state
+    id: indisponible
+  - entity_id:
+    - binary_sensor.esp178_piscine_status
+    to:
+    - 'on'
+    trigger: state
+    id: retour_normal
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: indisponible
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: L'ESP178 Piscine est indisponible depuis 5 minutes.
+          title: Piscine ⚠️
+        metadata: {}
+    - conditions:
+      - condition: trigger
+        id: retour_normal
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: L'ESP178 Piscine est de nouveau disponible.
+          title: Piscine ✅
+        metadata: {}
+  mode: single

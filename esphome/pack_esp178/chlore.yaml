@@ -212,28 +212,6 @@ sensor:
     filters:
       - round: 0
 
-  # Estimation du taux de chlore
-  - platform: template
-    name: "Chlore estimé (ppm)"
-    unit_of_measurement: "ppm"
-    accuracy_decimals: 2
-    update_interval: 60s
-    icon: mdi:biohazard
-    lambda: |-
-      const float orp = id(orp_ezo).state;
-      const float ph = id(ph_ezo).state;
-
-      if (orp <= 0 || ph <= 0) {
-        return NAN;
-      }
-
-      float ppm = 10 * exp((orp - 650.0) / 100.0) * pow(10, -(ph - 7.0));
-
-      if (ppm < 0.0) ppm = 0.0;
-      if (ppm > 5.0) ppm = 5.0;
-
-      return ppm;
-
   # Affiche la conso de chl
   - platform: template
     name: "Conso_Chl_Totale"

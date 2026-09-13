@@ -371,56 +371,6 @@
       max_alerts: 5
       resolved_message: ' '
       notify_message: ' '
-- id: '1642614758763'
-  alias: Changement HP<->HC
-  description: 1/3/5=HC_2/4/6=HP
-  triggers:
-  - entity_id:
-    - sensor.esp124_tic_linky_tarif_distributeur
-    trigger: state
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '1.0'
-        - condition: state
-          entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '3.0'
-        - condition: state
-          entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '5.0'
-      sequence:
-      - data:
-          option: hc
-        target:
-          entity_id:
-          - select.compteur_energie_autres_jour
-        action: select.select_option
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '2.0'
-        - condition: state
-          entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '4.0'
-        - condition: state
-          entity_id: sensor.esp124_tic_linky_n_tarif
-          state: '6.0'
-      sequence:
-      - data:
-          option: hp
-        target:
-          entity_id:
-          - select.compteur_energie_autres_jour
-        action: select.select_option
-    default: []
-  mode: single
 - id: '1642958036645'
   alias: Blueprint Notification Petite Porte Sous Sol Ouverte
   description: Blue Print
@@ -869,19 +819,35 @@
   mode: single
 - id: '1700469604629'
   alias: Asservissements Modes Tempo
-  description: Actions en fonction du changement de modes de  Tempo
+  description: Actions en fonction du changement de modes de Tempo
   triggers:
   - trigger: state
     entity_id:
     - sensor.esp124_tic_linky_n_tarif
+    to:
+    - '6.0'
+    id: debut_hp_rouge
+  - trigger: state
+    entity_id:
+    - sensor.esp124_tic_linky_n_tarif
+    to:
+    - '4.0'
+    id: debut_hp_blanc
+  - trigger: state
+    entity_id:
+    - sensor.esp124_tic_linky_n_tarif
+    to:
+    - '2.0'
+    from:
+    - '4.0'
+    - '6.0'
+    id: sortie_hp_rouge_blanc
   conditions: []
   actions:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state:
-        - '6.0'
+      - condition: trigger
+        id: debut_hp_rouge
       sequence:
       - action: switch.turn_on
         target:
@@ -894,10 +860,8 @@
           message: '{{states("sensor.date_time") }}'
           title: DEBUT HP ROUGE -> Forçage Arret ppe Piscine et CP 100%
     - conditions:
-      - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state:
-        - '4.0'
+      - condition: trigger
+        id: debut_hp_blanc
       sequence:
       - action: switch.turn_on
         target:
@@ -910,10 +874,8 @@
           message: '{{states("sensor.date_time") }}'
           title: DEBUT HP BLANC-> Forçage Arret ppe Piscine
     - conditions:
-      - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
-        state:
-        - '2.0'
+      - condition: trigger
+        id: sortie_hp_rouge_blanc
       sequence:
       - action: switch.turn_off
         target:
@@ -926,8 +888,6 @@
           message: '{{states("sensor.date_time") }}'
           title: Sortie HP ROUGE ou BLANC
   mode: single
-  trace:
-    stored_traces: 15
 - id: '1706170202385'
   alias: Ecran01 Actions toutes les 30 mn
   description: ''
@@ -1428,7 +1388,7 @@
   - choose:
     - conditions:
       - condition: state
-        entity_id: sensor.esp124_tic_linky_n_tarif
+        entity_id: sensor.esp124_tic_linky_tarif_fourniture
         state:
         - HC BLEU
       sequence:
@@ -1885,34 +1845,6 @@
           }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
           }}\nCycles de charge : {{ cycles_charge_jour_txt }}"
         parse_mode: plain_text
-  mode: single
-- id: '1741796346707'
-  alias: Rechargement Auto Automower Husqvarna
-  description: ''
-  triggers:
-  - trigger: state
-    entity_id:
-    - lawn_mower.am435x_awd
-    to: unavailable
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-  conditions: []
-  actions:
-  - action: homeassistant.reload_config_entry
-    data:
-      entry_id: husqvarna_automower
-  - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: '{{states("sensor.date_time") }}{{-"\n"-}}
-
-        L''intégration Husqvarna Automower est indisponible.
-
-        Tentative de rechargement automatique effectuée.'
-      title: Congelateur
   mode: single
 - id: '1746164692289'
   alias: Ecran02- Actions toutes les 30 mn

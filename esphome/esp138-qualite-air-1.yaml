@@ -80,6 +80,10 @@ sensor:
             window_size: 15
             send_every: 10
             send_first_at: 1
+        # MODIF : arrondi réel de la valeur publiée (accuracy_decimals ne fait
+        # qu'une suggestion d'affichage HA, ça n'arrondit pas ce que renvoie
+        # states() dans un template Jinja).
+        - lambda: return round(x);
 
     pm_2_5:
       name: "Concentration de particules 2.5µm"
@@ -93,6 +97,7 @@ sensor:
             window_size: 5
             send_every: 3
             send_first_at: 1
+        - lambda: return round(x);  # MODIF : arrondi réel avant publication
 
     pm_10_0:
       name: "Concentration de particules 10.0µm"
@@ -103,6 +108,7 @@ sensor:
             window_size: 15
             send_every: 10
             send_first_at: 1
+        - lambda: return round(x);  # MODIF : arrondi réel avant publication
 
     pm_0_3um:
       name: "Nb de particules 0.3"
@@ -193,17 +199,39 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
 
-# Cycle 90s : 40s ON (30s stabilisation + ~10s de mesure valide) / 50s OFF.
-# Duty cycle ~44% : compromis entre durée de vie laser et fiabilité des mesures
-# utilisées par la hotte (esp180). Filtrage pm2_5 réduit (voir plus haut) pour
-# rester réactif dans la fenêtre ON.
+  # MODIF : import de l'état de la hotte (esp180) pour piloter le cycle du capteur
+  - platform: homeassistant
+    id: hotte_running
+    entity_id: switch.esp180_hotte_hotte
+    on_press:
+      # Hotte qui démarre -> capteur en continu immédiatement, sans attendre
+      # le prochain tick de l'interval (jusqu'à 90s de latence sinon).
+      then:
+        - switch.turn_on: val_mes
+
+# Hotte à l'arrêt : cycle réduit 90s (40s ON / 50s OFF) pour préserver le laser
+# tout en gardant assez de fraîcheur pour l'auto-ON (~50-65s de latence max).
+# Hotte en marche : capteur en continu (pas de coupure) pour un pilotage
+# réactif des vitesses V1/V2/V3.
 interval:
   - interval: 90s
     then:
-      - switch.turn_on: val_mes
-      - delay: 40s
-      - switch.turn_off: val_mes
-      - delay: 50s
+      - if:
+          condition:
+            binary_sensor.is_on: hotte_running
+          then:
+            - switch.turn_on: val_mes
+          else:
+            - switch.turn_on: val_mes
+            - delay: 40s
+            # Re-vérifie avant de couper : si la hotte a démarré entre-temps
+            # (via on_press ci-dessus ou action manuelle), on ne coupe pas.
+            - if:
+                condition:
+                  binary_sensor.is_off: hotte_running
+                then:
+                  - switch.turn_off: val_mes
+            - delay: 50s
 
 switch:
   - platform: gpio

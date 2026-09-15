@@ -1015,6 +1015,19 @@
     par détection.
   triggers:
   - trigger: state
+    entity_id:
+    - binary_sensor.cuisine_person_occupancy
+    id: FD Detection Cu
+    from:
+    - 'on'
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    enabled: false
+  - trigger: state
     entity_id: binary_sensor.detecteur_porte_entree_ouverture
     to: 'on'
     id: Detecteur porte
@@ -1031,21 +1044,8 @@
       minutes: 0
       seconds: 2
     enabled: false
-  - trigger: state
-    entity_id:
-    - binary_sensor.cuisine_person_occupancy
-    id: FD Detection Cu
-    from:
-    - 'on'
-    to:
-    - 'off'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 30
-    enabled: false
   - trigger: time_pattern
-    minutes: /30
+    minutes: /15
     id: 30mn
   - trigger: state
     entity_id: input_select.mode_spot_cuisine
@@ -1059,6 +1059,12 @@
     entity_id: input_select.mode_spot_cuisine
     to: Auto
     id: mode_auto
+  - trigger: state
+    entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+    to: 'on'
+    for:
+      minutes: 1
+    id: spot_allume_jour
   conditions: []
   actions:
   - choose:
@@ -1076,17 +1082,17 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
       - delay:
           hours: 0
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1101,9 +1107,9 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1112,9 +1118,9 @@
         entity_id: input_select.mode_spot_cuisine
         state: Auto
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1126,33 +1132,44 @@
         before: sunset
         after: sunrise
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
         - mode_arret
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
         - mode_force
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
         - mode_auto
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp175_cde_spot_ext_cuisine
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+    - conditions:
+      - condition: trigger
+        id:
+        - spot_allume_jour
+      - condition: sun
+        after: sunrise
+        before: sunset
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
   mode: restart
   trace:
     stored_traces: 50
@@ -2075,6 +2092,12 @@
     entity_id: input_select.mode_spot_sous_sol
     to: Auto
     id: mode_auto
+  - trigger: state
+    entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+    to: 'on'
+    for:
+      minutes: 1
+    id: spot_allume_jour
   conditions: []
   actions:
   - choose:
@@ -2089,17 +2112,17 @@
         before: sunrise
         after: sunset
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp136_spot_sous_sol_r1
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
       - delay:
           hours: 0
           minutes: 3
           seconds: 0
           milliseconds: 0
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp136_spot_sous_sol_r1
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
@@ -2111,33 +2134,44 @@
         before: sunset
         after: sunrise
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp136_spot_sous_sol_r1
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
         - mode_arret
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp136_spot_sous_sol_r1
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
         - mode_force
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp136_spot_sous_sol_r1
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
         - mode_auto
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp136_spot_sous_sol_r1
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+    - conditions:
+      - condition: trigger
+        id:
+        - spot_allume_jour
+      - condition: sun
+        after: sunrise
+        before: sunset
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
   mode: restart
 - id: '1774000425673'
   alias: Rapport 22:00 DESS IA V2
@@ -4975,6 +5009,12 @@
     entity_id: input_select.mode_spot_garage
     to: Auto
     id: mode_auto
+  - trigger: state
+    entity_id: light.garage_inter_zb_spot_garage_ext
+    to: 'on'
+    for:
+      minutes: 1
+    id: spot_allume_jour
   conditions: []
   actions:
   - choose:
@@ -4992,17 +5032,17 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
       - delay:
           hours: 0
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5017,9 +5057,9 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5028,9 +5068,9 @@
         entity_id: input_select.mode_spot_garage
         state: Auto
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5045,17 +5085,17 @@
         entity_id: sensor.bh1750_illuminance
         below: 10
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
       - delay:
           hours: 0
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5067,33 +5107,44 @@
         before: sunset
         after: sunrise
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
         - mode_arret
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
         - mode_force
       sequence:
-      - action: switch.turn_on
+      - action: light.turn_on
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
         - mode_auto
       sequence:
-      - action: switch.turn_off
+      - action: light.turn_off
         target:
-          entity_id: switch.esp122_spot_terrasse_r1
+          entity_id: light.garage_inter_zb_spot_garage_ext
+    - conditions:
+      - condition: trigger
+        id:
+        - spot_allume_jour
+      - condition: sun
+        after: sunrise
+        before: sunset
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.garage_inter_zb_spot_garage_ext
   mode: restart
   trace:
     stored_traces: 50

@@ -1028,10 +1028,6 @@
       seconds: 30
     enabled: false
   - trigger: state
-    entity_id: binary_sensor.detecteur_porte_entree_ouverture
-    to: 'on'
-    id: Detecteur porte
-  - trigger: state
     entity_id:
     - binary_sensor.cuisine_person_occupancy
     from:
@@ -1044,8 +1040,12 @@
       minutes: 0
       seconds: 2
     enabled: false
+  - trigger: state
+    entity_id: binary_sensor.detecteur_porte_entree_ouverture
+    to: 'on'
+    id: Detecteur porte
   - trigger: time_pattern
-    minutes: /15
+    minutes: /30
     id: 30mn
   - trigger: state
     entity_id: input_select.mode_spot_cuisine
@@ -1059,12 +1059,6 @@
     entity_id: input_select.mode_spot_cuisine
     to: Auto
     id: mode_auto
-  - trigger: state
-    entity_id: light.cuisine_inter_zb_spot_cuisine_ext
-    to: 'on'
-    for:
-      minutes: 1
-    id: spot_allume_jour
   conditions: []
   actions:
   - choose:
@@ -1135,6 +1129,7 @@
       - action: light.turn_off
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        data: {}
     - conditions:
       - condition: trigger
         id:
@@ -1155,17 +1150,6 @@
       - condition: trigger
         id:
         - mode_auto
-      sequence:
-      - action: light.turn_off
-        target:
-          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
-    - conditions:
-      - condition: trigger
-        id:
-        - spot_allume_jour
-      - condition: sun
-        after: sunrise
-        before: sunset
       sequence:
       - action: light.turn_off
         target:
@@ -2070,7 +2054,7 @@
       notify_message: ' '
       resolved_message: ' '
 - id: '1765795366962'
-  alias: Spot exterieur Sous Sol
+  alias: Spot Exterieur Sous Sol  - Détection + Mode (Auto/Arrêt/Forcé)
   description: Pilotage du spot extérieur sous-sol. Le mode (input_select.mode_spot_sous_sol)
     permet de forcer l'arrêt ou la marche permanente, en plus du fonctionnement automatique
     par ouverture de porte.
@@ -2092,12 +2076,6 @@
     entity_id: input_select.mode_spot_sous_sol
     to: Auto
     id: mode_auto
-  - trigger: state
-    entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
-    to: 'on'
-    for:
-      minutes: 1
-    id: spot_allume_jour
   conditions: []
   actions:
   - choose:
@@ -2157,17 +2135,6 @@
       - condition: trigger
         id:
         - mode_auto
-      sequence:
-      - action: light.turn_off
-        target:
-          entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
-    - conditions:
-      - condition: trigger
-        id:
-        - spot_allume_jour
-      - condition: sun
-        after: sunrise
-        before: sunset
       sequence:
       - action: light.turn_off
         target:
@@ -4357,6 +4324,8 @@
         }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
         endif %}"
       linky_kwh_22h: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
+      conso_j1_estime: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
+        | round(1) }}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_dess_ia
@@ -4455,7 +4424,7 @@
         %'','''') }}, {{ ecart_soc_forcage_txt | replace('' %'','''') if forcage_actif_num
         == 1 else '''' }}, {{ perte_nuit_estimee_pct }}, {{ soc_prevu_0545_sans_charge
         }}, {{ besoin_corrige_pct_txt }}, {{ heure_debut_charge_previ_txt }}, {{ heure_fin_charge_txt
-        }}, {{ duree_charge_previ_min_txt }}'
+        }}, {{ duree_charge_previ_min_txt }}, {{ conso_j1_estime }}'
   - delay:
       hours: 0
       minutes: 1
@@ -5009,12 +4978,6 @@
     entity_id: input_select.mode_spot_garage
     to: Auto
     id: mode_auto
-  - trigger: state
-    entity_id: light.garage_inter_zb_spot_garage_ext
-    to: 'on'
-    for:
-      minutes: 1
-    id: spot_allume_jour
   conditions: []
   actions:
   - choose:
@@ -5134,17 +5097,6 @@
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
-    - conditions:
-      - condition: trigger
-        id:
-        - spot_allume_jour
-      - condition: sun
-        after: sunrise
-        before: sunset
-      sequence:
-      - action: light.turn_off
-        target:
-          entity_id: light.garage_inter_zb_spot_garage_ext
   mode: restart
   trace:
     stored_traces: 50
@@ -5249,3 +5201,29 @@
           title: Piscine ✅
         metadata: {}
   mode: single
+- id: '1789453273376'
+  alias: Spots extérieurs - Extinction si allumés de jour
+  description: 'Éteint automatiquement un spot garage/cuisine/sous-sol s''il reste
+    allumé plus d''1 min entre le lever et le coucher du soleil (ex : actionné par
+    l''interrupteur physique va-et-vient du module ZG-301Z). Automatisme indépendant
+    des automatismes de détection nocturne pour ne pas interrompre leurs temporisations
+    (mode restart).'
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.garage_inter_zb_spot_garage_ext
+    - light.cuisine_inter_zb_spot_cuisine_ext
+    - light.sous_sol_inter_zb_spot_sous_sol_ext
+    to: 'on'
+    for:
+      minutes: 1
+  conditions:
+  - condition: sun
+    after: sunrise
+    before: sunset
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: '{{ trigger.entity_id }}'
+  mode: parallel
+  max: 10

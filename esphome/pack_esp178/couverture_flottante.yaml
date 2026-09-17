@@ -234,18 +234,30 @@ script:
             id(script_ferm_volet).execute();
           }
 
-          // Auto - ouverture = H Début Filtration + 15 mn
-          if (current_minute == debut_minute &&
-              mode_volet == "Auto" &&
-              !id(action_ouv_executee)) {
-            auto mode_filtration = id(_Mode_Fonctionnement_filtration).current_option();
+          // Auto - ouverture = fenêtre [Début Filtration+15mn ; Fin Filtration[
+          // ET filtration réellement effective (pompe on depuis au moins la tempo de recirculation)
+          if (mode_volet == "Auto" &&
+              !id(action_ouv_executee) &&
+              id(flag_tempo_ppe_filtre)) {
 
-            if (mode_filtration == "Horaire" ||
-                mode_filtration == "Palier" ||
-                mode_filtration == "Classique" ||
-                mode_filtration == "Abaque") {
-              id(action_ouv_executee) = true;
-              id(script_ouv_volet).execute();
+            bool dans_fenetre;
+            if (debut_minute <= fin_minute) {
+              dans_fenetre = (current_minute >= debut_minute && current_minute < fin_minute);
+            } else {
+              // fenêtre traversant minuit
+              dans_fenetre = (current_minute >= debut_minute || current_minute < fin_minute);
+            }
+
+            if (dans_fenetre) {
+              auto mode_filtration = id(_Mode_Fonctionnement_filtration).current_option();
+
+              if (mode_filtration == "Horaire" ||
+                  mode_filtration == "Palier" ||
+                  mode_filtration == "Classique" ||
+                  mode_filtration == "Abaque") {
+                id(action_ouv_executee) = true;
+                id(script_ouv_volet).execute();
+              }
             }
           }
 

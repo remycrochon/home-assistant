@@ -4054,28 +4054,28 @@
         %}\n  {{ (v | float(0)) | round(2) }}\n{% endif %}"
       pv_jour_num: '{{ states(''sensor.mp2_total_energie_produite_jour'') | float(0)
         | round(2) }}'
-      import_reseau_num: '{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'')
+      import_reseau_num: '{{ states(''sensor.compteur_energie_total_jour_tous_tarifs'')
         | float(0) | round(2) }}'
       export_reseau_num: '{{ states(''sensor.mp2_energie_injectee_ds_reseau_par_jour'')
         | float(0) | round(2) }}'
       pv_jour_txt: "{% set v = states('sensor.mp2_total_energie_produite_jour') %}
         {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{% else
         %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
-      import_reseau_txt: "{% set v = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+      import_reseau_txt: "{% set v = states('sensor.compteur_energie_total_jour_tous_tarifs')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
         else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
       export_reseau_txt: "{% set v = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
         %} {% if v in ['unknown', 'unavailable', 'none', 'None', ''] %}\n  n/d\n{%
         else %}\n  {{ (v | float(0)) | round(2) }} kWh\n{% endif %}"
       conso_foyer_estimee: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
-        | float(0) +\n    states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) +\n    states('sensor.compteur_energie_total_jour_tous_tarifs')
         | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
         | float(0)\n  ) | round(2)\n}}"
       solaire_autoconsomme: "{{\n  (\n    states('sensor.mp2_total_energie_produite_jour')
         | float(0) -\n    states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
         | float(0)\n  ) | round(2)\n}}"
       taux_autonomie_solaire: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) %} {% set imp = states('sensor.compteur_energie_total_jour_tous_tarifs')
         | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
         | float(0) %} {% set conso = pv + imp - exp %} {% set solaire = pv - exp %}
         {% if conso > 0 %}\n  {{ ((solaire / conso) * 100) | round(1) }}\n{% else
@@ -4089,7 +4089,7 @@
         | float(0) %} {% if pv > 0 %}\n  {{ ((exp / pv) * 100) | round(1) }}\n{% else
         %}\n  0\n{% endif %}"
       part_import_reseau: "{% set pv = states('sensor.mp2_total_energie_produite_jour')
-        | float(0) %} {% set imp = states('sensor.mp2_energie_soutiree_du_reseau_par_jour')
+        | float(0) %} {% set imp = states('sensor.compteur_energie_total_jour_tous_tarifs')
         | float(0) %} {% set exp = states('sensor.mp2_energie_injectee_ds_reseau_par_jour')
         | float(0) %} {% set conso = pv + imp - exp %} {% if conso > 0 %}\n  {{ ((imp
         / conso) * 100) | round(1) }}\n{% else %}\n  0\n{% endif %}"

@@ -1,23 +1,28 @@
 mqtt:
   sensor:
     - name: "ESPHome LXC Version"
+      unique_id: esphome_mqtt_lxc_version
       state_topic: "monitor/esphome_lxc/version"
 
     - name: "ESPHome LXC Version la plus récente"
+      unique_id: esphome_mqtt_lxc_version_recente    
       state_topic: "monitor/esphome_lxc/latest"
 
     - name: "ESPHome LXC CPU"
       state_topic: "monitor/esphome_lxc/cpu_pct"
+      unique_id: esphome_mqtt_lxc_cpu_pct  
       unit_of_measurement: "%"
       state_class: measurement
 
     - name: "ESPHome LXC Mémoire"
       state_topic: "monitor/esphome_lxc/mem_pct"
+      unique_id: esphome_mqtt_lxc_mem_pct      
       unit_of_measurement: "%"
       state_class: measurement
 
   binary_sensor:
     - name: "ESPHome LXC En cours d'exécution"
       state_topic: "monitor/esphome_lxc/status"
+      unique_id: esphome_mqtt_lxc_status
       payload_on: "running"
       payload_off: "stopped"

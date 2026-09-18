@@ -8,7 +8,7 @@ rest:
       - name: "CrowdSec Bans Actifs"
         unique_id: "crowdsec_bans_actifs"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_active_decisions{origin=%22CAPI%22})"
@@ -18,7 +18,7 @@ rest:
       - name: "CrowdSec Bans Blocklist Communautaire"
         unique_id: "crowdsec_bans_blocklist_communautaire"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_alerts)"
@@ -28,18 +28,18 @@ rest:
       - name: "CrowdSec Alertes"
         unique_id: "crowdsec_alertes"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   # --- Fenêtre 1h (300s) ---
-  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(increase(cs_bucket_created_total{instance=%22192.168.0.206:6060%22}[1h]))"
+  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(increase(cs_bucket_instantiation_total{instance=%22192.168.0.206:6060%22}[1h]))"
     method: GET
     scan_interval: 300
     sensor:
       - name: "CrowdSec Scenarios Declenches 1h"
         unique_id: "crowdsec_scenarios_declenches_1h"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(increase(cs_parser_hits_ko_total{instance=%22192.168.0.206:6060%22}[1h]))"
@@ -49,7 +49,7 @@ rest:
       - name: "CrowdSec Lignes Non Parsees 1h"
         unique_id: "crowdsec_lignes_non_parsees_1h"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   # --- Compteurs lents (600s) ---
@@ -60,7 +60,7 @@ rest:
       - name: "CrowdSec Domo Lignes Traitees"
         unique_id: "crowdsec_domo_lignes_traitees"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_parser_hits_ok_total{instance=%22192.168.0.206:6060%22,source=%22/data/logs/proxy-host-17_access.log%22})"
@@ -70,7 +70,7 @@ rest:
       - name: "CrowdSec Immich Lignes Traitees"
         unique_id: "crowdsec_immich_lignes_traitees"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_parser_hits_ok_total{instance=%22192.168.0.206:6060%22,source=%22/data/logs/proxy-host-14_access.log%22})"
@@ -80,7 +80,7 @@ rest:
       - name: "CrowdSec Matomo Lignes Traitees"
         unique_id: "crowdsec_matomo_lignes_traitees"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_parser_hits_ok_total{instance=%22192.168.0.206:6060%22,source=%22/data/logs/proxy-host-5_access.log%22})"
@@ -90,7 +90,7 @@ rest:
       - name: "CrowdSec Meteo Lignes Traitees"
         unique_id: "crowdsec_meteo_lignes_traitees"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=process_resident_memory_bytes{instance=%22192.168.0.206:6060%22}"
@@ -100,18 +100,18 @@ rest:
       - name: "CrowdSec Memoire"
         unique_id: "crowdsec_memoire"
         value_template: >-
-          {{ ((value_json.data.result[0].value[1] | float / 1048576) | round(1)) if value_json.data.result | length > 0 else 0 }}
+          {{ ((value_json.data.result[0].value[1] | float(0) / 1048576) | round(1, default=0)) if value_json.data.result | length > 0 else 0 }}
         unit_of_measurement: "MB"
         state_class: measurement
 
-  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_bucket_created_total{instance=%22192.168.0.206:6060%22})"
+  - resource: "http://192.168.0.205:9090/api/v1/query?query=sum(cs_bucket_instantiation_total{instance=%22192.168.0.206:6060%22})"
     method: GET
     scan_interval: 600
     sensor:
       - name: "CrowdSec Scenarios Total"
         unique_id: "crowdsec_scenarios_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] | round(0) if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] | round(0, default=0) if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   # ============ FAIL2BAN ============
@@ -123,7 +123,7 @@ rest:
       - name: "Fail2ban Up"
         unique_id: "fail2ban_up"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_count"
@@ -133,7 +133,7 @@ rest:
       - name: "Fail2ban Nombre Jails"
         unique_id: "fail2ban_jail_count"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_banned_current{jail=%22npm-domo%22}"
@@ -143,7 +143,7 @@ rest:
       - name: "Fail2ban Domo Bans Actifs"
         unique_id: "fail2ban_domo_bans_actifs"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_banned_current{jail=%22npm-immich%22}"
@@ -153,7 +153,7 @@ rest:
       - name: "Fail2ban Immich Bans Actifs"
         unique_id: "fail2ban_immich_bans_actifs"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_banned_current{jail=%22npm-matomo%22}"
@@ -163,7 +163,7 @@ rest:
       - name: "Fail2ban Matomo Bans Actifs"
         unique_id: "fail2ban_matomo_bans_actifs"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   # --- Compteurs lents (600s) ---
@@ -174,7 +174,7 @@ rest:
       - name: "Fail2ban Domo Bans Total"
         unique_id: "fail2ban_domo_bans_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_failed_current{jail=%22npm-domo%22}"
@@ -184,7 +184,7 @@ rest:
       - name: "Fail2ban Domo Echecs Actuels"
         unique_id: "fail2ban_domo_echecs_actuels"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_failed_total{jail=%22npm-domo%22}"
@@ -194,7 +194,7 @@ rest:
       - name: "Fail2ban Domo Echecs Total"
         unique_id: "fail2ban_domo_echecs_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_banned_total{jail=%22npm-immich%22}"
@@ -204,7 +204,7 @@ rest:
       - name: "Fail2ban Immich Bans Total"
         unique_id: "fail2ban_immich_bans_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_failed_current{jail=%22npm-immich%22}"
@@ -214,7 +214,7 @@ rest:
       - name: "Fail2ban Immich Echecs Actuels"
         unique_id: "fail2ban_immich_echecs_actuels"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_failed_total{jail=%22npm-immich%22}"
@@ -224,7 +224,7 @@ rest:
       - name: "Fail2ban Immich Echecs Total"
         unique_id: "fail2ban_immich_echecs_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_banned_total{jail=%22npm-matomo%22}"
@@ -234,7 +234,7 @@ rest:
       - name: "Fail2ban Matomo Bans Total"
         unique_id: "fail2ban_matomo_bans_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_failed_current{jail=%22npm-matomo%22}"
@@ -244,7 +244,7 @@ rest:
       - name: "Fail2ban Matomo Echecs Actuels"
         unique_id: "fail2ban_matomo_echecs_actuels"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: measurement
 
   - resource: "http://192.168.0.205:9090/api/v1/query?query=f2b_jail_failed_total{jail=%22npm-matomo%22}"
@@ -254,5 +254,5 @@ rest:
       - name: "Fail2ban Matomo Echecs Total"
         unique_id: "fail2ban_matomo_echecs_total"
         value_template: >-
-          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int }}
+          {{ (value_json.data.result[0].value[1] if value_json.data.result | length > 0 else 0) | int(0) }}
         state_class: total_increasing

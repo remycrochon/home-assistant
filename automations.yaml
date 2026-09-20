@@ -1754,98 +1754,117 @@
       cycles_charge_jour_txt: "{% set v = states('sensor.amx435x_cycles_charge_jour')
         %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
         %}\n  {{ v|float(0)|round(0)|int }}\n{% endif %}"
-  - action: ai_task.generate_data
-    continue_on_error: true
-    response_variable: recap_robot
-    data:
-      task_name: recap robot am435x journalier
-      entity_id: ai_task.google_ai_task
-      instructions: 'Tu es un assistant de suivi pour une tondeuse robot automower.
-        Tu ne dois JAMAIS produire de chiffres, pourcentages ou unités : toutes les
-        valeurs numériques sont déjà connues et affichées séparément par le système.
-        Ton travail consiste uniquement à interpréter la situation en phrases courtes,
-        qualitatives, en français, sans jamais réutiliser ou paraphraser un nombre
-        fourni ci-dessous.
-
-        Contexte du jour (pour information seulement, ne recopie aucune valeur) :
-        - Statut erreur : {{ erreur_txt }} - Batterie actuelle : {{ batterie_txt }}
-        - Zone de travail actuelle : {{ zone_txt }} - Mode actuel : {{ mode_txt }}
-        - Temps de tonte du jour : {{ temps_tonte_jour_txt }} - Distance parcourue
-        du jour : {{ distance_jour_txt }} - Collisions du jour : {{ collisions_jour_txt
-        }} - Cycles de charge du jour : {{ cycles_charge_jour_txt }}
-
-        Pour chaque champ demandé, rédige une phrase courte (maximum 15 mots), sans
-        aucun chiffre ni unité, uniquement une appréciation qualitative. Exemples
-        de style attendu (ne pas recopier tel quel) : "Journée de tonte normale, rien
-        à signaler" ou "Nombre de collisions un peu élevé aujourd''hui" ou "Batterie
-        en bon état".'
-      structure:
-        titre:
-          description: Titre court du message, sans aucun chiffre
-          required: true
-          selector:
-            text:
-        synthese_globale:
-          description: Une phrase de synthèse globale sur la journée du robot, sans
-            aucun chiffre
-          required: true
-          selector:
-            text:
-        commentaire_activite:
-          description: Une phrase qualitative sur l'activité de tonte et la charge
-            du jour, sans aucun chiffre
-          required: true
-          selector:
-            text:
-        commentaire_anomalies:
-          description: Une phrase signalant une éventuelle anomalie (erreur, collisions
-            élevées) ou confirmant que tout est normal, sans aucun chiffre
-          required: true
-          selector:
-            text:
-        recommandation:
-          description: Une courte recommandation si utile, ou une phrase confirmant
-            qu'aucune action n'est nécessaire, sans aucun chiffre
-          required: true
-          selector:
-            text:
-        niveau:
-          description: Niveau global parmi INFO, VIGILANCE ou ALERTE
-          required: true
-          selector:
-            text:
-  - choose:
+  - alias: 'Arrêt volontaire : message simple, sinon rapport complet'
+    choose:
     - conditions:
-      - condition: template
-        value_template: '{{ recap_robot is defined and recap_robot.data is defined
-          and recap_robot.data.titre is defined and recap_robot.data.synthese_globale
-          is defined }}'
+      - condition: state
+        entity_id: sensor.am435x_awd_error
+        state:
+        - alarm_mower_stopped
+        - alarm_mower_switched_off
       sequence:
       - action: telegram_bot.send_message
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: '{{ recap_robot.data.titre }}'
-          message: "\U0001F916 {{ date_jour }}\n\n{{ recap_robot.data.synthese_globale
-            }}\n\n⚙️ Statut\nErreur : {{ erreur_txt }}\nMode : {{ mode_txt }}\nZone
-            : {{ zone_txt }}\nBatterie : {{ batterie_txt }}\n{{ recap_robot.data.commentaire_anomalies
-            }}\n\n\U0001F331 Activité du jour\nTemps de tonte : {{ temps_tonte_jour_txt
-            }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
-            }}\nCycles de charge : {{ cycles_charge_jour_txt }}\n{{ recap_robot.data.commentaire_activite
-            }}\n\n✅ Recommandation\n{{ recap_robot.data.recommandation }}\n\nNiveau
-            : {{ recap_robot.data.niveau if recap_robot.data.niveau is defined else
-            'INFO' }}"
+          title: Robot am435x à l'arrêt
+          message: "\U0001F916 {{ date_jour }}\n\n⏸️ Le robot est à l'arrêt volontaire
+            ({{ \"éteint\" if states(\"sensor.am435x_awd_error\") == \"alarm_mower_switched_off\"
+            else \"arrêté\" }}).\nAucun rapport journalier généré.\n\nMode : {{ mode_txt
+            }}\nBatterie : {{ batterie_txt }}"
           parse_mode: plain_text
     default:
-    - action: telegram_bot.send_message
+    - action: ai_task.generate_data
+      continue_on_error: true
+      response_variable: recap_robot
       data:
-        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-        title: Rapport Robot am435x
-        message: "\U0001F916 {{ date_jour }}\n\n⚙️ Statut\nErreur : {{ erreur_txt
-          }}\nMode : {{ mode_txt }}\nZone : {{ zone_txt }}\nBatterie : {{ batterie_txt
-          }}\n\n\U0001F331 Activité du jour\nTemps de tonte : {{ temps_tonte_jour_txt
-          }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
-          }}\nCycles de charge : {{ cycles_charge_jour_txt }}"
-        parse_mode: plain_text
+        task_name: recap robot am435x journalier
+        entity_id: ai_task.google_ai_task
+        instructions: 'Tu es un assistant de suivi pour une tondeuse robot automower.
+          Tu ne dois JAMAIS produire de chiffres, pourcentages ou unités : toutes
+          les valeurs numériques sont déjà connues et affichées séparément par le
+          système. Ton travail consiste uniquement à interpréter la situation en phrases
+          courtes, qualitatives, en français, sans jamais réutiliser ou paraphraser
+          un nombre fourni ci-dessous.
+
+          Contexte du jour (pour information seulement, ne recopie aucune valeur)
+          : - Statut erreur : {{ erreur_txt }} - Batterie actuelle : {{ batterie_txt
+          }} - Zone de travail actuelle : {{ zone_txt }} - Mode actuel : {{ mode_txt
+          }} - Temps de tonte du jour : {{ temps_tonte_jour_txt }} - Distance parcourue
+          du jour : {{ distance_jour_txt }} - Collisions du jour : {{ collisions_jour_txt
+          }} - Cycles de charge du jour : {{ cycles_charge_jour_txt }}
+
+          Pour chaque champ demandé, rédige une phrase courte (maximum 15 mots), sans
+          aucun chiffre ni unité, uniquement une appréciation qualitative. Exemples
+          de style attendu (ne pas recopier tel quel) : "Journée de tonte normale,
+          rien à signaler" ou "Nombre de collisions un peu élevé aujourd''hui" ou
+          "Batterie en bon état".'
+        structure:
+          titre:
+            description: Titre court du message, sans aucun chiffre
+            required: true
+            selector:
+              text:
+          synthese_globale:
+            description: Une phrase de synthèse globale sur la journée du robot, sans
+              aucun chiffre
+            required: true
+            selector:
+              text:
+          commentaire_activite:
+            description: Une phrase qualitative sur l'activité de tonte et la charge
+              du jour, sans aucun chiffre
+            required: true
+            selector:
+              text:
+          commentaire_anomalies:
+            description: Une phrase signalant une éventuelle anomalie (erreur, collisions
+              élevées) ou confirmant que tout est normal, sans aucun chiffre
+            required: true
+            selector:
+              text:
+          recommandation:
+            description: Une courte recommandation si utile, ou une phrase confirmant
+              qu'aucune action n'est nécessaire, sans aucun chiffre
+            required: true
+            selector:
+              text:
+          niveau:
+            description: Niveau global parmi INFO, VIGILANCE ou ALERTE
+            required: true
+            selector:
+              text:
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: '{{ recap_robot is defined and recap_robot.data is defined
+            and recap_robot.data.titre is defined and recap_robot.data.synthese_globale
+            is defined }}'
+        sequence:
+        - action: telegram_bot.send_message
+          data:
+            config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+            title: '{{ recap_robot.data.titre }}'
+            message: "\U0001F916 {{ date_jour }}\n\n{{ recap_robot.data.synthese_globale
+              }}\n\n⚙️ Statut\nErreur : {{ erreur_txt }}\nMode : {{ mode_txt }}\nZone
+              : {{ zone_txt }}\nBatterie : {{ batterie_txt }}\n{{ recap_robot.data.commentaire_anomalies
+              }}\n\n\U0001F331 Activité du jour\nTemps de tonte : {{ temps_tonte_jour_txt
+              }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
+              }}\nCycles de charge : {{ cycles_charge_jour_txt }}\n{{ recap_robot.data.commentaire_activite
+              }}\n\n✅ Recommandation\n{{ recap_robot.data.recommandation }}\n\nNiveau
+              : {{ recap_robot.data.niveau if recap_robot.data.niveau is defined else
+              'INFO' }}"
+            parse_mode: plain_text
+      default:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Rapport Robot am435x
+          message: "\U0001F916 {{ date_jour }}\n\n⚙️ Statut\nErreur : {{ erreur_txt
+            }}\nMode : {{ mode_txt }}\nZone : {{ zone_txt }}\nBatterie : {{ batterie_txt
+            }}\n\n\U0001F331 Activité du jour\nTemps de tonte : {{ temps_tonte_jour_txt
+            }}\nDistance parcourue : {{ distance_jour_txt }}\nCollisions : {{ collisions_jour_txt
+            }}\nCycles de charge : {{ cycles_charge_jour_txt }}"
+          parse_mode: plain_text
   mode: single
 - id: '1746164692289'
   alias: Ecran02- Actions toutes les 30 mn
@@ -5227,3 +5246,25 @@
       entity_id: '{{ trigger.entity_id }}'
   mode: parallel
   max: 10
+- id: '1789802808236'
+  alias: Alerte Stagnation Trafic Domo
+  description: Notifie sur Telegram si le trafic traite par CrowdSec pour domo.rem81.com
+    reste fige plus de 4h (indice d'un probleme dans la chaine de logs).
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.stagnation_trafic_domo
+    to: 'on'
+  actions:
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: Alerte Securite NPM
+      message: '⚠️ {{ now().strftime(''%d/%m/%Y %H:%M'') }}
+
+
+        Trafic fige : domo.rem81.com
+
+        Aucune nouvelle ligne traitee par CrowdSec depuis plus de 4h.
+
+        Verifier Nginx/logrotate sur le LXC 106.'
+      parse_mode: plain_text

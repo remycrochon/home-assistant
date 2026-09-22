@@ -1044,9 +1044,6 @@
     entity_id: binary_sensor.detecteur_porte_entree_ouverture
     to: 'on'
     id: Detecteur porte
-  - trigger: time_pattern
-    minutes: /30
-    id: 30mn
   - trigger: state
     entity_id: input_select.mode_spot_cuisine
     to: Arrêt
@@ -1079,6 +1076,19 @@
       - action: light.turn_on
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
       - delay:
           hours: 0
           minutes: 2
@@ -1104,6 +1114,19 @@
       - action: light.turn_on
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1115,21 +1138,6 @@
       - action: light.turn_off
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
-    - conditions:
-      - condition: trigger
-        id:
-        - 30mn
-      - condition: state
-        entity_id: input_select.mode_spot_cuisine
-        state: Auto
-      - condition: sun
-        before: sunset
-        after: sunrise
-      sequence:
-      - action: light.turn_off
-        target:
-          entity_id: light.cuisine_inter_zb_spot_cuisine_ext
-        data: {}
     - conditions:
       - condition: trigger
         id:
@@ -1146,6 +1154,19 @@
       - action: light.turn_on
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -2112,6 +2133,19 @@
       - action: light.turn_on
         target:
           entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
       - delay:
           hours: 0
           minutes: 3
@@ -2150,6 +2184,19 @@
       - action: light.turn_on
         target:
           entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
@@ -4982,9 +5029,6 @@
     to:
     - 'off'
     id: p_garage
-  - trigger: time_pattern
-    minutes: /30
-    id: 30mn
   - trigger: state
     entity_id: input_select.mode_spot_garage
     to: Arrêt
@@ -5017,6 +5061,19 @@
       - action: light.turn_on
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
       - delay:
           hours: 0
           minutes: 2
@@ -5042,6 +5099,19 @@
       - action: light.turn_on
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5070,25 +5140,24 @@
       - action: light.turn_on
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
       - delay:
           hours: 0
           minutes: 2
           seconds: 0
           milliseconds: 0
-      - action: light.turn_off
-        target:
-          entity_id: light.garage_inter_zb_spot_garage_ext
-    - conditions:
-      - condition: trigger
-        id:
-        - 30mn
-      - condition: state
-        entity_id: input_select.mode_spot_garage
-        state: Auto
-      - condition: sun
-        before: sunset
-        after: sunrise
-      sequence:
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
@@ -5108,6 +5177,19 @@
       - action: light.turn_on
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'on'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:

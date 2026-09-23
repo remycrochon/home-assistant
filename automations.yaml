@@ -1097,6 +1097,19 @@
       - action: light.turn_off
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1138,6 +1151,19 @@
       - action: light.turn_off
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1146,6 +1172,19 @@
       - action: light.turn_off
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
     - conditions:
       - condition: trigger
         id:
@@ -1175,6 +1214,19 @@
       - action: light.turn_off
         target:
           entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.cuisine_inter_zb_spot_cuisine_ext
   mode: restart
   trace:
     stored_traces: 50
@@ -2154,6 +2206,19 @@
       - action: light.turn_off
         target:
           entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
@@ -2168,6 +2233,19 @@
       - action: light.turn_off
         target:
           entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
@@ -2176,6 +2254,19 @@
       - action: light.turn_off
         target:
           entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
     - conditions:
       - condition: trigger
         id:
@@ -2205,6 +2296,19 @@
       - action: light.turn_off
         target:
           entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
   mode: restart
 - id: '1774000425673'
   alias: Rapport 22:00 DESS IA V2
@@ -5082,6 +5186,19 @@
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5123,6 +5240,19 @@
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5161,6 +5291,19 @@
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5169,6 +5312,19 @@
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
     - conditions:
       - condition: trigger
         id:
@@ -5198,6 +5354,19 @@
       - action: light.turn_off
         target:
           entity_id: light.garage_inter_zb_spot_garage_ext
+        continue_on_error: true
+      - delay:
+          seconds: 3
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: light.garage_inter_zb_spot_garage_ext
+            state: 'off'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id: light.garage_inter_zb_spot_garage_ext
   mode: restart
   trace:
     stored_traces: 50

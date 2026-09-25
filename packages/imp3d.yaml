@@ -1,0 +1,167 @@
+rest:
+  - resource: http://192.168.0.44:7125/printer/objects/query?print_stats&extruder&heater_bed&virtual_sdcard&display_status&fan&idle_timeout&webhooks&toolhead&pause_resume&gcode_move&motion_report&system_stats&temperature_sensor%20mcu_Temp&temperature_sensor%20Toolhead_Temp&temperature_sensor%20soc&heater_fan%20hotend_fan&controller_fan%20board_fan&filament_switch_sensor%20filament_sensor
+    scan_interval: 30
+    sensor:
+      # --- Impression ---
+      - name: SV06 état impression
+        unique_id: sv06_etat_impression
+        value_template: "{{ value_json.result.status.print_stats.state }}"
+      - name: SV06 fichier en cours
+        unique_id: sv06_fichier_en_cours
+        value_template: "{{ value_json.result.status.print_stats.filename or 'aucun' }}"
+      - name: SV06 message
+        unique_id: sv06_message
+        value_template: "{{ value_json.result.status.print_stats.message or 'aucun' }}"
+      - name: SV06 progression
+        unique_id: sv06_progression
+        value_template: "{{ (value_json.result.status.virtual_sdcard.progress * 100) | round(1) }}"
+        unit_of_measurement: "%"
+      - name: SV06 couche actuelle
+        unique_id: sv06_couche_actuelle
+        value_template: "{{ value_json.result.status.print_stats.info.current_layer or 0 }}"
+      - name: SV06 couches totales
+        unique_id: sv06_couches_totales
+        value_template: "{{ value_json.result.status.print_stats.info.total_layer or 0 }}"
+      - name: SV06 durée impression
+        unique_id: sv06_duree_impression
+        value_template: "{{ value_json.result.status.print_stats.print_duration | round(0) }}"
+        unit_of_measurement: "s"
+        device_class: duration
+      - name: SV06 durée totale
+        unique_id: sv06_duree_totale
+        value_template: "{{ value_json.result.status.print_stats.total_duration | round(0) }}"
+        unit_of_measurement: "s"
+        device_class: duration
+      - name: SV06 temps restant
+        unique_id: sv06_temps_restant
+        value_template: >
+          {% set p = value_json.result.status.virtual_sdcard.progress %}
+          {% set d = value_json.result.status.print_stats.print_duration %}
+          {{ ((d / p) - d) | round(0) if p > 0 else 0 }}
+        unit_of_measurement: "s"
+        device_class: duration
+      - name: SV06 filament utilisé
+        unique_id: sv06_filament_utilise
+        value_template: "{{ (value_json.result.status.print_stats.filament_used / 1000) | round(2) }}"
+        unit_of_measurement: "m"
+
+      # --- Buse ---
+      - name: SV06 température buse
+        unique_id: sv06_temperature_buse
+        value_template: "{{ value_json.result.status.extruder.temperature | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: SV06 consigne buse
+        unique_id: sv06_consigne_buse
+        value_template: "{{ value_json.result.status.extruder.target | round(0) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+      - name: SV06 puissance buse
+        unique_id: sv06_puissance_buse
+        value_template: "{{ (value_json.result.status.extruder.power * 100) | round(0) }}"
+        unit_of_measurement: "%"
+
+      # --- Plateau ---
+      - name: SV06 température plateau
+        unique_id: sv06_temperature_plateau
+        value_template: "{{ value_json.result.status.heater_bed.temperature | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: SV06 consigne plateau
+        unique_id: sv06_consigne_plateau
+        value_template: "{{ value_json.result.status.heater_bed.target | round(0) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+      - name: SV06 puissance plateau
+        unique_id: sv06_puissance_plateau
+        value_template: "{{ (value_json.result.status.heater_bed.power * 100) | round(0) }}"
+        unit_of_measurement: "%"
+
+      # --- Sondes de température ---
+      - name: SV06 température carte
+        unique_id: sv06_temperature_carte
+        value_template: "{{ value_json.result.status['temperature_sensor mcu_Temp'].temperature | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: SV06 température tête
+        unique_id: sv06_temperature_tete
+        value_template: "{{ value_json.result.status['temperature_sensor Toolhead_Temp'].temperature | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: SV06 température processeur
+        unique_id: sv06_temperature_processeur
+        value_template: "{{ value_json.result.status['temperature_sensor soc'].temperature | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+
+      # --- Ventilateurs ---
+      - name: SV06 ventilateur pièce
+        unique_id: sv06_ventilateur_piece
+        value_template: "{{ (value_json.result.status.fan.speed * 100) | round(0) }}"
+        unit_of_measurement: "%"
+      - name: SV06 ventilateur hotend
+        unique_id: sv06_ventilateur_hotend
+        value_template: "{{ (value_json.result.status['heater_fan hotend_fan'].speed * 100) | round(0) }}"
+        unit_of_measurement: "%"
+      - name: SV06 ventilateur carte
+        unique_id: sv06_ventilateur_carte
+        value_template: "{{ (value_json.result.status['controller_fan board_fan'].speed * 100) | round(0) }}"
+        unit_of_measurement: "%"
+
+      # --- Mouvement et réglages ---
+      - name: SV06 axes référencés
+        unique_id: sv06_axes_references
+        value_template: "{{ value_json.result.status.toolhead.homed_axes or 'aucun' }}"
+      - name: SV06 hauteur Z
+        unique_id: sv06_hauteur_z
+        value_template: "{{ value_json.result.status.toolhead.position[2] | round(2) }}"
+        unit_of_measurement: "mm"
+      - name: SV06 vitesse réelle
+        unique_id: sv06_vitesse_reelle
+        value_template: "{{ value_json.result.status.motion_report.live_velocity | round(0) }}"
+        unit_of_measurement: "mm/s"
+      - name: SV06 facteur vitesse
+        unique_id: sv06_facteur_vitesse
+        value_template: "{{ (value_json.result.status.gcode_move.speed_factor * 100) | round(0) }}"
+        unit_of_measurement: "%"
+      - name: SV06 facteur débit
+        unique_id: sv06_facteur_debit
+        value_template: "{{ (value_json.result.status.gcode_move.extrude_factor * 100) | round(0) }}"
+        unit_of_measurement: "%"
+
+      # --- Machine et système ---
+      - name: SV06 état Klipper
+        unique_id: sv06_etat_klipper
+        value_template: "{{ value_json.result.status.webhooks.state }}"
+      - name: SV06 activité
+        unique_id: sv06_activite
+        value_template: "{{ value_json.result.status.idle_timeout.state }}"
+      - name: SV06 charge système
+        unique_id: sv06_charge_systeme
+        value_template: "{{ value_json.result.status.system_stats.sysload | round(2) }}"
+      - name: SV06 mémoire disponible
+        unique_id: sv06_memoire_disponible
+        value_template: "{{ (value_json.result.status.system_stats.memavail / 1024) | round(0) }}"
+        unit_of_measurement: "MB"
+
+    binary_sensor:
+      - name: SV06 en impression
+        unique_id: sv06_en_impression
+        value_template: "{{ value_json.result.status.print_stats.state == 'printing' }}"
+        device_class: running
+      - name: SV06 en pause
+        unique_id: sv06_en_pause
+        value_template: "{{ value_json.result.status.pause_resume.is_paused }}"
+      - name: SV06 filament présent
+        unique_id: sv06_filament_present
+        value_template: "{{ value_json.result.status['filament_switch_sensor filament_sensor'].filament_detected }}"
+        device_class: plug
+      - name: SV06 détecteur filament actif
+        unique_id: sv06_detecteur_filament_actif
+        value_template: "{{ value_json.result.status['filament_switch_sensor filament_sensor'].enabled }}"
+

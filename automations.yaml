@@ -5519,3 +5519,42 @@
 
         Verifier Nginx/logrotate sur le LXC 106.'
       parse_mode: plain_text
+- id: '1790242593269'
+  alias: Imprimante 3D - Extinction fin d'impression
+  description: Coupe la prise de la Sovol SV06 quand l'impression est terminée et
+    la buse refroidie
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.sv06_en_impression
+    from: 'on'
+    to: 'off'
+    for: 00:01:00
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.sv06_etat_impression
+      state: paused
+  actions:
+  - wait_template: '{{ states(''sensor.sv06_temperature_buse'') | float(100) < seuil_buse
+      }}'
+    timeout: 01:00:00
+    continue_on_timeout: false
+  - condition: state
+    entity_id: binary_sensor.sv06_en_impression
+    state: 'off'
+  - delay: 00:02:00
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: 'Imprimante 3D : impression terminée'
+      message: 'Durée d''impression : {{ ((trigger.to_state.last_changed - trigger.from_state.last_changed).total_seconds()
+        / 60) | round(0) | int }} min{{-"\n"-}} Imprimante éteinte.{{-"\n"-}} {{ states(''sensor.date_time'')
+        }}'
+  - action: switch.turn_off
+    target:
+      entity_id: switch.imprimante_3d
+  mode: single
+  variables:
+    seuil_buse: 50

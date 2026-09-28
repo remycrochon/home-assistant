@@ -596,6 +596,11 @@ sensor:
     filters: 
       - round: 0
 
+  # Uptime      
+  - platform: uptime
+    name: "Esp178 Uptime"
+    update_interval: 60s
+    
 # déclaration des "text_sensors"
 text_sensor:
   # Affichage des heures de filtration dans Home Assistant

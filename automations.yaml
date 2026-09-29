@@ -1381,6 +1381,14 @@
       retain: false
       topic: ha/mp2/cp/energie_reseau_jour
       payload: '"{{ states(''sensor.mp2_energie_soutiree_du_reseau_par_jour'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/ve/mode_charge
+      payload: '{{ states(''input_select.mode_charge_ve'') }}'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet

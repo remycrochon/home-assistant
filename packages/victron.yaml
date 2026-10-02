@@ -27,6 +27,13 @@ mqtt:
       icon: mdi:battery-charging-outline
       state_class: measurement
 
+    - name: "Bilan nuit VE"
+      unique_id: bilan_nuit_ve
+      state_topic: "nr/mp2/ve/bilan_nuit"
+      value_template: "{{ value_json.resume }}"
+      json_attributes_topic: "nr/mp2/ve/bilan_nuit"
+      json_attributes_template: "{{ {'rapport': value_json.rapport, 'date': value_json.date} | tojson }}"
+
       # DESS Remy
 
     - name: "MP2 DESS Cible SOC par MQTT"
@@ -89,6 +96,7 @@ mqtt:
       value_template: "{{ value_json.state }}"
       json_attributes_topic: "mp2/batteries/capacity_debug"
       icon: mdi:battery-sync
+
 
 # Victron
 #modbus:

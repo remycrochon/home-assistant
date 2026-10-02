@@ -1311,6 +1311,11 @@
       state: unavailable
     enabled: false
   actions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.am435x_awd_error
+      state: alarm_mower_stopped
   - action: telegram_bot.send_message
     metadata: {}
     data:
@@ -4912,6 +4917,9 @@
         log.hf }} (SOC {{ log.sf }} %), ~{{ ((log.lf | float(0)) - (log.ld | float(0)))
         | round(2) }} kWh soutirés du réseau{% else %}NON (aucune charge programmée
         déclenchée cette nuit){% endif %}'
+      ve_bilan_txt: '{% set dt = state_attr(''sensor.bilan_nuit_ve'', ''date'') %}{%
+        if dt and (as_datetime(dt) | as_local).date() == now().date() %}{{ state_attr(''sensor.bilan_nuit_ve'',
+        ''rapport'') }}{% else %}Pas de bilan VE cette nuit{% endif %}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_bilan_ia
@@ -4987,7 +4995,8 @@
             }}{{-\"\\n\"-}}\n    {% if besoin_corrige_pct > 0 %}Charge prévue hier
             = {{ heure_debut_previ }} → durée ~{{ duree_previ_min }} min{% else %}Aucune
             charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau
-            = {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
+            = {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{
+            ve_bilan_txt }}{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
             }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
             is defined else 'INFO' }}\n"
     default:
@@ -5003,7 +5012,7 @@
           \   {% if besoin_corrige_pct > 0 %}Charge prévue hier = {{ heure_debut_previ
           }} → durée ~{{ duree_previ_min }} min{% else %}Aucune charge nécessaire
           hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau = {{ charge_reelle_txt
-          }}\n"
+          }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{ ve_bilan_txt }}\n"
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot

@@ -89,7 +89,7 @@ number:
     step: 5
     optimistic: true
     restore_value: true
-    initial_value: 60
+    initial_value: 15
     mode: box
 
 select:
@@ -442,7 +442,7 @@ script:
                 id(_log_fichier)->execute(mess, 0);
 
             - switch.turn_off: cde_ev_eau
-                  
+
   - id: _appoint_eau_auto_2
     mode: single
     then:
@@ -651,6 +651,28 @@ script:
             std::string mess = "ESP178 Defaut Appoint Eau->EV ouverte depuis " +
                                std::to_string(duration / 60) +
                                "min et LSL toujours decouvert. Niveau ne monte pas ou capteur/arrivee eau en defaut. Fermeture EV eau";
+
+            fermer_securite(mess, duration);
+            return;
+          }
+
+          // Sécurité 3b : EV ouverte mais LSH reste découvert trop longtemps
+          // Cas typiques :
+          // - capteur LSH HS, encrassé ou mal positionné
+          // - débordement au trop-plein sans détection du niveau haut
+          //
+          // Elle s'applique quel que soit le niveau de départ
+          // (bas ou intermédiaire), tant que LSH était découvert au départ.
+          if (!id(ev_eau_secu_niveau_declenchee) &&
+              duration >= tempo_niveau_s &&
+              id(ev_eau_start_lsh_state) == false &&
+              lsh_eau == false) {
+
+            id(ev_eau_secu_niveau_declenchee) = true;
+
+            std::string mess = "ESP178 Defaut Appoint Eau->EV ouverte depuis " +
+                               std::to_string(duration / 60) +
+                               "min et LSH toujours decouvert. Niveau haut non detecte, capteur LSH en defaut ou debordement. Fermeture EV eau";
 
             fermer_securite(mess, duration);
             return;

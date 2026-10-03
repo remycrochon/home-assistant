@@ -5575,3 +5575,54 @@
   mode: single
   variables:
     seuil_buse: 50
+- id: '1790957781940'
+  alias: Sauvegardes Gitea - surveillance
+  description: Reçoit le signal de bonne santé des scripts de sauvegarde du LXC Gitea
+    (cerbo, ha, weewx) via webhook local, met à jour l'entrée date/heure correspondante,
+    et chaque matin à 8h envoie une alerte Telegram si une sauvegarde n'a pas donné
+    signe de vie depuis plus de 26 h.
+  triggers:
+  - trigger: webhook
+    webhook_id: sauvegardes-gitea-k7q2m9x4
+    allowed_methods:
+    - POST
+    local_only: true
+    id: signal
+  - trigger: time
+    at: 08:00:00
+    id: controle
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: signal
+      - condition: template
+        value_template: '{{ trigger.json is defined and trigger.json.source in [''cerbo'',
+          ''ha'', ''weewx''] }}'
+      sequence:
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.sauvegarde_{{ trigger.json.source }}
+        data:
+          timestamp: '{{ now().timestamp() }}'
+    - conditions:
+      - condition: trigger
+        id: controle
+      sequence:
+      - variables:
+          en_retard: '{% set ns = namespace(l=[]) %}{% for s in [''cerbo'', ''ha'',
+            ''weewx''] %}{% set t = state_attr(''input_datetime.sauvegarde_'' ~ s,
+            ''timestamp'') %}{% if t is none or (now().timestamp() - t) > 26 * 3600
+            %}{% set ns.l = ns.l + [s] %}{% endif %}{% endfor %}{{ ns.l }}'
+      - if:
+        - condition: template
+          value_template: '{{ en_retard | count > 0 }}'
+        then:
+        - action: telegram_bot.send_message
+          data:
+            config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+            title: Sauvegardes Gitea !!!
+            message: '⚠️ Aucune sauvegarde réussie depuis plus de 24 h pour : {{ en_retard
+              | join('', '') }}{{-"\n"-}}{{ states(''sensor.date_time'') }}'
+  mode: queued

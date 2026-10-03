@@ -280,12 +280,12 @@ script:
           std::string heure_ferm_str;
 
           if (mode_volet == "Horaire") {
-            char buf_ouv[6];
+            char buf_ouv[16];
             snprintf(buf_ouv, sizeof(buf_ouv), "%02d:%02d", id(h_ouv_volet).hour, id(h_ouv_volet).minute);
             heure_ouv_str = buf_ouv;
 
             if (fermeture_horaire_active) {
-              char buf_ferm[6];
+              char buf_ferm[16];
               snprintf(buf_ferm, sizeof(buf_ferm), "%02d:%02d", id(h_ferm_volet).hour, id(h_ferm_volet).minute);
               heure_ferm_str = buf_ferm;
             } else {
@@ -302,8 +302,8 @@ script:
             int fin_hr = fin_total / 60;
             int fin_min = fin_total % 60;
 
-            char buf_ouv[6];
-            char buf_ferm[6];
+            char buf_ouv[16];
+            char buf_ferm[16];
 
             snprintf(buf_ouv, sizeof(buf_ouv), "%02d:%02d", debut_hr, debut_min);
             snprintf(buf_ferm, sizeof(buf_ferm), "%02d:%02d", fin_hr, fin_min);

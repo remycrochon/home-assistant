@@ -191,7 +191,7 @@ time:
               std::string mess = "ESP178 Rapport Journalier pH\n";
 
               CONVERT_SECONDS(id(_temps_fonctionnement_ppe_ph).state, id(g_hh), id(g_mm), id(g_ss));
-              char buf1[32];
+              char buf1[64];
               snprintf(buf1, sizeof(buf1), "Tps Ppe pH: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
               mess += buf1;
 
@@ -206,7 +206,7 @@ time:
           - lambda: |-
               std::string mess = "ESP178 Rapport Journalier Chlore\n";
               CONVERT_SECONDS(id(_temps_fonctionnement_ppe_chlore).state, id(g_hh), id(g_mm), id(g_ss));
-              char buf1[32];
+              char buf1[64];
               snprintf(buf1, sizeof(buf1), "Tps Ppe Chlore: %02d:%02d:%02d\n", id(g_hh), id(g_mm), id(g_ss));
               mess += buf1;
               // id(_message_telegram)->execute(mess,0);

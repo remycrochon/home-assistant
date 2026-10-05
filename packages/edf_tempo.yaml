@@ -2,3 +2,19 @@
 
 # EDF Tarif Bleu Option HP/HC & Tempo
 # Voir dans les entrées
+# templates utilisés dans l'hitorique dedu tableau automatique "energie"
+# t conservés à 0 pour ne pas etre détectés comme inextistant par Spoke
+template:
+  - sensor:
+      - name: "Energy total linky usage daily hc"
+        unique_id: energy_total_linky_usage_daily_hc_fige
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total_increasing
+        state: "0"
+      - name: "Energy total linky usage daily hp"
+        unique_id: energy_total_linky_usage_daily_hp_fige
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total_increasing
+        state: "0"

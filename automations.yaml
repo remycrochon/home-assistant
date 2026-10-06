@@ -5626,3 +5626,57 @@
             message: '⚠️ Aucune sauvegarde réussie depuis plus de 24 h pour : {{ en_retard
               | join('', '') }}{{-"\n"-}}{{ states(''sensor.date_time'') }}'
   mode: queued
+- id: '1791188891601'
+  alias: Alerte sonde puits figée ou indisponible
+  description: Prévient par Telegram si la sonde de niveau du puits (esp174) renvoie
+    la même valeur depuis 6 h (sonde bloquée) ou reste indisponible plus d'1 h.
+  triggers:
+  - trigger: state
+    entity_id: sensor.esp174_niveau_puit
+    not_to:
+    - unavailable
+    - unknown
+    for:
+      hours: 6
+      minutes: 0
+      seconds: 0
+    id: fige
+  - trigger: state
+    entity_id: sensor.esp174_niveau_puit
+    to: unavailable
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+    id: indisponible
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: fige
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Sonde puits figée
+          message: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}
+
+            La sonde de niveau du puits (esp174) renvoie la même valeur depuis 6 h
+            : {{ states(''sensor.esp174_niveau_puit'') }}.
+
+            Vérifier la sonde (encrassement, câble, alimentation).'
+    - conditions:
+      - condition: trigger
+        id: indisponible
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Sonde puits indisponible
+          message: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}
+
+            Le niveau du puits (esp174) est indisponible depuis plus d''1 h.
+
+            Vérifier l''ESP174 et la liaison Modbus.'
+  mode: single

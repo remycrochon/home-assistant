@@ -1278,7 +1278,7 @@
         id:
         - active
       sequence:
-      - action: script.activation_camera_2
+      - action: script.activation_camera
         metadata: {}
         data: {}
         enabled: true
@@ -1287,7 +1287,7 @@
         id:
         - desactive
       sequence:
-      - action: script.activation_camera
+      - action: script.desactivation_camera
         metadata: {}
         data: {}
   mode: single
@@ -1394,6 +1394,40 @@
       retain: false
       topic: ha/mp2/ve/mode_charge
       payload: '{{ states(''input_select.mode_charge_ve'') }}'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/ve/soc
+      payload: '"{{ states(''sensor.volvo_ex40_batterie'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/ve/cible
+      payload: '"{{ states(''sensor.volvo_ex40_niveau_de_charge_cible_de_la_batterie'')
+        }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/ve/capacite
+      payload: '"{{ states(''sensor.volvo_ex40_capacite_de_la_batterie'') }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/ve/conso
+      payload: '"{{ states(''sensor.volvo_ex40_consommation_d_energie_moyenne_du_trajet_manuel'')
+        }}"'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet
@@ -1726,48 +1760,63 @@
   mode: single
 - id: '1737366517257'
   alias: Notification Detection Frigate
-  description: ''
+  description: Notification Telegram quand Frigate détecte un humain, un chien ou
+    un chat dans une zone (cuisine, piscine, garage extérieur, garage intérieur, garage
+    sous-sol). Actif seulement la nuit.
   triggers:
-  - trigger: state
-    entity_id:
-    - binary_sensor.zone_cuisine_all_occupancy
+  - entity_id:
+    - binary_sensor.cuisine_zone_cuisine_person_occupancy
+    - binary_sensor.exterieur_zone_piscine_person_occupancy
+    - binary_sensor.zone_garage_ext_person_occupancy
+    - binary_sensor.zone_garage_int_person_occupancy
+    - binary_sensor.zone_garage_ssol_person_occupancy
     from: 'off'
+    id: person
     to: 'on'
-    id: detecte
-  - trigger: state
-    entity_id:
-    - binary_sensor.garage_ext_all_occupancy
+    trigger: state
+  - entity_id:
+    - binary_sensor.cuisine_zone_cuisine_dog_occupancy
+    - binary_sensor.zone_garage_ext_dog_occupancy
     from: 'off'
+    id: dog
     to: 'on'
-    id: garage
+    trigger: state
+  - entity_id:
+    - binary_sensor.zone_garage_ext_cat_occupancy
+    from: 'off'
+    id: cat
+    to: 'on'
+    trigger: state
   conditions:
-  - condition: sun
+  - after: sunset
     before: sunrise
-    after: sunset
+    condition: sun
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - detecte
-      sequence:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Cuisine'
-          title: Caméra Cuisine
-    - conditions:
-      - condition: trigger
-        id:
-        - garage
-      sequence:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '{{states("sensor.date_time") }}{{-"\n"-}}Detection Zone Garage'
-          title: Caméra Garage
+  - variables:
+      lieux:
+        binary_sensor.cuisine_zone_cuisine_cat_occupancy: Cuisine
+        binary_sensor.cuisine_zone_cuisine_dog_occupancy: Cuisine
+        binary_sensor.cuisine_zone_cuisine_person_occupancy: Cuisine
+        binary_sensor.exterieur_zone_piscine_person_occupancy: Piscine
+        binary_sensor.zone_garage_ext_cat_occupancy: Garage extérieur
+        binary_sensor.zone_garage_ext_dog_occupancy: Garage extérieur
+        binary_sensor.zone_garage_ext_person_occupancy: Garage extérieur
+        binary_sensor.zone_garage_int_person_occupancy: Garage intérieur
+        binary_sensor.zone_garage_ssol_person_occupancy: Garage sous-sol
+      objets:
+        cat: Chat
+        dog: Chien
+        person: Humain
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{ states(''sensor.date_time'') }}
+
+        {{ objets[trigger.id] }} détecté - {{ lieux[trigger.entity_id] }}'
+      title: Caméra {{ lieux[trigger.entity_id] }}
+    metadata: {}
+  max: 5
+  mode: queued
 - id: '1738578799131'
   alias: Gestion Alim Imprimante Brother
   description: ''
@@ -5679,4 +5728,132 @@
             Le niveau du puits (esp174) est indisponible depuis plus d''1 h.
 
             Vérifier l''ESP174 et la liaison Modbus.'
+  mode: single
+- id: '1791301184801'
+  alias: Alerte 21:30 - Charge VE de nuit
+  description: Prévient si la charge VE de la nuit risque d'être impossible ou incomplète
+  triggers:
+  - trigger: time
+    at: '21:30:00'
+  conditions: []
+  actions:
+  - variables:
+      soc: '{{ states(''sensor.volvo_ex40_batterie'') | float(-1) }}'
+      cible: '{{ states(''sensor.volvo_ex40_niveau_de_charge_cible_de_la_batterie'')
+        | float(100) }}'
+      cap: '{{ states(''sensor.volvo_ex40_capacite_de_la_batterie'') | float(81.6)
+        }}'
+      conso: '{{ states(''sensor.volvo_ex40_consommation_d_energie_moyenne_du_trajet_manuel'')
+        | float(19) }}'
+      possible_kwh: 36
+      mode_ve: '{{ states(''input_select.mode_charge_ve'') }}'
+      rouge: '{{ states(''sensor.rte_tempo_couleur_actuelle'') == ''Rouge'' }}'
+      branche: '{{ states(''sensor.volvo_ex40_etat_de_la_connexion_de_charge'') ==
+        ''connected'' }}'
+      besoin_kwh: '{{ ([(cible - soc) / 100 * cap, 0] | max) | round(1) if soc >=
+        0 else 0 }}'
+      soc_prevu: '{{ ([soc + possible_kwh / cap * 100, cible] | min) | round(0) }}'
+      message: '{% if soc < 0 or besoin_kwh < 1 or mode_ve == ''At Forcé'' %} {% elif
+        rouge and mode_ve == ''Auto'' %}Nuit Tempo ROUGE : pas de charge VE en Auto.{{
+        "\n" }}SOC {{ soc | round(0) }} % (cible {{ cible | round(0) }} %), il manque
+        {{ besoin_kwh }} kWh.{{ "\n" }}Passez en Ma Forcée si la voiture en a besoin
+        demain. {% elif not branche %}VE non branché.{{ "\n" }}SOC {{ soc | round(0)
+        }} % (cible {{ cible | round(0) }} %), il manque {{ besoin_kwh }} kWh (≈ {{
+        (besoin_kwh / conso * 100) | round(0) }} km). {% elif besoin_kwh > possible_kwh
+        %}Charge incomplète probable cette nuit.{{ "\n" }}Besoin {{ besoin_kwh }}
+        kWh pour ~{{ possible_kwh }} kWh possibles → SOC prévu ≈ {{ soc_prevu }} %
+        à 6h (cible {{ cible | round(0) }} %).{{ "\n" }}Passez en Ma Forcée dès maintenant
+        si nécessaire. {% endif %}'
+  - condition: template
+    value_template: '{{ message | trim | length > 0 }}'
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: Charge VE
+      message: '{{ message | trim }}'
+  mode: single
+- id: '1791301555556'
+  alias: Diagnostic Volvo EX40 - Alerte Telegram
+  description: Envoie un Telegram listant les éléments de diagnostic non OK du Volvo
+    EX40
+  triggers:
+  - trigger: state
+    id: probleme
+    to: 'on'
+    for: 00:02:00
+    entity_id:
+    - binary_sensor.volvo_ex40_liquide_de_frein
+    - binary_sensor.volvo_ex40_niveau_de_liquide_de_refroidissement
+    - binary_sensor.volvo_ex40_niveau_d_huile
+    - binary_sensor.volvo_ex40_liquide_lave_glace
+    - binary_sensor.volvo_ex40_feu_stop_central
+    - binary_sensor.volvo_ex40_feu_stop_gauche
+    - binary_sensor.volvo_ex40_feu_stop_droit
+    - binary_sensor.volvo_ex40_feu_de_jour_gauche
+    - binary_sensor.volvo_ex40_feu_de_jour_droit
+    - binary_sensor.volvo_ex40_feu_antibrouillard_avant
+    - binary_sensor.volvo_ex40_feu_antibrouillard_arriere
+    - binary_sensor.volvo_ex40_feux_de_detresse
+    - binary_sensor.volvo_ex40_feu_de_route_gauche
+    - binary_sensor.volvo_ex40_feu_de_route_droit
+    - binary_sensor.volvo_ex40_feu_de_croisement_gauche
+    - binary_sensor.volvo_ex40_feu_de_croisement_droit
+    - binary_sensor.volvo_ex40_feu_de_position_avant_gauche
+    - binary_sensor.volvo_ex40_feu_de_position_avant_droit
+    - binary_sensor.volvo_ex40_feu_de_position_arriere_gauche
+    - binary_sensor.volvo_ex40_feu_de_position_arriere_droit
+    - binary_sensor.volvo_ex40_eclairage_de_plaque_d_immatriculation
+    - binary_sensor.volvo_ex40_feux_de_recul
+    - binary_sensor.volvo_ex40_feux_de_gabarit_lateraux
+    - binary_sensor.volvo_ex40_clignotant_avant_gauche
+    - binary_sensor.volvo_ex40_clignotant_avant_droit
+    - binary_sensor.volvo_ex40_clignotant_arriere_gauche
+    - binary_sensor.volvo_ex40_clignotant_arriere_droit
+    - binary_sensor.volvo_ex40_pneu_avant_gauche
+    - binary_sensor.volvo_ex40_pneu_avant_droit
+    - binary_sensor.volvo_ex40_pneu_arriere_gauche
+    - binary_sensor.volvo_ex40_pneu_arriere_droit
+  - trigger: state
+    id: service
+    entity_id: sensor.volvo_ex40_service
+    not_to:
+    - no_warning
+    - unknown
+    - unavailable
+  - trigger: time
+    id: quotidien
+    at: 08:00:00
+  conditions: []
+  actions:
+  - variables:
+      defauts: "{{ states.binary_sensor\n   | selectattr('entity_id', 'search', '^binary_sensor\\.volvo_ex40_')\n
+        \  | selectattr('attributes.device_class', 'eq', 'problem')\n   | selectattr('state',
+        'eq', 'on')\n   | map(attribute='name')\n   | map('replace', 'Volvo EX40 ',
+        '')\n   | list }}"
+      service_etat: '{{ states(''sensor.volvo_ex40_service'') }}'
+      service_txt: "{% set m = {\n  'distance_driven_almost_time_for_service': 'Entretien
+        bientôt dû (kilométrage)',\n  'distance_driven_time_for_service': 'Entretien
+        à faire (kilométrage)',\n  'distance_driven_overdue_for_service': 'Entretien
+        DÉPASSÉ (kilométrage)',\n  'engine_hours_almost_time_for_service': 'Entretien
+        bientôt dû (heures de fonctionnement)',\n  'engine_hours_time_for_service':
+        'Entretien à faire (heures de fonctionnement)',\n  'engine_hours_overdue_for_service':
+        'Entretien DÉPASSÉ (heures de fonctionnement)',\n  'regular_maintenance_almost_time_for_service':
+        'Entretien périodique bientôt dû',\n  'regular_maintenance_time_for_service':
+        'Entretien périodique à faire',\n  'regular_maintenance_overdue_for_service':
+        'Entretien périodique DÉPASSÉ',\n  'unknown_warning': 'Alerte entretien non
+        identifiée'\n} %}{{ m.get(service_etat, '') }}"
+      message: "{% if defauts | count > 0 %}Anomalies détectées :{% for d in defauts
+        %}{{ \"\\n\" }}• {{ d }}{% endfor %}{% endif %} {% if service_txt %}{{ \"\\n\\n\"
+        if defauts | count > 0 else \"\" }}\U0001F527 {{ service_txt }}{{ \"\\n\"
+        }}Prochain entretien : {{ states('sensor.volvo_ex40_distance_avant_entretien')
+        }} km / {{ states('sensor.volvo_ex40_temps_avant_entretien') }} jours{% endif
+        %}"
+  - condition: template
+    value_template: '{{ message | trim | length > 0 }}'
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: ⚠️ Diagnostic EX40{{ ' (rappel)' if trigger.id == 'quotidien' else ''
+        }}
+      message: '{{ message | trim }}'
   mode: single

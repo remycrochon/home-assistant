@@ -4,6 +4,12 @@
 
 # ligne 101 pour tester ecs en journée
 
+# MODIFS borne VE :
+#  - Lecture du mode de charge VE (input_select.mode_charge_ve)
+#  - En HP, routeur en pause si VE en "Ma Forcée" (Mode Regulation = "OFF - VE forcé")
+#  - En HC, la batterie n'est plus prise en compte dans p_dispo (ECS prioritaire,
+#    Node-RED adapte le VE et la limite MP2)
+
 substitutions:
   device_name: "esp176-routeur"
   friendly_name: esp176
@@ -175,7 +181,7 @@ select:
         - lambda: |-
             char mess[128];
             snprintf(mess, sizeof(mess), "Mode Fonctionnement Routeur: %s",
-                     id(_Mode_Fonctionnement_routeur).current_option());
+                     id(_Mode_Fonctionnement_routeur).current_option().c_str());
             ESP_LOGI("fichier", "Message: %s", mess);
             id(_log_fichier).execute(mess);
 
@@ -552,6 +558,13 @@ text_sensor:
     id: etatbus_ve
     internal: True
 
+  # 🔌 Mode de charge du VE (Auto / Ma Forcée / At Forcé)
+  # En HP, si "Ma Forcée" → le routeur se met en pause (la borne consomme le PV)
+  - platform: homeassistant
+    entity_id: input_select.mode_charge_ve
+    id: mode_charge_ve
+    internal: true
+
 switch:
   - platform: gpio
     name: "Relais"
@@ -604,7 +617,7 @@ display:
       snprintf(ligne0, sizeof(ligne0), "Pr=%0.0fW Pe=%0.0fW", id(pureseau1).state, id(puecs).state);
       snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
       snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac).state, id(temperatureok).state ? "OK" : "NOK");
-      snprintf(ligne3, sizeof(ligne3), "Mode:%s", id(_Mode_Fonctionnement_routeur).current_option());
+      snprintf(ligne3, sizeof(ligne3), "Mode:%s", id(_Mode_Fonctionnement_routeur).current_option().c_str());
 
       it.print(0, 0, ligne0);
       it.print(0, 1, ligne1);
@@ -671,18 +684,23 @@ script:
           }
 
           ESP_LOGI("HP", 
-            "Check HP → Prod=%.0fW (Seuil=%.0f) | SOC=%.1f%% (Seuil=%.1f) | TempTriac=%.1f°C (Tmax=%.1f°C)",
+            "Check HP → Prod=%.0fW (Seuil=%.0f) | SOC=%.1f%% (Seuil=%.1f) | TempTriac=%.1f°C (Tmax=%.1f°C) | VE=%s",
             id(pu_prod).state, id(seuil_prod).state,
             id(soc).state, id(seuil_soc).state,
-            id(temp_triac).state, id(tmax).state
+            id(temp_triac).state, id(tmax).state,
+            id(mode_charge_ve).state.c_str()
           );
 
-      # 1️⃣ Conditions NOK ou mode Arret → arrêt complet
+      # 1️⃣ Conditions NOK, mode Arret ou VE en marche forcée → arrêt complet
       - if:
           condition:
             or:
               # Cas 1 : Mode Arret
               - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Arret";'
+              # Cas 1b : VE en marche forcée → pas de routage en HP
+              - and:
+                  - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Auto";'
+                  - lambda: 'return id(mode_charge_ve).state == "Ma Forcée";'
               # Cas 2 : Mode Auto mais conditions NOK
               - and:
                   - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Auto";'
@@ -694,18 +712,25 @@ script:
           then:
             - lambda: |-
                 id(striac) = 0;
-                id(moderegul).publish_state("OFF");
+                if (id(mode_charge_ve).state == "Ma Forcée" &&
+                    id(_Mode_Fonctionnement_routeur).current_option() == "Auto") {
+                  id(moderegul).publish_state("OFF - VE forcé");
+                  ESP_LOGW("HP", "⚠️ Régulation OFF : VE en marche forcée.");
+                } else {
+                  id(moderegul).publish_state("OFF");
+                  ESP_LOGW("HP", "⚠️ Régulation OFF : conditions NOK ou arrêt manuel.");
+                }
                 id(afpdispo).publish_state(0);
                 id(cons_batt_cours).publish_state(0);
-                ESP_LOGW("HP", "⚠️ Régulation OFF : conditions NOK ou arrêt manuel.");
             - output.turn_off: out_gradateur_0_10v
 
 
-      # 2️⃣ Mode Auto + toutes conditions OK → régulation active
+      # 2️⃣ Mode Auto + toutes conditions OK + VE pas en marche forcée → régulation active
       - if:
           condition:
             and:
               - lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Auto";'
+              - lambda: 'return id(mode_charge_ve).state != "Ma Forcée";'
               - switch.is_on: validrouteur
               - binary_sensor.is_on: seuil_prod_ok
               - binary_sensor.is_on: temperatureok
@@ -875,14 +900,15 @@ script:
 
             float conso = id(conso_maison).state;
             float pac   = id(pu_pac).state;
-            float batt  = id(pu_batteries).state;   // >0 décharge, <0 charge
+            float batt  = id(pu_batteries).state;   // affichage uniquement (>0 charge, <0 décharge)
 
             if (std::isnan(conso)) conso = 0;
             if (std::isnan(pac))   pac   = 0;
             if (std::isnan(batt))  batt  = 0;
 
-            // p_dispo = cible - conso_maison - pu_clim - pu_pac - pu_batteries
-            pdispo = RESEAU_CIBLE_HC - conso - pac - batt;
+            // ECS prioritaire : ni la batterie ni le VE ne sont pris en compte
+            // (Node-RED adapte le VE et la limite MP2 en fonction de l'ECS)
+            pdispo = RESEAU_CIBLE_HC - conso - pac;
             if (pdispo < 0.0f) pdispo = 0.0f;
 
             id(regul) = "HC Chauffe ECS";

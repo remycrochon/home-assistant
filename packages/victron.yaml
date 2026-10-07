@@ -26,7 +26,7 @@ mqtt:
       unit_of_measurement: "Ah"
       icon: mdi:battery-charging-outline
       state_class: measurement
-
+    # VE
     - name: "Bilan nuit VE"
       unique_id: bilan_nuit_ve
       state_topic: "nr/mp2/ve/bilan_nuit"

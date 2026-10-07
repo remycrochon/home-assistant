@@ -378,54 +378,36 @@ activation_camera:
     metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: '{{states("sensor.date_time") }}{{-"\n"-}}Désactivation Détection video
-        surveillance'
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Désactivation enregistrement
+        video surveillance'
       title: Caméra
   - action: switch.turn_off
     target:
       entity_id:
-      - switch.cuisine_detect
-      - switch.cuisine_motion
-      - switch.cuisine_recordings
-      - switch.cuisine_snapshots
-      - switch.piscine_detect
-      - switch.piscine_motion
-      - switch.piscine_recordings
-      - switch.piscine_snapshots
-      - switch.garage_ext_detect
-      - switch.garage_ext_motion
-      - switch.garage_ext_recordings
-      - switch.garage_ext_snapshots
+      - switch.cuisine_cuisine_recordings
+      - switch.exterieur_piscine_recordings
+      - switch.garage_garage_ext_recordings
     data: {}
   alias: Desactivation Camera
   description: ''
 activation_camera_2:
-  sequence:
-  - action: telegram_bot.send_message
-    metadata: {}
-    data:
-      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      message: '{{states("sensor.date_time") }}{{-"\n"-}}Activation Détection video
-        surveillance'
-      title: Caméra
-  - action: switch.turn_on
-    target:
-      entity_id:
-      - switch.cuisine_detect
-      - switch.cuisine_motion
-      - switch.piscine_detect
-      - switch.piscine_motion
-      - switch.garage_ext_detect
-      - switch.garage_ext_motion
-      - switch.piscine_snapshots
-      - switch.cuisine_snapshots
-      - switch.garage_ext_snapshots
-      - switch.piscine_recordings
-      - switch.cuisine_recordings
-      - switch.garage_ext_recordings
-    data: {}
   alias: Activation caméras
   description: ''
+  sequence:
+  - action: telegram_bot.send_message
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      message: '{{states("sensor.date_time") }}{{-"\n"-}}Activation enregistrement
+        video surveillance'
+      title: Caméra
+    metadata: {}
+  - action: switch.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.cuisine_cuisine_recordings
+      - switch.exterieur_piscine_recordings
+      - switch.garage_garage_ext_recordings
 envoyer_message_log_esp178:
   alias: Envoyer un message log depuis ESP178
   sequence:

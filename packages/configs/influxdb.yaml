@@ -1,15 +1,11 @@
-# InfluxDB
-# https://www.home-assistant.io/integrations/influxdb/
-# base influxdb
-
 influxdb:
-  #api_version: 2
-  #ssl: false
-  #host: 192.168.0.203
-  #port: 8086
-  #token: !secret influxDB_token 
-  #organization: 859933fbd6d2be44
-  #bucket: homeassistant
+  # api_version: 2
+  # ssl: false
+  # host: 192.168.0.203
+  # port: 8086
+  # token: !secret influxDB_token
+  # organization: 859933fbd6d2be44
+  # bucket: homeassistant
   tags:
     source: HA
   tags_attributes:
@@ -24,14 +20,13 @@ influxdb:
       - input_number
       - input_select
       - input_text
-      - number      
+      - number
       - sensor
       - switch
       - button
       - light
       - utility_meter
 
-      
   exclude:
     domains:
       - camera
@@ -58,8 +53,7 @@ influxdb:
       - sun
       - device_tracker
       - weather
-      - group   
+      - group
       - person
       - climate
-      - lawn_mower      
-
+      - lawn_mower

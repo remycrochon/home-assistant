@@ -110,18 +110,6 @@ sensor:
             send_first_at: 1
         - lambda: return round(x);  # MODIF : arrondi réel avant publication
 
-    pm_0_3um:
-      name: "Nb de particules 0.3"
-      id: pm_03_um
-      unit_of_measurement: "ppd"
-      accuracy_decimals: 0
-
-    pm_0_5um:
-      name: "Nb de particules 0.5"
-      id: pm_05_um
-      unit_of_measurement: "ppd"
-      accuracy_decimals: 0
-
     pm_1_0um:
       name: "Nb de particules 1.0"
       id: pm_10_um

@@ -51,8 +51,37 @@ recorder:
       - text
       - button
       - group
-
+    entity_globs:
+      - sensor.smartshunt_500a_50mv_id_277_time_since_last*
     entities:
       - sensor.temps_de_fonctionnement_vmc_n0
       - sensor.btc_mm_6h
       - sensor.pc_bureau_uptime_secondes
+      - sensor.vp2_datetime
+      - sensor.ecocompteur_date_time
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_input_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_device_0_output_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_grid_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_consumption_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_critical_loads_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_device_0_inverted_power
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_dc_power
+      - sensor.victron_mqtt_c0619ab1db0d_pvinverter_32_pvinverter_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_apparent_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_input_apparent_power_l1
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_heartbeat
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_consumption
+      - sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_current
+      - sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_voltage_l1
+      - sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_current
+      - sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_current_l1
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_grid_current_l1
+      - sensor.victron_mqtt_c0619ab1db0d_system_0_system_consumption_current_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_dc_current
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_dc_voltage
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_input_current_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_input_voltage_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_voltage_l1
+      - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_frequency_l1
+      - sensor.victron_mqtt_c0619ab1db0d_solarcharger_279_solarcharger_voltage
+      - sensor.victron_mqtt_c0619ab1db0d_solarcharger_279_solarcharger_pv_current

@@ -11,74 +11,6 @@
       repack: true
     action: recorder.purge
   mode: single
-- id: '1629296468909'
-  alias: Robot AMX435 Surveillance Pluviometrie
-  description: ''
-  triggers:
-  - entity_id: sensor.vp2_pluviometrie_moyenne
-    above: input_number.seuil_pluie_stop_robot
-    id: seuil_haut
-    trigger: numeric_state
-  - entity_id:
-    - sensor.vp2_pluviometrie_moyenne
-    id: seuil_bas
-    below: input_number.seuil_pluie_stop_robot
-    trigger: numeric_state
-    for:
-      hours: 1
-      minutes: 0
-      seconds: 0
-  - trigger: state
-    entity_id:
-    - binary_sensor.vp2_trigger_intensite_pluvieuse
-    from: 'off'
-    to: 'on'
-    id: intensité
-    enabled: false
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - seuil_haut
-        - intensité
-      sequence:
-      - data: {}
-        action: lawn_mower.dock
-        target:
-          device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          title: Robot-Début Alerte Meteo Pluie !!!
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: '    Le robot tondeuse a été garé à cause de la forte pluie:{{-"\n"-}}
-            Pluvio     Moyenne 10mn ({{states(''sensor.vp2_pluviometrie_moyenne'')}}
-            mm) {{-"\n"-}} >     Seuil Stop robot ({{states(''input_number.seuil_pluie_stop_robot'')}}
-            mm)     {{-"\n"-}} ou Intensité pluvieuse ({{states(''sensor.vp2_rain_rate'')}}
-            mm/h)     > 3 mm/h pendant 5mn. {{-"\n"-}} {{states("sensor.date_time")
-            }}'
-    - conditions:
-      - condition: trigger
-        id: seuil_bas
-      sequence:
-      - data: {}
-        action: lawn_mower.start_mowing
-        target:
-          device_id: 80c6c60b578848a2d4bb2a1e06f07fb1
-        enabled: true
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          message: Reprise programme horaire!!{{-"\n"-}} Pluvio Moyenne 10mn (     {{states('sensor.vp2_pluviometrie_moyenne')}}
-            mm) {{-"\n"-}} < Seuil Stop     robot ({{states('input_number.seuil_pluie_stop_robot')}}
-            mm) pendant 1h.     {{-"\n"-}}{{states("sensor.date_time") }}
-          title: Robot- Fin Alerte Meteo Pluie !!!
-  mode: single
-  trace:
-    stored_traces: 10
 - id: '1632232387237'
   alias: Reseau Notification Nouvelle IP
   description: ''
@@ -254,7 +186,7 @@
     input:
       condition_entity_state: 'on'
       sensor_entity: binary_sensor.status_communication_vantage_pro_2
-      alert_state: 'Off'
+      alert_state: 'off'
       alert_action:
       - action: telegram_bot.send_message
         metadata: {}
@@ -1428,6 +1360,17 @@
       topic: ha/mp2/ve/conso
       payload: '"{{ states(''sensor.volvo_ex40_consommation_d_energie_moyenne_du_trajet_manuel'')
         }}"'
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/ve/prix_kwh
+      payload: '"{% set c = {''Bleu'': ''bleu'', ''Blanc'': ''blanc'', ''Rouge'':
+        ''rouge''}.get(states(''sensor.rte_tempo_couleur_actuelle''), ''bleu'') %}{%
+        set hc = now().hour >= 22 or now().hour < 6 %}{{ states(''input_number.tarif_edf_tempo_''
+        ~ c ~ (''_hc'' if hc else ''_hp'')) }}"        '
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet

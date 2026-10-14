@@ -1083,23 +1083,19 @@ script:
       duree_sec: float
     then:
       - lambda: |-
-          int h, m, s;
-          CONVERT_SECONDS(duree_sec, h, m, s);
-          char buf[128];
-
-          // On commence avec le texte principal
-          snprintf(buf, sizeof(buf), "%s\n", mess1.c_str());
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += "\n";
+          mess += mess1;
+          mess += "\n";
 
           // Ajouter la durée uniquement si > 0
           if (duree_sec > 0) {
+            int h, m, s;
+            CONVERT_SECONDS(duree_sec, h, m, s);
             char buf2[64];
             snprintf(buf2, sizeof(buf2), "Tps: %02d:%02d:%02d\n", h, m, s);
-            strcat(buf, buf2);
+            mess += buf2;
           }
-
-          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
-          mess += "\n";
-          mess += buf;
 
           id(telegram_msg_buffer) = mess;
       - homeassistant.service:
@@ -1113,29 +1109,24 @@ script:
   - id: _log_fichier
     parameters:
       mess1: string
-      duree_sec: float      
+      duree_sec: float
     then:
       - lambda: |-
-          int h, m, s;
-          CONVERT_SECONDS(duree_sec, h, m, s);
-          char buf[128];
-
-          // On commence avec le texte principal
-          snprintf(buf, sizeof(buf),  mess1.c_str());
+          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
+          mess += ",";
+          mess += mess1;
 
           // Ajouter la durée uniquement si > 0
           if (duree_sec > 0) {
+            int h, m, s;
+            CONVERT_SECONDS(duree_sec, h, m, s);
             char buf2[64];
             snprintf(buf2, sizeof(buf2), ",Tps: %02d:%02d:%02d\n", h, m, s);
-            strcat(buf, buf2);
+            mess += buf2;
           }
 
-          std::string mess = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S").c_str();
-          mess += ",";
-          mess += buf;
-
-          id(telegram_msg_buffer) = mess;             
-      - homeassistant.service:                
+          id(telegram_msg_buffer) = mess;
+      - homeassistant.service:
           action: notify.send_message
           data:
             entity_id: notify.log_esp178

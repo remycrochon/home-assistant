@@ -390,6 +390,7 @@ sensor:
   - platform: template
     name: "Pu Reseau"
     id: pureseau1
+    internal: true
     unit_of_measurement: "W"
     state_class: "measurement"
     accuracy_decimals: 0

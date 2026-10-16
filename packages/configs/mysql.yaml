@@ -53,6 +53,19 @@ recorder:
       - group
     entity_globs:
       - sensor.smartshunt_500a_50mv_id_277_time_since_last*
+      - sensor.*_rssi_numeric
+      - sensor.*_rssi
+      - sensor.rssi_*
+      - sensor.*_lqi
+      - sensor.*_wifi_signal_db
+      - sensor.*_wifi_signal_percent
+      - sensor.*_wifi_signal_sensor
+      - sensor.wifi_strength
+      - sensor.*_uptime
+      - sensor.*_uptime_sensor
+      - sensor.*_uptime_1_day
+      - sensor.*_uptime_30_days
+      - sensor.*_uptime_365_days      
     entities:
       - sensor.temps_de_fonctionnement_vmc_n0
       - sensor.btc_mm_6h

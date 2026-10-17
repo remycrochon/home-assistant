@@ -4322,6 +4322,23 @@
         | float(0) %} {% set r = states('sensor.mp2_dess_consommation_6h_22h_vrm')
         | float(0) %} {% if p > 0 %}\n  {{ (((r - p) / p * 100) | round(1)) }}\n{%
         else %}\n  n/d\n{% endif %}"
+      ve_solaire_txt: '{% set ej = states(''sensor.energie_ve_solaire_jour'') | float(0)
+        %}{% set conso = states(''sensor.volvo_ex40_consommation_d_energie_moyenne_du_trajet_manuel'')
+        | float(19) %}{% set pref = states(''input_number.tarif_edf_tempo_bleu_hc'')
+        | float(0.1356) %}{% if ej > 0.05 %}{{ ej | round(1) }} kWh ≈ {{ (ej * 0.9
+        / conso * 100) | round(0) | int }} km ≈ {{ (ej * pref) | round(2) }} € économisés{%
+        else %}aucune charge solaire{% endif %}'
+      ve_reseau_txt: '{% set ebj = states(''sensor.ve_sous_sol_evcs_hq2603jcduz_energy_jour'')
+        | float(0) %}{% set esj = states(''sensor.energie_ve_solaire_jour'') | float(0)
+        %}{% set erj = [ebj - esj, 0] | max %}{% set cj = states(''sensor.cout_ve_reseau_jour'')
+        | float(0) %}{% if erj > 0.05 %}{{ erj | round(1) }} kWh ≈ {{ cj | round(2)
+        }} € (mois : {{ states(''sensor.cout_ve_reseau_mois'') | float(0) | round(2)
+        }} €){% else %}aucune charge réseau (mois : {{ states(''sensor.cout_ve_reseau_mois'')
+        | float(0) | round(2) }} €){% endif %}'
+      ve_solaire_kwh_num: '{{ states(''sensor.energie_ve_solaire_jour'') | float(0)
+        | round(2) }}'
+      ve_reseau_eur_num: '{{ states(''sensor.cout_ve_reseau_jour'') | float(0) | round(2)
+        }}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: recap_energie
@@ -4394,8 +4411,9 @@
             : {{ import_reseau_txt }} / {{ export_reseau_txt }}\nAutonomie / Autoconso
             solaire : {{ taux_autonomie_solaire }} % / {{ taux_autoconsommation_solaire
             }} %\nBatterie min/max/soir : {{ bat_min_txt }} / {{ bat_max_txt }} /
-            {{ soc_soir_txt }}\n\nProd prévue/réalisée : {{ previ_prod_jour }} / {{
-            realise_prod_jour }} kWh (écart {{ ecart_prod_pct_txt }})\n{{ recap_energie.data.analyse_production
+            {{ soc_soir_txt }}\nSolaire → VE : {{ ve_solaire_txt }}\nRéseau → VE :
+            {{ ve_reseau_txt }}\n\nProd prévue/réalisée : {{ previ_prod_jour }} /
+            {{ realise_prod_jour }} kWh (écart {{ ecart_prod_pct_txt }})\n{{ recap_energie.data.analyse_production
             }}\n\nConso 6-22h prévue/réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
             }} kWh (écart {{ ecart_conso_6_22_pct_txt }})\n{{ recap_energie.data.analyse_consommation
             }}\n\nTempo demain : {{ couleur_demain }} — {{ recap_energie.data.conseil_demain
@@ -4415,11 +4433,12 @@
           }} % / {{ taux_autoconsommation_solaire }} % {{ ''\n'' }}Export PV / Part
           import : {{ taux_export_pv }} % / {{ part_import_reseau }} % {{ ''\n'' }}Batterie
           min / max / soir : {{ bat_min_txt }} / {{ bat_max_txt }} / {{ soc_soir_txt
-          }} {{ ''\n'' }}Prod prévue / réalisée : {{ previ_prod_jour }} / {{ realise_prod_jour
-          }} kWh (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt }}) {{ ''\n''
-          }}Conso 6-22 prévue / réalisée : {{ previ_conso_6_22 }} / {{ realise_conso_6_22
-          }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt }})
-          {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
+          }} {{ ''\n'' }}Solaire → VE : {{ ve_solaire_txt }} {{ ''\n'' }}Réseau →
+          VE : {{ ve_reseau_txt }} {{ ''\n'' }}Prod prévue / réalisée : {{ previ_prod_jour
+          }} / {{ realise_prod_jour }} kWh (écart {{ ecart_prod_jour_txt }}, {{ ecart_prod_pct_txt
+          }}) {{ ''\n'' }}Conso 6-22 prévue / réalisée : {{ previ_conso_6_22 }} /
+          {{ realise_conso_6_22 }} kWh (écart {{ ecart_conso_6_22_txt }}, {{ ecart_conso_6_22_pct_txt
+          }}) {{ ''\n'' }}Tempo demain : {{ couleur_demain }}'
   - if:
     - condition: template
       value_template: '{{ trigger is defined and trigger.id == ''horaire_2359'' }}'
@@ -4436,7 +4455,8 @@
           \   bat_min_num,\n    bat_max_num,\n    soc_soir_num,\n    previ_prod_jour,\n
           \   realise_prod_jour,\n    ecart_prod_jour,\n    ecart_prod_pct_num,\n
           \   previ_conso_6_22,\n    realise_conso_6_22,\n    ecart_conso_6_22,\n
-          \   ecart_conso_6_22_pct_num,\n    couleur_demain\n  ] | join(', ')\n}}"
+          \   ecart_conso_6_22_pct_num,\n    couleur_demain,\n    ve_solaire_kwh_num,\n
+          \   ve_reseau_eur_num\n  ] | join(', ')\n}}"
   mode: single
 - id: '1787809671391'
   alias: Rapport 22:00 DESS IA V3

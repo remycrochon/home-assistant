@@ -5641,7 +5641,7 @@
 - id: '1791188891601'
   alias: Alerte sonde puits figée ou indisponible
   description: Prévient par Telegram si la sonde de niveau du puits (esp174) renvoie
-    la même valeur depuis 6 h (sonde bloquée) ou reste indisponible plus d'1 h.
+    la même valeur depuis 24 h (sonde bloquée) ou reste indisponible plus d'1 h.
   triggers:
   - trigger: state
     entity_id: sensor.esp174_niveau_puit
@@ -5649,7 +5649,7 @@
     - unavailable
     - unknown
     for:
-      hours: 6
+      hours: 24
       minutes: 0
       seconds: 0
     id: fige
@@ -5674,8 +5674,8 @@
           title: Sonde puits figée
           message: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}
 
-            La sonde de niveau du puits (esp174) renvoie la même valeur depuis 6 h
-            : {{ states(''sensor.esp174_niveau_puit'') }}.
+            La sonde de niveau du puits (esp174) renvoie la même valeur depuis 24
+            h : {{ states(''sensor.esp174_niveau_puit'') }}.
 
             Vérifier la sonde (encrassement, câble, alimentation).'
     - conditions:
@@ -5819,4 +5819,55 @@
       title: ⚠️ Diagnostic EX40{{ ' (rappel)' if trigger.id == 'quotidien' else ''
         }}
       message: '{{ message | trim }}'
+  mode: single
+- id: '1792248928377'
+  alias: 'Tempo : alerte jour blanc ou rouge'
+  description: Annonce EDF pour demain, ou prévision rouge probable à J+2..J+5
+  triggers:
+  - trigger: state
+    entity_id: sensor.calendrier_tempo_couleur_demain
+    to:
+    - blanc
+    - rouge
+    not_from: unavailable
+    id: officiel
+  - trigger: template
+    value_template: '{{ state_attr(''sensor.calendrier_tempo_previsions_15_jours'',
+      ''previsions'') | default([], true) | selectattr(''jour'', ''>='', 2) | selectattr(''jour'',
+      ''<='', 5) | rejectattr(''probabilite_rouge'', ''none'') | selectattr(''probabilite_rouge'',
+      ''>='', 0.5) | list | count > 0 }}'
+    id: prevision
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: officiel
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: 'Tempo : jour {{ states(''sensor.calendrier_tempo_couleur_demain'')
+            }} demain'
+          message: '{{ states("sensor.date_time") }}{{- "\n" -}}EDF annonce un jour
+            {{ states(''sensor.calendrier_tempo_couleur_demain'') }} demain.'
+    - conditions:
+      - condition: trigger
+        id: prevision
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: 'Tempo : jour rouge probable'
+          message: '{% set rouges = state_attr(''sensor.calendrier_tempo_previsions_15_jours'',
+            ''previsions'') | default([], true) | selectattr(''jour'', ''>='', 2)
+            | selectattr(''jour'', ''<='', 5) | rejectattr(''probabilite_rouge'',
+            ''none'') | selectattr(''probabilite_rouge'', ''>='', 0.5) | list %}{{
+            states("sensor.date_time") }}{{- "\n" -}}Rouge probable :{%- for j in
+            rouges %} {{ j.date }} ({{ (j.probabilite_rouge * 100) | round }} %){{
+            "," if not loop.last }}{% endfor %}.
+
+            Prévision, seule la couleur EDF fait foi.'
   mode: single

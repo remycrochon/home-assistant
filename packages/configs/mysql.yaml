@@ -67,7 +67,6 @@ recorder:
       - sensor.*_uptime_30_days
       - sensor.*_uptime_365_days      
     entities:
-      - sensor.temps_de_fonctionnement_vmc_n0
       - sensor.btc_mm_6h
       - sensor.pc_bureau_uptime_secondes
       - sensor.vp2_datetime
@@ -98,3 +97,4 @@ recorder:
       - sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_frequency_l1
       - sensor.victron_mqtt_c0619ab1db0d_solarcharger_279_solarcharger_voltage
       - sensor.victron_mqtt_c0619ab1db0d_solarcharger_279_solarcharger_pv_current
+      - number.mp2_id_276_ac_power_setpoint_l1      

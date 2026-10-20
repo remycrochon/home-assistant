@@ -245,7 +245,7 @@ binary_sensor:
     device_class: heat
     lambda: |-
       // Triac actif (>5%) mais quasi aucune puissance réellement consommée par l'ECS
-      return (id(afstriac).state > 5.0f) && (id(puecs).state < 15.0f);
+      return (id(striac) > 5.0f) && (id(puecs).state < 15.0f);
     filters:
       - delayed_on: 3min   # confirme l'état avant de le déclarer (évite les à-coups)
       - delayed_off: 30s  
@@ -394,16 +394,20 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"
     accuracy_decimals: 0
-
+    
   # Sortie triac de 0 à 100%
   - platform: template
     name: "Sortie Triac"
     id: afstriac
     unit_of_measurement: "%"
-    state_class: "measurement"  
+    state_class: "measurement"
     accuracy_decimals: 2
-  # Sortie triac de 0 à 10V 
-  
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 1.0
+
+  # Sortie triac de 0 à 10V
   - platform: template
     name: "Consigne 0-10V (V)"
     id: consigne_0_10v
@@ -417,6 +421,11 @@ sensor:
       if (pct < 0.0f) pct = 0.0f;
       if (pct > 100.0f) pct = 100.0f;
       return (pct / 100.0f) * 10.0f;
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.1
+
   # Pu disponible
   - platform: template
     name: "Pu Disponible"
@@ -424,7 +433,11 @@ sensor:
     unit_of_measurement: "W"
     state_class: "measurement"
     accuracy_decimals: 0
-
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 10
+ 
   # Sensor Intermediaire pour synoptique
   - platform: template
     name: "Cons batt en Cours"

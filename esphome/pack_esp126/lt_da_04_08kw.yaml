@@ -1,6 +1,7 @@
 # =========================================================
 # Conversion labeldef.h -> ESPHome (format identique au 1er)
 # Plateforme: altherma_hub
+# Version avec filtres anti-écritures inutiles (recorder HA)
 # =========================================================
 
 # anchors
@@ -14,6 +15,22 @@
   unit_of_measurement: °C
   state_class: measurement
   accuracy_decimals: 1
+  filters:
+    - or:
+        - throttle: 300s
+        - delta: 0.3
+
+# température utilisée dans le calcul du COP : filtre plus fin
+.temp_fine: &temp_fine
+  <<: *altherma_base
+  device_class: temperature
+  unit_of_measurement: °C
+  state_class: measurement
+  accuracy_decimals: 1
+  filters:
+    - or:
+        - throttle: 60s
+        - delta: 0.1
 
 .binary: &binary
   <<: *altherma_base
@@ -25,6 +42,10 @@
   icon: mdi:current-ac
   state_class: measurement
   accuracy_decimals: 1
+  filters:
+    - or:
+        - throttle: 300s
+        - delta: 0.5
 
 .voltage: &voltage
   <<: *altherma_base
@@ -36,11 +57,30 @@
   <<: *altherma_base
   unit_of_measurement: rps
   state_class: measurement
+  filters:
+    - or:
+        - throttle: 300s
+        - delta: 2
 
 .rpm: &rpm
   <<: *altherma_base
   unit_of_measurement: rpm
   state_class: measurement
+  filters:
+    - or:
+        - throttle: 300s
+        - delta: 20
+
+.pression: &pression
+  <<: *altherma_base
+  device_class: pressure
+  unit_of_measurement: bar
+  state_class: measurement
+  accuracy_decimals: 2
+  filters:
+    - or:
+        - throttle: 300s
+        - delta: 0.2
 
 .text: &text
   <<: *altherma_base
@@ -76,16 +116,12 @@ sensor:
     datasize: 2
 
   # {0x20,14,105,2,2,"Capteur de pression"}
-  - <<: *altherma_base
+  - <<: *pression
     name: "Capteur de pression"
     register: 0x20
     offset: 14
     convid: 105
     datasize: 2
-    device_class: pressure
-    unit_of_measurement: bar
-    state_class: measurement
-    accuracy_decimals: 2
 
   # {0x21,0,105,2,-1,"Courant primaire INV (A)"}
   - <<: *current
@@ -129,6 +165,9 @@ sensor:
     datasize: 1
     filters:
       - multiply: 10
+      - or:
+          - throttle: 300s
+          - delta: 20
 
   # {0x30,1,211,1,-1,"Ventilateur 2 (palier)"}
   - <<: *rpm
@@ -137,6 +176,10 @@ sensor:
     offset: 1
     convid: 211
     datasize: 1
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 1
 
   # {0x60,9,105,2,1,"Consigne LW (principal)"}
   - <<: *temp
@@ -147,12 +190,14 @@ sensor:
     datasize: 2
 
   # {0x61,2,105,2,1,"Laisser temp. eau avant BUH (R1T)"}
-  - <<: *temp
+  # utilisée pour le calcul du COP (eau de départ)
+  - <<: *temp_fine
     name: "Leaving water temp. avant BUH (R1T)"
     register: 0x61
     offset: 2
     convid: 105
     datasize: 2
+    id: temp_depart_r1t
 
   # {0x61,4,105,2,1,"Laisser temp. eau après BUH (R2T)"}
   - <<: *temp
@@ -161,7 +206,7 @@ sensor:
     offset: 4
     convid: 105
     datasize: 2
-    
+
   # {0x61,6,105,2,1,"Temp. réfrig. côté liquide (R3T)"}
   - <<: *temp
     name: "Temp. réfrig. côté liquide (R3T)"
@@ -171,14 +216,15 @@ sensor:
     datasize: 2
 
   # {0x61,8,105,2,1,"Temp. d eau d entrée (R4T)"}
-  - <<: *temp
+  # utilisée pour le calcul du COP (eau de retour)
+  - <<: *temp_fine
     name: "Temp. d eau d entrée (R4T)"
     register: 0x61
     offset: 8
     convid: 105
     datasize: 2
     id: temp_rt4
-    
+
   # {0x61,12,105,2,1,"Temp. ambiante intérieure (R1T)"}
   - <<: *temp
     name: "Temp. ambiante intérieure (R1T)"
@@ -186,7 +232,7 @@ sensor:
     offset: 12
     convid: 105
     datasize: 2
-    
+
   # {0x61,14,105,2,1,"Capteur ext. de temp. ambiante intérieure (R6T)"}
   - <<: *temp
     name: "Capteur ext. temp. ambiante intérieure (R6T)"
@@ -194,7 +240,7 @@ sensor:
     offset: 14
     convid: 105
     datasize: 2
-    
+
   # {0x62,5,105,2,1,"Consigne Thermostat int"}
   - <<: *temp
     name: "Consigne Thermostat int"
@@ -214,18 +260,18 @@ sensor:
     state_class: measurement
     accuracy_decimals: 1
     id: debit_pac
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.5
 
   # {0x62,11,105,1,2,"Pression d eau"}
-  - <<: *altherma_base
+  - <<: *pression
     name: "Pression d eau"
     register: 0x62
     offset: 11
     convid: 105
     datasize: 1
-    device_class: pressure
-    unit_of_measurement: bar
-    state_class: measurement
-    accuracy_decimals: 2
 
   # {0x62,12,152,1,-1,"Signal de pompe à eau (0:max-100:arrêt)"}
   - <<: *altherma_base
@@ -237,7 +283,10 @@ sensor:
     state_class: measurement
     accuracy_decimals: 0
     filters:
-      - lambda: return x -100;
+      - lambda: return x - 100;
+      - or:
+          - throttle: 300s
+          - delta: 3
 
 
 # =========================
@@ -363,4 +412,3 @@ text_sensor:
     convid: 203
     datasize: 1
     entity_category: diagnostic
-

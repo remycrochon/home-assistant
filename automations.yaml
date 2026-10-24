@@ -1371,6 +1371,18 @@
         ''rouge''}.get(states(''sensor.rte_tempo_couleur_actuelle''), ''bleu'') %}{%
         set hc = now().hour >= 22 or now().hour < 6 %}{{ states(''input_number.tarif_edf_tempo_''
         ~ c ~ (''_hc'' if hc else ''_hp'')) }}"        '
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: '0'
+      retain: false
+      topic: ha/mp2/routeur/entrees
+      payload: '{"prod": {{ states("sensor.mp2_production_solaire_totale") | float(0)
+        | round(0) }}, "pac": {{ states("sensor.ecocompteur_pac") | float(0) | round(0)
+        }}, "ecs": {{ states("sensor.ecocompteur_ecs") | float(0) | round(0) }}, "pmax":
+        {{ states("number.esp176_routeur_puissance_max_triac") | float(3300) | round(0)
+        }}}'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet
@@ -1945,7 +1957,7 @@
           parse_mode: plain_text
   mode: single
 - id: '1746164692289'
-  alias: Ecran02- Actions toutes les 30 mn
+  alias: Ecran02- Actions toutes les heures
   description: ''
   triggers:
   - trigger: time_pattern
@@ -2079,7 +2091,7 @@
     domain: light
   - delay:
       hours: 0
-      minutes: 2
+      minutes: 5
       seconds: 0
       milliseconds: 0
   - action: light.turn_off

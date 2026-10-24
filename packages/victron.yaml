@@ -97,6 +97,14 @@ mqtt:
       json_attributes_topic: "mp2/batteries/capacity_debug"
       icon: mdi:battery-sync
 
+    - name: "NR p_dispo routeur"
+      unique_id: nr_p_dispo_routeur
+      state_topic: "nr/mp2/routeur/p_dispo"
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      expire_after: 30
+
 
 # Victron
 #modbus:

@@ -4,7 +4,7 @@ openhasp:
     objects:
       - obj: "p0b3"
         properties:
-          "text": "{{ states('sensor.time') }}"
+          "text": "{{ now().strftime('%H:%M') }}"
 
       - obj: "p0b4"
         properties:
@@ -198,18 +198,90 @@ openhasp:
 
 ############### Page 4 ECS ###############
       ###############
-      - obj: "p4b10" # Regule
+      - obj: "p4b10" # Mode régulation + liaison NR
         properties:
           "text": "Reg: {{ states('sensor.esp176_routeur_mode_regulation') }}"
           "text_color": >
             {% set etat = states('sensor.esp176_routeur_mode_regulation') %}
-            {% if etat == 'Auto' %}
-            #00ff00
-            {% elif etat == 'Manuel' %}
-            #ff9800
-            {% else %}
+            {% if is_state('binary_sensor.sous_sol_esp176_routeur_liaison_nr', 'off') or etat in ['unavailable','unknown'] %}
             #ff0000
+            {% elif etat.startswith('HP') or etat == 'Auto' %}
+            #00ff00
+            {% else %}
+            #ff9800
             {% endif %}
+
+      - obj: "p4b20" # Prod
+        properties:
+          "text": >
+            {% set count = states('sensor.mp2_production_solaire_totale')|int(0) %}
+            {% if count >= 1000 %}
+              P={{ (count/1000) |round(2)}} kW
+            {% else %}
+              P={{ count |round(0)}} W
+            {% endif %}
+
+      - obj: "p4b21" # Maison
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|int(0) %}
+            {% if count >= 1000 %}
+              M={{ (count/1000) |round(2)}} kW
+            {% else %}
+              M={{ count |round(0)}} W
+            {% endif %}
+
+      - obj: "p4b22" # Batterie (remplace l'ancienne consigne batteries)
+        properties:
+          "text": >
+            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0) * -1 %}
+            {% if count|abs >= 1000 %}
+              B={{ (count/1000) |round(2)}} kW
+            {% else %}
+              B={{ count |round(0)|int }} W
+            {% endif %}
+
+      - obj: "p4b30" # P dispo réelle (Node-RED) en kW
+        properties:
+          "text": "{{ states('sensor.nr_pdispo_fleche').split(' ')[:2] | join('') }}"
+          "text_color": >-
+            {% set f = states('sensor.nr_pdispo_fleche').split(' ')[-1] %}
+            {% if f == '⬆' %}#00ff00{% elif f == '⬇' %}#ff0000{% else %}#ffffff{% endif %}
+
+      - obj: "p4b31" # Flèche de tendance pdispo
+        properties:
+          "text": >-
+            {% set f = states('sensor.nr_pdispo_fleche').split(' ')[-1] %}
+            {{ "\uE05D" if f == '⬆' else ("\uE045" if f == '⬇' else "\uE054") }}
+          "text_color": >-
+            {% set f = states('sensor.nr_pdispo_fleche').split(' ')[-1] %}
+            {% if f == '⬆' %}#00ff00{% elif f == '⬇' %}#ff0000{% else %}#ffffff{% endif %}
+
+      - obj: "p4b40" # S Triac
+        properties:
+          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0) }}"
+
+      - obj: "p4b50" # P ECS
+        properties:
+          "text": >
+            {% set count = states('sensor.ecocompteur_ecs')|float(0) %}
+            {% if count >= 1000 %}
+              P ECS={{ (count/1000) |round(2)}} kW
+            {% else %}
+              P ECS={{ count |round(0)|int }} W
+            {% endif %}
+
+      - obj: "p4b60" # TEMP Triac
+        properties:
+          "text": >
+            {% set count = states('sensor.esp176_routeur_temp_triac')|int(0) %}
+            T Triac={{ count |round(0)}} °C
+
+      - obj: "p4b70" # Temp ECS
+        properties:
+          "text": >
+            {% set volume = states('sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc')|int(0) %}
+            VOL={{ volume |round(0)}} L
 
       - obj: "p4b80" # Bus Ve
         properties:
@@ -233,34 +305,6 @@ openhasp:
             #00ff00
             {% endif %}
 
-      - obj: "p4b20" # Prod
-        properties:
-          "text": >
-            {% set count = states('sensor.mp2_production_solaire_totale')|int(0) %}
-            {% if count >= 1000 %}
-              P={{ (count/1000) |round(2)}} kW
-            {% else %}
-              P={{ count |round(0)}} W
-            {% endif %}
-      - obj: "p4b21" # Maison
-        properties:
-          "text": >
-            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|int(0) %}
-            {% if count >= 1000 %}
-              M={{ (count/1000) |round(2)}} kW
-            {% else %}
-              M={{ count |round(0)}} W
-            {% endif %}
-      - obj: "p4b22" # Consigne Batteries
-        properties:
-          "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_cons_batt_en_cours')|int(0) %}
-            {% if count >= 1000 %}
-              C={{ (count/1000) |round(2)}} kW
-            {% else %}
-              C={{ count |round(0)}} W
-            {% endif %}
-
       - obj: "p4b100" # PAC
         properties:
           "text": >
@@ -271,128 +315,144 @@ openhasp:
               PAC={{ count |round(0)}} W
             {% endif %}
 
-      - obj: "p4b30" # P Dispo
-        properties:
-          "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_pu_disponible')|int(0) %}
-            {% if count >= 1000 %}
-              D={{ (count/1000) |round(2)}} kW
-            {% else %}
-              D={{ count |round(0) }}W
-            {% endif %}
-
-      - obj: "p4b40" # S Triac
-        properties:
-          "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0) }}"
-      - obj: "p4b50" # ECS
-        properties:
-          "text": >
-            {% set count = states('sensor.esp176_esp32_routeur_1r_p_ecs_jsymk')|int(0) %}
-            {% if count >= 1000 %}
-              P ECS={{ (count/1000) |round(2)}} kW
-            {% else %}
-              P ECS={{ count |round(0)}} W
-            {% endif %}
-      - obj: "p4b60" # TEMP Triac
-        properties:
-          "text": >
-            {% set count = states('sensor.esp176_routeur_temp_triac')|int(0) %}
-            T Triac={{ count |round(0)}} °C
-
-      - obj: "p4b70" # Temp ECS
-        properties:
-          "text": >
-            {% set volume = states('sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc')|int(0) %}
-            VOL={{ volume |round(0)}} L
-
       - obj: "p4b110" # Ballon ECS chaud/OK
         properties:
           "text": >
             {{ 'Ballon chaud' if is_state('binary_sensor.sous_sol_esp176_routeur_ecs_ballon_chaud_thermostat_coupe','on') else 'Ballon OK' }}
           "text_color": >
             {{ '#ff9800' if is_state('binary_sensor.sous_sol_esp176_routeur_ecs_ballon_chaud_thermostat_coupe','on') else '#00ff00' }}
-      
-############### Page 5 Elec ###############
-      ############### Réseau
-      - obj: "p5b24" # Grid Power
+
+      - obj: "p4b120" # Borne VE
         properties:
           "text": >
-            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power')|int(0) %}
+            {% set count = states('sensor.evcs_hq2603jcduz_power')|float(0) %}
             {% if count >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
+              VE={{ (count/1000) |round(2)}} kW
             {% else %}
-            {{ count }} W
+              VE={{ count |round(0)|int }} W
             {% endif %}
-      - obj: "p5b25" # Grid Conso
+          "text_color": "{{ '#00ff00' if states('sensor.evcs_hq2603jcduz_power')|float(0) > 50 else '#ffffff' }}"      
+
+############### Page 5 Elec (style console Victron) ###############
+      ############### Réseau
+      - obj: "p5b21" # Puissance (+ soutirage / - injection)
+        properties:
+          "text": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power')|float(0) %}
+            {{ ('%+.2f kW' | format(p/1000)) if p|abs >= 1000 else ('%+d W' | format(p|round(0)|int)) }}
+      - obj: "p5b28" # Flèche réseau : verte vers l'icône = injection, rouge depuis l'icône = soutirage
+        properties:
+          "text": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power')|float(0) %}
+            {% if p <= -10 %}{{ "\uE6c1" }}{% elif p >= 10 %}{{ "\uE6c2" }}{% endif %}
+          "text_color": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power')|float(0) %}
+            {{ '#00ff00' if p <= -10 else '#ff0000' }}   
+
+      - obj: "p5b23" # Soutiré jour
         properties:
           "text": "{{ states('sensor.mp2_energie_soutiree_du_reseau_par_jour')|float(0)|round(1) }} kWh"
-            
-      - obj: "p5b26" # Grid Inject
+      - obj: "p5b25" # Injecté jour
         properties:
           "text": "{{ states('sensor.mp2_energie_injectee_ds_reseau_par_jour')|float(0)|round(1) }} kWh"
-      
-      ##################### Solaire
-      - obj: "p5b34" # Puissance production
+      - obj: "p5b27" # Tension
         properties:
-          "text": >
-            {% set count = states('sensor.mp2_production_solaire_totale')|float(0) %}
-            {% if count >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
-            {% else %}
-            {{ count }} W
-            {% endif %}
-      - obj: "p5b35" # Production
+          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_voltage')|float(0)|round(0)|int }} V"
+
+      ############### Solaire
+      - obj: "p5b31" # Puissance totale
+        properties:
+          "text": >-
+            {% set p = states('sensor.mp2_production_solaire_totale')|float(0) %}
+            {{ ((p/1000)|round(2) ~ ' kW') if p >= 1000 else (p|round(0)|int ~ ' W') }}
+      - obj: "p5b33" # Production jour
         properties:
           "text": "{{ states('sensor.mp2_total_energie_produite_jour')|float(0)|round(1) }} kWh"
-            
-      - obj: "p5b36" # Prévision
+      - obj: "p5b35" # Prévision jour
         properties:
           "text": "{{ states('input_number.mp2_memoire_estimation_production_jour')|float(0)|round(1) }} kWh"
+      - obj: "p5b37" # Dont micro-onduleurs AC
+        properties:
+          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_pvinverter_32_pvinverter_power_total')|float(0)|round(0)|int }} W"
 
-      ############# Batteries
-      - obj: "p5b44" # Charge/Décharge
+      ############### Batterie
+      - obj: "p5b41" # Puissance (+ charge / - décharge)
         properties:
-          "text": >
-            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|int(0) %}
-            {% if count >= 0 %}
-              {{"\uE6c1"}}
-            {% else %}
-              {{"\uE6c2"}}
-            {% endif %}
-      - obj: "p5b45" # Puissance
+          "text": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0) %}
+            {{ ('%+.2f kW' | format(p/1000)) if p|abs >= 1000 else ('%+d W' | format(p|round(0)|int)) }}
+      - obj: "p5b48" # Flèche batterie : verte vers l'icône = charge, rouge depuis l'icône = décharge
         properties:
-          "text": >
-            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0)*-1 %}
-            {% if count|abs >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
-            {% else %}
-            {{ count }} W
-            {% endif %}
-      - obj: "p5b46" # SOC
+          "text": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0) %}
+            {% if p >= 20 %}{{ "\uE6c1" }}{% elif p <= -20 %}{{ "\uE6c2" }}{% endif %}
+          "text_color": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_power')|float(0) %}
+            {{ '#00ff00' if p >= 20 else '#ff0000' }}            
+      - obj: "p5b43" # SOC
         properties:
-          "text": "{{ states('sensor.mp2_soc_affiche')|int(0) }} %"
-      - obj: "p5b47" # Tps restant
+          "text": "{{ states('sensor.mp2_soc_affiche')|float(0)|round(0)|int }} %"
+      - obj: "p5b45" # Temps restant
         properties:
           "text": >-
             {% set h = states('sensor.victron_mqtt_c0619ab1db0d_battery_277_battery_time_to_go') | float(0) %}
             {% set s = (h * 3600) | int %}
             {{ '%02d' | format(s // 3600) }}:{{ '%02d' | format((s % 3600) // 60) }}
-      ################## Maison
-      - obj: "p5b55" # Puissance
+      - obj: "p5b47" # Charge / Décharge jour
         properties:
-          "text": >
-            {% set count = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|float(0) %}
-            {% if count >= 1000 %}
-            {{ (count/1000) |round(2)}} kW
-            {% else %}
-            {{ count }} W
-            {% endif %}
-      - obj: "p5b56" # Conso
+          "text": "{{ states('sensor.mp2_energy_charge_batteries_jour')|float(0)|round(1) }}/{{ states('sensor.mp2_energy_decharge_batteries_jour')|float(0)|round(1) }} kWh"
+
+      ############### Maison
+      - obj: "p5b51" # Puissance
+        properties:
+          "text": >-
+            {% set p = states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_output_power_l1')|float(0) %}
+            {{ ((p/1000)|round(2) ~ ' kW') if p >= 1000 else (p|round(0)|int ~ ' W') }}
+      - obj: "p5b53" # Conso jour
+        properties:
+          "text": "{{ states('sensor.mp2_dess_consommation_totale_jour_vrm')|float(0)|round(1) }} kWh"
+      - obj: "p5b55" # Conso 6h-22h
         properties:
           "text": "{{ states('sensor.mp2_dess_consommation_6h_22h_vrm')|float(0)|round(1) }} kWh"
-      - obj: "p5b57" # PREVI
+      - obj: "p5b57" # Prévision conso 6h-22h
         properties:
-          "text": "{{ states('sensor.mp2_dess_previ_prod_6_22_j1')|float(0)|round(1) }} kWh"
+          "text": "{{ states('sensor.mp2_dess_previ_conso_6_22_j1')|float(0)|round(1) }} kWh"
+
+      ############### Borne VE
+      - obj: "p5b61" # Puissance
+        properties:
+          "text": >-
+            {% set p = states('sensor.evcs_hq2603jcduz_power')|float(0) %}
+            {{ ((p/1000)|round(2) ~ ' kW') if p >= 1000 else (p|round(0)|int ~ ' W') }}
+          "text_color": "{{ '#00ff00' if states('sensor.evcs_hq2603jcduz_power')|float(0) > 50 else '#ffffff' }}"
+      - obj: "p5b63" # Etat
+        properties:
+          "text": >-
+            {% set e = states('sensor.evcs_hq2603jcduz_status') %}
+            {{ {'disconnected':'Déconnecté','connected':'Branché','charging':'En charge','charged':'Chargé','waiting_for_sun':'Att. soleil','waiting_for_start':'Att. départ'}.get(e, e) }}
+      - obj: "p5b65" # Energie jour
+        properties:
+          "text": "{{ states('sensor.ve_sous_sol_evcs_hq2603jcduz_energy_jour')|float(0)|round(1) }} kWh"
+      - obj: "p5b67" # Dernière session
+        properties:
+          "text": "{{ states('sensor.evcs_hq2603jcduz_last_session_energy')|float(0)|round(1) }} kWh"
+
+      ############### Charges DC / Onduleur
+      - obj: "p5b71" # Charges DC
+        properties:
+          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_consumption')|float(0)|round(0)|int }} W"
+      - obj: "p5b73" # Etat onduleur
+        properties:
+          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state') }}"
+          "text_color": "{{ '#ff0000' if states('sensor.victron_mqtt_c0619ab1db0d_vebus_276_vebus_inverter_state') in ['off','unavailable','unknown'] else '#ffffff' }}"
+      - obj: "p5b75" # Charges CA (côté entrée)
+        properties:
+          "text": "{{ states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_ac_loads_l1')|float(0)|round(0)|int }} W"
+      - obj: "p5b77" # Source d'entrée
+        properties:
+          "text": >-
+            {% set s = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_ac_active_input_source') %}
+            {{ {'grid':'Réseau','generator':'Groupe','shore':'Quai','not_available':'Aucune'}.get(s, s) }}
 
 ############### Page 6 ###############
       ############### PORTE GARAGE

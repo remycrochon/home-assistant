@@ -171,17 +171,40 @@ ecs_off_off:
   icon: mdi:water-boiler-auto
 '1706464871250':
   alias: Volets RTS Fermeture
+  icon: mdi:window-shutter
+  description: ''
+  mode: single
   sequence:
-  - data: {}
+  - action: cover.close_cover
     target:
-      entity_id:
-      - cover.volet_sdb_rts
-      - cover.volet_parents_grand_zb_volets
-      - cover.volet_ch_parts_petit
-      - cover.volet_salon_petit
-      - cover.bureau_gauche_rts
-      - cover.bureau_droit_rts
-    action: cover.close_cover
+      entity_id: cover.volet_sdb_rts
+    data: {}
+    continue_on_error: true
+  - action: cover.close_cover
+    target:
+      entity_id: cover.volet_parents_grand_zb_volets
+    data: {}
+    continue_on_error: true
+  - action: cover.close_cover
+    target:
+      entity_id: cover.volet_ch_parts_petit
+    data: {}
+    continue_on_error: true
+  - action: cover.close_cover
+    target:
+      entity_id: cover.volet_salon_petit
+    data: {}
+    continue_on_error: true
+  - action: cover.close_cover
+    target:
+      entity_id: cover.bureau_gauche_rts
+    data: {}
+    continue_on_error: true
+  - action: cover.close_cover
+    target:
+      entity_id: cover.bureau_droit_rts
+    data: {}
+    continue_on_error: true
   - if:
     - condition: or
       conditions:
@@ -194,23 +217,22 @@ ecs_off_off:
         state:
         - Auto Pos Soleil
     then:
-    - data: {}
-      enabled: true
-      action: cover.close_cover
+    - action: cover.close_cover
       target:
-        entity_id:
-        - cover.volet_grand_ch_sud_zb
+        entity_id: cover.volet_grand_ch_sud_zb
+      data: {}
+      continue_on_error: true
   - if:
     - condition: state
       entity_id: input_select.mode_volets_chamb_sud
       state:
       - Auto Général
     then:
-    - data: {}
-      enabled: true
-      action: cover.close_cover
+    - action: cover.close_cover
       target:
         entity_id: cover.volet_ch_sud
+      data: {}
+      continue_on_error: true
   - if:
     - condition: state
       entity_id: input_select.mode_volets_chamb_nord
@@ -218,35 +240,41 @@ ecs_off_off:
       - Auto Général
     then:
     - action: cover.close_cover
-      metadata: {}
       target:
         entity_id: cover.volet_ch_nord
       data: {}
-  mode: single
-  icon: mdi:window-shutter
-  description: ''
+      continue_on_error: true
 0_0_1_ouverture_volets_rts:
   alias: Volets RTS Ouverture
+  icon: mdi:window-shutter-open
+  description: ''
+  mode: single
   sequence:
-  - target:
-      entity_id:
-      - cover.volet_cuisine
-      - cover.volet_sdb_rts
-      - cover.volet_sam_volets_zb
+  - action: cover.open_cover
+    target:
+      entity_id: cover.volet_cuisine
     data: {}
-    action: cover.open_cover
-  - target:
-      entity_id:
-      - cover.volet_salon_petit
+    continue_on_error: true
+  - action: cover.open_cover
+    target:
+      entity_id: cover.volet_sdb_rts
     data: {}
-    action: cover.open_cover
-    enabled: true
+    continue_on_error: true
+  - action: cover.open_cover
+    target:
+      entity_id: cover.volet_sam_volets_zb
+    data: {}
+    continue_on_error: true
+  - action: cover.open_cover
+    target:
+      entity_id: cover.volet_salon_petit
+    data: {}
+    continue_on_error: true
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-    enabled: true
   - if:
     - condition: state
       entity_id: input_select.mode_volets_bureau
@@ -255,11 +283,14 @@ ecs_off_off:
     then:
     - action: cover.open_cover
       target:
-        entity_id:
-        - cover.bureau_droit_rts
-        - cover.bureau_gauche_rts
+        entity_id: cover.bureau_droit_rts
       data: {}
-    enabled: true
+      continue_on_error: true
+    - action: cover.open_cover
+      target:
+        entity_id: cover.bureau_gauche_rts
+      data: {}
+      continue_on_error: true
   - if:
     - condition: state
       entity_id: input_select.mode_volets_chamb_nord
@@ -267,16 +298,15 @@ ecs_off_off:
       - Auto Général
     then:
     - action: cover.open_cover
-      metadata: {}
-      data: {}
       target:
         entity_id: cover.volet_ch_nord
+      data: {}
+      continue_on_error: true
   - delay:
       hours: 0
       minutes: 0
       seconds: 2
       milliseconds: 0
-    enabled: true
   - if:
     - condition: or
       conditions:
@@ -290,10 +320,10 @@ ecs_off_off:
         - Auto Pos Soleil
     then:
     - action: cover.open_cover
-      data: {}
       target:
-        entity_id:
-        - cover.volet_grand_ch_sud_zb
+        entity_id: cover.volet_grand_ch_sud_zb
+      data: {}
+      continue_on_error: true
   - if:
     - condition: state
       entity_id: input_select.mode_volets_chamb_sud
@@ -301,12 +331,10 @@ ecs_off_off:
       - Auto Général
     then:
     - action: cover.open_cover
-      data: {}
       target:
         entity_id: cover.volet_ch_sud
-  mode: single
-  icon: mdi:window-shutter-open
-  description: ''
+      data: {}
+      continue_on_error: true
 '1706601448211':
   alias: porte_sous_sol_down
   sequence:

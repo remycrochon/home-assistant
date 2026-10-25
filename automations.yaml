@@ -5883,3 +5883,56 @@
 
             Prévision, seule la couleur EDF fait foi.'
   mode: single
+- id: '1792826290496'
+  alias: Volets - Alerte Telegram volet muet
+  description: 'Envoie un message Telegram avec le nom du volet quand il ne répond
+    pas pendant l''ouverture ou la fermeture (erreur ignorée par les scripts Volets
+    RTS). La correspondance étape -> volet est dans les variables ci-dessous : à mettre
+    à jour si les scripts changent.'
+  triggers:
+  - trigger: event
+    event_type: system_log_event
+    event_data:
+      level: ERROR
+  conditions:
+  - condition: template
+    value_template: "{% set msg = trigger.event.data.message | join(' ') %}\n{{ trigger.event.data.name.startswith('homeassistant.components.script.')\n
+      \  and 'Volets RTS' in msg\n   and 'did not respond' in msg }}"
+  actions:
+  - variables:
+      msg: '{{ trigger.event.data.message | join('' '') }}'
+      script_nom: '{{ msg.split('':'')[0] }}'
+      etape: '{% set st = msg | regex_findall_index(''step (\\d+)'', 0) if ''step
+        '' in msg else '''' %}{% set ps = msg | regex_findall_index(''pos (\\d+)'',
+        0) if ''pos '' in msg else '''' %}{{ (st ~ ''.'' ~ ps) if st else ps }}'
+      noms_ouverture:
+        '1': Cuisine
+        '2': Salle de bain
+        '3': Salle à manger
+        '4': Petit salon
+        '6.1': Bureau droit
+        '6.2': Bureau gauche
+        '7.1': Chambre nord
+        '9.1': Grand volet chambre sud
+        '10.1': Chambre sud
+      noms_fermeture:
+        '1': Salle de bain
+        '2': Parents grand volet
+        '3': Parents petit volet
+        '4': Petit salon
+        '5': Bureau gauche
+        '6': Bureau droit
+        '7.1': Grand volet chambre sud
+        '8.1': Chambre sud
+        '9.1': Chambre nord
+      volet: '{% set noms = noms_ouverture if ''Ouverture'' in script_nom else noms_fermeture
+        %}{{ noms.get(etape, ''inconnu (étape '' ~ etape ~ '')'') }}'
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: 'Volets : pas de réponse'
+      message: 'Le volet {{ volet }} n''a pas répondu.{{ ''\n'' }}Script : {{ script_nom
+        }}{{ ''\n'' }}{{ states(''sensor.date_time'') }}'
+  mode: queued
+  max: 5

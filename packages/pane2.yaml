@@ -261,15 +261,9 @@ openhasp:
         properties:
           "text": "{{ states('sensor.esp176_routeur_sortie_triac')|float(0) | round(0) }}"
 
-      - obj: "p4b50" # P ECS
+      - obj: "p4b50" # P ECS, même unité que la pdispo
         properties:
-          "text": >
-            {% set count = states('sensor.ecocompteur_ecs')|float(0) %}
-            {% if count >= 1000 %}
-              P ECS={{ (count/1000) |round(2)}} kW
-            {% else %}
-              P ECS={{ count |round(0)|int }} W
-            {% endif %}
+          "text": "P ECS={{ states('sensor.ecs_affichage') }}"
 
       - obj: "p4b60" # TEMP Triac
         properties:

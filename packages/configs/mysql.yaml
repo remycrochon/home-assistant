@@ -99,3 +99,9 @@ recorder:
       - sensor.victron_mqtt_c0619ab1db0d_solarcharger_279_solarcharger_pv_current
       - number.mp2_id_276_ac_power_setpoint_l1      
       - sensor.nr_routeur_statut
+      - sensor.niak_weather_en_bref
+      - sensor.niak_weather_bulletin_du_jour
+      - sensor.niak_weather_alerte
+      - sensor.niak_weather_point_de_givre
+      - sensor.niak_weather_point_de_rosee
+      - sensor.niak_weather_humidex      

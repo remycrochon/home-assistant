@@ -4533,6 +4533,9 @@
       linky_kwh_22h: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
       conso_j1_estime: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0)
         | round(1) }}'
+      ecs_kwh_22h: '{{ states(''sensor.energie_ecs'') | float(0) | round(3) }}'
+      ballon_l_22h: '{{ states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
+        | float(0) | round(0) }}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_dess_ia
@@ -4655,7 +4658,8 @@
       value: '{{ {''sa'': soc_actuel, ''sc'': soc_cible, ''sp'': soc_prevu_0545_sans_charge,
         ''bp'': besoin_corrige_pct_txt, ''hd'': heure_debut_charge_previ_txt, ''dm'':
         duree_charge_previ_min_txt, ''fa'': forcage_actif_txt, ''nf'': niveau_forcage,
-        ''pd'': previ_prod_demain, ''lk'': linky_kwh_22h} | tojson }}'
+        ''pd'': previ_prod_demain, ''lk'': linky_kwh_22h, ''ek'': ecs_kwh_22h, ''vb'':
+        ballon_l_22h} | tojson }}'
     target:
       entity_id: input_text.mp2_dess_snapshot_22h
   - action: input_text.set_value
@@ -4944,6 +4948,16 @@
       ve_bilan_txt: '{% set dt = state_attr(''sensor.bilan_nuit_ve'', ''date'') %}{%
         if dt and (as_datetime(dt) | as_local).date() == now().date() %}{{ state_attr(''sensor.bilan_nuit_ve'',
         ''rapport'') }}{% else %}Pas de bilan VE cette nuit{% endif %}'
+      ecs_bilan_txt: '{% if snap.ek is defined and snap.vb is defined %}{% set e =
+        [(states(''sensor.energie_ecs'') | float(0)) - (snap.ek | float(0)), 0] |
+        max %}{% set vb22 = snap.vb | float(0) | round(0) | int %}{% set vb6 = states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
+        | float(0) | round(0) | int %}{% if e < 0.05 %}Pas de chauffe cette nuit{%
+        else %}Chauffe : {{ e | round(2) }} kWh{% endif %} (ballon {{ vb22 }} → {{
+        vb6 }} L éq. 40 °C){% else %}Pas de mesure ECS à 22h (disponible dès demain){%
+        endif %}'
+      ecs_ia_txt: '{% if snap.ek is defined %}{{ ''a chauffé'' if ((states(''sensor.energie_ecs'')
+        | float(0)) - (snap.ek | float(0))) >= 0.05 else ''pas de chauffe'' }}{% else
+        %}inconnu{% endif %}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_bilan_ia
@@ -4965,7 +4979,8 @@
         jugée nécessaire hier soir : {{ ''oui'' if besoin_corrige_pct > 0 else ''non''
         }} - Charge estimée avoir eu lieu cette nuit : {{ charge_a_eu_lieu }} - Forçage
         actif hier soir : {{ forcage_etait_actif }} - Charge réseau cette nuit (détail
-        précis) : {{ charge_reelle_txt }}
+        précis) : {{ charge_reelle_txt }} - Chauffe-eau (ECS) cette nuit : {{ ecs_ia_txt
+        }}
 
         - Détection système d''une décharge nocturne anormale (calcul déjà fait, ne
         recalcule rien toi-même) : {{ ''OUI'' if decharge_anormale else ''NON'' }}
@@ -4979,6 +4994,11 @@
         aucune anomalie de décharge, même si l''écart au SOC cible (différent du SOC
         "sans charge") est très élevé — un grand écart au SOC cible seul n''est jamais
         un signal d''anomalie.
+
+        Chauffe-eau (ECS) : l''absence de chauffe est normale quand le ballon est
+        déjà chaud et n''est jamais une anomalie. Tu peux mentionner la chauffe de
+        l''ECS dans ta phrase seulement si cela aide à comprendre la nuit, toujours
+        sans chiffre ; si la valeur est inconnue, n''en parle pas.
 
         Exemples de style attendu (ne pas recopier tel quel) : "Nuit conforme à la
         prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."
@@ -5020,9 +5040,10 @@
             = {{ heure_debut_previ }} → durée ~{{ duree_previ_min }} min{% else %}Aucune
             charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau
             = {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{
-            ve_bilan_txt }}{{-\"\\n\"-}}\n    {{ rapport_bilan_ia.data.commentaire_bilan
-            }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
-            is defined else 'INFO' }}\n"
+            ve_bilan_txt }}{{-\"\\n\"-}}\n    ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt }}{{-\"\\n\"-}}\n
+            \   {{ rapport_bilan_ia.data.commentaire_bilan }}{{-\"\\n\"-}}\n    Niveau
+            = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau is defined
+            else 'INFO' }}\n"
     default:
     - action: telegram_bot.send_message
       metadata: {}
@@ -5036,7 +5057,8 @@
           \   {% if besoin_corrige_pct > 0 %}Charge prévue hier = {{ heure_debut_previ
           }} → durée ~{{ duree_previ_min }} min{% else %}Aucune charge nécessaire
           hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau = {{ charge_reelle_txt
-          }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{ ve_bilan_txt }}\n"
+          }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{ ve_bilan_txt }}{{-\"\\n\"-}}\n
+          \   ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt }}\n"
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot

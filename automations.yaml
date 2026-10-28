@@ -424,7 +424,7 @@
     path: pavax/nagging_alert_notification.yaml
     input:
       condition_entity_state: 'on'
-      sensor_entity: binary_sensor.amx435x_temps_usage_lames_atteint
+      sensor_entity: binary_sensor.exterieur_am435x_awd_amx435x_temps_usage_lames
       alert_state: 'on'
       alert_action:
       - action: telegram_bot.send_message
@@ -433,7 +433,7 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           message: '{{states("sensor.date_time") }}{{-"\n"-}}
 
-            Lames robot à remplacer ={{states("sensor.am435x_awd_duree_d_utilisation_des_lames")|float(0)|round(2)}}
+            Lames robot à remplacer ={{states("sensor.exterieur_am435x_awd_duree_d_utilisation_des_lames")|float(0)|round(2)}}
             h'
           title: Alarme Robot AMX435X!!!
       resolved_action:
@@ -1228,7 +1228,7 @@
   description: ''
   triggers:
   - entity_id:
-    - sensor.am435x_awd_error
+    - sensor.exterieur_am435x_awd_erreur
     id: error
     trigger: state
     for:
@@ -1239,22 +1239,23 @@
   - condition: not
     conditions:
     - condition: state
-      entity_id: sensor.am435x_awd_error
+      entity_id: sensor.exterieur_am435x_awd_erreur
       state: unavailable
     enabled: false
   actions:
   - condition: not
     conditions:
     - condition: state
-      entity_id: sensor.am435x_awd_error
+      entity_id: sensor.exterieur_am435x_awd_erreur
       state: alarm_mower_stopped
   - action: telegram_bot.send_message
     metadata: {}
     data:
       message: '{{ states(''sensor.date_time'') }}
 
-        {% if states(''sensor.am435x_awd_error'') == ''no_error'' %}Pas de Probleme{%
-        else %}Probleme={{ states(''sensor.am435x_awd_error'') }}{% endif %}'
+        {% if states(''sensor.exterieur_am435x_awd_erreur'') == ''no_error'' %}Pas
+        de Probleme{% else %}Probleme={{ states(''sensor.exterieur_am435x_awd_erreur'')
+        }}{% endif %}'
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
       title: Robot notification
       parse_mode: plain_text
@@ -1382,7 +1383,10 @@
         | round(0) }}, "pac": {{ states("sensor.ecocompteur_pac") | float(0) | round(0)
         }}, "ecs": {{ states("sensor.ecocompteur_ecs") | float(0) | round(0) }}, "pmax":
         {{ states("number.esp176_routeur_puissance_max_triac") | float(3300) | round(0)
-        }}}'
+        }}, "vol": {{ states("sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc")
+        | float(0) | round(0) }}, "vplein": {{ states("input_number.ecs_seuil_ballon_plein_l_eq_40_degc")
+        | float(400) | round(0) }}, "rmode": "{{ states("select.esp176_routeur_mode_fonctionnement_routeur")
+        }}"}'
   mode: single
 - id: '1726480156769'
   alias: Surveillance Puissance Chalet
@@ -1811,44 +1815,46 @@
   actions:
   - action: notify.send_message
     data:
-      message: '{% set tf=states(''sensor.am435x_awd_temps_de_fonctionnement_total'')|float(0)%}
-        {% set tr=states(''sensor.am435x_awd_temps_de_recherche_total'')|float(0)%}
-        {% set tt=states(''sensor.am435x_awd_temps_de_tonte_total'')|float(0)%} {{states("sensor.date_time")}},
-        {{ (tf*24)|round(0) }}, {{ (tr/(tf*24)*100)|round(2)}}, {{ (tt/(tf*24)*100)|round(2)}},
-        {{ states(''sensor.am435x_awd_distance_parcourue_totale'')|round(0) }}, {{
-        states(''sensor.am435x_awd_nombre_de_cycles_de_charge'')|round(0)}}, {{ states(''sensor.am435x_awd_temps_de_charge_total'')|round(0)}},
-        {{ states(''sensor.am435x_awd_nombre_de_collisions'')|round(0)}}, {{ states(''sensor.am435x_awd_duree_d_utilisation_des_lames'')|round(0)}}'
+      message: '{% set tf=states(''sensor.exterieur_am435x_awd_temps_de_fonctionnement_total'')|float(0)%}
+        {% set tr=states(''sensor.exterieur_am435x_awd_temps_de_recherche_total'')|float(0)%}
+        {% set tt=states(''sensor.exterieur_am435x_awd_temps_de_tonte_total'')|float(0)%}
+        {{states("sensor.date_time")}}, {{ (tf*24)|round(0) }}, {{ (tr/(tf*24)*100)|round(2)}},
+        {{ (tt/(tf*24)*100)|round(2)}}, {{ states(''sensor.exterieur_am435x_awd_distance_parcourue_totale'')|round(0)
+        }}, {{ states(''sensor.exterieur_am435x_awd_nombre_de_cycles_de_charge'')|round(0)}},
+        {{ states(''sensor.exterieur_am435x_awd_temps_de_charge_total'')|round(0)}},
+        {{ states(''sensor.exterieur_am435x_awd_nombre_de_collisions'')|round(0)}},
+        {{ states(''sensor.exterieur_am435x_awd_duree_d_utilisation_des_lames'')|round(0)}}'
     target:
       entity_id: notify.statistique_am435x
   - variables:
       date_jour: '{{ now().strftime(''%d/%m/%Y %H:%M'') }}'
-      erreur_actuelle: '{{ states(''sensor.am435x_awd_error'') }}'
-      erreur_txt: "{% if states('sensor.am435x_awd_error') == 'no_error' %}\n  Aucune
-        erreur en cours\n{% else %}\n  Erreur en cours : {{ states('sensor.am435x_awd_error')
+      erreur_actuelle: '{{ states(''sensor.exterieur_am435x_awd_erreur'') }}'
+      erreur_txt: "{% if states('sensor.exterieur_am435x_awd_erreur') == 'no_error'
+        %}\n  Aucune erreur en cours\n{% else %}\n  Erreur en cours : {{ states('sensor.exterieur_am435x_awd_erreur')
         }}\n{% endif %}"
-      batterie_txt: "{% set v = states('sensor.am435x_awd_batterie') %}{% if v in
-        ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n  {{ v|float(0)|round(0)
-        }} %\n{% endif %}"
-      zone_txt: '{{ states(''sensor.am435x_awd_aire_de_travail'') }}'
-      mode_txt: '{{ states(''sensor.am435x_awd_mode'') }}'
-      distance_jour_txt: "{% set v = states('sensor.amx435x_distance_jour') %}{% if
-        v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n  {{
-        v|float(0)|round(2) }} km\n{% endif %}"
-      temps_tonte_jour_txt: "{% set v = states('sensor.amx435x_temps_tonte_jour')
+      batterie_txt: "{% set v = states('sensor.exterieur_am435x_awd_batterie') %}{%
+        if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n
+        \ {{ v|float(0)|round(0) }} %\n{% endif %}"
+      zone_txt: '{{ states(''sensor.exterieur_am435x_awd_aire_de_travail'') }}'
+      mode_txt: '{{ states(''sensor.exterieur_am435x_awd_mode'') }}'
+      distance_jour_txt: "{% set v = states('sensor.exterieur_am435x_awd_amx435x_distance_jour')
+        %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
+        %}\n  {{ v|float(0)|round(2) }} km\n{% endif %}"
+      temps_tonte_jour_txt: "{% set v = states('sensor.exterieur_am435x_awd_amx435x_temps_tonte_jour')
         %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
         %}\n  {% set total = (v|float(0)*3600)|int %}{{ '%02d:%02d' % (total // 3600,
         (total % 3600) // 60) }}\n{% endif %}"
-      collisions_jour_txt: "{% set v = states('sensor.amx435x_collisions_jour') %}{%
-        if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else %}\n
-        \ {{ v|float(0)|round(0)|int }}\n{% endif %}"
-      cycles_charge_jour_txt: "{% set v = states('sensor.amx435x_cycles_charge_jour')
+      collisions_jour_txt: "{% set v = states('sensor.exterieur_am435x_awd_amx435x_collisions_jour')
+        %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
+        %}\n  {{ v|float(0)|round(0)|int }}\n{% endif %}"
+      cycles_charge_jour_txt: "{% set v = states('sensor.exterieur_am435x_awd_amx435x_cycles_charge_jour')
         %}{% if v in ['unknown','unavailable','none','None',''] %}\n  n/d\n{% else
         %}\n  {{ v|float(0)|round(0)|int }}\n{% endif %}"
   - alias: 'Arrêt volontaire : message simple, sinon rapport complet'
     choose:
     - conditions:
       - condition: state
-        entity_id: sensor.am435x_awd_error
+        entity_id: sensor.exterieur_am435x_awd_erreur
         state:
         - alarm_mower_stopped
         - alarm_mower_switched_off
@@ -1858,7 +1864,7 @@
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
           title: Robot am435x à l'arrêt
           message: "\U0001F916 {{ date_jour }}\n\n⏸️ Le robot est à l'arrêt volontaire
-            ({{ \"éteint\" if states(\"sensor.am435x_awd_error\") == \"alarm_mower_switched_off\"
+            ({{ \"éteint\" if states(\"sensor.exterieur_am435x_awd_erreur\") == \"alarm_mower_switched_off\"
             else \"arrêté\" }}).\nAucun rapport journalier généré.\n\nMode : {{ mode_txt
             }}\nBatterie : {{ batterie_txt }}"
           parse_mode: plain_text

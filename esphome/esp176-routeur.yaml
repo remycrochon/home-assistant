@@ -3,15 +3,15 @@
 # 7=Equalize;8=Passthru;9=Inverting;10=Power assist;11=Power supply;252=External control
 
 # ============================================================================
-# esp176-routeur V2 : le calcul de la puissance disponible est fait par Node-RED
+# esp176-routeur V3 : le calcul de la puissance disponible est fait par Node-RED
 #
-#   NR (fonction "Pilotage VE + limite MP2 V11")
+#   NR (fonction "Pilotage VE + limite MP2 V14.x")
 #     → MQTT nr/mp2/routeur/p_dispo (toutes les 5 s)
 #     → HA   sensor.nr_p_dispo_routeur (expire_after: 30 → "unavailable" si NR se tait)
 #     → ESP  ce fichier
 #
 # L'ESP ne fait plus que :
-#   - modes Auto / Manu / Arret / Etalonnage + switch "Valid Routeur"
+#   - modes Auto / Manu / Arret / Etalonnage (plus de switch "Valid Routeur" : le mode Arret suffit)
 #   - chauffe de nuit (HC) avec hystérésis sur le volume d'eau chaude (seuil bas / haut)
 #   - sécurité température triac, pmax, interpolation puissance → % triac
 #   - pilotage du gradateur 0-10V, relais surprod, LEDs, afficheur
@@ -200,14 +200,13 @@ select:
               # arrêt explicite du script d'étalonnage.
               - script.stop: etalonnage_striac
 
-              # Passage en Manu : remise à zéro + validrouteur OFF
+              # Passage en Manu : consigne remise à zéro
               - if:
                   condition:
                     lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Manu";'
                   then:
                     - lambda: |-
                         id(ctriac_manu).publish_state(0);
-                    - switch.turn_off: validrouteur
 
               # Remise à zéro de la sortie et des affichages intermédiaires
               - lambda: |-
@@ -436,12 +435,6 @@ switch:
     pin: ${GPIO_Relais}
     id: relais
 
-  - platform: template
-    name: "Valid Routeur"
-    id: validrouteur
-    optimistic: True
-    restore_mode: always_on
-
   - platform: restart
     name: "Restart"
 
@@ -474,7 +467,7 @@ display:
       char ligne3[21];
 
       snprintf(ligne0, sizeof(ligne0), "Pd=%0.0fW Pe=%0.0fW", id(p_dispo), id(puecs).state);
-      snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% V:%s", id(striac), id(validrouteur).state ? "OK" : "NOK");
+      snprintf(ligne1, sizeof(ligne1), "Tr=%0.1f%% Vol=%0.0fL", id(striac), id(volume_ecs_ha).state);
       snprintf(ligne2, sizeof(ligne2), "Tp=%0.1fc E:%s", id(temp_triac).state, id(temperatureok).state ? "OK" : "NOK");
       snprintf(ligne3, sizeof(ligne3), "M:%s NR:%s",
                id(_Mode_Fonctionnement_routeur).current_option().c_str(),
@@ -513,7 +506,6 @@ script:
       - lambda: |-
           std::string mode_rt(id(_Mode_Fonctionnement_routeur).current_option().c_str());
           const bool is_hp = id(is_hp_hours);
-          const bool valid = id(validrouteur).state;
 
           // --- Liaison Node-RED (valeur disponible + API HA connectée) ---
           float p_nr = id(p_dispo_nr).state;
@@ -532,18 +524,11 @@ script:
             txt = "OFF - Arrêt";
 
           } else if (mode_rt == "Manu") {
-            if (valid) {
-              s = id(ctriac_manu).state;
-              txt = "Manu";
-            } else {
-              txt = "Manu - non validé";
-            }
+            s = id(ctriac_manu).state;
+            txt = "Manu";
 
           } else if (mode_rt == "Auto") {
-            if (!valid) {
-              id(hc_chauffe) = false;
-              txt = "OFF - Routeur non validé";
-            } else if (!temp_ok) {
+            if (!temp_ok) {
               id(hc_chauffe) = false;
               txt = "OFF - Température triac";
             } else if (!nr_ok) {
@@ -724,7 +709,7 @@ script:
 
   ########################################################################
   # ------------  Pilotage led
-  #   rouge = routage en cours (triac > 1 %) ; jaune = routeur validé
+  #   rouge = routage en cours (triac > 1 %) ; jaune = mode Auto
   ########################################################################
   - id: etat_production
     mode: single
@@ -739,7 +724,7 @@ script:
 
       - if:
           condition:
-            switch.is_on: validrouteur
+            lambda: 'return id(_Mode_Fonctionnement_routeur).current_option() == "Auto";'
           then:
             - output.turn_on: led_jaune
           else:

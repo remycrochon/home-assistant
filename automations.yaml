@@ -4957,13 +4957,21 @@
       ecs_bilan_txt: '{% if snap.ek is defined and snap.vb is defined %}{% set e =
         [(states(''sensor.energie_ecs'') | float(0)) - (snap.ek | float(0)), 0] |
         max %}{% set vb22 = snap.vb | float(0) | round(0) | int %}{% set vb6 = states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
-        | float(0) | round(0) | int %}{% if e < 0.05 %}Pas de chauffe cette nuit{%
-        else %}Chauffe : {{ e | round(2) }} kWh{% endif %} (ballon {{ vb22 }} → {{
-        vb6 }} L éq. 40 °C){% else %}Pas de mesure ECS à 22h (disponible dès demain){%
-        endif %}'
-      ecs_ia_txt: '{% if snap.ek is defined %}{{ ''a chauffé'' if ((states(''sensor.energie_ecs'')
-        | float(0)) - (snap.ek | float(0))) >= 0.05 else ''pas de chauffe'' }}{% else
-        %}inconnu{% endif %}'
+        | float(0) | round(0) | int %}{% set sb = states(''number.esp176_routeur_seuil_bas_ecs_l'')
+        | float(0) | round(0) | int %}{% set sh = states(''number.esp176_routeur_seuil_haut_ecs_l'')
+        | float(0) | round(0) | int %}{% if e >= 0.05 %}Chauffe de nuit : {{ e | round(2)
+        }} kWh (ballon {{ vb22 }} → {{ vb6 }} L éq. 40 °C, plage de nuit {{ sb }}–{{
+        sh }} L){% elif vb6 < sb %}⚠ Pas de chauffe alors que le ballon est sous le
+        seuil bas de nuit (ballon {{ vb22 }} → {{ vb6 }} L éq. 40 °C, seuil bas {{
+        sb }} L){% else %}Pas de chauffe (chauffe de nuit seulement entre {{ sb }}
+        et {{ sh }} L){% endif %}{% else %}Pas de mesure ECS à 22h (disponible dès
+        demain){% endif %}'
+      ecs_ia_txt: '{% if snap.ek is defined %}{% set e = (states(''sensor.energie_ecs'')
+        | float(0)) - (snap.ek | float(0)) %}{% if e >= 0.05 %}a chauffé{% elif (states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
+        | float(0)) < (states(''number.esp176_routeur_seuil_bas_ecs_l'') | float(0))
+        %}pas de chauffe alors que le ballon était sous le seuil bas de nuit{% else
+        %}pas de chauffe, normal car le ballon était au-dessus du seuil de nuit{%
+        endif %}{% else %}inconnu{% endif %}'
   - action: ai_task.generate_data
     continue_on_error: true
     response_variable: rapport_bilan_ia
@@ -5004,7 +5012,9 @@
         Chauffe-eau (ECS) : l''absence de chauffe est normale quand le ballon est
         déjà chaud et n''est jamais une anomalie. Tu peux mentionner la chauffe de
         l''ECS dans ta phrase seulement si cela aide à comprendre la nuit, toujours
-        sans chiffre ; si la valeur est inconnue, n''en parle pas.
+        sans chiffre ; si la valeur est inconnue, n''en parle pas. Si le champ indique
+        une absence de chauffe alors que le ballon était sous le seuil bas de nuit,
+        signale-le brièvement (sans chiffre) comme un point à vérifier.
 
         Exemples de style attendu (ne pas recopier tel quel) : "Nuit conforme à la
         prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."
@@ -5046,10 +5056,10 @@
             = {{ heure_debut_previ }} → durée ~{{ duree_previ_min }} min{% else %}Aucune
             charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau
             = {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{
-            ve_bilan_txt }}{{-\"\\n\"-}}\n    ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt }}{{-\"\\n\"-}}\n
-            \   {{ rapport_bilan_ia.data.commentaire_bilan }}{{-\"\\n\"-}}\n    Niveau
-            = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau is defined
-            else 'INFO' }}\n"
+            ve_bilan_txt }}{{-\"\\n\"-}}\n    {% if ecs_bilan_txt | trim != '' %}ECS
+            :{{-\"\\n\"-}}{{ ecs_bilan_txt }}{{-\"\\n\"-}}{% endif %}\n    {{ rapport_bilan_ia.data.commentaire_bilan
+            }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
+            is defined else 'INFO' }}\n"
     default:
     - action: telegram_bot.send_message
       metadata: {}
@@ -5064,7 +5074,8 @@
           }} → durée ~{{ duree_previ_min }} min{% else %}Aucune charge nécessaire
           hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau = {{ charge_reelle_txt
           }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{ ve_bilan_txt }}{{-\"\\n\"-}}\n
-          \   ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt }}\n"
+          \   {% if ecs_bilan_txt | trim != '' %}ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt
+          }}{% endif %}\n"
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot

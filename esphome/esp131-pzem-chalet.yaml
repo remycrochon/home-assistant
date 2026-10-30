@@ -25,9 +25,6 @@ wifi:
     dns1: !secret dns1
     dns2: !secret dns2
 
-external_components:
-  - source: github://dentra/esphome-components
-
 # Enable logging
 logger:
   baud_rate: 0
@@ -36,29 +33,21 @@ api:
 
 ota:
   platform: esphome
-# Configuration UART
+web_server:
+  port: 80  
+
+  # Configuration UART
 uart:
   rx_pin: GPIO3
   tx_pin: GPIO1
   baud_rate: 9600
   stop_bits: 1
 
-web_server:
-  port: 80
 # Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
     number: GPIO16
     inverted: true
-
-time:
-  - platform: sntp
-    id: sntp_time
-    timezone: Europe/Paris
-    servers:
-     - 0.pool.ntp.org
-     - 1.pool.ntp.org
-     - 2.pool.ntp.org
 
 binary_sensor:
 #Etat de la connection

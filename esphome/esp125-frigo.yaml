@@ -10,13 +10,15 @@ esphome:
       - climate.control:
           id: pid_climate
           mode: "OFF"
-      - light.turn_off:
-          id: manual_heater
       - lambda: |-
           id(r1_demoulage_arme) = false;
           id(r1_cycle_chauffe_en_cours) = false;
           id(r1_minutes_sans_demoulage) = 0;
           id(r1_etat).publish_state("Repos");
+      # Re-applique le mode memorise (Auto / Manu / Arret) apres un redemarrage
+      - script.execute:
+          id: appliquer_mode
+          mode: !lambda 'return std::string(id(mode_fonctionnement).current_option());'
 
 esp32:
   board: esp32dev
@@ -25,8 +27,6 @@ esp32:
     advanced:
       minimum_chip_revision: "3.0"
 
-packages:
-  - !include packages/mqtt_pve.yaml
 
 logger:
 
@@ -108,30 +108,28 @@ binary_sensor:
     lambda: |-
       return id(r1_cycle_chauffe_en_cours);
 
-number:
+# Mode de fonctionnement memorise (restore_value) :
+#  - Auto  : production de glacons active, cycles demoulage / entretien automatiques
+#  - Manu  : production de glacons arretee, regulation PID de chauffe R1 forcee, ventilo force a l'arret
+#  - Arret : tout est arrete (regulation, chauffage, ventilo)
+select:
   - platform: template
-    name: "Puissance chauffage manuel"
-    id: puissance_manuelle
-    min_value: 0
-    max_value: 100
-    step: 1
-    mode: box
+    name: "Mode de fonctionnement"
+    id: mode_fonctionnement
+    icon: "mdi:state-machine"
+    options:
+      - "Auto"
+      - "Manu"
+      - "Arrêt"
+    initial_option: "Auto"
     restore_value: true
     optimistic: true
-    initial_value: 0
-    unit_of_measurement: "%"
     set_action:
-      - if:
-          condition:
-            switch.is_on: chauffage_mode_manuel
-          then:
-            - climate.control:
-                id: pid_climate
-                mode: "OFF"
-            - light.turn_on:
-                id: manual_heater
-                brightness: !lambda 'return x / 100.0f;'
+      - script.execute:
+          id: appliquer_mode
+          mode: !lambda 'return x;'
 
+number:
   - platform: template
     name: "R1 Seuil froid armement"
     id: r1_seuil_froid_armement
@@ -194,6 +192,29 @@ number:
     optimistic: true
     initial_value: 10
     unit_of_measurement: "°C"
+
+  # Consigne de la regulation PID forcee en mode Manu.
+  - platform: template
+    name: "R1 Consigne PID manuel"
+    id: r1_consigne_pid_manuel
+    min_value: 0
+    max_value: 15
+    step: 0.5
+    mode: box
+    restore_value: true
+    optimistic: true
+    initial_value: 6
+    unit_of_measurement: "°C"
+    set_action:
+      - if:
+          condition:
+            lambda: |-
+              return id(mode_fonctionnement).current_option() == "Manu";
+          then:
+            - climate.control:
+                id: pid_climate
+                mode: HEAT
+                target_temperature: !lambda 'return x;'
 
   - platform: template
     name: "R1 Duree maxi PID entretien"
@@ -270,11 +291,14 @@ sensor:
           if (isnan(x)) return {};
           return x;
 
+  # Sonde dégivrage : valeur BRUTE, utilisée par la logique et le debug.
+  # Interne : elle n'est pas envoyée à HA (c'est la copie ci-dessous qui l'est).
   - platform: dallas_temp
     one_wire_id: ow1
-    name: "Temp DS18B20 Degivrage"
+    name: "Temp DS18B20 Degivrage Brut"
     address: 0x9900000491efe528
     id: temp_ds18b20_d
+    internal: true
     device_class: temperature
     state_class: "measurement"
     update_interval: 5s
@@ -284,13 +308,29 @@ sensor:
           if (isnan(x)) return {};
           return x;
 
+  # Copie filtrée pour HA : même nom qu'avant => même entité, même historique.
+  # Une valeur au plus toutes les 60 s, sauf variation >= 0,5 °C (envoyée tout de suite,
+  # donc les cycles de dégivrage restent bien visibles).
+  - platform: copy
+    source_id: temp_ds18b20_d
+    name: "Temp DS18B20 Degivrage"
+    id: temp_ds18b20_d_ha
+    device_class: temperature
+    state_class: "measurement"
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.5
+
   # Température bac lue depuis l'ESP179 via Home Assistant.
   # Elle sert uniquement à sécuriser / prolonger l'entretien R1.
   - platform: homeassistant
     name: "Temp Bac Frigo ESP179"
     id: temp_bac_frigo_esp179
     entity_id: sensor.cuisine_esp179_test_ventilo_frigo_temp_ds18b20_bac_frigo_test
-    internal: false
+    internal: true
 
   - platform: template
     name: "R1 Minutes sans demoulage"
@@ -367,15 +407,17 @@ text_sensor:
   - platform: template
     name: "R1 Debug Court"
     id: r1_debug_court
-    update_interval: 10s
+    update_interval: 60s
     lambda: |-
       char buffer[300];
 
       const char *etat = id(r1_etat).state.c_str();
+      std::string mode = std::string(id(mode_fonctionnement).current_option());
 
       snprintf(buffer, sizeof(buffer),
-        "Etat:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Entretiens:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC | Auto:%d | Manu:%d",
+        "Etat:%s | Mode:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Entretiens:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC",
         etat,
+        mode.c_str(),
         id(r1_demoulage_arme),
         id(r1_cycle_chauffe_en_cours),
         id(r1_minutes_sans_demoulage),
@@ -383,9 +425,7 @@ text_sensor:
         id(r1_compteur_entretien),
         id(temp_ds18b20_d).state,
         id(temp_ds18b20_r).state,
-        id(temp_bac_frigo_esp179).state,
-        id(r1_auto_degivr).state,
-        id(chauffage_mode_manuel).state
+        id(temp_bac_frigo_esp179).state
       );
 
       return std::string(buffer);
@@ -435,86 +475,61 @@ output:
     id: pwm_heater
     max_power: 100%
 
-light:
-  - platform: monochromatic
-    output: pwm_heater
-    id: manual_heater
-    name: "Sortie Chauffage (Manuel)"
-    restore_mode: ALWAYS_OFF
-
-switch:
-  - platform: template
-    name: "Mode Manuel Chauffage"
-    id: chauffage_mode_manuel
-    optimistic: true
-    restore_mode: ALWAYS_OFF
-    turn_on_action:
-      - logger.log: "Mode manuel active : auto R1 et PID desactives"
-      - script.stop: r1_pid_demoulage
-      - script.stop: r1_pid_entretien
-      - climate.control:
-          id: pid_climate
-          mode: "OFF"
-      - lambda: |-
-          id(r1_cycle_chauffe_en_cours) = false;
-          id(r1_demoulage_arme) = false;
-          id(r1_etat).publish_state("Manuel");
-      - light.turn_on:
-          id: manual_heater
-          brightness: !lambda 'return id(puissance_manuelle).state / 100.0f;'
-
-    turn_off_action:
-      - logger.log: "Mode manuel desactive : retour auto evenementiel, PID OFF"
-      - light.turn_off:
-          id: manual_heater
-      - climate.control:
-          id: pid_climate
-          mode: "OFF"
-      - lambda: |-
-          id(r1_cycle_chauffe_en_cours) = false;
-          id(r1_demoulage_arme) = false;
-          id(r1_etat).publish_state("Repos");
-
-  - platform: template
-    name: "R1 Auto Degivrage"
-    id: r1_auto_degivr
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    turn_on_action:
-      - logger.log: "R1 auto degivrage active"
-      - light.turn_off:
-          id: manual_heater
-      - climate.control:
-          id: pid_climate
-          mode: "OFF"
-      - lambda: |-
-          id(r1_cycle_chauffe_en_cours) = false;
-          id(r1_demoulage_arme) = false;
-          id(r1_etat).publish_state("Repos");
-
-    turn_off_action:
-      - logger.log: "R1 auto degivrage desactive"
-      - script.stop: r1_pid_demoulage
-      - script.stop: r1_pid_entretien
-      - climate.control:
-          id: pid_climate
-          mode: "OFF"
-      - light.turn_off:
-          id: manual_heater
-      - lambda: |-
-          id(r1_demoulage_arme) = false;
-          id(r1_cycle_chauffe_en_cours) = false;
-          id(r1_etat).publish_state("Auto OFF");
-
 script:
+  # Applique un mode de fonctionnement : "Auto", "Manu" ou "Arrêt".
+  - id: appliquer_mode
+    mode: restart
+    parameters:
+      mode: string
+    then:
+      # Dans tous les cas : on repart d'un etat propre
+      - script.stop: r1_pid_demoulage
+      - script.stop: r1_pid_entretien
+      - climate.control:
+          id: pid_climate
+          mode: "OFF"
+      - lambda: |-
+          id(r1_cycle_chauffe_en_cours) = false;
+          id(r1_demoulage_arme) = false;
+          id(r1_chauffe_start_ms) = 0;
+          id(r1_minutes_sans_demoulage) = 0;
+          ESP_LOGI("r1", "Mode de fonctionnement : %s", mode.c_str());
+
+      - if:
+          condition:
+            lambda: 'return mode == "Auto";'
+          then:
+            - lambda: |-
+                id(r1_etat).publish_state("Repos");
+
+      - if:
+          condition:
+            lambda: 'return mode == "Manu";'
+          then:
+            # Regulation PID de chauffe R1 forcee (securite temperature max active)
+            - lambda: |-
+                id(r1_cycle_chauffe_en_cours) = true;
+                id(r1_chauffe_start_ms) = millis();
+                id(r1_etat).publish_state("Manuel");
+            - climate.control:
+                id: pid_climate
+                mode: HEAT
+                target_temperature: !lambda 'return id(r1_consigne_pid_manuel).state;'
+
+      - if:
+          condition:
+            lambda: 'return mode == "Arrêt";'
+          then:
+            - lambda: |-
+                id(r1_etat).publish_state("Arret");
+
   - id: r1_pid_demoulage
     mode: single
     then:
       - if:
           condition:
-            and:
-              - switch.is_on: r1_auto_degivr
-              - switch.is_off: chauffage_mode_manuel
+            lambda: |-
+              return id(mode_fonctionnement).current_option() == "Auto";
           then:
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = true;
@@ -529,8 +544,6 @@ script:
                          id(r1_duree_maxi_pid_demoulage).state,
                          id(r1_seuil_froid_armement).state);
 
-            - light.turn_off:
-                id: manual_heater
 
             - climate.control:
                 id: pid_climate
@@ -566,8 +579,6 @@ script:
                 id: pid_climate
                 mode: "OFF"
 
-            - light.turn_off:
-                id: manual_heater
 
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = false;
@@ -580,9 +591,8 @@ script:
     then:
       - if:
           condition:
-            and:
-              - switch.is_on: r1_auto_degivr
-              - switch.is_off: chauffage_mode_manuel
+            lambda: |-
+              return id(mode_fonctionnement).current_option() == "Auto";
           then:
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = true;
@@ -597,8 +607,6 @@ script:
                          id(r1_duree_maxi_pid_entretien).state,
                          id(r1_seuil_securite_bac_entretien).state);
 
-            - light.turn_off:
-                id: manual_heater
 
             - climate.control:
                 id: pid_climate
@@ -637,8 +645,6 @@ script:
                 id: pid_climate
                 mode: "OFF"
 
-            - light.turn_off:
-                id: manual_heater
 
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = false;
@@ -655,8 +661,8 @@ interval:
       - if:
           condition:
             and:
-              - switch.is_on: r1_auto_degivr
-              - switch.is_off: chauffage_mode_manuel
+              - lambda: |-
+                  return id(mode_fonctionnement).current_option() == "Auto";
               - lambda: |-
                   return !id(r1_cycle_chauffe_en_cours);
           then:
@@ -693,8 +699,8 @@ interval:
       - if:
           condition:
             and:
-              - switch.is_on: r1_auto_degivr
-              - switch.is_off: chauffage_mode_manuel
+              - lambda: |-
+                  return id(mode_fonctionnement).current_option() == "Auto";
               - lambda: |-
                   return !id(r1_cycle_chauffe_en_cours);
           then:
@@ -727,8 +733,6 @@ interval:
             - climate.control:
                 id: pid_climate
                 mode: "OFF"
-            - light.turn_off:
-                id: manual_heater
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = false;
                 id(r1_demoulage_arme) = false;

@@ -111,7 +111,7 @@ mqtt:
         {% set a=value_json.rainRate_cm_per_hour|float(default=0)%}
         {{ (a*10)|round(3) }}
       state_class: measurement
-      device_class: PRECIPITATION_INTENSITY
+      device_class: precipitation_intensity
 
   #RAIN STORM (AVERSE D'ORAGE).
   #Rain Storm (L'averse d'orage) affiche le cumul de pluie de la dernière averse.
@@ -134,7 +134,7 @@ mqtt:
       unit_of_measurement: 'km/h'
       value_template: "{{ value_json.windGust_kph | round(2) }}"
       state_class: measurement
-      device_class: WIND_SPEED
+      device_class: wind_speed
 
     - name: "VP2_Win_Speed"
       unique_id: "VP2_Win_Speed"
@@ -142,7 +142,7 @@ mqtt:
       unit_of_measurement: 'km/h'
       value_template: "{{ value_json.windSpeed_kph | round(2) }}"
       state_class: measurement
-      device_class: WIND_SPEED
+      device_class: wind_speed
       
     - name: "VP2_Win_Dir"
       unique_id: "VP2_Win_Dir"

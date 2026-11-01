@@ -233,6 +233,7 @@ ecs_off_off:
         entity_id: cover.volet_ch_sud
       data: {}
       continue_on_error: true
+    enabled: false
   - if:
     - condition: state
       entity_id: input_select.mode_volets_chamb_nord
@@ -335,6 +336,7 @@ ecs_off_off:
         entity_id: cover.volet_ch_sud
       data: {}
       continue_on_error: true
+    enabled: false
 '1706601448211':
   alias: porte_sous_sol_down
   sequence:

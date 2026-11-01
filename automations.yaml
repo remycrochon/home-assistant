@@ -5975,3 +5975,89 @@
         }}{{ ''\n'' }}{{ states(''sensor.date_time'') }}'
   mode: queued
   max: 5
+- id: '1793467697920'
+  alias: Alarme Détecteur Fumée + CO Salon - Telegram
+  description: 'Message Telegram : alarme du détecteur, CO >= 30 ppm (surveillance)
+    et CO >= 50 ppm (seuil EN 50291).'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.detecteur_co_1_etat_de_l_alarme
+    to: 'on'
+    id: alarme
+  - trigger: state
+    entity_id: binary_sensor.detecteur_co_1_etat_de_l_alarme
+    from: 'on'
+    to: 'off'
+    id: alarme_fin
+  - trigger: numeric_state
+    entity_id: sensor.detecteur_co_1_co_lecture
+    above: 29
+    for:
+      minutes: 2
+    id: co30
+  - trigger: numeric_state
+    entity_id: sensor.detecteur_co_1_co_lecture
+    above: 49
+    for:
+      minutes: 1
+    id: co50
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: alarme
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "\U0001F6A8 ALARME Fumée + CO (Salon)"
+          message: '{{ states(''sensor.date_time'') }}
+
+            CO : {{ states(''sensor.detecteur_co_1_co_lecture'') }} ppm
+
+            Alarme déclenchée (fumée ou CO) : évacuez et appelez le 18 ou le 112.'
+    - conditions:
+      - condition: trigger
+        id: alarme_fin
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: Détecteur Fumée + CO (Salon)
+          message: '{{ states(''sensor.date_time'') }}
+
+            Alarme terminée. CO : {{ states(''sensor.detecteur_co_1_co_lecture'')
+            }} ppm'
+    - conditions:
+      - condition: trigger
+        id: co30
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: ⚠️ CO élevé (Salon)
+          message: '{{ states(''sensor.date_time'') }}
+
+            CO : {{ states(''sensor.detecteur_co_1_co_lecture'') }} ppm (30 ppm ou
+            plus).
+
+            Surveillance : aérez, l''alarme se déclenche vers 50 ppm après 60 à 90
+            min.'
+    - conditions:
+      - condition: trigger
+        id: co50
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "\U0001F6A8 CO dangereux (Salon)"
+          message: '{{ states(''sensor.date_time'') }}
+
+            CO : {{ states(''sensor.detecteur_co_1_co_lecture'') }} ppm (50 ppm ou
+            plus).
+
+            Aérez, coupez les appareils à combustion, évacuez si besoin et appelez
+            le 18 ou le 112.'
+  mode: queued
+  max: 10

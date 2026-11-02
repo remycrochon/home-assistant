@@ -3509,7 +3509,7 @@
   triggers:
   - trigger: zone
     entity_id: device_tracker.iphoneremy
-    zone: zone.maison
+    zone: zone.home
     event: enter
   conditions: []
   actions:
@@ -3551,7 +3551,7 @@
   triggers:
   - trigger: zone
     entity_id: device_tracker.iphoneremy
-    zone: zone.maison
+    zone: zone.home
     event: enter
   conditions:
   - condition: state
@@ -5981,22 +5981,22 @@
     et CO >= 50 ppm (seuil EN 50291).'
   triggers:
   - trigger: state
-    entity_id: binary_sensor.detecteur_co_1_etat_de_l_alarme
+    entity_id: binary_sensor.df_co_salon_etat_de_l_alarme
     to: 'on'
     id: alarme
   - trigger: state
-    entity_id: binary_sensor.detecteur_co_1_etat_de_l_alarme
+    entity_id: binary_sensor.df_co_salon_etat_de_l_alarme
     from: 'on'
     to: 'off'
     id: alarme_fin
   - trigger: numeric_state
-    entity_id: sensor.detecteur_co_1_co_lecture
+    entity_id: sensor.df_co_salon_co_lecture
     above: 29
     for:
       minutes: 2
     id: co30
   - trigger: numeric_state
-    entity_id: sensor.detecteur_co_1_co_lecture
+    entity_id: sensor.df_co_salon_co_lecture
     above: 49
     for:
       minutes: 1
@@ -6014,7 +6014,7 @@
           title: "\U0001F6A8 ALARME Fumée + CO (Salon)"
           message: '{{ states(''sensor.date_time'') }}
 
-            CO : {{ states(''sensor.detecteur_co_1_co_lecture'') }} ppm
+            CO : {{ states(''sensor.df_co_salon_co_lecture'') }} ppm
 
             Alarme déclenchée (fumée ou CO) : évacuez et appelez le 18 ou le 112.'
     - conditions:
@@ -6027,8 +6027,8 @@
           title: Détecteur Fumée + CO (Salon)
           message: '{{ states(''sensor.date_time'') }}
 
-            Alarme terminée. CO : {{ states(''sensor.detecteur_co_1_co_lecture'')
-            }} ppm'
+            Alarme terminée. CO : {{ states(''sensor.df_co_salon_co_lecture'') }}
+            ppm'
     - conditions:
       - condition: trigger
         id: co30
@@ -6039,8 +6039,7 @@
           title: ⚠️ CO élevé (Salon)
           message: '{{ states(''sensor.date_time'') }}
 
-            CO : {{ states(''sensor.detecteur_co_1_co_lecture'') }} ppm (30 ppm ou
-            plus).
+            CO : {{ states(''sensor.df_co_salon_co_lecture'') }} ppm (30 ppm ou plus).
 
             Surveillance : aérez, l''alarme se déclenche vers 50 ppm après 60 à 90
             min.'
@@ -6054,10 +6053,147 @@
           title: "\U0001F6A8 CO dangereux (Salon)"
           message: '{{ states(''sensor.date_time'') }}
 
-            CO : {{ states(''sensor.detecteur_co_1_co_lecture'') }} ppm (50 ppm ou
-            plus).
+            CO : {{ states(''sensor.df_co_salon_co_lecture'') }} ppm (50 ppm ou plus).
 
             Aérez, coupez les appareils à combustion, évacuez si besoin et appelez
             le 18 ou le 112.'
   mode: queued
   max: 10
+- id: '1793517388810'
+  alias: VE - Suivi capacité batterie EX40
+  description: Estime la capacité utilisable de la batterie de l'EX40 à chaque charge
+    significative (énergie borne x 0,9 / variation de SOC). Mesure retenue si SOC
+    >= 20 points et >= 10 kWh. Référence = médiane des 10 premières mesures, SOH relatif
+    = médiane des 10 dernières / référence. Alerte Telegram sous 95 %.
+  triggers:
+  - trigger: state
+    id: debut
+    entity_id: sensor.evcs_hq2603jcduz_status
+    to: charging
+    for: 00:01:00
+  - trigger: state
+    id: fin
+    entity_id: sensor.evcs_hq2603jcduz_status
+    to:
+    - charged
+    - waiting_for_start
+    - disconnected
+    for: 00:10:00
+  actions:
+  - choose:
+    - alias: 'Début de charge : mémoriser SOC et compteur borne'
+      conditions:
+      - condition: trigger
+        id: debut
+      - condition: numeric_state
+        entity_id: input_number.ve_soc_debut_charge
+        below: 1
+      - condition: numeric_state
+        entity_id: sensor.volvo_ex40_batterie
+        above: 0
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.ve_soc_debut_charge
+        data:
+          value: '{{ states(''sensor.volvo_ex40_batterie'') | float(0) }}'
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.ve_energie_borne_debut_charge
+        data:
+          value: '{{ states(''sensor.evcs_hq2603jcduz_total_energy'') | float(0) }}'
+    - alias: 'Fin de charge : calculer et enregistrer la capacité'
+      conditions:
+      - condition: trigger
+        id: fin
+      - condition: numeric_state
+        entity_id: input_number.ve_soc_debut_charge
+        above: 0
+      sequence:
+      - variables:
+          soc_deb: '{{ states(''input_number.ve_soc_debut_charge'') | float(0) }}'
+          soc_fin: '{{ states(''sensor.volvo_ex40_batterie'') | float(0) }}'
+          d_soc: '{{ soc_fin - soc_deb }}'
+          e_kwh: '{{ states(''sensor.evcs_hq2603jcduz_total_energy'') | float(0) -
+            states(''input_number.ve_energie_borne_debut_charge'') | float(0) }}'
+          capa: '{{ ((e_kwh * 0.9 / (d_soc / 100)) | round(1)) if d_soc > 0 else 0
+            }}'
+          valide: '{{ d_soc >= 20 and e_kwh >= 10 and 60 <= capa <= 100 }}'
+      - alias: 'Fin du segment : remise à zéro du SOC de début'
+        action: input_number.set_value
+        target:
+          entity_id: input_number.ve_soc_debut_charge
+        data:
+          value: 0
+      - alias: 'Mesure valide : enregistrer'
+        if:
+        - condition: template
+          value_template: '{{ valide }}'
+        then:
+        - variables:
+            histo_old: '{{ states(''input_text.ve_capacite_batterie_historique'')
+              }}'
+            liste: '{{ ((histo_old.split('','') if histo_old not in ['''', ''unknown'',
+              ''unavailable''] else []) + [capa | string])[-40:] }}'
+            liste_txt: '{{ liste | join('','') }}'
+            nb: '{{ states(''counter.ve_capacite_batterie_nb_mesures'') | int(0) +
+              1 }}'
+            mediane10: '{{ (liste[-10:] | map(''float'') | list | median) | round(2)
+              }}'
+            mediane_ref: '{{ (liste[:10] | map(''float'') | list | median) | round(2)
+              }}'
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.ve_capacite_batterie_derniere_mesure
+          data:
+            value: '{{ capa }}'
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.ve_capacite_batterie_historique
+          data:
+            value: '{{ liste_txt }}'
+        - action: counter.increment
+          target:
+            entity_id: counter.ve_capacite_batterie_nb_mesures
+        - alias: Référence provisoire puis figée à la 10e mesure
+          if:
+          - condition: template
+            value_template: '{{ nb <= 10 }}'
+          then:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.ve_capacite_batterie_reference
+            data:
+              value: '{{ mediane_ref }}'
+        - alias: '10e mesure : notification référence figée'
+          if:
+          - condition: template
+            value_template: '{{ nb == 10 }}'
+          then:
+          - action: telegram_bot.send_message
+            data:
+              config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+              title: "\U0001F50B Batterie EX40 : référence figée"
+              message: 'Les 10 premières mesures de capacité sont réunies.
+
+                Référence : {{ mediane_ref }} kWh (médiane).
+
+                Le SOH relatif sera calculé par rapport à cette valeur.'
+        - alias: Alerte si SOH relatif sous 95 %
+          if:
+          - condition: template
+            value_template: '{{ nb > 10 and (mediane10 / (states(''input_number.ve_capacite_batterie_reference'')
+              | float(1)) * 100) < 95 }}'
+          then:
+          - action: telegram_bot.send_message
+            data:
+              config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+              title: '⚠️ Batterie EX40 : capacité en baisse'
+              message: 'Capacité estimée (médiane des 10 dernières mesures) : {{ mediane10
+                }} kWh.
+
+                Soit {{ (mediane10 / (states(''input_number.ve_capacite_batterie_reference'')
+                | float(1)) * 100) | round(1) }} % de la référence ({{ states(''input_number.ve_capacite_batterie_reference'')
+                }} kWh).'
+  mode: queued
+  max: 5

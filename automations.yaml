@@ -6197,3 +6197,141 @@
                 }} kWh).'
   mode: queued
   max: 5
+- id: '1793610535620'
+  alias: Volet Ch Sud - Modes Adaptive Cover
+  description: 'Applique les 3 modes de input_select.mode_volets_chamb_sud à Adaptive
+    Cover Pro : Arret = aucune commande, Auto Général = ouverture au début de plage
+    et fermeture de nuit sans suivi du soleil, Auto Pos Soleil = idem avec suivi du
+    soleil.'
+  triggers:
+  - trigger: state
+    entity_id: input_select.mode_volets_chamb_sud
+    id: mode
+  - trigger: homeassistant
+    event: start
+    id: start
+  conditions: []
+  actions:
+  - if:
+    - condition: trigger
+      id: start
+    then:
+    - delay:
+        minutes: 1
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state: Arret
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.chambre_sud_automatic_control
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state: Auto Général
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.chambre_sud_automatic_control
+      - action: switch.turn_off
+        target:
+          entity_id: switch.chambre_sud_sun_tracking
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_sud
+        state: Auto Pos Soleil
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.chambre_sud_automatic_control
+      - action: switch.turn_on
+        target:
+          entity_id: switch.chambre_sud_sun_tracking
+  mode: restart
+- id: '1793612430120'
+  alias: Volet Ch Nord - Modes Adaptive Cover
+  description: 'Applique les 3 modes de input_select.mode_volets_chamb_nord à Adaptive
+    Cover Pro : Arret = aucune commande, Auto Général = ouverture au début de plage
+    et fermeture de nuit sans suivi du soleil, Auto Pos Soleil = idem avec suivi du
+    soleil.'
+  triggers:
+  - trigger: state
+    entity_id: input_select.mode_volets_chamb_nord
+    id: mode
+  - trigger: homeassistant
+    event: start
+    id: start
+  conditions: []
+  actions:
+  - if:
+    - condition: trigger
+      id: start
+    then:
+    - delay:
+        minutes: 1
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_nord
+        state: Arret
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.chambre_nord_automatic_control
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_nord
+        state: Auto Général
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.chambre_nord_automatic_control
+      - action: switch.turn_off
+        target:
+          entity_id: switch.chambre_nord_sun_tracking
+    - conditions:
+      - condition: state
+        entity_id: input_select.mode_volets_chamb_nord
+        state: Auto Pos Soleil
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.chambre_nord_automatic_control
+      - action: switch.turn_on
+        target:
+          entity_id: switch.chambre_nord_sun_tracking
+  mode: restart
+- id: qualite_eau_albi_alerte_telegram
+  alias: Qualité eau Albi - Alerte Telegram
+  description: Alerte Telegram quand un nouveau prélèvement Hub'Eau (Albi) est non
+    conforme aux limites de qualité (sanitaires).
+  triggers:
+  - trigger: state
+    entity_id: sensor.qualite_eau_ph
+    attribute: date_prelevement
+    not_from:
+    - unavailable
+    - unknown
+  conditions:
+  - condition: template
+    value_template: '{{ ''non conforme aux limites'' in (state_attr(''sensor.qualite_eau_ph'',
+      ''conclusion_conformite_prelevement'') or '''') | lower }}'
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+      title: Qualité eau Albi
+      message: '⚠️ Nouveau prélèvement du {{ as_timestamp(state_attr(''sensor.qualite_eau_ph'',
+        ''date_prelevement'')) | timestamp_custom(''%d/%m/%Y'') }} : eau NON CONFORME
+        aux limites de qualité.
+
+        {{ state_attr(''sensor.qualite_eau_ph'', ''conclusion_conformite_prelevement'')
+        }}
+
+        Valeurs : pH {{ states(''sensor.qualite_eau_ph'') }} | Nitrates {{ states(''sensor.qualite_eau_nitrates'')
+        }} mg/L | Conductivité {{ states(''sensor.qualite_eau_conductivite'') }} µS/cm
+        | Chlore libre {{ states(''sensor.qualite_eau_chlore'') }} mg/L'
+  mode: single

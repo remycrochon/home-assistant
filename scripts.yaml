@@ -245,6 +245,7 @@ ecs_off_off:
         entity_id: cover.volet_ch_nord
       data: {}
       continue_on_error: true
+    enabled: false
 0_0_1_ouverture_volets_rts:
   alias: Volets RTS Ouverture
   icon: mdi:window-shutter-open
@@ -303,6 +304,7 @@ ecs_off_off:
         entity_id: cover.volet_ch_nord
       data: {}
       continue_on_error: true
+    enabled: false
   - delay:
       hours: 0
       minutes: 0

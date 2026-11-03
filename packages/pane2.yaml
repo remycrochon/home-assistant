@@ -25,8 +25,8 @@ openhasp:
           "text": "\uE6A1 {{'%.1f' | format (states('sensor.vp2_temp_out') |float(0)| round(1)) }}°C"
       - obj: "p0b6"
         properties:
-          "text": "\uE606 {{'%.1f' | format (states('sensor.esp178_piscine_temperature_eau')|float(0) | round(1)) }}°C"
-          #"text": "\uE2DC {{'%.1f' | format (states('sensor.salon_ts0101_temperature')|float(0) | round(1)) }}°C"
+          #"text": "\uE606 {{'%.1f' | format (states('sensor.esp178_piscine_temperature_eau')|float(0) | round(1)) }}°C"
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_in')|float(0) | round(1)) }}°C"
 
       - obj: "p0b7"
         properties:
@@ -56,6 +56,20 @@ openhasp:
               #ff5500
             {% else %}
               #ff0000
+            {% endif %}
+
+      - obj: "p0b9" # Tempo J2
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.calendrier_tempo_prevision_j2') %}
+            {% if couleur == "bleu" %}
+            #0000FF
+            {% elif couleur == "blanc" %}
+            #FFFFFF
+            {% elif couleur == "rouge" %}
+            #FF0000
+            {% else %}
+            #00FF00
             {% endif %}
 
       - obj: "p0b18" #BP Volet, passe en rouge si alarme portes
@@ -97,7 +111,9 @@ openhasp:
                 entity_id: "switch.esp180_hotte_auto_hotte_pm2_5"
 
 
-      - obj: "p2b23" # STOP
+      - obj: "p2b23" # STOP      - obj: "p0b6"
+        properties:
+          "text": "\uE2DC {{'%.1f' | format (states('sensor.salon_ts0101_temperature')|float(0) | round(1)) }}°C"
         properties:
           "val": '{{ 1 if is_state("switch.esp180_hotte_hotte", "on") else 0 }}'
           "text": '{{ "STOP" if is_state("switch.esp180_hotte_hotte", "on") else "MAR" | e }}'

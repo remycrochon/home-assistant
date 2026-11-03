@@ -1,0 +1,64 @@
+rest:
+  # Code 1302 -> PH
+  - resource: "https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_commune=81004&code_parametre=1302&size=1"
+    scan_interval: 86400
+    sensor:
+      - name: "Qualité Eau - PH"
+        value_template: "{{ value_json.data[0].resultat_numerique | float(default=0) }}"
+        unit_of_measurement: "pH"
+        json_attributes_path: "$.data[0]"
+        json_attributes: &hubeau_attr
+          - date_prelevement
+          - libelle_parametre
+          - reference_qualite_parametre
+          - conclusion_conformite_prelevement
+
+  # Code 1340 -> Nitrates
+  - resource: "https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_commune=81004&code_parametre=1340&size=1"
+    scan_interval: 86400
+    sensor:
+      - name: "Qualité Eau - Nitrates"
+        value_template: "{{ value_json.data[0].resultat_numerique | float(default=0) }}"
+        unit_of_measurement: "mg/L"
+        json_attributes_path: "$.data[0]"
+        json_attributes: *hubeau_attr
+
+  # Code 1303 -> Conductivité
+  - resource: "https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_commune=81004&code_parametre=1303&size=1"
+    scan_interval: 86400
+    sensor:
+      - name: "Qualité Eau - Conductivité"
+        value_template: "{{ value_json.data[0].resultat_numerique | float(default=0) }}"
+        unit_of_measurement: "µS/cm"
+        json_attributes_path: "$.data[0]"
+        json_attributes: *hubeau_attr
+
+  # Code 1345 -> Dureté de l'eau (Calcaire)
+  - resource: "https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_commune=81004&code_parametre=1345&size=1"
+    scan_interval: 86400
+    sensor:
+      - name: "Qualité Eau - Dureté"
+        value_template: "{{ value_json.data[0].resultat_numerique | float(default=0) }}"
+        unit_of_measurement: "°f"
+        json_attributes_path: "$.data[0]"
+        json_attributes: *hubeau_attr
+
+  # Code 1398 -> Chlore libre
+  - resource: "https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_commune=81004&code_parametre=1398&size=1"
+    scan_interval: 86400
+    sensor:
+      - name: "Qualité Eau - Chlore"
+        value_template: "{{ value_json.data[0].resultat_numerique | float(default=0) }}"
+        unit_of_measurement: "mg/L"
+        json_attributes_path: "$.data[0]"
+        json_attributes: *hubeau_attr
+
+  # Code 1301 -> Température de l'eau
+  - resource: "https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable/resultats_dis?code_commune=81004&code_parametre=1301&size=1"
+    scan_interval: 86400
+    sensor:
+      - name: "Qualité Eau - Température"
+        value_template: "{{ value_json.data[0].resultat_numerique | float(default=0) }}"
+        unit_of_measurement: "°C"
+        json_attributes_path: "$.data[0]"
+        json_attributes: *hubeau_attr

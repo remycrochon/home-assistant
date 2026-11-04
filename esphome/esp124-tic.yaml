@@ -28,9 +28,7 @@ wifi:
     dns1: !secret dns1
     dns2: !secret dns2
     
-packages:
-  - !include packages/mqtt_pve.yaml
-    
+
 # Enable logging
 logger:
 #  baud_rate: 0

@@ -2,6 +2,14 @@ substitutions:
   device_name: esp125-frigo
   adress_ip: "192.168.0.125"
 
+  # --- Securite sondes (resistance + degivrage) ---
+  # Sonde consideree defectueuse si aucune lecture valide depuis ce delai (ms)
+  sonde_timeout_ms: "60000"
+  # ... ou si elle affiche exactement 0,0 sur ce nombre de lectures consecutives (12 x 5 s = 1 min)
+  sonde_zero_max: "12"
+  # Retour a la normale apres ce nombre de controles (toutes les 5 s) sans defaut (60 x 5 s = 5 min)
+  sonde_retour_ticks: "60"
+
 esphome:
   name: ${device_name}
   on_boot:
@@ -92,6 +100,47 @@ globals:
     restore_value: yes
     initial_value: "0"
 
+  # --- Securite sondes ---
+  # true = defaut sonde verrouille : chauffage coupe et interdit
+  - id: r1_sonde_defaut
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+  # Resultat instantane du controle des sondes (true = les deux sondes sont saines)
+  - id: r1_sondes_ok
+    type: bool
+    restore_value: no
+    initial_value: "true"
+
+  # Horodatage (millis) de la derniere lecture valide de chaque sonde
+  - id: r1_last_ok_r_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+
+  - id: r1_last_ok_d_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+
+  # Nombre de lectures consecutives exactement egales a 0,0 par sonde
+  - id: r1_zero_cnt_r
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+  - id: r1_zero_cnt_d
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+  # Nombre de controles consecutifs sans defaut depuis le declenchement du defaut
+  - id: r1_cpt_sain
+    type: int
+    restore_value: no
+    initial_value: "0"
+
 binary_sensor:
   - platform: status
     name: "Status"
@@ -107,6 +156,14 @@ binary_sensor:
     id: r1_chauffe_en_cours_sensor
     lambda: |-
       return id(r1_cycle_chauffe_en_cours);
+
+  # Allume tant qu'une sonde (resistance ou degivrage) est jugee defectueuse.
+  - platform: template
+    name: "R1 Defaut Sonde"
+    id: r1_defaut_sonde_sensor
+    device_class: problem
+    lambda: |-
+      return id(r1_sonde_defaut);
 
 # Mode de fonctionnement memorise (restore_value) :
 #  - Auto  : production de glacons active, cycles demoulage / entretien automatiques
@@ -209,7 +266,7 @@ number:
       - if:
           condition:
             lambda: |-
-              return id(mode_fonctionnement).current_option() == "Manu";
+              return id(mode_fonctionnement).current_option() == "Manu" && !id(r1_sonde_defaut);
           then:
             - climate.control:
                 id: pid_climate
@@ -287,9 +344,20 @@ sensor:
     update_interval: 5s
     accuracy_decimals: 1
     filters:
+      # Rejette les lectures invalides (NaN, hors plage -45/+60 °C) : la derniere valeur valide est conservee.
       - lambda: |-
-          if (isnan(x)) return {};
+          if (isnan(x) || x < -45.0f || x > 60.0f) return {};
           return x;
+    # Appele uniquement pour les lectures valides (apres filtre) : alimente la securite sondes.
+    on_value:
+      then:
+        - lambda: |-
+            id(r1_last_ok_r_ms) = millis();
+            if (x == 0.0f) {
+              id(r1_zero_cnt_r)++;
+            } else {
+              id(r1_zero_cnt_r) = 0;
+            }
 
   # Sonde dégivrage : valeur BRUTE, utilisée par la logique et le debug.
   # Interne : elle n'est pas envoyée à HA (c'est la copie ci-dessous qui l'est).
@@ -304,9 +372,20 @@ sensor:
     update_interval: 5s
     accuracy_decimals: 1
     filters:
+      # Rejette les lectures invalides (NaN, hors plage -45/+60 °C) : la derniere valeur valide est conservee.
       - lambda: |-
-          if (isnan(x)) return {};
+          if (isnan(x) || x < -45.0f || x > 60.0f) return {};
           return x;
+    # Appele uniquement pour les lectures valides (apres filtre) : alimente la securite sondes.
+    on_value:
+      then:
+        - lambda: |-
+            id(r1_last_ok_d_ms) = millis();
+            if (x == 0.0f) {
+              id(r1_zero_cnt_d)++;
+            } else {
+              id(r1_zero_cnt_d) = 0;
+            }
 
   # Copie filtrée pour HA : même nom qu'avant => même entité, même historique.
   # Une valeur au plus toutes les 60 s, sauf variation >= 0,5 °C (envoyée tout de suite,
@@ -409,15 +488,16 @@ text_sensor:
     id: r1_debug_court
     update_interval: 60s
     lambda: |-
-      char buffer[300];
+      char buffer[320];
 
       const char *etat = id(r1_etat).state.c_str();
       std::string mode = std::string(id(mode_fonctionnement).current_option());
 
       snprintf(buffer, sizeof(buffer),
-        "Etat:%s | Mode:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Entretiens:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC",
+        "Etat:%s | Mode:%s | Sondes:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Entretiens:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC",
         etat,
         mode.c_str(),
+        id(r1_sonde_defaut) ? "DEFAUT" : "OK",
         id(r1_demoulage_arme),
         id(r1_cycle_chauffe_en_cours),
         id(r1_minutes_sans_demoulage),
@@ -434,7 +514,11 @@ button:
   - platform: template
     name: "PID Climate Autotune"
     on_press:
-      - climate.pid.autotune: pid_climate
+      - if:
+          condition:
+            lambda: 'return !id(r1_sonde_defaut);'
+          then:
+            - climate.pid.autotune: pid_climate
 
   - platform: template
     name: "R1 Test PID Demoulage"
@@ -477,6 +561,7 @@ output:
 
 script:
   # Applique un mode de fonctionnement : "Auto", "Manu" ou "Arrêt".
+  # Si une sonde est defectueuse, aucun chauffage n'est lance quel que soit le mode.
   - id: appliquer_mode
     mode: restart
     parameters:
@@ -495,16 +580,25 @@ script:
           id(r1_minutes_sans_demoulage) = 0;
           ESP_LOGI("r1", "Mode de fonctionnement : %s", mode.c_str());
 
+      # Sonde defectueuse : on reste a l'arret, etat "Defaut sonde"
       - if:
           condition:
-            lambda: 'return mode == "Auto";'
+            lambda: 'return id(r1_sonde_defaut);'
+          then:
+            - lambda: |-
+                id(r1_etat).publish_state("Defaut sonde");
+                ESP_LOGW("r1", "Mode %s demande mais sonde defectueuse : chauffage maintenu a l'arret", mode.c_str());
+
+      - if:
+          condition:
+            lambda: 'return mode == "Auto" && !id(r1_sonde_defaut);'
           then:
             - lambda: |-
                 id(r1_etat).publish_state("Repos");
 
       - if:
           condition:
-            lambda: 'return mode == "Manu";'
+            lambda: 'return mode == "Manu" && !id(r1_sonde_defaut);'
           then:
             # Regulation PID de chauffe R1 forcee (securite temperature max active)
             - lambda: |-
@@ -518,7 +612,7 @@ script:
 
       - if:
           condition:
-            lambda: 'return mode == "Arrêt";'
+            lambda: 'return mode == "Arrêt" && !id(r1_sonde_defaut);'
           then:
             - lambda: |-
                 id(r1_etat).publish_state("Arret");
@@ -529,7 +623,7 @@ script:
       - if:
           condition:
             lambda: |-
-              return id(mode_fonctionnement).current_option() == "Auto";
+              return id(mode_fonctionnement).current_option() == "Auto" && !id(r1_sonde_defaut);
           then:
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = true;
@@ -592,7 +686,7 @@ script:
       - if:
           condition:
             lambda: |-
-              return id(mode_fonctionnement).current_option() == "Auto";
+              return id(mode_fonctionnement).current_option() == "Auto" && !id(r1_sonde_defaut);
           then:
             - lambda: |-
                 id(r1_cycle_chauffe_en_cours) = true;
@@ -658,11 +752,14 @@ interval:
       - lambda: |-
           id(r1_demoulage_arme_sensor).publish_state(id(r1_demoulage_arme));
           id(r1_chauffe_en_cours_sensor).publish_state(id(r1_cycle_chauffe_en_cours));
+          id(r1_defaut_sonde_sensor).publish_state(id(r1_sonde_defaut));
       - if:
           condition:
             and:
               - lambda: |-
                   return id(mode_fonctionnement).current_option() == "Auto";
+              - lambda: |-
+                  return !id(r1_sonde_defaut);
               - lambda: |-
                   return !id(r1_cycle_chauffe_en_cours);
           then:
@@ -702,6 +799,8 @@ interval:
               - lambda: |-
                   return id(mode_fonctionnement).current_option() == "Auto";
               - lambda: |-
+                  return !id(r1_sonde_defaut);
+              - lambda: |-
                   return !id(r1_cycle_chauffe_en_cours);
           then:
             - lambda: |-
@@ -720,6 +819,72 @@ interval:
 
   - interval: 5s
     then:
+      # ===================== SECURITE SONDES (prioritaire) =====================
+      # 1) Controle des sondes resistance (R) et degivrage (D) :
+      #    defectueuse = aucune lecture valide depuis ${sonde_timeout_ms} ms
+      #                  OU exactement 0,0 sur ${sonde_zero_max} lectures consecutives.
+      - lambda: |-
+          uint32_t now = millis();
+          bool r_ok = ((now - id(r1_last_ok_r_ms)) <= (uint32_t) ${sonde_timeout_ms})
+                      && (id(r1_zero_cnt_r) < ${sonde_zero_max});
+          bool d_ok = ((now - id(r1_last_ok_d_ms)) <= (uint32_t) ${sonde_timeout_ms})
+                      && (id(r1_zero_cnt_d) < ${sonde_zero_max});
+          id(r1_sondes_ok) = r_ok && d_ok;
+          if (id(r1_sonde_defaut)) {
+            if (id(r1_sondes_ok)) {
+              id(r1_cpt_sain)++;
+            } else {
+              id(r1_cpt_sain) = 0;
+            }
+          }
+
+      # 2) Nouveau defaut : on coupe tout et on verrouille.
+      - if:
+          condition:
+            lambda: 'return !id(r1_sonde_defaut) && !id(r1_sondes_ok);'
+          then:
+            - lambda: |-
+                uint32_t now = millis();
+                ESP_LOGW("r1", "SECURITE SONDES : defaut (R: derniere lecture il y a %u ms, zeros %d | D: derniere lecture il y a %u ms, zeros %d) -> chauffage coupe",
+                         (unsigned) (now - id(r1_last_ok_r_ms)), id(r1_zero_cnt_r),
+                         (unsigned) (now - id(r1_last_ok_d_ms)), id(r1_zero_cnt_d));
+            - script.stop: r1_pid_demoulage
+            - script.stop: r1_pid_entretien
+            - climate.control:
+                id: pid_climate
+                mode: "OFF"
+            - lambda: |-
+                id(r1_sonde_defaut) = true;
+                id(r1_cpt_sain) = 0;
+                id(r1_cycle_chauffe_en_cours) = false;
+                id(r1_demoulage_arme) = false;
+                id(r1_chauffe_start_ms) = 0;
+                id(r1_etat).publish_state("Defaut sonde");
+
+      # 3) Retour a la normale : sondes saines en continu pendant ${sonde_retour_ticks} controles.
+      - if:
+          condition:
+            lambda: 'return id(r1_sonde_defaut) && id(r1_cpt_sain) >= ${sonde_retour_ticks};'
+          then:
+            - lambda: |-
+                id(r1_sonde_defaut) = false;
+                id(r1_cpt_sain) = 0;
+                ESP_LOGI("r1", "SECURITE SONDES : sondes de nouveau saines, reprise du mode de fonctionnement");
+            - script.execute:
+                id: appliquer_mode
+                mode: !lambda 'return std::string(id(mode_fonctionnement).current_option());'
+
+      # 4) Tant que le defaut est verrouille, le chauffage est maintenu coupe
+      #    (y compris si on tente de relancer la regulation PID depuis HA).
+      - if:
+          condition:
+            lambda: 'return id(r1_sonde_defaut);'
+          then:
+            - climate.control:
+                id: pid_climate
+                mode: "OFF"
+
+      # ===================== Securite temperature max =====================
       - if:
           condition:
             lambda: |-

@@ -468,3 +468,122 @@ envoyer_un_message_log_depuis_esphome:
       description: Le message à loguer
       example: test depuis ESPHome
   description: ''
+annonce_bose_cuisine:
+  alias: Annonce vocale Bose cuisine
+  description: 'Annonce un message sur la Bose de la cuisine (voix Home Assistant
+    Cloud), precede de "Votre attention.". Le volume de l''annonce se regle avec input_number.volume_annonce_bose_cuisine
+    (0 a 100 %). Si la Bose joue : annonce par Music Assistant, la lecture reprend
+    ensuite. Si elle est a l''arret : volume regle par Cast, attente de 5 s, annonce
+    par Cast (la radio ne repart pas), puis remise du volume d''origine.'
+  icon: mdi:bullhorn
+  mode: queued
+  max: 5
+  fields:
+    message:
+      name: Message
+      description: Texte a annoncer
+      required: true
+      example: 'Premier rappel : il faut sortir le fromage.'
+      selector:
+        text: {}
+  sequence:
+  - variables:
+      volume_annonce: '{{ states(''input_number.volume_annonce_bose_cuisine'') | float(50)
+        }}'
+      volume_avant: '{{ state_attr(''media_player.cuisine_3'', ''volume_level'') |
+        float(0.2) }}'
+      texte: Votre attention. {{ message }}
+  - if:
+    - condition: state
+      entity_id: media_player.cuisine_3
+      state: playing
+    then:
+    - action: music_assistant.play_announcement
+      target:
+        entity_id: media_player.cuisine_3
+      data:
+        message: '{{ texte }}'
+        tts_entity_id: tts.home_assistant_cloud
+        use_pre_announce: false
+        announce_volume: '{{ volume_annonce | int }}'
+    else:
+    - action: media_player.volume_set
+      target:
+        entity_id: media_player.cuisine_2
+      data:
+        volume_level: '{{ volume_annonce / 100 }}'
+      continue_on_error: true
+    - delay: 00:00:05
+    - action: tts.speak
+      target:
+        entity_id: tts.home_assistant_cloud
+      data:
+        media_player_entity_id: media_player.cuisine_2
+        message: '{{ texte }}'
+    - wait_for_trigger:
+      - trigger: state
+        entity_id: media_player.cuisine_2
+        to:
+        - idle
+        - 'off'
+      timeout: 00:00:30
+      continue_on_timeout: true
+    - action: media_player.volume_set
+      target:
+        entity_id: media_player.cuisine_2
+      data:
+        volume_level: '{{ volume_avant }}'
+      continue_on_error: true
+test_annonce_bose_cast:
+  alias: TEST annonce Bose (Cast)
+  description: 'Script de test : regle le volume de la Bose par Cast (cuisine_2),
+    attend quelques secondes, puis annonce un message avec la voix Home Assistant
+    Cloud. Volume, delai et message se reglent au lancement. A supprimer une fois
+    les essais termines.'
+  icon: mdi:test-tube
+  mode: single
+  fields:
+    volume:
+      name: Volume (%)
+      description: Volume de l'annonce, de 0 a 100
+      required: true
+      default: 85
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
+    delai:
+      name: Delai avant la voix (secondes)
+      description: Attente entre le reglage du volume et la parole
+      required: true
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 1
+          mode: slider
+    message:
+      name: Message
+      required: false
+      default: 'Premier rappel : il faut sortir les poubelles jaunes.'
+      selector:
+        text: {}
+  sequence:
+  - action: media_player.volume_set
+    target:
+      entity_id: media_player.cuisine_2
+    data:
+      volume_level: '{{ (volume | float(85)) / 100 }}'
+    continue_on_error: true
+  - delay:
+      seconds: '{{ delai | int(3) }}'
+  - action: tts.speak
+    target:
+      entity_id: tts.home_assistant_cloud
+    data:
+      media_player_entity_id: media_player.cuisine_2
+      message: '{{ message | default(''Premier rappel : il faut sortir les poubelles
+        jaunes.'', true) }}'

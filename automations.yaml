@@ -6335,3 +6335,324 @@
         }} mg/L | Conductivité {{ states(''sensor.qualite_eau_conductivite'') }} µS/cm
         | Chlore libre {{ states(''sensor.qualite_eau_chlore'') }} mg/L'
   mode: single
+- id: '1793777253998'
+  alias: Frigo ESP125 Alerte Telegram
+  description: 'Alerte Telegram : défaut sonde, sécurité température, ESP125 hors
+    ligne, sondes figées à 0 °C (fabrique à glaçons)'
+  triggers:
+  - entity_id: binary_sensor.cuisine_esp125_frigo_r1_defaut_sonde
+    id: defaut_sonde
+    to: 'on'
+    trigger: state
+  - entity_id: sensor.cuisine_esp125_frigo_r1_etat
+    id: securite_temp
+    to: Securite temperature
+    trigger: state
+  - entity_id: binary_sensor.esp125_status
+    for:
+      minutes: 5
+    id: hors_ligne
+    to: 'off'
+    trigger: state
+  - entity_id:
+    - sensor.esp125_frigo_temp_ds18b20_resistance
+    - sensor.esp125_frigo_temp_ds18b20_degivrage
+    for:
+      minutes: 3
+    id: sonde_zero
+    to:
+    - '0'
+    - '0.0'
+    trigger: state
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: defaut_sonde
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{ states(''sensor.date_time'') }}
+
+            Sonde en défaut (bus 1-Wire) : chauffage COUPÉ par sécurité.
+
+            Résistance : {{ states(''sensor.esp125_frigo_temp_ds18b20_resistance'')
+            }} °C
+
+            Dégivrage : {{ states(''sensor.esp125_frigo_temp_ds18b20_degivrage'')
+            }} °C'
+          title: 'Frigo : défaut sonde'
+    - conditions:
+      - condition: trigger
+        id: securite_temp
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{ states(''sensor.date_time'') }}
+
+            Température résistance trop élevée, chauffage coupé.
+
+            Résistance : {{ states(''sensor.esp125_frigo_temp_ds18b20_resistance'')
+            }} °C'
+          title: 'Frigo : sécurité température'
+    - conditions:
+      - condition: trigger
+        id: hors_ligne
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{ states(''sensor.date_time'') }}
+
+            ESP125 injoignable depuis 5 min.'
+          title: 'Frigo : ESP125 hors ligne'
+    - conditions:
+      - condition: trigger
+        id: sonde_zero
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: '{{ states(''sensor.date_time'') }}
+
+            Une sonde reste à 0 °C depuis 3 min (panne 1-Wire probable).
+
+            Résistance : {{ states(''sensor.esp125_frigo_temp_ds18b20_resistance'')
+            }} °C
+
+            Dégivrage : {{ states(''sensor.esp125_frigo_temp_ds18b20_degivrage'')
+            }} °C'
+          title: 'Frigo : sonde bloquée à 0 °C'
+  mode: single
+- id: '1793779958943'
+  alias: Alarme Notification tableau alarmes
+  description: 'Telegram pour le tableau d''alarmes (Industrial Alarm Panel) : message
+    a l''apparition (activated), rappel toutes les 10 min (5 max) tant que l''alarme
+    est active et non acquittee, message au retour a la normale (cleared).'
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.industrial_alarm_panel_last_event
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sensor.industrial_alarm_panel_last_event
+      attribute: event_type
+      state:
+      - activated
+      - cleared
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: sensor.industrial_alarm_panel_last_event
+        attribute: event_type
+        state: acknowledged
+      - condition: state
+        entity_id: sensor.industrial_alarm_panel_last_event
+        attribute: new_state
+        state: ACTIVE_ACK
+  actions:
+  - variables:
+      nom: '{{ trigger.to_state.attributes.name }}'
+      lieu: '{{ trigger.to_state.attributes.area }} · {{ trigger.to_state.attributes.system
+        }}'
+      repere: '{{ trigger.to_state.attributes.tag }}'
+      priorite: '{{ {''critical'':''Critique'',''high'':''Haute'',''medium'':''Moyenne'',''low'':''Basse'',''info'':''Info'',''status'':''Statut''}.get(trigger.to_state.attributes.priority,
+        trigger.to_state.attributes.priority) }}'
+      eid: '{{ trigger.to_state.attributes.entity_id }}'
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.industrial_alarm_panel_last_event
+        attribute: event_type
+        state: activated
+      sequence:
+      - if:
+        - condition: state
+          entity_id: sensor.industrial_alarm_panel_last_event
+          attribute: tag
+          state:
+          - TEST-ALARME
+          - MP2-OFF
+          - MP2-INDISPO
+          - RESEAU-TENSION-BASSE
+        then:
+        - action: script.turn_on
+          target:
+            entity_id: script.annonce_bose_cuisine
+          data:
+            variables:
+              message: 'Alarme {{ nom | replace('' : '', '' '') | regex_replace(''
+                [(][^)]*[)]'', '''') }}.'
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: "\U0001F6A8 Alarme"
+          message: '{{ states(''sensor.date_time'') }}
+
+            {{ nom }}
+
+            Entité : {{ state_attr(eid, ''friendly_name'') }} = {{ states(eid) | round(2,
+            default=states(eid)) }}{{ ('' '' ~ state_attr(eid, ''unit_of_measurement''))
+            if is_number(states(eid)) and state_attr(eid, ''unit_of_measurement'')
+            else '''' }}
+
+            Lieu : {{ lieu }}
+
+            Repère : {{ repere }}
+
+            Priorité : {{ priorite }}'
+      - repeat:
+          count: 5
+          sequence:
+          - wait_for_trigger:
+            - trigger: state
+              entity_id: binary_sensor.industrial_alarm_panel_any_active
+              to: 'off'
+            - trigger: state
+              entity_id: binary_sensor.industrial_alarm_panel_any_unacknowledged
+              to: 'off'
+            timeout:
+              minutes: 10
+              seconds: 0
+            continue_on_timeout: true
+          - if:
+            - condition: state
+              entity_id: binary_sensor.industrial_alarm_panel_any_active
+              state: 'on'
+            - condition: state
+              entity_id: binary_sensor.industrial_alarm_panel_any_unacknowledged
+              state: 'on'
+            then:
+            - action: telegram_bot.send_message
+              data:
+                config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+                title: ⏰ Rappel alarme
+                message: '{{ states(''sensor.date_time'') }}
+
+                  {{ nom }}
+
+                  Entité : {{ state_attr(eid, ''friendly_name'') }} = {{ states(eid)
+                  | round(2, default=states(eid)) }}{{ ('' '' ~ state_attr(eid, ''unit_of_measurement''))
+                  if is_number(states(eid)) and state_attr(eid, ''unit_of_measurement'')
+                  else '''' }}
+
+                  Toujours active et non acquittée
+
+                  Lieu : {{ lieu }}'
+            else:
+            - stop: Alarme revenue à la normale ou acquittée
+    - conditions:
+      - condition: state
+        entity_id: sensor.industrial_alarm_panel_last_event
+        attribute: event_type
+        state: cleared
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: ✅ Retour à la normale
+          message: '{{ states(''sensor.date_time'') }}
+
+            {{ nom }}
+
+            Entité : {{ state_attr(eid, ''friendly_name'') }} = {{ states(eid) | round(2,
+            default=states(eid)) }}{{ ('' '' ~ state_attr(eid, ''unit_of_measurement''))
+            if is_number(states(eid)) and state_attr(eid, ''unit_of_measurement'')
+            else '''' }}
+
+            Lieu : {{ lieu }}'
+    - conditions:
+      - condition: state
+        entity_id: sensor.industrial_alarm_panel_last_event
+        attribute: event_type
+        state: acknowledged
+      sequence:
+      - action: telegram_bot.send_message
+        data:
+          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          title: ⏰ Rappel alarme
+          message: '{{ states(''sensor.date_time'') }}
+
+            {{ nom }}
+
+            Entité : {{ state_attr(eid, ''friendly_name'') }} = {{ states(eid) | round(2,
+            default=states(eid)) }}{{ ('' '' ~ state_attr(eid, ''unit_of_measurement''))
+            if is_number(states(eid)) and state_attr(eid, ''unit_of_measurement'')
+            else '''' }}
+
+            Toujours active et acquittée
+
+            Lieu : {{ lieu }}'
+  mode: restart
+- id: '1793811756960'
+  alias: Rappel fromage (Bose cuisine)
+  description: 'Remplace les 2 rappels Alexa : annonce vocale sur la Bose de la cuisine
+    a 11h (1er rappel) et 12h (2eme rappel) pour sortir le fromage. La musique en
+    cours est mise en pause puis reprise.'
+  triggers:
+  - trigger: time
+    at: '11:00:00'
+    id: rappel1
+  - trigger: time
+    at: '12:00:00'
+    id: rappel2
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: rappel1
+      sequence:
+      - action: script.annonce_bose_cuisine
+        data:
+          message: 'Premier rappel : il faut sortir le fromage.'
+    - conditions:
+      - condition: trigger
+        id: rappel2
+      sequence:
+      - action: script.annonce_bose_cuisine
+        data:
+          message: 'Deuxième rappel : il faut sortir le fromage.'
+  mode: single
+- id: '1793812966938'
+  alias: Rappel poubelles (calendrier, Bose cuisine)
+  description: 'Annonce vocale sur la Bose de la cuisine pour les poubelles du calendrier
+    Poubelles : 1er rappel au debut de l''evenement (11h30), 2eme rappel a la fin
+    (16h00). Le nom de l''evenement (Poubelles jaunes / Poubelles marron) est repris
+    dans le message.'
+  triggers:
+  - trigger: calendar
+    event: start
+    entity_id: calendar.poubelle
+    offset: 0:0:0
+    id: rappel1
+  - trigger: calendar
+    event: end
+    entity_id: calendar.poubelle
+    offset: 0:0:0
+    id: rappel2
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: rappel1
+      sequence:
+      - action: script.annonce_bose_cuisine
+        data:
+          message: 'Premier rappel : il faut sortir les {{ trigger.calendar_event.summary
+            | lower }}.'
+    - conditions:
+      - condition: trigger
+        id: rappel2
+      sequence:
+      - action: script.annonce_bose_cuisine
+        data:
+          message: 'Deuxième rappel : il faut sortir les {{ trigger.calendar_event.summary
+            | lower }}.'
+  mode: single

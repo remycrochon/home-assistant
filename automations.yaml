@@ -6656,3 +6656,46 @@
           message: 'Deuxième rappel : il faut sortir les {{ trigger.calendar_event.summary
             | lower }}.'
   mode: single
+- id: '1793863520494'
+  alias: 'Tempo : rafraîchir la couleur de demain le matin'
+  description: 'POURQUOI CET AUTOMATISME
+
+    L''intégration Calendrier Tempo EDF (calendrier-tempo.fr) n''interroge le site
+    que par intervalles espacés (relevé de 06h35 puis vers 08h05-08h35 selon les jours).
+    Chaque nuit à 00h05, le capteur sensor.calendrier_tempo_couleur_demain passe à
+    « unknown » (la date de « demain » change), puis il ne se remplit qu''au relevé
+    suivant la publication de la couleur. Constat du 05/11/2026 : le site affichait
+    déjà « Blanc » pour demain à 08h16, alors que le capteur restait à « unknown »
+    jusqu''à 08h23 (rafraîchissement manuel).
+
+    Conséquences d''un capteur en retard : sensor.calendrier_tempo_visuel_demain affiche
+    ❓, l''affichage LED Tempo (esp141 / esp127) n''a pas la couleur de demain et l''alerte
+    Telegram « jour blanc ou rouge » ne peut pas se déclencher.
+
+
+    CE QUE FAIT L''AUTOMATISME
+
+    Entre 07h00 et 09h00, toutes les 5 minutes, SI le capteur de demain est encore
+    « unknown », il force la lecture de l''intégration avec homeassistant.update_entity.
+    Dès que la couleur est récupérée (bleu, blanc ou rouge), la condition n''est plus
+    vraie et plus aucune requête n''est envoyée : au maximum 24 rafraîchissements
+    par jour, en pratique quelques-uns.
+
+    Si la couleur n''est pas encore publiée par le site, le capteur reste « unknown
+    » et l''on réessaie 5 minutes plus tard, sans effet de bord.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /5
+  conditions:
+  - condition: time
+    after: 07:00:00
+    before: 09:00:00
+  - condition: state
+    entity_id: sensor.calendrier_tempo_couleur_demain
+    state: unknown
+  actions:
+  - alias: Forcer la relecture de la couleur de demain
+    action: homeassistant.update_entity
+    target:
+      entity_id: sensor.calendrier_tempo_couleur_demain
+  mode: single

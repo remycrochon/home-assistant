@@ -474,7 +474,8 @@ annonce_bose_cuisine:
     Cloud), precede de "Votre attention.". Le volume de l''annonce se regle avec input_number.volume_annonce_bose_cuisine
     (0 a 100 %). Si la Bose joue : annonce par Music Assistant, la lecture reprend
     ensuite. Si elle est a l''arret : volume regle par Cast, attente de 5 s, annonce
-    par Cast (la radio ne repart pas), puis remise du volume d''origine.'
+    par Cast avec la voix Brigitte (la radio ne repart pas), puis remise du volume
+    d''origine.'
   icon: mdi:bullhorn
   mode: queued
   max: 5
@@ -520,6 +521,9 @@ annonce_bose_cuisine:
       data:
         media_player_entity_id: media_player.cuisine_2
         message: '{{ texte }}'
+        language: fr-FR
+        options:
+          voice: BrigitteNeural
     - wait_for_trigger:
       - trigger: state
         entity_id: media_player.cuisine_2

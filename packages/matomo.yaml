@@ -1,0 +1,42 @@
+rest:
+  - resource: https://matomo.rem81.com/index.php
+    method: POST
+    payload: !secret matomo_payload_live
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    scan_interval: 120
+    sensor:
+      - name: "Matomo Visiteurs 30 min"
+        unique_id: matomo_visiteurs_30min
+        value_template: "{{ value_json[0].visits | default(0) | int(0) }}"
+        state_class: measurement
+        icon: mdi:account-clock
+
+  - resource: https://matomo.rem81.com/index.php
+    method: POST
+    payload: !secret matomo_payload_jour
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    scan_interval: 300
+    sensor:
+      - name: "Matomo Visites Jour"
+        unique_id: matomo_visites_jour
+        value_template: "{{ value_json.nb_visits | default(0) | int(0) }}"
+        state_class: measurement
+        icon: mdi:account-multiple
+      - name: "Matomo Visiteurs Uniques Jour"
+        unique_id: matomo_visiteurs_uniques_jour
+        value_template: "{{ value_json.nb_uniq_visitors | default(0) | int(0) }}"
+        state_class: measurement
+        icon: mdi:account
+      - name: "Matomo Pages Vues Jour"
+        unique_id: matomo_pages_vues_jour
+        value_template: "{{ value_json.nb_actions | default(0) | int(0) }}"
+        state_class: measurement
+        icon: mdi:file-document-multiple
+      - name: "Matomo Taux Rebond Jour"
+        unique_id: matomo_taux_rebond_jour
+        value_template: "{{ (value_json.bounce_rate | default('0') | string | replace('%','')) | float(0) }}"
+        unit_of_measurement: "%"
+        state_class: measurement
+        icon: mdi:exit-run

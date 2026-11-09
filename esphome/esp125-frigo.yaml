@@ -14,9 +14,9 @@
 #
 # ADS1115 (adresse 0x48, ADDR -> GND) :
 #   A0 = NTC sonde BAC (cablage actuel, securite entretien) -> voir substitution mux_bac
-#   A1, A2, A3 libres ; ALRT non connectee
-#   Cible finale : A0 = NTC resistance, A1 = NTC degivrage, A2 = NTC bac (mux_bac: "A2_GND")
-#
+#   A1, A2 libres ; ALRT non connectee
+#   A3: 3.3V de l'esp
+#   Cible finale : A0 = NTC Bac, A1 = NTC degivrage, A2 = NTC Resistance (mux_bac: "A2_GND") Remy
 # Pont diviseur (un par NTC, a monter pres de l'ESP) :
 #   3,3 V --[ NTC 10 kOhm ]--+-- entree Ax de l'ADS1115
 #                            +--[ 100 nF (104) ]-- GND
@@ -33,8 +33,13 @@ substitutions:
   mux_bac: "A0_GND"
   # Valeur reelle de la resistance de reference du pont (a mesurer au multimetre)
   r_ref_bac: "10kOhm"
+  r_ref_degivrage: "9.99KOhm"
+  r_ref_resistance: "10.05KOhm"
   # Tension reelle du 3,3 V de l'ESP (entre 3V3 et GND) : a REMESURER sur la carte finale
-  tension_3v3: "3.287V"
+  # Le 3,3 V est maintenant aussi mesure en direct sur A3 : cette valeur sert de reference
+  # pour la correction et de valeur de repli si la lecture A3 est invalide.
+  tension_3v3_val: "3.287"
+  tension_3v3: "${tension_3v3_val}V"
   # Coefficient B mesure (la valeur constructeur 3435 est fausse vers 0 °C et en dessous)
   ntc_b: "3150"
   # Etalonnage a 0 °C (eau + glacons) : offset = 0 - valeur lue
@@ -414,8 +419,39 @@ sensor:
     entity_category: diagnostic
     disabled_by_default: true
 
+  # 3,3 V de l'ESP mesure en direct (entree A3, via 1 kOhm). Lissage sur 12 mesures (~1 min),
+  # une valeur envoyee a HA au plus toutes les 60 s.
+  - platform: ads1115
+    ads1115_id: ads1
+    multiplexer: A3_GND
+    gain: 4.096
+    sample_rate: "16"
+    name: "Tension 3V3 ESP"
+    id: tension_3v3_mesuree
+    update_interval: 5s
+    accuracy_decimals: 3
+    entity_category: diagnostic
+    filters:
+      - sliding_window_moving_average:
+          window_size: 12
+          send_every: 1
+      - throttle: 60s
+
+  # Tension de la NTC bac corrigee des variations du 3,3 V :
+  # tension x (3,3 V de reference / 3,3 V mesure). Si la lecture A3 est invalide
+  # (hors 3,0 - 3,6 V), la tension n'est pas corrigee (comportement precedent).
+  - platform: copy
+    source_id: ntc_bac_tension
+    id: ntc_bac_tension_corrigee
+    internal: true
+    filters:
+      - lambda: |-
+          float v33 = id(tension_3v3_mesuree).state;
+          if (isnan(v33) || v33 < 3.0f || v33 > 3.6f) return x;
+          return x * ((float) ${tension_3v3_val}) / v33;
+
   - platform: resistance
-    sensor: ntc_bac_tension
+    sensor: ntc_bac_tension_corrigee
     configuration: UPSTREAM
     resistor: ${r_ref_bac}
     reference_voltage: ${tension_3v3}

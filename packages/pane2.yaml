@@ -110,14 +110,11 @@ openhasp:
               target:
                 entity_id: "switch.esp180_hotte_auto_hotte_pm2_5"
 
-
-      - obj: "p2b23" # STOP      - obj: "p0b6"
-        properties:
-          "text": "\uE2DC {{'%.1f' | format (states('sensor.salon_ts0101_temperature')|float(0) | round(1)) }}°C"
+      - obj: "p2b23" # STOP
         properties:
           "val": '{{ 1 if is_state("switch.esp180_hotte_hotte", "on") else 0 }}'
           "text": '{{ "STOP" if is_state("switch.esp180_hotte_hotte", "on") else "MAR" | e }}'
-          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte', 'on') else '#ffffff' }}" 
+          "text_color": "{{ '#00ff00' if is_state('switch.esp180_hotte_hotte', 'on') else '#ffffff' }}"
         event:
           "up":
             - service: homeassistant.toggle

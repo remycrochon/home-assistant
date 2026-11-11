@@ -1,6 +1,6 @@
 rest:
   - resource: http://192.168.0.44:7125/printer/objects/query?print_stats&extruder&heater_bed&virtual_sdcard&display_status&fan&idle_timeout&webhooks&toolhead&pause_resume&gcode_move&motion_report&system_stats&temperature_sensor%20mcu_Temp&temperature_sensor%20Toolhead_Temp&temperature_sensor%20soc&heater_fan%20hotend_fan&controller_fan%20board_fan&filament_switch_sensor%20filament_sensor
-    scan_interval: 30
+    scan_interval: 86400
     sensor:
       # --- Impression ---
       - name: SV06 état impression

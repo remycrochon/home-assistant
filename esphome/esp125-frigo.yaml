@@ -622,19 +622,27 @@ sensor:
   - platform: pid
     name: "PID P"
     type: PROPORTIONAL
+    filters:
+      - throttle: 60s
 
   - platform: pid
     name: "PID I"
     type: INTEGRAL
+    filters:
+      - throttle: 60s
 
   - platform: pid
     name: "PID D"
     type: DERIVATIVE
+    filters:
+      - throttle: 60s
 
   - platform: pid
     name: "PID Erreur"
     type: ERROR
-
+    filters:
+      - throttle: 60s
+        
   - platform: template
     name: "R1 Consigne PID Active"
     id: r1_consigne_pid_active

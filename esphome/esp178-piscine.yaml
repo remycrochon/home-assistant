@@ -1102,6 +1102,7 @@ script:
           action: telegram_bot.send_message
           data:
             config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+            parse_mode: plain_text
             message: !lambda 'return id(telegram_msg_buffer).c_str();'
 
   # Stockage des messages dans un fichier

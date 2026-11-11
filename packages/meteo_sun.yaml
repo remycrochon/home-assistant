@@ -25,14 +25,6 @@ command_line:
       command: !secret mf_cmd_image_tomorrow
       value_template: "mf_alert_tomorrow"
       unique_id: meteo_france_alerts_picture_tomorrow
-camera:
-  - platform: local_file
-    name: MF_alerte_today
-    file_path: ./www/images/meteo_france_alerte_today.png
-    
-  - platform: local_file
-    name: MF_alerte_tomorrow
-    file_path: ./www/images/meteo_france_alerte_tomorrow.png
 
 mqtt:
   sensor:

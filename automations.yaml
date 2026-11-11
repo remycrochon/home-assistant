@@ -6678,3 +6678,85 @@
     target:
       entity_id: sensor.calendrier_tempo_couleur_demain
   mode: single
+- id: '1794332020205'
+  alias: Imprimante 3D - lecture Moonraker si allumée
+  description: 'Interroge Moonraker (capteurs REST sv06_*) toutes les 10 s uniquement
+    quand la prise de l''imprimante consomme plus de 3 W. Une dernière lecture à l''extinction
+    passe les capteurs en indisponible. Le bloc REST doit avoir scan_interval: 86400.'
+  triggers:
+  - id: lecture
+    seconds: /10
+    trigger: time_pattern
+  - below: 3
+    entity_id: sensor.imprimante_3d_puissance
+    for: 00:00:30
+    id: arret
+    trigger: numeric_state
+  conditions:
+  - condition: or
+    conditions:
+    - condition: trigger
+      id: arret
+    - above: 3
+      condition: numeric_state
+      entity_id: sensor.imprimante_3d_puissance
+  actions:
+  - action: homeassistant.update_entity
+    target:
+      entity_id: sensor.sv06_etat_impression
+  max_exceeded: silent
+  mode: single
+- id: '1794333238112'
+  alias: Ecrans openHASP - rechargement auto si indisponible
+  description: 'Si une entité d''un écran openHASP (ecran01, ecran02) reste indisponible
+    5 min, ou l''est encore 5 min après un redémarrage de HA, recharge l''entrée openHASP
+    de l''écran. Aucun message ici : si le rechargement ne suffit pas, c''est le tableau
+    d''alarmes qui alerte (règles ECRAN01-INDISPO, ECRAN02-INDISPO, ECRAN02-SW1-INDISPO,
+    indisponible depuis 10 min). Une seule tentative tant que l''écran n''est pas
+    revenu.'
+  triggers:
+  - entity_id:
+    - light.ecran01_backlight
+    - light.ecran02_backlight
+    - switch.ecran02_switch_1
+    for: 00:05:00
+    id: indispo
+    to: unavailable
+    trigger: state
+  - event: start
+    id: demarrage
+    trigger: homeassistant
+  conditions:
+  - condition: or
+    conditions:
+    - condition: trigger
+      id: demarrage
+    - condition: template
+      value_template: '{{ trigger.platform == ''state'' and trigger.from_state is
+        not none and trigger.from_state.state != ''unavailable'' }}'
+  actions:
+  - if:
+    - condition: trigger
+      id: demarrage
+    then:
+    - delay: 00:05:00
+  - repeat:
+      for_each:
+      - entites:
+        - light.ecran01_backlight
+        nom: Ecran01 (salon)
+      - entites:
+        - light.ecran02_backlight
+        - switch.ecran02_switch_1
+        nom: Ecran02 (cuisine)
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ repeat.item.entites | select(''is_state'', ''unavailable'')
+            | list | count > 0 }}'
+        then:
+        - action: homeassistant.reload_config_entry
+          target:
+            entity_id: '{{ repeat.item.entites[0] }}'
+  max: 3
+  mode: queued

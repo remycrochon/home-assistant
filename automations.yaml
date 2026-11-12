@@ -228,6 +228,7 @@
         config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
         message: '{{ reponse_push[''stdout''] }}'
         title: Push Github OK
+      enabled: false
     - action: persistent_notification.create
       metadata: {}
       data:
@@ -735,19 +736,6 @@
       - camera.mf_alerte_today
       - camera.mf_alerte_tomorrow
     action: homeassistant.update_entity
-  mode: single
-- id: '1699429641790'
-  alias: 02 Backup total HA 2:00 du matin
-  description: ''
-  triggers:
-  - at: 02:00:00
-    trigger: time
-  conditions: []
-  actions:
-  - data:
-      compressed: true
-      location: truenas
-    action: hassio.backup_full
   mode: single
 - id: '1700469604629'
   alias: Asservissements Modes Tempo

@@ -18,7 +18,7 @@ openhasp:
             {% endif %}
       - obj: "p0b2"
         properties:
-          "text": "{{ states('sensor.time') }}"
+          "text": "{{ now().strftime('%H:%M') }}"
       - obj: "p0b6"
         properties:
           "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_out')|float(0) | round(1)) }}°C"

@@ -6418,10 +6418,13 @@
 - id: '1793779958943'
   alias: Alarme Notification tableau alarmes
   description: 'Telegram pour le tableau d''alarmes (Industrial Alarm Panel) : message
-    à l''apparition, rappel toutes les 10 min (5 max) PAR ALARME tant qu''elle est
-    active et non acquittée (arrêt dès l''acquittement ou le retour à la normale),
-    message à l''acquittement d''une alarme encore active, message au retour à la
-    normale.'
+    à l''apparition, rappels toutes les 10 min PAR ALARME tant qu''elle est active
+    et non acquittée (arrêt dès l''acquittement ou le retour à la normale) avec un
+    nombre de rappels selon la priorité (critique 5, haute 5, moyenne 3, basse 1,
+    info 0), message à l''acquittement d''une alarme encore active (sauf info), message
+    au retour à la normale. Les alarmes de priorité info sont acquittées automatiquement
+    à leur apparition. Annonce vocale : 3 règles critiques (MP2 arrêt, MP2 indisponible,
+    réseau tension basse) + règle d''essai.'
   triggers:
   - trigger: state
     entity_id:
@@ -6429,8 +6432,8 @@
   conditions:
   - condition: template
     value_template: '{% set a = trigger.to_state.attributes %}{{ a.event_type in [''activated'',
-      ''cleared''] or (a.event_type == ''acknowledged'' and a.new_state == ''ACTIVE_ACK'')
-      }}'
+      ''cleared''] or (a.event_type == ''acknowledged'' and a.new_state == ''ACTIVE_ACK''
+      and a.priority not in [''info'', ''status'']) }}'
   actions:
   - variables:
       nom: '{{ trigger.to_state.attributes.name }}'
@@ -6444,6 +6447,8 @@
       rule_sensor: '{{ states.binary_sensor | selectattr(''attributes.id'', ''defined'')
         | selectattr(''attributes.id'', ''eq'', trigger.to_state.attributes.rule_id)
         | map(attribute=''entity_id'') | first | default('''') }}'
+      nb_rappels: '{{ {''critical'': 5, ''high'': 5, ''medium'': 3, ''low'': 1, ''info'':
+        0, ''status'': 0}.get(trigger.to_state.attributes.priority, 5) }}'
   - choose:
     - conditions:
       - condition: template
@@ -6480,8 +6485,17 @@
             Repère : {{ repere }}
 
             Priorité : {{ priorite }}'
+      - if:
+        - condition: template
+          value_template: '{{ trigger.to_state.attributes.priority in [''info'', ''status'']
+            }}'
+        then:
+        - action: industrial_alarm_panel.acknowledge_alarm
+          data:
+            rule_id: '{{ rule_id }}'
+            comment: Acquittement automatique (priorité info)
       - repeat:
-          count: 5
+          count: '{{ nb_rappels | int(0) }}'
           sequence:
           - wait_for_trigger:
             - trigger: template

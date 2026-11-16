@@ -234,6 +234,7 @@
       data:
         message: '{{ reponse_push[''stdout''] }}'
         title: Push Github OK ok
+      enabled: false
     else:
     - action: telegram_bot.send_message
       metadata: {}
@@ -246,6 +247,7 @@
       data:
         message: '{{ reponse_push[''stderr''] }}'
         title: Push Github en erreur
+      enabled: true
   mode: single
 - id: '1637073026237'
   alias: Balise ouverture Porte sous sol

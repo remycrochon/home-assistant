@@ -3380,38 +3380,40 @@
 - id: '1774291163691'
   alias: Volet Automatisme Général RTS V2
   description: Ete -> ouvre et ferme sur horaire Hiver -> ouvre sur horaire et ferme
-    sur transition jour/nuit Absent -> ouvre et ferme sur transitions jour/nuit
+    sur transition jour/nuit (uniquement après midi, pour éviter une fermeture au
+    petit matin avant le lever du soleil) Absent -> ouvre et ferme sur transitions
+    jour/nuit
   triggers:
-  - trigger: homeassistant
-    event: start
+  - event: start
     id: ha_start
-  - trigger: template
-    id: jour_vers_nuit
+    trigger: homeassistant
+  - id: jour_vers_nuit
+    trigger: template
     value_template: "{{ states('sensor.bh1750_illuminance') | float(0)\n   < states('input_number.luminosite_seuil_bas')
       | float(0)\n   and is_state('sun.sun', 'below_horizon') }}"
-  - trigger: template
-    id: nuit_vers_jour
+  - id: nuit_vers_jour
+    trigger: template
     value_template: "{{ states('sensor.bh1750_illuminance') | float(0)\n   > states('input_number.luminosite_seuil_haut')
       | float(0)\n   and is_state('sun.sun', 'above_horizon') }}"
-  - trigger: time
-    at: input_datetime.horaire_ete_volet_ouv
+  - at: input_datetime.horaire_ete_volet_ouv
     id: heure_ouv_ete
-  - trigger: time
-    at: input_datetime.horaire_ete_volet_ferm
+    trigger: time
+  - at: input_datetime.horaire_ete_volet_ferm
     id: heure_ferm_ete
-  - trigger: time
-    at: input_datetime.horaire_hiver_volet_ouv
+    trigger: time
+  - at: input_datetime.horaire_hiver_volet_ouv
     id: ouv_hiv
+    trigger: time
   actions:
   - variables:
+      is_day_now: '{{ states(''sensor.bh1750_illuminance'') | float(0) > states(''input_number.luminosite_seuil_haut'')
+        | float(0) and is_state(''sun.sun'', ''above_horizon'') }}'
+      is_night_now: '{{ states(''sensor.bh1750_illuminance'') | float(0) < states(''input_number.luminosite_seuil_bas'')
+        | float(0) and is_state(''sun.sun'', ''below_horizon'') }}'
       lux: '{{ states(''sensor.bh1750_illuminance'') | float(0) }}'
-      seuil_haut: '{{ states(''input_number.luminosite_seuil_haut'') | float(0) }}'
-      seuil_bas: '{{ states(''input_number.luminosite_seuil_bas'') | float(0) }}'
-      is_day_now: '{{ lux > seuil_haut and is_state(''sun.sun'', ''above_horizon'')
-        }}'
-      is_night_now: '{{ lux < seuil_bas and is_state(''sun.sun'', ''below_horizon'')
-        }}'
       mode_volets: '{{ states(''input_select.volets'') }}'
+      seuil_bas: '{{ states(''input_number.luminosite_seuil_bas'') | float(0) }}'
+      seuil_haut: '{{ states(''input_number.luminosite_seuil_haut'') | float(0) }}'
   - choose:
     - conditions:
       - condition: state
@@ -3419,6 +3421,8 @@
         state: Auto Hiv
       - condition: trigger
         id: jour_vers_nuit
+      - after: '12:00:00'
+        condition: time
       sequence:
       - action: script.1706464871250
     - conditions:
@@ -3436,7 +3440,8 @@
       - condition: trigger
         id: ha_start
       - condition: template
-        value_template: '{{ is_night_now }}'
+        value_template: '{{ states(''sensor.bh1750_illuminance'') | float(0) < states(''input_number.luminosite_seuil_bas'')
+          | float(0) and is_state(''sun.sun'', ''below_horizon'') }}'
       sequence:
       - action: script.1706464871250
     - conditions:
@@ -3478,7 +3483,8 @@
       - condition: trigger
         id: ha_start
       - condition: template
-        value_template: '{{ is_day_now }}'
+        value_template: '{{ states(''sensor.bh1750_illuminance'') | float(0) > states(''input_number.luminosite_seuil_haut'')
+          | float(0) and is_state(''sun.sun'', ''above_horizon'') }}'
       sequence:
       - action: script.0_1_1_ouverture_volets_mode_absent_rts
     - conditions:
@@ -3488,7 +3494,8 @@
       - condition: trigger
         id: ha_start
       - condition: template
-        value_template: '{{ is_night_now }}'
+        value_template: '{{ states(''sensor.bh1750_illuminance'') | float(0) < states(''input_number.luminosite_seuil_bas'')
+          | float(0) and is_state(''sun.sun'', ''below_horizon'') }}'
       sequence:
       - action: script.0_1_0_fermeture_volets_mode_absent_rts
     default: []

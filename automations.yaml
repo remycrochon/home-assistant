@@ -2323,157 +2323,6 @@
           target:
             entity_id: light.sous_sol_inter_zb_spot_sous_sol_ext
   mode: restart
-- id: '1774000425673'
-  alias: Rapport 22:00 DESS IA V2
-  description: ''
-  triggers:
-  - trigger: time
-    at: '22:00:00'
-    id: '22:00'
-  conditions: []
-  actions:
-  - variables:
-      date_snapshot: '{{ states(''sensor.date_time'') }}'
-      previ_prod_demain: '{{ states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
-        | float(0) | round(1) }}'
-      soc_cible: '{{ states(''sensor.mp2_dess_cible_soc_par_mqtt'') | float(0) | round(0)
-        }}'
-      soc_actuel: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
-        | float(0) | round(1) }}'
-      forcage_actif_num: '{{ 1 if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
-        ''on'') else 0 }}'
-      forcage_actif_txt: '{{ ''actif'' if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
-        ''on'') else ''inactif'' }}'
-      niveau_forcage_num: '{{ states(''input_number.mp2_niveau_forcage_cp1'') | float(0)
-        | round(0) }}'
-      niveau_forcage: '{{ niveau_forcage_num if forcage_actif_num == 1 else ''n/d''
-        }}'
-      ecart_soc_cible_txt: '{{ ''%+.1f'' | format((soc_actuel | float - soc_cible
-        | float) | round(1)) }} %'
-      ecart_soc_forcage_txt: "{% if forcage_actif_num == 1 %}\n  {{ '%+.1f' | format((soc_actuel
-        | float - niveau_forcage_num | float) | round(1)) }} %\n{% else %}\n  n/d\n{%
-        endif %}"
-      perte_nuit_estimee_pct: 27
-      soc_prevu_0545_sans_charge: '{{ [soc_actuel | float - perte_nuit_estimee_pct,
-        0] | max | round(1) }}'
-      besoin_corrige_pct_txt: '{{ [soc_cible | float - soc_prevu_0545_sans_charge
-        | float, 0] | max | round(1) }}'
-      cap_ah_mesure: '{{ states(''sensor.capacite_batterie_estimee_par_nr'') | float(300)
-        | round(0) }}'
-      i_avg_estime: 40
-      duree_charge_min: "{% set need_pct = besoin_corrige_pct_txt | float(0) %}\n{%
-        if need_pct <= 0 %}\n  0\n{% else %}\n  {% set ah_needed = (need_pct / 100)
-        * (cap_ah_mesure | float) %}\n  {% set bulk_min = (ah_needed / i_avg_estime)
-        * 60 if i_avg_estime > 0 else 0 %}\n  {% set abs_min = 60 if (soc_cible |
-        float) >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min)
-        | round(0, 'ceil')) %}\n  {% if ns.need < 15 %}{% set ns.need = 15 %}{% endif
-        %}\n  {% if ns.need > 480 %}{% set ns.need = 480 %}{% endif %}\n  {{ ns.need
-        | int }}\n{% endif %}"
-      duree_charge_previ_min_txt: '{{ duree_charge_min | int }}'
-      heure_fin_charge_txt: 05:45
-      heure_debut_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  n/d\n{%
-        else %}\n  {% set step = 5 %}\n  {% set start_floor = 22 * 60 %}\n  {% set
-        end_fixed = 5 * 60 + 45 %}\n  {% set ns = namespace(start=(((end_fixed - (duree_charge_min
-        | int)) // step) * step) | int) %}\n  {% if ns.start < 0 %}{% set ns.start
-        = ns.start + 1440 %}{% endif %}\n  {% if not (ns.start >= start_floor or ns.start
-        < end_fixed) %}\n    {% set ns.start = start_floor %}\n  {% endif %}\n  {{
-        '%02d:%02d' | format((ns.start // 60) | int, (ns.start % 60) | int) }}\n{%
-        endif %}"
-      synthese_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  pas de
-        charge prévisionnelle nécessaire\n{% else %}\n  début estimé {{ heure_debut_charge_previ_txt
-        }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
-        endif %}"
-  - action: ai_task.generate_data
-    continue_on_error: true
-    response_variable: rapport_dess_ia
-    data:
-      task_name: rapport dess 22h
-      entity_id: ai_task.google_ai_task
-      instructions: 'Tu es un assistant énergie domestique.
-
-        Rédige un message Telegram en français. Sois factuel, compact et utile. N''invente
-        aucune donnée. 6 lignes maximum. Commence par un emoji.
-
-        Analyse uniquement la situation DESS à 22:00.
-
-        Tu dois : - indiquer si le forçage DESS est actif ou non, - si le forçage
-        est actif, mentionner le niveau de forçage demandé, - comparer le SOC actuel
-        au SOC cible, - si le forçage est actif, comparer aussi le SOC actuel au niveau
-        de forçage, - rappeler la prévision de production demain, - estimer le SOC
-        à 05:45 sans charge en tenant compte d''une baisse nocturne historique, -
-        indiquer l''heure prévisionnelle de début de charge pour finir à 05:45, -
-        préciser que cette estimation repose sur une baisse nocturne moyenne de 27
-        %, - conclure par une remarque très courte sur la cohérence de la situation.
-
-        Données : - Horodatage : {{ date_snapshot }} - Prévision production demain
-        : {{ previ_prod_demain }} kWh - Forçage DESS : {{ forcage_actif_txt }} - Forçage
-        DESS (0/1) : {{ forcage_actif_num }} - Niveau de forçage demandé : {{ niveau_forcage
-        }} - SOC cible : {{ soc_cible }} % - SOC actuel : {{ soc_actuel }} % - Ecart
-        SOC actuel - SOC cible : {{ ecart_soc_cible_txt }} - Ecart SOC actuel - niveau
-        de forçage : {{ ecart_soc_forcage_txt }} - Baisse nocturne historique estimée
-        22:00->05:45 : {{ perte_nuit_estimee_pct }} % - SOC prévu à 05:45 sans charge
-        : {{ soc_prevu_0545_sans_charge }} % - Besoin corrigé de charge : {{ besoin_corrige_pct_txt
-        }} % - Heure prévisionnelle de début de charge : {{ heure_debut_charge_previ_txt
-        }} - Heure prévisionnelle de fin de charge : {{ heure_fin_charge_txt }} -
-        Durée prévisionnelle de charge : {{ duree_charge_previ_min_txt }} min - Synthèse
-        prévisionnelle : {{ synthese_charge_previ_txt }} - Capacité batterie utilisée
-        pour le calcul : {{ cap_ah_mesure }} Ah'
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{\n  rapport_dess_ia is defined and\n  rapport_dess_ia.data
-          is defined and\n  (rapport_dess_ia.data | string | trim | length) > 0\n}}"
-      sequence:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: Rapport DESS 22h
-          message: '{{ rapport_dess_ia.data }}'
-    default:
-    - action: telegram_bot.send_message
-      metadata: {}
-      data:
-        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-        title: Rapport DESS 22h
-        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Prévi demain = {{ previ_prod_demain
-          }} kWh{{-\"\\n\"-}}\n    Forçage DESS = {{ forcage_actif_txt }}{% if forcage_actif_num
-          == 1 %} / Niveau = {{ niveau_forcage }} %{% endif %}{{-\"\\n\"-}}\n    SOC
-          cible = {{ soc_cible }} % / Actuel = {{ soc_actuel }} %{{-\"\\n\"-}}\n    Ecart
-          SOC-cible = {{ ecart_soc_cible_txt }}{% if forcage_actif_num == 1 %} / Ecart
-          SOC-forçage = {{ ecart_soc_forcage_txt }}{% endif %}{{-\"\\n\"-}}\n    SOC
-          prévu à 05:45 sans charge = {{ soc_prevu_0545_sans_charge }} %{{-\"\\n\"-}}\n
-          \   Charge prévisionnelle = {{ synthese_charge_previ_txt }}\n"
-  - action: notify.send_message
-    target:
-      entity_id: notify.suivi_dess
-    data:
-      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ previ_prod_demain
-        }}, {{ forcage_actif_num }}, {{ niveau_forcage if forcage_actif_num == 1 else
-        '''' }}, {{ soc_cible }}, {{ soc_actuel }}, {{ ecart_soc_cible_txt | replace(''
-        %'','''') }}, {{ ecart_soc_forcage_txt | replace('' %'','''') if forcage_actif_num
-        == 1 else '''' }}, {{ perte_nuit_estimee_pct }}, {{ soc_prevu_0545_sans_charge
-        }}, {{ besoin_corrige_pct_txt }}, {{ heure_debut_charge_previ_txt }}, {{ heure_fin_charge_txt
-        }}, {{ duree_charge_previ_min_txt }}'
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - action: input_number.set_value
-    data:
-      value: '{{ previ_prod_demain }}'
-    target:
-      entity_id:
-      - input_number.mp2_memoire_estimation_production_jour
-  - action: input_number.set_value
-    data:
-      value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) | round(1)
-        }}'
-    target:
-      entity_id:
-      - input_number.mp2_memoire_estimation_conso_jour
-  mode: single
 - id: '1774028162818'
   alias: Volet Chambre Parents - V4 été heure ouverture/fermeture réglable
   description: 'Ouverture à heure réglable. Suivi solaire en journée. Fermeture à
@@ -4028,157 +3877,6 @@
       entity_id: input_boolean.rebootweewx2026
     data: {}
   mode: single
-- id: '1787411767535'
-  alias: Rapport 22:00 DESS IA
-  description: ''
-  triggers:
-  - trigger: time
-    at: '22:00:00'
-    id: '22:00'
-  conditions: []
-  actions:
-  - variables:
-      date_snapshot: '{{ states(''sensor.date_time'') }}'
-      previ_prod_demain: '{{ states(''sensor.victron_remote_monitoring_production_d_energie_estimee_demain'')
-        | float(0) | round(1) }}'
-      soc_cible: '{{ states(''sensor.mp2_dess_cible_soc_par_mqtt'') | float(0) | round(0)
-        }}'
-      soc_actuel: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
-        | float(0) | round(1) }}'
-      forcage_actif_num: '{{ 1 if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
-        ''on'') else 0 }}'
-      forcage_actif_txt: '{{ ''actif'' if is_state(''input_boolean.forcage_charge_pgm_mp1_100'',
-        ''on'') else ''inactif'' }}'
-      niveau_forcage_num: '{{ states(''input_number.mp2_niveau_forcage_cp1'') | float(0)
-        | round(0) }}'
-      niveau_forcage: '{{ niveau_forcage_num if forcage_actif_num == 1 else ''n/d''
-        }}'
-      ecart_soc_cible_txt: '{{ ''%+.1f'' | format((soc_actuel | float - soc_cible
-        | float) | round(1)) }} %'
-      ecart_soc_forcage_txt: "{% if forcage_actif_num == 1 %}\n  {{ '%+.1f' | format((soc_actuel
-        | float - niveau_forcage_num | float) | round(1)) }} %\n{% else %}\n  n/d\n{%
-        endif %}"
-      perte_nuit_estimee_pct: 27
-      soc_prevu_0545_sans_charge: '{{ [soc_actuel | float - perte_nuit_estimee_pct,
-        0] | max | round(1) }}'
-      besoin_corrige_pct_txt: '{{ [soc_cible | float - soc_prevu_0545_sans_charge
-        | float, 0] | max | round(1) }}'
-      cap_ah_mesure: '{{ states(''sensor.capacite_batterie_estimee_par_nr'') | float(300)
-        | round(0) }}'
-      i_avg_estime: 40
-      duree_charge_min: "{% set need_pct = besoin_corrige_pct_txt | float(0) %}\n{%
-        if need_pct <= 0 %}\n  0\n{% else %}\n  {% set ah_needed = (need_pct / 100)
-        * (cap_ah_mesure | float) %}\n  {% set bulk_min = (ah_needed / i_avg_estime)
-        * 60 if i_avg_estime > 0 else 0 %}\n  {% set abs_min = 60 if (soc_cible |
-        float) >= 95 else 0 %}\n  {% set ns = namespace(need=(bulk_min + abs_min)
-        | round(0, 'ceil')) %}\n  {% if ns.need < 15 %}{% set ns.need = 15 %}{% endif
-        %}\n  {% if ns.need > 480 %}{% set ns.need = 480 %}{% endif %}\n  {{ ns.need
-        | int }}\n{% endif %}"
-      duree_charge_previ_min_txt: '{{ duree_charge_min | int }}'
-      heure_fin_charge_txt: 05:45
-      heure_debut_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  n/d\n{%
-        else %}\n  {% set step = 5 %}\n  {% set start_floor = 22 * 60 %}\n  {% set
-        end_fixed = 5 * 60 + 45 %}\n  {% set ns = namespace(start=(((end_fixed - (duree_charge_min
-        | int)) // step) * step) | int) %}\n  {% if ns.start < 0 %}{% set ns.start
-        = ns.start + 1440 %}{% endif %}\n  {% if not (ns.start >= start_floor or ns.start
-        < end_fixed) %}\n    {% set ns.start = start_floor %}\n  {% endif %}\n  {{
-        '%02d:%02d' | format((ns.start // 60) | int, (ns.start % 60) | int) }}\n{%
-        endif %}"
-      synthese_charge_previ_txt: "{% if (duree_charge_min | int) == 0 %}\n  pas de
-        charge prévisionnelle nécessaire\n{% else %}\n  début estimé {{ heure_debut_charge_previ_txt
-        }}, fin {{ heure_fin_charge_txt }}, durée ~{{ duree_charge_min | int }} min\n{%
-        endif %}"
-  - action: ai_task.generate_data
-    continue_on_error: true
-    response_variable: rapport_dess_ia
-    data:
-      task_name: rapport dess 22h
-      entity_id: ai_task.google_ai_task
-      instructions: 'Tu es un assistant énergie domestique.
-
-        Rédige un message Telegram en français. Sois factuel, compact et utile. N''invente
-        aucune donnée. 6 lignes maximum. Commence par un emoji.
-
-        Analyse uniquement la situation DESS à 22:00.
-
-        Tu dois : - indiquer si le forçage DESS est actif ou non, - si le forçage
-        est actif, mentionner le niveau de forçage demandé, - comparer le SOC actuel
-        au SOC cible, - si le forçage est actif, comparer aussi le SOC actuel au niveau
-        de forçage, - rappeler la prévision de production demain, - estimer le SOC
-        à 05:45 sans charge en tenant compte d''une baisse nocturne historique, -
-        indiquer l''heure prévisionnelle de début de charge pour finir à 05:45, -
-        préciser que cette estimation repose sur une baisse nocturne moyenne de 27
-        %, - conclure par une remarque très courte sur la cohérence de la situation.
-
-        Données : - Horodatage : {{ date_snapshot }} - Prévision production demain
-        : {{ previ_prod_demain }} kWh - Forçage DESS : {{ forcage_actif_txt }} - Forçage
-        DESS (0/1) : {{ forcage_actif_num }} - Niveau de forçage demandé : {{ niveau_forcage
-        }} - SOC cible : {{ soc_cible }} % - SOC actuel : {{ soc_actuel }} % - Ecart
-        SOC actuel - SOC cible : {{ ecart_soc_cible_txt }} - Ecart SOC actuel - niveau
-        de forçage : {{ ecart_soc_forcage_txt }} - Baisse nocturne historique estimée
-        22:00->05:45 : {{ perte_nuit_estimee_pct }} % - SOC prévu à 05:45 sans charge
-        : {{ soc_prevu_0545_sans_charge }} % - Besoin corrigé de charge : {{ besoin_corrige_pct_txt
-        }} % - Heure prévisionnelle de début de charge : {{ heure_debut_charge_previ_txt
-        }} - Heure prévisionnelle de fin de charge : {{ heure_fin_charge_txt }} -
-        Durée prévisionnelle de charge : {{ duree_charge_previ_min_txt }} min - Synthèse
-        prévisionnelle : {{ synthese_charge_previ_txt }} - Capacité batterie utilisée
-        pour le calcul : {{ cap_ah_mesure }} Ah'
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{\n  rapport_dess_ia is defined and\n  rapport_dess_ia.data
-          is defined and\n  (rapport_dess_ia.data | string | trim | length) > 0\n}}"
-      sequence:
-      - action: telegram_bot.send_message
-        metadata: {}
-        data:
-          config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-          title: Rapport DESS 22h
-          message: '{{ rapport_dess_ia.data }}'
-    default:
-    - action: telegram_bot.send_message
-      metadata: {}
-      data:
-        config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-        title: Rapport DESS 22h
-        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Prévi demain = {{ previ_prod_demain
-          }} kWh{{-\"\\n\"-}}\n    Forçage DESS = {{ forcage_actif_txt }}{% if forcage_actif_num
-          == 1 %} / Niveau = {{ niveau_forcage }} %{% endif %}{{-\"\\n\"-}}\n    SOC
-          cible = {{ soc_cible }} % / Actuel = {{ soc_actuel }} %{{-\"\\n\"-}}\n    Ecart
-          SOC-cible = {{ ecart_soc_cible_txt }}{% if forcage_actif_num == 1 %} / Ecart
-          SOC-forçage = {{ ecart_soc_forcage_txt }}{% endif %}{{-\"\\n\"-}}\n    SOC
-          prévu à 05:45 sans charge = {{ soc_prevu_0545_sans_charge }} %{{-\"\\n\"-}}\n
-          \   Charge prévisionnelle = {{ synthese_charge_previ_txt }}\n"
-  - action: notify.send_message
-    target:
-      entity_id: notify.suivi_dess
-    data:
-      message: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}, {{ previ_prod_demain
-        }}, {{ forcage_actif_num }}, {{ niveau_forcage if forcage_actif_num == 1 else
-        '''' }}, {{ soc_cible }}, {{ soc_actuel }}, {{ ecart_soc_cible_txt | replace(''
-        %'','''') }}, {{ ecart_soc_forcage_txt | replace('' %'','''') if forcage_actif_num
-        == 1 else '''' }}, {{ perte_nuit_estimee_pct }}, {{ soc_prevu_0545_sans_charge
-        }}, {{ besoin_corrige_pct_txt }}, {{ heure_debut_charge_previ_txt }}, {{ heure_fin_charge_txt
-        }}, {{ duree_charge_previ_min_txt }}'
-  - delay:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-  - action: input_number.set_value
-    data:
-      value: '{{ previ_prod_demain }}'
-    target:
-      entity_id:
-      - input_number.mp2_memoire_estimation_production_jour
-  - action: input_number.set_value
-    data:
-      value: '{{ states(''sensor.mp2_dess_previ_conso_6_22_j1'') | float(0) | round(1)
-        }}'
-    target:
-      entity_id:
-      - input_number.mp2_memoire_estimation_conso_jour
-  mode: single
 - id: '1787763504633'
   alias: Alerte utilisation disque Frigate recordings
   description: Surveillance disque Frigate recordings
@@ -4910,70 +4608,95 @@
   alias: Rapport 06:00 DESS IA - Bilan nuit
   description: ''
   triggers:
-  - trigger: time
-    at: 06:00:00
+  - at: 06:00:00
     id: 06:00
+    trigger: time
   conditions: []
   actions:
   - variables:
       date_snapshot: '{{ states(''sensor.date_time'') }}'
-      snap: '{{ states(''input_text.mp2_dess_snapshot_22h'') | from_json }}'
       soc_actuel_6h: '{{ states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
         | float(0) | round(1) }}'
-      soc_actuel_22h: '{{ snap.sa | float(0) | round(1) }}'
-      soc_cible_22h: '{{ snap.sc | float(0) | round(0) }}'
-      soc_prevu_0545_sans_charge: '{{ snap.sp | float(0) | round(1) }}'
-      besoin_corrige_pct: '{{ snap.bp | float(0) | round(1) }}'
-      heure_debut_previ: '{{ snap.hd }}'
-      duree_previ_min: '{{ snap.dm }}'
-      forcage_etait_actif: '{{ snap.fa }}'
-      niveau_forcage_previ: '{{ snap.nf }}'
-      previ_prod_demain_22h: '{{ snap.pd }}'
-      gain_soc_nuit: '{{ (soc_actuel_6h - soc_prevu_0545_sans_charge) | round(1) }}'
-      ecart_vs_cible_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_cible_22h) |
-        round(1)) }} %'
-      ecart_vs_previ_sans_charge_txt: '{{ ''%+.1f'' | format((soc_actuel_6h - soc_prevu_0545_sans_charge)
-        | round(1)) }} %'
-      charge_a_eu_lieu: '{{ ''oui'' if gain_soc_nuit > ([besoin_corrige_pct * 0.5,
-        1.0] | max) else ''non ou partielle'' }}'
-      linky_kwh_22h: '{{ snap.lk | float(0) | round(2) }}'
+      soc_actuel_22h: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).sa
+        | float(0) | round(1) }}'
+      soc_cible_22h: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).sc
+        | float(0) | round(0) }}'
+      soc_prevu_0545_sans_charge: '{{ (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).sp | float(0) | round(1) }}'
+      besoin_corrige_pct: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).bp
+        | float(0) | round(1) }}'
+      heure_debut_previ: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).hd
+        }}'
+      duree_previ_min: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).dm
+        }}'
+      forcage_etait_actif: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).fa
+        }}'
+      niveau_forcage_previ: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).nf
+        }}'
+      previ_prod_demain_22h: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).pd
+        }}'
+      linky_kwh_22h: '{{ (states(''input_text.mp2_dess_snapshot_22h'') | from_json).lk
+        | float(0) | round(2) }}'
       linky_kwh_6h: '{{ states(''sensor.linky_hphc_kwh'') | float(0) | round(2) }}'
-      conso_nuit_kwh: '{{ (linky_kwh_6h - linky_kwh_22h) | round(2) }}'
-      decharge_anormale: '{{ (besoin_corrige_pct <= 0) and ((soc_actuel_6h - soc_prevu_0545_sans_charge)
-        | abs > 5) }}'
+      gain_soc_nuit: '{% set soc_actuel_6h = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) %}{% set soc_prevu_0545_sans_charge = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).sp | float(0) | round(1) %}{{ (soc_actuel_6h - soc_prevu_0545_sans_charge)
+        | round(1) }}'
+      ecart_vs_cible_txt: '{% set soc_actuel_6h = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) %}{% set soc_cible_22h = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).sc | float(0) | round(0) %}{{ ''%+.1f'' | format((soc_actuel_6h
+        - soc_cible_22h) | round(1)) }} %'
+      ecart_vs_previ_sans_charge_txt: '{% set soc_actuel_6h = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) %}{% set soc_prevu_0545_sans_charge = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).sp | float(0) | round(1) %}{{ ''%+.1f'' | format((soc_actuel_6h
+        - soc_prevu_0545_sans_charge) | round(1)) }} %'
+      charge_a_eu_lieu: '{% set soc_actuel_6h = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) %}{% set soc_prevu_0545_sans_charge = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).sp | float(0) | round(1) %}{% set besoin_corrige_pct = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).bp | float(0) | round(1) %}{% set gain_soc_nuit = (soc_actuel_6h
+        - soc_prevu_0545_sans_charge) | round(1) %}{{ ''oui'' if gain_soc_nuit > ([besoin_corrige_pct
+        * 0.5, 1.0] | max) else ''non ou partielle'' }}'
+      conso_nuit_kwh: '{% set linky_kwh_22h = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).lk | float(0) | round(2) %}{% set linky_kwh_6h = states(''sensor.linky_hphc_kwh'')
+        | float(0) | round(2) %}{{ (linky_kwh_6h - linky_kwh_22h) | round(2) }}'
+      decharge_anormale: '{% set soc_actuel_6h = states(''sensor.victron_mqtt_c0619ab1db0d_system_0_system_dc_battery_soc'')
+        | float(0) | round(1) %}{% set soc_prevu_0545_sans_charge = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).sp | float(0) | round(1) %}{% set besoin_corrige_pct = (states(''input_text.mp2_dess_snapshot_22h'')
+        | from_json).bp | float(0) | round(1) %}{{ (besoin_corrige_pct <= 0) and ((soc_actuel_6h
+        - soc_prevu_0545_sans_charge) | abs > 5) }}'
       charge_reelle_txt: '{% set log = (states(''input_text.dess_charge_reelle_log_debut_fin'')
         | from_json) if states(''input_text.dess_charge_reelle_log_debut_fin'') not
         in [''unknown'',''unavailable'',''''] else {} %}{% if log.hd is defined and
         log.hf is defined %}OUI : début {{ log.hd }} (SOC {{ log.sd }} %) → fin {{
         log.hf }} (SOC {{ log.sf }} %), ~{{ ((log.lf | float(0)) - (log.ld | float(0)))
-        | round(2) }} kWh soutirés du réseau{% else %}NON (aucune charge programmée
-        déclenchée cette nuit){% endif %}'
+        | round(2) }} kWh soutirés du réseau{% else %}NON{% endif %}'
       ve_bilan_txt: '{% set dt = state_attr(''sensor.bilan_nuit_ve'', ''date'') %}{%
-        if dt and (as_datetime(dt) | as_local).date() == now().date() %}{{ state_attr(''sensor.bilan_nuit_ve'',
-        ''rapport'') }}{% else %}Pas de bilan VE cette nuit{% endif %}'
-      ecs_bilan_txt: '{% if snap.ek is defined and snap.vb is defined %}{% set e =
-        [(states(''sensor.energie_ecs'') | float(0)) - (snap.ek | float(0)), 0] |
-        max %}{% set vb22 = snap.vb | float(0) | round(0) | int %}{% set vb6 = states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
+        if dt and (as_datetime(dt) | as_local).date() == now().date() %}{% set rapport
+        = state_attr(''sensor.bilan_nuit_ve'', ''rapport'') %}{% if rapport and ''non
+        branché'' in rapport %}VE non branché{% else %}{{ rapport }}{% endif %}{%
+        else %}Pas de bilan VE cette nuit{% endif %}'
+      ecs_bilan_txt: '{% set snap = states(''input_text.mp2_dess_snapshot_22h'') |
+        from_json %}{% if snap.ek is defined and snap.vb is defined %}{% set e = [(states(''sensor.energie_ecs'')
+        | float(0)) - (snap.ek | float(0)), 0] | max %}{% set vb22 = snap.vb | float(0)
+        | round(0) | int %}{% set vb6 = states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
         | float(0) | round(0) | int %}{% set sb = states(''number.esp176_routeur_seuil_bas_ecs_l'')
         | float(0) | round(0) | int %}{% set sh = states(''number.esp176_routeur_seuil_haut_ecs_l'')
         | float(0) | round(0) | int %}{% if e >= 0.05 %}Chauffe de nuit : {{ e | round(2)
         }} kWh (ballon {{ vb22 }} → {{ vb6 }} L éq. 40 °C, plage de nuit {{ sb }}–{{
         sh }} L){% elif vb6 < sb %}⚠ Pas de chauffe alors que le ballon est sous le
         seuil bas de nuit (ballon {{ vb22 }} → {{ vb6 }} L éq. 40 °C, seuil bas {{
-        sb }} L){% else %}Pas de chauffe (chauffe de nuit seulement entre {{ sb }}
-        et {{ sh }} L){% endif %}{% else %}Pas de mesure ECS à 22h (disponible dès
-        demain){% endif %}'
-      ecs_ia_txt: '{% if snap.ek is defined %}{% set e = (states(''sensor.energie_ecs'')
-        | float(0)) - (snap.ek | float(0)) %}{% if e >= 0.05 %}a chauffé{% elif (states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
+        sb }} L){% else %}Pas de chauffe{% endif %}{% else %}Pas de mesure ECS à 22h
+        (disponible dès demain){% endif %}'
+      ecs_ia_txt: '{% set snap = states(''input_text.mp2_dess_snapshot_22h'') | from_json
+        %}{% if snap.ek is defined %}{% set e = (states(''sensor.energie_ecs'') |
+        float(0)) - (snap.ek | float(0)) %}{% if e >= 0.05 %}a chauffé{% elif (states(''sensor.sous_sol_esp139_ecs_ballon_litres_equivalents_40degc'')
         | float(0)) < (states(''number.esp176_routeur_seuil_bas_ecs_l'') | float(0))
         %}pas de chauffe alors que le ballon était sous le seuil bas de nuit{% else
         %}pas de chauffe, normal car le ballon était au-dessus du seuil de nuit{%
         endif %}{% else %}inconnu{% endif %}'
   - action: ai_task.generate_data
     continue_on_error: true
-    response_variable: rapport_bilan_ia
     data:
-      task_name: rapport bilan nuit 6h
       entity_id: ai_task.google_ai_task
       instructions: 'Tu es un assistant énergie domestique. Tu ne dois JAMAIS produire
         de chiffres, pourcentages, unités ou horaires : toutes les valeurs numériques
@@ -5017,11 +4740,6 @@
         prévision, cible atteinte." ou "Charge plus faible que prévu, cible non atteinte."
         ou "Charge plus importante que prévu, à vérifier."'
       structure:
-        titre:
-          description: Titre très court du message Telegram, sans aucun chiffre
-          required: true
-          selector:
-            text:
         commentaire_bilan:
           description: Une phrase courte jugeant si la nuit s'est déroulée conformément
             à la prévision de 22h, sans aucun chiffre ni unité
@@ -5033,6 +4751,13 @@
           required: true
           selector:
             text:
+        titre:
+          description: Titre très court du message Telegram, sans aucun chiffre
+          required: true
+          selector:
+            text:
+      task_name: rapport bilan nuit 6h
+    response_variable: rapport_bilan_ia
   - choose:
     - conditions:
       - condition: template
@@ -5041,38 +4766,33 @@
           is defined\n}}"
       sequence:
       - action: telegram_bot.send_message
-        metadata: {}
         data:
           config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+          message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    J-1 22h : cible {{ soc_cible_22h
+            }} % / J : {{ soc_actuel_6h }} %{{-\"\\n\"-}}\n    {% if besoin_corrige_pct
+            > 0 %}Charge prévue hier = {{ heure_debut_previ }} → durée ~{{ duree_previ_min
+            }} min{% else %}Aucune charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n
+            \   Charge réseau: {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    Charge VE:
+            {{ ve_bilan_txt }}{{-\"\\n\"-}}\n    {% if ecs_bilan_txt | trim != ''
+            %}ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt }}{{-\"\\n\"-}}{% endif %}\n    {{
+            rapport_bilan_ia.data.commentaire_bilan }}{{-\"\\n\"-}}\n    Niveau =
+            {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau is defined
+            else 'INFO' }}\n"
           title: '{{ rapport_bilan_ia.data.titre }}'
-          message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Hier 22h : cible {{
-            soc_cible_22h }} % / SOC {{ soc_actuel_22h }} %{{-\"\\n\"-}}\n    Ce matin
-            : SOC {{ soc_actuel_6h }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt
-            }}{{-\"\\n\"-}}\n    Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt
-            }}{{-\"\\n\"-}}\n    {% if besoin_corrige_pct > 0 %}Charge prévue hier
-            = {{ heure_debut_previ }} → durée ~{{ duree_previ_min }} min{% else %}Aucune
-            charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau
-            = {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{
-            ve_bilan_txt }}{{-\"\\n\"-}}\n    {% if ecs_bilan_txt | trim != '' %}ECS
-            :{{-\"\\n\"-}}{{ ecs_bilan_txt }}{{-\"\\n\"-}}{% endif %}\n    {{ rapport_bilan_ia.data.commentaire_bilan
-            }}{{-\"\\n\"-}}\n    Niveau = {{ rapport_bilan_ia.data.niveau if rapport_bilan_ia.data.niveau
-            is defined else 'INFO' }}\n"
+        metadata: {}
     default:
     - action: telegram_bot.send_message
-      metadata: {}
       data:
         config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
+        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    J-1 22h : cible {{ soc_cible_22h
+          }} % / J : {{ soc_actuel_6h }} %{{-\"\\n\"-}}\n    {% if besoin_corrige_pct
+          > 0 %}Charge prévue hier = {{ heure_debut_previ }} → durée ~{{ duree_previ_min
+          }} min{% else %}Aucune charge nécessaire hier soir{% endif %}{{-\"\\n\"-}}\n
+          \   Charge réseau: {{ charge_reelle_txt }}{{-\"\\n\"-}}\n    Charge VE:
+          {{ ve_bilan_txt }}{{-\"\\n\"-}}\n    {% if ecs_bilan_txt | trim != '' %}ECS
+          :{{-\"\\n\"-}}{{ ecs_bilan_txt }}{% endif %}\n"
         title: Rapport 06h Bilan nuit
-        message: "    {{ date_snapshot }}{{-\"\\n\"-}}\n    Hier 22h : cible {{ soc_cible_22h
-          }} % / SOC {{ soc_actuel_22h }} %{{-\"\\n\"-}}\n    Ce matin : SOC {{ soc_actuel_6h
-          }} %{{-\"\\n\"-}}\n    Ecart vs cible = {{ ecart_vs_cible_txt }}{{-\"\\n\"-}}\n
-          \   Ecart vs \"sans charge\" = {{ ecart_vs_previ_sans_charge_txt }}{{-\"\\n\"-}}\n
-          \   {% if besoin_corrige_pct > 0 %}Charge prévue hier = {{ heure_debut_previ
-          }} → durée ~{{ duree_previ_min }} min{% else %}Aucune charge nécessaire
-          hier soir{% endif %}{{-\"\\n\"-}}\n    Charge réseau = {{ charge_reelle_txt
-          }}{{-\"\\n\"-}}\n    Charge VE :{{-\"\\n\"-}}{{ ve_bilan_txt }}{{-\"\\n\"-}}\n
-          \   {% if ecs_bilan_txt | trim != '' %}ECS :{{-\"\\n\"-}}{{ ecs_bilan_txt
-          }}{% endif %}\n"
+      metadata: {}
   mode: single
 - id: '1788110290374'
   alias: ESP129 - Auto-correction tare chlore après reboot

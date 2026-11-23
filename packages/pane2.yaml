@@ -2,11 +2,8 @@ openhasp:
   ecran02:
 ############### Page 0 All ###############
     objects:
-      - obj: "p0b3"
-        properties:
-          "text": "{{ now().strftime('%H:%M') }}"
 
-      - obj: "p0b4"
+      - obj: "p0b4" #J
         properties:
           "bg_color": >
             {% set couleur = states('sensor.rte_tempo_couleur_actuelle') %}
@@ -28,7 +25,7 @@ openhasp:
           #"text": "\uE606 {{'%.1f' | format (states('sensor.esp178_piscine_temperature_eau')|float(0) | round(1)) }}°C"
           "text": "\uE2DC {{'%.1f' | format (states('sensor.vp2_temp_in')|float(0) | round(1)) }}°C"
 
-      - obj: "p0b7"
+      - obj: "p0b7" # J1
         properties:
           "bg_color": >
             {% set couleur = states('sensor.rte_tempo_prochaine_couleur') %}
@@ -71,7 +68,32 @@ openhasp:
             {% else %}
             #00FF00
             {% endif %}
-
+      - obj: "p0b11" # Tempo J3
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.calendrier_tempo_prevision_j3') %}
+            {% if couleur == "bleu" %}
+            #0000FF
+            {% elif couleur == "blanc" %}
+            #FFFFFF
+            {% elif couleur == "rouge" %}
+            #FF0000
+            {% else %}
+            #00FF00
+            {% endif %}
+      - obj: "p0b12" # Tempo J4
+        properties:
+          "bg_color": >
+            {% set couleur = states('sensor.calendrier_tempo_prevision_j4') %}
+            {% if couleur == "bleu" %}
+            #0000FF
+            {% elif couleur == "blanc" %}
+            #FFFFFF
+            {% elif couleur == "rouge" %}
+            #FF0000
+            {% else %}
+            #00FF00
+            {% endif %}
       - obj: "p0b18" #BP Volet, passe en rouge si alarme portes
         properties:
           "bg_color": "{{ '#ff0000' if is_state('binary_sensor.alarmes_portes', 'on') else '#EE82EE' }}"

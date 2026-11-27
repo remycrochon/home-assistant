@@ -534,8 +534,6 @@ interval:
 script:
   # Envoi de la consigne de vitesse à l'esp128 (sniffer/émetteur IBUS), qui relaie
   # l'ordre sur le bus de la VMC via ses boutons "IBUS Envoyer V1/V2/V3".
-  # ⚠️ Vérifier dans Outils de développement > États (HA) que ces entity_id
-  # correspondent bien à celles de vos boutons esp128 ; adapter si besoin.
   - id: envoyer_consigne_vmc
     mode: single
     parameters:

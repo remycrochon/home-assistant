@@ -5316,36 +5316,37 @@
 - id: '1790242593269'
   alias: Imprimante 3D - Extinction fin d'impression
   description: Coupe la prise de la Sovol SV06 quand l'impression est terminée et
-    la buse refroidie
+    la buse refroidie (entités Moonraker)
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.sv06_en_impression
-    from: 'on'
-    to: 'off'
+  - entity_id: sensor.bureau_sovol_sv06_plus_ace_current_print_state
     for: 00:01:00
+    from: printing
+    trigger: state
   conditions:
   - condition: not
     conditions:
     - condition: state
-      entity_id: sensor.sv06_etat_impression
+      entity_id: sensor.bureau_sovol_sv06_plus_ace_current_print_state
       state: paused
   actions:
-  - wait_template: '{{ states(''sensor.sv06_temperature_buse'') | float(100) < seuil_buse
-      }}'
+  - continue_on_timeout: false
     timeout: 01:00:00
-    continue_on_timeout: false
-  - condition: state
-    entity_id: binary_sensor.sv06_en_impression
-    state: 'off'
+    wait_template: '{{ states(''sensor.bureau_sovol_sv06_plus_ace_extruder_temperature'')
+      | float(100) < seuil_buse }}'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.bureau_sovol_sv06_plus_ace_current_print_state
+      state: printing
   - delay: 00:02:00
   - action: telegram_bot.send_message
-    metadata: {}
     data:
       config_entry_id: 01JZDD4YV6TJXXZ0BGJ3BDGD5A
-      title: 'Imprimante 3D : impression terminée'
       message: 'Durée d''impression : {{ ((trigger.to_state.last_changed - trigger.from_state.last_changed).total_seconds()
         / 60) | round(0) | int }} min{{-"\n"-}} Imprimante éteinte.{{-"\n"-}} {{ states(''sensor.date_time'')
         }}'
+      title: 'Imprimante 3D : impression terminée'
+    metadata: {}
   - action: switch.turn_off
     target:
       entity_id: switch.imprimante_3d
@@ -6405,34 +6406,6 @@
     action: homeassistant.update_entity
     target:
       entity_id: sensor.calendrier_tempo_couleur_demain
-  mode: single
-- id: '1794332020205'
-  alias: Imprimante 3D - lecture Moonraker si allumée
-  description: 'Interroge Moonraker (capteurs REST sv06_*) toutes les 10 s uniquement
-    quand la prise de l''imprimante consomme plus de 3 W. Une dernière lecture à l''extinction
-    passe les capteurs en indisponible. Le bloc REST doit avoir scan_interval: 86400.'
-  triggers:
-  - id: lecture
-    seconds: /10
-    trigger: time_pattern
-  - below: 3
-    entity_id: sensor.imprimante_3d_puissance
-    for: 00:00:30
-    id: arret
-    trigger: numeric_state
-  conditions:
-  - condition: or
-    conditions:
-    - condition: trigger
-      id: arret
-    - above: 3
-      condition: numeric_state
-      entity_id: sensor.imprimante_3d_puissance
-  actions:
-  - action: homeassistant.update_entity
-    target:
-      entity_id: sensor.sv06_etat_impression
-  max_exceeded: silent
   mode: single
 - id: '1794333238112'
   alias: Ecrans openHASP - rechargement auto si indisponible

@@ -1,0 +1,297 @@
+substitutions:
+  device_name: esp127_tempo_5leds
+  adress_ip: "192.168.0.127"
+  friendly_name: esp127
+  nb_led: "5"
+  # Tension reseau (V) en dessous de laquelle les 5 LED clignotent en rouge
+  seuil_reseau: "10"
+  # Luminosite des LED (1.0 = 100 %)
+  lum_jour: "0.7"
+  lum_nuit: "0.5"
+  # Type des puces :
+  #  - SK6812 avec canal blanc (RGBW / RGBCW) : GRBW + SK6812
+  #  - WS2812B (RGB seul)                      : GRB  + WS2812X
+  type_led: GRBW
+  variante_led: SK6812
+
+esphome:
+  name: ${device_name}
+#  platformio_options:
+#    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      # Le "maitre" doit etre allume (en noir) pour que les LED s'affichent
+      - light.turn_on:
+          id: bandeau
+          brightness: 100%
+          red: 0%
+          green: 0%
+          blue: 0%
+          transition_length: 0s
+      - script.execute: maj_leds
+
+esp8266:
+  board: d1_mini
+  framework:
+    version: recommended
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 2
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+  min_auth_mode: WPA2
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+logger:
+api:
+ota:
+  platform: esphome
+web_server:
+  port: 80
+
+# 5 LED en serie : 0 = aujourd'hui | 1 = demain | 2 = J+2 | 3 = J+3 | 4 = J+4
+# Data de la premiere LED sur GPIO3 (RX), comme l'esp141
+light:
+  - platform: neopixelbus
+    id: bandeau
+    name: "Bandeau"
+    internal: true
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s
+    type: ${type_led}
+    variant: ${variante_led}
+    method:
+      type: esp8266_dma
+    pin: GPIO3
+    num_leds: ${nb_led}
+
+globals:
+  # Intensite des LED (0 a 1) : 1.0 = pleine luminosite
+  - id: intlum
+    type: float
+    restore_value: no
+    initial_value: '${lum_jour}'
+  # Etat pour le clignotement (perte reseau)
+  - id: blink_state
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+binary_sensor:
+  # Etat de la connexion
+  - platform: status
+    name: "Status"
+
+# Tension reseau (meme capteur que l'esp141) : < seuil = perte reseau
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.mp2_tension_entree_l1
+    id: u_reseau
+    internal: true
+    on_value:
+      then:
+        - script.execute: maj_leds
+
+# Integration HACS "Calendrier Tempo EDF" : couleurs en minuscules
+# internal = utilises uniquement par l'ESP, non remontes dans Home Assistant
+text_sensor:
+  # Jour / nuit : la luminosite passe a 75 % quand le soleil est couche (sun.sun)
+  - platform: homeassistant
+    name: "Soleil"
+    entity_id: sun.sun
+    id: soleil
+    internal: true
+    on_value:
+      then:
+        - lambda: |-
+            id(intlum) = (x == "below_horizon") ? ${lum_nuit} : ${lum_jour};
+        - script.execute: maj_leds
+
+  - platform: homeassistant
+    name: "Tempo Jour"
+    entity_id: sensor.calendrier_tempo_couleur_aujourd_hui
+    id: tempo_jour
+    internal: true
+    on_value:
+      then:
+        - script.execute: maj_leds
+
+  - platform: homeassistant
+    name: "Tempo j+1"
+    entity_id: sensor.calendrier_tempo_couleur_demain
+    id: tempo_jour1
+    internal: true
+    on_value:
+      then:
+        - script.execute: maj_leds
+
+  - platform: homeassistant
+    name: "Tempo j+2"
+    entity_id: sensor.calendrier_tempo_prevision_j2
+    id: tempo_j2
+    internal: true
+    on_value:
+      then:
+        - script.execute: maj_leds
+
+  - platform: homeassistant
+    name: "Tempo j+3"
+    entity_id: sensor.calendrier_tempo_prevision_j3
+    id: tempo_j3
+    internal: true
+    on_value:
+      then:
+        - script.execute: maj_leds
+
+  - platform: homeassistant
+    name: "Tempo j+4"
+    entity_id: sensor.calendrier_tempo_prevision_j4
+    id: tempo_j4
+    internal: true
+    on_value:
+      then:
+        - script.execute: maj_leds
+
+switch:
+  # Mode test : LED 1 rouge, 2 verte, 3 bleue, 4 blanche, 5 jaune
+  # Si une couleur est fausse, le type de puce (substitutions) n'est pas le bon
+  - platform: template
+    name: "Mode test LED"
+    id: mode_test
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - script.execute: maj_leds
+    on_turn_off:
+      - script.execute: maj_leds
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+interval:
+  # Rafraichit l'affichage regulierement (securite contre un parasite sur la ligne data)
+  - interval: 30s
+    then:
+      - script.execute: maj_leds
+
+  # Perte reseau : clignotement rouge des 5 LED (1 s allumees / 1 s eteintes)
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            sensor.in_range:
+              id: u_reseau
+              below: ${seuil_reseau}
+          then:
+            - script.execute: blink_leds_red
+
+# ------------------------  Scripts
+script:
+  # Allume une LED : couleur inconnue ou indisponible = LED eteinte
+  - id: affiche_couleur
+    mode: queued
+    parameters:
+      led: int
+      couleur: string
+      niveau: float
+    then:
+      - light.addressable_set:
+          id: bandeau
+          range_from: !lambda 'return led;'
+          range_to: !lambda 'return led;'
+          red: !lambda 'return (couleur == "rouge" || couleur == "jaune" || couleur == "blanc") ? niveau : 0.0f;'
+          green: !lambda 'return (couleur == "vert" || couleur == "jaune" || couleur == "blanc") ? niveau : 0.0f;'
+          blue: !lambda 'return (couleur == "bleu" || couleur == "blanc") ? niveau : 0.0f;'
+          white: 0%
+
+  # Clignotement des 5 LED en rouge (perte reseau)
+  - id: blink_leds_red
+    mode: single
+    then:
+      - lambda: |-
+          id(blink_state) = !id(blink_state);
+      - light.addressable_set:
+          id: bandeau
+          range_from: 0
+          range_to: 4
+          red: !lambda 'return id(blink_state) ? id(intlum) : 0.0f;'
+          green: 0%
+          blue: 0%
+          white: 0%
+
+  # Mise a jour des 5 LED (Tempo, ou couleurs fixes en mode test)
+  - id: maj_leds
+    mode: restart
+    then:
+      # Pendant une perte reseau, c'est le clignotement rouge qui commande les LED
+      - if:
+          condition:
+            sensor.in_range:
+              id: u_reseau
+              below: ${seuil_reseau}
+          then:
+            - script.stop: maj_leds
+      - if:
+          condition:
+            switch.is_on: mode_test
+          then:
+            - script.execute:
+                id: affiche_couleur
+                led: 0
+                couleur: "rouge"
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 1
+                couleur: "vert"
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 2
+                couleur: "bleu"
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 3
+                couleur: "blanc"
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 4
+                couleur: "jaune"
+                niveau: !lambda 'return id(intlum);'
+          else:
+            - script.execute:
+                id: affiche_couleur
+                led: 0
+                couleur: !lambda 'return id(tempo_jour).state;'
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 1
+                couleur: !lambda 'return id(tempo_jour1).state;'
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 2
+                couleur: !lambda 'return id(tempo_j2).state;'
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 3
+                couleur: !lambda 'return id(tempo_j3).state;'
+                niveau: !lambda 'return id(intlum);'
+            - script.execute:
+                id: affiche_couleur
+                led: 4
+                couleur: !lambda 'return id(tempo_j4).state;'
+                niveau: !lambda 'return id(intlum);'

@@ -1,0 +1,19 @@
+mqtt:
+  broker: 192.168.0.204
+  port: 1883
+  username: !secret mqtt_pve_name
+  password: !secret mqtt_pve_pw
+
+  # Nécessaire pour la découverte expérimentale de Gladys
+  discovery: true
+  discovery_prefix: homeassistant
+  discovery_retain: true
+
+  # Inutile ici : découverte de l'adresse ESPHome par HA
+  discover_ip: false
+
+  # Évite que l'ESP redémarre si le broker est provisoirement indisponible
+  reboot_timeout: 0s
+
+  # Évite d'envoyer tous les logs ESPHome sur MQTT
+  log_topic: null

@@ -1,0 +1,51 @@
+# ===================================================================
+# Remplacement JSY-MK-194T par capteurs Home Assistant
+# - Plus de UART / Modbus pour le JSY
+# - Puissance réseau lue depuis Victron / Home Assistant
+# - Puissance ECS lue depuis sensor.ecocompteur_ecs_0
+# ===================================================================
+
+sensor:
+  # -----------------------------------------------------------------
+  # Puissance réseau Victron
+  # Convention attendue par le code ESP :
+  #   positif = soutirage réseau
+  #   négatif = injection réseau
+  #
+  # Si ton entité Victron réseau a un autre nom, remplace uniquement
+  # la ligne entity_id ci-dessous.
+  # -----------------------------------------------------------------
+  - platform: homeassistant
+    id: pureseau_victron
+    entity_id: sensor.victron_mqtt_c0619ab1db0d_grid_31_grid_power
+    internal: true
+    filters:
+      - sliding_window_moving_average:
+          window_size: 2
+          send_every: 1
+    on_value:
+      then:
+        - lambda: |-
+            float p = id(pureseau_victron).state;
+            if (!std::isfinite(p)) p = 0.0f;
+
+            // Le reste du code utilise id(pureseau1) :
+            // positif = soutirage réseau
+            // négatif = injection réseau
+            id(pureseau1).publish_state(p);
+
+            // Si ton capteur Victron est inversé, remplace la ligne ci-dessus par :
+            // id(pureseau1).publish_state(-p);
+
+  # -----------------------------------------------------------------
+  # Puissance ECS mesurée ailleurs, via l'écocompteur
+  # Cette valeur remplace l'ancien id(puecs) du JSY.
+  # -----------------------------------------------------------------
+  - platform: homeassistant
+    id: puecs
+    entity_id: sensor.ecocompteur_ecs
+    internal: true
+    filters:
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 1

@@ -6461,3 +6461,29 @@
             entity_id: '{{ repeat.item.entites[0] }}'
   max: 3
   mode: queued
+- id: '1795789611919'
+  alias: IBUS esp128 - Log brut trames vers fichier
+  description: Consigne sans filtre, dans notify.log_esp128, chaque trame IBUS reçue
+    ou émise par esp128 (sniffer VMC Dee Fly), avec horodatage précis de réception
+    côté HA (= horodatage ESP, propagation quasi instantanée via l'API).
+  triggers:
+  - entity_id: sensor.cuisine_esp128_ibus_derniere_trame_recue
+    id: rx
+    trigger: state
+  - entity_id: sensor.cuisine_esp128_ibus_derniere_trame_envoyee
+    id: tx
+    trigger: state
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.to_state is not none and trigger.to_state.state not
+      in [''unavailable'',''unknown''] }}'
+  actions:
+  - action: notify.send_message
+    data:
+      message: '{{ trigger.to_state.last_changed.strftime(''%Y-%m-%d %H:%M:%S.%f'')[:-3]
+        }} {{ ''RX'' if trigger.id == ''rx'' else ''TX'' }} {{ trigger.to_state.state
+        }}'
+    target:
+      entity_id: notify.log_esp128
+  max: 50
+  mode: queued

@@ -1,8 +1,8 @@
 openhasp:
   ecran02:
-############### Page 0 All ###############
+    
     objects:
-
+    ############### Page 0 All ###############
       - obj: "p0b4" #J
         properties:
           "bg_color": >
@@ -98,7 +98,7 @@ openhasp:
         properties:
           "bg_color": "{{ '#ff0000' if is_state('binary_sensor.alarmes_portes', 'on') else '#EE82EE' }}"
 
-############### Page 1 Home ###############
+      ############### Page 1 Home ###############
       - obj: "p1b21" # Temp Ext
         properties:
           "text": "{{ states('sensor.vp2_temp_out')|float(0)|round(1) }}°C"
@@ -119,7 +119,7 @@ openhasp:
           "text": "{{ states('sensor.vp2_rainjour')|float(0)|round(1) }} mm"
             
 
-####### PAGE 2 - HOTTE ############### 
+    ####### PAGE 2 - HOTTE ############### 
 
       - obj: "p2b22" # AUTO
         properties:
@@ -185,7 +185,7 @@ openhasp:
         properties:
           "text": "{{ states('sensor.esp180_hotte_humidite_hotte')|float(0)|round(1)}} %" 
 
-####### PAGE 3 VMC ############### 
+    ####### PAGE 3 VMC ############### 
       - obj: "p3b10"
         properties:
           "text": "{{ states('sensor.esp137_vmc_temp_air_vicie')|float(0)|round(1)}}C°" 
@@ -203,7 +203,7 @@ openhasp:
           "text": "{{ states('sensor.esp137_vmc_temp_combles')|float(0)|round(1)}}C°"
       - obj: "p3b16"
         properties:
-          "text": "{{ states('sensor.esp137_vmc_rendement')|float(0)|round(0)}} %"
+          "text": "{{ states('sensor.combles_esp137_vmc_rendement_soufflage')|float(0)|round(0)}} %"
       - obj: "p3b21"
         properties:
           "text": "{{ states('sensor.esp145_conc_particules_2_5mm')|float(0)|round(0)}}"      
@@ -231,7 +231,7 @@ openhasp:
             - service: homeassistant.toggle
               entity_id: "switch.relais_cde_vmc_niv0_on_off"
 
-############### Page 4 ECS ###############
+    ############### Page 4 ECS ###############
       ###############
       - obj: "p4b10" # Mode régulation + liaison NR
         properties:
@@ -362,7 +362,7 @@ openhasp:
             {% endif %}
           "text_color": "{{ '#00ff00' if states('sensor.evcs_hq2603jcduz_power')|float(0) > 50 else '#ffffff' }}"      
 
-############### Page 5 Elec (style console Victron) ###############
+    ############### Page 5 Elec (style console Victron) ###############
       ############### Réseau
       - obj: "p5b21" # Puissance (+ soutirage / - injection)
         properties:
@@ -483,7 +483,7 @@ openhasp:
             {% set s = states('sensor.victron_mqtt_c0619ab1db0d_system_0_system_ac_active_input_source') %}
             {{ {'grid':'Réseau','generator':'Groupe','shore':'Quai','not_available':'Aucune'}.get(s, s) }}
 
-############### Page 6 ###############
+    ############### Page 6 ###############
       ############### PORTE GARAGE
       - obj: "p6b11" # porte_garage. up button
         properties:
@@ -730,7 +730,7 @@ openhasp:
           "text": >
             {{state_attr('cover.groupe_tous_volets','current_position')|int(0) |round(0)}}%   
 
-############### Page 7 Piscine ###############
+    ############### Page 7 Piscine ###############
       - obj: "p7b21" # Température eau
         properties:
           "text": "{{ states('sensor.esp178_piscine_temperature_eau')|float(0)|round(1) }} C°"

@@ -26,10 +26,10 @@ substitutions:
   adress_ip: "192.168.0.174"
   friendly_name: esp174
   time_timezone: "Europe/Paris"
-
+  
 esphome:
   name: ${device_name}
-
+    
 esp32:
   board: wt32-eth01 #esp-wrover-kit
   framework:
@@ -37,7 +37,7 @@ esp32:
 
 # Enable logging
 logger:
-  level: DEBUG
+  level: info
 
 # Enable Home Assistant API
 api:
@@ -50,9 +50,7 @@ ethernet:
   type: LAN8720
   mdc_pin: GPIO23
   mdio_pin: GPIO18
-  clk:
-    pin: GPIO0
-    mode: CLK_EXT_IN      
+  clk_mode: GPIO0_IN
   phy_addr: 1
   power_pin: GPIO16
 
@@ -60,23 +58,14 @@ ethernet:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
-    dns1: !secret dns1
-    dns2: !secret dns2
-
+    dns1: 192.168.0.254
+    
 # Connection sonde(s) de température DS18b20
 one_wire:
-  - platform: gpio
+  - platform: gpio    
     pin: 32
 
-### AJOUT 1 : mémoire de la dernière valeur et de l'heure du dernier changement
-globals:
-  - id: niv_precedent
-    type: float
-    initial_value: '-1'
-  - id: niv_change_ms
-    type: uint32_t
-    initial_value: '0'
-
+  
 uart:
   id: mod_bus
   tx_pin: 17
@@ -105,7 +94,7 @@ modbus_controller:
     update_interval: 10s
     command_throttle: 50ms
     # setup_priority: -10
-sensor:
+sensor:  
 
 # Lecture Registre F0-1 -> Valeur affichée
   - platform: modbus_controller
@@ -127,21 +116,12 @@ sensor:
 #          window_size: 10 # moyenne sur x lectures
 #          send_every: 5 # envoi toutes les x lectures
 #          send_first_at: 1 # envoi à la premiere lecture
-    ### AJOUT 2 : mémorise l'heure du dernier changement de valeur
-    on_value:
-      then:
-        - lambda: |-
-            if (isnan(x)) return;
-            if (x != id(niv_precedent)) {
-              id(niv_precedent) = x;
-              id(niv_change_ms) = millis();
-            }
 
 
   - platform: dallas_temp
     address: 0xab0321117f919d28
     name: "${friendly_name}_temperature_air"
-    update_interval: 60s
+    update_interval: 60s    
     id: temp_air
     filters:
       - filter_out: 0.0
@@ -154,17 +134,17 @@ sensor:
     icon: mdi:flash
     unit_of_measurement: "m³"
     device_class: volume
-    state_class: measurement
+    state_class: measurement    
     accuracy_decimals: 2
     lambda: |-
       return (id(_niv_eau).state*0.6*0.6*3.14159);
-
+      
   - platform: template
     name: "${friendly_name}_niveau_remplissage_puit"
     id: niveau
     icon: mdi:flash
     unit_of_measurement: "%"
-    state_class: measurement
+    state_class: measurement    
     accuracy_decimals: 2
     lambda: |-
       return (id(_niv_eau).state/5.8*100);
@@ -175,7 +155,7 @@ sensor:
     icon: mdi:flash
     unit_of_measurement: "m"
     device_class: distance
-    state_class: measurement
+    state_class: measurement    
     accuracy_decimals: 2
     lambda: |-
       return (5.8-id(_niv_eau).state);
@@ -184,12 +164,3 @@ sensor:
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
-
-  ### AJOUT 3 : sonde figée (même valeur depuis plus de 24 h)
-  - platform: template
-    name: "${friendly_name}_Sonde_Puit_Figee"
-    id: sonde_puit_figee
-    device_class: problem
-    lambda: |-
-      if (isnan(id(_niv_eau).state)) return {};
-      return (millis() - id(niv_change_ms)) > 86400000UL;

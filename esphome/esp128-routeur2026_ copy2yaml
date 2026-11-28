@@ -1,0 +1,97 @@
+substitutions:
+  adress_ip: "192.168.0.128"
+  device_name: "esp128-routeur2026"
+  friendly_name: "esp128-routeur2026"
+  time_timezone: "Europe/Paris"
+
+  # LED status (optionnel)
+  GPIO_Led_status: "GPIO32"
+
+  # I2C
+  GPIO_sda: "GPIO21"
+  GPIO_scl: "GPIO22"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+  reboot_timeout: 5min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+
+logger:
+  baud_rate: 0
+  level: DEBUG
+
+api:
+
+ota:
+  platform: esphome
+
+web_server:
+  port: 80
+  version: 3
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: ${time_timezone}
+
+status_led:
+  pin:
+    number: ${GPIO_Led_status}
+    inverted: true
+
+# Bus I2C
+i2c:
+  sda: ${GPIO_sda}
+  scl: ${GPIO_scl}
+  scan: true
+  #frequency: 50kHz
+  id: bus_a
+
+
+# ----------- GP8403 (DAC) -----------
+# Sortie analogique 0..10V sur CH1/CH2
+gp8403:
+  id: my_gp8403
+  voltage: 10V
+  model: GP8403
+  address: 0x5f
+
+
+# ----------- Output : canal DAC vers LSA -----------
+# CH0 = canal 0 du GP8403 (OUT0)
+output:
+  - platform: gp8403
+    gp8403_id: my_gp8403
+    channel: 0
+    id: out_lsa_dac
+
+# Expose un light pour piloter la tension (0..1 -> 0..10V)
+number:
+  - platform: template
+    name: "Consigne LSA (%)"
+    id: lsa_percent
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 1
+    set_action:
+      - output.set_level:
+          id: out_lsa_dac
+          level: !lambda "return x / 100.0f;"
+

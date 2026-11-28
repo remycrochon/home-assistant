@@ -1,0 +1,628 @@
+substitutions:
+  name: "guition-esp32-s3-4848s040"
+  friendly_name: "esp182-Guition480-basic"
+  adress_ip: "192.168.0.182"
+  device_description: "Guition ESP32-S3-4848S040 480*480 Smart Screen"
+  project_name: "Guition.ESP32_S3_4848S040"
+  project_version: "1.0.1"
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
+  platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      COMPILER_OPTIMIZATION_SIZE: y
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+web_server:
+  port: 80
+
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+i2c:
+  sda: 19
+  scl: 45
+
+spi:
+  clk_pin: 48
+  mosi_pin: 47
+  miso_pin: 41
+
+sensor:
+  # Solar
+  - platform: homeassistant
+    id: solar_power_total
+    entity_id: sensor.mp2_prod_totale_mqtt
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: solar_energy_day
+    entity_id: sensor.mp2_total_energie_produite_jour
+    unit_of_measurement: kWh
+    internal: true
+  - platform: homeassistant
+    id: pv1_power
+    entity_id: sensor.mp2_mppt1_puissance_production_pv
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: pv2_power
+    entity_id: sensor.envoy_122103023124_current_power_production
+    unit_of_measurement: W
+    internal: true
+
+  # House (Essential Load)
+  - platform: homeassistant
+    id: house_power
+    entity_id: sensor.mp2_conso_out1_mqtt
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: house_energy_day
+    entity_id: sensor.mp2_energy_conso_ac_l1_jour
+    unit_of_measurement: kWh
+    internal: true
+  - platform: homeassistant
+    id: load1_power
+    entity_id: sensor.pzem_pisc_puissance
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: load2_power
+    entity_id: sensor.pc_onduleur_eaton_puissance
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: load3_power
+    entity_id: sensor.pzem_cuisine_puissance
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: load4_power
+    entity_id: sensor.ecocompteur_vmc_niv0
+    unit_of_measurement: W
+    internal: true
+
+  # Battery
+  - platform: homeassistant
+    id: battery_soc
+    entity_id: sensor.mp2_soc_mqtt
+    unit_of_measurement: "%"
+    internal: true
+  - platform: homeassistant
+    id: battery_power
+    entity_id: sensor.mp2_pu_batteries_par_mqtt
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: battery_voltage
+    entity_id: sensor.mp2_tension_batteries_par_mqtt
+    unit_of_measurement: V
+    internal: true
+  - platform: homeassistant
+    id: battery_charge_day
+    entity_id: sensor.mp2_energy_charge_batteries_jour
+    unit_of_measurement: kWh
+    internal: true
+  - platform: homeassistant
+    id: battery_discharge_day
+    entity_id: sensor.mp2_energy_decharge_batteries_jour
+    unit_of_measurement: kWh
+    internal: true
+
+  # Grid
+  - platform: homeassistant
+    id: grid_power
+    entity_id: sensor.mp2_conso_ac_l1
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: grid_import_day
+    entity_id: sensor.mp2_energie_soutiree_du_reseau_par_jour
+    unit_of_measurement: kWh
+    internal: true
+  - platform: homeassistant
+    id: grid_export_day
+    entity_id: sensor.mp2_energie_injectee_ds_reseau_par_jour
+    unit_of_measurement: kWh
+    internal: true
+
+  # Non-essential Loads (Hors MP2)
+  - platform: homeassistant
+    id: nonessential_power
+    entity_id: sensor.pu_ecs_clim_pac
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: nonessential_load1
+    entity_id: sensor.ecocompteur_ecs
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: nonessential_load2
+    entity_id: sensor.ecocompteur_clim
+    unit_of_measurement: W
+    internal: true
+  - platform: homeassistant
+    id: nonessential_load3
+    entity_id: sensor.ecocompteur_pac
+    unit_of_measurement: W
+    internal: true
+
+font:
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icon_font
+    size: 32
+    glyphs: [ "\U000F0F05", "\U000F02DC", "\U000F0590", "\U000F0E7E", "\U000F04B2" ] # Sun, House, Battery, Grid, Oven
+  - file: "fonts/arial.ttf"
+    id: text_font
+    size: 18
+
+
+display:
+  - platform: st7701s
+    id: my_display
+    update_interval: never
+    auto_clear_enabled: False
+    spi_mode: MODE3
+    data_rate: 2MHz
+    color_order: RGB
+    invert_colors: False
+    dimensions:
+      width: 480
+      height: 480
+    cs_pin: 39
+    de_pin: 18
+    hsync_pin: 16
+    vsync_pin: 17
+    pclk_pin: 21
+    pclk_frequency: 12MHz
+    pclk_inverted: False
+    hsync_pulse_width: 8
+    hsync_front_porch: 10
+    hsync_back_porch: 20
+    vsync_pulse_width: 8
+    vsync_front_porch: 10
+    vsync_back_porch: 10
+    init_sequence:
+      - 1
+      # Custom sequences are an array, first byte is command, the rest are data.
+      - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10] # CMD2_BKSEL_BK0
+      - [0xCD, 0x00] # disable MDT flag
+    data_pins:
+      red:
+        - 11 #r1
+        - 12 #r2
+        - 13 #r3
+        - 14 #r4
+        - 0 #r5
+      green:
+        - 8 #g0
+        - 20 #g1
+        - 3 #g2
+        - 46 #g3
+        - 9 #g4
+        - 10 #g5
+      blue:
+        - 4 #b1
+        - 5 #b2
+        - 6 #b3
+        - 7 #b4
+        - 15 #b5
+
+lvgl:
+  id: lvgl_comp
+  displays:
+    - my_display
+  touchscreens:
+    - touchscreen_id: my_touchscreen
+  widgets:
+    # Solar (top left)
+    - obj:
+        id: solar_box
+        x: 10
+        y: 10
+        width: 140
+        height: 110
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: CENTER
+        x: 80  # (10 + 140/2)
+        y: 20  # 10 + 10
+        text: "\U000F0F05" # Sun icon
+        text_font: icon_font
+    - label:
+        align: CENTER
+        x: 80  # (10 + 140/2)
+        y: 60  # 10 + 50
+        text: !lambda 'return id(solar_power_total).state != 0 ? to_string((int)id(solar_power_total).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: CENTER
+        x: 80  # (10 + 140/2)
+        y: 90  # 10 + 80
+        text: !lambda 'return id(solar_energy_day).state != 0 ? to_string(id(solar_energy_day).state) + " kWh" : "0 kWh";'
+        text_font: text_font
+
+    # PV1 (Pergolat) and PV2 (MO) (below Solar)
+    - obj:
+        id: pv_box
+        x: 10
+        y: 130
+        width: 140
+        height: 80
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: LEFT_MID
+        x: 20  # 10 + 10
+        y: 140  # 130 + 10
+        text: "Pergolat:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 20  # 10 + 10
+        y: 170  # 130 + 40
+        text: "MO:"
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 140  # 10 + 140 - 10
+        y: 140  # 130 + 10
+        text: !lambda 'return id(pv1_power).state != 0 ? to_string((int)id(pv1_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 140  # 10 + 140 - 10
+        y: 170  # 130 + 40
+        text: !lambda 'return id(pv2_power).state != 0 ? to_string((int)id(pv2_power).state) + " W" : "0 W";'
+        text_font: text_font
+
+    # House (center)
+    - obj:
+        id: house_box
+        x: 160
+        y: 130
+        width: 160
+        height: 110
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: CENTER
+        x: 240  # (160 + 160/2)
+        y: 140  # 130 + 10
+        text: "\U000F02DC" # House icon
+        text_font: icon_font
+    - label:
+        align: CENTER
+        x: 240  # (160 + 160/2)
+        y: 180  # 130 + 50
+        text: !lambda 'return id(house_power).state != 0 ? to_string((int)id(house_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: CENTER
+        x: 240  # (160 + 160/2)
+        y: 210  # 130 + 80
+        text: !lambda 'return id(house_energy_day).state != 0 ? to_string(id(house_energy_day).state) + " kWh" : "0 kWh";'
+        text_font: text_font
+
+    # Essential Loads (right of House)
+    - obj:
+        id: essential_loads_box
+        x: 330
+        y: 130
+        width: 140
+        height: 110
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 140  # 130 + 10
+        text: "Pisc:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 160  # 130 + 30
+        text: "Ond:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 180  # 130 + 50
+        text: "Cui:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 200  # 130 + 70
+        text: "VMC:"
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 140  # 130 + 10
+        text: !lambda 'return id(load1_power).state != 0 ? to_string((int)id(load1_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 160  # 130 + 30
+        text: !lambda 'return id(load2_power).state != 0 ? to_string((int)id(load2_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 180  # 130 + 50
+        text: !lambda 'return id(load3_power).state != 0 ? to_string((int)id(load3_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 200  # 130 + 70
+        text: !lambda 'return id(load4_power).state != 0 ? to_string((int)id(load4_power).state) + " W" : "0 W";'
+        text_font: text_font
+
+    # Battery (bottom center)
+    - obj:
+        id: battery_box
+        x: 160
+        y: 260
+        width: 160
+        height: 110
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: CENTER
+        x: 240  # (160 + 160/2)
+        y: 270  # 260 + 10
+        text: "\U000F0590" # Battery icon
+        text_font: icon_font
+    - label:
+        align: CENTER
+        x: 240  # (160 + 160/2)
+        y: 310  # 260 + 50
+        text: !lambda 'return id(battery_soc).state != 0 ? to_string((int)id(battery_soc).state) + " %" : "0 %";'
+        text_font: text_font
+    - label:
+        align: CENTER
+        x: 240  # (160 + 160/2)
+        y: 340  # 260 + 80
+        text: !lambda 'return id(battery_power).state != 0 ? to_string((int)id(battery_power).state) + " W" : "0 W";'
+        text_font: text_font
+
+    # Battery Details (below Battery)
+    - obj:
+        id: battery_details_box
+        x: 160
+        y: 380
+        width: 160
+        height: 90
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: LEFT_MID
+        x: 170  # 160 + 10
+        y: 390  # 380 + 10
+        text: "Volt:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 170  # 160 + 10
+        y: 410  # 380 + 30
+        text: "Chg:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 170  # 160 + 10
+        y: 430  # 380 + 50
+        text: "Dch:"
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 310  # 160 + 160 - 10
+        y: 390  # 380 + 10
+        text: !lambda 'return id(battery_voltage).state != 0 ? to_string(id(battery_voltage).state) + " V" : "0 V";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 310  # 160 + 160 - 10
+        y: 410  # 380 + 30
+        text: !lambda 'return id(battery_charge_day).state != 0 ? to_string(id(battery_charge_day).state) + " kWh" : "0 kWh";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 310  # 160 + 160 - 10
+        y: 430  # 380 + 50
+        text: !lambda 'return id(battery_discharge_day).state != 0 ? to_string(id(battery_discharge_day).state) + " kWh" : "0 kWh";'
+        text_font: text_font
+
+    # Grid (top right)
+    - obj:
+        id: grid_box
+        x: 330
+        y: 10
+        width: 140
+        height: 110
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: CENTER
+        x: 400  # (330 + 140/2)
+        y: 20  # 10 + 10
+        text: "\U000F0E7E" # Grid icon
+        text_font: icon_font
+    - label:
+        align: CENTER
+        x: 400  # (330 + 140/2)
+        y: 60  # 10 + 50
+        text: !lambda 'return id(grid_power).state != 0 ? to_string((int)id(grid_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: CENTER
+        x: 400  # (330 + 140/2)
+        y: 90  # 10 + 80
+        text: !lambda 'return id(grid_import_day).state != 0 ? to_string(id(grid_import_day).state) + " kWh" : "0 kWh";'
+        text_font: text_font
+
+    # Grid Details (below Grid)
+    - obj:
+        id: grid_details_box
+        x: 330
+        y: 260
+        width: 140
+        height: 60
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 270  # 260 + 10
+        text: "Export:"
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 270  # 260 + 10
+        text: !lambda 'return id(grid_export_day).state != 0 ? to_string(id(grid_export_day).state) + " kWh" : "0 kWh";'
+        text_font: text_font
+
+    # Non-essential Loads (Hors MP2, bottom right)
+    - obj:
+        id: nonessential_box
+        x: 330
+        y: 330
+        width: 140
+        height: 140
+        pad_all: 5
+        border_width: 2
+        border_color: 0xFFFFFF
+        bg_color: 0x333333
+    - label:
+        align: CENTER
+        x: 400  # (330 + 140/2)
+        y: 340  # 330 + 10
+        text: "\U000F04B2" # Oven icon (Hors MP2)
+        text_font: icon_font
+    - label:
+        align: CENTER
+        x: 400  # (330 + 140/2)
+        y: 370  # 330 + 40
+        text: !lambda 'return id(nonessential_power).state != 0 ? to_string((int)id(nonessential_power).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 400  # 330 + 70
+        text: "ECS:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 420  # 330 + 90
+        text: "Clim:"
+        text_font: text_font
+    - label:
+        align: LEFT_MID
+        x: 340  # 330 + 10
+        y: 440  # 330 + 110
+        text: "PAC:"
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 400  # 330 + 70
+        text: !lambda 'return id(nonessential_load1).state != 0 ? to_string((int)id(nonessential_load1).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 420  # 330 + 90
+        text: !lambda 'return id(nonessential_load2).state != 0 ? to_string((int)id(nonessential_load2).state) + " W" : "0 W";'
+        text_font: text_font
+    - label:
+        align: RIGHT_MID
+        x: 460  # 330 + 140 - 10
+        y: 440  # 330 + 110
+        text: !lambda 'return id(nonessential_load3).state != 0 ? to_string((int)id(nonessential_load3).state) + " W" : "0 W";'
+        text_font: text_font
+
+    # Flow lines (simplified with labels)
+    - label:
+        x: 80
+        y: 100
+        text: !lambda 'return id(pv1_power).state != 0 ? to_string((int)id(pv1_power).state) + " W" : "0 W";'
+        text_color: 0xFFFF00
+        text_font: text_font
+        align: CENTER
+    - label:
+        x: 80
+        y: 230
+        text: !lambda 'return id(battery_power).state != 0 ? to_string((int)id(battery_power).state) + " W" : "0 W";'
+        text_color: 0xFFFF00
+        text_font: text_font
+        align: CENTER
+    - label:
+        x: 400
+        y: 100
+        text: !lambda 'return id(grid_power).state != 0 ? to_string((int)id(grid_power).state) + " W" : "0 W";'
+        text_color: 0xFFFF00
+        text_font: text_font
+        align: CENTER
+
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    address: 0x5D

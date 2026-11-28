@@ -1,0 +1,270 @@
+substitutions:
+  device_name: esp180-hotte-aspirante
+  adress_ip: "192.168.0.180"
+  friendly_name: esp180
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP32
+#  board: esp32dev
+  board: mhetesp32minikit
+
+#  on_boot:
+#    priority: 800
+#    then: 
+#      - script.execute: calcul_vitesse    
+    
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+  baud_rate: 0
+  level: debug
+#  logs:
+#    light.component: very_verbose
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+
+# Configuration detecteur ouverture BLE
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 10ms
+    window: 10ms
+    active: false
+
+external_components:
+  - source: github://Fabian-Schmidt/esphome-xiaomi_mccgq02hl
+    components: [ xiaomi_ble, xiaomi_mccgq02hl ]
+
+xiaomi_mccgq02hl:
+  - id: window_one
+    mac_address: "E4:AA:EC:36:C5:44"
+    bindkey: "3627f27701709d3ac77a41111db9afe9"
+
+# Informations supplementaires sur le WIFI
+#text_sensor:
+#  - platform: wifi_info
+#    ip_address:
+#      name: ${friendly_name}_ESP IP Address
+#    ssid:
+#      name: ${friendly_name}_ESP Connected SSID
+#    bssid:
+#      name: ${friendly_name}_ESP Connected BSSID
+#    mac_address:
+#      name: ${friendly_name}_ESP Mac Wifi Address
+#    scan_results:
+#      name: ${friendly_name}_ESP Latest Scan Results
+
+# Input Number
+number:
+  # Seuil humidité v1->v2
+  - platform: template
+    name: "${friendly_name} Seuil_V2 Hum"
+    id: seuilv2_hum
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    initial_value: 55
+    unit_of_measurement: "%"
+    step: 1
+
+  # Seuil humidité v2->v3
+  - platform: template
+    name: "${friendly_name} Seuil_V3 Hum"
+    id: seuilv3_hum
+    optimistic: true
+    restore_value: true
+    mode: box
+    min_value: 0
+    max_value: 100
+    initial_value: 80
+    unit_of_measurement: "%"
+    step: 1
+
+binary_sensor:
+  - platform: xiaomi_mccgq02hl
+    id: window_one
+    # Etat: OFF si hotte fermée
+    # Etat: ON si hotte ouverte 
+    open:
+      name: "${friendly_name} Porte Hotte" 
+      id: porte
+      filters:
+        - delayed_on_off: 1s
+      on_press:
+         - script.execute: calcul_vitesse     
+      on_release:
+         - script.execute: calcul_vitesse     
+
+
+#Etat de la connection
+  - platform: status
+    name: "${friendly_name}_Status"
+
+sensor:
+  - platform: xiaomi_mccgq02hl
+    id: window_one
+    battery_level:
+      name: "${friendly_name} Battery Level"
+  - platform: homeassistant
+    entity_id: "sensor.temperature_hotte_zb"
+    id: temp_hotte
+
+  - platform: homeassistant
+    entity_id: "sensor.humidite_hotte_zb"
+    id: hum_hotte
+    on_value:
+      then:
+        - script.execute: calcul_vitesse
+
+switch:
+  - platform: template
+    name: "${friendly_name} Hotte V1"    
+    id: v1
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v2
+      - switch.turn_off: v3
+      - delay: 500 ms
+      - switch.turn_on: r3
+    turn_off_action:
+      - switch.turn_off: r3
+
+  - platform: template
+    name: "${friendly_name} Hotte V2"    
+    id: v2
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v3      
+      - delay: 500 ms      
+      - switch.turn_on: r2
+    turn_off_action:
+      - switch.turn_off: r2
+               
+  - platform: template
+    name: "${friendly_name} Hotte V3"    
+    id: v3
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - delay: 500 ms      
+      - switch.turn_on: r3
+      - delay: 200ms
+      - switch.turn_on: r4
+
+    turn_off_action:
+      - switch.turn_off: r3
+      - delay: 250ms
+      - switch.turn_off: r4
+
+  - platform: template
+    name: "${friendly_name} Hotte Arret"    
+    id: stop
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: v1
+      - switch.turn_off: v2
+      - switch.turn_off: v3      
+
+
+  - platform: restart
+    name: "${friendly_name} Restart"
+
+  - platform: gpio
+    name: "${friendly_name} Hotte Lumiere"
+    pin: GPIO25 
+    id: r1
+
+  - platform: gpio
+    name: "${friendly_name} R2"
+    pin: GPIO22
+    id: r2
+
+  - platform: gpio
+    name: "${friendly_name} R3"
+    pin: GPIO26
+    id: r3
+
+  - platform: gpio
+    name: "${friendly_name} R4"
+    pin: GPIO21
+    id: r4
+
+
+script:
+  # Calcul vitesse aspiration
+  - id: calcul_vitesse
+    mode: single
+    then:
+      - logger.log:
+          format: "Log Etat Porte= %f"
+          args: [ 'id(porte).state']
+      # Si porte fermée
+        # Etat: OFF si hotte fermée
+        # Etat: ON si hotte ouverte
+      - if:
+          condition:
+            - binary_sensor.is_off: porte            
+          then:
+            - switch.turn_on: stop
+            - delay: 1500ms
+            - switch.turn_off: r1
+            - delay: 500ms
+            - switch.turn_off: stop
+
+      # Si porte ouverte (on)
+      # Si Humidité hotte < seuil v2 alors on enclenche V1
+      - if:
+          condition:
+            and:
+              - binary_sensor.is_on: porte
+              - lambda: 'return id(hum_hotte).state < id(seuilv2_hum).state;'
+          then:
+            - switch.turn_on: v1
+            - delay: 1500ms
+            - switch.turn_on: r1
+      
+      # Si porte ouverte
+      # Si Humidité hotte > au seuil V1 et < seuil v2 alors on enclenche V2
+      - if:
+          condition:
+            and:
+              - binary_sensor.is_on: porte
+              - lambda: 'return id(hum_hotte).state > id(seuilv2_hum).state;'
+              - lambda: 'return id(hum_hotte).state < id(seuilv3_hum).state;'
+          then:
+            - switch.turn_on: v2
+            - delay: 1500ms
+            - switch.turn_on: r1
+      
+      # Si porte ouverte
+      # Si Humidité hotte > au seuil V3 alors on enclenche V3 pendant 2mn    
+      - if:
+          condition:
+            - binary_sensor.is_on: porte
+            - lambda: 'return id(hum_hotte).state > id(seuilv3_hum).state;'
+          then:
+            - switch.turn_on: v3
+            - delay: 1500ms            
+            - switch.turn_on: r1
+

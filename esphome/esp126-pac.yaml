@@ -32,8 +32,7 @@ logger:
 
 # Enable Home Assistant API
 api:
-  custom_services: true
-  
+
 ota:
   platform: esphome
 
@@ -95,10 +94,6 @@ sensor:
     state_class: measurement
     accuracy_decimals: 2
     update_interval: 30s
-    filters:
-      - or:
-          - throttle: 300s
-          - delta: 0.3    
     lambda: |-
       const float p102 = 37.0f;
       const float p103 = 25.0f;
@@ -123,10 +118,6 @@ sensor:
     state_class: measurement
     accuracy_decimals: 2
     update_interval: 30s
-    filters:
-      - or:
-          - throttle: 300s
-          - delta: 0.2    
     lambda: |-
       // Lecture des entrées
       float debit = id(debit_pac).state;            // L/min

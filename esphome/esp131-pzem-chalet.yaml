@@ -22,8 +22,10 @@ wifi:
     static_ip: ${adress_ip}
     gateway: 192.168.0.254
     subnet: 255.255.255.0
-    dns1: !secret dns1
-    dns2: !secret dns2
+    dns1: 192.168.0.254    
+
+external_components:
+  - source: github://dentra/esphome-components
 
 # Enable logging
 logger:
@@ -33,21 +35,29 @@ api:
 
 ota:
   platform: esphome
-web_server:
-  port: 80  
-
-  # Configuration UART
+# Configuration UART
 uart:
   rx_pin: GPIO3
   tx_pin: GPIO1
   baud_rate: 9600
   stop_bits: 1
 
+web_server:
+  port: 80
 # Utilisez la LED bleue de l'appareil comme LED d'état, qui clignotera s'il y a des avertissements (lent) ou des erreurs (rapide)
 status_led:
   pin:
     number: GPIO16
     inverted: true
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Paris
+    servers:
+     - 0.pool.ntp.org
+     - 1.pool.ntp.org
+     - 2.pool.ntp.org
 
 binary_sensor:
 #Etat de la connection
@@ -70,6 +80,19 @@ sensor:
       name: "${friendly_name} Puissance"
       unit_of_measurement: "W"
     update_interval: 30s
+
+  - platform: energy_statistics
+    total: puissance
+    energy_today:
+      name: "${friendly_name} Energie Jour"
+    energy_yesterday:
+      name: "${friendly_name} Energie Hier"
+    energy_week:
+      name: "${friendly_name} Energie Semaine"
+    energy_month:
+      name: "${friendly_name} Energie Mois"
+    energy_year:
+      name: "${friendly_name} Energie Annnée"
 
 switch:
   - platform: gpio

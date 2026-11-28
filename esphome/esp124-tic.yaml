@@ -8,13 +8,15 @@ esphome:
   name: ${device_name}
   project:
     name: "rem81.esp124-TIC"
-    version: "1.1.0"
+    version: "1.0.1"
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
       
 esp32:
   board: mhetesp32minikit
   framework:
-    type: esp-idf
-        
+    type: arduino
+    
 wifi:
   networks:
     - ssid: !secret wifi
@@ -28,7 +30,12 @@ wifi:
     dns1: !secret dns1
     dns2: !secret dns2
     
-
+mqtt:
+  broker: 192.168.0.204
+  port: 1883
+  username: !secret mqtt_pve_name
+  password: !secret mqtt_pve_pw
+  topic_prefix: esp124-tic
 # Enable logging
 logger:
 #  baud_rate: 0
@@ -78,12 +85,11 @@ light:
         from: 0
         to: 0
 
-  - platform: esp32_rmt_led_strip
-    pin: GPIO18
+  - platform: neopixelbus
     num_leds: 1
-    chipset: WS2812
-    rgb_order: GRB
+    pin: GPIO18
     name: "RGB strip"
+    variant: ws2812
     id: rgb_led
     default_transition_length: 0s  
 
@@ -106,20 +112,6 @@ globals:
 
 
 sensor:
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
-    name: "WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    entity_category: "diagnostic"
-
-  - platform: copy # Reports the WiFi signal strength in %
-    source_id: wifi_signal_db
-    name: "WiFi Signal Percent"
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "Signal %"
-    entity_category: "diagnostic"
-    device_class: ""  
 # Energie Active soutirée totale
   - platform: teleinfo
     id: hc_hp
@@ -326,18 +318,13 @@ sensor:
 ############### TEMPLATE  ######################"
 # Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
   - platform: template
-    name: "Linky P-PCoup"
+    name: "Linky P/PCoup"
     id: p100
     icon: mdi:flash
     unit_of_measurement: "%"
     accuracy_decimals: 0
     lambda: |-
-      if (isnan(id(papp).state) ||
-          isnan(id(pcoup).state) ||
-          id(pcoup).state <= 0) {
-        return NAN;
-      }
-      return (id(papp).state / 1000.0f) / id(pcoup).state * 100.0f;
+      return ((id(papp).state/1000)/id(pcoup).state*100);
 
 # Lecture dans HA de la conso du jour
   - platform: homeassistant

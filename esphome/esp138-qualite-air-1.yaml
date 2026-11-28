@@ -3,18 +3,18 @@ substitutions:
   adress_ip: "192.168.0.138"
   friendly_name: esp138
   time_timezone: "Europe/Paris"
-
+  
 esphome:
   name: ${device_name}
-
-esp32:
+  
+esp32:  
   board: mhetesp32minikit
   #board: wemos_d1_mini32
   framework:
-    type: esp-idf
+    type: esp-idf  
     advanced:
-      sram1_as_iram: true
-
+      minimum_chip_revision: "3.0"
+      
 wifi:
   networks:
     - ssid: !secret wifi_esp
@@ -28,10 +28,8 @@ wifi:
 
   manual_ip:
     static_ip: ${adress_ip}
-    gateway: 192.168.0.254
+    gateway: 192.168.0.1
     subnet: 255.255.255.0
-    dns1: !secret dns1
-    dns2: !secret dns2
 
 # Enable logging
 logger:
@@ -49,7 +47,7 @@ i2c:
   scl: GPIO22 #
   scan: True
   id: bus_a
-
+  
 uart:
   - id: uart_a
     rx_pin: GPIO25 #
@@ -61,12 +59,12 @@ uart:
     baud_rate: 9600
 #    debug:
 #      direction: BOTH
-
+    
 globals:
   - id: bp_mode
     type: int
     initial_value: '1'
-
+    
 sensor:
   - platform: pmsx003
     uart_id: uart_a
@@ -80,24 +78,16 @@ sensor:
             window_size: 15
             send_every: 10
             send_first_at: 1
-        # MODIF : arrondi réel de la valeur publiée (accuracy_decimals ne fait
-        # qu'une suggestion d'affichage HA, ça n'arrondit pas ce que renvoie
-        # states() dans un template Jinja).
-        - lambda: return round(x);
 
     pm_2_5:
       name: "Concentration de particules 2.5µm"
       id: pm2_5
       accuracy_decimals: 0
       filters:
-        # MODIF : lissage réduit pour la réactivité (pilotage auto de la hotte).
-        # window_size 5 / send_every 3 -> ~5s de moyenne glissante, publiée
-        # toutes les ~3s pendant la fenêtre ON (au lieu de 15s/10s).
         - sliding_window_moving_average:
-            window_size: 5
-            send_every: 3
+            window_size: 15
+            send_every: 10
             send_first_at: 1
-        - lambda: return round(x);  # MODIF : arrondi réel avant publication
 
     pm_10_0:
       name: "Concentration de particules 10.0µm"
@@ -108,24 +98,35 @@ sensor:
             window_size: 15
             send_every: 10
             send_first_at: 1
-        - lambda: return round(x);  # MODIF : arrondi réel avant publication
+            
+    pm_0_3um:
+      name: "Nb de particules 0.3"
+      id: pm_03_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
+
+    pm_0_5um:
+      name: "Nb de particules 0.5"
+      id: pm_05_um
+      unit_of_measurement: "ppd" 
+      accuracy_decimals: 0
 
     pm_1_0um:
       name: "Nb de particules 1.0"
       id: pm_10_um
-      unit_of_measurement: "ppd"
+      unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_2_5um:
       name: "Nb de particules 2.5"
       id: pm_25_um
-      unit_of_measurement: "ppd"
+      unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_5_0um:
       name: "Nb de particules 5.0"
       id: pm_50_um
-      unit_of_measurement: "ppd"
+      unit_of_measurement: "ppd" 
       accuracy_decimals: 0
 
     pm_10_0um:
@@ -133,12 +134,6 @@ sensor:
       id: pm_100_um
       unit_of_measurement: "ppd"
       accuracy_decimals: 0
-
-  - platform: aqi
-    name: "European Air Quality Index"
-    pm_2_5: pm2_5
-    pm_10_0: pm10_0
-    calculation_type: CAQI
 
 # le MZH19 n'est pas utilisé
 #  - platform: mhz19
@@ -153,7 +148,7 @@ sensor:
 #            window_size: 12 # moyenne sur 12 lecture
 #            send_every: 6 # envoi toutes les 6 lectures
 #            send_first_at: 1 # envoi à la premiere lecture
-#
+            
 #    temperature:
 #      name: "MH-Z19 Temperature"
 #      id: temp
@@ -162,78 +157,57 @@ sensor:
 #            window_size: 24
 #            send_every: 12
 #            send_first_at: 1
-#
+#          
 #    update_interval: 10s
-#    automatic_baseline_calibration: false
+#    automatic_baseline_calibration: false    
 
-# Entité de "tendance longue" (indicative, non utilisée pour piloter la hotte :
-# c'est bien pm2_5 ci-dessus qui est consommé par esp180).
+# Il s'agit d'un modèle de capteur qui effectue une moyenne mobile de 30 minutes de PM2,5
+# il supprime les valeurs aberrantes et de rendre le contrôle plus fluide
+
   - platform: template
     name: "Concentration de particules 2.5µm median"
     id: pm2_5_median
-    icon: mdi:air-filter  # MODIF : mdi:chemical-weapon remplacé, icône plus appropriée
+    icon: mdi:chemical-weapon
     unit_of_measurement: µg/m³
     lambda: |-
       return id(pm2_5).state;
-    update_interval: 90s  # aligné sur le cycle ON/OFF du capteur
+    update_interval: 60s
     filters:
       - median:
-          window_size: 20   # 20 x 90s = 30 min de fenêtre glissante
-          send_every: 20
-          send_first_at: 10
+          window_size: 30
+          send_every: 30
+          send_first_at: 15
 
 binary_sensor:
 #Etat de la connection
   - platform: status
     name: "${friendly_name} Status"
 
-  # MODIF : import de l'état de la hotte (esp180) pour piloter le cycle du capteur
-  - platform: homeassistant
-    id: hotte_running
-    entity_id: switch.esp180_hotte_hotte
-    on_press:
-      # Hotte qui démarre -> capteur en continu immédiatement, sans attendre
-      # le prochain tick de l'interval (jusqu'à 90s de latence sinon).
-      then:
-        - switch.turn_on: val_mes
-
-# Hotte à l'arrêt : cycle réduit 90s (40s ON / 50s OFF) pour préserver le laser
-# tout en gardant assez de fraîcheur pour l'auto-ON (~50-65s de latence max).
-# Hotte en marche : capteur en continu (pas de coupure) pour un pilotage
-# réactif des vitesses V1/V2/V3.
 interval:
-  - interval: 90s
+  - interval: 60s
     then:
-      - if:
-          condition:
-            binary_sensor.is_on: hotte_running
-          then:
-            - switch.turn_on: val_mes
-          else:
-            - switch.turn_on: val_mes
-            - delay: 40s
-            # Re-vérifie avant de couper : si la hotte a démarré entre-temps
-            # (via on_press ci-dessus ou action manuelle), on ne coupe pas.
-            - if:
-                condition:
-                  binary_sensor.is_off: hotte_running
-                then:
-                  - switch.turn_off: val_mes
-            - delay: 50s
+      - switch.turn_on: val_mes
+      - delay: 10s
+#     - switch.turn_on: val_mes
+      - switch.turn_off: val_mes
+      - delay: 30s
 
-switch:
+switch:   
   - platform: gpio
-    pin:
+    pin: 
       number: GPIO27 #
     id: val_mes
     name: "${friendly_name} Validation mesure"
-
+ 
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "${friendly_name} Restart"   
 
+    
 #  - platform: template
 #    name: "${friendly_name} Calibration zero Mh-Z19 CO2"
 #    turn_on_action:
 #      - mhz19.calibrate_zero: mh_z19
 #      - switch.turn_off: co2_cal
 #    id: co2_cal
+
+

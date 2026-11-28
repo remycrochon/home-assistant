@@ -26,7 +26,7 @@ select:
       then:
         - logger.log:
             format: "Mode Fonct Volet --> %s"
-            args: [ 'id(_Mode_Fonctionnement_volet).current_option().c_str()' ]
+            args: [ 'id(_Mode_Fonctionnement_volet).current_option()' ]
             level: INFO
 
 binary_sensor: 
@@ -64,30 +64,27 @@ binary_sensor:
   - platform: template
     name: "Volet Ouvert"
     id: volet_ouvert
-    lambda: 'return id(volet_ouvert_etor).state;'
-    
-    filters:
-      - delayed_on_off: 2s
-    on_press:
+    lambda: 'return id(volet_ouvert_etor).state ;'
+    on_state:
       then:
-        - lambda: |-
-            id(volet_ferme_off_time) = millis() / 1000;
+        - if:
+            condition:
+              - binary_sensor.is_on: volet_ouvert
 
-            std::string mess = "ESP178 Appoint Eau->Volet ouvert detecte, controle appoint dans 240s";
-            ESP_LOGI("VOLET", "%s", mess.c_str());
-            id(_log_fichier)->execute(mess, 0);
-
-        - script.execute: _appoint_eau_apres_ouverture_volet
-
-    on_release:
-      then:
-        - script.stop: _appoint_eau_apres_ouverture_volet
-        - lambda: |-
-            id(volet_ferme_off_time) = 0;
-
-            std::string mess = "ESP178 Appoint Eau->Volet non ouvert, controle appoint apres ouverture annule";
-            ESP_LOGI("VOLET", "%s", mess.c_str());
-            id(_log_fichier)->execute(mess, 0);
+            then:
+              - lambda: |-
+                  id(volet_ferme_off_time) = millis() / 1000;
+                  ESP_LOGI("VOLET", "Volet ouvert, temporisation démarrée à %u secondes", id(volet_ferme_off_time));
+              - delay: 60s
+              - if:
+                  condition:
+                    and:
+                      - binary_sensor.is_on: volet_ouvert
+                      - lambda: 'return id(_Mode_Fonctionnement_regul_eau).current_option() == "Auto";'
+                  then:
+                    - script.execute: _regul_eau
+                    - lambda: |-
+                        ESP_LOGI("REGUL EAU", "Lancement Régulation Appoint Eau");
 
   - platform: template
     name: "Volet Ferme"
@@ -176,6 +173,90 @@ script:
   # En mode "Horaire" La commande ouverture & fermeture volet sont asservies à l'heure d'ouverture et de l'heure de fermeture du volet
   # En mode "Auto": La commande ouverture volet est asservi à l'heure de debut Ma Ppe filtration +15 mn en modes Palier/Classique/Horaire/Abaque
   #               : La commande fermeture volet est asservi à l'heure de fin Ma Ppe filtration + 30 mn
+  - id: _calcul_cde_volet_old
+    mode: single
+    then:
+      - if:
+          condition:
+            time.has_time: {}
+          else:
+            - logger.log:
+                format: "L'heure n'est ni initialisée, ni validée!"
+                level: INFO
+      - lambda: |-
+          auto now = id(sntp_time).now();
+          int current_minute = now.hour * 60 + now.minute;
+          int ouv_minute = id(h_ouv_volet).hour * 60 + id(h_ouv_volet).minute;
+          int ferm_minute = id(h_ferm_volet).hour * 60 + id(h_ferm_volet).minute;
+          int debut_minute = id(h_debut).hour * 60 + (id(h_debut).minute+15);
+          int fin_minute = id(h_fin).hour * 60 + (id(h_fin).minute+30);
+
+          // Horaire - ouverture
+          if (now.is_valid() && current_minute == ouv_minute &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Horaire" &&
+              !id(action_ouv_executee)) {
+            id(action_ouv_executee) = true;
+            id(script_ouv_volet).execute();
+          }
+
+          // Horaire - fermeture
+          if (now.is_valid() && current_minute == ferm_minute &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Horaire" &&
+              !id(action_ferm_executee)) {
+            id(action_ferm_executee) = true;
+            id(script_ferm_volet).execute();
+          }
+
+          // Auto - ouverture = H Début Filtration + 15 mn
+          if (now.is_valid() && current_minute == debut_minute &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Auto" &&
+              !id(action_ouv_executee)) {
+            auto mode_filtration = id(_Mode_Fonctionnement_filtration).current_option();
+            if (mode_filtration == "Horaire" || mode_filtration == "Palier" ||
+                mode_filtration == "Classique" || mode_filtration == "Abaque") {
+              id(action_ouv_executee) = true;
+              id(script_ouv_volet).execute();
+            }
+          }
+
+          // Auto - fermeture = F Fin filtration + 30mn
+          if (now.is_valid() && current_minute == fin_minute &&
+              id(_Mode_Fonctionnement_volet).current_option() == "Auto" &&
+              !id(action_ferm_executee)) {
+            id(action_ferm_executee) = true;
+            id(script_ferm_volet).execute();
+          }
+
+          // Reset à minuit
+          if (now.hour == 0 && now.minute == 0) {
+            id(action_ouv_executee) = false;
+            id(action_ferm_executee) = false;
+          }
+          // Affichage des heures d'ouverture et de fermeture du volet
+          std::string heure_ouv_str;
+          std::string heure_ferm_str;
+
+          if (id(_Mode_Fonctionnement_volet).current_option() == "Horaire") {
+            heure_ouv_str = to_string(id(h_ouv_volet).hour) + ":" + (id(h_ouv_volet).minute < 10 ? "0" : "") + to_string(id(h_ouv_volet).minute);
+            heure_ferm_str = to_string(id(h_ferm_volet).hour) + ":" + (id(h_ferm_volet).minute < 10 ? "0" : "") + to_string(id(h_ferm_volet).minute);
+          } else if (id(_Mode_Fonctionnement_volet).current_option() == "Auto") {
+            int debut_min = id(h_debut).minute + 15;
+            int debut_hr = id(h_debut).hour + (debut_min / 60);
+            debut_min = debut_min % 60;
+
+            int fin_min = id(h_fin).minute + 30;
+            int fin_hr = id(h_fin).hour + (fin_min / 60);
+            fin_min = fin_min % 60;
+
+            heure_ouv_str = to_string(debut_hr) + ":" + (debut_min < 10 ? "0" : "") + to_string(debut_min);
+            heure_ferm_str = to_string(fin_hr) + ":" + (fin_min < 10 ? "0" : "") + to_string(fin_min);
+          } else {
+            heure_ouv_str = "N/A";
+            heure_ferm_str = "N/A";
+          }
+
+          id(heure_ouverture_volet_calculee).publish_state(heure_ouv_str);
+          id(heure_fermeture_volet_calculee).publish_state(heure_ferm_str);
 
   - id: _calcul_cde_volet
     mode: single
@@ -234,30 +315,18 @@ script:
             id(script_ferm_volet).execute();
           }
 
-          // Auto - ouverture = fenêtre [Début Filtration+15mn ; Fin Filtration[
-          // ET filtration réellement effective (pompe on depuis au moins la tempo de recirculation)
-          if (mode_volet == "Auto" &&
-              !id(action_ouv_executee) &&
-              id(flag_tempo_ppe_filtre)) {
+          // Auto - ouverture = H Début Filtration + 15 mn
+          if (current_minute == debut_minute &&
+              mode_volet == "Auto" &&
+              !id(action_ouv_executee)) {
+            auto mode_filtration = id(_Mode_Fonctionnement_filtration).current_option();
 
-            bool dans_fenetre;
-            if (debut_minute <= fin_minute) {
-              dans_fenetre = (current_minute >= debut_minute && current_minute < fin_minute);
-            } else {
-              // fenêtre traversant minuit
-              dans_fenetre = (current_minute >= debut_minute || current_minute < fin_minute);
-            }
-
-            if (dans_fenetre) {
-              auto mode_filtration = id(_Mode_Fonctionnement_filtration).current_option();
-
-              if (mode_filtration == "Horaire" ||
-                  mode_filtration == "Palier" ||
-                  mode_filtration == "Classique" ||
-                  mode_filtration == "Abaque") {
-                id(action_ouv_executee) = true;
-                id(script_ouv_volet).execute();
-              }
+            if (mode_filtration == "Horaire" ||
+                mode_filtration == "Palier" ||
+                mode_filtration == "Classique" ||
+                mode_filtration == "Abaque") {
+              id(action_ouv_executee) = true;
+              id(script_ouv_volet).execute();
             }
           }
 
@@ -280,12 +349,12 @@ script:
           std::string heure_ferm_str;
 
           if (mode_volet == "Horaire") {
-            char buf_ouv[16];
+            char buf_ouv[6];
             snprintf(buf_ouv, sizeof(buf_ouv), "%02d:%02d", id(h_ouv_volet).hour, id(h_ouv_volet).minute);
             heure_ouv_str = buf_ouv;
 
             if (fermeture_horaire_active) {
-              char buf_ferm[16];
+              char buf_ferm[6];
               snprintf(buf_ferm, sizeof(buf_ferm), "%02d:%02d", id(h_ferm_volet).hour, id(h_ferm_volet).minute);
               heure_ferm_str = buf_ferm;
             } else {
@@ -302,8 +371,8 @@ script:
             int fin_hr = fin_total / 60;
             int fin_min = fin_total % 60;
 
-            char buf_ouv[16];
-            char buf_ferm[16];
+            char buf_ouv[6];
+            char buf_ferm[6];
 
             snprintf(buf_ouv, sizeof(buf_ouv), "%02d:%02d", debut_hr, debut_min);
             snprintf(buf_ferm, sizeof(buf_ferm), "%02d:%02d", fin_hr, fin_min);
@@ -382,11 +451,11 @@ script:
                 if (haut && inter) mess += "Haut + Intermediaire\n";
                 else if (haut)    mess += "Haut\n";
                 else if (inter)   mess += "Intermediaire\n";
-                mess += "Mode: ";
-                mess += id(_Mode_Fonctionnement_volet).current_option();
-                mess += "\n";
-                id(_message_telegram)->execute(mess,0);
-                id(_log_fichier)->execute(mess, 0);
+                  mess += "Mode: ";
+                  mess += id(_Mode_Fonctionnement_volet).current_option();
+                  mess += "\n";
+                  id(_message_telegram)->execute(mess,0);
+                  id(_log_fichier)->execute(mess, 0);
 
             - switch.turn_on: cde_eclairage
             - delay: 20s
@@ -396,13 +465,15 @@ script:
             - lambda: |-
                 bool def = id(niv_defaut).state;
                 std::string mess = "Fermeture Volet Piscine BLOQUEE\n";
-                if (def) mess += "Raison: Niveau en defaut\n";
-                else mess += "Raison: aucun niveau actif (Bas)\n";
-                mess += "Mode: ";
-                mess += id(_Mode_Fonctionnement_volet).current_option();
-                mess += "\n";
-                id(_message_telegram)->execute(mess,0);
-                id(_log_fichier)->execute(mess, 0);
+                if (def) mess += "Raison: Niveau en defaut";
+                else
+                  std::string mess;
+                  mess += "Raison: aucun niveau actif (Bas)\n";
+                  mess += "Mode: ";
+                  mess += id(_Mode_Fonctionnement_volet).current_option();
+                  mess += "\n";
+                  id(_message_telegram)->execute(mess,0);
+                  id(_log_fichier)->execute(mess, 0);
 
   - id: script_stop_volet
     mode: single

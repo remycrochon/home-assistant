@@ -1,0 +1,246 @@
+substitutions:
+  device_name: "esp176-esp32-routeur-1r"
+  friendly_name: esp176
+  adress_ip: "192.168.0.176"
+  time_timezone: "Europe/Paris"
+
+  name: jsy194
+  current_address: '1'
+  current_baud_rate: '38400'
+  updates: 2s
+  modbus_throttle: 1000ms
+  offset_select: '2'  
+  
+esphome:
+  name: ${device_name}
+ 
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    version: 2.0.11 #2.0.5 2.0.9
+    platform_version: 6.4.0 #4.4.0 6.2.0   
+
+wifi:
+  networks:
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+  baud_rate: 0
+  level: debug
+#  logs:
+#    modbus.component: INFO
+
+
+web_server:
+  port: 80
+api:
+ota:
+# Protocole afficheur
+
+
+external_components:
+#  - source: "github://SeByDocKy/myESPhome/"
+  - source: mes_composants
+    components: [jsy194]
+    refresh: 0s
+
+uart:
+  - id: uart_0
+    tx_pin: 17
+    rx_pin: 16 
+    baud_rate: ${current_baud_rate}
+    stop_bits: 1 # 2 for ESP32, 1 for ESP8266
+    debug:
+      direction: BOTH
+      dummy_receiver: false
+      after:
+        timeout: 150ms
+      sequence:
+        - lambda: |-
+            UARTDebug::log_string(direction, bytes);  //Still log the data
+
+text_sensor:
+  - platform: template
+    name: "Raw String"
+    id: "rawString"
+
+modbus:
+   id: modbus_0
+   uart_id: uart_0
+   send_wait_time: ${modbus_throttle}
+
+#modbus_controller:
+#  - id: jsymk
+#    ## the Modbus device addr
+#    address: 0x1
+#    modbus_id: modbus_0
+#    update_interval: 0.75s
+#    command_throttle: 50ms
+    # setup_priority: -10
+
+
+button:
+  - platform: template
+    name: ${name}_reset_energy1pos
+    id: ${name}_reset_energy1pos
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.reset_energy1pos: 
+           id: ${name}_id
+
+  - platform: template
+    name: ${name}_reset_energy1neg
+    id: ${name}_reset_energy1neg
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.reset_energy1neg: 
+           id: ${name}_id          
+
+  - platform: template
+    name: ${name}_reset_energy2pos
+    id: ${name}_reset_energy2pos
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.reset_energy2pos: 
+           id: ${name}_id
+
+  - platform: template
+    name: ${name}_reset_energy2neg
+    id: ${name}_reset_energy2neg
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.reset_energy2neg: 
+           id: ${name}_id
+
+  - platform: template
+    name: ${name}_write_register04
+    id: ${name}_write_register04
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - jsy194.write_com_setting:
+            id: ${name}_id
+            new_address: !lambda 'return stoi(id(new_address).state);'
+            new_baudrate: !lambda |-
+              auto index = id(new_baudrate).active_index();
+              return uint8_t( index.value() + ${offset_select}  );
+          
+  - platform: template
+    name: ${name}_read_register04
+    id: ${name}_read_register04
+    icon: "mdi:button-pointer"
+    on_press:
+      then:
+        - lambda: |-
+           uint8_t current_address, current_baudrate;
+           esphome::jsy194::JSY194 *sen =  id(${name}_id);
+           sen->read_register04();
+           current_address = sen->get_address();
+           auto address = id(new_address).make_call();
+           address.set_value(std::to_string(current_address));
+           address.perform();
+           current_baudrate = sen->get_baudrate();
+           auto baudrate = id(new_baudrate).make_call();
+           baudrate.set_index(current_baudrate - ${offset_select});
+           baudrate.perform();        
+
+text:
+  - platform: template
+    name: ${name}_new_address
+    id: new_address
+    optimistic: true
+    min_length: 0
+    max_length: 3
+    mode: text
+    initial_value: '   '
+    restore_value: false
+
+select:
+  - platform: template
+    name: ${name}_new_baudrate
+    id: new_baudrate
+    optimistic: true
+    options:
+      - '              '
+      - '3 - 1200 bauds'
+      - '4 - 2400 bauds'
+      - '5 - 4800 bauds'
+      - '6 - 9600 bauds'
+      - '7 - 19200 bauds'
+      - '8 - 38400 bauds'
+    initial_option: '              '
+    restore_value: false
+
+
+sensor:
+  - platform: jsy194
+    address: ${current_address}
+# Voir ECS
+    current1:
+      name: ${name}_current1
+      accuracy_decimals: 2
+    voltage1:
+      name: ${name}_voltage1
+      accuracy_decimals: 2
+    power1:
+      name: ${name}_power1
+      id: puecs
+      accuracy_decimals: 2
+    frequency1:
+      name: ${name}_frequency1
+      accuracy_decimals: 2
+    power_factor1:
+      name: ${name}_power_factor1
+      accuracy_decimals: 2
+    pos_energy1:
+      name: ${name}_pos_energy1
+      accuracy_decimals: 1
+    neg_energy1:
+      name: ${name}_neg_energy1
+      accuracy_decimals: 1
+# grid
+    current2:
+      name: ${name}_current2
+      accuracy_decimals: 2
+    voltage2:
+      name: ${name}_voltage2
+      accuracy_decimals: 2
+    power2:
+      name: ${name}_power2
+      id: pureseau
+      unit_of_measurement: W
+      accuracy_decimals: 2
+
+    frequency2:
+      name: ${name}_frequency2
+      accuracy_decimals: 2
+    power_factor2:
+      name: ${name}_power_factor2
+      accuracy_decimals: 2
+    pos_energy2:
+      name: ${name}_pos_energy2
+      accuracy_decimals: 1
+    neg_energy2:
+      name: ${name}_neg_energy2
+      accuracy_decimals: 1     
+    update_interval: ${updates}
+    modbus_id: modbus_0
+    id: ${name}_id
+
+
+switch:
+  - platform: restart
+    name: "${friendly_name} Restart"

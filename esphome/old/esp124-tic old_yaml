@@ -1,0 +1,344 @@
+substitutions:
+  device_name: esp124-tic
+  adress_ip: "192.168.0.124"
+  friendly_name: esp124
+  time_timezone: "Europe/Paris"
+  
+esphome:
+  name: ${device_name}
+  platform: ESP32
+  board: mhetesp32minikit
+  project:
+    name: "rem81.esp124-TIC"
+    version: "1.0.1"
+  platformio_options:
+    lib_deps: NeoPixelBus@2.6.0
+  on_boot:
+    then:
+      - light.control:
+          id: led1
+          brightness: 0.25
+          state: on
+wifi:
+  networks:
+    - ssid: !secret wifi_esp
+      password: !secret mdpwifi_esp
+      priority: 1
+    - ssid: !secret wifi
+      password: !secret mdpwifi
+      priority: 0
+  reboot_timeout: 5min
+
+  manual_ip:
+    static_ip: ${adress_ip}
+    gateway: 192.168.0.254
+    subnet: 255.255.255.0
+
+# Enable logging
+logger:
+#  baud_rate: 0
+# Enable Home Assistant API
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+font:
+  - file: "fonts/arial.ttf"
+    id: arial
+    size: 15
+
+i2c:
+  sda: GPIO21 #D2=pin 19
+  scl: GPIO22 #D1=pin 20
+  scan: True
+  id: bus_a
+  
+# 
+uart:
+  id: uart_a
+  rx_pin: GPIO23
+#  tx_pin: GPIO1
+  baud_rate: 9600
+  parity: EVEN
+  data_bits: 7
+
+teleinfo:
+  id: myteleinfo
+  uart_id: uart_a
+  update_interval: 10s
+  historical_mode: false
+  
+# Led WS2812 RGB  
+light:
+  - platform: partition
+    name: led1
+    id: led1
+    default_transition_length: 0s
+    segments:
+      - id: rgb_led
+        from: 0
+        to: 0
+
+  - platform: neopixelbus
+    num_leds: 1
+    pin: GPIO18
+    name: "RGB strip"
+    variant: ws2812
+    id: rgb_led
+    default_transition_length: 0s  
+
+
+sensor:
+# Energie Active soutirée totale
+  - platform: teleinfo
+    id: hc_hp
+    tag_name: "EAST"
+    name: "Linky HPHC KWH"
+    unit_of_measurement: "kWh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    device_class: "energy"
+    state_class: "total_increasing"  
+    filters:
+      - filter_out: 0.0
+      - lambda: |-
+          return x/1000;
+          
+# C'est facile, c'est PTEC : période tarifaire en cours :
+#- Heures Creuses Jours Bleus : HCJB
+#- Heures Pleines Jours Bleus : HPJB
+#- Heures Creuses Jours Blancs : HCJW
+#- Heures Pleines Jours Blancs : HPJW
+#- Heures Creuses Jours Rouges : HCJR
+#- Heures Pleines Jours Rouges : HPJR
+
+# Energie Active soutirée Index01 HC Bleu
+  - platform: teleinfo
+    id: hchc
+    tag_name: "EASF01"
+    name: "Linky HC Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0
+    
+# Energie Active soutirée Index02 HP Bleu
+  - platform: teleinfo
+    id: hchp
+    tag_name: "EASF02"
+    name: "Linky HP Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0    
+
+# Energie Active soutirée Index03 HC Blanc
+  - platform: teleinfo
+    id: hcblanc
+    tag_name: "EASF03"
+    name: "Linky HC Blanc Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0
+
+# Energie Active soutirée Index04 HP Blanc
+  - platform: teleinfo
+    id: hpblanc
+    tag_name: "EASF04"
+    name: "Linky HP Blanc Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0    
+
+# Energie Active soutirée Index05 HC Rouge
+  - platform: teleinfo
+    id: hcrouge
+    tag_name: "EASF05"
+    name: "Linky HC Rouge Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0
+
+# Energie Active soutirée Index06 HP Rouge
+  - platform: teleinfo
+    id: hprouge
+    tag_name: "EASF06"
+    name: "Linky HP Rouge Wh"
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    filters:
+      - filter_out: 0.0    
+
+#Puissance apparente de coupure
+  - platform: teleinfo
+    id: pcoup
+    tag_name: "PCOUP"
+    name: "Linky PCOUP"
+    unit_of_measurement: "kVA"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+#Puissance apparente instantanée ph1 
+
+  - platform: teleinfo
+    id: papp
+    tag_name: "SINSTS"
+    name: "Linky PAPP"
+    unit_of_measurement: "VA"
+    device_class: "power"
+    state_class: "measurement"  
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+    on_value:
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              below: 1000
+          then: 
+            - light.control:
+                id: led1
+                red: 0%
+                green: 100% # vert
+                blue: 0%
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              above: 1000
+              below: 3000
+          then: 
+            - light.control:
+                id: led1
+                red: 0%
+                green: 0% # bleu
+                blue: 100%
+      - if:
+          condition:
+            sensor.in_range:
+              id: papp
+              above: 3000
+          then: 
+            - light.control:
+                id: led1
+                red: 100% #rouge
+                green: 0%
+                blue: 0%    
+
+#Tension moyenne ph1
+  - platform: teleinfo
+    id: umoy1
+    tag_name: "UMOY1"
+    name: "Linky Umoy"
+    unit_of_measurement: "V"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+#Courant efficace ph1
+  - platform: teleinfo
+    id: iinst
+    tag_name: "IRMS1"
+    name: "Linky I Inst"
+    unit_of_measurement: "A"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Numero du Tarif en cours
+  - platform: teleinfo
+    id: ntarif
+    tag_name: "NTARF"
+    name: "linky N Tarif"
+    unit_of_measurement: ""
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+############### TEMPLATE  ######################"
+# Calcul du ratio de la puissance apparente utilisée en % par rapport au contrat
+  - platform: template
+    name: "Linky P/PCoup"
+    id: p100
+    icon: mdi:flash
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      return ((id(papp).state/1000)/id(pcoup).state*100);
+
+# Lecture dans HA de la conso du jour
+  - platform: homeassistant
+    name: "HCHP J"
+    unit_of_measurement: "kWh"
+    entity_id: sensor.energie_totale_jour
+    id: hphcj
+
+    
+#######################################
+text_sensor:
+# Registre de statuts
+  - platform: teleinfo
+    id: stge
+    tag_name: "STGE"
+    name: "linky Statuts"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# nom du calendrier tarifaire
+  - platform: teleinfo
+    id: ngtf
+    tag_name: "NGTF"
+    name: "linky Nom calendrier tarifaire"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Libellé tarif fournisseur en cours
+  - platform: teleinfo
+    id: ltarf
+    tag_name: "LTARF"
+    name: "linky Libellé tarif fournisseur en cours"
+    icon: mdi:flash
+    teleinfo_id: myteleinfo
+
+# Convertion du tarif en cours
+  - platform: template
+    id: tarif
+    name: "Linky PTEC"
+    lambda: |-
+      if ( id(ntarif).state == 1 || id(ntarif).state == 3 || id(ntarif).state == 5){
+        return { "HC.." };
+      } else {
+        return { "HP.." };
+      }
+
+#Etat de la connection
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+# Affichage
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    brightness: 100%
+    lambda: |-
+      it.printf(0,0,id(arial),"P=%.0f VA",id(papp).state);
+      it.printf(75,0,id(arial),"-%.0f %%",id(p100).state);
+      it.printf(0,15,id(arial),"I Inst=%.0f A",id(iinst).state);
+      it.printf(0,30,id(arial),"ConsoJ=%.0f kWh",id(hphcj).state);
+      std::string tarif_ = id(tarif).state;
+      it.printf(0,45,id(arial), "Tarif: %s", tarif_.c_str());      
+
+
+      
+   

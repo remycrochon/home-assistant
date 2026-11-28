@@ -1,77 +1,9 @@
-# ============================================================
-# ESP125 FRIGO - VERSION FUSIONNEE (ex ESP125 + ex ESP179)
-#
-# AFFECTATION DES BROCHES (GPIO)
-#
-#   GPIO4  : bus 1-Wire - DS18B20 resistance et degivrage (sondes UTILISEES par le PID et la
-#            logique, a basculer sur l'ADS1115 plus tard). Pull-up 4,7 kOhm vers 3,3 V.
-#   GPIO18 : sortie ventilo bac (grille du MOSFET IRLZ44N, pull-down 10 kOhm)
-#   GPIO21 : I2C SDA vers l'ADS1115
-#   GPIO22 : I2C SCL vers l'ADS1115
-#   GPIO23 : PWM chauffage (module AOD4184, entree PWM1) - pull-down 10 kOhm conseillee
-#   3V3    : alimente l'ADS1115 (VDD) et le pont diviseur de la NTC (cote NTC)
-#   GND    : masse de l'ADS1115 (GND + ADDR) et du pont diviseur
-#
-# ADS1115 (adresse 0x48, ADDR -> GND) :
-#   A0 = NTC sonde BAC (cablage actuel, securite entretien) -> voir substitution mux_bac
-#   A1, A2 libres ; ALRT non connectee
-#   A3: 3.3V de l'esp
-#   Cible finale : A0 = NTC Bac, A1 = NTC degivrage, A2 = NTC Resistance (mux_bac: "A2_GND") Remy
-# Pont diviseur (un par NTC, a monter pres de l'ESP) :
-#   3,3 V --[ NTC 10 kOhm ]--+-- entree Ax de l'ADS1115
-#                            +--[ 100 nF (104) ]-- GND
-#                            +--[ R reference 10 kOhm 1 % metal ]-- GND
-#
-# Cable blinde vers chaque NTC : 2 fils (3,3 V + point milieu), blindage a GND cote ESP uniquement.
-# ============================================================
 substitutions:
   device_name: esp125-frigo
   adress_ip: "192.168.0.125"
 
-  # --- Sonde bac : NTC 10 kOhm via ADS1115 ---
-  # Entree de l'ADS1115 de la NTC bac : A0_GND (cablage actuel) ; A2_GND quand le cablage final sera fait
-  mux_bac: "A0_GND"
-  # Valeur reelle de la resistance de reference du pont (a mesurer au multimetre)
-  r_ref_bac: "10kOhm"
-  r_ref_degivrage: "9.99KOhm"
-  r_ref_resistance: "10.05KOhm"
-  # Tension reelle du 3,3 V de l'ESP (entre 3V3 et GND) : a REMESURER sur la carte finale
-  # Le 3,3 V est maintenant aussi mesure en direct sur A3 : cette valeur sert de reference
-  # pour la correction et de valeur de repli si la lecture A3 est invalide.
-  tension_3v3_val: "3.287"
-  tension_3v3: "${tension_3v3_val}V"
-  # Coefficient B mesure (la valeur constructeur 3435 est fausse vers 0 °C et en dessous)
-  ntc_b: "3150"
-  # Etalonnage a 0 °C (eau + glacons) : offset = 0 - valeur lue
-  offset_bac: "0.7"
-
-  # --- Securite sondes (resistance + degivrage, DS18B20) ---
-  # Sonde consideree defectueuse si aucune lecture valide depuis ce delai (ms)
-  # 180 s (3 min) : tolere les trous de lecture du bus 1-Wire (etait 60 s)
-  sonde_timeout_ms: "180000"
-  # ... ou si elle affiche exactement 0,0 sur ce nombre de lectures consecutives (12 x 5 s = 1 min)
-  sonde_zero_max: "12"
-  # Retour a la normale apres ce nombre de controles (toutes les 5 s) sans defaut (60 x 5 s = 5 min)
-  sonde_retour_ticks: "60"
-
 esphome:
   name: ${device_name}
-  on_boot:
-    priority: -100
-    then:
-      - climate.control:
-          id: pid_climate
-          mode: "OFF"
-      - lambda: |-
-          id(r1_demoulage_arme) = false;
-          id(r1_cycle_chauffe_en_cours) = false;
-          id(r1_minutes_sans_demoulage) = 0;
-          id(r1_etat).publish_state("Repos");
-      # Re-applique le mode memorise (Auto / Manu / Arret) apres un redemarrage
-      # (applique aussi l'etat du ventilo selon le mode)
-      - script.execute:
-          id: appliquer_mode
-          mode: !lambda 'return std::string(id(mode_fonctionnement).current_option());'
 
 esp32:
   board: esp32dev
@@ -79,8 +11,8 @@ esp32:
     type: esp-idf
     advanced:
       minimum_chip_revision: "3.0"
-
-
+            
+# Enable logging
 logger:
 
 api:
@@ -105,1120 +37,149 @@ web_server:
   port: 80
   version: 3
 
-i2c:
-  sda: GPIO21
-  scl: GPIO22
-  scan: true
-
-ads1115:
-  - address: 0x48
-    id: ads1
-
 one_wire:
-  - platform: gpio
+  - platform: gpio  
     pin: GPIO4
     id: ow1
-
-globals:
-  - id: r1_demoulage_arme
-    type: bool
-    restore_value: no
-    initial_value: "false"
-
-  - id: r1_cycle_chauffe_en_cours
-    type: bool
-    restore_value: no
-    initial_value: "false"
-
-  - id: r1_minutes_sans_demoulage
-    type: int
-    restore_value: no
-    initial_value: "0"
-
-  - id: r1_chauffe_start_ms
-    type: uint32_t
-    restore_value: no
-    initial_value: "0"
-
-  # Compteur persistant du nombre de cycles de demoulage effectivement executes
-  # (survit aux redemarrages/coupures).
-  - id: r1_compteur_demoulage
-    type: int
-    restore_value: yes
-    initial_value: "0"
-
-  # Compteur persistant du nombre de cycles d'entretien sans demoulage effectivement executes
-  # (survit aux redemarrages/coupures).
-  - id: r1_compteur_entretien
-    type: int
-    restore_value: yes
-    initial_value: "0"
-
-  # --- Securite sondes ---
-  # true = defaut sonde verrouille : chauffage coupe et interdit
-  - id: r1_sonde_defaut
-    type: bool
-    restore_value: no
-    initial_value: "false"
-
-  # Resultat instantane du controle des sondes (true = les deux sondes sont saines)
-  - id: r1_sondes_ok
-    type: bool
-    restore_value: no
-    initial_value: "true"
-
-  # Horodatage (millis) de la derniere lecture valide de chaque sonde
-  - id: r1_last_ok_r_ms
-    type: uint32_t
-    restore_value: no
-    initial_value: "0"
-
-  - id: r1_last_ok_d_ms
-    type: uint32_t
-    restore_value: no
-    initial_value: "0"
-
-  # Nombre de lectures consecutives exactement egales a 0,0 par sonde
-  - id: r1_zero_cnt_r
-    type: int
-    restore_value: no
-    initial_value: "0"
-
-  - id: r1_zero_cnt_d
-    type: int
-    restore_value: no
-    initial_value: "0"
-
-  # Nombre de controles consecutifs sans defaut depuis le declenchement du defaut
-  - id: r1_cpt_sain
-    type: int
-    restore_value: no
-    initial_value: "0"
-
+#Etat de la connection
 binary_sensor:
   - platform: status
     name: "Status"
-
-  - platform: template
-    name: "R1 Demoulage Arme"
-    id: r1_demoulage_arme_sensor
-    lambda: |-
-      return id(r1_demoulage_arme);
-
-  # Ex ESP179 : le ventilo reagit des que la chauffe demarre ou s'arrete (le capteur template
-  # est evalue en continu, donc la reaction est immediate, sans passer par Home Assistant).
-  - platform: template
-    name: "R1 Chauffe En Cours"
-    id: r1_chauffe_en_cours_sensor
-    lambda: |-
-      return id(r1_cycle_chauffe_en_cours);
-    on_press:
-      then:
-        - logger.log: "R1 chauffe en cours detectee : ventilo OFF immediat"
-        - script.execute: maj_ventilo_selon_r1
-    on_release:
-      then:
-        - logger.log: "R1 chauffe terminee : demarrage tempo rallumage ventilo"
-        - script.execute: maj_ventilo_selon_r1
-
-  # Allume tant qu'une sonde (resistance ou degivrage) est jugee defectueuse.
-  - platform: template
-    name: "R1 Defaut Sonde"
-    id: r1_defaut_sonde_sensor
-    device_class: problem
-    lambda: |-
-      return id(r1_sonde_defaut);
-
-  - platform: template
-    name: "Ventilo Rallumage Temporise Actif"
-    id: ventilo_rallumage_temporise_actif
-    lambda: |-
-      return id(rallumage_ventilo_temporise).is_running();
-
-# Mode de fonctionnement memorise (restore_value) :
-#  - Auto  : production de glacons active, cycles demoulage / entretien automatiques,
-#            ventilo pilote selon la chauffe R1
-#  - Manu  : production de glacons arretee, regulation PID de chauffe R1 forcee, ventilo a l'arret
-#  - Arret : tout est arrete (regulation, chauffage, ventilo)
-select:
-  - platform: template
-    name: "Mode de fonctionnement"
-    id: mode_fonctionnement
-    icon: "mdi:state-machine"
-    options:
-      - "Auto"
-      - "Manu"
-      - "Arrêt"
-    initial_option: "Auto"
-    restore_value: true
-    optimistic: true
-    set_action:
-      - script.execute:
-          id: appliquer_mode
-          mode: !lambda 'return x;'
-
+    
 number:
   - platform: template
-    name: "R1 Seuil froid armement"
-    id: r1_seuil_froid_armement
-    min_value: -25
-    max_value: 0
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: -8
-    unit_of_measurement: "°C"
-
-  - platform: template
-    name: "R1 Seuil detection demoulage"
-    id: r1_seuil_detection_demoulage
-    min_value: -5
-    max_value: 20
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 2
-    unit_of_measurement: "°C"
-
-  - platform: template
-    name: "R1 Consigne PID demoulage"
-    id: r1_consigne_pid_demoulage
+    name: "Puissance chauffage manuel"
+    id: puissance_manuelle
     min_value: 0
-    max_value: 15
-    step: 0.5
+    max_value: 100
+    step: 1
     mode: box
     restore_value: true
-    optimistic: true
-    initial_value: 6
-    unit_of_measurement: "°C"
-
-  # Parametre unique, partage par les deux cycles (demoulage et entretien) :
-  # duree de chauffe garantie avant toute verification des conditions de sortie
-  # (seuil froid pour le demoulage, securite bac pour l'entretien).
-  - platform: template
-    name: "R1 Duree minimale chauffe"
-    id: r1_duree_min_chauffe
-    min_value: 0.5
-    max_value: 15
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 5
-    unit_of_measurement: "min"
-
-  - platform: template
-    name: "R1 Consigne PID entretien"
-    id: r1_consigne_pid_entretien
-    min_value: 0
-    max_value: 15
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 10
-    unit_of_measurement: "°C"
-
-  # Consigne de la regulation PID forcee en mode Manu.
-  - platform: template
-    name: "R1 Consigne PID manuel"
-    id: r1_consigne_pid_manuel
-    min_value: 0
-    max_value: 15
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 6
-    unit_of_measurement: "°C"
+    initial_value: 0  # première mise sous tension
+    unit_of_measurement: "%"
     set_action:
-      - if:
-          condition:
-            lambda: |-
-              return id(mode_fonctionnement).current_option() == "Manu" && !id(r1_sonde_defaut);
-          then:
-            - climate.control:
-                id: pid_climate
-                mode: HEAT
-                target_temperature: !lambda 'return x;'
-
-  - platform: template
-    name: "R1 Duree maxi PID entretien"
-    id: r1_duree_maxi_pid_entretien
-    min_value: 5
-    max_value: 60
-    step: 1
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 40
-    unit_of_measurement: "min"
-
-  - platform: template
-    name: "R1 Seuil securite bac entretien"
-    id: r1_seuil_securite_bac_entretien
-    min_value: -10
-    max_value: 5
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: -1
-    unit_of_measurement: "°C"
-
-  - platform: template
-    name: "R1 Delai entretien sans demoulage"
-    id: r1_delai_entretien_h
-    min_value: 1
-    max_value: 24
-    step: 1
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 2
-    unit_of_measurement: "h"
-
-  - platform: template
-    name: "R1 Temperature securite max"
-    id: r1_temperature_securite_max
-    min_value: 5
-    max_value: 30
-    step: 0.5
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 15
-    unit_of_measurement: "°C"
-
-  - platform: template
-    name: "R1 Duree maxi PID demoulage"
-    id: r1_duree_maxi_pid_demoulage
-    min_value: 3
-    max_value: 30
-    step: 1
-    mode: box
-    restore_value: true
-    optimistic: true
-    initial_value: 6
-    unit_of_measurement: "min"
+      - light.turn_on:
+          id: manual_heater
+          brightness: !lambda 'return x / 100.0;'
 
 sensor:
-  # ===================== NTC BAC (ADS1115, entree ${mux_bac}) - securite entretien =====================
-  # Ex ESP179 : etalonnee avec B = 3150 et offset +0,7.
-  - platform: ads1115
-    ads1115_id: ads1
-    multiplexer: ${mux_bac}
-    gain: 4.096
-    sample_rate: "16"
-    name: "NTC Bac Tension"
-    id: ntc_bac_tension
-    update_interval: 5s
-    accuracy_decimals: 4
-    entity_category: diagnostic
-    disabled_by_default: true
-
-  # 3,3 V de l'ESP mesure en direct (entree A3, via 1 kOhm). Lissage sur 12 mesures (~1 min),
-  # une valeur envoyee a HA au plus toutes les 60 s.
-  - platform: ads1115
-    ads1115_id: ads1
-    multiplexer: A3_GND
-    gain: 4.096
-    sample_rate: "16"
-    name: "Tension 3V3 ESP"
-    id: tension_3v3_mesuree
-    update_interval: 5s
-    accuracy_decimals: 3
-    entity_category: diagnostic
-    filters:
-      - sliding_window_moving_average:
-          window_size: 12
-          send_every: 1
-      - throttle: 60s
-
-  # Tension de la NTC bac corrigee des variations du 3,3 V :
-  # tension x (3,3 V de reference / 3,3 V mesure). Si la lecture A3 est invalide
-  # (hors 3,0 - 3,6 V), la tension n'est pas corrigee (comportement precedent).
-  - platform: copy
-    source_id: ntc_bac_tension
-    id: ntc_bac_tension_corrigee
-    internal: true
-    filters:
-      - lambda: |-
-          float v33 = id(tension_3v3_mesuree).state;
-          if (isnan(v33) || v33 < 3.0f || v33 > 3.6f) return x;
-          return x * ((float) ${tension_3v3_val}) / v33;
-
-  - platform: resistance
-    sensor: ntc_bac_tension_corrigee
-    configuration: UPSTREAM
-    resistor: ${r_ref_bac}
-    reference_voltage: ${tension_3v3}
-    name: "NTC Bac Ohms Brut"
-    id: ntc_bac_ohms
-    internal: true
-
-  - platform: ntc
-    sensor: ntc_bac_ohms
-    calibration:
-      b_constant: ${ntc_b}
-      reference_temperature: 25°C
-      reference_resistance: 10kOhm
-    name: "Temp NTC Bac Brut"
-    id: temp_ntc_bac
-    internal: true
-    unit_of_measurement: "°C"
-    accuracy_decimals: 2
-    filters:
-      # Rejette les lectures invalides (NaN, hors plage) : NTC debranchee, coupee ou en court-circuit
-      - lambda: |-
-          if (isnan(x) || x < -45.0f || x > 60.0f) return {};
-          return x;
-      # Anti-parasites : mediane puis moyenne glissante
-      - median:
-          window_size: 5
-          send_every: 1
-          send_first_at: 1
-      - sliding_window_moving_average:
-          window_size: 3
-          send_every: 1
-      - offset: ${offset_bac}
-
-  # Copie pour HA : une valeur au plus toutes les 30 s, sauf variation >= 0,3 °C.
-  - platform: copy
-    source_id: temp_ntc_bac
-    name: "Temp NTC Bac"
-    id: temp_ntc_bac_ha
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-    accuracy_decimals: 1
-    filters:
-      - or:
-          - throttle: 30s
-          - delta: 0.3
-
-  - platform: copy
-    source_id: ntc_bac_ohms
-    name: "NTC Bac Ohms"
-    id: ntc_bac_ohms_ha
-    entity_category: diagnostic
-    accuracy_decimals: 0
-    filters:
-      - throttle: 30s
-
-  # ===================== DS18B20 resistance et degivrage (1-Wire GPIO4) =====================
-  # Sondes UTILISEES par le PID, les cycles et la securite sondes.
-  # A basculer sur l'ADS1115 (NTC) plus tard.
   - platform: dallas_temp
     one_wire_id: ow1
     name: "Temp DS18B20 Resistance"
-    address: 0xf300eca700000328
+    address:  0xf300eca700000328
     id: temp_ds18b20_r
     device_class: temperature
     state_class: "measurement"
     update_interval: 5s
     accuracy_decimals: 1
     filters:
-      # Rejette les lectures invalides (NaN, hors plage -45/+60 °C) : la derniere valeur valide est conservee.
       - lambda: |-
-          if (isnan(x) || x < -45.0f || x > 60.0f) return {};
+          if (isnan(x)) return {};  // ignore valeur NaN
           return x;
-    # Appele uniquement pour les lectures valides (apres filtre) : alimente la securite sondes.
-    on_value:
-      then:
-        - lambda: |-
-            id(r1_last_ok_r_ms) = millis();
-            if (x == 0.0f) {
-              id(r1_zero_cnt_r)++;
-            } else {
-              id(r1_zero_cnt_r) = 0;
-            }
 
-  # Sonde degivrage : valeur BRUTE, utilisee par la logique et le debug.
-  # Interne : elle n'est pas envoyee a HA (c'est la copie ci-dessous qui l'est).
   - platform: dallas_temp
     one_wire_id: ow1
-    name: "Temp DS18B20 Degivrage Brut"
+    name: "Temp DS18B20 Degivrage"
     address: 0x9900000491efe528
     id: temp_ds18b20_d
-    internal: true
     device_class: temperature
     state_class: "measurement"
     update_interval: 5s
     accuracy_decimals: 1
     filters:
-      # Rejette les lectures invalides (NaN, hors plage -45/+60 °C) : la derniere valeur valide est conservee.
       - lambda: |-
-          if (isnan(x) || x < -45.0f || x > 60.0f) return {};
-          return x;
-    # Appele uniquement pour les lectures valides (apres filtre) : alimente la securite sondes.
-    on_value:
-      then:
-        - lambda: |-
-            id(r1_last_ok_d_ms) = millis();
-            if (x == 0.0f) {
-              id(r1_zero_cnt_d)++;
-            } else {
-              id(r1_zero_cnt_d) = 0;
-            }
-
-  # Copie filtree pour HA : meme nom qu'avant => meme entite, meme historique.
-  # Une valeur au plus toutes les 60 s, sauf variation >= 0,5 °C (envoyee tout de suite,
-  # donc les cycles de degivrage restent bien visibles).
-  - platform: copy
-    source_id: temp_ds18b20_d
-    name: "Temp DS18B20 Degivrage"
-    id: temp_ds18b20_d_ha
-    device_class: temperature
-    state_class: "measurement"
-    unit_of_measurement: "°C"
-    accuracy_decimals: 1
-    filters:
-      - or:
-          - throttle: 60s
-          - delta: 0.5
-
-  # ===================== Compteurs et PID =====================
-  - platform: template
-    name: "R1 Minutes sans demoulage"
-    id: r1_minutes_sans_demoulage_sensor
-    unit_of_measurement: "min"
-    accuracy_decimals: 0
-    update_interval: 60s
-    lambda: |-
-      return id(r1_minutes_sans_demoulage);
-
-  # Nombre total de cycles de demoulage executes depuis le dernier reset
-  # (persiste aux redemarrages).
-  - platform: template
-    name: "R1 Compteur Demoulage"
-    id: r1_compteur_demoulage_sensor
-    icon: "mdi:counter"
-    accuracy_decimals: 0
-    state_class: "total_increasing"
-    update_interval: 60s
-    lambda: |-
-      return id(r1_compteur_demoulage);
-
-  # Nombre total de cycles d'entretien (sans demoulage) executes depuis le dernier reset
-  # (persiste aux redemarrages).
-  - platform: template
-    name: "R1 Compteur Entretien"
-    id: r1_compteur_entretien_sensor
-    icon: "mdi:counter"
-    accuracy_decimals: 0
-    state_class: "total_increasing"
-    update_interval: 60s
-    lambda: |-
-      return id(r1_compteur_entretien);
-
+          if (isnan(x)) return {};  // ignore valeur NaN
+          return x; 
+# --- Capteur PID ---
   - platform: pid
     name: "PID Sortie"
-    id: pid_sortie
     type: HEAT
 
   - platform: pid
     name: "PID P"
     type: PROPORTIONAL
-    filters:
-      - throttle: 60s
 
   - platform: pid
     name: "PID I"
     type: INTEGRAL
-    filters:
-      - throttle: 60s
 
   - platform: pid
     name: "PID D"
     type: DERIVATIVE
-    filters:
-      - throttle: 60s
 
   - platform: pid
     name: "PID Erreur"
     type: ERROR
-    filters:
-      - throttle: 60s
-        
+
+# declenche l'Autotune
+button:
   - platform: template
-    name: "R1 Consigne PID Active"
-    id: r1_consigne_pid_active
-    unit_of_measurement: "°C"
-    accuracy_decimals: 1
-    update_interval: 5s
-    lambda: |-
-      if (id(r1_cycle_chauffe_en_cours)) {
-        return id(pid_climate).target_temperature;
-      } else {
-        return 0.0f;
-      }
+    name: "PID Climate Autotune"
+    on_press:
+      - climate.pid.autotune: pid_climate
 
-text_sensor:
-  - platform: template
-    name: "R1 Etat"
-    id: r1_etat
-    update_interval: never
-
-  - platform: template
-    name: "R1 Debug Court"
-    id: r1_debug_court
-    update_interval: 60s
-    lambda: |-
-      char buffer[320];
-
-      const char *etat = id(r1_etat).state.c_str();
-      std::string mode = std::string(id(mode_fonctionnement).current_option());
-
-      snprintf(buffer, sizeof(buffer),
-        "Etat:%s | Mode:%s | Sondes:%s | Arme:%d | Chauffe:%d | Sans dem:%dmin | Demoulages:%d | Entretiens:%d | Td:%.1fC | Tr:%.1fC | Bac:%.1fC",
-        etat,
-        mode.c_str(),
-        id(r1_sonde_defaut) ? "DEFAUT" : "OK",
-        id(r1_demoulage_arme),
-        id(r1_cycle_chauffe_en_cours),
-        id(r1_minutes_sans_demoulage),
-        id(r1_compteur_demoulage),
-        id(r1_compteur_entretien),
-        id(temp_ds18b20_d).state,
-        id(temp_ds18b20_r).state,
-        id(temp_ntc_bac).state
-      );
-
-      return std::string(buffer);
-
-  - platform: template
-    name: "Debug Ventilo R1 Frigo"
-    id: debug_ventilo_r1_frigo
-    update_interval: 5s
-    lambda: |-
-      char buffer[300];
-      std::string mode = std::string(id(mode_fonctionnement).current_option());
-
-      snprintf(buffer, sizeof(buffer),
-        "R1:%s | Mode:%s | Tempo:%d | Auto:%d | Ventilo:%s | Bac:%.1fC | PID:%.3f",
-        id(r1_cycle_chauffe_en_cours) ? "CHAUFFE" : "OFF",
-        mode.c_str(),
-        id(rallumage_ventilo_temporise).is_running(),
-        id(auto_ventilo_r1_frigo).state,
-        id(ventilo_bac).state ? "ON" : "OFF",
-        id(temp_ntc_bac).state,
-        id(pid_sortie).state
-      );
-
-      return std::string(buffer);
-
+# Sortie PWM du chauffage
 output:
   - platform: ledc
     pin: GPIO23
     frequency: 1000 Hz
     id: pwm_heater
     max_power: 100%
+            
+# --- Mode manuel (light dimmable) ---
+light:
+  - platform: monochromatic
+    output: pwm_heater
+    id: manual_heater
+    name: "Sortie Chauffage (Manuel)"
+    restore_mode: ALWAYS_OFF
 
-  - platform: gpio
-    pin: GPIO18
-    id: output_ventilo_bac
-
+# --- Sélecteur de mode ---
 switch:
-  - platform: output
-    name: "Ventilo Bac Frigo"
-    id: ventilo_bac
-    output: output_ventilo_bac
-    restore_mode: RESTORE_DEFAULT_ON
-
   - platform: template
-    name: "Auto Ventilo Selon R1 Frigo"
-    id: auto_ventilo_r1_frigo
+    name: "Mode Manuel Chauffage"
+    id: chauffage_mode_manuel
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: ALWAYS_OFF
     turn_on_action:
-      - logger.log: "Auto ventilo selon R1 frigo active"
-      - script.execute: maj_ventilo_selon_r1
-    turn_off_action:
-      - logger.log: "Auto ventilo selon R1 frigo desactive"
-      - script.stop: rallumage_ventilo_temporise
-
-button:
-  - platform: template
-    name: "PID Climate Autotune"
-    on_press:
-      - if:
-          condition:
-            lambda: 'return !id(r1_sonde_defaut);'
-          then:
-            - climate.pid.autotune: pid_climate
-
-  - platform: template
-    name: "R1 Test PID Demoulage"
-    on_press:
-      - script.execute: r1_pid_demoulage
-
-  - platform: template
-    name: "R1 Test PID Entretien"
-    on_press:
-      - script.execute: r1_pid_entretien
-
-  - platform: template
-    name: "R1 Reset compteur sans demoulage"
-    on_press:
-      - lambda: |-
-          id(r1_minutes_sans_demoulage) = 0;
-          id(r1_etat).publish_state("Repos");
-          ESP_LOGI("r1", "Compteur sans demoulage remis a zero");
-
-  - platform: template
-    name: "R1 Reset compteur demoulage"
-    on_press:
-      - lambda: |-
-          id(r1_compteur_demoulage) = 0;
-          ESP_LOGI("r1", "Compteur demoulage remis a zero");
-
-  - platform: template
-    name: "R1 Reset compteur entretien"
-    on_press:
-      - lambda: |-
-          id(r1_compteur_entretien) = 0;
-          ESP_LOGI("r1", "Compteur entretien remis a zero");
-
-  - platform: template
-    name: "Forcer MAJ Ventilo R1"
-    on_press:
-      - script.execute: maj_ventilo_selon_r1
-
-script:
-  # Applique un mode de fonctionnement : "Auto", "Manu" ou "Arrêt".
-  # Si une sonde est defectueuse, aucun chauffage n'est lance quel que soit le mode.
-  - id: appliquer_mode
-    mode: restart
-    parameters:
-      mode: string
-    then:
-      # Dans tous les cas : on repart d'un etat propre
-      - script.stop: r1_pid_demoulage
-      - script.stop: r1_pid_entretien
+      - logger.log: "Mode manuel activé : PID désactivé"
       - climate.control:
           id: pid_climate
           mode: "OFF"
-      - lambda: |-
-          id(r1_cycle_chauffe_en_cours) = false;
-          id(r1_demoulage_arme) = false;
-          id(r1_chauffe_start_ms) = 0;
-          id(r1_minutes_sans_demoulage) = 0;
-          ESP_LOGI("r1", "Mode de fonctionnement : %s", mode.c_str());
+      - light.turn_on:
+          id: manual_heater
+          brightness: !lambda 'return id(puissance_manuelle).state / 100.0;'
 
-      # Ventilo : Manu et Arret => ventilo a l'arret ; Auto => pilotage selon la chauffe R1
-      - if:
-          condition:
-            lambda: 'return mode != "Auto";'
-          then:
-            - script.stop: rallumage_ventilo_temporise
-            - switch.turn_off:
-                id: ventilo_bac
-            - logger.log: "Mode hors Auto : ventilo OFF"
-          else:
-            - script.execute: maj_ventilo_selon_r1
+    turn_off_action:
+      - logger.log: "Mode manuel désactivé : PID activé"
+      - light.turn_off:
+          id: manual_heater
+      - climate.control:
+          id: pid_climate
+          mode: HEAT
 
-      # Sonde defectueuse : on reste a l'arret, etat "Defaut sonde"
-      - if:
-          condition:
-            lambda: 'return id(r1_sonde_defaut);'
-          then:
-            - lambda: |-
-                id(r1_etat).publish_state("Defaut sonde");
-                ESP_LOGW("r1", "Mode %s demande mais sonde defectueuse : chauffage maintenu a l'arret", mode.c_str());
-
-      - if:
-          condition:
-            lambda: 'return mode == "Auto" && !id(r1_sonde_defaut);'
-          then:
-            - lambda: |-
-                id(r1_etat).publish_state("Repos");
-
-      - if:
-          condition:
-            lambda: 'return mode == "Manu" && !id(r1_sonde_defaut);'
-          then:
-            # Regulation PID de chauffe R1 forcee (securite temperature max active)
-            - lambda: |-
-                id(r1_cycle_chauffe_en_cours) = true;
-                id(r1_chauffe_start_ms) = millis();
-                id(r1_etat).publish_state("Manuel");
-            - climate.control:
-                id: pid_climate
-                mode: HEAT
-                target_temperature: !lambda 'return id(r1_consigne_pid_manuel).state;'
-
-      - if:
-          condition:
-            lambda: 'return mode == "Arrêt" && !id(r1_sonde_defaut);'
-          then:
-            - lambda: |-
-                id(r1_etat).publish_state("Arret");
-
-  # Ex ESP179 : pilote le ventilo du bac selon la chauffe R1 (uniquement en mode Auto
-  # et si l'automatisme "Auto Ventilo Selon R1 Frigo" est actif).
-  #  - chauffe en cours  : ventilo OFF immediat
-  #  - chauffe terminee  : ventilo rallume apres 2 min
-  - id: maj_ventilo_selon_r1
-    mode: restart
-    then:
-      - if:
-          condition:
-            and:
-              - switch.is_on: auto_ventilo_r1_frigo
-              - lambda: 'return id(mode_fonctionnement).current_option() == "Auto";'
-          then:
-            - if:
-                condition:
-                  lambda: 'return id(r1_cycle_chauffe_en_cours);'
-                then:
-                  - script.stop: rallumage_ventilo_temporise
-                  - switch.turn_off:
-                      id: ventilo_bac
-                  - logger.log: "R1 chauffe ON : ventilo OFF"
-                else:
-                  - if:
-                      condition:
-                        switch.is_off: ventilo_bac
-                      then:
-                        - script.execute: rallumage_ventilo_temporise
-                        - logger.log: "R1 chauffe OFF : ventilo OFF actuellement, tempo de rallumage lancee"
-                      else:
-                        - logger.log: "R1 chauffe OFF : ventilo deja ON"
-          else:
-            - script.stop: rallumage_ventilo_temporise
-
-  - id: rallumage_ventilo_temporise
-    mode: single
-    then:
-      - delay: 2min
-      - if:
-          condition:
-            and:
-              - switch.is_on: auto_ventilo_r1_frigo
-              - lambda: 'return id(mode_fonctionnement).current_option() == "Auto";'
-              - lambda: 'return !id(r1_cycle_chauffe_en_cours);'
-          then:
-            - switch.turn_on:
-                id: ventilo_bac
-            - logger.log: "Tempo terminee : R1 toujours OFF, ventilo ON"
-          else:
-            - logger.log: "Tempo terminee : rallumage annule (R1 chauffe, auto local OFF ou mode hors Auto)"
-
-  - id: r1_pid_demoulage
-    mode: single
-    then:
-      - if:
-          condition:
-            lambda: |-
-              return id(mode_fonctionnement).current_option() == "Auto" && !id(r1_sonde_defaut);
-          then:
-            - lambda: |-
-                id(r1_cycle_chauffe_en_cours) = true;
-                id(r1_minutes_sans_demoulage) = 0;
-                id(r1_chauffe_start_ms) = millis();
-                id(r1_compteur_demoulage)++;
-                id(r1_etat).publish_state("PID demoulage");
-                ESP_LOGI("r1", "PID demoulage #%d debut : consigne %.1f C, duree min chauffe %.1f min, maxi %.1f min, arret retour froid <= %.1f C",
-                         id(r1_compteur_demoulage),
-                         id(r1_consigne_pid_demoulage).state,
-                         id(r1_duree_min_chauffe).state,
-                         id(r1_duree_maxi_pid_demoulage).state,
-                         id(r1_seuil_froid_armement).state);
-
-
-            - climate.control:
-                id: pid_climate
-                mode: HEAT
-                target_temperature: !lambda 'return id(r1_consigne_pid_demoulage).state;'
-
-            # Duree minimale garantie : aucune condition de sortie verifiee avant ce delai.
-            - delay: !lambda |-
-                return (uint32_t)(id(r1_duree_min_chauffe).state * 60000.0f);
-
-            - lambda: |-
-                ESP_LOGI("r1", "PID demoulage : duree min chauffe atteinte, maintien jusqu'au retour froid ou timeout");
-
-            - wait_until:
-                condition:
-                  or:
-                    - lambda: |-
-                        if (isnan(id(temp_ds18b20_d).state)) return false;
-                        return id(temp_ds18b20_d).state <= id(r1_seuil_froid_armement).state;
-
-                    - lambda: |-
-                        uint32_t duree_max_ms = (uint32_t)(id(r1_duree_maxi_pid_demoulage).state * 60000.0f);
-                        return (millis() - id(r1_chauffe_start_ms)) >= duree_max_ms;
-
-            - lambda: |-
-                uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;
-                ESP_LOGI("r1", "PID demoulage arret apres %u s : temp degivrage %.1f C / seuil froid %.1f C",
-                         duree_s,
-                         id(temp_ds18b20_d).state,
-                         id(r1_seuil_froid_armement).state);
-
-            - climate.control:
-                id: pid_climate
-                mode: "OFF"
-
-
-            - lambda: |-
-                id(r1_cycle_chauffe_en_cours) = false;
-                id(r1_chauffe_start_ms) = 0;
-                id(r1_etat).publish_state("Repos");
-                ESP_LOGI("r1", "PID demoulage fin : PID OFF");
-
-  - id: r1_pid_entretien
-    mode: single
-    then:
-      - if:
-          condition:
-            lambda: |-
-              return id(mode_fonctionnement).current_option() == "Auto" && !id(r1_sonde_defaut);
-          then:
-            - lambda: |-
-                id(r1_cycle_chauffe_en_cours) = true;
-                id(r1_minutes_sans_demoulage) = 0;
-                id(r1_chauffe_start_ms) = millis();
-                id(r1_compteur_entretien)++;
-                id(r1_etat).publish_state("PID entretien");
-                ESP_LOGI("r1", "PID entretien #%d debut : consigne %.1f C, duree min chauffe %.1f min, duree maxi %.1f min, seuil bac %.1f C",
-                         id(r1_compteur_entretien),
-                         id(r1_consigne_pid_entretien).state,
-                         id(r1_duree_min_chauffe).state,
-                         id(r1_duree_maxi_pid_entretien).state,
-                         id(r1_seuil_securite_bac_entretien).state);
-
-
-            - climate.control:
-                id: pid_climate
-                mode: HEAT
-                target_temperature: !lambda 'return id(r1_consigne_pid_entretien).state;'
-
-            # Duree minimale garantie (meme parametre que le demoulage) :
-            # la securite bac n'est pas verifiee avant ce delai.
-            - delay: !lambda |-
-                return (uint32_t)(id(r1_duree_min_chauffe).state * 60000.0f);
-
-            - lambda: |-
-                ESP_LOGI("r1", "PID entretien : duree min chauffe atteinte, maintien jusqu'au seuil bac ou timeout");
-
-            - wait_until:
-                condition:
-                  or:
-                    - lambda: |-
-                        if (isnan(id(temp_ntc_bac).state)) return false;
-                        return id(temp_ntc_bac).state >= id(r1_seuil_securite_bac_entretien).state;
-
-                    - lambda: |-
-                        uint32_t duree_max_ms = (uint32_t)(id(r1_duree_maxi_pid_entretien).state * 60000.0f);
-                        return (millis() - id(r1_chauffe_start_ms)) >= duree_max_ms;
-
-            - lambda: |-
-                uint32_t duree_s = (millis() - id(r1_chauffe_start_ms)) / 1000;
-                ESP_LOGI("r1", "PID entretien arret apres %u s : bac %.1f C / seuil %.1f C / temp R %.1f C / temp D %.1f C",
-                         duree_s,
-                         id(temp_ntc_bac).state,
-                         id(r1_seuil_securite_bac_entretien).state,
-                         id(temp_ds18b20_r).state,
-                         id(temp_ds18b20_d).state);
-
-            - climate.control:
-                id: pid_climate
-                mode: "OFF"
-
-
-            - lambda: |-
-                id(r1_cycle_chauffe_en_cours) = false;
-                id(r1_chauffe_start_ms) = 0;
-                id(r1_etat).publish_state("Repos");
-                ESP_LOGI("r1", "PID entretien fin : PID OFF");
-
-interval:
-  - interval: 10s
-    then:
-      - lambda: |-
-          id(r1_demoulage_arme_sensor).publish_state(id(r1_demoulage_arme));
-          id(r1_defaut_sonde_sensor).publish_state(id(r1_sonde_defaut));
-      - if:
-          condition:
-            and:
-              - lambda: |-
-                  return id(mode_fonctionnement).current_option() == "Auto";
-              - lambda: |-
-                  return !id(r1_sonde_defaut);
-              - lambda: |-
-                  return !id(r1_cycle_chauffe_en_cours);
-          then:
-            - if:
-                condition:
-                  lambda: |-
-                    if (isnan(id(temp_ds18b20_d).state)) return false;
-                    return id(temp_ds18b20_d).state <= id(r1_seuil_froid_armement).state;
-                then:
-                  - lambda: |-
-                      if (!id(r1_demoulage_arme)) {
-                        id(r1_demoulage_arme) = true;
-                        id(r1_etat).publish_state("Arme demoulage");
-                        ESP_LOGI("r1", "Demoulage arme : temp degivrage %.1f C",
-                                 id(temp_ds18b20_d).state);
-                      }
-
-            - if:
-                condition:
-                  lambda: |-
-                    if (isnan(id(temp_ds18b20_d).state)) return false;
-                    return id(r1_demoulage_arme)
-                        && id(temp_ds18b20_d).state >= id(r1_seuil_detection_demoulage).state;
-                then:
-                  - lambda: |-
-                      id(r1_demoulage_arme) = false;
-                      id(r1_minutes_sans_demoulage) = 0;
-                      ESP_LOGI("r1", "Demoulage detecte : temp degivrage %.1f C",
-                               id(temp_ds18b20_d).state);
-                  - script.execute: r1_pid_demoulage
-
-  - interval: 1min
-    then:
-      - if:
-          condition:
-            and:
-              - lambda: |-
-                  return id(mode_fonctionnement).current_option() == "Auto";
-              - lambda: |-
-                  return !id(r1_sonde_defaut);
-              - lambda: |-
-                  return !id(r1_cycle_chauffe_en_cours);
-          then:
-            - lambda: |-
-                id(r1_minutes_sans_demoulage)++;
-
-            - if:
-                condition:
-                  lambda: |-
-                    int delai_min = (int)(id(r1_delai_entretien_h).state * 60.0f);
-                    return id(r1_minutes_sans_demoulage) >= delai_min;
-                then:
-                  - lambda: |-
-                      ESP_LOGI("r1", "Entretien declenche : aucun demoulage depuis %d min",
-                               id(r1_minutes_sans_demoulage));
-                  - script.execute: r1_pid_entretien
-
-  - interval: 5s
-    then:
-      # Ventilo : reevaluation reguliere (filet de securite en plus de la reaction immediate)
-      - script.execute: maj_ventilo_selon_r1
-      - lambda: |-
-          id(ventilo_rallumage_temporise_actif).publish_state(id(rallumage_ventilo_temporise).is_running());
-
-      # ===================== SECURITE SONDES (prioritaire) =====================
-      # 1) Controle des sondes resistance (R) et degivrage (D) :
-      #    defectueuse = aucune lecture valide depuis ${sonde_timeout_ms} ms
-      #                  OU exactement 0,0 sur ${sonde_zero_max} lectures consecutives.
-      - lambda: |-
-          uint32_t now = millis();
-          bool r_ok = ((now - id(r1_last_ok_r_ms)) <= (uint32_t) ${sonde_timeout_ms})
-                      && (id(r1_zero_cnt_r) < ${sonde_zero_max});
-          bool d_ok = ((now - id(r1_last_ok_d_ms)) <= (uint32_t) ${sonde_timeout_ms})
-                      && (id(r1_zero_cnt_d) < ${sonde_zero_max});
-          id(r1_sondes_ok) = r_ok && d_ok;
-          if (id(r1_sonde_defaut)) {
-            if (id(r1_sondes_ok)) {
-              id(r1_cpt_sain)++;
-            } else {
-              id(r1_cpt_sain) = 0;
-            }
-          }
-
-      # 2) Nouveau defaut : on coupe tout et on verrouille.
-      - if:
-          condition:
-            lambda: 'return !id(r1_sonde_defaut) && !id(r1_sondes_ok);'
-          then:
-            - lambda: |-
-                uint32_t now = millis();
-                ESP_LOGW("r1", "SECURITE SONDES : defaut (R: derniere lecture il y a %u ms, zeros %d | D: derniere lecture il y a %u ms, zeros %d) -> chauffage coupe",
-                         (unsigned) (now - id(r1_last_ok_r_ms)), id(r1_zero_cnt_r),
-                         (unsigned) (now - id(r1_last_ok_d_ms)), id(r1_zero_cnt_d));
-            - script.stop: r1_pid_demoulage
-            - script.stop: r1_pid_entretien
-            - climate.control:
-                id: pid_climate
-                mode: "OFF"
-            - lambda: |-
-                id(r1_sonde_defaut) = true;
-                id(r1_cpt_sain) = 0;
-                id(r1_cycle_chauffe_en_cours) = false;
-                id(r1_demoulage_arme) = false;
-                id(r1_chauffe_start_ms) = 0;
-                id(r1_etat).publish_state("Defaut sonde");
-
-      # 3) Retour a la normale : sondes saines en continu pendant ${sonde_retour_ticks} controles.
-      - if:
-          condition:
-            lambda: 'return id(r1_sonde_defaut) && id(r1_cpt_sain) >= ${sonde_retour_ticks};'
-          then:
-            - lambda: |-
-                id(r1_sonde_defaut) = false;
-                id(r1_cpt_sain) = 0;
-                ESP_LOGI("r1", "SECURITE SONDES : sondes de nouveau saines, reprise du mode de fonctionnement");
-            - script.execute:
-                id: appliquer_mode
-                mode: !lambda 'return std::string(id(mode_fonctionnement).current_option());'
-
-      # 4) Tant que le defaut est verrouille, le chauffage est maintenu coupe
-      #    (y compris si on tente de relancer la regulation PID depuis HA).
-      - if:
-          condition:
-            lambda: 'return id(r1_sonde_defaut);'
-          then:
-            - climate.control:
-                id: pid_climate
-                mode: "OFF"
-
-      # ===================== Securite temperature max =====================
-      - if:
-          condition:
-            lambda: |-
-              if (isnan(id(temp_ds18b20_r).state)) return false;
-              return id(r1_cycle_chauffe_en_cours)
-                  && id(temp_ds18b20_r).state >= id(r1_temperature_securite_max).state;
-          then:
-            - logger.log: "SECURITE R1 : temperature max atteinte, coupure PID"
-            - script.stop: r1_pid_demoulage
-            - script.stop: r1_pid_entretien
-            - climate.control:
-                id: pid_climate
-                mode: "OFF"
-            - lambda: |-
-                id(r1_cycle_chauffe_en_cours) = false;
-                id(r1_demoulage_arme) = false;
-                id(r1_chauffe_start_ms) = 0;
-                id(r1_etat).publish_state("Securite temperature");
-
+# --- Lier l'ID du PID pour contrôle ---
 climate:
   - platform: pid
-    id: pid_climate
+    id: pid_climate   # 
     name: "Regulation PID"
     sensor: temp_ds18b20_r
-    default_target_temperature: 6°C
+    default_target_temperature: 1°C
     heat_output: pwm_heater
     control_parameters:
-      kp: 0.37040
-      ki: 0.02178
-      kd: 1.5750
+      kp: 0.37040 #0.71901 #0.13143
+      ki: 0.02178 #0.02875 #0.00305
+      kd: 1.5750  #4.49541 #1.41370
       output_averaging_samples: 5
       derivative_averaging_samples: 2
-
+      
     deadband_parameters:
       threshold_high: 0.2°C
       threshold_low: -0.2°C
-
     visual:
-      min_temperature: -20°C
-      max_temperature: 15°C
+      min_temperature: -3°C
+      max_temperature: 10°C
       temperature_step:
         target_temperature: 0.1
         current_temperature: 0.1
+
